@@ -88,7 +88,7 @@ var
 function hash_string(src : string) : PString; overload;
 function hash_string(src : PString) : PString; overload;
 
-procedure unhash_string(src : PString);
+procedure unhash_string(var src : PString);
 
 
 function defaultHash(size, prime : cardinal; key : string) : integer;
@@ -403,7 +403,6 @@ begin
 
   writeln('Hash size ' + inttostr(hashsize) + ' with key ' + inttostr(hashprime));
   writeln('Total hash items : ' + inttostr(total));
-  writeln('Min/max items per bucket : ' + inttostr(min) + '/' + inttostr(max));
   writeln('Load factor : ' + floattostrf(load, ffFixed, 7, 4));
 end;
 
@@ -483,7 +482,7 @@ begin
       end;
     end;
 
-  writeln('Bytes used ' + inttostr(bytesused) + ', bytes saved ' + inttostr(wouldhave - bytesused));
+  writeln('Byte savings (used/saved): ', inttostr(bytesused), '/', inttostr(wouldhave - bytesused), ' (', (bytesused * 100) div wouldhave, '%/', ((wouldhave - bytesused) * 100) div wouldhave, '%)');
 end;
 
 function hash_string(src : string) : PString;
@@ -502,6 +501,7 @@ begin
     if (comparestr(GString(node.element).value, src) = 0) then
       begin
       fnode := node;
+      break;
       end;
 
     node := node.next;
@@ -537,6 +537,7 @@ begin
     if (comparestr(GString(node.element).value, src^) = 0) then
       begin
       fnode := node;
+      break;
       end;
 
     node := node.next;
@@ -556,14 +557,17 @@ begin
     end;
 end;
 
-procedure unhash_string(src : PString);
+procedure unhash_string(var src : PString);
 var
    hash : integer;
    node, fnode : GListNode;
    g : GString;
 begin
-  hash := str_hash.getHash(src^);
+  if (src = nil) then
+    exit;
 
+  hash := str_hash.getHash(src^);
+    
   node := str_hash.bucketList[hash].head;
   fnode := nil;
 
@@ -572,6 +576,7 @@ begin
     if (comparestr(GString(node.element).value, src^) = 0) then
       begin
       fnode := node;
+      break;
       end;
 
     node := node.next;
@@ -582,7 +587,12 @@ begin
     dec(fnode.refcount);
 
     if (fnode.refcount <= 0) then
+      begin
+      GString(fnode.element).Free;
       str_hash.bucketList[hash].remove(fnode);
+      end;
+
+    src := nil;
     end;
 end;
 
