@@ -2,7 +2,7 @@
   Summary:
   	Wrappers for IPv4 and IPv6 socket operations
   	
-  ## $Id: socket.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ## $Id: socket.pas,v 1.7 2004/03/17 00:21:57 ***REMOVED*** Exp $
 }
 
 unit socket;
@@ -19,12 +19,15 @@ uses
 	Libc;
 {$ENDIF}
 
+
 type
 {$IFDEF LINUX}
 	TSockAddr = sockaddr;
 	TSockAddr6 = sockaddr_in6;
 	TSockAddr_Storage = sockaddr_storage;
 {$ENDIF}
+
+	GSocketTypes = (SOCKTYPE_IPV4, SOCKTYPE_IPV6);
 	
 	GSocket = class
 	private
@@ -90,8 +93,11 @@ type
 	end;
 
 
-function isSupported(af : integer) : boolean;
-function createSocket(af : integer; fd : TSocket = -1) : GSocket;
+function isSupported(socketType : GSocketTypes) : boolean; overload;
+function isSupported(af : integer) : boolean; overload;
+
+function createSocket(socketType : GSocketTypes; fd : TSocket = -1) : GSocket; overload;
+function createSocket(af : integer; fd : TSocket = -1) : GSocket; overload;
 
 
 implementation
@@ -108,59 +114,82 @@ var
 {$ENDIF}
 
 
+{ Convert a symbolic socketType to address family }
+function socketTypeToFamily(socketType : GSocketTypes) : integer;
+begin
+	case socketType of
+		SOCKTYPE_IPV4: Result := AF_INET;
+		SOCKTYPE_IPV6: Result := AF_INET6;
+	end;
+end;
+
+{ Check wether socketType is a supported address family }
+function isSupported(socketType : GSocketTypes) : boolean;
+begin
+	Result := isSupported(socketTypeToFamily(socketType));
+end;
+
+{ Check wether af is a supported address family }
 function isSupported(af : integer) : boolean;
 {$IFDEF WIN32}
 var
-   a, t : DWORD;
-   lp : array[0..1] of integer;
-   prot : pointer;
-   pprot : LPWSAProtocol_Info;
+	a, t : DWORD;
+	lp : array[0..1] of integer;
+	prot : pointer;
+	pprot : LPWSAProtocol_Info;
 begin
-  Result := false;
-  
-  t := 0;
-  lp[0] := IPPROTO_TCP;
-  lp[1] := 0;
+	Result := false;
 
-  WSAEnumProtocols(@lp, nil, t);
+	t := 0;
+	lp[0] := IPPROTO_TCP;
+	lp[1] := 0;
 
-  getmem(prot, t);
-  pprot := prot;
+	WSAEnumProtocols(@lp, nil, t);
 
-  t := WSAEnumProtocols(@lp, pprot, t);
+	getmem(prot, t);
+	pprot := prot;
 
-  for a := 0 to t - 1 do
-    begin
-    pprot := pointer(integer(prot) + (a * sizeof(TWSAProtocol_Info)));
+	t := WSAEnumProtocols(@lp, pprot, t);
 
-    if (pprot^.iAddressFamily = af) then
-      Result := true;
-    end;
+	for a := 0 to t - 1 do
+		begin
+		pprot := pointer(integer(prot) + (a * sizeof(TWSAProtocol_Info)));
 
-  freemem(prot, t);
+		if (pprot^.iAddressFamily = af) then
+			Result := true;
+		end;
+
+	freemem(prot, t);
 end;
 {$ELSE}
 var
-  fd : TSocket;
+	fd : TSocket;
 begin
-  fd := Libc.socket(af, SOCK_STREAM, IPPROTO_TCP);
+	fd := Libc.socket(af, SOCK_STREAM, IPPROTO_TCP);
 
-  if (fd = INVALID_SOCKET) then
-    Result := false
-  else
-    Result := true;
+	if (fd = INVALID_SOCKET) then
+		Result := false
+	else
+		Result := true;
 end;
 {$ENDIF}
 
+{ Create a socket of type socketType }
+function createSocket(socketType : GSocketTypes; fd : TSocket = -1) : GSocket;
+begin
+	Result := createSocket(socketTypeToFamily(socketType), fd);
+end;
+
+{ Create a socket of type af }
 function createSocket(af : integer; fd : TSocket = -1) : GSocket;
 begin
-  if (af = AF_INET) then
-    Result := GSocket4.Create(fd)
-  else
-  if (af = AF_INET6) then
-    Result := GSocket6.Create(fd)
-  else
-    raise Exception.Create('Unsupported address family');
+	if (af = AF_INET) then
+		Result := GSocket4.Create(fd)
+	else
+	if (af = AF_INET6) then
+		Result := GSocket6.Create(fd)
+	else
+		raise Exception.Create('Unsupported address family');
 end;
 
 
@@ -403,12 +432,12 @@ end;
 
 function GSocket.acceptConnection(lookup_hosts : boolean) : GSocket;
 var
-  ac_fd : TSocket;
-  client_addr : TSockAddr_Storage;
-  len : integer;
-  sk : GSocket;
+	ac_fd : TSocket;
+	client_addr : TSockAddr_Storage;
+	len : integer;
+	sk : GSocket;
 begin
-  len := 128;
+	len := 128;
 
 {$IFDEF LINUX}  
 	ac_fd := accept(fd, PSockAddr(@client_addr), @len);
@@ -416,12 +445,12 @@ begin
 	ac_fd := accept(fd, PSockAddr(@client_addr)^, len);
 {$ENDIF}
 
-  sk := createSocket(af, ac_fd);
-  sk.addr := client_addr;
-  
-  sk.resolve(lookup_hosts);
-  
-  Result := sk;
+	sk := createSocket(af, ac_fd);
+	sk.addr := client_addr;
+
+	sk.resolve(lookup_hosts);
+
+	Result := sk;
 end;
 
 function GSocket.connect(const remoteName : string; port : integer) : boolean;
@@ -461,12 +490,12 @@ end;
 // GSocket4
 constructor GSocket4.Create;
 begin 
-  inherited Create(AF_INET);
+	inherited Create(AF_INET);
 end;
 
 constructor GSocket4.Create(fd : TSocket);
 begin 
-  inherited Create(AF_INET, fd);
+	inherited Create(AF_INET, fd);
 end;
 
 procedure GSocket4.openPort(port : integer);
