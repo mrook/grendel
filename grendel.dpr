@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.64 2002/08/21 19:51:32 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.65 2002/11/14 16:27:56 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -730,9 +730,10 @@ begin
                     grace_exit := true;
                     halt;
                     end;
-    on E: Exception do 
-                    writeConsole('Exception in main game loop: ' + E.Message)
-    else
-      writeConsole('Unknown exception in main game loop');
+    on E: Exception do if (TTextRec(logfile).mode <> fmClosed) then
+													writeConsole('Exception in main game loop: ' + E.Message)
+    else 
+    	if (TTextRec(logfile).mode <> fmClosed) then
+				writeConsole('Exception in main game loop: ' + E.Message);
   end;
 end.
