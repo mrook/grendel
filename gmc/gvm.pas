@@ -225,6 +225,7 @@ procedure GContext.callMethod(classAddr, methodAddr : pointer; signature : GSign
 var
 	i : integer;
   v, vd : variant;
+  resstr : string;
 begin
   if (methodAddr = nil) then
     exit;
@@ -259,9 +260,16 @@ begin
   asm
     mov eax, classAddr
     test eax, eax
-    jz @call
+    jz @strresult
 
     @methodcall:
+    push eax
+
+    @strresult:
+    mov eax, signature.ResultType
+    cmp eax, varString
+    jne @call
+    lea eax, resstr
     push eax
 
     @call:
@@ -290,6 +298,9 @@ begin
 @end:
   end;
 
+  if (signature.ResultType = varString) then
+    push(resstr)
+  else
   if (signature.ResultType <> varEmpty) then
     push(vd);
 end;
