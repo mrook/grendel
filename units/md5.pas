@@ -60,7 +60,6 @@ procedure MD5Update(var Context: MD5Context; Input: pChar; Length: longword);
 procedure MD5Final(var Context: MD5Context; var Digest: MD5Digest);
 
 function MD5String(M: string): MD5Digest;
-function MD5File(N: string): MD5Digest;
 function MD5Print(D: MD5Digest): string;
 
 function MD5Match(D1, D2: MD5Digest): boolean;
@@ -329,35 +328,6 @@ var
 begin
 	MD5Init(Context);
 	MD5Update(Context, pChar(M), length(M));
-	MD5Final(Context, Result);
-end;
-
-// Create digest of file with given Name
-function MD5File(N: string): MD5Digest;
-var
-	FileHandle: THandle;
-	MapHandle: THandle;
-	ViewPointer: pointer;
-	Context: MD5Context;
-begin
-	MD5Init(Context);
-	FileHandle := CreateFile(pChar(N), GENERIC_READ, FILE_SHARE_READ or FILE_SHARE_WRITE,
-		nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL or FILE_FLAG_SEQUENTIAL_SCAN, 0);
-	if FileHandle <> INVALID_HANDLE_VALUE then try
-		MapHandle := CreateFileMapping(FileHandle, nil, PAGE_READONLY, 0, 0, nil);
-		if MapHandle <> 0 then try
-			ViewPointer := MapViewOfFile(MapHandle, FILE_MAP_READ, 0, 0, 0);
-			if ViewPointer <> nil then try
-				MD5Update(Context, ViewPointer, GetFileSize(FileHandle, nil));
-			finally
-				UnmapViewOfFile(ViewPointer);
-			end;
-		finally
-			CloseHandle(MapHandle);
-		end;
-	finally
-		CloseHandle(FileHandle);
-	end;
 	MD5Final(Context, Result);
 end;
 
