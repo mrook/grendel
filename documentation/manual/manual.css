@@ -80,8 +80,9 @@
     font-family: verdana, arial, helvetica, serif;
     color: black;
   }
-  table 
+  table
   {
+    border-collapse: collapse;
     empty-cells: show;
   }
   .small
@@ -180,11 +181,6 @@
   {
     font-size: 12px;
     font-family: verdana, arial, helvetica, serif;
-  }
-  .tableborder
-  {
-    border-collapse: collapse;
-    border: 1px solid #999999;
   }
   .quote
   {
