@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.59 2001/09/10 21:32:55 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.60 2001/09/28 21:29:02 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -464,7 +464,7 @@ begin
   {$I+}
 
   if (IOResult <> 0) then
-    writeConsole('NOTE: Could not open logfile. Messages are not being logged.');
+    writeDirect('NOTE: Could not open logfile. Messages are not being logged.');
 
   writeDirect(version_info + ', ' + version_number + '.');
   writeDirect(version_copyright + '.');
