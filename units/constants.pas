@@ -1,6 +1,6 @@
 {
   @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.52 2003/09/16 18:15:32 ***REMOVED*** Exp $)
+  @lastmod($Id: constants.pas,v 1.53 2003/10/03 20:58:22 ***REMOVED*** Exp $)
 }
 
 unit constants;
@@ -9,11 +9,11 @@ interface
 
 const 
 {$IFDEF LINUX}
-  version_number = '1.0.0 alpha1 (linux)';
+  version_number = '1.0.0 alpha2 (linux)';
 {$ELSE}
-  version_number = '1.0.0 alpha1';
+  version_number = '1.0.0 alpha2';
 {$ENDIF}
-  version_info = 'The Grendel Project - A Windows MUD Server';
+  version_info = 'The Grendel Project - A Windows/Linux MUD Server';
   version_copyright = 'Copyright (c) 2000-2003 by Michiel Rook';
 
 {$IFDEF LINUX}
@@ -23,6 +23,7 @@ const
 {$ENDIF}
 
   SystemDir = 'system' + PathDelimiter;
+  ModulesDir = 'modules' + PathDelimiter;
 
 { misc. bitvectors }
 const BV00=1 shl 0;
