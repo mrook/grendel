@@ -2,7 +2,7 @@
   Summary:
     Constants
     
-  ## $Id: constants.pas,v 1.5 2004/02/19 14:38:49 ***REMOVED*** Exp $
+  ## $Id: constants.pas,v 1.6 2004/02/19 19:51:09 hemko Exp $
 }
 
 unit constants;
@@ -63,6 +63,7 @@ const BV00=1 shl 0;
 { system maxima }
 const MAX_RECEIVE = 2048;
       MAX_TRADE = 5;
+      MAX_DOORTYPE = 4;
 
 const ARMOR_HAC=1;
       ARMOR_BAC=2;

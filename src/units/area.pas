@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.11 2004/02/18 23:07:14 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.12 2004/02/19 19:51:09 hemko Exp $
 }
 
 unit area;
@@ -372,6 +372,7 @@ begin
   area_list.insertLast(Self);
 end;
 
+// Destructor
 destructor GArea.Destroy;
 begin
   resets.clean;
@@ -385,6 +386,7 @@ begin
   bugreport(func, 'area.pas', fname + ': ' + problem + ', line ' + inttostr(af.line));
 end;
 
+// Load the rooms
 procedure GArea.loadRooms();
 var s : string;
     vnum : integer;
@@ -396,6 +398,7 @@ var s : string;
     node : GListNode;
 begin
   vnum := 0;
+
   repeat
     repeat
       s := af.readLine;
@@ -452,6 +455,9 @@ begin
 
       if (_maxlevel = 0) then
         _maxlevel := LEVEL_MAX;
+
+      if (_sector < 0) or (_sector >= SECT_MAX) then
+        areaBug('loadRooms()', 'Sector type mismatch');
 
       if (flags.isBitSet(ROOM_TELEPORT)) then
         begin
@@ -552,11 +558,11 @@ begin
     try
       num := strtoint(s);
 
-      npc := GNPCIndex.Create;
+      npc := GNPCIndex.Create();
 
       npc.prog := nil;
       npc.area := Self;
-      npc.skills_learned := GDLinkedList.Create;
+      npc.skills_learned := GDLinkedList.Create();
 
       with npc do
         begin
@@ -628,7 +634,7 @@ begin
               g.node := skills_learned.insertLast(g);
               end
             else
-              areaBug('loadNPCs()', 'unknown skill '+s);
+              areaBug('loadNPCs()', 'unknown skill ' + s);
             end;
 
           s := af.readLine;
@@ -641,12 +647,13 @@ begin
         npc_list.insertLast(npc);
         end;
       except
-        areaBug('GArea.loadNPCs()', 'Exception while loading mobile section, please check your area');
-        npc.Free;
+        areaBug('loadNPCs()', 'Exception while loading mobile section, please check your area');
+        npc.Free();
       end;
   until (uppercase(s) = '#END');
 end;
 
+// Load the objects
 procedure GArea.loadObjects();
 var 
   s : string;
@@ -654,7 +661,7 @@ var
   obj : GObject;
   aff : GAffect;
 begin
-  num:=0;
+  num := 0;
   s := af.readLine;
 
   repeat
@@ -662,15 +669,16 @@ begin
       exit;
 
     try
-      num:=StrToInt(right(s,'#'));
+      num := StrToInt(right(s,'#'));
     except
-      areaBug('loadObjects()','illegal numeric format '+s);
+      areaBug('loadObjects()','illegal numeric format ' + s);
       exit;
     end;
 
+    // Object already exists
     if (objectIndices[num] <> nil) then
       begin
-      areaBug('loadObjects()','vnum conflict ('+inttostr(num)+')');
+      areaBug('loadObjects()','vnum conflict (' + IntToStr(num) + ')');
       exit;
       end;
 
@@ -683,7 +691,7 @@ begin
       short := af.readLine();
       long := af.readLine();
       
-      vnum:=num;
+      vnum := num;
 
       if (not found_range) then
         begin
@@ -695,8 +703,8 @@ begin
 
       item_type := af.readInteger;
 
-      wear_location1 := af.readToken;
-      wear_location2 := af.readToken;
+      wear_location1 := af.readToken();
+      wear_location2 := af.readToken();
       
       if (IntToStr(StrToIntDef(wear_location1, 0)) = wear_location1) then
       	writeConsole('hint on line ' + IntToStr(af.line) + ': wear_location1 no longer numeric (now ' + wear_location1 + ')');
@@ -771,9 +779,11 @@ begin
   until (uppercase(s) = '#END');
 end;
 
+// Load the resets
 procedure GArea.loadResets();
-var g : GReset;
-    d, s : string;
+var
+  g : GReset;
+  d, s : string;
 begin
   repeat
     s := af.readLine;
@@ -798,7 +808,7 @@ begin
           begin
           if (findNPCIndex(arg1) = nil) then
             begin
-            areaBug('GArea.loadResets()', 'npc reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'M reset npc #' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -809,7 +819,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets()', 'obj reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'O reset obj #' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -820,7 +830,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets()', 'equip reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'E reset obj #' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -831,7 +841,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets()', 'insert reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'I reset obj #' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -842,7 +852,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets()', 'give reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'G reset obj #' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -850,12 +860,21 @@ begin
           end
         else
         if (reset_type = 'D') then
-          resets.insertLast(g);
+          begin
+          if (arg3 < 0) or (arg3 > MAX_DOORTYPE) then
+            begin
+            areaBug('GArea.loadResets()', 'D resettype ' + IntToStr(arg3) + ' not a valid doortype');
+            g.Free;
+            end
+          else
+            resets.insertLast(g);
+          end;
         end;
       end;
   until (uppercase(s) = '#END');
 end;
 
+// Load the shops
 procedure GArea.loadShops();
 var
    shop : GShop;
@@ -863,11 +882,11 @@ var
    s : string;
 begin
   repeat
-    s := af.readLine;
+    s := af.readLine();
 
     if (uppercase(s) <> '#END') then
       begin
-      shop := GShop.Create;
+      shop := GShop.Create();
       shop.area := Self;
       shop.keeper := strtoint(left(s,' '));
 
@@ -909,8 +928,10 @@ begin
   until (uppercase(s) = '#END');
 end;
 
+// Load the areafile
 procedure GArea.load(fn : string);
-var s : string;
+var
+  s : string;
 begin
   try
     af := GFileReader.Create('areas\' + fn);
@@ -1739,91 +1760,85 @@ begin
 
   case weather.sky of
     SKY_CLOUDLESS:begin
-                  if (weather.mmhg<1000) or
-                   ((weather.mmhg<1020) and (random(4)<2)) then
+                  if (weather.mmhg < 1000) or ((weather.mmhg < 1020) and (random(4) < 2)) then
                     begin
                     buf := 'The sky is getting cloudy.';
-                    weather.sky:=SKY_CLOUDY;
+                    weather.sky := SKY_CLOUDY;
                     end;
                   end;
        SKY_CLOUDY:begin
-                  if (weather.mmhg<980) or
-                   ((weather.mmhg<1000) and (random(4)<2)) then
+                  if (weather.mmhg < 980) or ((weather.mmhg < 1000) and (random(4) < 2)) then
                     begin
                     buf := 'It starts to rain.';
-                    weather.sky:=SKY_RAINING;
+                    weather.sky := SKY_RAINING;
                     end
                   else
-                  if (weather.mmhg>1030) and (random(4)<2) then
+                  if (weather.mmhg > 1030) and (random(4) < 2) then
                     begin
                     buf := 'The clouds disappear.';
-                    weather.sky:=SKY_CLOUDLESS;
+                    weather.sky := SKY_CLOUDLESS;
                     end;
                   end;
       SKY_RAINING:begin
-                  if (weather.mmhg<970) then
+                  if (weather.mmhg < 970) then
                    case random(4) of
                      1:begin
                        buf := 'Lightning flashes in the sky.';
-                       weather.sky:=SKY_LIGHTNING;
+                       weather.sky := SKY_LIGHTNING;
                        end;
                      2:begin
                        buf := 'Fierce winds start blowing as a storm approaches.';
-                       weather.sky:=SKY_STORMING;
+                       weather.sky := SKY_STORMING;
                        end;
                    end;
-                  if (weather.mmhg>1030) or
-                   ((weather.mmhg>1010) and (random(4)<2)) then
+                  if (weather.mmhg > 1030) or ((weather.mmhg > 1010) and (random(4) < 2)) then
                     begin
                     buf := 'The rain stopped.';
-                    weather.sky:=SKY_CLOUDY;
+                    weather.sky := SKY_CLOUDY;
                     end
                   else
-                  if (weather.temp<0) then
+                  if (weather.temp < 0) then
                     begin
                     buf := 'Snowflakes fall on your head.';
-                    weather.sky:=SKY_SNOWING;
+                    weather.sky := SKY_SNOWING;
                     end;
                   end;
       SKY_SNOWING:begin
-                  if (weather.mmhg<970) then
+                  if (weather.mmhg < 970) then
                    case random(4) of
                      1:begin
                        buf := 'The sky lights up as lightning protrudes the snow.';
-                       weather.sky:=SKY_LIGHTNING;
+                       weather.sky := SKY_LIGHTNING;
                        end;
                      2:begin
                        buf := 'A blizzard blows snow in your face.';
-                       weather.sky:=SKY_STORMING;
+                       weather.sky := SKY_STORMING;
                        end;
                    end;
-                  if (weather.mmhg>1030) or
-                   ((weather.mmhg>1010) and (random(4)<2)) then
+                  if (weather.mmhg > 1030) or ((weather.mmhg > 1010) and (random(4) < 2)) then
                     begin
                     buf := 'The snowflakes stop falling down';
-                    weather.sky:=SKY_CLOUDY;
+                    weather.sky := SKY_CLOUDY;
                     end
                   else
-                  if (weather.temp>1) then
+                  if (weather.temp > 1) then
                     begin
                     buf := 'The snow turns into wet rain.';
-                    weather.sky:=SKY_RAINING;
+                    weather.sky := SKY_RAINING;
                     end;
                   end;
     SKY_LIGHTNING:begin
-                  if (weather.mmhg>1010) or
-                   ((weather.mmhg>990) and (random(4)<2)) then
+                  if (weather.mmhg > 1010) or ((weather.mmhg > 990) and (random(4) < 2)) then
                     begin
                     buf := 'The lightning has stopped.';
-                    weather.sky:=SKY_RAINING;
+                    weather.sky := SKY_RAINING;
                     end;
                   end;
      SKY_STORMING:begin
-                  if (weather.mmhg>1010) or
-                   ((weather.mmhg>990) and (random(4)<2)) then
+                  if (weather.mmhg > 1010) or ((weather.mmhg > 990) and (random(4) < 2)) then
                     begin
                     buf := 'The winds subside.';
-                    weather.sky:=SKY_CLOUDY;
+                    weather.sky := SKY_CLOUDY;
                     end;
                   end;
    else
@@ -2056,7 +2071,7 @@ var
 	num, cnt : integer;
 	ch, vict : GCharacter;
 begin
-  findChar := nil;
+  Result := nil;
   ch := c;
 
   num := findnumber(name);
@@ -2064,9 +2079,9 @@ begin
   name := uppercase(name);
   cnt := 0;
 
-  if (uppercase(name) = 'SELF') then
+  if (name = 'SELF') then
     begin
-    findChar := ch;
+    Result := ch;
     exit;
     end;
 
@@ -2086,11 +2101,12 @@ begin
 
       if (cnt = num) then
         begin
-        findChar := vict;
-        exit;
+        Result := vict;
+        break;
         end;
       end;
     end;
+
   iterator.Free();
 end;
 
@@ -2126,6 +2142,7 @@ begin
 
   cnt := 0;
   iterator := chars.iterator();
+
   while (iterator.hasNext()) do
     begin
     vict := GCharacter(iterator.next());
@@ -2133,12 +2150,14 @@ begin
     if (vict.IS_GOOD) then
       inc(cnt);
     end;
+
   iterator.Free();
 
   num := random(cnt);
   a := 0;
 
   iterator := chars.iterator();
+
   while (iterator.hasNext()) do
     begin
     vict := GCharacter(iterator.next());
@@ -2149,6 +2168,7 @@ begin
       break;
       end;
     end;
+
   iterator.Free();
 end;
 
@@ -2163,6 +2183,7 @@ begin
 
   cnt := 0;
   iterator := chars.iterator();
+
   while (iterator.hasNext()) do
     begin
     vict := GCharacter(iterator.next());
@@ -2170,12 +2191,14 @@ begin
     if (vict.IS_EVIL) then
       inc(cnt);
     end;
+
   iterator.Free();
 
   num := random(cnt);
   a := 0;
 
   iterator := chars.iterator();
+
   while (iterator.hasNext()) do
     begin
     vict := GCharacter(iterator.next());
@@ -2186,6 +2209,7 @@ begin
       break;
       end;
     end;
+
   iterator.Free();
 end;
 
@@ -2414,7 +2438,7 @@ begin
 
 	iterator.Free();
 	
-  node_room := to_room.objects.insertLast(Self);
+  node_room := to_room.objects.insertFirst(Self);
 
   room := to_room;
   in_obj := nil;
@@ -2424,8 +2448,11 @@ end;
 // Object from room
 procedure Gobject.fromRoom();
 begin
-  if (room=nil) then
+  if (room = nil) then
+    begin
     bugreport('obj_from_room', 'area.pas', 'room null');
+    exit;
+    end;
 
   room.objects.remove(node_room);
   node_room := nil;
@@ -2490,7 +2517,7 @@ begin
   carried_by := nil;
 end;
 
-{ grouped obj.toObject - Nemesis }
+// Object to object
 procedure GObject.toObject(obj : GObject);
 var 
 	iterator : GIterator;
@@ -2772,7 +2799,7 @@ begin
     end;
 
   { when ch dies in bg, we don't want to have him lose all his items! - Grimlord }
-  if not (not ch.IS_NPC and (GPlayer(ch).bg_status=BG_PARTICIPATE)) then
+  if not (not ch.IS_NPC and (GPlayer(ch).bg_status = BG_PARTICIPATE)) then
     begin
     // Inventory put into corpse as well, but not for shopkeepers of course :)
     if (not ch.IS_SHOPKEEPER) then
@@ -2785,7 +2812,7 @@ begin
 
         if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
-          obj_in.fromChar;
+          obj_in.fromChar();
           obj_in.toObject(obj);
           end;
         end;
@@ -2800,7 +2827,7 @@ begin
 
         if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
-          obj_in.fromChar;
+          obj_in.fromChar();
           obj_in.toObject(obj);
           end;
         end;
@@ -2849,15 +2876,17 @@ begin
 end;
 
 function findHeading(s : string) : integer;
-var a:integer;
+var
+  a : integer;
 begin
-  FindHeading:=-1;
-  s:=lowercase(s);
-  for a:=DIR_NORTH to DIR_UP do
-   if pos(s,headings[a])=1 then
+  FindHeading := -1;
+  s := lowercase(s);
+
+  for a := DIR_NORTH to DIR_UP do
+   if (pos(s, headings[a]) = 1) then
     begin
-    FindHeading:=a;
-    break;
+    Result := a;
+    exit;
     end;
 end;
 

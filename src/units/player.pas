@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.11 2004/02/18 23:07:37 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.12 2004/02/19 19:51:09 hemko Exp $
 }
 unit player;
 
@@ -21,7 +21,6 @@ uses
 
 const
 	PLAYER_FIELDS_HASHSIZE = 256;
-
 
 {$M+}
 type

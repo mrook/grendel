@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.5 2004/02/18 23:07:14 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.6 2004/02/19 19:51:09 hemko Exp $
 }
 
 unit chars;
@@ -142,7 +142,7 @@ type
 
       function ansiColor(color : integer) : string; virtual;
 
-      function getTrust : integer;
+      function getTrust() : integer;
 
       function CHAR_DIED : boolean;
 
@@ -175,7 +175,7 @@ type
       procedure SET_LEARNED(perc : integer; skill : pointer);
 
       procedure extract(pull : boolean);
-      procedure fromRoom;
+      procedure fromRoom();
       procedure toRoom(to_room : GRoom);
 
       function getEQ(location : string) : GObject;
@@ -190,10 +190,10 @@ type
 
       function calcxp2lvl : cardinal;
 
-      procedure calcAC;
+      procedure calcAC();
 
-      procedure startFlying;
-      procedure stopFlying;
+      procedure startFlying();
+      procedure stopFlying();
 
       function findInventory(s : string) : GObject;
       function findEquipment(s : string) : GObject;
@@ -370,7 +370,7 @@ begin
     end;
 
   if (room <> nil) then
-    fromRoom;
+    fromRoom();
 
   if (not pull) then
     begin
@@ -847,7 +847,6 @@ begin
   node_room := room.chars.insertLast(Self);
 
   { Only PCs register as players, so increase the number! - Grimlord }
-
   if (not IS_NPC) then
     inc(to_room.area.nplayer);
 
@@ -1152,7 +1151,7 @@ end;
 // Calculate Armour Class
 procedure GCharacter.calcAC();
 var
-  dex_mod:integer;
+  dex_mod : integer;
   iterator : GIterator;
   obj : GObject;
 begin
