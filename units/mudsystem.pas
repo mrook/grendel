@@ -7,8 +7,9 @@ uses
     Classes,
     constants,
     strip,
-    dtypes,
     clean,
+    timers,
+    dtypes,
     util;
 
 const BOOTTYPE_SHUTDOWN = 1;
@@ -83,11 +84,8 @@ var
    socials : GHashObject;
    dm_msg : GDLinkedList;
 
-   pulse_violence,pulse_tick,pulse_gamehour,
-   pulse_autosave,pulse_sec : integer;
-   pulse_gametime : integer;
-
    clean_thread : GCleanThread;
+   timer_thread : GTimerThread;
 
    auction_good, auction_evil : GAuction;
 
