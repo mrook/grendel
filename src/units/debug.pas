@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.9 2004/03/18 15:13:34 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.10 2004/03/18 15:24:04 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -194,8 +194,6 @@ var
 	oldExceptProc :  pointer;
 
 procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
-var
-	E : Exception;
 begin
 	ExceptProc := oldExceptProc;
 	
