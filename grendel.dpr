@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.66 2003/06/24 21:41:13 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.67 2003/06/24 22:04:23 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -548,11 +548,6 @@ begin
 		registerSysTray();
 		{$ENDIF}  
 	{$ENDIF}
-
-	{$IFDEF __DEBUG}
-	writeConsole('Enabling memory debugger...');
-	enableMemoryDebug();
-	{$ENDIF}
 end;
 
 procedure from_copyover;
@@ -720,7 +715,7 @@ begin
 
   writeConsole('Server boot took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
 
-  writeConsole('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
+  writeConsole('Grendel ' + version_number + ' ready...');
 
 {$IFDEF WIN32}
   {$IFDEF CONSOLEBUILD}
