@@ -34,6 +34,8 @@ contains
 	WinSock2,
 	systray,
 {$ENDIF}
+	dtypes,
+	server,
 	ansiio,
 	LibXmlParser,
 	RegExpr,
@@ -49,7 +51,6 @@ contains
 	clean,
 	conns,
 	constants,
-	dtypes,
 	fight,
 	fsys,
 	gasmdef,
