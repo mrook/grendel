@@ -946,6 +946,12 @@ position: 0
 #end
 
 #command
+name: findpath
+function: do_findpath
+level: 998
+#end
+
+#command
 name: force
 function: do_force
 level: 993
