@@ -1,4 +1,5 @@
-Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal priority)
+Grendel's TODO list with probable release date/version
+ (! = closed, * = urgent, l = low priority, - = normal priority)
 
 
 ! level messages with amounts
@@ -32,40 +33,41 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
   helppages with the word sect in them)
 ! add copyright etc. notice for LibXmlParser to text\Credits.txt?
 ! mobprog compiling to some sort of pseudo stack machine code
+! channel history, for gt/ct/chat/raid
 
 
-* add named affects
-* add some checks to do_give, do_get, do_drop with respect to inter-align trading,
-  ROOM_NODROP etc.
-* implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
-		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
-* better damage/xp system (more balanced)
-* Better online construction (autocreate exit+room when moving),
+* (0.4.0) add named affects
+* (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
+      		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
+* (0.4.1) better damage/xp system (more balanced)
+* (0.4.1) Better online construction (autocreate exit+room when moving),
   mobile create/edit, reset edit etc.
-- some form of classes/professions/guilds/religions/whatever
-	-> probably Schools	
-- more help text
-- skills: Disarm, Steal, Lockpick, Hide
-- reloadarea command
-- race specifics
-  -> add field to race format for racial abilities like Infravision etc.
-- bugtrack/report system 
-- modularized mud, pluggable objects (like timers, sets of commands, etc.)
-- spells: Mistform (walk thru doors, ethereal bla)
-- "real life" sleep - players need sleep to keep from falling down after 2 days,
-  some rooms (with beds) have better sleep ratios etc.
-- expand tracking system
-- when rapier in inv and rapier in eq, make 2.rapier match the one in eq
-- implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
+* (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
+
+- (0.4.1) new area format using XML
+- (0.4.1) implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
-- have mudstatus save when shutting down (mudstatus defined as: mudtime, weather(?), etc.)
+- (0.4.1) add some checks to do_give, do_get, do_drop with respect to inter-align trading,
+          ROOM_NODROP etc.
+- (0.4.1) race specifics
+          -> add field to race format for racial abilities like Infravision etc.
+- (0.4.1) expand tracking system
+
+- (0.4.2) some form of classes/professions/guilds/religions/whatever
+        	-> probably Schools	
+- (0.4.2) reloadarea command
+- (0.4.2) bugtrack/report system 
+
+- (0.4.3) more help text
+- (0.4.3) modularized mud, pluggable objects (like timers, sets of commands, etc.)
+- (0.4.3) "real life" sleep - players need sleep to keep from falling down after 2 days,
+          some rooms (with beds) have better sleep ratios etc.
+- (0.4.3) have mudstatus save when shutting down (mudstatus defined as: mudtime, weather(?), etc.)
 
 
 l implementation of the mud sound protocol
-l new area format using XML
 l purge command (strips char of objects, only for admins)
 l clan competition for wps/pkillnum
-l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
 l mud police!
 l online suggest (pray) history
