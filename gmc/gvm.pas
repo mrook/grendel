@@ -10,6 +10,17 @@ type
 	GSystemTrap = procedure(msg : string);
 	GExternalTrap = function(obj : variant; member : string) : variant;
 
+  GSignature = record
+    resultType : integer;
+    paramTypes : array of integer;
+  end;
+
+  GExternalMethod = class
+    name : string;
+    classAddr, methodAddr : pointer;
+    signature : GSignature;
+  end;
+
 	GCodeBlock = class
 		code : array of char;
 		codeSize, dataSize : integer;
@@ -27,6 +38,8 @@ type
 		procedure pushr(v : variant);
 		function popr : variant;
 
+		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
+
     procedure Load(blck : GCodeBlock);
 		procedure Execute;
 	end;
@@ -36,12 +49,15 @@ var
   input : file;
   systemTrap : GSystemTrap;
   externalTrap : GExternalTrap;
+  externalMethods : GHashTable;
 	codeCache : GHashTable;
 
 function loadCode(fname : string) : GCodeBlock;
 
 procedure setSystemTrap(method : GSystemTrap);
 procedure setExternalTrap(method : GExternalTrap);
+
+procedure registerExternalMethod(name : string; classAddr, methodAddr : pointer; signature : GSignature);
 
 implementation
 
@@ -65,12 +81,12 @@ end;
 
 function loadCode(fname : string) : GCodeBlock;
 var
-	cd : GCodeBlock;
+	cb : GCodeBlock;
   input : file;
 begin
-  cd := GCodeBlock(codeCache.get(fname));
+  cb := GCodeBlock(codeCache.get(fname));
 
-  if (cd = nil) then
+  if (cb = nil) then
     begin
 	  assign(input, fname);
 	  {$I-}
@@ -80,20 +96,20 @@ begin
 	  if (IOResult <> 0) then
 			vmError('Could not open ' + fname);
 
-    cd := GCodeBlock.Create;
+    cb := GCodeBlock.Create;
 
-	  blockread(input, cd.codeSize, 4);
-	  blockread(input, cd.dataSize, 4);
+	  blockread(input, cb.codeSize, 4);
+	  blockread(input, cb.dataSize, 4);
 
-	  setLength(cd.code, cd.codeSize);
+	  setLength(cb.code, cb.codeSize);
   
-	  blockread(input, cd.code[0], cd.codeSize);
+	  blockread(input, cb.code[0], cb.codeSize);
 
 	  closefile(input);
-	  codeCache.put(fname, cd);
+	  codeCache.put(fname, cb);
     end;
 
-	Result := cd;
+	Result := cb;
 end;
 
 // GContext
@@ -151,6 +167,79 @@ begin
   block := blck;
 end;
 
+procedure GContext.callMethod(classAddr, methodAddr : pointer; signature : GSignature);
+var
+	i : integer;
+  v, vd : variant;
+begin
+  if (methodAddr = nil) then
+    exit;
+
+  for i := length(signature.ParamTypes) downto 1 do
+    begin
+    v := pop();
+
+    VarCast(vd, v, signature.ParamTypes[i]);
+
+    case varType(vd) of
+      varBoolean: asm
+                  xor eax, eax
+                  mov ax, vd.TVarData.VBoolean
+                  push eax
+                  end;
+      varInteger: asm
+                  mov eax, vd.TVarData.VInteger
+                  push eax
+                  end;
+       varSingle: asm
+                  mov eax, vd.TVarData.VSingle
+                  push eax
+                  end;
+       varString: asm
+                  mov eax, vd.TVarData.VString
+                  push eax
+                  end;
+    end;
+    end;
+
+  asm
+    mov eax, classAddr
+    test eax, eax
+    jz @call
+
+    @methodcall:
+    push eax
+
+    @call:
+    call methodAddr
+
+    mov edx, signature.ResultType
+
+    cmp edx, varSingle
+    je @varSingle
+
+    cmp edx, varInteger
+    je @varInteger
+
+    jmp @end
+
+@varSingle:
+    fstp dword ptr vd.TVarData.VSingle
+    mov vd.TVarData.VType, varSingle
+    jmp @end
+
+@varInteger:
+    mov vd.TVarData.VType, varInteger
+    mov vd.TVarData.VInteger, eax
+    jmp @end
+
+@end:
+  end;
+
+  if (signature.ResultType <> varEmpty) then
+    push(vd);
+end;
+
 procedure GContext.Execute;
 var
 	i : integer;
@@ -158,6 +247,7 @@ var
   r : byte;
   p : pchar;
 	v1, v2 : variant;
+  meth : GExternalMethod;
 begin
 	writeln('Starting execution, codesize is ', block.codeSize, ' byte(s), datasize is ', block.dataSize, ' element(s).');
 
@@ -226,18 +316,21 @@ begin
                   inc(pc);
                   end;
         _SUB		: begin
-                  v1 := pop() - pop();
-                  push(v1);
+                  v1 := pop();
+                  v2 := pop();
+                  push(v1 - v2);
                   inc(pc);
                   end;
         _MUL		: begin
-                  v1 := pop() * pop();
-                  push(v1);
+                  v1 := pop();
+                  v2 := pop();
+                  push(v1 * v2);
                   inc(pc);
                   end;
         _DIV		: begin
-                  v1 := pop() / pop();
-                  push(v1);
+                  v1 := pop();
+                  v2 := pop();
+                  push(v1 / v2);
                   inc(pc);
                   end;
         _AND    : begin
@@ -249,29 +342,39 @@ begin
                   inc(pc);
                   end;
         _LT     : begin
-                  push(pop() < pop());
+                  v2 := pop();
+                  v1 := pop();
+                  push(v1 < v2);
                   inc(pc);
                   end;
         _GT     : begin
-                  push(pop() > pop());
+                  v2 := pop();
+                  v1 := pop();
+                  push(v1 > v2);
                   inc(pc);
                   end;
         _LTE    : begin
-                  push(pop() <= pop());
+                  v2 := pop();
+                  v1 := pop();
+                  push(v1 <= v2);
                   inc(pc);
                   end;
         _GTE    : begin
-                  push(pop() >= pop());
+                  v2 := pop();
+                  v1 := pop();
+                  push(v1 >= v2);
                   inc(pc);
                   end;
         _EQ     : begin
-                  v1 := pop();
                   v2 := pop();
+                  v1 := pop();
                   push(v1 = v2);
                   inc(pc);
                   end;
         _GET		: begin
-                  push(externalTrap(pop(), pop()));
+                  v2 := pop();
+                  v1 := pop();
+                  push(externalTrap(v1, v2));
                   inc(pc);
                   end;
         _GETR		: begin
@@ -295,6 +398,17 @@ begin
 
                   pushr(pc + 5);					// save return address
                   pc := i;
+                  end;
+        _CALLE  : begin
+                  p := @block.code[pc + 1];
+                  inc(pc, strlen(p) + 2);
+
+                  meth := GExternalMethod(externalMethods.get(string(p)));
+
+                  if (meth <> nil) then
+										callMethod(meth.classAddr, meth.methodAddr, meth.signature)
+                  else
+                    vmError('unregistered external method "' + p + '"');
                   end;
         _JMP    : begin
                   move(block.code[pc + 1], i, 4);
@@ -372,6 +486,20 @@ begin
     externalTrap := method;
 end;
 
+procedure registerExternalMethod(name : string; classAddr, methodAddr : pointer; signature : GSignature);
+var
+	meth : GExternalMethod;
+begin
+  meth := GExternalMethod.Create;
+
+  meth.name := name;
+  meth.classAddr := classAddr;
+  meth.methodAddr := methodAddr;
+  meth.signature := signature;
+
+  externalMethods.put(name, meth);
+end;
+
 begin
   DecimalSeparator := '.';
 
@@ -379,4 +507,5 @@ begin
   setExternalTrap(dummyExternalTrap);
 
   codeCache := GHashTable.Create(1024);
+  externalMethods := GHashTable.Create(256);
 end.

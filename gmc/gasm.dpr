@@ -196,6 +196,15 @@ begin
 									setLength(line.code, 1);
 									line.code[0] := chr(b);
 									end;
+				_CALLE : 	begin
+									line.displ := length(line.attr) + 2;
+									setLength(line.code, length(line.attr) + 1);
+
+									for b := 1 to length(line.attr) do
+                    line.code[b - 1] := line.attr[b];
+
+									line.code[length(line.attr)] := #0;
+									end; 
 
 				else
             begin

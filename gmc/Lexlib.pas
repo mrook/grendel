@@ -8,65 +8,15 @@ unit LexLib;
 
 interface
 
-(* The Lex library unit supplies a collection of variables and routines
-   needed by the lexical analyzer routine yylex and application programs
-   using Lex-generated lexical analyzers. It also provides access to the
-   input/output streams used by the lexical analyzer and the text of the
-   matched string, and provides some utility functions which may be used
-   in actions.
-
-   This `standard' version of the LexLib unit is used to implement lexical
-   analyzers which read from and write to MS-DOS files (using standard input
-   and output, by default). It is suitable for many standard applications
-   for lexical analyzers, such as text conversion tools or compilers.
-
-   However, you may create your own version of the LexLib unit, tailored to
-   your target applications. In particular, you may wish to provide another
-   set of I/O functions, e.g., if you want to read from or write to memory
-   instead to files, or want to use different file types. *)
-
-(* Variables:
-
-   The variable yytext contains the current match, yyleng its length.
-   The variable yyline contains the current input line, and yylineno and
-   yycolno denote the current input position (line, column). These values
-   are often used in giving error diagnostics (however, they will only be
-   meaningful if there is no rescanning across line ends).
-
-   The variables yyinput and yyoutput are the text files which are used
-   by the lexical analyzer. By default, they are assigned to standard
-   input and output, but you may change these assignments to fit your
-   target application (use the Turbo Pascal standard routines assign,
-   reset, and rewrite for this purpose). *)
+uses
+    fsys;
 
 var
 
-yyinput, yyoutput : Text;        (* input and output file *)
+yyoutput : Text;        (* input and output file *)
 yyline            : String;      (* current input line *)
 yylineno, yycolno : Integer;     (* current input position *)
 yytext            : String;      (* matched text (should be considered r/o) *)
-
-(* I/O routines:
-
-   The following routines get_char, unget_char and put_char are used to
-   implement access to the input and output files. Since \n (newline) for
-   Lex means line end, the I/O routines have to translate MS-DOS line ends
-   (carriage-return/line-feed) into newline characters and vice versa. Input
-   is buffered to allow rescanning text (via unput_char).
-
-   The input buffer holds the text of the line to be scanned. When the input
-   buffer empties, a new line is obtained from the input stream. Characters
-   can be returned to the input buffer by calls to unget_char. At end-of-
-   file a null character is returned.
-
-   The input routines also keep track of the input position and set the
-   yyline, yylineno, yycolno variables accordingly.
-
-   Since the rest of the Lex library only depends on these three routines
-   (there are no direct references to the yyinput and yyoutput files or
-   to the input buffer), you can easily replace get_char, unget_char and
-   put_char by another suitable set of routines, e.g. if you want to read
-   from/write to memory, etc. *)
 
 function get_char : Char;
   (* obtain one character from the input file (null character at end-of-
@@ -78,6 +28,8 @@ procedure unget_char ( c : Char );
 
 procedure put_char ( c : Char );
   (* write one character to the output file *)
+
+procedure yyopen(fname : string);
 
 (* Utility routines: *)
 
@@ -172,26 +124,32 @@ procedure fatal ( msg : String );
 (* I/O routines: *)
 
 const nl = #10;  (* newline character *)
-
-const max_chars = 2048;
+      max_chars = 32768;
+      max_inputs = 16;
+      max_matches = 1024;
+      max_rules   = 256;
 
 var
-
-bufptr : Integer;
-buf    : array [1..max_chars] of Char;
+  bufptr : Integer;
+  buf    : array [1..max_chars] of Char;
+  iptr : Integer;
+  inputStack : array[1..max_inputs] of GFileReader;
 
 function get_char : Char;
   var i : Integer;
   begin
-    if (bufptr=0) and not eof(yyinput) then
+    if (bufptr=0) and (not inputStack[iptr].eof()) then
       begin
-        readln(yyinput, yyline);
-        inc(yylineno); yycolno := 1;
-        buf[1] := nl;
-        for i := 1 to length(yyline) do
-          buf[i+1] := yyline[length(yyline)-i+1];
-        inc(bufptr, length(yyline)+1);
+      yyline := inputStack[iptr].readLine();
+
+      yylineno := inputStack[iptr].line;
+      yycolno := 1;
+      buf[1] := nl;
+      for i := 1 to length(yyline) do
+        buf[i+1] := yyline[length(yyline)-i+1];
+      inc(bufptr, length(yyline)+1);
       end;
+
     if bufptr>0 then
       begin
         get_char := buf[bufptr];
@@ -220,38 +178,28 @@ procedure put_char ( c : Char );
       write(yyoutput, c)
   end(*put_char*);
 
-(* Variables:
+procedure yyopen(fname : string);
+begin
+  inc(iptr);
 
-   Some state information is maintained to keep track with calls to yymore,
-   yyless, reject, start and yymatch/yymark, and to initialize state
-   information used by the lexical analyzer.
-   - yystext: contains the initial contents of the yytext variable; this
-     will be the empty string, unless yymore is called which sets yystext
-     to the current yytext
-   - yysstate: start state of lexical analyzer (set to 0 during
-     initialization, and modified in calls to the start routine)
-   - yylstate: line state information (1 if at beginning of line, 0
-     otherwise)
-   - yystack: stack containing matched rules; yymatches contains the number of
-     matches
-   - yypos: for each rule the last marked position (yymark); zeroed when rule
-     has already been considered
-   - yysleng: copy of the original yyleng used to restore state information
-     when reject is used *)
+  try
+    inputStack[iptr] := GFileReader.Create(fname);
+  except
+    writeln('Could not open ', fname);
+    exit;
+  end;
 
-const
+	yylineno := 0;
+end;
 
-max_matches = 1024;
-max_rules   = 256;
 
 var
-
-yystext            : String;
-yysstate, yylstate : Integer;
-yymatches          : Integer;
-yystack            : array [1..max_matches] of Integer;
-yypos              : array [1..max_rules] of Integer;
-yysleng            : Byte;
+	yystext            : String;
+	yysstate, yylstate : Integer;
+	yymatches          : Integer;
+	yystack            : array [1..max_matches] of Integer;
+	yypos              : array [1..max_rules] of Integer;
+	yysleng            : Byte;
 
 (* Utilities: *)
 
@@ -306,8 +254,17 @@ procedure start ( state : Integer );
 
 function yywrap : Boolean;
   begin
-    close(yyinput); close(yyoutput);
-    yywrap := true;
+    inputStack[iptr].Free;
+    dec(iptr);
+
+    if (iptr > 0) then
+      begin
+      yylineno := inputStack[iptr].line;
+      yywrap := false;
+			bufptr := 0;
+      end
+    else
+      yywrap := true;
   end(*yywrap*);
 
 (* Internal routines: *)
@@ -399,9 +356,10 @@ procedure yyclear;
   end(*yyclear*);
 
 begin
-  assign(yyinput, '');
+{  yyopen(''); }
   assign(yyoutput, '');
-  reset(yyinput); rewrite(yyoutput);
+  rewrite(yyoutput);
   yylineno := 0;
+  iptr := 0;
   yyclear;
 end(*LexLib*).

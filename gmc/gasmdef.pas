@@ -31,7 +31,8 @@ const
 	_JNZ = $A1;
 	_JZ = $A2;
 	_CALL = $A3;
-  _RET = $A4;
+  _CALLE = $A4;
+  _RET = $A5;
 
 	_PUSHI = $B0;
   _PUSHF = $B1;
@@ -48,7 +49,7 @@ const
 	_BTOS = $D3;
 	_FTOS = $D4;
 
-  opcodeNum = 32;
+  opcodeNum = 33;
 	
 	opcodes : array[1..opcodeNum] of opcode_trans = (
                                                 (keyword:'NOP'; opcode:_NOP),
@@ -73,6 +74,7 @@ const
 																								(keyword:'JNZ'; opcode:_JNZ),
 																								(keyword:'JZ'; opcode:_JZ),
                                                 (keyword:'CALL'; opcode:_CALL),
+                                                (keyword:'CALLE'; opcode:_CALLE),
                                                 (keyword:'RET'; opcode:_RET),
 
 																								(keyword:'PUSHI'; opcode:_PUSHI),

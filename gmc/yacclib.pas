@@ -48,14 +48,15 @@ var
 
 yyflag    : ( yyfnone, yyfaccept, yyfabort, yyferror );
 yyerrflag : Integer;
-yylinenum : Integer;
 yyerrors : boolean;
 
 implementation
 
+uses lexlib;
+
 procedure yyerror ( msg : String );
   begin
-    writeln(msg, ' at line ', yylinenum);
+    writeln(msg, ' at line ', yylineno,':',yycolno);
     yyerrors := true;
   end(*yyerrmsg*);
 
@@ -85,6 +86,5 @@ procedure yyerrok;
   end(*yyerrork*);
 
 begin
-  yylinenum := 0;
   yyerrors := false;
 end(*YaccLib*).

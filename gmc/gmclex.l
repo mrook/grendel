@@ -31,12 +31,12 @@ const
 																							(kw:'for'; state:_FOR),
 																							(kw:'void'; state:_VOID),
 																							(kw:'bool'; state:_BOOL),
-																							(kw:'char'; state:_CHAR),
 																							(kw:'int'; state:_INT),
 																							(kw:'float'; state:_FLOAT),
 																							(kw:'string'; state:_STRING),
 																							(kw:'external'; state:_EXTERNAL),
-																							(kw:'asm'; state:_ASM)
+																							(kw:'asm'; state:_ASM),
+																							(kw:'require'; state:_REQUIRE)
 																					 	  );
 
 %}
@@ -51,7 +51,7 @@ SEP					" "
 SEPS				{SEPS}*
 
 BOOLOP			"&&"|"||"|"<"|">"|"=<"|">="|"=="
-RESERV			"!"|"*"|"("|")"|","|"\~"|"|"|"["|"]"
+RESERV			"!"|"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"
 EXTRA				"_"|"-"
 
 ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
@@ -94,7 +94,7 @@ ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
 						return(IDENTIFIER);
   	        end;
 
-<INITIAL>" "|\t|\r             		;
+<INITIAL>" "|\t|\r|\n     		;
 
 <INITIAL>"\""		 	 	  				begin
 															start(LINEMODE);
@@ -110,8 +110,6 @@ ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
 															start(INITIAL);
 											        returnc(yytext[1]);
 															end;
-
-<INITIAL,LINEMODE>\n					inc(yylinenum);
 
 <INITIAL,LINEMODE>.				begin
         returnc(yytext[1]);
