@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.3 2003/10/03 18:06:25 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.4 2003/10/03 21:00:28 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -14,7 +14,8 @@ uses
 	Classes,
 	fsys,
 	dtypes,
-	LibXmlParser;
+	LibXmlParser,
+	imc3_const;
 	
 
 type
@@ -109,6 +110,7 @@ implementation
 uses
 	SysUtils,
 	console,
+	mudsystem,
 	util;
 	
 	
@@ -124,7 +126,7 @@ begin
 	
 	status := 0;
 	routers := TList.Create();
-	player_port := 4000;
+	player_port := 0;
 	password := 0;
 end;
 
@@ -242,6 +244,9 @@ begin
 				if (prep(parser.CurName) = 'DRIVER') then
 					driver := parser.CurContent
 				else
+				if (prep(parser.CurName) = 'PLAYER_PORT') then
+					player_port := StrToIntDef(parser.CurContent, 0)
+				else
 				if (prep(parser.CurName) = 'ROUTER') then
 					router.name := parser.CurContent
 				else
@@ -348,11 +353,11 @@ var
 begin
 	parser := TXmlParser.Create();
 	parser.Normalize := true;
-	parser.LoadFromFile('config.xml');
+	parser.LoadFromFile(I3_CONFIG_FILE);
 
-	if (parser.Source <> 'config.xml') then
+	if (parser.Source <> I3_CONFIG_FILE) then
 		begin
-    		writeConsole('Could not load config.xml');
+		writeConsole('Could not load ' + I3_CONFIG_FILE);
 		exit;
 		end;
 
@@ -368,6 +373,10 @@ begin
 		end;
 
 	parser.Free();
+	
+	// Get some info from running core
+	player_port := system_info.port;
+	name := system_info.mud_name;
 end;
 
 procedure loadMudList();
@@ -375,9 +384,12 @@ var
 	parser : TXmlParser;
 	mud : GMud_I3;
 begin
+	if (not FileExists(I3_MUDLIST_FILE)) then
+		exit;
+		
   parser := TXmlParser.Create();
 	parser.Normalize := true;
-  parser.LoadFromFile('mudlist.xml');
+  parser.LoadFromFile(I3_MUDLIST_FILE);
 
 	parser.StartScan();
 
@@ -405,7 +417,7 @@ var
 begin
 	iterator := mudList.iterator();
 	
-	writer := GFileWriter.Create('mudlist.xml');
+	writer := GFileWriter.Create(I3_MUDLIST_FILE);
 	
 	writer.writeLine('<?xml version="1.0"?>');
 	writer.writeLine('<!-- InterMud 3 MudList -->');
@@ -429,6 +441,5 @@ end;
 begin
 	mudList := GHashTable.Create(256);
 	
-	if (FileExists('mudlist.xml')) then
-		loadMudList();
+	loadMudList();
 end.

@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_chan.pas,v 1.2 2003/10/02 08:23:20 ***REMOVED*** Exp $
+	$Id: imc3_chan.pas,v 1.3 2003/10/03 21:00:28 ***REMOVED*** Exp $
 }
 unit imc3_chan;
 
@@ -14,11 +14,8 @@ uses
 	Classes,
 	dtypes,
 	fsys,
-	LibXmlParser;
-
-
-const
-	MAX_I3HISTORY = 20;
+	LibXmlParser,
+	imc3_const;
 
 
 type
@@ -96,9 +93,12 @@ var
 	parser : TXmlParser;
 	channel : GChannel_I3;
 begin
+	if (not FileExists(I3_CHANLIST_FILE)) then
+		exit;
+
   parser := TXmlParser.Create();
 	parser.Normalize := true;
-  parser.LoadFromFile('chanlist.xml');
+  parser.LoadFromFile(I3_CHANLIST_FILE);
 
 	parser.StartScan();
 
@@ -127,7 +127,7 @@ var
 begin
 	iterator := chanList.iterator();
 	
-	writer := GFileWriter.Create('chanlist.xml');
+	writer := GFileWriter.Create(I3_CHANLIST_FILE);
 	
 	writer.writeLine('<?xml version="1.0"?>');
 	writer.writeLine('<!-- InterMud 3 ChanList -->');
@@ -151,6 +151,5 @@ end;
 begin
 	chanList := GHashTable.Create(256);
 	
-	if (FileExists('chanlist.xml')) then
-		loadChanList();
+	loadChanList();
 end.

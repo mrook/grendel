@@ -30,10 +30,11 @@ requires
 	vcl;
 
 contains
-	imc3_main,
+	imc3_chan,
+	imc3_const,
 	imc3_core,
+	imc3_main,
 	imc3_mud,
-	imc3_packet,
-	imc3_chan;
+	imc3_packet;
 
 end.

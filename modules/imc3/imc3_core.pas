@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.4 2003/10/03 18:06:25 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.5 2003/10/03 21:00:28 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -17,12 +17,8 @@ uses
 	socket,
 	imc3_chan,
 	imc3_mud,
-	imc3_packet;
-
-
-const
-	MAX_IPS = 8192 * 16;
-	MAX_READ = 4096;
+	imc3_packet,
+	imc3_const;
 
 
 type
@@ -598,6 +594,8 @@ begin
 						debug('Pointer at ' + IntToStr(inputPointer), 2);
 
 						handlePacket(packet);
+						
+						packet.Free();
 						end;
 					end;
 				end;
