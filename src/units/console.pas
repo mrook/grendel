@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.4 2004/03/13 15:50:06 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.5 2004/03/13 18:01:35 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -235,7 +235,7 @@ begin
   {$I+}
 
   if (IOResult <> 0) then
-    raise Exception.Create('Could not open logfile');
+    writeConsole('Could not open logfile');
 end;
 
 { GConsoleLogWriter destructor }
