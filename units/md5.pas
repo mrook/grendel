@@ -60,10 +60,10 @@ type
 		Count: MD5Count;
 		Buffer: MD5Buffer;
 	end;
-
+	
 procedure MD5Init(var Context: MD5Context);
-//procedure MD5Update(var Context: MD5Context; Input: pChar; Length: longword);
-//procedure MD5Final(var Context: MD5Context; var Digest: MD5Digest);
+procedure MD5Update(var Context: MD5Context; Input: pChar; Length: longword);
+procedure MD5Final(var Context: MD5Context; var Digest: MD5Digest);
 
 function MD5String(M: string): MD5Digest;
 function MD5Print(D: MD5Digest): string;
@@ -287,29 +287,40 @@ procedure MD5Update(var Context: MD5Context; Input: pChar; Length: longword);
 var
 	Index: longword;
 	PartLen: longword;
-	I: longword;
+	T, I: longword;
+	
 begin
-	with Context do begin
+	with Context do 
+	  begin
 		Index := (Count[0] shr 3) and $3f;
 		inc(Count[0], Length shl 3);
 		if Count[0] < (Length shl 3) then inc(Count[1]);
 		inc(Count[1], Length shr 29);
-	end;
+  	end;
+
 	PartLen := 64 - Index;
-	if Length >= PartLen then begin
-//		CopyMemory(@Context.Buffer[Index], Input, PartLen);
-		move(Context.Buffer[Index], Input, PartLen);
+
+	if Length >= PartLen then 
+	  begin
+  	for T := 0 to Partlen - 1 do
+	    Context.Buffer[Index + T] := byte(Input[T]);
+
 		Transform(@Context.Buffer, Context.State);
 		I := PartLen;
-		while I + 63 < Length do begin
+		
+		while I + 63 < Length do 
+		  begin
 			Transform(@Input[I], Context.State);
 			inc(I, 64);
-		end;
+  		end;
+  		
 		Index := 0;
-	end else I := 0;
-
-	move(Context.Buffer[Index], Input[I], Length - I);
-//	CopyMemory(@Context.Buffer[Index], @Input[I], Length - I);
+	end 
+	  else I := 0;
+	  
+	if (Length - I > 0) then
+	for T := 0 to (Length - I) - 1 do 
+	  Context.Buffer[Index + T] := byte(Input[I + T]);
 end;
 
 // Finalize given Context, create Digest and zeroize Context
