@@ -172,10 +172,7 @@ uses
 // GNPCIndex
 destructor GNPCIndex.Destroy;
 begin
-  if (prog <> nil) then
-    prog.Free();
-
-  inherited Destroy;
+	inherited Destroy;
 end;
 
 { GArea constructor }

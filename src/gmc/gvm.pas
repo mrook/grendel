@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.11 2004/04/21 21:08:59 ***REMOVED*** Exp $
+	## $Id$
 }
 
 unit gvm;
@@ -743,6 +743,7 @@ initialization
 	setWaitTrap(dummyWaitTrap);
 
 	codeCache := GHashTable.Create(128);
+	codeCache.ownsObjects := true;
 	externalMethods := GHashTable.Create(256);
 
 finalization
