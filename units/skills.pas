@@ -1,6 +1,8 @@
 {
-  @abstract(Various skill related functions)
-  @lastmod($Id: skills.pas,v 1.29 2003/10/22 13:12:38 ***REMOVED*** Exp $)
+  Summary:
+  	Various skill related functions
+  
+  ##	$Id: skills.pas,v 1.30 2003/11/03 13:23:23 ***REMOVED*** Exp $
 }
 
 unit skills;
@@ -62,8 +64,8 @@ type
       die_char,die_vict,die_room:string;
       imm_char,imm_vict,imm_room:string;
 
-      constructor Create;
-      destructor Destroy; override;
+      constructor Create();
+      destructor Destroy(); override;
     end;
 
 var

@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.76 2003/10/23 08:09:08 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.77 2003/11/03 13:23:22 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -64,6 +64,8 @@ type
 		end;
 
     GLearned = class
+      node : GListNode;
+
       skill : pointer;
       perc : integer;
 
@@ -705,8 +707,8 @@ begin
 		 or IS_IMMORT)) then
 			CAN_SEE := false;
 
-	{ TODO:	if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
-			CAN_SEE := false; }
+		if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
+			CAN_SEE := false;
 		end;
 
   if (IS_SET(aff_flags, AFF_BLIND)) then
@@ -759,13 +761,16 @@ begin
   iterator.Free();
 
   if (g = nil) then
-    skills_learned.insertLast(GLearned.Create(perc, skill))
+    begin
+    g := GLearned.Create(perc, skill);
+    g.node := skills_learned.insertLast(g);
+    end
   else
   	begin
     if (perc > 0) then
       g.perc := perc
     else
-      { TODO skills_learned.remove(g.node); }
+      skills_learned.remove(g.node);
     end;
 end;
 

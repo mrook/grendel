@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.66 2003/10/23 08:09:07 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.67 2003/11/03 13:23:21 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -518,10 +518,12 @@ begin
 end;
 
 procedure GArea.loadNPCs;
-var s:string;
-    num:integer;
-    sk : GSkill;
-    npc : GNPCIndex;
+var 
+	s:string;
+	num:integer;
+	sk : GSkill;
+	npc : GNPCIndex;
+	g : GLearned;
 //    prog : GProgram;
 //    progfile : string;
 begin
@@ -611,7 +613,10 @@ begin
             sk := findSkill(s);
 
             if (sk <> nil) then
-              skills_learned.insertLast(GLearned.Create(100, sk))
+            	begin
+            	g := GLearned.Create(100, sk);
+              g.node := skills_learned.insertLast(g);
+              end
             else
               areaBug('loadNPCs', 'unknown skill '+s);
             end;

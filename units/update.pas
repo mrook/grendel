@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.25 2003/10/23 08:09:09 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.26 2003/11/03 13:23:23 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -319,9 +319,13 @@ begin
     begin
     ch := GCharacter(iterator.next());
 
-    { TODO: switched mobs don't wander }
-{    if (ch.IS_NPC) and (ch.conn = nil) then
+    
+    if (ch.IS_NPC) then
       begin
+      { switched mobs don't wander }
+      if (ch.snooped_by <> nil) and (GPlayer(ch.snooped_by).switching = ch) then
+      	continue;
+      
       if (not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL)) and (ch.state = STATE_IDLE) then
         begin
         p:=random(6)+1;
@@ -416,7 +420,7 @@ begin
              act(AT_REPORT,'$n kneels down, muttering and chanting in tongues...',false,ch,nil,nil,TO_ROOM);
              end;
         end;
-      end; }
+      end;
     end; 
     
   iterator.Free();

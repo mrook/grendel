@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.31 2003/10/23 08:12:24 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.32 2003/11/03 13:23:22 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -514,9 +514,8 @@ begin
         GNPC(oppnt).context.Execute;
         end;
 
-      { TODO: if switched, let go }
-      { if (oppnt.conn <> nil) then
-        interpret(oppnt, 'return sub'); }
+      if (oppnt.snooped_by <> nil) and (GPlayer(oppnt.snooped_by).switching = oppnt) then
+        interpret(oppnt, 'return sub');
 
       oppnt.die();
 
