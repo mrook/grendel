@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.19 2004/04/21 21:27:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.20 2004/04/21 21:44:53 ***REMOVED*** Exp $
 #
 
 
@@ -30,6 +30,7 @@ ifdef WIN32
 	makejcldbg -J 'src\*.map'
 	makejcldbg -J 'src\modules\*.map'
 	$(CP) 'src\grendel.exe'
+	$(CP) 'src\convert.exe'
 	$(CP) 'src\grendelservice.exe'
 	$(CP) 'src\core.bpl'
 	$(CP) 'src\*.jdbg'
@@ -41,6 +42,7 @@ ifdef WIN32
 endif
 ifdef LINUX
 	$(CP) src/grendel .
+	$(CP) src/convert
 	$(CP) src/bplcore.so .
 	$(CP) src/*.map .
 	$(CP) src/gmc/gmcc .

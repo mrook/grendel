@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.10 2004/04/21 21:27:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.11 2004/04/21 21:44:53 ***REMOVED*** Exp $
 #
 
 
@@ -21,10 +21,11 @@ DCC=dcc32
 
 GRENDEL=grendel.exe
 COPYOVER=copyover.exe
+CONVERT=convert.exe
 CORE=core.bpl
 SERVICE=grendelservice.exe
 
-ALL=$(GRENDEL) $(SERVICE) $(COPYOVER) $(CORE)
+ALL=$(GRENDEL) $(CONVERT) $(COPYOVER) $(CORE) $(SERVICE)
 
 MAKE=$(CURDIR)/../make
 
@@ -41,9 +42,10 @@ DCC=dcc
 
 GRENDEL=grendel
 COPYOVER=copyover
+CONVERT=convert
 CORE=bplcore.so
 
-ALL=$(GRENDEL) $(COPYOVER) $(CORE)
+ALL=$(GRENDEL) $(CONVERT) $(CORE)
 
 RM=rm -f
 endif
@@ -69,6 +71,7 @@ clean:
 	$(RM) $(GRENDEL) 
 	$(RM) $(SERVICE)
 	$(RM) $(COPYOVER) 
+	$(RM) $(CONVERT)
 	$(RM) $(CORE)
 	$(RM) *.map
 	$(RM) *.jdbg
@@ -84,6 +87,9 @@ $(GRENDEL):	grendel.dpr $(CORE)
 	
 $(COPYOVER):	copyover.dpr $(CORE)
 	$(DCC) copyover.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
+
+$(CONVERT):	convert.dpr $(CORE)
+	$(DCC) convert.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
 
 $(SERVICE):	grendelservice.dpr servicemain.pas $(CORE)
 	$(DCC) grendelservice.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -LUvcl
