@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.22 2003/10/09 20:13:36 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.23 2003/10/30 19:48:27 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -8,7 +8,7 @@ unit util;
 interface
 
 uses
-    Strip,
+    strip,
     SysUtils,
     ansiio;
 

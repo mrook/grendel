@@ -2,7 +2,7 @@
   Summary:
   	Clan routines
   
-  ##	$Id: clan.pas,v 1.12 2003/10/29 12:55:47 ***REMOVED*** Exp $
+  ##	$Id: clan.pas,v 1.13 2003/10/30 19:48:13 ***REMOVED*** Exp $
 }
 
 unit clan;
@@ -50,7 +50,7 @@ implementation
 
 uses
     SysUtils,
-    Strip,
+    strip,
     console,
     mudsystem;
 

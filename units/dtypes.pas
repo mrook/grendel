@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.35 2003/10/29 12:55:01 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.36 2003/10/30 19:48:13 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -186,7 +186,6 @@ type
     	property bucketcount : cardinal read hashsize;
     end;   
 
-
 {
 	Size of global string hash table
 }
@@ -211,9 +210,6 @@ function firstHash(size, prime : cardinal; key : string) : cardinal;
 implementation
 
 uses
-{$IFDEF LINUX}
-    Variants,
-{$ENDIF}
     md5;
 
 
