@@ -450,7 +450,7 @@ begin
 
   to_hit:=ch.point.hitroll + 10;             { +10 bonus because of backstab }
 
-  dec(to_hit,victim.point.ac);
+  inc(to_hit,victim.point.ac);
   inc(to_hit,(ch.learned[sn]-50) div 5);
   roll:=rolldice(1,100);
   
@@ -588,6 +588,8 @@ begin
 end;
 
 procedure do_circle(ch:GCharacter;param:string);
+var
+   wield : GObject;
 begin
   if (ch.learned[gsn_circle] = 0) then
     begin
@@ -604,6 +606,14 @@ begin
   if (ch.fighting.fighting=ch) then
     begin
     ch.sendBuffer('You are on the frontline and can not circle!'#13#10);
+    exit;
+    end;
+
+  wield := ch.getWield(ITEM_WEAPON);
+
+  if (wield=nil) or not (wield.value[4] in [FG_PIERCE,FG_STAB]) then
+    begin
+    ch.sendBuffer('You must wield a piercing or stabbing weapon.'#13#10);
     exit;
     end;
 
@@ -644,6 +654,7 @@ begin
   if (number_percent <= ch.learned[gsn_rescue]) then
     begin
     act(AT_REPORT,'You rescue $N!',false,ch,nil,victim,TO_CHAR);
+    act(AT_REPORT,'$N rescues you!',false,victim,nil,ch,TO_VICT);
     act(AT_REPORT,'$N rescues $n!',false,victim,nil,ch,TO_NOTVICT);
 
     if (ch.position <> POS_FIGHTING) then
