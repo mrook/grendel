@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.50 2001/07/31 21:47:26 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.51 2001/08/01 15:38:27 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -153,7 +153,7 @@ type
       function IS_KEYLOCKED : boolean; virtual;
       function IS_EDITING : boolean; virtual;
       function CAN_FLY : boolean; virtual;
-      function CAN_SEE(target : TObject) : boolean; virtual;
+      function CAN_SEE(target : TObject) : boolean;
 
       function LEARNED(skill : pointer) : integer;
       procedure SET_LEARNED(perc : integer; skill : pointer);
@@ -965,16 +965,16 @@ var
 begin
   CAN_SEE := true;
 
-  if (Self = vict) then
+  if (Self = target) then
     exit;
-
+    
   if (not IS_AWAKE) then
     CAN_SEE := false;
 
   if (room.IS_DARK) and (not IS_HOLYLIGHT) and (not IS_SET(aff_flags, AFF_INFRAVISION)) then
     CAN_SEE := false;
 
-  if (target is GCharacter) then
+  if (target is GPlayer) or (target is GNPC) then
     begin
     vict := GCharacter(target);
 

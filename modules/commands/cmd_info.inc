@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.2 2001/07/30 13:00:17 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.3 2001/08/01 15:38:26 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -633,7 +633,7 @@ begin
   while (node <> nil) do
   begin
     conn := node.element;
-
+    
     if (conn.state = CON_PLAYING) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
     begin
       if not(specarg) or
