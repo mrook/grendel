@@ -40,6 +40,7 @@ Grendel's TODO list with probable release date/version
 ! (0.4.0) racial abilities
 ! (0.4.0) modularized mud, pluggable objects (like timers, sets of commands, etc.)
 ! (0.4.0) minimize to systray
+! (0.4.1) purge command (strips char/room of objects)
 
 
 * (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
@@ -50,7 +51,6 @@ Grendel's TODO list with probable release date/version
 * (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 
 
-- (0.4.1) purge command (strips char of objects, only for admins)
 - (0.4.1) new area format using XML
 - (0.4.1) implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code

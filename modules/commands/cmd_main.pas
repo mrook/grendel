@@ -851,6 +851,7 @@ initialization
   registerCommand('do_cloak', do_cloak);
   registerCommand('do_showprompt', do_showprompt);
   registerCommand('do_exits', do_exits);
+  registerCommand('do_purge', do_purge);
 
 finalization
   unregisterCommand('do_quit');
@@ -1044,5 +1045,6 @@ finalization
   unregisterCommand('do_cloak');
   unregisterCommand('do_showprompt');
   unregisterCommand('do_exits');
+  unregisterCommand('do_purge');
 
 end.

@@ -1082,6 +1082,13 @@ position: 0
 #end
 
 #command
+name: purge
+function: do_purge
+level: 997
+position: 0
+#end
+
+#command
 name: reload
 function: do_reload
 level: 998

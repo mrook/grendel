@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.12 2001/09/02 21:48:58 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.13 2001/09/17 21:52:46 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -335,7 +335,7 @@ begin
 
         if (level >= 990) then
           begin
-          ch.sendBuffer('That player cannot be purged.'#13#10);
+          ch.sendBuffer('That player cannot be destroyed.'#13#10);
           exit;
           end;
         end;
@@ -2437,4 +2437,93 @@ begin
     ch.sendBuffer('Cloak on.'#13#10);
     SET_BIT(GPlayer(ch).flags, PLR_CLOAK);
     end;
+end;
+
+// Purge objects from char - Nemesis
+procedure do_purge(ch : GCharacter; param : string);
+var 
+  obj : GObject;
+  vict : GCharacter;
+  objstr, victstr : string;
+  iterator : GIterator;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: PURGE <object>/ALL <target>'#13#10);
+    ch.sendBuffer('       PURGE ROOM'#13#10);
+    exit;
+    end;
+
+  if (uppercase(param) = 'ROOM') then
+    begin
+    iterator := ch.room.objects.iterator();
+
+    while (iterator.hasNext()) do
+      begin
+      obj := GObject(iterator.Next());
+
+      obj.extract;
+      end;
+
+    iterator.Free();
+
+    ch.sendBuffer('Ok, room purged.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param, objstr);
+  param := one_argument(param, victstr);
+
+  vict := ch.room.findChar(ch, victstr);
+
+  if (vict = nil) then
+    begin
+    ch.sendBuffer('That character does not exist.'#13#10);
+    exit;
+    end;
+
+  if (uppercase(objstr) = 'ALL') then
+    begin
+    iterator := vict.objects.iterator();
+
+    while (iterator.hasNext()) do
+      begin
+      obj := GObject(iterator.Next());
+
+      if (obj.wear_location > WEAR_NULL) then
+        vict.affectObject(obj, true);
+
+      obj.fromChar;
+      obj.extract;
+      end;
+      
+    iterator.Free();
+
+    act(AT_REPORT,'All your items have been purged by $N.',false, vict, nil, ch, TO_CHAR);
+    act(AT_REPORT,'You have purged all items of $N.',false, ch, nil, vict, TO_CHAR);
+    exit;
+    end;
+
+  obj := vict.findInventory(objstr);
+
+  if (obj = nil) then
+    obj := vict.findEquipment(objstr);
+
+  if (obj = nil) then
+    obj := vict.findInventory(objstr);
+
+  if (obj = nil) then
+    begin
+    ch.sendBuffer('That character does not have that object.'#13#10);
+    exit;
+    end;
+
+  if (obj.wear_location > WEAR_NULL) then
+    vict.affectObject(obj, true);
+
+  obj.fromChar;
+  obj.extract;
+
+  act(AT_REPORT,'$p has been purged by $N.',false, vict, obj, ch, TO_CHAR);
+  act(AT_REPORT,'You have purged $p of $N.',false, ch, obj, vict, TO_CHAR);
 end;
