@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.15 2001/04/30 15:51:56 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.16 2001/05/01 20:14:35 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -462,7 +462,7 @@ begin
     begin
     if (GHashValue(node.element).key = key) then
       begin
-      fnode := node.element;
+      fnode := node;
       break;
       end;
 
