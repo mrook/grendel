@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.3 2004/01/26 01:08:08 hemko Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.4 2004/01/31 12:17:07 hemko Exp $)
 }
 
 unit mudsystem;
@@ -320,29 +320,31 @@ begin
     af.Free();
     end;
 
-  if (fileExists(SystemDir + 'bans.dat')) then
-    begin
+  try
     af := GFileWriter.Create(SystemDir + 'bans.dat');
+  except
+    exit;
+  end;
 
-    for a := 0 to banned_masks.count-1 do
-      af.writeLine(banned_masks[a]);
+  for a := 0 to banned_masks.count-1 do
+    af.writeLine(banned_masks[a]);
 
-    af.writeLine('$');
+  af.writeLine('$');
 
-    af.Free();
-    end;
+  af.Free();
 
-  if (fileExists(SystemDir + 'names.dat')) then
-    begin
+  try
     af := GFileWriter.Create(SystemDir + 'names.dat');
+  except
+    exit;
+  end;
 
-    for a := 0 to banned_names.count-1 do
-      af.writeLine(banned_names[a]);
+  for a := 0 to banned_names.count-1 do
+    af.writeLine(banned_names[a]);
 
-    af.writeLine('$');
+  af.writeLine('$');
 
-    af.Free();
-    end;
+  af.Free();
 end;
 
 function isMaskBanned(host : string) : boolean;
