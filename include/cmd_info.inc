@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.35 2001/04/29 16:46:21 xenon Exp $
+// $Id: cmd_info.inc,v 1.36 2001/04/30 16:07:14 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -2031,6 +2031,12 @@ end;
 
 procedure do_prompt(ch : GCharacter; param : string);
 begin
+  if (ch.IS_NPC()) then
+  begin
+    ch.sendBuffer('This command is not available for NPCs.'#13#10);
+    exit;
+  end;
+  
   if (length(param) = 0) then
     begin
     ch.sendBuffer('%h - no. of hitpoints'#13#10);
@@ -2045,6 +2051,8 @@ begin
     ch.sendBuffer('%f - status of opponent (when fighting)'#13#10);
     ch.sendBuffer('%k - status of tank (when fighting)'#13#10);
     ch.sendBuffer(#13#10'Default prompt is %hhp %mmv %ama (%l)'#13#10#13#10);
+    ch.sendBuffer('Your prompt is: ' + ch.player^.prompt + #13#10);
+    exit;
     end;
 
   ch.player^.prompt := param;
