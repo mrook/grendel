@@ -295,18 +295,23 @@ begin
   addr := E.ExceptionRecord.ExceptionAddress;
   write_console('Win32 exception detected.');
   write_console('Exception message: "' + E.Message + '".');
-  write_console('Call stack follows:');
-  showAddress(addr);
+  
+  try
+    write_console('Call stack follows:');
+    showAddress(addr);
 
-  FillCallStack(st, false);
+    FillCallStack(st, false);
 
-  for a := 0 to 1 do
-    begin
-    if (st[a] = nil) then
-      continue;
+    for a := 0 to 1 do
+      begin
+      if (st[a] = nil) then
+        continue;
 
-    showAddress(st[a]);
-    end;
+      showAddress(st[a]);
+      end;
+  except
+    write_console('Unable to read call stack.');
+  end;
 {$ELSE}
   write_console('Exception detected, debugging disabled on this platform.');
 {$ENDIF}
