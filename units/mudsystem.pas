@@ -373,7 +373,9 @@ begin
       readln(f,s);
       inc(line_num);
 
-      g := trim(uppercase(stripl(s,':')));
+      s := trim(s);
+
+      g := uppercase(stripl(s,':'));
       
       if g = 'NAME' then
         name := hash_string(uppercase(striprbeg(s,' ')))
