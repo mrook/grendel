@@ -845,12 +845,22 @@ begin
 end;
 
 procedure do_allow(ch:GCharacter;param:string);
+var a : integer;
 begin
   if (length(param) = 0) then
     begin
     do_ban(ch, param);
     exit;
     end;
+
+  a := banned_masks.indexOf(param);
+  if (a >= 0) then
+    begin
+    ch.sendBuffer('Ok.'#13#10);
+    banned_masks.delete(a);
+    end
+  else
+    ch.sendBuffer('That mask is not in the ban list.'#13#10);
 end;
 
 procedure do_log(ch:GCharacter;param:string);
