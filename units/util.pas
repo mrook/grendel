@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.15 2002/08/03 19:14:05 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.16 2002/08/30 21:05:07 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -126,18 +126,20 @@ begin
   pad_string_front := StringOfChar(' ', num - length(s)) + s;
 end;
 
-function trail_number(s:integer):string;
-var g:string;
+function trail_number(s : integer):string;
+var 
+  g : string;
 begin
-  g:=inttostr(s);
-  case s of
-    1:g:=g+'st';
-    2:g:=g+'nd';
-    3:g:=g+'rd';
+  g := inttostr(s);
+  case (s mod 10) of
+    1 : g := g + 'st';
+    2 : g := g + 'nd';
+    3 : g := g + 'rd';
   else
-    g:=g+'th';
+    g := g + 'th';
   end;
-  trail_number:=g;
+  
+  Result := g;
 end;
 
 function findNumber(var s:string):integer;
