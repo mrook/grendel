@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.17 2003/11/02 20:22:05 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.18 2003/11/10 09:27:42 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -51,10 +51,22 @@ begin
 	
 	if (length(cmd) = 0) then
 		begin
-		ch.sendBuffer('Usage: I3 <status/mudlist/chanlist/chat/listen/tell/locate/beep/who/finger>'#13#10);
+		ch.sendBuffer('Usage: I3 <connect/status/mudlist/chanlist/chat/listen/tell/locate/beep/who/finger/help>'#13#10);
 		exit;
 		end;
-		
+	
+	if (prep(cmd) = 'CONNECT') then
+		begin
+		if (i3.isConnected) then
+			begin
+			ch.sendBuffer('Already  connected.'#13#10);
+			exit;
+			end;
+			
+		i3.wait := 2;
+		ch.sendBuffer('Ok.'#13#10);
+		end
+	else
 	if (prep(cmd) = 'STATUS') then
 		begin
 		if (not i3.isConnected) then
@@ -352,7 +364,50 @@ begin
 		ch.sendBuffer('Ok.'#13#10);
 		end
 	else
-		ch.sendBuffer('Unimplemented.'#13#10);
+	if (prep(cmd) = 'HELP') then
+		begin
+		ch.sendBuffer('General Usage:'#13#10);
+		ch.sendBuffer('------------------------------------------------'#13#10);
+		ch.sendBuffer('List channels available                : i3chanlist [all] [filter]'#13#10);
+		ch.sendBuffer('To tune into a channel                 : i3listen <localchannel>'#13#10);
+		ch.sendBuffer('To see who is listening on another mud : i3chanwho <channel> <mud>'#13#10);
+		ch.sendBuffer('List muds connected to I3              : i3mudlist [filter]'#13#10);
+		ch.sendBuffer('Information on another mud             : i3mudinfo <mud>'#13#10);
+		ch.sendBuffer('Ignore someone who annoys you          : i3ignore <string>'#13#10);
+		ch.sendBuffer('Make yourself invisible to I3          : i3invis'#13#10);
+		ch.sendBuffer('Toggle I3 color                        : i3color'#13#10);
+
+		{ if (I3PERM(ch) >= I3PERM_IMM) then
+			begin
+			ch.sendBuffer('\n\r&YImmortal functions'#13#10);
+			ch.sendBuffer('&Y------------------------------------------------\n\r'#13#10);
+			ch.sendBuffer('&YGeneral statistics:'#13#10);
+			ch.sendBuffer('&wi3ucache'#13#10);
+			ch.sendBuffer('&wi3user <person@mud>'#13#10);
+			ch.sendBuffer('&wi3perms <user>\n\r'#13#10);
+			ch.sendBuffer('&YChannel control:'#13#10);
+			ch.sendBuffer('&wi3deny <person> <local channel>'#13#10);
+			end;
+
+		if (I3PERM(ch) >= I3PERM_ADMIN) then
+			begin
+			ch.sendBuffer('\n\r&RAdministrative functions'#13#10);
+			ch.sendBuffer('&R------------------------------------------------\n\r'#13#10);
+			ch.sendBuffer('&RLocal channel setup and editing:'#13#10);
+			ch.sendBuffer('&wi3setchan <i3channelname> <localname> [level]'#13#10);
+			ch.sendBuffer('&wi3editchan <localchannel>'#13#10);
+			ch.sendBuffer('&wi3chanlayout <localchannel> <message> <emote>\n\r'#13#10);
+			ch.sendBuffer('&RNew channel creation and administration:'#13#10);
+			ch.sendBuffer('&wi3addchan <channelname> <localname> <type>'#13#10);
+			ch.sendBuffer('&wi3removechan <channel>'#13#10);
+			ch.sendBuffer('&wi3adminchan <localchannel> <add|remove> <mudname>\n\r'#13#10);
+			ch.sendBuffer('&RTraffic control and permissions:'#13#10);
+			ch.sendBuffer('&wi3ban <string>'#13#10);
+			ch.sendBuffer('&wi3permset <user> <permission>'#13#10);
+			end; }
+		end
+	else
+		ch.sendBuffer('Not implemented.'#13#10);
 end;
 
 

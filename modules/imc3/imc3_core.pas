@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.23 2003/11/05 15:19:21 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.24 2003/11/10 09:27:42 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -31,6 +31,9 @@ type
 		connected : boolean;
 		
 		debugLevel : integer;
+		
+		reconattempts : integer;
+		_wait : integer;
 
 		outputBuffer : string;
 	 	inputBuffer : array[0..MAX_IPS - 1] of char;
@@ -84,6 +87,7 @@ type
 		
 		property connectedRouter : GRouter_I3 read router;
 		property isConnected : boolean read connected;
+		property wait : integer read _wait write _wait;
 	end;
 
 
@@ -121,6 +125,9 @@ begin
 	this_mud.readConfig();
 	
 	socket := GSocket4.Create();
+	
+	reconattempts := 0;
+	wait := 0;
 end;
 
 destructor GInterMud.Destroy();
@@ -883,15 +890,21 @@ begin
 	if (this_mud.preferredRouter = nil) then	
 		begin
 		writeConsole('I3: Impossible to connect to non-existing router');
-		Terminate();
-		end
-	else
-		router := this_mud.preferredRouter;
+		exit;
+		end;
+
+	router := this_mud.preferredRouter;
+	
+	if (this_mud.autoconnect) then
+		_wait := 2;
 	
 	while (not Terminated) do
 		begin
+		if (_wait > 0) then
+			dec(_wait);
+
 		try
-			if (not connected) then
+			if (not connected) and (_wait = 1) then
 				begin
 				if (socket.connect(router.ipaddress, router.port)) then
 					begin
@@ -904,9 +917,18 @@ begin
 				else
 					begin
 					writeConsole('I3: Could not connect to ' + router.ipaddress + ' port ' + IntToStr(router.port));
-					
-					// Wait 5 minutes
-					Sleep(5 * 60 * 1000);
+        	inc(reconattempts);
+
+					if (reconattempts <= 5) then
+						_wait := 10
+					else
+					if (reconattempts <= 20) then
+						_wait := 500
+					else
+						begin
+            _wait := -2;	{ Abandon attempts - probably an ISP failure anyway if this happens :) }
+						writeConsole('Abandoning attempts to reconnect to Intermud-3 router. Too many failures.');
+	   				end;
 					end;
 				end
 			else
