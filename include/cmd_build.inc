@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.24 2001/04/26 21:06:26 xenon Exp $
+// $Id: cmd_build.inc,v 1.25 2001/04/28 16:06:26 ***REMOVED*** Exp $
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
@@ -1536,19 +1536,23 @@ function findFreeVNum(ch : GCharacter) : integer;
 var
    room : GRoom;
    node : GListNode;
-   vnum : integer;
+   vnum, h : integer;
 begin
   vnum := ch.player^.r_lo;
 
-  node := room_list.head;
-  while (node <> nil) do
+  for h := 0 to room_list.hashsize - 1 do
     begin
-    room := node.element;
+    node := room_list.bucketList[h].head;
 
-    if (room.vnum > vnum) and (room.vnum<=ch.player^.r_hi) then
-      vnum:=room.vnum;
+    while (node <> nil) do
+      begin
+      room := node.element;
 
-    node := node.next;
+      if (room.vnum > vnum) and (room.vnum<=ch.player^.r_hi) then
+        vnum:=room.vnum;
+
+      node := node.next;
+      end;
     end;
 
   inc(vnum);
@@ -1567,7 +1571,7 @@ begin
   room.name := hash_string('Floating in a void');
   room.description := 'Merely wisps of gas and steam, this room has not yet been clearly defined.';
 
-  room.node := room_list.insertLast(room);
+  room_list.put(vnum, room);
 
   Result := room;
 end;
@@ -2004,6 +2008,7 @@ var
    area : GArea;
    node : GListNode;
    no_errors : boolean;
+   h : integer;
 begin
   if (ch.player^.area_fname='') then
     begin
@@ -2020,47 +2025,50 @@ begin
   ch.sendBuffer('Checking area '+area.fname+'...'#13#10#13#10);
   no_errors := true;
 
-  node := room_list.head;
-
-  while (node <> nil) do
+  for h := 0 to room_list.hashsize - 1 do
     begin
-    room := node.element;
+    node := room_list.bucketList[h].head;
 
-    if (room.area = area) then
+    while (node <> nil) do
       begin
-      if (room.name = nil) or (length(room.name^) = 0) then
-        begin
-        no_errors := false;
-        ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
-        end;
-      { else
-      if (find_last(room.name) = '.') then
-        begin
-        no_errors:=false;
-        ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
-        end; }
+      room := node.element;
 
-      if (length(room.description) = 0) then
+      if (room.area = area) then
         begin
-        no_errors := false;
-        ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
-        end;
-      { else
-      if (find_last(room.description)<>'.') then
-        begin
-        no_errors:=false;
-        ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
-        end; }
+        if (room.name = nil) or (length(room.name^) = 0) then
+          begin
+          no_errors := false;
+          ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
+          end;
+        { else
+        if (find_last(room.name) = '.') then
+          begin
+          no_errors:=false;
+          ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
+          end; }
+
+        if (length(room.description) = 0) then
+          begin
+          no_errors := false;
+          ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
+          end;
+        { else
+        if (find_last(room.description)<>'.') then
+          begin
+          no_errors:=false;
+          ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
+          end; }
 
 
-      if (not checkWords(room.description)) then
-        begin
-        no_errors:=false;
-        ch.sendBuffer('('+inttostr(room.vnum)+') possibly misspelled word(s), [' + trim(misspelled_words) + ']'#13#10);
+        if (not checkWords(room.description)) then
+          begin
+          no_errors:=false;
+          ch.sendBuffer('('+inttostr(room.vnum)+') possibly misspelled word(s), [' + trim(misspelled_words) + ']'#13#10);
+          end;
         end;
+
+      node := node.next;
       end;
-
-    node := node.next;
     end;
 
   { obj := obj_reset_first;

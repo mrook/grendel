@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.33 2001/04/26 21:13:38 xenon Exp $
+// $Id: cmd_info.inc,v 1.34 2001/04/28 16:06:26 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1062,7 +1062,7 @@ var
 begin
   buf := '$B$4Some world statistics:$A$7'#13#10#13#10 +
          'Open areas:        [$B$1' + pad_integer_front(area_list.getSize, 5) + '$A$7]'#13#10 +
-         'Rooms explorable:  [$B$1' + pad_integer_front(room_list.getSize, 5) + '$A$7]'#13#10 +
+         'Rooms explorable:  [$B$1' + pad_integer_front(room_list.size(), 5) + '$A$7]'#13#10 +
          'World user max:    [$B$1' + pad_integer_front(system_info.user_high, 5) + '$A$7]'#13#10;
 
   act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);

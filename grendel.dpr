@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.27 2001/04/27 19:39:38 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.28 2001/04/28 16:06:27 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -267,7 +267,7 @@ begin
 
     // clean up rooms and all
     area_list.clean;
-    room_list.clean;
+    room_list.clear;
     shop_list.clean;
     teleport_list.clean;
     extracted_object_list.clean;

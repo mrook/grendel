@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.25 2001/04/26 21:16:33 xenon Exp $
+// $Id: area.pas,v 1.26 2001/04/28 16:06:25 ***REMOVED*** Exp $
 
 unit area;
 
@@ -173,8 +173,6 @@ type
     end;
 
     GRoom = class
-      node : GListNode;
-
       vnum : integer;
       name : PString;
       description : string;
@@ -220,7 +218,7 @@ type
 
 var
    area_list : GDLinkedList;
-   room_list : GDLinkedList;
+   room_list : GHashTable;
    object_list : GDLinkedList;
    shop_list : GDLinkedList;
    teleport_list : GDLinkedList;
@@ -322,6 +320,7 @@ var s : string;
     s_extra : GExtraDescription;
     buf : string;
     fnd : boolean;
+    node : GListNode;
 begin
   vnum := 0;
   repeat
@@ -342,7 +341,6 @@ begin
     end;
 
     room := GRoom.Create(vnum, Self);
-    room.node := room_list.insertLast(room);
 
     with room do
       begin
@@ -454,6 +452,8 @@ begin
           end;
         end;
       end;
+
+    room_list.put(vnum, room);
   until (uppercase(s) = '#END');
 end;
 
@@ -876,7 +876,11 @@ var to_room, room : GRoom;
     lf : TextFile;
     area : GArea;
     node, node_exit : GListNode;
+    h : integer;
+    tm : TDateTime;
 begin
+  tm := Now();
+
   assignfile(lf, 'areas\area.list');
 
   {$I-}
@@ -919,49 +923,52 @@ begin
 
   { Checking rooms for errors }
 
-  node := room_list.head;
-  
-  while (node <> nil) do
+  for h := 0 to room_list.hashsize - 1 do
     begin
-    room := node.element;
+    node := room_list.bucketList[h].head;
 
-    node_exit := room.exits.head;
-
-    while (node_exit <> nil) do
+    while (node <> nil) do
       begin
-      pexit := node_exit.element;
+      room := GRoom(GHashValue(node.element).value);
 
-      to_room := findRoom(pexit.vnum);
+      node_exit := room.exits.head;
 
-      if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
+      while (node_exit <> nil) do
         begin
-        bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' illegal direction '+
-                  inttostr(pexit.direction), 'The room parser encountered a flaw in this area.');
+        pexit := node_exit.element;
 
-        room.exits.remove(node_exit);
+        to_room := findRoom(pexit.vnum);
 
-        node_exit := room.exits.head;
-        end
-      else
-      if (to_room=nil) then
-        begin
-        bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' '+
-                   headings[pexit.direction]+' -> '+inttostr(pexit.vnum)+' null',
-                   'The room parser encountered a flaw in this area.');
+        if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
+          begin
+          bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' illegal direction '+
+                    inttostr(pexit.direction), 'The room parser encountered a flaw in this area.');
 
-        room.exits.remove(node_exit);
+          room.exits.remove(node_exit);
 
-        node_exit := room.exits.head;
-        end
-      else
-        begin
-        pexit.to_room:=to_room;
+          node_exit := room.exits.head;
+          end
+        else
+        if (to_room=nil) then
+          begin
+          bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' '+
+                     headings[pexit.direction]+' -> '+inttostr(pexit.vnum)+' null',
+                     'The room parser encountered a flaw in this area.');
 
-        node_exit := node_exit.next;
+          room.exits.remove(node_exit);
+
+          node_exit := room.exits.head;
+          end
+        else
+          begin
+          pexit.to_room:=to_room;
+
+          node_exit := node_exit.next;
+          end;
         end;
-      end;
 
-    node := node.next;
+      node := node.next;
+      end;
     end;
 
   { check the links }
@@ -979,6 +986,10 @@ begin
 
     node := node.next;
     end;
+
+  tm := Now() - tm;
+
+  write_console('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
 end;
 
 procedure GArea.save(fn : string);
@@ -994,6 +1005,7 @@ var
    prog : GProgram;
    shop : GShop;
    obj : GObjectIndex;
+   h : integer;
 begin
   assign(f, 'areas\' + fn);
   {$I-}
@@ -1015,59 +1027,63 @@ begin
   writeln(f);
   writeln(f, '#ROOMS');
 
-  node := room_list.head;
-  while (node <> nil) do
+  for h := 0 to room_list.hashsize - 1 do
     begin
-    room := node.element;
+    node := room_list.bucketList[h].head;
 
-    if (room.area <> Self) then
+    while (node <> nil) do
       begin
-      node := node.next;
-      continue;
-      end;
+      room := node.element;
 
-    writeln(f, '#', room.vnum);
-    writeln(f, room.name^);
-    write(f, room.description);
-    writeln(f, '~');
+      if (room.area <> Self) then
+        begin
+        node := node.next;
+        continue;
+        end;
 
-    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
+      writeln(f, '#', room.vnum);
+      writeln(f, room.name^);
+      write(f, room.description);
+      writeln(f, '~');
 
-    if (IS_SET(room.flags, ROOM_TELEPORT)) then
-      writeln(f, ' ', room.televnum, ' ', room.teledelay)
-    else
-      writeln(f);
+      write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
 
-    node_ex := room.exits.head;
-    while (node_ex <> nil) do
-      begin
-      ex := node_ex.element;
-
-      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
-
-      if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
-        writeln(f, ' ', ex.keywords^)
+      if (IS_SET(room.flags, ROOM_TELEPORT)) then
+        writeln(f, ' ', room.televnum, ' ', room.teledelay)
       else
         writeln(f);
 
-      node_ex := node_ex.next;
+      node_ex := room.exits.head;
+      while (node_ex <> nil) do
+        begin
+        ex := node_ex.element;
+
+        write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
+
+        if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
+          writeln(f, ' ', ex.keywords^)
+        else
+          writeln(f);
+
+        node_ex := node_ex.next;
+        end;
+
+      node_ex := room.extra.head;
+      while (node_ex <> nil) do
+        begin
+        extra := node_ex.element;
+
+        writeln(f, 'E ', extra.keywords);
+        write(f, extra.description);
+        writeln(f, '~');
+
+        node_ex := node_ex.next;
+        end;
+
+      writeln(f, 'S');
+
+      node := node.next;
       end;
-
-    node_ex := room.extra.head;
-    while (node_ex <> nil) do
-      begin
-      extra := node_ex.element;
-
-      writeln(f, 'E ', extra.keywords);
-      write(f, extra.description);
-      writeln(f, '~');
-
-      node_ex := node_ex.next;
-      end;
-
-    writeln(f, 'S');
-
-    node := node.next;
     end;
 
   writeln(f, '#END');
@@ -2346,26 +2362,8 @@ begin
 end;
 
 function findRoom(vnum : integer) : GRoom;
-var
-   node : GListNode;
-   room : GRoom;
 begin
-  findRoom := nil;
-
-  node := room_list.head;
-
-  while (node <> nil) do
-    begin
-    room := GRoom(node.element);
-
-    if (room.vnum = vnum) then
-      begin
-      findRoom := room;
-      exit;
-      end;
-
-    node := node.next;
-    end;
+  Result := GRoom(room_list.get(vnum));
 end;
 
 function findNPCIndex(vnum : integer) : GNPCIndex;
@@ -2710,7 +2708,7 @@ end;
 
 initialization
 area_list := GDLinkedList.Create;
-room_list := GDLinkedList.Create;
+room_list := GHashTable.Create(16384);
 object_list := GDLinkedList.Create;
 shop_list := GDLinkedList.Create;
 teleport_list := GDLinkedList.Create;

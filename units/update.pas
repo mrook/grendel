@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.8 2001/04/26 21:44:41 xenon Exp $
+// $Id: update.pas,v 1.9 2001/04/28 16:06:26 ***REMOVED*** Exp $
 
 unit update;
 
@@ -418,32 +418,36 @@ var
    node_room, node_track, node_tracknext : GListNode;
    room : GRoom;
    track : GTrack;
+   h : integer;
 begin
-  node_room := room_list.head;
-
-  while (node_room <> nil) do
+  for h := 0 to room_list.hashsize - 1 do
     begin
-    room := node_room.element;
-    node_track := room.tracks.head;
+    node_room := room_list.bucketList[h].head;
 
-    while (node_track <> nil) do
+    while (node_room <> nil) do
       begin
-      node_tracknext := node_track.next;
+      room := node_room.element;
+      node_track := room.tracks.head;
 
-      track := node_track.element;
-
-      dec(track.life);
-
-      if (track.life = 0) then
+      while (node_track <> nil) do
         begin
-        room.tracks.remove(node_track);
-        track.Free;
+        node_tracknext := node_track.next;
+
+        track := node_track.element;
+
+        dec(track.life);
+
+        if (track.life = 0) then
+          begin
+          room.tracks.remove(node_track);
+          track.Free;
+          end;
+
+        node_track := node_tracknext;
         end;
 
-      node_track := node_tracknext;
+      node_room := node_room.next;
       end;
-
-    node_room := node_room.next;
     end;
 end;
 
