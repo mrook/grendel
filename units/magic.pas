@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.19 2002/08/03 21:05:28 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.20 2002/12/31 13:54:55 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -323,11 +323,11 @@ begin
                         node := victim.node_world;
                         vict := victim;
                         
-                        if (not ch.IS_SAME_ALIGN(vict)) then
+{                        if (not ch.IS_SAME_ALIGN(vict)) then
                           begin
                           ch.sendBuffer('They are not here.'#13#10);
                           exit;
-                          end;
+                          end; }
                         end;
         TARGET_OFF_AREA:begin
                         { check fighting }
