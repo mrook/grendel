@@ -485,12 +485,13 @@ var s, i : string;
     vch : GCharacter;
     obj1, obj2 : GObject;
     boldflag:boolean;
+    ex : GExit;
 begin
   vch := arg2;
   obj1 := arg1; obj2 := arg2;
   s := '';
   t := 1;
-  
+
   while (t <= length(acts)) do
     begin
     if (acts[t] = '$') then
@@ -560,7 +561,15 @@ begin
              if (arg2 = nil) then
                write_console('[BUG]: act() -> pchar(arg2) null')
              else
-               i := strpas(arg2);
+               i := (PString(arg2))^;
+             end;
+        'd': begin
+             ex := GExit(arg2);
+
+             if (length(ex.keyword) = 0) then
+               i := 'door'
+             else
+               one_argument(ex.keyword, i);
              end;
    '0'..'9','A','B':begin
                     i:='$'+acts[t];
