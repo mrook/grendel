@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.13 2003/10/29 12:55:47 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.14 2003/10/30 19:50:38 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -174,8 +174,8 @@ end;
 // GConsoleDefault
 procedure GConsoleDefault.write(timestamp : TDateTime; text : string);
 begin
-{$IFDEF CONSOLEBUILD OR LINUX}
-  writeln(text);
+{$IFDEF CONSOLEBUILD}
+  writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
 {$ENDIF}
 end;
 
