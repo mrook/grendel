@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.15 2002/07/06 18:54:43 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.16 2002/08/18 19:35:15 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1026,10 +1026,7 @@ end;
 procedure do_switch(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
-  ch.sendBuffer('Temporarily disabled.'#13#10);
-  exit;
-
-{  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage:  SWITCH <character>'#13#10);
     exit;
@@ -1049,46 +1046,34 @@ begin
     exit;
     end;
 
-  if (vict.conn <> nil) then
+  if (vict.snooped_by <> nil) then
     begin
     act(AT_REPORT,'$N is already switched.',false,ch,nil,vict,TO_CHAR);
     exit;
     end;
 
   ch.sendBuffer('Ok.'#13#10);
-  GConnection(ch.conn).ch := vict;
-  GConnection(ch.conn).original := ch;
-  vict.conn := ch.conn;
-  ch.conn := nil;
-  ch.player^.switched := vict; }
+
+  GPlayer(ch).switching := vict;
+  vict.snooped_by := ch;
 end;
 
 procedure do_return(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
-  ch.sendBuffer('Temporarily disabled.'#13#10);
-  exit;
-
-{  if (ch.conn = nil) then
-    exit;
-    
-  if (GConnection(ch.conn).original = nil) then
+  if (ch.snooped_by = nil) or (GPlayer(ch.snooped_by).switching <> ch) then
     begin
     act(AT_REPORT,'You aren''t switched.',false,ch,nil,nil,TO_CHAR);
     exit;
     end;
 
-  vict := GConnection(ch.conn).original;
-  vict.conn := ch.conn;
-  GConnection(ch.conn).original := nil;
-  GConnection(ch.conn).ch := vict;
-  vict.player^.switched := nil;
-  ch.conn := nil;
+  vict := ch.snooped_by;
+  GPlayer(ch.snooped_by).switching := nil;
+  ch.snooped_by := nil;
+  
+  vict.sendBuffer('Ok.'#13#10);
 
-  ch.sendBuffer('Ok.'#13#10);
-
-  if (param = 'sub') then
-    vict.emptyBuffer; }
+  vict.emptyBuffer();
 end;
 
 procedure do_wizhelp(ch:GCharacter;param:string);

@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: mudthread.pas,v 1.78 2002/08/18 17:39:37 ***REMOVED*** Exp $)
+  @lastmod($Id: mudthread.pas,v 1.79 2002/08/18 19:35:19 ***REMOVED*** Exp $)
 }
 
 unit mudthread;
@@ -238,6 +238,12 @@ var
     hash, time : cardinal;
     al : GAlias;
 begin
+  if (not ch.IS_NPC) and (GPlayer(ch).switching <> nil) then
+    begin
+    interpret(GPlayer(ch).switching, line);
+    exit;
+    end;
+    
   with ch do
     begin
     { Check if keyboard is locked - Nemesis }

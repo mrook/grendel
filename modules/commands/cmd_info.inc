@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.9 2002/08/14 18:14:13 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.10 2002/08/18 19:35:16 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -334,9 +334,6 @@ begin
 
         if (ch.IS_IMMORT) and (not vict.IS_NPC) and (IS_SET(GPlayer(vict).flags, PLR_LOADED)) then
           act_str := act_str + ' (Loaded)';
-
-        if (ch.IS_IMMORT) and (not vict.IS_NPC) and (GPlayer(vict).switched <> nil) then
-          act_str := act_str + ' (Switched: '+ GPlayer(vict).switched.name^ + ')';
 
         if (not vict.IS_NPC) and (vict.IS_WIZINVIS) then
           act_str := act_str + ' (WizInvis: ' + inttostr(GPlayer(vict).wiz_level) + ')';

@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.64 2002/08/06 21:53:28 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.65 2002/08/18 19:35:17 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -241,6 +241,7 @@ type
       function IS_BANKER : boolean; override;
       function IS_SHOPKEEPER : boolean; override;
 
+      procedure sendBuffer(s : string); override;
       procedure die; override;
     end;
 
@@ -272,9 +273,9 @@ type
       bg_room : pointer;
       war_points, quest_points : integer;
       snooping : GCharacter;
+      switching : GCharacter;
       trophy : array[1..15] of GTrophy;
       trophysize: integer;
-      switched : GCharacter;
       logon_first : TDateTime;
       logon_now : TDateTime;
       played : TDateTime;
@@ -485,9 +486,9 @@ function GCharacter.getTrust : integer;
 var
    ch : GCharacter;
 begin
-{  if (conn <> nil) and (GConnection(conn).original <> nil) then
-    ch := GConnection(conn).original
-  else }
+  if (snooped_by <> nil) and (GPlayer(snooped_by).switching = Self) then
+    ch := snooped_by
+  else
     ch := Self;
 
   if (ch.trust <> 0) then
@@ -562,6 +563,7 @@ begin
   title := 'the Newbie Adventurer';
   rank := 'an apprentice';
   snooping := nil;
+  switching := nil;
 
   cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI or CFG_AUTOPEEK;
   bankgold := 500;
@@ -704,12 +706,11 @@ begin
     snooping := nil;
     end;
 
-{  if (snooped_by <> nil) then
+  if (switching <> nil) then
     begin
-    snooped_by.player^.snooping := nil;
-    snooped_by.sendBuffer('No longer snooping.'#13#10);
-    snooped_by := nil;
-    end; }
+    switching.snooped_by := nil;
+    switching := nil;
+    end;
 
   if (leader <> Self) then
     begin
@@ -1911,7 +1912,8 @@ begin
     GConnection(snooped_by.conn).send(s);
 
 // Xenon 21/Feb/2001: I think someone snooping still wants to see output of his own commands
-  if (conn = nil) {or (not IS_NPC and (player^.snooping <> nil))} then
+// Grimlord 18/Aug/2002: A switched player should not, too much clutter
+  if (conn = nil) or (not IS_NPC and (switching <> nil)) then
     exit;
 
   if (IS_EDITING) then
@@ -2428,6 +2430,12 @@ begin
   dec(npc_index.count);
   extract(true);
   dec(mobs_loaded);
+end;
+
+procedure GNPC.sendBuffer(s : string);
+begin
+  if (snooped_by <> nil) then
+    GConnection(snooped_by.conn).send(s);
 end;
 
 procedure GCharacter.setWait(ticks : integer);
