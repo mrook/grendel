@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.28 2001/04/28 16:05:33 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.29 2001/04/29 16:45:44 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -431,8 +431,7 @@ begin
     end;
 end;
 
-{Jago 5/Jan/01 : implemented do_transfer as done in MERC
-									(implementation not quite identical to MERC)}
+{Jago 5/Jan/01 : implemented do_transfer as done in MERC (implementation not quite identical to MERC)}
 procedure do_transfer( ch : GCharacter; param : string );
 var
 	arg1, arg2 : string;
@@ -452,11 +451,11 @@ begin
   // get the trans location.  could be ch.room or a location given by arg2
   if length(arg2) = 0 then
   begin
-  	location := ch.room;
+    location := ch.room;
   end
   else
   begin
-		location := findLocation(ch, arg2);
+    location := findLocation(ch, arg2);
   end;
 
   if location = nil then
@@ -467,7 +466,7 @@ begin
 
   if uppercase(arg1) = 'ALL' then // transfer all
   begin
-  	char_node := char_list.head;
+   char_node := char_list.head;
 
    while char_node <> nil do
    begin
@@ -515,24 +514,53 @@ end;
 {Jago 5/Jan/01 : implemented do_goto as done in MERC }
 procedure do_goto(ch : GCharacter; param: string);
 var
-	location : GRoom;
+  location : GRoom;
   locn_name : string;
+  vnum : integer;
+  new_room : GRoom;
 begin
-
  param := one_argument(param, locn_name);
 
-	if length(locn_name) = 0 then
-	begin
+ if length(locn_name) = 0 then
+ begin
    ch.sendBuffer('Goto where?' + #13#10);
    exit;
  end;
 
  location := findLocation(ch, locn_name);
 
- if location = nil then
+ if (location = nil) then // if vnum doesn't exist yet and vnum is in builders range, create the room
  begin
-   ch.sendBuffer('No such location!' + #13#10);
-   exit;
+   try
+     if (length(ch.player^.area_fname) = 0) then
+     begin
+       raise GException.Create('cmd_imm.inc:do_goto', 'no area assigned');
+     end;
+     vnum := StrToInt(locn_name);
+     if (vnum >= ch.player^.r_lo) and (vnum < ch.player^.r_hi) then
+       if (ch.player^.area = nil) then
+       begin
+         ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+         exit;
+       end
+       else
+       begin
+         ch.sendBuffer('Creating room #' + inttostr(vnum) + '.'#13#10);
+         new_room := createRoom(vnum, ch.player^.area);
+         ch.fromRoom();
+         ch.toRoom(new_room);
+         interpret(ch, 'look');
+         exit;
+       end
+     else
+     begin
+       ch.sendBuffer('That vnum is not within your assigned room ranges.'#13#10);
+       exit;
+     end;
+   except
+     ch.sendBuffer('No such location!' + #13#10);
+     exit;
+   end;
  end;
 
  if (IS_SET(location.flags, ROOM_PRIVATE)) then
@@ -1195,19 +1223,20 @@ begin
 end;
 
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
-procedure do_areas(ch:GCharacter; param:string);
+{ Xenon 28/Apr/2001 : renamed do_areas() to do_vnums() }
+procedure do_vnums(ch:GCharacter; param:string);
 var
 	//area:AREA_DATA;
 	area: GArea;
  area_node : GListNode;
 begin
-  act(AT_DCYAN, 'Area name                          Author                   VNum Range'#13#10, false, ch, nil, nil, TO_CHAR);
+  act(AT_DCYAN, 'Area name                          Filename                  Author              VNum Range'#13#10, false, ch, nil, nil, TO_CHAR);
 
   area_node := area_list.head;
   while area_node <> nil do
   begin
    area := GArea(area_node.element);
-		act(AT_REPORT, pad_string(area.name, 35) + pad_string(area.author, 25) + pad_integer(area.r_lo, 5) + ' - ' + pad_integer(area.r_hi, 5), false, ch, nil, nil, TO_CHAR);
+		act(AT_REPORT, pad_string(area.name, 35) + pad_string(area.fname, 26) + pad_string(area.author, 19) + ' ' + pad_integer(area.r_lo, 5) + ' - ' + pad_integer(area.r_hi, 5), false, ch, nil, nil, TO_CHAR);
 		area_node := area_node.next;
   end;
 end;
