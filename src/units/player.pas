@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.27 2004/03/30 19:25:11 hemko Exp $
+	## $Id: player.pas,v 1.28 2004/03/30 19:54:04 hemko Exp $
 }
 unit player;
 
@@ -2310,6 +2310,8 @@ begin
 
 			af.writeLine( 'Skill: ''' + GSkill(g.skill).name + ''' ' + IntToStr(g.perc));
 			end;
+			
+		iterator.Free();
 
 		af.writeLine('#END');
 		af.writeLine('');
@@ -2345,6 +2347,8 @@ begin
 				af.writeLine('');
 				end;
 			end;
+			
+		iterator.Free();
 
 		af.writeLine('#END');
 		af.writeLine('');
@@ -2359,6 +2363,8 @@ begin
 
 			af.writeLine(al.alias + ':' + al.expand);
 			end;
+			
+		iterator.Free();
 
 		af.writeLine( '#END');
 		af.writeLine('');
