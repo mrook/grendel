@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.5 2004/03/10 22:10:01 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.6 2004/03/13 17:48:15 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -114,17 +114,18 @@ implementation
 
 
 uses 
+	debug,
 	gasmdef;
 
 
 procedure dummyError(owner : TObject; const msg : string);
 begin
-  writeln('fatal vm error: ', msg);
+  debugger.write('Fatal VM error: ' + msg, 0);
 end;
 
 procedure dummySystemTrap(owner : TObject; const msg : string);
 begin
-  writeln('Trap: ', msg);
+  debugger.write('Trap: ' + msg, 0);
 end;
 
 function dummyExternalTrap(obj : variant; const member : string) : variant;
