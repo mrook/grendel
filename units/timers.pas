@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.26 2003/10/23 08:11:44 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.27 2003/10/29 12:54:30 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -363,7 +363,7 @@ begin
        end;
 
     if (conn.state=CON_PLAYING) and (not conn.ch.in_command) then
-      GPlayer(conn.ch).emptyBuffer;
+      conn.ch.emptyBuffer();
 
     if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
       dec(conn.ch.wait);
