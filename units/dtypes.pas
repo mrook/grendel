@@ -7,6 +7,19 @@ uses
     SyncObjs;
 
 type
+    GString = class
+      refcount : integer;
+      value : string;
+
+      constructor Create(s : string);
+    end;
+
+    GInteger = class
+      value : integer;
+
+      constructor Create(s : integer);
+    end;
+    
     GListNode = class
       prev, next : GListNode;
       element : pointer;
@@ -35,13 +48,6 @@ type
 
     GPrimes = array of integer;
 
-    GString = class
-      refcount : integer;
-      value : string;
-
-      constructor Create(s : string);
-    end;
-
     GHASH_FUNC = function(size, prime : cardinal; key : string) : integer;
 
     GHashTable = class
@@ -51,6 +57,8 @@ type
       bucketList : array of GDLinkedList;
 
       hashFunc : GHASH_FUNC;
+
+      procedure clean;
 
       function getUsed : integer;
       function getHash(key : string) : integer;
@@ -98,6 +106,23 @@ implementation
 
 uses
     mudsystem;
+
+
+// GString
+constructor GString.Create(s : string);
+begin
+  inherited Create;
+
+  value := s;
+end;
+
+// GInteger
+constructor GInteger.Create(s : integer);
+begin
+  inherited Create;
+
+  value := s;
+end;
 
 // GListNode
 constructor GListNode.Create(e : pointer; p, n : GListNode);
@@ -164,7 +189,7 @@ begin
 
     if (tn.next <> nil) then
       tn.next.prev := node;
-      
+
     tn.next := node;
 
     if (tail = tn) then
@@ -261,15 +286,6 @@ begin
 
     remove(node);
     end;
-end;
-
-
-// GString
-constructor GString.Create(s : string);
-begin
-  inherited Create;
-
-  value := s;
 end;
 
 
@@ -414,6 +430,16 @@ begin
   writeln('Hash size ' + inttostr(hashsize) + ' with key ' + inttostr(hashprime));
   writeln('Total hash items : ' + inttostr(total));
   writeln('Load factor : ' + floattostrf(load, ffFixed, 7, 4));
+end;
+
+procedure GHashTable.clean;
+var
+   i : integer;
+begin
+  for i := 0 to hashsize - 1 do
+    begin
+    bucketList[i].clean;
+    end;
 end;
 
 constructor GHashTable.Create(size : integer);
@@ -616,7 +642,6 @@ procedure GException.show;
 begin
   write_console('Exception ' + Message + ' @ ' + e_location);
 end;
-
 
 begin
   str_hash := GHashString.Create(STR_HASH_SIZE);
