@@ -390,16 +390,16 @@ position: 4
 #end
 
 #command
+name: raceinfo
+function: do_raceinfo
+#end
+
+#command
 name: raid
 alias: \
 function: do_raid
 position: 4
 level: 100
-#end
-
-#command
-name: raceinfo
-function: do_raceinfo
 #end
 
 #command
