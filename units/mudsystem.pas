@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.25 2001/07/17 15:24:13 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.26 2001/07/17 20:42:17 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -217,7 +217,7 @@ begin
   system_info.bind_ip := INADDR_ANY;
 
   try
-    af := GFileReader.Create('system\sysdata.dat');
+    af := GFileReader.Create(SystemDir + 'sysdata.dat');
   except
     bugreport('load_system', 'mudsystem.pas', 'could not open system\sysdata.dat.');
     exit;
@@ -262,7 +262,7 @@ begin
   af.Free;
 
   try
-    af := GFileReader.Create('system\bans.dat');
+    af := GFileReader.Create(SystemDir + 'bans.dat');
   except
     bugreport('load_system', 'mudsystem.pas', 'could not open system\bans.dat');
     exit;
@@ -279,35 +279,45 @@ begin
 end;
 
 procedure save_system;
-var f : textfile;
-    t : TInAddr;
-    a : integer;
+var
+  af : GFileWriter;
+  t : TInAddr;
+  a : integer;
 begin
   t.s_addr := system_info.bind_ip;
 
-  assignfile(f, translateFileName('system\sysdata.dat'));
-  rewrite(f);
+  try
+    af := GFileWriter.Create(SystemDir + 'sysdata.dat');
+  except
+    exit;
+  end;
 
-  writeln(f,'Name: ',system_info.mud_name);
-  writeln(f,'EMail: ',system_info.admin_email);
-  writeln(f,'Port: ',system_info.port);
-  writeln(f,'DenyNewConns: ',integer(system_info.deny_newconns));
-  writeln(f,'DenyNewPlayers: ',integer(system_info.deny_newplayers));
-  writeln(f,'HostLookup: ',integer(system_info.lookup_hosts));
-  writeln(f,'LevelForcePC: ',system_info.level_forcepc);
-  writeln(f,'LevelLog: ',system_info.level_log);
-  writeln(f,'BindIP: ',inet_ntoa(t));
-  writeln(f,'$');
-  closefile(f);
+  af.writeLine('Name: ' + system_info.mud_name);
+  af.writeLine('EMail: ' + system_info.admin_email);
+  af.writeLine('Port: ' + IntToStr(system_info.port));
+  af.writeLine('Port6: ' + IntToStr(system_info.port6));
+  af.writeLine('DenyNewConns: ' + IntToStr(integer(system_info.deny_newconns)));
+  af.writeLine('DenyNewPlayers: ' + IntToStr(integer(system_info.deny_newplayers)));
+  af.writeLine('HostLookup: ' + IntToStr(integer(system_info.lookup_hosts)));
+  af.writeLine('LevelForcePC: ' + IntToStr(system_info.level_forcepc));
+  af.writeLine('LevelLog: ' + IntToStr(system_info.level_log));
+  af.writeLine('BindIP: ' + inet_ntoa(t));
+  af.writeLine('$');
 
-  assignfile(f, translateFileName('system\bans.dat'));
-  rewrite(f);
+  af.Free();
+
+  try
+    af := GFileWriter.Create(SystemDir + 'bans.dat');
+  except
+    exit;
+  end;
 
   for a := 0 to banned_masks.count-1 do
-    writeln(f, banned_masks[a]);
+    af.writeLine(banned_masks[a]);
 
-  writeln(f,'$');
-  closefile(f);
+  af.writeLine('$');
+
+  af.Free();
 end;
 
 function isMaskBanned(host : string) : boolean;
@@ -325,44 +335,36 @@ end;
 
 // socials
 procedure load_socials;
-var f : textfile;
-    s, g : string;
-    social : GSocial;
-    line_num : integer;
+var
+  af : GFileReader;
+  s, g : string;
+  social : GSocial;
 begin
-  assignfile(f, translateFileName('system\socials.dat'));
-  {$I-}
-  reset(f);
-  {$I+}
-
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileReader.Create(SystemDir + 'socials.dat');
+  except
     bugreport('load_socials', 'mudsystem.pas', 'could not open system\socials.dat');
     exit;
-    end;
-
-  line_num := 0;
+  end;
 
   repeat
     repeat
-      readln(f,s);
-      inc(line_num);
-    until (uppercase(s)='#SOCIAL') or eof(f);
+      s := af.readLine();
+    until (uppercase(s) = '#SOCIAL') or (af.eof());
 
-    if (eof(f)) then
+    if (af.eof()) then
       break;
 
     social := GSocial.Create;
 
     with social do
       repeat
-      readln(f,s);
-      inc(line_num);
+      s := af.readLine();
 
       s := trim(s);
 
       g := uppercase(left(s,':'));
-      
+
       if g = 'NAME' then
         name := uppercase(right(s,' '))
       else
@@ -392,18 +394,18 @@ begin
       else
       if g='OTHERSOBJECT' then
         others_object := right(s,' ');
-      until (uppercase(s)='#END') or eof(f);
+      until (uppercase(s)='#END') or (af.eof());
 
     if (findSocial(social.name) <> nil) then
       begin
-      write_console('duplicate social "' + social.name + '" on line ' + inttostr(line_num) + ', discarding');
+      write_console('duplicate social "' + social.name + '" on line ' + inttostr(af.line) + ', discarding');
       social.Free;
       end
     else
       socials.put(social.name, social);
-  until eof(f);
+  until (af.eof());
 
-  closefile(f);
+  af.Free();
 end;
 
 function findSocial(cmd : string) : GSocial;
@@ -538,7 +540,7 @@ var
   dam : GDamMessage;
 begin
   try
-    af := GFileReader.Create('system\damage.dat');
+    af := GFileReader.Create(SystemDir + 'damage.dat');
   except
     bugreport('load_damage', 'mudsystem.pas', 'could not open system\damage.dat');
     exit;
@@ -572,7 +574,7 @@ var
    area : GArea;
 begin
   try
-    af := GFileReader.Create('system\mudstate.dat');
+    af := GFileReader.Create(SystemDir + 'mudstate.dat');
   except
     bugreport('loadMudState()', 'mudsystem.pas', 'Could not load mud state');
     exit;
@@ -580,6 +582,8 @@ begin
 
   with time_info do
     begin
+    af.readToken();
+
     hour := af.readInteger();
     day := af.readInteger();
     month := af.readInteger();
@@ -588,6 +592,9 @@ begin
     end;
 
   repeat
+    if (af.eof()) then
+      break;
+
     s := af.readLine();
 
     if (s <> '$') then
@@ -599,6 +606,8 @@ begin
       else
         with area.weather do
           begin
+          af.readToken();
+          
           mmhg := af.readInteger();
           change := af.readInteger();
           sky := af.readInteger();
@@ -617,7 +626,7 @@ var
   area : GArea;
 begin
   try
-    af := GFileWriter.Create('system\mudstate.dat');
+    af := GFileWriter.Create(SystemDir + 'mudstate.dat');
   except
     bugreport('saveMudState()', 'mudsystem.pas', 'Could not save mud state');
     exit;

@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.10 2001/07/17 15:24:12 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.11 2001/07/17 20:42:17 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -80,8 +80,8 @@ begin
   fname := fn;
 
   fsize := fp.Read(buffer, BUFSIZE);
-  if (fsize = 0) then
-    raise GException.Create('fsys.pas:GFileReader.Create', '0 length file');
+//  if (fsize = 0) then
+//    raise GException.Create('fsys.pas:GFileReader.Create', '0 length file');
 
   fpos := 0;
   line := 1;
@@ -361,12 +361,14 @@ begin
   fn := translateFileName(fn);
   fpos := 0;
 
-  fp := TFileStream.Create(fn, fmOpenWrite);
+  fp := TFileStream.Create(fn, fmCreate);
   fname := fn;
 end;
 
 destructor GFileWriter.Destroy;
 begin
+  flush();
+  
   fp.Free;
 
   inherited Destroy;

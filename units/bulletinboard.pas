@@ -32,24 +32,23 @@ uses
     mudsystem;
 
 procedure load_notes(fname : string);
-var f : textfile;
-    note : GNote;
-    s, g : string;
-    board, number : integer;
-    date, author, subject, text : string;
+var
+  af : GFileReader;
+  note : GNote;
+  s, g : string;
+  board, number : integer;
+  date, author, subject, text : string;
 begin
-  assignfile(f, translateFileName('boards\' + fname));
-  {$I-}
-  reset(f);
-  {$I+}
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileReader.Create('boards\' + fname);
+  except
     bugreport('load_notes', 'bulletinboard.pas', 'could not open boards\' + fname);
     exit;
-    end;
+  end;
 
   repeat
-    readln(f,s);
+    s := af.readLine();
+
     if (pos('#',s) = 1) then
       begin
       g := uppercase(left(s,'='));
@@ -74,7 +73,7 @@ begin
         text := '';
 
         repeat
-          readln(f,s);
+          s := af.readLine();
 
           if (s <> '~') then
             text := text + s + #13#10;
@@ -99,8 +98,9 @@ begin
         load_notes(rightr(s,'='));
       end;
 
-  until eof(f);
-  closefile(f);
+  until (af.eof());
+
+  af.Free();
 end;
 
 procedure save_notes;

@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.40 2001/07/17 15:24:10 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.41 2001/07/17 20:42:16 ***REMOVED*** Exp $
 
 unit area;
 
@@ -921,28 +921,26 @@ begin
 end;
 
 procedure load_areas;
-var to_room, room : GRoom;
-    pexit : GExit;
-    s : string;
-    lf : TextFile;
-    area : GArea;
-    node, node_exit : GListNode;
-    h : integer;
-    tm : TDateTime;
+var
+  af : GFileReader;
+  to_room, room : GRoom;
+  pexit : GExit;
+  s : string;
+  area : GArea;
+  node, node_exit : GListNode;
+  h : integer;
+  tm : TDateTime;
 begin
   tm := Now();
 
-  assignfile(lf, translateFileName('areas\area.list'));
-
-  {$I-}
-  reset(lf);
-  {$I+}
-
-  if (IOResult <> 0) then
+  try
+    af := GFileReader.Create('areas\area.list');
+  except
     raise GException.Create('load_areas', 'Could not open areas\area.list');
+  end;
 
   repeat
-    readln(lf, s);
+    s := af.readLine();
 
     if (s <> '$') then
       begin
@@ -965,7 +963,7 @@ begin
       end;
   until (s = '$');
 
-  closefile(lf);
+  af.Free();
 
   write_console('Checking exits...');
 

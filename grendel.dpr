@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.36 2001/07/17 15:24:08 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.37 2001/07/17 20:42:17 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -288,7 +288,7 @@ begin
     end;
 end;
 
-procedure cleanup_mud;
+procedure cleanupServer();
 var
    node : GListNode;
 begin
@@ -296,6 +296,8 @@ begin
 
   timer_thread.Terminate;
   clean_thread.Terminate;
+
+  saveMudState();
 
   write_console('Releasing allocated memory...');
 
@@ -424,7 +426,7 @@ begin
     write_console('Exception caught while cleaning up memory');
   end;
 
-  cleanup_mud;
+  cleanupServer();
 
 {$IFDEF WIN32}
   FillChar(SI, SizeOf(SI), 0);
@@ -540,7 +542,7 @@ begin
 
   CloseHandle(pipe);
 
-  cleanup_mud;
+  cleanupServer();
 end;
 {$ELSE}
 begin
@@ -551,17 +553,17 @@ end;
 procedure shutdown_mud;
 begin
   write_console('Server shutting down...');
-  try
 
+  try
     if MUD_Booted then
       flushConnections;
 
     Sleep(1000);
   except
-    write_console('... wrong');
+    write_console('Could not flush connections while shutting down server');
   end;
 
-  cleanup_mud;
+  cleanupServer();
 end;
 
 procedure sendtoall(s : string);
