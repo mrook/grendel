@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.29 2001/04/29 16:45:44 xenon Exp $
+// $Id: cmd_imm.inc,v 1.30 2001/04/30 16:05:14 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -545,7 +545,7 @@ begin
        end
        else
        begin
-         ch.sendBuffer('Creating room #' + inttostr(vnum) + '.'#13#10);
+         ch.sendBuffer(ch.ansiColor(15) + 'Creating room #' + inttostr(vnum) + '.' + ch.ansiColor(7) + #13#10#13#10);
          new_room := createRoom(vnum, ch.player^.area);
          ch.fromRoom();
          ch.toRoom(new_room);
@@ -1236,7 +1236,7 @@ begin
   while area_node <> nil do
   begin
    area := GArea(area_node.element);
-		act(AT_REPORT, pad_string(area.name, 35) + pad_string(area.fname, 26) + pad_string(area.author, 19) + ' ' + pad_integer(area.r_lo, 5) + ' - ' + pad_integer(area.r_hi, 5), false, ch, nil, nil, TO_CHAR);
+		act(AT_REPORT, pad_string(area.name, 29) + pad_string(area.fname, 15) + ' ' + pad_string(area.author, 17) + ' ' + pad_integer(area.r_lo, 5) + ' - ' + pad_integer(area.r_hi, 5), false, ch, nil, nil, TO_CHAR);
 		area_node := area_node.next;
   end;
 end;
@@ -1837,6 +1837,85 @@ begin
   begin
     act(AT_REPORT, Format('  $B$1[$7%2d$1]$A$7   %s', [i, generateName(nt.template_name)]), false, ch, nil, nil, TO_CHAR);
   end
+end;
+
+procedure createCoordinates(ch : GCharacter; startroom : GRoom);
+var
+  node : GListNode;
+  room : GRoom;
+  ex : GExit;
+begin
+  node := startroom.exits.head;
+
+  while (node <> nil) do
+  begin
+    ex := node.element;
+    
+    room := ex.to_room;
+
+    if (room.areacoords = nil) then
+    begin
+      room.areacoords := GCoords.Create(startroom.areacoords);
+      case ex.direction of
+        DIR_NORTH:
+          begin
+            inc(room.areacoords.y);
+          end;
+        DIR_EAST:
+          begin
+            inc(room.areacoords.x);
+          end;
+        DIR_SOUTH:
+          begin
+            dec(room.areacoords.y);
+          end;
+        DIR_WEST:
+          begin
+            dec(room.areacoords.x);
+          end;
+        DIR_DOWN:
+          begin
+            dec(room.areacoords.z);
+          end;
+        DIR_UP:
+          begin
+            inc(room.areacoords.z);
+          end;
+      end;
+      ch.sendBuffer('Created coords (#' + IntToStr(room.vnum) + '): ' + room.areacoords.toString() + #13#10);
+      createCoordinates(ch, room);
+    end;
+    
+    node := node.next;
+  end;
+end;
+
+procedure do_coordgen(ch : GCharacter; param : string);
+var
+  room : GRoom;
+begin
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage: COORDGEN <vnum>'#13#10#13#10);
+    ch.sendBuffer('Generates coordinates with specifief vnum as (0,0,0).'#13#10);
+    exit;
+  end;
+
+  try
+    room := findRoom(StrToInt(param));
+  except
+    on E: EConvertError do
+    begin
+      ch.sendBuffer('That vnum doesn''t exit.');
+      exit;
+    end;
+  end;
+
+  room.areacoords := GCoords.Create();
+  room.areacoords.x := 0;
+  room.areacoords.y := 0;
+  room.areacoords.z := 0;
+  createCoordinates(ch, room);
 end;
 
 {procedure do_thunder(ch:GCharacter;param:string);
