@@ -295,8 +295,8 @@ begin
 
     for sn := 0 to MAX_SKILLS - 1 do
       begin
-      if (vict.learned[sn] > 0) then
-        ch.sendBuffer(skill_table[sn].name + #13#10);
+      if (vict.learned[sn] > 0) and (ch.learned[sn] = 0) then
+        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(skill_table[sn].min_lvl, 3) + '$A$7) ' + skill_table[sn].name, false, ch, nil, nil, TO_CHAR);
       end;
     end
   else
@@ -309,17 +309,51 @@ begin
       begin
       if (ch.learned[sn] = 0) then
         begin
-        if skill_table[sn].min_lvl<=ch.level then
+        if (skill_table[sn].min_lvl > ch.level) then
+          ch.sendBuffer('You have not yet reached the appropiate level.'#13#10)
+        else
           begin
+          node := skill_table[sn].prereqs.head;
+          while (node <> nil) do
+            begin
+            if (ch.learned[GSkill(node.element).sn] < 50) then
+              begin
+              ch.sendBuffer('You need to have sufficient knowledge of ' + GSkill(node.element).name + ' first.'#13#10);
+              exit;
+              end;
+
+            node := node.next;
+            end;
+
           act(AT_REPORT,'You learn '+cap(skill_table[sn].name)+'.',false,ch,nil,nil,TO_CHAR);
           ch.learned[sn]:=20;
-          end
-        else
-          ch.sendBuffer('You have not yet reached the appropiate level.'#13#10);
+          end;
         end
       else
         act(AT_REPORT,'You have already learned that skill.',false,ch,nil,nil,TO_CHAR);
       end;
+    end;
+end;
+
+procedure do_unlearn(ch:GCharacter;param:string);
+var
+   sn : integer;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('UNLEARN <skill or spell to unlearn>'#13#10#13#10);
+    ch.sendBuffer('This is irreversible, and you won''t get any practice sessions back.'#13#10);
+    exit;
+    end;
+
+  sn := findSkill(param);
+
+  if (sn = -1) or (ch.learned[sn] = 0) then
+    act(AT_REPORT, 'You haven''t learned this skill.',false,ch,nil,nil,TO_CHAR)
+  else
+    begin
+    ch.learned[sn] := 0;
+    act(AT_REPORT, 'You have unlearned ' + skill_table[sn].name + '.', false, ch, nil, nil, TO_CHAR);
     end;
 end;
 
@@ -352,12 +386,12 @@ begin
   else
   if (length(param)=0) then
     begin
-    ch.sendBuffer('Skills you can learn here:'#13#10#13#10);
+    ch.sendBuffer('Skills you can practice here:'#13#10#13#10);
 
     for sn := 0 to MAX_SKILLS - 1 do
       begin
       if (vict.learned[sn] > 0) then
-        ch.sendBuffer(skill_table[sn].name + #13#10);
+        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(skill_table[sn].min_lvl, 3) + '$A$7) ' + skill_table[sn].name, false, ch, nil, nil, TO_CHAR);
       end;
     end
   else
@@ -752,3 +786,4 @@ begin
 
   addTimer(ch, vict, TIMER_TRACK, track_timer, gsn_track, 4);
 end;
+
