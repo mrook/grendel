@@ -1,10 +1,11 @@
-// $Id: mudhelp.pas,v 1.7 2001/07/12 16:37:02 ***REMOVED*** Exp $
+// $Id: mudhelp.pas,v 1.8 2001/07/16 13:36:47 ***REMOVED*** Exp $
 
 unit mudhelp;
 
 interface
 
 uses
+    fsys,
     dtypes;
 
 type
@@ -127,7 +128,7 @@ var f:textfile;
     help : GHelp;
     a, b : integer;
 begin
-  assignfile(f,'help\'+fname);
+  assignfile(f, translateFileName('help\'+fname));
   {$I-}
   reset(f);
   {$I+}

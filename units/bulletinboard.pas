@@ -3,6 +3,7 @@ unit bulletinboard;
 interface
 
 uses
+    fsys,
     dtypes;
 
 type
@@ -37,7 +38,7 @@ var f : textfile;
     board, number : integer;
     date, author, subject, text : string;
 begin
-  assignfile(f,'boards\' + fname);
+  assignfile(f, translateFileName('boards\' + fname));
   {$I-}
   reset(f);
   {$I+}
@@ -111,7 +112,7 @@ var node : GListNode;
 begin
   for i:=1 to BOARD_MAX-1 do
     begin
-    assignfile(f,'boards\' + board_names[i] + '.brd');
+    assignfile(f, translateFileName('boards\' + board_names[i] + '.brd'));
     rewrite(f);
 
     node := notes.head;

@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.37 2001/07/14 13:26:10 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.38 2001/07/16 13:36:41 ***REMOVED*** Exp $
 
 unit area;
 
@@ -424,6 +424,9 @@ begin
         begin
         s := af.readToken;
 
+        if (s = '#END') then
+          break;
+
         case s[1] of
           'S' : break;
           'D' : begin
@@ -436,13 +439,7 @@ begin
                 if not (af.feol) then
                   s_exit.keywords := hash_string(af.readLine)
                 else
-                begin
-                  if (s_exit.keywords = nil) then
-                  begin
-                    new(s_exit.keywords);
-                    s_exit.keywords^ := '';
-                  end;
-                end;
+                  s_exit.keywords := hash_string('');
 
                 if (exits.head = nil) then
                   exits.insertLast(s_exit)

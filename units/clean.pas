@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.10 2001/07/14 13:26:14 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.11 2001/07/16 13:36:44 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -16,13 +16,8 @@ uses
   user threads. }
 
 type GCleanThread = class(TThread)
-     private
-       t_log : string;
-
      protected
        procedure AutoSave;
-       procedure SyncWrite;
-       procedure SyncWritelog(s:string);
        procedure Execute; override;
 
      public
@@ -53,22 +48,11 @@ constructor GCleanThread.Create;
 begin
   inherited Create(false);
 
-  SyncWritelog('Started cleanup thread.');
+  write_console('Started cleanup thread.');
 {$IFDEF WIN32}
   SetThreadPriority(Handle, THREAD_PRIORITY_IDLE);
 {$ENDIF}
   freeonterminate := true;
-end;
-
-procedure GCleanThread.SyncWrite;
-begin
-  write_console(t_log);
-end;
-
-procedure GCleanThread.SyncWritelog(s:string);
-begin
-  t_log := s;
-  Synchronize(SyncWrite);
 end;
 
 procedure GCleanThread.AutoSave;
@@ -76,7 +60,7 @@ var
    ch : GCharacter;
    node : GListNode;
 begin
-  SyncWritelog('Autosaving characters...');
+  write_console('Autosaving characters...');
 
   node := char_list.head;
 
@@ -103,8 +87,6 @@ var
 begin
   a := 0;
   repeat
-    sleep(10000);
-
     inc(a);
 
     if (a = 15) then
@@ -157,7 +139,7 @@ begin
         node := node_next;
         continue;
         end;
-        
+
       node := node_next;
       end;
 {$ENDIF}
@@ -179,9 +161,9 @@ begin
 
     cleanChars;
     cleanObjects;
-  until (Terminated);
 
-  SyncWritelog('Simple task thread terminated.');
+    sleep(10000);
+  until (Terminated);
 end;
 
 end.

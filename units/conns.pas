@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.26 2001/07/14 13:26:14 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.27 2001/07/16 13:36:44 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -235,7 +235,7 @@ begin
     DispatchMessage(msg);
     end; }
 
-  if (select(0,@read_set,nil,@ex_set,tel_val) = SOCKET_ERROR) then
+  if (select(socket+1,@read_set,nil,@ex_set,tel_val) = SOCKET_ERROR) then
     try
       thread.terminate;
     except
@@ -300,7 +300,9 @@ begin
 
         exit;
         end;
-{$ENDIF}
+{$ELSE}
+      break;
+{$ENDIF}      
       end
     else
       begin
@@ -314,7 +316,7 @@ end;
 procedure GConnection.readBuffer;
 var i : integer;
 begin
-  if (length(comm_buf) <> 0) or (pos(#10, input_buf) = 0) then
+  if (length(comm_buf) <> 0) or ((pos(#10, input_buf) = 0) and (pos(#13, input_buf) = 0))  then
     exit;
 
   i := 1;

@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.8 2001/07/14 13:26:20 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.9 2001/07/16 13:36:46 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -93,9 +93,11 @@ begin
     fpos := 0;
     end;
 
-  if (c = #13) then
+  if (c = #13) or (c = #10) then
     begin
-    readChar;
+    if (buffer[fpos] = #13) or (buffer[fpos] = #10) then
+      readChar;
+      
     inc(line);
     feol := true;
     end

@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.33 2001/07/15 21:21:11 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.34 2001/07/16 13:36:40 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -222,6 +222,7 @@ begin
 {$ENDIF}
 
       write_console('ERROR: Could not bind to IPv4, port ' + inttostr(system_info.port));
+      write_console('Fatal error, could not complete boot.');
       halt;
       end;
 
@@ -259,14 +260,16 @@ begin
 {$ENDIF}
 
       write_console('ERROR: Could not bind to IPv6, port ' + inttostr(system_info.port));
-      end;
-
-    rc := listen(listenv6, 15);
-
-    if (rc > 0) then
-      write_console('ERROR: Could not listen on IPv6 socket.')
+      end
     else
-      write_console('IPv6 bound on port ' + inttostr(system_info.port) + '.');
+      begin
+      rc := listen(listenv6, 15);
+
+      if (rc > 0) then
+        write_console('ERROR: Could not listen on IPv6 socket.')
+      else
+        write_console('IPv6 bound on port ' + inttostr(system_info.port) + '.');
+      end;
     end;
 end;
 
@@ -748,8 +751,15 @@ begin
 
   // set non-blocking mode
 
+{$IFDEF WIN32}
   len := 1;
-//  len := ioctlsocket(ac, FIONBIO, len);
+  len := ioctlsocket(ac, FIONBIO, len);
+{$ELSE}
+  len := fcntl(ac, F_GETFL, 0);
+
+  if (len <> -1) then
+    fcntl(ac, F_SETFL, len or O_NONBLOCK);
+{$ENDIF}
 
   if (boot_info.timer >= 0) then
     begin
@@ -803,9 +813,7 @@ var
 begin
   while (true) do
     begin
-    Sleep(5);
-
-    if (use_ipv4) and (listenv4 > 0) then
+    if (use_ipv4) and (listenv4 >= 0) then
       begin
       FD_ZERO(accept_set);
       FD_SET(listenv4, accept_set);
@@ -813,11 +821,11 @@ begin
       accept_val.tv_sec:=0;
       accept_val.tv_usec:=0;
 
-      if (select(listenv4, @accept_set, nil, nil, @accept_val) <> 0) then
+      if (select(listenv4 + 1, @accept_set, nil, nil, @accept_val) <> 0) then
         accept_connection(listenv4);
       end;
 
-    if (use_ipv6) and (listenv6 > 0) then
+    if (use_ipv6) and (listenv6 >= 0) then
       begin
       FD_ZERO(accept_set);
       FD_SET(listenv6, accept_set);
@@ -825,11 +833,12 @@ begin
       accept_val.tv_sec:=0;
       accept_val.tv_usec:=0;
 
-      if (select(listenv6, @accept_set, nil, nil, @accept_val) <> 0) then
+      if (select(listenv6 + 1, @accept_set, nil, nil, @accept_val) <> 0) then
         accept_connection(listenv6);
       end;
 
-    sleep(500);
+    usleep(500000);
+//    sleep(500);
     end;
 end;
 
@@ -934,5 +943,12 @@ begin
   SetConsoleTitle(version_info + ', ' + version_number + '. ' + version_copyright + '.');
 {$ENDIF}
 
-  game_loop;
+  try
+    game_loop();
+  except
+    on EControlC do begin
+                    grace_exit := true;
+                    halt;
+                    end;
+  end;
 end.

@@ -171,8 +171,17 @@ begin
 
       race.node := race_list.insertLast(race);
     until (FindNext(t) <> 0);
-    
+
   FindClose(t);
+
+  // fall-through rule: if no races are loaded, we must create a dummy one
+
+  if (race_list.getSize() = 0) then
+    begin
+    race := GRace.Create;
+    race.name := 'Creature';
+    race.node := race_list.insertLast(race);
+    end;
 end;
 
 function findRace(name : string) : GRace;

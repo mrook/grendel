@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.44 2001/07/14 13:26:11 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.45 2001/07/16 13:36:42 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1670,7 +1670,7 @@ begin
     exit;
     end;
 
-  assignfile(f, 'players\' + fn + '.usr');
+  assignfile(f, translateFileName('players\' + fn + '.usr'));
 
   {$I-}
   rewrite(f);
@@ -2166,11 +2166,11 @@ begin
   t := 1;
   s := '';
 
-  while (t <= length(prompt)) do
+  while (t <= length(pr)) do
     begin
-    if (prompt[t] = '%') then
+    if (pr[t] = '%') then
       begin
-      case prompt[t + 1] of
+      case pr[t + 1] of
         'h':  s := s + inttostr(hp);
         'H':  s := s + inttostr(max_hp);
         'm':  s := s + inttostr(mv);
@@ -2202,13 +2202,13 @@ begin
                  s := s + ']';
                  end;
               end;
-        else s := s + '%' + prompt[t + 1]; 
+        else s := s + '%' + pr[t + 1];
       end;
 
       inc(t);
       end
     else
-      s := s + prompt[t];
+      s := s + pr[t];
 
     inc(t);
     end;
