@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.10 2004/02/28 15:53:24 hemko Exp $
+	## $Id: conns.pas,v 1.11 2004/03/10 21:49:18 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -53,7 +53,7 @@ type
 	GConnectionCloseEvent = procedure() of object;
 		
 	{ Called for every iteration in GConnection.Execute(), if return = false, rest of iteration is skipped }
-	GConnectionTickEvent = function() : boolean of object;
+	GConnectionTickEvent = procedure() of object;
 		
 	{ Called when GConnection has one or more lines of input waiting }
 	GConnectionInputEvent = procedure() of object;
@@ -179,8 +179,7 @@ begin
 		sleep(50);
 
 	  if (Assigned(FOnTick)) then
-  		if (not FOnTick()) then 
-  			continue; 
+  		FOnTick();
 
 		if (not Terminated) then
 			read();
