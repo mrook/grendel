@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.27 2001/04/26 21:12:15 xenon Exp $
+// $Id: cmd_imm.inc,v 1.28 2001/04/28 16:05:33 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1507,7 +1507,7 @@ procedure do_hashstats(ch : GCharacter; param : string);
 var
    node : GListNode;
    n, c : integer;
-   g : GString;
+   g : GHashValue;
 begin
   ch.sendPager('Allocated hash entries: '#13#10#13#10);
   c := 0;
@@ -1519,7 +1519,7 @@ begin
       begin
       g := node.element;
 
-      ch.sendPager('(' + pad_integer_front(c, 3) + ') ' + g.value + ' [' + inttostr(node.refcount) + ']'#13#10);
+      ch.sendPager('(' + pad_integer_front(c, 3) + ') ' + GString(g.value).value + ' [' + inttostr(g.refcount) + ']'#13#10);
 
       inc(c);
 
