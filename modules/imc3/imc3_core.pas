@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.8 2003/10/09 20:33:54 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.9 2003/10/09 20:47:38 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -646,7 +646,7 @@ begin
 						debug(packet.toString(), 2);
 						debug(#13#10, 2);
 
-						debug('Got packet: ' + packet.packet_type, 2); 
+						debug('Got packet: ' + packet.packet_type, 1); 
 
 						debug('Removing head ' + IntToStr(size + 4) + ' bytes from buffer', 2); 
 					

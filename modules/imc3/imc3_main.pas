@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.6 2003/10/09 20:13:15 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.7 2003/10/09 20:47:38 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -48,7 +48,7 @@ begin
 	
 	if (prep(cmd) = 'MUDLIST') then
 		begin
-		ch.sendBuffer(pad_string('Name', 30) + pad_string('Type', 10) + pad_string('Mudlib', 20) + pad_string('Address', 15) + #13#10#13#10);
+		ch.sendPager(pad_string('Name', 30) + pad_string('Type', 10) + pad_string('Mudlib', 20) + pad_string('Address', 15) + #13#10#13#10);
 		
 		iterator := mudList.iterator();
 		
@@ -57,9 +57,9 @@ begin
 			mud := GMud_I3(iterator.next());
 			
 			case mud.status of
-				-1:	ch.sendBuffer(pad_string(mud.name, 30) + pad_string(mud.mud_type, 10) + pad_string(mud.mudlib, 20) + pad_string(mud.ipaddress + ':' + IntToStr(mud.player_port), 15) + #13#10);
-				0:	ch.sendBuffer(pad_string(mud.name, 30) + '(down)' + #13#10);
-			else  ch.sendBuffer(pad_string(mud.name, 30) + '(rebooting)' + #13#10);
+				-1:	ch.sendPager(pad_string(mud.name, 30) + pad_string(mud.mud_type, 10) + pad_string(mud.mudlib, 20) + pad_string(mud.ipaddress + ':' + IntToStr(mud.player_port), 15) + #13#10);
+				0:	ch.sendPager(pad_string(mud.name, 30) + '(down)' + #13#10);
+			else  ch.sendPager(pad_string(mud.name, 30) + '(rebooting)' + #13#10);
 			end;
 			end;
 			
@@ -146,7 +146,7 @@ begin
 	i3.Terminate();
 
 	{ Give thread a chance to terminate and free }
-	Sleep(100);
+	Sleep(250);
 end;
 
 
