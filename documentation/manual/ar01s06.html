@@ -1,0 +1,101 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Building areas</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.64.1"><link rel="home" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="previous" href="ar01s05.html" title="Developer information"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Building areas</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;</td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="building"></a>Building areas</h2></div></div><div></div></div><p>
+		This section discusses the area format used by Grendel, common practices when building,
+		as well as various structures and constants used in areas.
+		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_areaformat"></a>Area format</h3></div></div><div></div></div><p>
+			Listed below is a sample area (actually a trimmed-down version of the <tt class="literal">roads.area</tt>
+			file that is shipped with Grendel). Attentive readers will notice that the
+			format of the area is quite similar to the format used in the SMAUG codebase.
+			</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+			Since a switch to an XML area format is planned, this section is subject to change.
+			</p></div><p>
+			</p><div class="example"><a name="id2506016"></a><p class="title"><b>Example&#160;5.&#160;An example area</b></p><pre class="screen">#RANGES
+100 199 100 199 100 199                                                         <i class="lineannotation"><span class="lineannotation">Hints for min/max rooms/mobiles/objects</span></i>
+
+#AREA
+Central Ruia                                                                    <i class="lineannotation"><span class="lineannotation">Name of the area</span></i>
+Grimlord                                                                        <i class="lineannotation"><span class="lineannotation">Name of the owner/builder</span></i>
+A fresh wind blows through your hair.                                           <i class="lineannotation"><span class="lineannotation">Message to display when area resets</span></i>
+35                                                                              <i class="lineannotation"><span class="lineannotation">Number of gamerounds (roughly 75 secs) between resets</span></i>
+8 18 0                                                                          <i class="lineannotation"><span class="lineannotation">Temp. multiplier, avg. temperature, flags 
+                                                                                (see: <a href="ar01s06.html#table.areaflags" title="Table&#160;1.&#160;Area flags">Table&#160;1, &#8220;Area flags&#8221;</a>)</span></i>
+
+#ROOMS
+#100                                                                            <i class="lineannotation"><span class="lineannotation">Number (vnum) of room</span></i>
+The Great Junction                                                              <i class="lineannotation"><span class="lineannotation">Name of room</span></i>
+The wind blows through your hair as you arrive at the great junction            <i class="lineannotation"><span class="lineannotation">Multiline room description</span></i>
+of roads, the central point in Ruia. Here, 3 roads come together.
+To the south, the road to Southaven. To the north, the road to Gailen and
+Castle Pakthan. To the east, you see the Warriors School.
+~                                                                               <i class="lineannotation"><span class="lineannotation">Separator</span></i>
+0 0 500 3
+D 101 3 0 0
+E sign                                                                          <i class="lineannotation"><span class="lineannotation">Extra description "sign"</span></i>
+The sign says 'Southaven south'.                                                <i class="lineannotation"><span class="lineannotation">Multiline extra description</span></i>
+~                                                                               <i class="lineannotation"><span class="lineannotation">Separator</span></i>
+S
+#101
+Southaven Road
+This road is one of the main roads leading through Ruia. It takes you
+from the junction to Southaven or back. The road is paved well and
+walking on this road is pleasant.
+~
+0 0 500 3
+D 100 1 0 0
+D 102 3 0 0
+S
+#102
+Southaven Central Square
+The beautiful fountain built on the square shows the welfare of the city.
+Numerous little drops burst out of the fountain, falling down till they
+hit the little pool of water. Many people come here to sit and eat or talk.
+To the north, you see some shops. To the east, you see the bank. To the
+west you see the town hall. To the south, you can continue to the docks.
+~
+0 0 500 2
+D 101 1 0 0
+S
+#END
+
+#MOBILES
+#100
+Syra
+Syra is here
+Syra, protectress of Southaven, patrols for danger
+800 1
+15 521 0 0 0
+skill: Burning Hands
+skill: Magic Missile
+skill: Slashing Weapons
+skill: Second Attack
+&gt; give.cod
+#END
+
+#OBJECTS
+#100
+a fountain
+a sparkling fountain
+a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
+12 none none
+0 0 12 0
+0 4097 0
+#101
+a robe
+a stained robe
+a robe, cluttered with dirty stains, lies here
+1 body none
+0 2 2 0
+0 0 0
+A "" 0 { apply_max_hp 20 }
+#END
+
+#RESETS
+M 100 102 1
+G 101 100 0
+O 100 101 1
+#END
+
+$</pre></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_tables"></a>Tables, constants and structures</h3></div></div><div></div></div><p>
+			</p><div class="table"><a name="table.areaflags"></a><p class="title"><b>Table&#160;1.&#160;Area flags</b></p><table summary="Area flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>AREA_NORESET</td><td>Do not reset area</td><td>BV00</td><td>1</td></tr><tr><td>AREA_NOPC</td><td>No players allowed</td><td>BV01</td><td>2</td></tr><tr><td>AREA_PROTO</td><td>Prototype area</td><td>BV02</td><td>4</td></tr></tbody></table></div><p>
+			</p><div class="table"><a name="table.roomflags"></a><p class="title"><b>Table&#160;2.&#160;Room flags</b></p><table summary="Room flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>ROOM_DARK</td><td>Total darkness</td><td>BV00</td><td>1</td></tr><tr><td>ROOM_DEATH</td><td>Deathtrap</td><td>BV01</td><td>2</td></tr><tr><td>ROOM_NOMOB</td><td>Mobiles not allowed</td><td>BV02</td><td>4</td></tr><tr><td>ROOM_INDOORS</td><td>Indoors</td><td>BV03</td><td>8</td></tr><tr><td>ROOM_GOOD</td><td>Only good aligned players allowed</td><td>BV04</td><td>16</td></tr><tr><td>ROOM_EVIL</td><td>Only evil aligned players allowed</td><td>BV05</td><td>32</td></tr><tr><td>ROOM_NOCAST</td><td>Using magic not allowed</td><td>BV06</td><td>64</td></tr><tr><td>ROOM_TUNNEL</td><td>Tunnel (could cause problems for larger sized characters)</td><td>BV07</td><td>128</td></tr><tr><td>ROOM_PRIVATE</td><td>Only one character at a time</td><td>BV08</td><td>256</td></tr><tr><td>ROOM_SAFE</td><td>Fighting not allowed</td><td>BV09</td><td>512</td></tr><tr><td>ROOM_SOLITARY</td><td>??</td><td>BV10</td><td>1024</td></tr><tr><td>ROOM_NORECALL</td><td>Recall spell not allowed</td><td>BV11</td><td>2048</td></tr><tr><td>ROOM_NODROPALL</td><td>??</td><td>BV12</td><td>4096</td></tr><tr><td>ROOM_NOSUMMON</td><td>Summon spell not allowed</td><td>BV13</td><td>8192</td></tr><tr><td>ROOM_CLANSTORE</td><td>Clan store</td><td>BV14</td><td>16384</td></tr><tr><td>ROOM_TELEPORT</td><td>Teleport</td><td>BV15</td><td>32768</td></tr><tr><td>ROOM_NOFLOOR</td><td>No floor</td><td>BV16</td><td>65536</td></tr><tr><td>ROOM_MANAROOM</td><td>Accelerated mana replenishment</td><td>BV17</td><td>131072</td></tr><tr><td>ROOM_NOTRADE</td><td>Trading not allowed</td><td>BV18</td><td>262144</td></tr><tr><td>ROOM_PROTO</td><td>Prototype room</td><td>BV31</td><td>2147483648</td></tr></tbody></table></div><p>					
+			</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a>&#160;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&#160;</td></tr><tr><td width="40%" align="left" valign="top">Developer information&#160;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&#160;</td></tr></table></div></body></html>

@@ -1,0 +1,74 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>The Grendel Manual</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.64.1"><link rel="home" href="index.html" title="The Grendel Manual"><link rel="next" href="ar01s02.html" title="Installing, compiling, running"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">The Grendel Manual</th></tr><tr><td width="20%" align="left">&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s02.html">Next</a></td></tr></table><hr></div><div class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id2443544"></a>The Grendel Manual</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Michiel</span> <span class="surname">Rook</span></h3><tt class="email">&lt;<a href="mailto:michiel@grendelproject.nl">michiel@grendelproject.nl</a>&gt;</tt></div><div class="author"><h3 class="author"><span class="firstname">Hemko</span> <span class="surname">de Visser</span></h3><tt class="email">&lt;<a href="mailto:nemesis@grendelproject.nl">nemesis@grendelproject.nl</a>&gt;</tt></div></div></div><div><p class="releaseinfo">$Id: manual.xml,v 1.1 2004/04/06 22:19:26 ***REMOVED*** Exp $</p></div></div><div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="index.html#intro">Introduction</a></span></dt><dd><dl><dt><span class="section"><a href="index.html#copyright">Copyright and License</a></span></dt><dt><span class="section"><a href="index.html#credits">Credits and acknowledgements</a></span></dt><dt><span class="section"><a href="index.html#disclaimer">Disclaimer</a></span></dt></dl></dd><dt><span class="section"><a href="ar01s02.html">Installing, compiling, running</a></span></dt><dd><dl><dt><span class="section"><a href="ar01s02.html#install_installation">Installation</a></span></dt><dt><span class="section"><a href="ar01s02.html#install_compilation">Compilation</a></span></dt><dt><span class="section"><a href="ar01s02.html#install_running">Running</a></span></dt><dt><span class="section"><a href="ar01s02.html#install_immortals">Creating immortals</a></span></dt></dl></dd><dt><span class="section"><a href="ar01s03.html">Command Reference</a></span></dt><dd><dl><dt><span class="section"><a href="ar01s03.html#apropos">APROPOS</a></span></dt><dt><span class="section"><a href="ar01s03.html#damage">DAMAGE</a></span></dt><dt><span class="section"><a href="ar01s03.html#raceinfo">RACEINFO</a></span></dt></dl></dd><dt><span class="section"><a href="ar01s04.html">GMC introductory guide and specification</a></span></dt><dd><dl><dt><span class="section"><a href="ar01s04.html#gmc_syntax">Syntax</a></span></dt><dt><span class="section"><a href="ar01s04.html#gmc_compiler">Compiler</a></span></dt><dt><span class="section"><a href="ar01s04.html#gmc_assembler">Assembler</a></span></dt><dt><span class="section"><a href="ar01s04.html#gmc_vm">Virtual Machine</a></span></dt><dt><span class="section"><a href="ar01s04.html#gmc_out">'Getting out' of the VM</a></span></dt><dt><span class="section"><a href="ar01s04.html#gmc_types">Types</a></span></dt><dt><span class="section"><a href="ar01s04.html#gmc_entrypoints">Common entry points</a></span></dt></dl></dd><dt><span class="section"><a href="ar01s05.html">Developer information</a></span></dt><dd><dl><dt><span class="section"><a href="ar01s05.html#developers_modules">Modules</a></span></dt></dl></dd><dt><span class="section"><a href="ar01s06.html">Building areas</a></span></dt><dd><dl><dt><span class="section"><a href="ar01s06.html#building_areaformat">Area format</a></span></dt><dt><span class="section"><a href="ar01s06.html#building_tables">Tables, constants and structures</a></span></dt></dl></dd></dl></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="intro"></a>Introduction</h2></div></div><div></div></div><p>
+		Welcome to the official documentation of The Grendel Project.
+		These pages will tell you everything you need to know about
+		installing, setting up, running and maintaining Grendel.
+		</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+		This manual is by no means complete. If you spot any errors,
+		have suggestions or questions, do not hesitate to contact one of the
+		authors.
+		</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="copyright"></a>Copyright and License</h3></div></div><div></div></div><p>
+				<span class="emphasis"><em>The Grendel Project - A Windows/Linux MUD Server  &#169; 2000-2004 by Michiel Rook</em></span>
+			</p><p>
+			Please observe the file "documentation\License.txt" before using this software.
+			</p><p>
+			Redistribution and use in source and binary forms, with or without modification,
+			are permitted provided that the following conditions are met:
+			</p><div class="itemizedlist"><ul type="disc"><li><p>Redistributions of source code must retain the above copyright notice,
+				this list of conditions and the following disclaimer.</p></li><li><p>Redistributions in binary form must reproduce the above copyright notice,
+				this list of conditions and the following disclaimer in the documentation and/or
+				other materials provided with the distribution.</p></li></ul></div><p>
+			</p><p>
+			Neither the name of The Grendel Project nor the names of its contributors may be used
+			to endorse or promote products derived from this software without specific prior
+			written permission.
+			</p><p>
+			THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+			EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+			OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+			SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+			EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+			SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+			HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+			OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+			SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="credits"></a>Credits and acknowledgements</h3></div></div><div></div></div><p>
+			</p><div class="literallayout"><p>The&#160;Grendel&#160;Project&#160;is&#160;&#169;&#160;2000-2004&#160;by&#160;Michiel&#160;Rook.&#160;<br>
+			Additional&#160;code&#160;by&#160;Hemko&#160;de&#160;Visser,&#160;Roeland&#160;van&#160;Houte,&#160;Brad&#160;Taylor&#160;and&#160;Oscar&#160;Martin.<br>
+			Additional&#160;documentation&#160;and&#160;FAQs&#160;by&#160;Jeremiah&#160;Davis.</p></div><p>
+			</p><p>
+			</p><div class="literallayout"><p>Uses&#160;the&#160;LibXmlParser&#160;unit&#160;&#169;&#160;Stefan&#160;Heymann.<br>
+			Uses&#160;the&#160;RegExpr&#160;unit&#160;&#169;&#160;Andrey&#160;V.&#160;Sorokin.<br>
+			Uses&#160;a&#160;modified&#160;version&#160;of&#160;Winsock2&#160;interface&#160;unit&#160;&#169;&#160;Alex&#160;Konshin.<br>
+			Uses&#160;a&#160;modified&#160;version&#160;of&#160;the&#160;AnsiIO&#160;unit&#160;&#169;&#160;Gayle&#160;Davis.<br>
+			Uses&#160;parts&#160;of&#160;the&#160;Delphi&#160;Implementation&#160;of&#160;MD5&#160;Algorithm&#160;&#169;&#160;Matthias&#160;Fichtner.<br>
+			Uses&#160;parts&#160;of&#160;the&#160;Delphi&#160;Fundamentals&#160;library&#160;&#169;&#160;David&#160;Butler.<br>
+			Uses&#160;parts&#160;of&#160;the&#160;FastStrings&#160;library&#160;&#169;&#160;Peter&#160;Morris.<br>
+			Uses&#160;parts&#160;of&#160;the&#160;Jedi&#160;Code&#160;Library&#160;&#169;&#160;Project&#160;JEDI.</p></div><p>
+			</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="credits_diku"></a>Diku Mud</h4></div></div><div></div></div><p>
+				Diku Mud is copyright (C) 1990, 1991 by Sebastian Hammer, Michael Seifert,
+				Hans Henrik St{rfeldt, Tom Madsen, and Katja Nyboe.  Their license agreement
+				is in the file 'documentation\license.diku'.
+				</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="credits_merc"></a>Merc Diku Mud</h4></div></div><div></div></div><p>
+				Merc Diku Mud is a derivative of the original Diku Mud.  Merc Diku Mud contains
+				substantial enhancements to Diku Mud.  These enhancements are copyright 1992,
+				1993 by Michael Chastain, Michael Quan, and Mitchell Tse.  Their license
+				agreement is in the file 'documentation\license.merc'.
+				</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="credits_smaug"></a>SMAUG</h4></div></div><div></div></div><p>
+				SMAUG is a derivative of the version 2.1 distribution of Merc Diku Mud.
+				SMAUG contains substantial enhancements to Merc Diku Mud, including some
+				features of the original Diku Mud that were removed by the Merc team.
+				SMAUG is C() 1994, 1995, 1996, 1997, 1998 by Derek Snider. Their license
+				agreement is in the file 'documentation\license.smaug'.
+				</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="disclaimer"></a>Disclaimer</h3></div></div><div></div></div><p>
+			No liability for the contents of this document can be accepted.
+			Use the concepts, examples and information at your own risk.
+			There may be errors and inaccuracies, that could be damaging to
+			your system.  Proceed with caution, and although this is highly
+			unlikely, the author(s) do not take any responsibility.
+			</p><p>
+			All copyrights are held by their by their respective owners,
+			unless specifically noted otherwise.  Use of a term in this
+			document should not be regarded as affecting the validity of any
+			trademark or service mark.  Naming of particular products or
+			brands should not be seen as endorsements.
+			</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left">&#160;</td><td width="20%" align="center">&#160;</td><td width="40%" align="right">&#160;<a accesskey="n" href="ar01s02.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">&#160;</td><td width="20%" align="center">&#160;</td><td width="40%" align="right" valign="top">&#160;Installing, compiling, running</td></tr></table></div></body></html>
