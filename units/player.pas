@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.3 2003/10/17 11:05:57 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.4 2003/10/17 12:39:56 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -13,6 +13,7 @@ uses
 	area,
 	dtypes,
 	conns,
+	socket,
 	constants,
 	chars;
 
@@ -26,9 +27,17 @@ type
       
       procedure OnOpenEvent();
       procedure OnInputEvent();
+      procedure OnOutputEvent();
       procedure OnCloseEvent();
+
+		public
+    	constructor Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+		
+      procedure writePager(txt : string);
+      procedure setPagerInput(argument : string);
+      procedure outputPager;
       
-    public
+    published
     	property state : integer read _state write _state;
     	
     	property ch: GPlayer read _ch write _ch;
@@ -102,6 +111,7 @@ type
       function IS_AFK : boolean; override;
       function IS_KEYLOCKED : boolean; override;
       function IS_EDITING : boolean; override;
+      function IS_DRUNK : boolean; override;
 
       function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
       function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
@@ -154,6 +164,16 @@ uses
 	
 
 // GPlayerConnection
+constructor GPlayerConnection.Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+begin
+	inherited Create(socket);
+	
+	FOnOpen := OnOpenEvent;
+	FOnClose := OnCloseEvent;
+	FOnInput := OnInputEvent;
+	FOnOutput := OnOutputEvent;
+end;
+
 procedure GPlayerConnection.OnOpenEvent();
 begin
 end;
@@ -184,6 +204,116 @@ begin
 		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
 		ch.Free;
 		end;
+end;
+
+procedure GPlayerConnection.OnOutputEvent();
+begin
+	ch.sendPrompt();
+end;
+
+procedure GPlayerConnection.writePager(txt : string);
+begin
+  if (_pagepoint = 0) then
+    begin
+    _pagepoint := 1;
+    pagecmd:=#0;
+    end;
+
+  pagebuf := pagebuf + txt;
+end;
+
+procedure GPlayerConnection.setPagerInput(argument : string);
+begin
+  argument := trim(argument);
+
+  if (length(argument) > 0) then
+    pagecmd := argument[1];
+end;
+
+procedure GPlayerConnection.outputPager();
+var last : cardinal;
+    c : GPlayer;
+    pclines,lines:integer;
+    buf:string;
+begin
+  if (pagepoint = 0) then
+    exit;
+
+{  if (original <> nil) then
+    c := original
+  else
+    c := ch; }
+  c := ch;
+
+  pclines := UMax(c.pagerlen, 5) - 2;
+
+  c.emptyBuffer;
+
+  if (pagecmd <> #0) then
+    send(#13#10);
+    
+  case pagecmd of
+    'b':lines:=-1-(pclines*2);
+    'r':lines:=-1-pclines;
+    'q':begin
+        c.sendPrompt;
+        _pagepoint := 0;
+        pagebuf := '';
+        exit;
+        end;
+  else
+    lines:=0;
+  end;
+
+  while (lines<0) and (_pagepoint >= 1) do
+    begin
+    if (pagebuf[_pagepoint] = #13) then
+      inc(lines);
+
+    dec(_pagepoint);
+    end;
+
+  if (_pagepoint < 1) then
+    _pagepoint := 1;
+
+  lines := 0;
+  last := _pagepoint;
+
+  while (lines < pclines) and (last <= length(pagebuf)) do
+    begin
+    if (pagebuf[last] = #0) then
+      break
+    else
+    if (pagebuf[last] = #13) then
+      inc(lines);
+
+    inc(last);
+    end;
+
+  if (last <= length(pagebuf)) and (pagebuf[last] = #10) then
+    inc(last);
+
+  if (last <> pagepoint) then
+    begin
+    buf := copy(pagebuf, pagepoint, last - pagepoint);
+    send(buf);
+    _pagepoint := last;
+    end;
+
+  while (last <= length(pagebuf)) and (pagebuf[last] = ' ') do
+    inc(last);
+
+  if (last >= length(pagebuf)) then
+    begin
+    _pagepoint := 0;
+    c.sendPrompt;
+    pagebuf := '';
+    exit;
+    end;
+
+  pagecmd:=#0;
+
+  send(#13#10'(C)ontinue, (R)efresh, (B)ack, (Q)uit: ');
 end;
 
 
@@ -439,6 +569,11 @@ end;
 function GPlayer.IS_EDITING : boolean;
 begin
   IS_EDITING := conn.state = CON_EDITING;
+end;
+
+function GPlayer.IS_DRUNK : boolean;
+begin
+	IS_DRUNK := (condition[COND_DRUNK] > 80);
 end;
 
 function GPlayer.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
@@ -1331,15 +1466,15 @@ begin
   if (IS_NPC) or (not IS_SET(cfg_flags,CFG_PAGER)) then
     sendBuffer(txt)
   else
-    GConnection(conn).writePager(txt);
+    conn.writePager(txt);
 end;
 
-procedure GPlayer.emptyBuffer;
+procedure GPlayer.emptyBuffer();
 begin
   if (conn = nil) then
     exit;
 
-	GConnection(conn).emptyBuffer();
+	conn.emptyBuffer();
 end;
 
 procedure GPlayer.startEditing(text : string);

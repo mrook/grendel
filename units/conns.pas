@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.48 2003/10/17 11:05:56 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.49 2003/10/17 12:39:56 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -41,9 +41,17 @@ const
 type
 		GConnection = class;
 		
+		{ Called when GConnection.Execute() starts }
 		GConnectionOpenEvent = procedure() of object;
+		
+		{ Called when GConnection.Execute() terminates }
 		GConnectionCloseEvent = procedure() of object;
+		
+		{ Called when GConnection has one or more lines of input waiting }
 		GConnectionInputEvent = procedure() of object;
+		
+		{ Called when GConnection has sent one or more lines of output }
+		GConnectionOutputEvent = procedure() of object;
 		
     GConnection = class(TThread)
     protected
@@ -72,6 +80,7 @@ type
       FOnOpen : GConnectionOpenEvent;
       FOnClose : GConnectionCloseEvent;
       FOnInput : GConnectionInputEvent;
+      FOnOutput : GConnectionOutputEvent;
       
     protected
     	procedure Execute(); override;
@@ -85,12 +94,9 @@ type
       procedure readBuffer();
 
 			procedure emptyBuffer();
-      procedure writePager(txt : string);
       procedure writeBuffer(txt : string; in_command : boolean = false);
-      procedure setPagerInput(argument : string);
-      procedure outputPager;
 
-      constructor Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+      constructor Create(socket : GSocket);
       destructor Destroy; override;
       
     published
@@ -108,6 +114,7 @@ type
     	property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
     	property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
     	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
+    	property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
     end;
 
 var
@@ -134,11 +141,12 @@ implementation
 uses
   FastStrings,
   FastStringFuncs,
+  player,
   commands;
 
 
 // GConnection
-constructor GConnection.Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+constructor GConnection.Create(socket : GSocket);
 begin
   inherited Create(false);
 
@@ -183,8 +191,8 @@ begin
 		if (not Terminated) then
 			read();
 
-		if (not Terminated) and (wait > 0) then
-			continue;
+{		if (not Terminated) and (wait > 0) then
+			continue; }
 
 		if (not Terminated) then
 			readBuffer();
@@ -391,7 +399,10 @@ begin
   if (length(sendbuffer) > 0) then
     begin
     send(sendbuffer);
-    ch.sendPrompt();
+    
+    if (Assigned(FOnOutput)) then
+    	FOnOutput();
+
     sendbuffer := '';
     end;
 
@@ -410,111 +421,6 @@ begin
     sendbuffer := sendbuffer + #13#10;
 
   sendbuffer := sendbuffer + txt;
-end;
-
-procedure GConnection.writePager(txt : string);
-begin
-  if (_pagepoint = 0) then
-    begin
-    _pagepoint := 1;
-    pagecmd:=#0;
-    end;
-
-  pagebuf := pagebuf + txt;
-end;
-
-procedure GConnection.setPagerInput(argument : string);
-begin
-  argument := trim(argument);
-
-  if (length(argument) > 0) then
-    pagecmd := argument[1];
-end;
-
-procedure GConnection.outputPager;
-var last : cardinal;
-    c : GPlayer;
-    pclines,lines:integer;
-    buf:string;
-begin
-  if (pagepoint = 0) then
-    exit;
-
-{  if (original <> nil) then
-    c := original
-  else
-    c := ch; }
-  c := ch;
-
-  pclines := UMax(c.pagerlen, 5) - 2;
-
-  c.emptyBuffer;
-
-  if (pagecmd <> #0) then
-    send(#13#10);
-    
-  case pagecmd of
-    'b':lines:=-1-(pclines*2);
-    'r':lines:=-1-pclines;
-    'q':begin
-        c.sendPrompt;
-        _pagepoint := 0;
-        pagebuf := '';
-        exit;
-        end;
-  else
-    lines:=0;
-  end;
-
-  while (lines<0) and (_pagepoint >= 1) do
-    begin
-    if (pagebuf[_pagepoint] = #13) then
-      inc(lines);
-
-    dec(_pagepoint);
-    end;
-
-  if (_pagepoint < 1) then
-    _pagepoint := 1;
-
-  lines := 0;
-  last := _pagepoint;
-
-  while (lines < pclines) and (last <= length(pagebuf)) do
-    begin
-    if (pagebuf[last] = #0) then
-      break
-    else
-    if (pagebuf[last] = #13) then
-      inc(lines);
-
-    inc(last);
-    end;
-
-  if (last <= length(pagebuf)) and (pagebuf[last] = #10) then
-    inc(last);
-
-  if (last <> pagepoint) then
-    begin
-    buf := copy(pagebuf, pagepoint, last - pagepoint);
-    send(buf);
-    _pagepoint := last;
-    end;
-
-  while (last <= length(pagebuf)) and (pagebuf[last] = ' ') do
-    inc(last);
-
-  if (last >= length(pagebuf)) then
-    begin
-    _pagepoint := 0;
-    c.sendPrompt;
-    pagebuf := '';
-    exit;
-    end;
-
-  pagecmd:=#0;
-
-  send(#13#10'(C)ontinue, (R)efresh, (B)ack, (Q)uit: ');
 end;
 
 function playername(from_ch, to_ch : GCharacter) : string;
@@ -969,10 +875,7 @@ begin
     ac.Free();
     end
   else
-  	begin
-  	conn := GConnection.Create(ac);
-  	GGameConnection.Create(conn);
-  	end;
+  	GPlayerConnection.Create(ac, false, '');
 end;
 
 procedure gameLoop();

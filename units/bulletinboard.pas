@@ -1,6 +1,6 @@
 {
   @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id: bulletinboard.pas,v 1.11 2003/09/12 14:21:33 ***REMOVED*** Exp $)
+  @lastmod($Id: bulletinboard.pas,v 1.12 2003/10/17 12:39:57 ***REMOVED*** Exp $)
 }
 
 unit bulletinboard;
@@ -37,6 +37,7 @@ uses
     constants,
     strip,
     chars,
+    player,
     mudsystem;
 
 procedure load_notes(fname : string);

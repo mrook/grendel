@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.70 2003/10/16 16:06:04 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.71 2003/10/17 12:39:57 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -379,8 +379,9 @@ begin
     end
   else
     begin
+    { TODO: 
     if (conn <> nil) then
-      GConnection(conn).ch := nil;
+      GConnection(conn).ch := nil; }
 
     char_list.remove(node_world);
     node_world := extracted_chars.insertLast(Self);
@@ -438,7 +439,7 @@ function GCharacter.getTrust : integer;
 var
    ch : GCharacter;
 begin
-  if (snooped_by <> nil) and (GPlayer(snooped_by).switching = Self) then
+  if (snooped_by <> nil) { TODO: and (GPlayer(snooped_by).switching = Self) } then
     ch := snooped_by
   else
     ch := Self;
@@ -616,9 +617,7 @@ end;
 function GCharacter.IS_DRUNK : boolean;
 begin
   if (IS_NPC) then
-    IS_DRUNK := false
-  else
-    IS_DRUNK := (GPlayer(Self).condition[COND_DRUNK] > 80);
+    IS_DRUNK := false;
 end;
 
 function GCharacter.IS_WEARING(item_type : integer) : boolean;
@@ -695,21 +694,18 @@ begin
   if (room.IS_DARK) and (not IS_HOLYLIGHT) and (not IS_SET(aff_flags, AFF_INFRAVISION)) then
     CAN_SEE := false;
 
-  if (target is GPlayer) or (target is GNPC) then
-    begin
-    vict := GCharacter(target);
+	vict := GCharacter(target);
 
-    if (vict.IS_INVIS) and (not (IS_SET(aff_flags, AFF_DETECT_INVIS)
-     or IS_IMMORT)) then
-      CAN_SEE:=false;
+	if (vict.IS_INVIS) and (not (IS_SET(aff_flags, AFF_DETECT_INVIS)
+	 or IS_IMMORT)) then
+		CAN_SEE:=false;
 
-    if (vict.IS_HIDDEN) and (not (IS_SET(aff_flags, AFF_DETECT_HIDDEN)
-     or IS_IMMORT)) then
-      CAN_SEE := false;
+	if (vict.IS_HIDDEN) and (not (IS_SET(aff_flags, AFF_DETECT_HIDDEN)
+	 or IS_IMMORT)) then
+		CAN_SEE := false;
 
-    if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
-      CAN_SEE := false;
-    end;
+{ TODO:	if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
+		CAN_SEE := false; }
 
   if (IS_SET(aff_flags, AFF_BLIND)) then
     CAN_SEE := false;
@@ -862,13 +858,13 @@ end;
 procedure GCharacter.die;
 begin
   { snooping/switching immortals should stop doing so when we die }
-  if (snooped_by <> nil) then
+{ TODO:  if (snooped_by <> nil) then
     begin
     GPlayer(snooped_by).snooping := nil;
     GPlayer(snooped_by).switching := nil;
     snooped_by.sendBuffer('Ok.'#13#10);
     snooped_by := nil;
-    end;
+    end; }
 
   addCorpse(Self);
 end;
@@ -884,8 +880,8 @@ end;
 
 procedure GNPC.sendBuffer(s : string);
 begin
-  if (snooped_by <> nil) then
-    GConnection(snooped_by.conn).send(s);
+{ TODO: if (snooped_by <> nil) then
+    GConnection(snooped_by.conn).send(s); }
 end;
 
 procedure GCharacter.setWait(ticks : integer);
@@ -1285,7 +1281,7 @@ begin
     end;
 end;
 
-function findPlayerWorld(ch : GCharacter; name : string) : GPlayer;
+function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
 var
    iterator : GIterator;
    vict : GCharacter;
@@ -1297,7 +1293,7 @@ begin
 
   if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
     begin
-    Result := GPlayer(ch);
+    Result := ch;
     exit;
     end;
 
@@ -1318,7 +1314,7 @@ begin
 
       if (count = number) then
         begin
-        Result := GPlayer(vict);
+        Result := vict;
         exit;
         end;
       end;
@@ -1327,7 +1323,7 @@ begin
   iterator.Free();
 end;
 
-function findPlayerWorldEx(ch : GCharacter; name : string) : GPlayer;
+function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
 var
    iterator : GIterator;
    vict : GCharacter;
@@ -1339,7 +1335,7 @@ begin
 
   if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
     begin
-    Result := GPlayer(ch);
+    Result := ch;
     exit;
     end;
 
@@ -1360,7 +1356,7 @@ begin
 
       if (count = number) then
         begin
-        Result := GPlayer(vict);
+        Result := vict;
         exit;
         end;
       end;
