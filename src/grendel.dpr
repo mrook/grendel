@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.4 2004/02/11 20:04:42 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.5 2004/02/11 23:03:30 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -98,7 +98,7 @@ var
   listenSockets : GDLinkedList;
 
 
-procedure startup_tcpip();
+procedure openListenSockets();
 var
 	socket : GSocket;
 begin
@@ -121,7 +121,7 @@ begin
     end;
 end;
 
-procedure flushConnections;
+procedure flushConnections();
 var
    conn : GPlayerConnection;
    iterator : GIterator;
@@ -538,9 +538,9 @@ begin
 
 	loadMudState();
 
-	randomize;
+	randomize();
 
-	startup_tcpip;
+	openListenSockets();
 
 	ExitProc := @reboot_exitproc;
 
@@ -551,10 +551,10 @@ begin
 	registerTimer('characters', update_chars, CPULSE_TICK, true);
 	registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
 
-	timer_thread := GTimerThread.Create;
-	clean_thread := GCleanThread.Create;
+	timer_thread := GTimerThread.Create();
+	clean_thread := GCleanThread.Create();
 
-	calculateonline;
+	calculateonline();
 
 	{$IFDEF WIN32}
 		{$IFNDEF CONSOLEBUILD}
@@ -652,56 +652,6 @@ begin
 end;
 {$ENDIF}
 {$ENDIF}
-
-procedure acceptConnection(list_socket : GSocket);
-var
-  ac : GSocket;
-begin
-  ac := list_socket.acceptConnection(system_info.lookup_hosts);
-  
-  ac.setNonBlocking();
-
-  if (isMaskBanned(ac.hostString)) then
-    begin
-    writeConsole('(' + IntToStr(ac.getDescriptor) + ') Closed banned IP (' + ac.hostString + ')');
-
-    ac.send(system_info.mud_name + #13#10#13#10);
-    ac.send('Your site has been banned from this server.'#13#10);
-    ac.send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
-    end
-  else
-  if (boot_info.timer >= 0) then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is in the process of a reboot.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  if system_info.deny_newconns then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is refusing new connections.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  if (connection_list.size() >= system_info.max_conns) then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is too busy to accept new connections.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  	GPlayerConnection.Create(ac, false, '');
-end;
 
 procedure gameLoop();
 var
