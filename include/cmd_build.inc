@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.26 2001/04/28 19:05:19 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.27 2001/04/29 16:43:15 xenon Exp $
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
@@ -1437,7 +1437,7 @@ begin
 
     if (pexit=nil) then
       begin
-      ch.sendBuffer('Can not find that exit.'#13#10);
+      ch.sendBuffer('Cannot find that exit.'#13#10);
       exit;
       end;
 
@@ -1563,19 +1563,6 @@ begin
     Result := vnum;
 end;
 
-function createRoom(vnum : integer; area : GArea) : GRoom;
-var
-   room : GRoom;
-begin
-  room := GRoom.Create(vnum, area);
-  room.name := hash_string('Floating in a void');
-  room.description := 'Merely wisps of gas and steam, this room has not yet been clearly defined.';
-
-  room_list.put(vnum, room);
-
-  Result := room;
-end;
-
 procedure do_rmake(ch : GCharacter; param : string);
 var dir:integer;
     new_vnum:integer;
@@ -1614,7 +1601,7 @@ begin
   if (new_vnum=-1) then
     begin
     ch.sendBuffer('No more vnums available in your range. Try decreasing the size'#13#10);
-    ch.sendBuffer('of your area or asking another immortal for more a bigger range.'#13#10);
+    ch.sendBuffer('of your area or asking another immortal for a bigger range.'#13#10);
     exit;
     end;
 
@@ -1736,6 +1723,7 @@ begin
     begin
     ch.sendBuffer('Usage: AASSIGN <player> <filename>'#13#10#13#10);
     ch.sendBuffer('Assigns an area to a player for online construction.'#13#10);
+    ch.sendBuffer('Specify just a player name to unassign an assigned area.'#13#10);
     exit;
     end;
 
@@ -1768,7 +1756,31 @@ begin
       vict.player^.o_hi := area.o_hi;
       end
     else
-      ch.sendBuffer('That area cannot be found.'#13#10);
+      if (length(param) = 0) then
+      begin
+        if (vict.player^.area <> nil) then
+        begin
+          act(AT_REPORT,'Unassigned area ' + vict.player^.area.name + ' from $N.',false,ch,nil,vict,TO_CHAR);
+          if (vict <> ch) then
+            act(AT_REPORT,ch.name^ + ' has unassigned area ' + vict.player^.area.name + ' from you.',false,vict,nil,ch,TO_CHAR);
+          vict.player^.area := nil;
+          vict.player^.area_fname := '';
+          vict.player^.r_lo := High(integer);
+          vict.player^.r_hi := -1;
+          vict.player^.m_lo := High(integer);
+          vict.player^.m_hi := -1;
+          vict.player^.o_lo := High(integer);
+          vict.player^.o_hi := -1;
+        end
+        else
+        begin
+          ch.sendBuffer('There is no area assigned to that player.'#13#10);
+        end;
+      end
+      else
+      begin
+        ch.sendBuffer('That area cannot be found.'#13#10);
+      end;
     end;
 end;
 
@@ -1857,7 +1869,7 @@ begin
     temp_mult := 5;
     end;
 
-  area_list.insertLast(area);
+//  area_list.insertLast(area); { Xenon 28/Apr/2001: this is already done in GArea.Create() }
 
   Result := area;
 end;
@@ -1891,7 +1903,7 @@ const area_flags : array[0..2] of string = ('noreset','nopc','proto');
 procedure do_aset(ch : GCharacter; param : string);
 var
    area : GArea;
-   sub : string;
+   sub, str : string;
    a : integer;
 begin
   if (length(param) = 0) then
@@ -2580,6 +2592,57 @@ begin
       buf := buf + gr.grid[xpos, ypos];
     end;
     act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+  end;
+end;
+
+{Xenon 28/Apr/2001 : assign ranges to area. }
+procedure do_aranges(ch : GCharacter; param : string);
+var
+  area : GArea;
+  areaname, sub : string;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: ARANGES <area filename> <roomlo> <roomhi> <moblo> <mobhi> <objlo> <objhi>'#13#10#13#10);
+    ch.sendBuffer('Manually assigns ranges to an area.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param, areaname);
+  
+  area := findArea(areaname);
+
+  if (area = nil) then
+  begin
+    ch.sendBuffer('That area could not be found.'#13#10);
+    exit;
+  end;
+  
+  try
+    with area do
+    begin
+      param := one_argument(param,sub);
+      r_lo := strtoint(sub);
+
+      param := one_argument(param,sub);
+      r_hi := strtoint(sub);
+
+      param := one_argument(param,sub);
+      m_lo := strtoint(sub);
+
+      param:= one_argument(param,sub);
+      m_hi := strtoint(sub);
+
+      param:= one_argument(param,sub);
+      o_lo := strtoint(sub);
+
+      one_argument(param,sub);
+      o_hi := strtoint(sub);
+    end;
+
+    act(AT_REPORT, 'Assigned ranges to area ' + area.name + '.', false, ch, nil, nil, TO_CHAR);
+  except
+    ch.sendBuffer('Invalid numeric format.'#13#10);
   end;
 end;
 
