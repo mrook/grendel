@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.13 2004/04/04 14:25:29 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.14 2004/04/04 22:13:54 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -384,8 +384,8 @@ begin
 			end;
 		
 		dec(shutdownDelay);
-		end;
-
+		end
+	else
 	if (shutdownDelay = 0) then
 		begin
 		running := false;
@@ -476,7 +476,6 @@ function GServer.getShutdownDelay() : integer;
 begin
 	Result := Ceil(shutdownDelay / SERVER_PULSE_RES);
 end;
-
 
 { Returns true if server is running }
 function GServer.isRunning() : boolean;
