@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.11 2004/03/11 17:18:47 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.12 2004/03/13 16:09:28 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -2329,9 +2329,9 @@ begin
     resultdirs := '';
   end;
 
-  llopen.Clean();
+  llopen.Clear();
   llopen.Free();
-  llclosed.Clean();
+  llclosed.Clear();
   llclosed.Free();
 end;
 

@@ -2,7 +2,7 @@
 	Summary:
 		Main interface for commands module
 		
-	## $Id: cmd_main.pas,v 1.5 2004/03/04 19:39:50 ***REMOVED*** Exp $
+	## $Id: cmd_main.pas,v 1.6 2004/03/13 16:09:28 ***REMOVED*** Exp $
 }
 
 unit cmd_main;
@@ -231,7 +231,7 @@ begin
       end;
     iterator.Free();
 
-    keywordlist.Clean();
+    keywordlist.Clear();
     keywordlist.Free();
     ch.sendPager(buf + #13#10);
     exit;
@@ -260,7 +260,7 @@ begin
         
         if ((uppercase(param) = s) and (help.level <= ch.level)) then // if it's a 1-on-1 match, stop right away
           begin
-          keywordlist.Clean();
+          keywordlist.Clear();
           keywordlist.Free();
           keywordlist := GDLinkedList.Create();
           keywordlist.insertLast(THelpKeyword.Create(lowercase(s), help));
@@ -309,7 +309,7 @@ begin
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
     end;
 
-  keywordlist.Clean();
+  keywordlist.Clear();
   keywordlist.Free();
 end;
 
@@ -671,7 +671,7 @@ begin
     iterator.Free();
     end;
 
-  matchlist.Clean();
+  matchlist.Clear();
   matchlist.Free();
 end;
 
