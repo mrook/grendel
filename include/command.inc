@@ -1,4 +1,4 @@
-// $Id: command.inc,v 1.15 2001/04/21 18:31:21 ***REMOVED*** Exp $
+// $Id: command.inc,v 1.16 2001/04/22 23:24:37 xenon Exp $
 
 {$F+}
 
@@ -69,44 +69,46 @@ begin
   phelp := p;
 end;
 
+{ Xenon 22/Apr/2001: helper function for do_help() and do_apropos() }
+procedure insertAlphabetical(var ll : GDLinkedList; hk : THelpKeyword);
+var
+  node, ins : GListNode;
+  s : THelpKeyword;
+begin
+  ins := nil;
+  node := ll.head;
+
+  if (ll.head = nil) then
+  begin
+    ll.insertLast(hk);
+    exit;
+  end;
+
+  while (node <> nil) do
+  begin
+    s := node.element;
+
+    if (AnsiCompareStr(hk.keyword, s.keyword) > 0) then
+    begin
+      ins := node;
+    end
+    else
+    begin
+      ll.insertBefore(node, hk);
+      exit;
+    end;
+    
+    node := node.next;
+  end;
+
+  ll.insertAfter(ins, hk)
+end;
+
+
 { Revised help - Nemesis }
 { Xenon 16/Apr/2001: - help without arguments now gives sorted keywordlist
                      - help with an arg that matches multiple keywords will show matching keywords}
 procedure do_help(ch : GCharacter; param : string);
-  procedure insertAlphabetical(var ll : GDLinkedList; hk : THelpKeyword);
-  var
-    node, ins : GListNode;
-    s : THelpKeyword;
-  begin
-    ins := nil;
-    node := ll.head;
-
-    if (ll.head = nil) then
-    begin
-      ll.insertLast(hk);
-      exit;
-    end;
-
-    while (node <> nil) do
-    begin
-      s := node.element;
-
-      if (AnsiCompareStr(hk.keyword, s.keyword) > 0) then
-      begin
-        ins := node;
-      end
-      else
-      begin
-        ll.insertBefore(node, hk);
-        exit;
-      end;
-    
-      node := node.next;
-    end;
-
-    ll.insertAfter(ins, hk)
-  end;
-
 var buf, s, keyword : string;
     help : GHelp;
     counter : integer;
@@ -629,6 +631,67 @@ begin
     end;
 end;
 
+{ Xenon 23/Apr/2001: apropos searches through all helpfiles for a match on user input }
+procedure do_apropos(ch : GCharacter; param : string);
+var
+  node : GListNode;
+  help : GHelp;
+  matchlist : GDLinkedList;
+  hk : THelpKeyword;
+  s : string;
+begin
+  if (ch.IS_NPC) then
+    exit;
+
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage: APROPOS <text>'#13#10#13#10);
+    ch.sendBuffer('Apropos searches for ''text'' in the online helpfiles.'#13#10);
+    exit;
+  end;
+
+  matchlist := GDLinkedList.Create();
+  
+  node := help_files.head;
+  while (node <> nil) do
+  begin
+    help := node.element;
+
+    s := help.keywords;
+    
+    if ((s[length(s)] <> '_') and (pos(param, help.text) > 0) and (help.level <= ch.level)) then
+    begin
+      hk := THelpKeyword.Create(lowercase(s), help);
+      insertAlphabetical(matchlist, hk);
+    end;
+
+    node := node.next;
+  end;
+
+  if (matchlist.getSize() = 0) then
+  begin
+    ch.sendBuffer(Format('No matches found for your query ''%s''.'#13#10, [param]));
+    exit;
+  end
+  else
+  begin
+    ch.sendPager(act_string(Format('Found $B$7%d$A$7 helpfiles that match your query ''$B$7%s$A$7'':'#13#10#13#10, [matchlist.getSize(), param]), ch, nil, nil, nil));
+    
+    node := matchlist.head;
+    while (node <> nil) do
+    begin
+      hk := node.element;
+    
+      ch.sendPager(act_string(Format('  $B$7%s$A$7'#13#10, [hk.keyword]), ch, nil, nil, nil));
+
+      node := node.next;
+    end;
+  end;
+
+  matchlist.Clean();
+  matchlist.Free();
+end;
+
 {$I include\cmd_imm.inc}
 {$I include\cmd_info.inc}
 {$I include\cmd_move.inc}
@@ -639,3 +702,4 @@ end;
 {$I include\cmd_obj.inc}
 {$I include\cmd_shops.inc}
 {$I include\cmd_build.inc}
+

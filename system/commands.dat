@@ -76,6 +76,11 @@ function: do_alias
 #end
 
 #command
+name: apropos
+function: do_apropos
+#end
+
+#command
 name: armor
 alias: arm
 position: 4

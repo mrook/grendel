@@ -40,3 +40,9 @@ Syntax: RACEINFO [<racename>]
 Raceinfo without any parameters gives a list of races available to players.
 Raceinfo <racename> will give information on that particular race.
 #End=0
+#Keyword=APROPOS
+Syntax: APROPOS <text>
+
+Apropos searches through all helpfiles for <text> and gives back
+a list of matching entries.
+#End=0
