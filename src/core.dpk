@@ -39,6 +39,7 @@ contains
 	JclSysUtils,
 	JclMath,
 	JclResources,
+	JclSvcCtrl,
 {$ENDIF}
 	dtypes,
 	server,
