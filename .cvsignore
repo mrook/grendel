@@ -1,0 +1,9 @@
+build
+*.map
+*.jdbg
+*.bpl
+*.dcu
+*.dcp
+*.dpu
+*.drc
+*.~*
