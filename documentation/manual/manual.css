@@ -1,0 +1,228 @@
+  h2
+  {
+    font-family: Verdana;
+    font-size: 18pt;
+  }
+  h3
+  {
+    font-family: Verdana;
+    font-size: 13.5pt;
+  }
+  a
+  {
+    color: black;
+    text-decoration: underline;
+  }
+  a:hover
+  {
+    color: black;
+    text-decoration: none;
+  }
+  .nav a,.bottomnav a,.middlenav a
+  {
+    color: #ffffff;
+    background-color: transparent; 
+    text-decoration: underline;
+  }
+  font.nav a, font.nav a:hover {
+    color: black
+  }
+  font.nav {
+    color: black;
+    background-color: transparent;
+    padding: 0px;
+  }
+  .nav a:hover,.bottomnav a:hover,.middlenav a:hover
+  {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .topnav h1
+  {
+    font-family: arial;
+    font-variant: small-caps;
+    font-size: 26pt;
+    color: #cccc33;
+    display: inline;
+  }
+  .topnav {
+    background-color: black;
+    background-image: url('/images/bg.jpg');
+    padding: 4px;
+    color: #cccc33;
+  }
+  .nav
+  {
+    color: #cccc33;
+    background-color: black;
+    text-decoration: none;
+    padding: 4px;
+  }
+  .bottomnav
+  {
+    color: #cccc33;
+    background-color: black;
+    background-image: url('/images/bg.jpg');
+    text-decoration: none;
+    padding: 4px;
+  }
+  .middlenav
+  {
+    border: 1px black;
+    border-style: solid none solid none;
+    color: black;
+    background-color: #cccc33;
+    padding: 4px;
+  }
+  body 
+  {
+    font-size: 12px;
+    font-family: verdana, arial, helvetica, serif;
+    color: black;
+  }
+  table 
+  {
+    empty-cells: show;
+  }
+  .small
+  {
+    font-size: 10px;
+    font-family: verdana, arial, helvetica, serif;
+  }
+  td
+  {
+    font-size: 12px;
+    color: black;
+    font-family: verdana, arial, helvetica, serif;
+  }
+  th
+  {
+    font-size: 12px;
+    color: #000000;
+    background-color: #cccc33;
+    font-family: arial;
+  }
+  th.blocktitle
+  {
+    border: 1px solid black;
+  }
+  input
+  {
+    font-size: 9pt;
+    color: #000000;
+    font-family: verdana,arial, helvetica, serif;
+  }
+  textarea
+  {
+    font-size: 9pt;
+    color: #000000;
+    font-family: verdana,arial, helvetica, serif;
+  }
+  select
+  {
+    font-size: 7pt;
+    color: #000000;
+    font-family: verdana,arial, helvetica, serif;
+  }
+  .windowbg
+  {
+    font-size: 12px;
+    color: black;
+    font-family: verdana, arial, helvetica, serif;
+  }
+  .windowbg2
+  {
+    font-size: 12px;
+    color: black;
+    font-family: verdana, arial, helvetica, serif;
+  }
+  .windowbg3
+  {
+    font-size: 12px;
+    color: black;
+    font-family: verdana, arial, helvetica, serif;
+  }
+  hr
+  {
+    color: #999999;
+    background-color: transparent;
+  }
+  form
+  {
+    display: inline;
+    margin: 0;
+    padding: 0;
+  }
+  .titlebg
+  {
+    color: black;
+    padding-left: 2px;
+  }
+  .text1
+  {
+    font-weight: bold;
+    font-size: 12px;
+    color: black;
+    font-style: normal;
+    background-color: transparent;
+  }
+  .catbg
+  {
+    font-family: arial;
+    border: 1px solid black;
+    font-weight: bold;
+    font-size: 12px;
+    background-color: #cccc33;
+    color: #000000;
+    padding-left: 2px;
+  }
+  .bordercolor
+  {
+    font-size: 12px;
+    font-family: verdana, arial, helvetica, serif;
+  }
+  .tableborder
+  {
+    border-collapse: collapse;
+    border: 1px solid #999999;
+  }
+  .quote
+  {
+    font-size: 10px;
+    color: black;
+    font-family: arial, verdana, helvetica, serif;
+  }
+  .code
+  {
+    font-size: 10px;
+    color: black;
+    font-family: courier new, helvetica, times new roman, serif;
+  }
+  .help
+  {
+    cursor: help;
+    background-color: transparent;
+  }
+  .meaction
+  {
+    color: red;
+    background-color: transparent;
+  }
+  .editor
+  {
+    width : 100%;
+  }
+  p
+  {
+    font-family: arial, verdana, helvetica, serif;
+  }
+  input, textarea
+  {
+    font-family: verdana;
+    font-size: 10px;
+    border: 1px solid black;
+    margin: 0;
+    background-color: white;
+    color: black;
+    padding: 0.1em;
+  }

@@ -1,0 +1,894 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "docbookx.dtd" []>
+<article>
+	<articleinfo>
+		<title>The Grendel Manual</title>
+		<authorgroup>
+			<author>
+				<firstname>Michiel</firstname>
+				<surname>Rook</surname>
+				<email>michiel@grendelproject.nl</email>
+			</author>
+			<author>
+				<firstname>Hemko</firstname>
+				<surname>de Visser</surname>
+				<email>nemesis@grendelproject.nl</email>
+			</author>
+		</authorgroup>
+		<releaseinfo>$Id: manual.xml,v 1.1 2004/04/06 22:19:26 ***REMOVED*** Exp $</releaseinfo>
+	</articleinfo>
+	<section id="intro">
+		<title>Introduction</title>
+		<para>
+		Welcome to the official documentation of The Grendel Project.
+		These pages will tell you everything you need to know about
+		installing, setting up, running and maintaining Grendel.
+		</para>
+		<note>
+		<para>
+		This manual is by no means complete. If you spot any errors,
+		have suggestions or questions, do not hesitate to contact one of the
+		authors.
+		</para>
+		</note>
+		<section id="copyright">
+			<title>Copyright and License</title>
+			<para>
+				<emphasis>The Grendel Project - A Windows/Linux MUD Server  &copy; 2000-2004 by Michiel Rook</emphasis>
+			</para>
+			<para>
+			Please observe the file "documentation\License.txt" before using this software.
+			</para>
+			<para>
+			Redistribution and use in source and binary forms, with or without modification,
+			are permitted provided that the following conditions are met:
+			<itemizedlist>
+				<listitem><para>Redistributions of source code must retain the above copyright notice,
+				this list of conditions and the following disclaimer.</para></listitem>
+				<listitem><para>Redistributions in binary form must reproduce the above copyright notice,
+				this list of conditions and the following disclaimer in the documentation and/or
+				other materials provided with the distribution.</para></listitem>
+			</itemizedlist>
+			</para>
+			<para>
+			Neither the name of The Grendel Project nor the names of its contributors may be used
+			to endorse or promote products derived from this software without specific prior
+			written permission.
+			</para>			
+			<para>
+			THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+			EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+			OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+			SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+			EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+			SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+			HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+			OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+			SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+			</para>
+		</section>
+		<section id="credits">
+			<title>Credits and acknowledgements</title>
+			<para>
+			<literallayout>The Grendel Project is &copy; 2000-2004 by Michiel Rook. 
+			Additional code by Hemko de Visser, Roeland van Houte, Brad Taylor and Oscar Martin.
+			Additional documentation and FAQs by Jeremiah Davis.</literallayout>
+			</para>
+			<para>
+			<literallayout>Uses the LibXmlParser unit &copy; Stefan Heymann.
+			Uses the RegExpr unit &copy; Andrey V. Sorokin.
+			Uses a modified version of Winsock2 interface unit &copy; Alex Konshin.
+			Uses a modified version of the AnsiIO unit &copy; Gayle Davis.
+			Uses parts of the Delphi Implementation of MD5 Algorithm &copy; Matthias Fichtner.
+			Uses parts of the Delphi Fundamentals library &copy; David Butler.
+			Uses parts of the FastStrings library &copy; Peter Morris.
+			Uses parts of the Jedi Code Library &copy; Project JEDI.</literallayout>
+			</para>
+			<section id="credits_diku">
+				<title>Diku Mud</title>
+				<para>
+				Diku Mud is copyright (C) 1990, 1991 by Sebastian Hammer, Michael Seifert,
+				Hans Henrik St{rfeldt, Tom Madsen, and Katja Nyboe.  Their license agreement
+				is in the file 'documentation\license.diku'.
+				</para>
+			</section>
+			<section id="credits_merc">
+				<title>Merc Diku Mud</title>
+				<para>
+				Merc Diku Mud is a derivative of the original Diku Mud.  Merc Diku Mud contains
+				substantial enhancements to Diku Mud.  These enhancements are copyright 1992,
+				1993 by Michael Chastain, Michael Quan, and Mitchell Tse.  Their license
+				agreement is in the file 'documentation\license.merc'.
+				</para>
+			</section>
+			<section id="credits_smaug">
+				<title>SMAUG</title>
+				<para>
+				SMAUG is a derivative of the version 2.1 distribution of Merc Diku Mud.
+				SMAUG contains substantial enhancements to Merc Diku Mud, including some
+				features of the original Diku Mud that were removed by the Merc team.
+				SMAUG is C() 1994, 1995, 1996, 1997, 1998 by Derek Snider. Their license
+				agreement is in the file 'documentation\license.smaug'.
+				</para>
+			</section>
+		</section>
+		<section id="disclaimer">
+			<title>Disclaimer</title>
+			<para>
+			No liability for the contents of this document can be accepted.
+			Use the concepts, examples and information at your own risk.
+			There may be errors and inaccuracies, that could be damaging to
+			your system.  Proceed with caution, and although this is highly
+			unlikely, the author(s) do not take any responsibility.
+			</para>
+			<para>
+			All copyrights are held by their by their respective owners,
+			unless specifically noted otherwise.  Use of a term in this
+			document should not be regarded as affecting the validity of any
+			trademark or service mark.  Naming of particular products or
+			brands should not be seen as endorsements.
+			</para>
+		</section>
+	</section>
+	<section id="install">
+		<title>Installing, compiling, running</title>
+		<para>
+		This section outlines the steps required to install, optionally compile, and run the Grendel software.
+		</para>		
+		<section id="install_installation">
+			<title>Installation</title>
+			<para>  
+			The archive you have downloaded contains prebuilt binaries for 
+			the target operating system. The target operating system can be identified 
+			by the extension of the archive; .zip => Windows, .tar.gz => Linux.
+			</para>
+			<para>
+			You can install the software in any location you deem useful.
+			</para>
+		</section>
+		<section id="install_compilation">
+			<title>Compilation</title>
+			<para>
+			If you want to recompile the binaries, you need the following ingredients:
+			<itemizedlist>
+				<listitem>
+					<para>Linux</para>
+					<para>
+					<itemizedlist>
+						<listitem><para>Borland Kylix 3</para></listitem>
+						<listitem><para>GNU make (usually pre-installed on your system)</para></listitem>
+					</itemizedlist>
+					</para>
+				</listitem>
+				<listitem>
+					<para>Windows</para>
+					<para>
+					<itemizedlist>
+						<listitem><para>Borland Delphi 6 or higher</para></listitem>
+						<listitem><para>GNU make (available at <ulink url="http://www.grendelproject.nl/dls/gnumake-win32.zip">the Grendel website</ulink>)</para></listitem>
+					</itemizedlist>
+					</para>
+				</listitem>
+			</itemizedlist>
+			</para>
+			<para>
+			If these ingredients are present, you can run 'make' in the directory
+			where you've installed Grendel.
+			</para>
+		</section>		
+		<section id="install_running">
+			<title>Running</title>
+			<para>
+			Starting Grendel is simple. Windows users can click on the <literal>grendel.exe</literal>
+			icon, or open a console window and start the <literal>grendel.exe</literal> file manually.
+			</para>
+			<para>
+			Linux users can either start the executable <literal>grendel</literal> from an automated 
+			script or manually from a terminal.
+			<note><para>Under Linux Grendel forks to the background by default, to override this 
+			and let Grendel write to stdout use <literal>grendel -f</literal> instead.</para></note>
+			</para>
+			<para>
+			If all is well, you should be able to connect to Grendel by using
+			a telnet client to connect to localhost, port 4444.
+			</para>
+		</section>
+		<section id="install_immortals">
+			<title>Creating immortals</title>
+			<para>
+			Grendel comes shipped without any users (characters), so you'll have to create your own.
+			</para>
+			<para>
+			After connecting to Grendel, you should see a brief introductory message,
+			and a prompt. Here you can create a new user and explore the example world.
+			</para>
+			<para>
+			Once you've created a new user, navigate to the <literal>players</literal> directory,
+			and edit the file <literal>YourUserName.usr</literal>. To 'immortalize' this user,
+			change the number on the line with <literal>Level:</literal> to a number
+			in the range 990-1000, where 990 is the lowest ranking Immortal, and 1000 the highest.
+			</para>
+		</section>
+	</section>	
+	<section id="commands">
+		<title>Command Reference</title>
+		<para>
+		This section contains a reference for most commands available to players on a stock Grendel
+		installation. It does not claim to be an exhaustive reference, as any command-set is subject to
+		change, and documentation often lags behind development.
+		</para>
+		<note>
+			<para>
+			There is no guarantee that any of the commands listed here are actually present on a modified
+			installation of Grendel. Administrators are allowed to remove and add to their command-set as they see fit.
+			</para>
+		</note>
+		<section id="apropos">
+			<title>APROPOS</title>
+			<cmdsynopsis>
+				<command>apropos</command>
+				<arg choice="req"><replaceable>text</replaceable></arg>
+			</cmdsynopsis>
+			<para>
+			APROPOS searches through all helpfiles for '<replaceable>text</replaceable>' and returns
+			a list of matching entries.
+			</para>
+		</section>
+		<section id="damage">
+			<title>DAMAGE</title>
+
+			<para>
+			<example>
+				<title>Literal output produced by the DAMAGE command</title>
+				<programlisting>You miss your punch at a bat.
+You tickle a bat with your punch.
+You barely punch a bat.
+You punch a bat.
+You punch a bat hard.
+You punch a bat very hard.
+You punch a bat extremely hard.
+You hit a bat with your punch.
+You injure a bat with your skillful punch.
+A bat winces in pain with your forceful punch.
+A bat cries out in agony with your powerful punch.
+You devastate a bat with your agonizing punch!
+You mangle a bat with your outstanding punch!
+You MUTILATE a bat with your furious punch!
+You DECIMATE a bat with your incredible punch!
+You ObliteratE a bat with your unsurpassed punch!
+You MASSACRE a bat to pieces with your unforgettable punch!
+You --- ANNIHILATE --- a bat with your deadly punch!
+You &lt;&lt;== LIQUIFY ==&gt;&gt; a bat with your terrifying punch!
+You *** SLAUGHTER *** a bat with your masterful punch!
+You {&lt;&lt;&lt; EVISCERATE &gt;&gt;&gt;} a bat with your unsurvivable punch!
+You %% %% %%  VAPORIZE  %% %% %% a bat with your SUPERB punch!!!
+You [[&lt; == ATOMIZE == &gt;]] a bat with your punch!!
+You &lt; - &lt; ILLUMINATE &gt; - &gt; a bat with your TERRIBLE punch!!
+You ___... DESTROY ...___ a bat with your AGONIZING punch!!!
+You -&lt; { { : : : DISINTEGRATE : : : } } &gt;- a bit with your GODLY punch!!!!</programlisting>
+			</example>
+			</para>
+		</section>
+		<section id="raceinfo">
+			<title>RACEINFO</title>
+
+			<cmdsynopsis>
+				<command>raceinfo</command>
+				<arg choice="opt"><replaceable>race</replaceable></arg>
+			</cmdsynopsis>
+
+			<para>
+			RACEINFO without any parameters gives a list of races available to players.
+			RACEINFO '<replaceable>race</replaceable>' will give information on that particular race.
+			</para>
+		</section>
+	</section>
+	<section id="gmc">
+		<title>GMC introductory guide and specification</title>
+		<para>
+		GMC (or Grendel MUD C if you will) is a language similar to C, devised for
+		the sole purpose of powering the scripted parts of the Grendel MUD Server.
+		</para>
+		<para>
+		It has support for variables, control structures, (nested) functions
+		and external variables/traps.
+		</para>
+		<para>
+		The system consists of a compiler, an assembler and a virtual machine setup
+		which can be called from an application, in this case Grendel.
+		</para>
+		
+		<section id="gmc_syntax">
+			<title>Syntax</title>
+			<para>
+			The GMC language is in many respects quite like C, with some
+			simplifications and exceptions.
+			</para>
+			<para>
+			The most important supported language constructs:
+			<itemizedlist>
+				<listitem><para>global and local variables</para></listitem>
+				<listitem><para>function definitions</para></listitem>
+				<listitem><para>loops (only for currently)</para></listitem>
+				<listitem><para>'include' files</para></listitem>
+				<listitem><para>basic flow control (if statements)</para></listitem>
+				<listitem><para>valid integer and boolean expressions</para></listitem>
+			</itemizedlist>
+			</para>
+		</section>
+		
+		<section id="gmc_compiler">
+			<title>Compiler</title>
+			<para>
+			The GMC compiler works in four distinct passes.
+			</para>
+			<para>
+			In the first pass, the source files are scanned and parsed,
+			and basic syntax checking is performed.
+			</para>
+			<para>
+			The second pass performs type checking and coercion.
+			</para>
+			<para>
+			In the third pass an optimizer performs some basic
+			optimizations: dead-code elimination, algebraic
+			simplication (constant elimination) and some flow-of-
+			control optimizations.
+			</para>
+			<para>
+			The fourth and final pass is the code generator,
+			where assembly code for the stack machine is written
+			to a file.
+			</para>
+		</section>
+		<section id="gmc_assembler">
+			<title>Assembler</title>
+			<para>
+			The assembler simply converts the "human readable"
+			assembly code to a binary format (this includes translating
+			the labels for jumps/calls).
+			</para>
+			<para>
+			Additionally, the assembler performs some simple optimizations
+			(in a section commonly known as the 'peephole optimizer'),
+			to reduce the number of instructions.
+			</para>
+		</section>
+		<section id="gmc_vm">
+			<title>Virtual Machine</title>
+			<para>
+			The VM of the GMC language is a fully functional stack machine processor
+			with some 40+ opcodes in its instruction set.
+			</para>
+			<para>
+			Internally the machine consists of a stack utilizing the Delphi 'variant'
+			type. 
+			</para>
+			<para>
+			Apart from the stack there are a number of registers - the stack pointer,
+			the base pointer, and the program counter (or instruction pointer).
+			Only the first two can be accessed directly from the assembler.
+			</para>
+			<para>
+			Lastly there is a data segment present. Its size is defined through
+			the assembler directive '$DATA'.
+			</para>
+		</section>
+		<section id="gmc_out">
+			<title>'Getting out' of the VM</title>
+			<para>
+			The VM has support for a number of mechanisms to help a program 'get out' of the 
+			environment and have some interaction with the calling application.
+			</para>
+			<para>
+			These mechanisms are:
+			<itemizedlist>
+				<listitem><para>System traps</para></listitem>
+				<listitem><para>Signals and sleep</para></listitem>
+				<listitem><para>External variables</para></listitem>
+				<listitem><para>External methods</para></listitem>
+			</itemizedlist>
+			</para>
+			<para>
+			The system trap (in the form of <literal>do("some expression")</literal>) can be set to a
+			userspecified function by the calling application. The trap can do with
+			the string expression as it sees fit.
+			</para>
+			<para>
+			Signals are used to "suspend" the execution of the program until
+			some condition has been met (e.g. a signal has been raised) in another
+			part of the server (wether that be native or scripted code).
+			The sleep function suspends the program until a certain tickcount has
+			been reached.
+			</para>
+			<para>
+			External variables are a construct to associate external data with names
+			or expressions in the GMC language.
+			</para>
+			<para>
+			External methods are methods within a class, that are registered
+			before a script is executed. In a script they are represented
+			by a function without a body ('float cos(float x);' for example).
+			These 'callbacks' are somewhat dangerous, as there is no mechanism
+			to check the validity of the parameters specified in the declaration, nor 
+			the values provided at the time of calling.
+			</para>
+		</section>
+		<section id="gmc_types">
+			<title>Types</title>
+			<para>
+			GMC only allows basic (primitive) types - thus compound and structured types
+			or arrays are not included in the language.
+			</para>
+			<para>
+			The following basic types are supported:
+			<itemizedlist>
+				<listitem>
+					<para>int</para>
+					<para>Mapped to the pascal type integer</para>
+				</listitem>
+				<listitem>
+					<para>bool</para>
+					<para>Alias for int</para>
+				</listitem>
+				<listitem>
+					<para>float</para>
+					<para>Mapped to the pascal type single</para>
+				</listitem>
+				<listitem>
+					<para>string</para>
+					<para>Mapped to the pascal type LongString</para>
+				</listitem>
+				<listitem>
+					<para>void</para>
+					<para>Should not be used for basic identifiers</para>
+				</listitem>
+				<listitem>
+					<para>external</para>
+					<para>A special type; it has no strict semantic meaning in itself, 
+					but will evaluate to a callback to the shell surrounding 
+					(or calling, if you will) the VM. This callback will take care of 
+					the necessary checks (including or excluding typing) and 
+					return a value associated with the external.
+					</para>
+				</listitem>
+			</itemizedlist>
+			</para>
+			<para>
+			<example>
+				<title>Associating a variable with the environment</title>
+				<programlisting>external ch;
+ch = "Grimlord";</programlisting>
+			</example>
+			</para>
+			<para>
+			Executing this snippet will have the external callback trying to associate the string
+			value "Grimlord" with some enviroment. If this association succeeds, the resulting value
+			will be placed in 'ch'.
+			</para>
+			<para>
+			<example>
+				<title>De-referencing an external value</title>
+				<programlisting>x = ch.alignment;</programlisting>
+			</example>
+			</para>
+			<para>
+			Again, this will have the callback trying to associate the member variable 'alignment'
+			with the (already associated) variable 'ch'. Care must be taken that this member variable
+			does actually exist, or hell will fall down and chaos will ensue.
+			</para>
+		</section>
+		<section id="gmc_entrypoints">
+			<title>Common entry points</title>
+			<para>
+			An 'entry point' is a position in your script code that has a common syntax or structure,
+			and can be easily identified by the calling process. These entry points can be viewed
+			as seperate blocks of code that are called when a particular event is triggered.
+			</para>
+			<para>
+			Below you will find some common entry points that are used throughout the server code.
+			</para>
+			<para>
+			<itemizedlist>
+				<listitem>
+					<para><literal>void onTick(external ch)</literal></para>
+					<para>Called every second</para>
+				</listitem>
+				<listitem>
+					<para><literal>void onAct(external ch, external target, string arg)</literal></para>
+					<para>Called when <literal>ch</literal> receives some action <literal>arg</literal> from <literal>target</literal></para>
+				</listitem>
+				<listitem>
+					<para><literal>void onFight(external ch, external target)</literal></para>
+					<para>Called every fight tick</para>
+				</listitem>
+				<listitem>
+					<para><literal>void onDeath(external ch, external target)</literal></para>
+					<para>Called when <literal>ch</literal> dies at the hands of <literal>target</literal></para>
+				</listitem>
+				<listitem>
+					<para><literal>void onReset(external ch)</literal></para>
+					<para>Called when <literal>ch</literal> resets (spawns)</para>
+				</listitem>
+				<listitem>
+					<para><literal>bool onBlock(external ch, external target, string dir)</literal></para>
+					<para>Called when <literal>target</literal> tries to leaves the room where <literal>ch</literal>
+					is (in direction <literal>dir</literal>). Returns <literal>true</literal> when blocking</para>
+				</listitem>
+				<listitem>
+					<para><literal>void onGive(external ch, external target, external obj)</literal></para>
+					<para>Called when <literal>target</literal> gives <literal>obj</literal> to <literal>ch</literal></para>
+				</listitem>
+				<listitem>
+					<para><literal>void onEmoteTarget(external victim, external actor, string arg)</literal></para>
+					<para>Called when <literal>victim</literal> is target of an emote executed by <literal>actor</literal>
+					(e.g. <literal>slap victim</literal>).					
+					The name of the emote (Name:-field from system\socials.dat, e.g. 'SLAP') will be in <literal>arg</literal>.
+					</para>
+					<note>
+					<para>When an entry point onEmoteTarget exists, the default emote handling (as defined in checkSocial() in mudsystem.pas) 
+			   		will not be used.</para>
+			   		</note>
+			   	</listitem>
+			   	<listitem>
+			   		<para><literal>void onGreet(external ch, external target)</literal></para>
+			   		<para>Called when <literal>target</literal> enters the room where <literal>ch</literal> is</para>
+			   	</listitem>
+			</itemizedlist>
+			</para>
+		</section>
+	</section>
+	<section id="developers">
+		<title>Developer information</title>
+		<para>
+		This section contains information for developers that want to modify or add to the Grendel sourcecode.
+		</para>
+		<section id="developers_modules">
+			<title>Modules</title>			
+			<para>
+			As of 0.4.0, the Grendel sourcecode contains so called 'modules'. These
+			modules (or plugins, if you will) can be loaded on demand by the server,
+			and can contain arbitrary functionality that you may wish to enable.
+			</para>
+			<para>
+			It also provides a more suitable platform for 3rd party code, which will
+			rely less on the core functionality, and thus better survive the
+			rough tide of code improvements and version changes.
+			</para>
+			<para>
+			Modules are built and loaded through the native Delphi package mechanism,
+			and as such they are simply "enhanced" DLL's (or shared libraries).
+			</para>
+			<para>
+			There are however a few guidelines and requirements for these modules:
+			<itemizedlist>
+				<listitem><para>Each module should have a unique name. If in doubt about the name
+				of your module, contact the developers</para></listitem>
+				<listitem><para>Compiled modules should be placed in the modules directory</para></listitem>
+				<listitem><para>Add a <literal>{$DESCRIPTION}</literal> line in the .dpk file of the module, with
+			  	a small description of the functionality of the module</para></listitem>
+				<listitem><para>Make sure the units in the module do not collide with units in any
+			  	other module. Good common practice is to prefix all units with an abbreviation 
+			  	of the modulename</para></listitem>
+			</itemizedlist>
+			</para>
+			<para>
+			Each module should define a class which implements <classname>IModuleInterface</classname>,
+			and export that class, as per the following example.
+			
+			<example>
+				<title>Implementing IModuleInterface</title>
+				<programlisting>type
+	GExampleModule = class(TInterfacedObject, IModuleInterface)
+	published
+		procedure registerModule();
+		procedure unregisterModule();
+	end;
+
+procedure GExampleModule.registerModule();
+begin
+	{ perform some initialization here }
+end;
+
+procedure GExampleModule.unregisterModule();
+begin
+	{ perform some cleanup here }
+end;
+
+function returnModuleInterface() : IModuleInterface;
+begin
+	Result := GExampleMudModule.Create();
+end;
+
+exports
+	returnModuleInterface;</programlisting>
+			</example>
+			</para>
+		</section>
+	</section>
+	<section id="building">
+		<title>Building areas</title>
+		<para>
+		This section discusses the area format used by Grendel, common practices when building,
+		as well as various structures and constants used in areas.
+		</para>
+		<section id="building_areaformat">
+			<title>Area format</title>
+			<para>
+			Listed below is a sample area (actually a trimmed-down version of the <literal>roads.area</literal>
+			file that is shipped with Grendel). Attentive readers will notice that the
+			format of the area is quite similar to the format used in the SMAUG codebase.
+			</para>
+			<note>
+			<para>
+			Since a switch to an XML area format is planned, this section is subject to change.
+			</para>
+			</note>
+			<para>
+			<example>
+				<title>An example area</title>
+<screen>#RANGES
+100 199 100 199 100 199                                                         <lineannotation>Hints for min/max rooms/mobiles/objects</lineannotation>
+
+#AREA
+Central Ruia                                                                    <lineannotation>Name of the area</lineannotation>
+Grimlord                                                                        <lineannotation>Name of the owner/builder</lineannotation>
+A fresh wind blows through your hair.                                           <lineannotation>Message to display when area resets</lineannotation>
+35                                                                              <lineannotation>Number of gamerounds (roughly 75 secs) between resets</lineannotation>
+8 18 0                                                                          <lineannotation>Temp. multiplier, avg. temperature, flags 
+                                                                                (see: <xref linkend="table.areaflags"/>)</lineannotation>
+
+#ROOMS
+#100                                                                            <lineannotation>Number (vnum) of room</lineannotation>
+The Great Junction                                                              <lineannotation>Name of room</lineannotation>
+The wind blows through your hair as you arrive at the great junction            <lineannotation>Multiline room description</lineannotation>
+of roads, the central point in Ruia. Here, 3 roads come together.
+To the south, the road to Southaven. To the north, the road to Gailen and
+Castle Pakthan. To the east, you see the Warriors School.
+~                                                                               <lineannotation>Separator</lineannotation>
+0 0 500 3
+D 101 3 0 0
+E sign                                                                          <lineannotation>Extra description "sign"</lineannotation>
+The sign says 'Southaven south'.                                                <lineannotation>Multiline extra description</lineannotation>
+~                                                                               <lineannotation>Separator</lineannotation>
+S
+#101
+Southaven Road
+This road is one of the main roads leading through Ruia. It takes you
+from the junction to Southaven or back. The road is paved well and
+walking on this road is pleasant.
+~
+0 0 500 3
+D 100 1 0 0
+D 102 3 0 0
+S
+#102
+Southaven Central Square
+The beautiful fountain built on the square shows the welfare of the city.
+Numerous little drops burst out of the fountain, falling down till they
+hit the little pool of water. Many people come here to sit and eat or talk.
+To the north, you see some shops. To the east, you see the bank. To the
+west you see the town hall. To the south, you can continue to the docks.
+~
+0 0 500 2
+D 101 1 0 0
+S
+#END
+
+#MOBILES
+#100
+Syra
+Syra is here
+Syra, protectress of Southaven, patrols for danger
+800 1
+15 521 0 0 0
+skill: Burning Hands
+skill: Magic Missile
+skill: Slashing Weapons
+skill: Second Attack
+> give.cod
+#END
+
+#OBJECTS
+#100
+a fountain
+a sparkling fountain
+a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
+12 none none
+0 0 12 0
+0 4097 0
+#101
+a robe
+a stained robe
+a robe, cluttered with dirty stains, lies here
+1 body none
+0 2 2 0
+0 0 0
+A "" 0 { apply_max_hp 20 }
+#END
+
+#RESETS
+M 100 102 1
+G 101 100 0
+O 100 101 1
+#END
+
+$</screen>
+			</example>
+			</para>
+		</section>
+		<section id="building_tables">
+			<title>Tables, constants and structures</title>
+			<para>
+			<table id="table.areaflags">
+				<title>Area flags</title>
+				<tgroup cols='4'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>AREA_NORESET</entry>
+						<entry>Do not reset area</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>AREA_NOPC</entry>
+						<entry>No players allowed</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>AREA_PROTO</entry>
+						<entry>Prototype area</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.roomflags">
+				<title>Room flags</title>
+				<tgroup cols='4'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>	
+						<row>
+						<entry>ROOM_DARK</entry>
+						<entry>Total darkness</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>ROOM_DEATH</entry>
+						<entry>Deathtrap</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOMOB</entry>
+						<entry>Mobiles not allowed</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>ROOM_INDOORS</entry>
+						<entry>Indoors</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>ROOM_GOOD</entry>
+						<entry>Only good aligned players allowed</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>ROOM_EVIL</entry>
+						<entry>Only evil aligned players allowed</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOCAST</entry>
+						<entry>Using magic not allowed</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>ROOM_TUNNEL</entry>
+						<entry>Tunnel (could cause problems for larger sized characters)</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>ROOM_PRIVATE</entry>
+						<entry>Only one character at a time</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>ROOM_SAFE</entry>
+						<entry>Fighting not allowed</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>ROOM_SOLITARY</entry>
+						<entry>??</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>ROOM_NORECALL</entry>
+						<entry>Recall spell not allowed</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>ROOM_NODROPALL</entry>
+						<entry>??</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOSUMMON</entry>
+						<entry>Summon spell not allowed</entry>
+						<entry>BV13</entry>
+						<entry>8192</entry>
+						</row>
+						<row>
+						<entry>ROOM_CLANSTORE</entry>
+						<entry>Clan store</entry>
+						<entry>BV14</entry>
+						<entry>16384</entry>
+						</row>
+						<row>
+						<entry>ROOM_TELEPORT</entry>
+						<entry>Teleport</entry>
+						<entry>BV15</entry>
+						<entry>32768</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOFLOOR</entry>
+						<entry>No floor</entry>
+						<entry>BV16</entry>
+						<entry>65536</entry>
+						</row>
+						<row>
+						<entry>ROOM_MANAROOM</entry>
+						<entry>Accelerated mana replenishment</entry>
+						<entry>BV17</entry>
+						<entry>131072</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOTRADE</entry>
+						<entry>Trading not allowed</entry>
+						<entry>BV18</entry>
+						<entry>262144</entry>
+						</row>
+						<row>
+						<entry>ROOM_PROTO</entry>
+						<entry>Prototype room</entry>
+						<entry>BV31</entry>
+						<entry>2147483648</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>					
+			</para>
+		</section>
+	</section>
+</article>
