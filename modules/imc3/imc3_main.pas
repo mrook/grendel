@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.4 2003/10/03 18:06:25 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.5 2003/10/09 14:55:04 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -119,15 +119,14 @@ end;
 
 initialization
   i3 := GInterMud.Create(1);
-  registerCommand('do_i3', do_i3);
+	i3.FreeOnTerminate := true;
+	registerCommand('do_i3', do_i3);
 
 finalization
   unregisterCommand('do_i3');
 	i3.Terminate();
 
-	{ Give thread a chance to stop }
-	Sleep(10);
-
-	i3.Free();
+	{ Give thread a chance to terminate and free }
+	Sleep(100);
 
 end.
