@@ -22,7 +22,8 @@ type GCleanThread = class(TThread)
        procedure StopMud;
        procedure BootMsg;
        procedure AutoSave;
-       procedure SyncProc;
+       procedure SyncWrite;
+       procedure SyncHalt;
        procedure SyncWritelog(s:string);
        procedure Execute; override;
 
@@ -51,15 +52,20 @@ begin
   freeonterminate := true;
 end;
 
-procedure GCleanThread.SyncProc;
+procedure GCleanThread.SyncWrite;
 begin
   write_console(t_log);
+end;
+
+procedure GCleanThread.SyncHalt;
+begin
+  halt;
 end;
 
 procedure GCleanThread.SyncWritelog(s:string);
 begin
   t_log:=s;
-  Synchronize(SyncProc);
+  Synchronize(SyncWrite);
 end;
 
 procedure GCleanThread.SetMessage(msg:integer);
@@ -101,9 +107,10 @@ begin
                       to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                       end;
   end;
-  boot_type:=boot_info.boot_type;
-  grace_exit:=true;
-  halt;
+  boot_type := boot_info.boot_type;
+  grace_exit := true;
+
+  Synchronize(SyncHalt);
 end;
 
 procedure GCleanThread.AutoSave;
@@ -129,7 +136,6 @@ end;
 procedure GCleanThread.Execute;
 var msg:TMsg;
 begin
-  freeonterminate:=true;
   repeat
     if (t_message>0) then
       begin
