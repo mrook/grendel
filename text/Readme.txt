@@ -7,38 +7,14 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 1. Introduction
 
-Development is going great, here's 0.3.5 already!
+This is a release candidate for Grendel 0.4.0. It has the basic functionality 
+0.4.0 will have (with named affects), and requires a lot of testing.
 
-The biggest changes since 0.3.4:
-  - some additions were made to the OLC system by Xenon,
-    namely an overhead map display and a number of bug fixes
-  - spamming/auto-login now works correctly
-  - new affects system, very generic, very spiffy,
-    supports about everything but toasting your
-    morning sandwhich
-  - added some nice drunken speech code provided by Nemesis
-  - restructured the cleaning & timing threads - code
-    is where it belongs now, and the cleaning thread
-    is now acting as a watchdog for the timer & client
-    threads - should the timer thread blow up, it'll
-    try to repair things and restart it, should a client thread
-    crash, the clean thread will disconnect the player
-    and kill the offending thread.
-    Testing shows that this feature increases stability
-    and uptime greatly, something we all want in a server.
-  - support for ITEM_LIGHT was added, as well as a 'holylight'
-  - added dynamic prompts, users can define their own prompt now
-  - changed the internal representation of skills quite a bit,
-    the fixed array indexing is completely gone.
-  - numerous bugfixes: re-enabled host lookups (only for ipv4
-    for the time being), fixed a number of crash bugs, fixed 
-    the lack of kill xp, some fixes to freeze/silence, and a number 
-    of other small things.
-  - a noteboard system by Nemesis, check the files in boards\,
-    the 'board' and the 'note' command.
-  - a hideously cool namegenerator by Xenon; it creates a list of
-    names through a number of phonetic templates. Check 'namegen'.
-  - a version of the popular 'AT' command (again by Xenon)
+The final 0.4.0 release will appear in one or two weeks, depending on any
+last-minute bugs and peculiarities popping up.
+
+You can help me by testing this release candiditate, reporting any oddities 
+you find back to us.
 
 A small note about the directory structure:
 
@@ -48,34 +24,7 @@ As of this release, a standard immortal character, 'Grendel', is included
 which can be used as a starting point for your own immortal(s).
 
 
-2. The new affects system
-
-Release 0.3.5 sports an exciting new affects handling system, for
-spells, skills, objects (heck, and maybe even more if I can find
-the imagination).
-
-An affect consists of an apply type, a modifier, and a duration.
-
-At the moment, the following apply types are supported:
-
-  APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
-  APPLY_HP, APPLY_MAX_HP, APPLY_MV, APPLY_MAX_MV, APPLY_MANA, APPLY_MAX_MANA,
-  APPLY_AC, APPLY_APB, APPLY_AFFECT, APPLY_REMOVE,
-  APPLY_STRIPSPELL, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE
-
-The modifier is specific to the apply type used, for example, when you use
-APPLY_INT, the modifier reflects the amount of intelligence gained (or lost)
-through this affect, whereas with APPLY_AFFECT, the modifier is one of the
-AFF_ flags found in constants.pas (or the manual).
-
-For spells/skills, the syntax is "affects: <apply type> <modifier> <duration>",
-for objects, the syntax is "A <apply type> <modifier> <duration>".
-
-Check the areas and system\skills.dat for examples on objects and spells,
-respectively.
-
-
-3. Features
+2. Features
 
 Grendel requires Winsock2 to be installed. Windows 98, Me, NT4 and 2000
 all come with this preinstalled, Windows 95 users will have to download
@@ -105,18 +54,16 @@ an update from the Microsoft site.
   - OLC support: design and builds your area without leaving the MUD!
 
 
-4. The team
-
-Oscar Martin has temporarily left us, due to personal reasons.
+3. The team
 
   Michiel Rook                (Grimlord)		manager, website, code
-  Hemko de Visser	      (Nemesis)			code, field testing
-  Roeland van Houte           (Xenon)			code
-  Jeremiah Davis              (Woodstock)  		documentation
-  Oscar Martin (inactive)     (Jago)			code
+  Hemko de Visser	            (Nemesis)			code, field testing
+  Roeland van Houte           (Xenon)			  code
+  Jeremiah Davis              (Woodstock)  	documentation
+  Oscar Martin                (Jago)			  code
 
 
-5. Compiling & running
+4. Compiling & running
 
 The executable comes with the zipfile, but if you wish to (re)compile grendel.exe,
 use the compile.bat file, located in the root dir. You can ofcourse also use
@@ -126,7 +73,7 @@ After that, simply type 'grendel' and hit ENTER. Grendel defaults to port 4444,
 so get a telnet client and connect.
 
 
-6. Copyover
+5. Copyover
 
 Grendel sports a neat copyover system, which I think is relatively uncommon on
 Win32 servers. The copyover procedure also supports copying a new grendel executable
@@ -139,6 +86,33 @@ other scripts in the distribution, so your best shot would be to keep it that wa
 The copyover system is very itchy, which means that if *anything* goes wrong,
 it immediately dumps everything and starts a normal reboot instead - there shouldn't
 be any endless loops.
+
+
+6. The new affects system
+
+Since release 0.3.5 Grendel sports an exciting new affects handling system, for
+spells, skills, objects (heck, and maybe even more if I can find
+the imagination).
+
+An affect consists of an apply type, a modifier, and a duration.
+
+At the moment, the following apply types are supported:
+
+  APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
+  APPLY_HP, APPLY_MAX_HP, APPLY_MV, APPLY_MAX_MV, APPLY_MANA, APPLY_MAX_MANA,
+  APPLY_AC, APPLY_APB, APPLY_AFFECT, APPLY_REMOVE,
+  APPLY_STRIPSPELL, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE
+
+The modifier is specific to the apply type used, for example, when you use
+APPLY_INT, the modifier reflects the amount of intelligence gained (or lost)
+through this affect, whereas with APPLY_AFFECT, the modifier is one of the
+AFF_ flags found in constants.pas (or the manual).
+
+For spells/skills, the syntax is "affects: <apply type> <modifier> <duration>",
+for objects, the syntax is "A <apply type> <modifier> <duration>".
+
+Check the areas and system\skills.dat for examples on objects and spells,
+respectively.
 
 
 7. Known problems
