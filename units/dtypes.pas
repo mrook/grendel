@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.19 2001/07/14 13:26:18 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.20 2001/07/30 11:13:46 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -197,7 +197,7 @@ begin
 
   if (hasNext()) then
     begin
-    Result := current;
+    Result := current.element;
 
     current := current.next;
     end;
@@ -217,7 +217,7 @@ begin
     begin
     if (tbl.bucketlist[cursor].head <> nil) then
       current := tbl.bucketList[cursor].head;
-
+      
     inc(cursor);
     end;
 end;
@@ -233,7 +233,7 @@ begin
 
   if (hasNext()) then
     begin
-    Result := current;
+    Result := GHashValue(current.element).value;
 
     current := current.next;
 
