@@ -57,7 +57,7 @@ begin
 
 		if (debugLevel = 0) then
 			begin
-			consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
+			consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', timestamp) + '] ' + text);
 			Application.ProcessMessages();
 			end;
 	except
