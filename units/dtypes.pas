@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.31 2003/10/15 13:46:53 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.32 2003/10/22 13:11:57 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -11,8 +11,7 @@ interface
 
 uses
     Variants,
-    SysUtils,
-    SyncObjs;
+    SysUtils;
 
 type
 		{
@@ -59,37 +58,43 @@ type
 		end;
 
 		{
+			Base class for list nodes
+		}
+    GListNode = class
+    private
+      _prev : GListNode; 				{ Pointer to previous node in list }
+      _next : GListNode;					{ Pointer to next node in list }
+      _element : TObject;				{ Pointer to element }
+
+		published
+      constructor Create(e : pointer; p, n : GListNode);
+      
+      property prev : GListNode read _prev write _prev;
+      property next : GListNode read _next write _next;
+      property element : TObject read _element write _element;
+    end;
+
+		{
 			Abstract base class for iterators
 		}
     GIterator = class
+    published
     	function getCurrent() : TObject; virtual; abstract;	{ Abstract getCurrent() }
       function hasNext() : boolean; virtual; abstract;		{ Abstract hasNext() }
       function next() : TObject; virtual; abstract;				{ Abstract next() }
     end;
-
-		{
-			Base class for list nodes
-		}
-    GListNode = class
-      prev : GListNode; 				{ Pointer to previous node in list }
-      next : GListNode;					{ Pointer to next node in list }
-      element : pointer;				{ Pointer to element }
-
-      constructor Create(e : pointer; p, n : GListNode);
-    end;
-
+    
 		{
 			Doubled linked list
 		}
     GDLinkedList = class
    	private
-      size : integer;						
-      serial : integer;
+      _size : integer;						
+      _serial : integer;
+      _head : GListNode;					{ Pointer to head of list }
+      _tail : GListnode;					{ Pointer to tail of list }
 
 		published
-      head : GListNode;					{ Pointer to head of list }
-      tail : GListnode;					{ Pointer to tail of list }
-
       function insertLast(element : pointer) : GListNode;
       function insertAfter(tn : GListNode; element : pointer) : GListNode;
       function insertBefore(tn : GListNode; element : pointer) : GListNode;
@@ -97,12 +102,15 @@ type
       procedure clean();
       procedure smallClean();
 
-      function getSize() : integer;
+      function size() : integer;
 
       function iterator() : GIterator;
 
-      constructor Create;
-      destructor Destroy; override;
+      constructor Create();
+      destructor Destroy(); override;
+      
+      property head : GListNode read _head;
+      property tail : GListNode read _tail;
     end;
 
 		{
@@ -119,9 +127,20 @@ type
 			Container for hash elements
 		}
     GHashValue = class
-      key : variant;				{ Hash key }
-      value : TObject;			{ Element }
-      refcount : integer;		{ Reference count }
+    private
+      _key : variant;				{ Hash key }
+      _refcount : integer;		{ Reference count }
+      _value : TObject;			{ Element }
+      
+    published
+    	constructor Create(key : variant; value : TObject);
+    	
+    	procedure addRef();
+    	procedure release();
+    	
+    	property key : variant read _key;
+    	property refcount : integer read _refcount;
+    	property value : TObject read _value;
     end;
 
     {
@@ -130,22 +149,21 @@ type
     GHashTable = class
     private
       hashprime : cardinal;
-
-      hashFunc : GHASH_FUNC;
-      
-    public
       hashsize : cardinal;										{ Size of hash table }
       bucketList : array of GDLinkedList;			{ Array of double linked lists }
+      hashFunc : GHASH_FUNC;
+      
+    	function getBucket(index : integer) : GDLinkedList;
+      function _get(key : variant) : GHashValue;
+      function findPrimes(n : integer) : GPrimes;
 
 		published
       procedure clear();
 
       function isEmpty() : boolean;
-      function getSize() : integer;
+      function size() : integer;
 
       function iterator() : GIterator;
-
-      function _get(key : variant) : GHashValue;
 
       function get(key : variant) : TObject;
       procedure put(key : variant; value : TObject);
@@ -153,16 +171,16 @@ type
 
       function getHash(key : variant) : cardinal;
       procedure setHashFunc(func : GHASH_FUNC);
-      function findPrimes(n : integer) : GPrimes;
 
       procedure hashStats(); virtual;
 
       constructor Create(size : integer);
-      destructor Destroy; override;
+      destructor Destroy(); override;
       
     public
       property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
-    end;
+      property buckets[index : integer] : GDLinkedList read getBucket;
+    end;   
 
 
 {
@@ -432,23 +450,23 @@ end;
 	Summary:
 		GDLinkedList constructor
 }
-constructor GDLinkedList.Create;
+constructor GDLinkedList.Create();
 begin
   inherited Create;
 
-  head := nil;
-  tail := nil;
-  size := 0;
-  serial := 1;
+  _head := nil;
+  _tail := nil;
+  _size := 0;
+  _serial := 1;
 end;
 
 {
 	Summary:
 		GDLinkedList destructor
 }
-destructor GDLinkedList.Destroy;
+destructor GDLinkedList.Destroy();
 begin
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 {
@@ -462,16 +480,16 @@ begin
 	node := GListNode.Create(element, tail, nil);
 
 	if (head = nil) then
-		head := node
+		_head := node
 	else
-		tail.next := node;
+		_tail.next := node;
 
-	tail := node;
+	_tail := node;
 
 	insertLast := node;
 
-	inc(size);
-	inc(serial);
+	inc(_size);
+	inc(_serial);
 end;
 
 {
@@ -489,13 +507,13 @@ begin
 
 	tn.next := node;
 
-	if (tail = tn) then
-		tail := node;
+	if (_tail = tn) then
+		_tail := node;
 
 	insertAfter := node;
 
-	inc(serial);
-	inc(size);
+	inc(_size);
+	inc(_serial);
 end;
 
 {
@@ -514,12 +532,12 @@ begin
 	tn.prev := node;
 
 	if (head = tn) then
-		head := node;
+		_head := node;
 
 	insertBefore := node;
 
-	inc(serial);
-	inc(size);
+	inc(_size);
+	inc(_serial);
 end;
 
 {
@@ -529,17 +547,17 @@ end;
 procedure GDLinkedList.remove(node : GListNode);
 begin
 	if (node.prev = nil) then
-		head := node.next
+		_head := node.next
 	else
 		node.prev.next := node.next;
 
 	if (node.next = nil) then
-		tail := node.prev
+		_tail := node.prev
 	else
 		node.next.prev := node.prev;
 
-	dec(size);
-	inc(serial);
+	dec(_size);
+	inc(_serial);
 	node.Free();
 end;
 
@@ -547,22 +565,22 @@ end;
 	Summary:
 		Get size of list
 }
-function GDLinkedList.getSize() : integer;
+function GDLinkedList.size() : integer;
 begin
-  Result := size;
+  Result := _size;
 end;
 
 {
 	Summary:
 		Clean up list (remove/free elements, remove nodes)
 }
-procedure GDLinkedList.clean;
+procedure GDLinkedList.clean();
 var
    node : GListNode;
 begin
   while (true) do
     begin
-    node := tail;
+    node := _tail;
 
     if (node = nil) then
       exit;
@@ -577,13 +595,13 @@ end;
 	Summary:
 		Clean up list (remove elements, remove nodes)
 }
-procedure GDLinkedList.smallClean;
+procedure GDLinkedList.smallClean();
 var
    node : GListNode;
 begin
   while (true) do
     begin
-    node := head;
+    node := _head;
 
     if (node = nil) then
       exit;
@@ -716,6 +734,37 @@ end;
 
 {
 	Summary:
+		GHashValue constructor
+}
+constructor GHashValue.Create(key : variant; value : TObject);
+begin
+	inherited Create();
+	
+	_key := key;
+	_value := value;
+	_refcount := 1;
+end;
+
+{
+	Summary:
+		Increases the reference count by one
+}
+procedure GHashValue.addRef();
+begin
+	inc(_refcount);
+end;
+
+{
+	Summary:
+		Decreases the reference count by one
+}
+procedure GHashValue.release();
+begin
+	dec(_refcount);
+end;
+
+{
+	Summary:
 		Get hash-value for a key
 	
 	Remarks:
@@ -746,6 +795,18 @@ end;
 
 {
 	Summary:
+		Retrieves bucket at given index
+}
+function GHashTable.getBucket(index : integer) : GDLinkedList;
+begin
+	if (index < 0) or (index >= sizeof(bucketList)) then
+		Result := nil
+	else
+		Result := bucketList[index];
+end;
+
+{
+	Summary:
 		Get hash object corresponding with key
 }
 function GHashTable._get(key : variant) : GHashValue;
@@ -762,7 +823,7 @@ begin
     begin
     if (GHashValue(node.element).key = key) then
       begin
-      Result := node.element;
+      Result := GHashValue(node.element);
       break;
       end;
 
@@ -799,16 +860,13 @@ begin
 
   if (hv <> nil) then
     begin
-    inc(hv.refcount);
+    hv.addRef();
     end
   else
     begin
     hash := getHash(key);
 
-    hv := GHashValue.Create;
-    hv.refcount := 1;
-    hv.key := key;
-    hv.value := value;
+    hv := GHashValue.Create(key, value);
 
     bucketList[hash].insertLast(hv);
     end;
@@ -847,7 +905,7 @@ end;
 	Summary:
 		Get size of hash table
 }
-function GHashTable.getSize() : integer;
+function GHashTable.size() : integer;
 var
    i : integer;
    total : integer;
@@ -856,7 +914,7 @@ begin
 
   for i := 0 to hashsize - 1 do
     begin
-    total := total + bucketList[i].getSize();
+    total := total + bucketList[i].size();
     end;
 
   Result := total;
@@ -868,7 +926,7 @@ end;
 }
 function GHashTable.isEmpty() : boolean;
 begin
-  Result := getSize() = 0;
+  Result := size() = 0;
 end;
 
 {
@@ -888,12 +946,12 @@ begin
 
   for i := 0 to hashsize - 1 do
     begin
-    total := total + bucketList[i].getSize;
+    total := total + bucketList[i].size();
 
-    if (bucketList[i].getSize < min) then
-      min := bucketList[i].getSize;
-    if (bucketList[i].getSize > max) then
-      max := bucketList[i].getSize;
+    if (bucketList[i].size() < min) then
+      min := bucketList[i].size();
+    if (bucketList[i].size() > max) then
+      max := bucketList[i].size();
     end;
 
   load := total / hashsize;
@@ -985,7 +1043,7 @@ begin
   if (hv <> nil) then
     begin
     hash_string := @GString(hv.value).value;
-    inc(hv.refcount);
+    hv.addRef();
     end
   else
     begin
@@ -1011,7 +1069,7 @@ begin
   if (hv <> nil) then
     begin
     hash_string := @GString(hv.value).value;
-    inc(hv.refcount);
+    hv.addRef();
     end
   else
     begin
@@ -1038,7 +1096,7 @@ begin
 
   if (hv <> nil) then
     begin
-    dec(hv.refcount);
+    hv.release();
 
     if (hv.refcount <= 0) then
       begin
