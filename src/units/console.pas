@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.11 2004/04/03 16:08:41 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.12 2004/04/04 14:25:29 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -37,7 +37,6 @@ type
 	private
 		writers : GDLinkedList;
 		history : GDLinkedList;
-		queue : GDLinkedList;
 		
 		synchronizer : TMultiReadExclusiveWriteSynchronizer;
 
@@ -47,7 +46,6 @@ type
 
 	published
 		procedure write(const text : string; debugLevel : integer = 0);
-		procedure poll();
 
 		procedure attachWriter(writer : GConsoleWriter);
 		procedure detachWriter(writer : GConsoleWriter);
@@ -57,7 +55,6 @@ type
 
   
 procedure writeConsole(const text : string; debugLevel : integer = 0);
-procedure pollConsole();
 
 
 implementation
@@ -95,7 +92,6 @@ constructor GConsole.ActualCreate();
 begin
 	writers := GDLinkedList.Create();
 	history := GDLinkedList.Create();
-	queue := GDLinkedList.Create();
 	
 	synchronizer := TMultiReadExclusiveWriteSynchronizer.Create();
 end;
@@ -105,11 +101,9 @@ destructor GConsole.ActualDestroy();
 begin
 	writers.clear();
 	history.clear();
-	queue.clear();
 	
 	writers.Free();
 	history.Free();
-	queue.Free();
 	
 	synchronizer.Free();
 end;
@@ -130,76 +124,39 @@ end;
 procedure GConsole.write(const text : string; debugLevel : integer = 0);
 var
 	he : GConsoleHistoryElement;
+	iterator : GIterator;
+	writer : GConsoleWriter;	
 begin
 	// lock write
 	synchronizer.BeginWrite();
 	
 	try
+		if (history.size() >= CONSOLE_HISTORY_MAX) then
+			begin
+			he := GConsoleHistoryElement(history.head.element);
+			history.remove(history.head);
+			he.Free();
+			end;
+
 		he := GConsoleHistoryElement.Create();
 		he.timestamp := Now();
 		he.text := text;
 		he.debugLevel := debugLevel;
-		queue.add(he);
-	finally
-		// unlock write
-		synchronizer.EndWrite();
-	end;
-end;
+		history.add(he);
 
-{ Poll the console }
-procedure GConsole.poll();
-var
-	he, he_hist : GConsoleHistoryElement;
-	queue_iterator, iterator : GIterator;
-	writer : GConsoleWriter;
-begin
-	// lock read
-	synchronizer.BeginRead();
+		iterator := writers.iterator();
 
-	try
-		queue_iterator := queue.iterator();
-
-		while (queue_iterator.hasNext()) do
+		while (iterator.hasNext()) do
 			begin
-			he := GConsoleHistoryElement(queue_iterator.next());
+			writer := GConsoleWriter(iterator.next());
 
-			he_hist := GConsoleHistoryElement.Create();
-			he_hist.timestamp := he.timestamp;
-			he_hist.text := he.text;
-			he_hist.debugLevel := he.debugLevel;
-			history.add(he_hist);
+			writer.write(he.timestamp, he.text, he.debugLevel);
+			end;    
 
-			if (history.size() > CONSOLE_HISTORY_MAX) then
-				begin
-				he_hist := GConsoleHistoryElement(history.head.element);
-				history.remove(history.head);
-				he_hist.Free();
-				end;
-
-			iterator := writers.iterator();
-
-			while (iterator.hasNext()) do
-				begin
-				writer := GConsoleWriter(iterator.next());
-
-				writer.write(he.timestamp, he.text, he.debugLevel);
-				end;    
-
-			iterator.Free();	
-			end;
-
-		queue_iterator.Free();
-	
-		// lock write
-		synchronizer.BeginWrite();
-	
-		queue.clear();
+		iterator.Free();	
 	finally
 		// unlock write
 		synchronizer.EndWrite();
-
-		// unlock read
-		synchronizer.EndRead();
 	end;
 end;
 
@@ -239,11 +196,6 @@ end;
 procedure writeConsole(const text : string; debugLevel : integer = 0);
 begin
 	cons.write(text, debugLevel);
-end;
-
-procedure pollConsole();
-begin
-	cons.poll();
 end;
 
 

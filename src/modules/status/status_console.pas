@@ -7,13 +7,14 @@ implementation
 
 {$IFNDEF CONSOLEBUILD}
 uses
+	Classes,
 	Windows,
 	StdCtrls,
+	ExtCtrls,
 	SysUtils,
 	Graphics,
 	Forms,
 	console,
-	debug,
 	modules,
 	constants,
 	systray;
@@ -26,6 +27,8 @@ type
 	end;
 
 	GConsoleModule = class(TInterfacedObject, IModuleInterface)
+	private
+		procedure handleOnTimer(Sender : TObject);
 	public
 		procedure registerModule();
 		procedure unregisterModule();
@@ -33,9 +36,11 @@ type
 
   
 var
+	consoleQueue : TStringList;
 	consoleForm : TForm;
 	consoleMemo : TMemo;
 	consoleFont : TFont;
+	consoleTimer : TTimer;
 	consoleDriver : GConsoleWindowWriter;
   
 
@@ -51,18 +56,20 @@ end;
 
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
-	try
-		if (consoleMemo = nil) then
-			exit;
+	consoleQueue.add('[' + FormatDateTime('hh:nn', timestamp) + '] ' + text);
+end;
 
-		if (debugLevel = 0) then
-			begin
-			consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', timestamp) + '] ' + text);
-			Application.ProcessMessages();
-			end;
-	except
-		on E : Exception do reportException(E);
-	end;
+procedure GConsoleModule.handleOnTimer(Sender: TObject);
+var
+	idx : integer;
+begin
+	for idx := 0 to consoleQueue.Count - 1 do
+		begin
+		consoleMemo.Lines.Add(consoleQueue[idx]);
+		end;
+		
+	Application.ProcessMessages();
+	consoleQueue.Clear();
 end;
 
 procedure GConsoleModule.registerModule();
@@ -91,9 +98,17 @@ begin
 	consoleMemo.ReadOnly := True;
 	consoleMemo.WordWrap := false;
 	consoleMemo.Font := consoleFont;
+	
+	consoleTimer := TTimer.Create(consoleForm);
+	consoleTimer.Interval := 250;
+	consoleTimer.OnTimer := handleOnTimer;
+
+	consoleQueue := TStringList.Create();
+	consoleQueue.Duplicates := dupAccept;
+	consoleQueue.Sorted := false;
 
 	consoleDriver := GConsoleWindowWriter.Create();
-
+	
 	registerMenuItem('Show console', showConsoleProc);
 
 	console := GConsole.Create();
@@ -106,6 +121,8 @@ procedure GConsoleModule.unregisterModule();
 var
 	console : GConsole;
 begin
+	consoleTimer.Enabled := false;
+	
 	console := GConsole.Create();
 	console.detachWriter(consoleDriver);
 	console.Free();
@@ -115,6 +132,8 @@ begin
 	unregisterMenuItem('Show console');
 
 	consoleDriver.Free();
+	
+	consoleQueue.Free();
 end;
 
 
