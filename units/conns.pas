@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.44 2003/10/15 21:08:43 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.45 2003/10/15 22:38:00 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -27,6 +27,16 @@ uses
     console,
     mudsystem;
 
+const
+		IAC_COMPRESS = 85;		// MCCP v1
+		IAC_COMPRESS2 = 86;		// MCCP v2
+		IAC_SE = 240;
+		IAC_SB = 250;
+		IAC_WILL = 251;
+		IAC_WONT = 252;
+		IAC_DO = 253;
+		IAC_DONT = 254;
+		IAC_IAC = 255;
 
 type
     GConnection = class
@@ -52,6 +62,7 @@ type
 
       procedure send(s : string);
       procedure read();
+      procedure sendIAC(option : byte; params : array of byte);
       procedure processIAC();
       procedure readBuffer();
 
@@ -104,6 +115,8 @@ begin
   afk := false;
 
   node := connection_list.insertLast(Self);
+  
+  sendIAC(IAC_WILL, [IAC_COMPRESS2]);
 end;
 
 destructor GConnection.Destroy;
@@ -140,7 +153,7 @@ begin
     try
       thread.terminate;
     except
-      writeConsole('could not terminate thread');
+			writeConsole('(' + IntToStr(sock.getDescriptor) + ') could not terminate thread');
     end;
   end;
   
@@ -162,7 +175,7 @@ begin
       try
         thread.terminate;
       except
-        writeConsole('could not terminate thread');
+          writeConsole('(' + IntToStr(sock.getDescriptor) + ') could not terminate thread');
       end;
 
       exit;
@@ -180,7 +193,7 @@ begin
         try
           thread.terminate;
         except
-          writeConsole('could not terminate thread');
+          writeConsole('(' + IntToStr(sock.getDescriptor) + ') could not terminate thread');
         end;
 
         exit;
@@ -190,6 +203,22 @@ begin
 {$ENDIF}      
       end;
   until false;
+end;
+
+procedure GConnection.sendIAC(option : byte; params : array of byte);
+var
+	buf : array[0..255] of char;
+	i : integer;
+begin
+	buf[0] := chr(IAC_IAC);
+	buf[1] := chr(option);
+	
+	for i := 0 to length(params) - 1 do
+		buf[2 + i] := chr(params[i]);
+  	
+	while (not sock.canWrite()) do;
+  	
+  sock.send(buf, 2 + length(params));
 end;
 
 procedure GConnection.processIAC();
@@ -207,30 +236,36 @@ begin
     if (iac) then
     	begin
     	case byte(input_buf[i]) of
-    		251: 	begin
-    					inc(i);
-    					//writeConsole('IAC WILL ' + IntToStr(byte(input_buf[i])));
-    					end;
-    		252: 	begin
-    					inc(i);
-    					//writeConsole('IAC WON''T ' + IntToStr(byte(input_buf[i])));
-    					end;
-    		253: 	begin
-    					inc(i);
-    					//writeConsole('IAC DO ' + IntToStr(byte(input_buf[i])));
-    					end;
-    		254: 	begin
-    					inc(i);
-    					//writeConsole('IAC DON''T ' + IntToStr(byte(input_buf[i])));
-    					end;
-    	else
-	    	//writeConsole('IAC ' + IntToStr(byte(input_buf[i])));
+    		IAC_WILL: 	begin
+										inc(i);
+    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC WILL ' + IntToStr(byte(input_buf[i])));
+			    					end;
+    		IAC_WONT: 	begin
+										inc(i);
+    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC WON''T ' + IntToStr(byte(input_buf[i])));
+										end;
+    		IAC_DO: 		begin
+										inc(i);
+    								case byte(input_buf[i]) of
+    									IAC_COMPRESS2:	begin
+    																	writeConsole('(' + IntToStr(sock.getDescriptor) + ') Client has MCCPv2');
+    																	end;
+    								end;
+    								
+    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC DO ' + IntToStr(byte(input_buf[i])));
+										end;
+    		IAC_DONT: 	begin
+										inc(i);
+    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC DON''T ' + IntToStr(byte(input_buf[i])));
+										end;
+			else
+	    	writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC ' + IntToStr(byte(input_buf[i])));
     	end;     	
     	
     	iac := false;
     	end    	
     else
-    if (input_buf[i] = #255) then		// IAC
+    if (byte(input_buf[i]) = IAC_IAC) then		// IAC
     	begin
     	iac := true;
     	end
