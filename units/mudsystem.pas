@@ -422,6 +422,8 @@ begin
     end;
 end;
 
+{ Xenon 19/Feb/2001 :   - added socials on objects
+                        - added checks on social-strings (if empty, ignore) to fix odd behaviour i noticed }
 function checkSocial(c : pointer; cmd, param : string) : boolean;
 var social : GSocial;
     chance : integer;
@@ -441,17 +443,16 @@ begin
   with social do
     begin
     vict := ch.room.findChar(ch, param);
-
     obj := ch.room.findObject(param);
     if (obj = nil) then
       obj := ch.findEquipment(param);
     if (obj = nil) then
       obj := ch.findInventory(param);
 
-    if (length(param)=0) then
+    if (length(param)=0) then   // no victim, e.g. 'lick'
       begin
       if (length(char_no_arg) = 0) then
-        act(AT_SOCIAL,' ',false,ch,nil,vict,TO_CHAR)
+        ch.sendBuffer(' ')
       else
         act(AT_SOCIAL,char_no_arg,false,ch,nil,vict,TO_CHAR);
 
@@ -459,34 +460,36 @@ begin
         act(AT_SOCIAL,others_no_arg,false,ch,nil,vict,TO_ROOM);
       end
     else
-    if (vict = ch) then
+    if vict=ch then             // victim yourself, e.g. 'lick self'
       begin
-      act(AT_SOCIAL,char_auto,false,ch,nil,vict,TO_CHAR);
-      act(AT_SOCIAL,others_auto,false,ch,nil,vict,TO_ROOM);
+      if (length(char_auto) = 0) then
+        ch.sendBuffer(' ')
+      else
+        act(AT_SOCIAL,char_auto,false,ch,nil,vict,TO_CHAR);
+      if (length(others_auto) <> 0) then
+        act(AT_SOCIAL,others_auto,false,ch,nil,vict,TO_ROOM);
       end
     else
     if (obj <> nil) then        // victim is object, e.g. 'lick rapier'
       begin
       if (length(char_object) = 0) then
-        act(AT_SOCIAL,' ',false,ch,obj,nil,TO_CHAR)
+        ch.sendBuffer(' ')
       else
         act(AT_SOCIAL,char_object,false,ch,obj,nil,TO_CHAR);
       if (length(others_object) <> 0) then
         act(AT_SOCIAL,others_object,false,ch,obj,nil,TO_ROOM);
       end
     else
-    if (vict = nil) then
+    if vict=nil then            // victim not there, e.g. 'lick blablablabla'
       act(AT_SOCIAL,'They are not here.',false,ch,nil,nil,TO_CHAR)
     else
-      begin
+      begin                     // victim, e.g. 'lick grimlord'
       if (length(char_found) = 0) then
-        act(AT_SOCIAL,' ',false,ch,nil,vict,TO_CHAR)
+        ch.sendBuffer(' ')
       else
         act(AT_SOCIAL,char_found,false,ch,nil,vict,TO_CHAR);
-
       if (length(others_found) <> 0) then
         act(AT_SOCIAL,others_found,false,ch,nil,vict,TO_NOTVICT);
-
       if (length(vict_found) <> 0) then
         act(AT_SOCIAL,vict_found,false,ch,nil,vict,TO_VICT);
 
@@ -499,15 +502,14 @@ begin
           1,2,3,4,5,6:begin
                       if (length(vict_found) <> 0) then
                         act(AT_SOCIAL,vict_found,false,vict,nil,ch,TO_VICT);
-
                       if (length(others_found) <> 0) then
                         act(AT_SOCIAL,others_found,false,vict,nil,ch,TO_NOTVICT);
-
                       if (length(char_found) = 0) then
-                        act(AT_SOCIAL,' ',false,ch,nil,vict,TO_CHAR)
+                        ch.sendBuffer(' ')
                       else
-                        act(AT_SOCIAL,char_found,false,vict,nil,ch,TO_CHAR);                      end;
-                  7,8:begin
+                        act(AT_SOCIAL,char_found,false,vict,nil,ch,TO_CHAR);
+                      end;
+                  7,8:begin     // Xenon (19/Feb/2001) : kinda odd, this one ;)
                       interpret(vict,'say Cut it out!');
                       interpret(vict,'sigh');
                       end;
