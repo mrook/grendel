@@ -75,6 +75,7 @@ type
       played : TDateTime;
       wimpy : integer;
       aliases : GDLinkedList;
+      pracs : integer;
       bamfin, bamfout : string;
       taunt : string;
       // profession:PROF_DATA;
@@ -122,7 +123,6 @@ type
       kills : integer;
       wait : integer;
       learned : array[0..MAX_SKILLS-1] of integer;
-      wear : array[1..MAX_WEAR] of GObject;
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
       npc_index : GNPCIndex;
@@ -242,9 +242,6 @@ begin
   snooped_by := nil;
   leader := Self;
   tracking := '';
-
-  for h := 1 to MAX_WEAR do
-    wear[h] := nil;
 end;
 
 destructor GCharacter.Destroy;
@@ -262,15 +259,13 @@ begin
   affects.clean;
   affects.Free;
 
-  for s := 1 to MAX_WEAR do
-   if (wear[s] <> nil) then
-    wear[s].extract;
-
-  if (objects.head <> nil) then
+  if (objects.tail <> nil) then
     repeat
       obj := objects.tail.element;
       obj.extract;
-    until (objects.head = nil);
+    until (objects.tail = nil);
+
+  objects.Free;
 
   hunting := nil;
 
@@ -1079,15 +1074,20 @@ begin
             cost:=StrToInt(stripl(a,' '));
             a := striprbeg(a, ' ');
             count := strtointdef(stripl(a, ' '), 1);
+            if (count = 0) then
+              count := 1;
+
             room:=nil;
             end;
 
           obj.node_world := object_list.insertLast(obj);
 
-          if (strtoint(g) = -1) then
-            obj.toChar(Self)
-          else
-            wear[strtoint(g)] := obj;
+          obj.toChar(Self);
+
+          obj.wear_location := strtoint(g);
+
+          if (obj.wear_location < WEAR_NULL) then
+            obj.wear_location := WEAR_NULL;
           end;
       until (uppercase(g) = '#END') or (af.eof);
 
@@ -1291,7 +1291,7 @@ begin
     begin
     obj := node.element;
 
-    writeln(f,-1);
+    writeln(f, obj.wear_location);
 
     if (obj.obj_index <> nil) then
       writeln(f,obj.obj_index.vnum)
@@ -1308,22 +1308,6 @@ begin
     node := node.next;
     end;
 
-  for h:=1 to MAX_WEAR do
-   if wear[h]<>nil then
-    begin
-    obj:=wear[h];
-    writeln(f,h);
-    with obj do
-      begin
-      writeln(f,obj_index.vnum);
-      writeln(f,name);
-      writeln(f,short);
-      writeln(f,long);
-      writeln(f,item_type,' ',wear1,' ',wear2,' ');
-      writeln(f,value[1],' ',value[2],' ',value[3],' ',value[4]);
-      writeln(f,weight,' ',flags,' ',cost);
-      end;
-    end;
   writeln(f,'#END');
   writeln(f);
 
@@ -1620,11 +1604,25 @@ begin
 end;
 
 function GCharacter.getEQ(location : integer) : GObject;
+var
+   node : GListNode;
+   obj : GObject;
 begin
-  getEQ := nil;
+  Result := nil;
 
-  if (location >= 1) and (location <= MAX_WEAR) then
-    getEQ := wear[location];
+  node := objects.head;
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (obj.wear_location = location) then
+      begin
+      Result := obj;
+      break;
+      end;
+
+    node := node.next;
+    end;
 end;
 
 function GCharacter.getWield(item_type : integer) : GObject;
@@ -1724,19 +1722,19 @@ begin
     exit;
     end;
 
-  if (obj.wear1>0) and (wear[obj.wear1]=nil) then      { Wear on spot #1}
+  if (obj.wear1 > 0) and (getEQ(obj.wear1) = nil) then      { Wear on spot #1}
     begin
     act(AT_REPORT,'You wear $p ' + wr_string[obj.wear1, 1] + '.',false, Self, obj, nil, TO_CHAR);
     act(AT_REPORT,'$n wears $p ' + wr_string[obj.wear1, 2] + '.',false, Self, obj, nil, TO_ROOM);
-    wear[obj.wear1]:=obj;
+    obj.wear_location := obj.wear1;
     affectObject(obj, false);
     end
   else
-  if (obj.wear2>0) and (wear[obj.wear2]=nil) then      { Wear on spot #2}
+  if (obj.wear2 > 0) and (getEQ(obj.wear2) = nil) then      { Wear on spot #2}
     begin
     act(AT_REPORT,'You wear $p ' + wr_string[obj.wear2, 1] + '.',false, Self, obj, nil, TO_CHAR);
     act(AT_REPORT,'$n wears $p ' + wr_string[obj.wear2, 2] + '.',false, Self, obj, nil, TO_ROOM);
-    wear[obj.wear2]:=obj;
+    obj.wear_location := obj.wear2;
     affectObject(obj, false);
     end
   else                                              { No spots left }
@@ -1752,7 +1750,10 @@ begin
 end;
 
 procedure GCharacter.calcAC;
-var i,dex_mod:integer;
+var
+   i,dex_mod:integer;
+   node : GListNode;
+   obj : GObject;
 begin
   dex_mod := (ability.dex-50) div 12;
   point.hac := point.natural_ac - dex_mod - point.ac_mod;
@@ -1760,16 +1761,21 @@ begin
   point.aac := point.natural_ac - dex_mod - point.ac_mod;
   point.lac := point.natural_ac - dex_mod - point.ac_mod;
 
-  for i:=1 to MAX_WEAR do
-   if wear[i]<>nil then
-    with GObject(wear[i]) do
-    if item_type=ITEM_ARMOR then
-     case value[2] of
-       ARMOR_HAC : dec(point.hac,value[3]);
-       ARMOR_BAC : dec(point.bac,value[3]);
-       ARMOR_AAC : dec(point.aac,value[3]);
-       ARMOR_LAC : dec(point.lac,value[3]);
-     end;
+  node := objects.head;
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (obj.wear_location > WEAR_NULL) and (obj.item_type = ITEM_ARMOR) then
+      case obj.value[2] of
+        ARMOR_HAC : dec(point.hac, obj.value[3]);
+        ARMOR_BAC : dec(point.bac, obj.value[3]);
+        ARMOR_AAC : dec(point.aac, obj.value[3]);
+        ARMOR_LAC : dec(point.lac, obj.value[3]);
+      end;
+
+    node := node.next;
+    end;
 
   point.ac:=(point.hac+point.bac+point.aac+point.lac) div 4;
 end;
@@ -1867,7 +1873,7 @@ begin
     begin
     obj := node.element;
 
-    if (pos(s, obj.name) <> 0) or (pos(s, obj.short) <> 0) then
+    if (obj.wear_location = WEAR_NULL) and ((pos(s, obj.name) <> 0) or (pos(s, obj.short) <> 0)) then
       begin
       findInventory := obj;
       exit;
@@ -1888,7 +1894,7 @@ begin
 
   number := findNumber(name); // eg 2.char
 
-  if (comparestr(name, 'SELF') = 0) then
+  if (uppercase(name) = 'SELF') then
     begin
     findCharWorld := ch;
     exit;
@@ -1940,7 +1946,8 @@ begin
     end;
 end;
 
-begin
-  char_list := GDLinkedList.Create;
-  extracted_chars := GDLinkedList.Create;
+initialization
+char_list := GDLinkedList.Create;
+extracted_chars := GDLinkedList.Create;
+
 end.

@@ -51,6 +51,7 @@ type
       procedure load(fn : string);
 
       constructor Create;
+      destructor Destroy; override;
     end;
 
     GObjectValues = array[1..4] of integer;
@@ -80,6 +81,8 @@ type
 
       name, short, long : string;
 
+      wear_location : integer;
+
       flags : cardinal;
       item_type,wear1,wear2:integer;
       weight:integer;
@@ -106,6 +109,7 @@ type
       procedure seperate;
 
       constructor Create;
+      destructor Destroy; override;
     end;
 
     GExit = class
@@ -136,6 +140,8 @@ type
       area : GArea;
       clan : GClan;
       shop : GShop;
+
+      destructor Destroy; override;
     end;
 
     GReset = class
@@ -180,6 +186,7 @@ type
       function findExitKeyword(s : string) : GExit;
 
       constructor Create(vn : integer; ar : GArea);
+      destructor Destroy; override;
     end;
 
     GShop = class
@@ -225,6 +232,16 @@ uses
     progs,
     conns;
 
+
+// GNPCIndex
+destructor GNPCIndex.Destroy;
+begin
+  programs.clean;
+  programs.Destroy;
+  
+  inherited Destroy;
+end;
+
 // GArea
 constructor GArea.Create;
 begin
@@ -258,6 +275,14 @@ begin
     end;
 
   area_list.insertLast(Self);
+end;
+
+destructor GArea.Destroy;
+begin
+  resets.clean;
+  resets.Free;
+
+  inherited Destroy;
 end;
 
 procedure GArea.areaBug(func : string; problem : string);
@@ -391,8 +416,6 @@ begin
   s := af.readLine;
 
   repeat
-    npc := GNPCIndex.Create;
-
     while (pos('#',s) = 0) do
       s := af.readLine;
 
@@ -402,6 +425,8 @@ begin
     delete(s,1,1);
 
     try
+      npc := GNPCIndex.Create;
+      
       num := strtoint(s);
 
       npc.area := Self;
@@ -1441,6 +1466,21 @@ begin
   flags := 0;
 end;
 
+destructor GRoom.Destroy;
+begin
+  exits.clean;
+  chars.clean;
+  objects.clean;
+  tracks.clean;
+
+  exits.Free;
+  chars.Free;
+  objects.Free;
+  tracks.Free;
+  
+  inherited Destroy;
+end;
+
 function GRoom.findChar(c : pointer; name : string) : pointer;
 var
    node : GListNode;
@@ -1455,7 +1495,7 @@ begin
   name := uppercase(name);
   cnt := 0;
 
-  if (comparestr(name, 'SELF') = 0) then
+  if (uppercase(name) = 'SELF') then
     begin
     findChar := ch;
     exit;
@@ -1657,9 +1697,18 @@ constructor GObject.Create;
 begin
   inherited Create;
 
+  wear_location := WEAR_NULL;
   contents := GDLinkedList.Create;
   obj_index := nil;
   count := 1;
+end;
+
+destructor GObject.Destroy;
+begin
+  contents.clean;
+  contents.Free;
+  
+  inherited Destroy;
 end;
 
 procedure GObject.extract;
@@ -1777,12 +1826,29 @@ begin
   GCharacter(carried_by).objects.remove(node_carry);
   dec(GCharacter(carried_by).carried_weight, getWeight);
 
+  wear_location := WEAR_NULL;
+
   node_carry := nil;
   carried_by := nil;
 end;
 
+{ grouped obj.toObject - Nemesis }
 procedure GObject.toObject(obj : GObject);
+var node : GListNode;
+    otmp : GObject;
 begin
+  node := obj.contents.head;
+
+  while (node <> nil) do
+    begin
+    otmp := node.element;
+
+    if (otmp.group(Self)) then
+      exit;
+
+    node := node.next;
+    end;
+
   node_in := obj.contents.insertLast(Self);
   in_obj := obj;
 end;
@@ -2002,7 +2068,7 @@ begin
         begin
         obj_in := node.element;
 
-        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) then
+        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.wear_location > WEAR_NULL) and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
           obj_in.fromChar;
           obj_in.toObject(obj);
@@ -2012,15 +2078,6 @@ begin
 
         end;
       end;
-
-    for h:=1 to MAX_WEAR do
-     if (ch.wear[h] <> nil) then
-      if (not IS_SET(ch.wear[h].flags, OBJ_LOYAL)) and (not IS_SET(ch.wear[h].flags, OBJ_NOREMOVE)) then
-       begin
-       ch.wear[h].toObject(obj);
-       ch.wear[h] := nil;
-       end;
-
     end;
 
   obj.toRoom(ch.room);
@@ -2090,6 +2147,7 @@ begin
    (Self.value[2] = obj.value[2]) and
    (Self.value[3] = obj.value[3]) and
    (Self.value[4] = obj.value[4]) and
+   (Self.wear_location = obj.wear_location) and
    (Self.contents.getSize() = 0) and (obj.contents.getSize() = 0) then
     begin
     inc(count, obj.count);
@@ -2206,14 +2264,15 @@ begin
   Result := nil;
 end;
 
-begin
-  area_list := GDLinkedList.Create;
-  room_list := GDLinkedList.Create;
-  object_list := GDLinkedList.Create;
-  shop_list := GDLinkedList.Create;
-  teleport_list := GDLinkedList.Create;
-  extracted_object_list := GDLinkedList.Create;
+initialization
+area_list := GDLinkedList.Create;
+room_list := GDLinkedList.Create;
+object_list := GDLinkedList.Create;
+shop_list := GDLinkedList.Create;
+teleport_list := GDLinkedList.Create;
+extracted_object_list := GDLinkedList.Create;
 
-  npc_list := GDLinkedList.Create;
-  obj_list := GDLinkedList.Create;
+npc_list := GDLinkedList.Create;
+obj_list := GDLinkedList.Create;
+
 end.
