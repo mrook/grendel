@@ -31,6 +31,7 @@ uses
   conns,
   dtypes,
   chars,
+  player,
   constants,
   timers,
   util,
@@ -86,8 +87,8 @@ begin
   act(AT_REPORT, '$n has logged off.', false, ch, nil, nil, TO_ROOM);
 
 
-  if (ch.conn <> nil) then
-    GConnection(ch.conn).send('Thanks for playing! Please visit this MUD again!'#13#10);
+  if (GPlayer(ch).conn <> nil) then
+    GPlayer(ch).conn.send('Thanks for playing! Please visit this MUD again!'#13#10);
 
   GPlayer(ch).quit;
 end;
@@ -103,7 +104,10 @@ end;
 
 procedure do_afk(ch : GCharacter; param : string);
 begin
-  GConnection(ch.conn).afk := true;
+	if (ch.IS_NPC) then
+		exit;
+		
+  GPlayer(ch).afk := true;
   ch.sendBuffer('You are now listed as AFK. Hitting ENTER will cease this.'#13#10);
 end;
 
@@ -302,13 +306,11 @@ end;
 
 { Revised - Nemesis }
 procedure do_delete(ch: GCharacter; param : string);
-var f:file;
+var 
+	f : file;
 begin
   if (ch.IS_NPC) then
-    begin
-    ch.sendBuffer('NPCs cannot delete.'#13#10);
     exit;
-    end;
 
   if (not MD5Match(GPlayer(ch).md5_password, MD5String(param))) then
     begin
@@ -316,7 +318,7 @@ begin
     exit;
     end;
 
-  GConnection(ch.conn).send('You feel yourself dissolving, atom by atom...'#13#10);
+  GPlayer(ch).conn.send('You feel yourself dissolving, atom by atom...'#13#10);
 
   writeConsole(ch.name + ' has deleted');
   GPlayer(ch).quit;
@@ -353,8 +355,11 @@ end;
 { Allow players to lock their keyboard - Nemesis }
 procedure do_keylock(ch : GCharacter; param: string);
 begin
-  GConnection(ch.conn).afk := true;
-  GConnection(ch.conn).keylock := true;
+	if (ch.IS_NPC) then
+		exit;
+		
+  GPlayer(ch).afk := true;
+  GPlayer(ch).keylock := true;
 
   ch.sendBuffer('You are now away from keyboard.'#13#10);
   ch.sendBuffer('Enter your password to unlock.'#13#10);

@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.62 2003/10/15 13:47:55 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.63 2003/10/17 16:34:38 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -10,16 +10,16 @@ unit area;
 interface
 
 uses
-    SysUtils,
-    Classes,
-    constants,
-    dtypes,
-    clan,
-    race,
-    fsys,
-    gvm,
-    strip,
-    util;
+	SysUtils,
+	Classes,
+	constants,
+	dtypes,
+	clan,
+	race,
+	fsys,
+	gvm,
+	strip,
+	util;
 
 {$M+}
 type
@@ -308,12 +308,13 @@ procedure cleanupAreas();
 implementation
 
 uses
-    chars,
-    skills,
-    fight,
-    console,
-    mudsystem,
-    conns;
+	chars,
+	player,
+	skills,
+	fight,
+	console,
+	mudsystem,
+	conns;
 
 
 // GNPCIndex
@@ -1355,7 +1356,6 @@ begin
     apb:=npcindex.apb;
     skills_learned := npcindex.skills_learned;
     clan:=npcindex.clan;
-    conn:=nil;
     npc.room := nil;
     position := POS_STANDING;
     state := STATE_IDLE;
@@ -1383,33 +1383,37 @@ begin
 end;
 
 procedure GArea.reset;
-var reset : GReset;
-    npc, vict, lastmob : GNPC;
-    obj, lastobj, tempobj : GObject;
-    npcindex : GNPCIndex;
-    room : GRoom;
-    pexit : GExit;
-    conn : GConnection;
-    node_reset, node_char : GListNode;
-    buf : string;
-    p : integer;
+var 
+	reset : GReset;
+	npc, lastmob : GNPC;
+	vict : GCharacter;
+	obj, lastobj, tempobj : GObject;
+	npcindex : GNPCIndex;
+	room : GRoom;
+	pexit : GExit;
+	conn : GPlayerConnection;
+	node_reset : GListNode;
+	iterator : GIterator;
+	buf : string;
+	p : integer;
 begin
   lastobj := nil;
   lastmob := nil;
 
-  node_char := connection_list.head;
-  while (node_char <> nil) do
+	iterator := connection_list.iterator();
+	
+  while (iterator.hasNext()) do
     begin
-    conn := node_char.element;
+    conn := GPlayerConnection(iterator.next());
 
     if (conn.state=CON_PLAYING) and (conn.ch.room.area = Self) then
       begin
       buf := conn.ch.ansiColor(AT_REPORT) + resetmsg + #13#10;
       conn.ch.sendBuffer(buf);
       end;
-
-    node_char := node_char.next;
     end;
+    
+  iterator.Free();
 
   node_reset := resets.head;
   while (node_reset <> nil) do
@@ -1462,20 +1466,20 @@ begin
 
           if (reset.arg3<>0) then
             begin
-            node_char := char_list.head;
+            iterator := char_list.iterator();
 
-            while (node_char <> nil) do
+            while (iterator.hasNext()) do
               begin
-              vict := node_char.element;
+              vict := GCharacter(iterator.next());
 
-              if (vict.IS_NPC) and (vict.npc_index.vnum = reset.arg3) then
+              if (vict.IS_NPC) and (GNPC(vict).npc_index.vnum = reset.arg3) then
                 begin
-                npc:=vict;
+                npc := GNPC(vict);
                 break;
                 end;
-
-              node_char := node_char.next;
               end;
+              
+            iterator.Free();
 
             if (npc = nil) then
               begin
@@ -1485,7 +1489,7 @@ begin
               end;
             end
           else
-            npc:=lastmob;
+            npc := lastmob;
 
           if lastmob=nil then
             begin
@@ -1518,20 +1522,20 @@ begin
 
           if (reset.arg3 <> 0) then
             begin
-            node_char := char_list.head;
+            iterator := char_list.iterator();
 
-            while (node_char <> nil) do
+            while (iterator.hasNext()) do
               begin
-              vict := node_char.element;
-              
-              if (vict.IS_NPC) and (vict.npc_index.vnum = reset.arg3) then
+              vict := GCharacter(iterator.next());
+
+              if (vict.IS_NPC) and (GNPC(vict).npc_index.vnum = reset.arg3) then
                 begin
-                npc := vict;
+                npc := GNPC(vict);
                 break;
                 end;
-
-              node_char := node_char.next;
               end;
+              
+            iterator.Free();
 
             if (npc = nil) then
               begin
@@ -1541,7 +1545,7 @@ begin
               end;
             end
           else
-            npc:=lastmob;
+            npc := lastmob;
 
           if lastmob=nil then
             begin
@@ -1685,10 +1689,11 @@ begin
 end;
 
 procedure GArea.update;
-var buf : string;
-    diff:integer;
-    conn : GConnection;
-    node : GListNode;
+var 
+	buf : string;
+	diff:integer;
+	conn : GPlayerConnection;
+	iterator : GIterator;
 begin
   inc(_age);
 
@@ -1845,11 +1850,11 @@ begin
     buf := buf + 'It is VERY hot!';
     end;
 
-  node := connection_list.head;
+  iterator := connection_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    conn := node.element;
+    conn := GPlayerConnection(iterator.next());
     
     if (conn.state = CON_PLAYING) and (conn.ch.room.area = Self) and (conn.ch.IS_OUTSIDE) then
       begin
@@ -1873,9 +1878,9 @@ begin
                       end;
       end;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 { Xenon 28/Apr/2001: moved createRoom() from cmd_build.inc to area.pas }

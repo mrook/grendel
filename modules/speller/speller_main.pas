@@ -8,6 +8,7 @@ implementation
 uses
   SysUtils,
   chars,
+  player,
   area,
   dtypes,
   modules,

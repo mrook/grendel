@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.4 2003/10/17 12:39:56 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.5 2003/10/17 16:34:41 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -76,6 +76,7 @@ type
       war_points, quest_points : integer;
       snooping : GCharacter;
       switching : GCharacter;
+      reply : GPlayer;
       trophy : array[1..15] of GTrophy;
       trophysize: integer;
       logon_first : TDateTime;
@@ -172,6 +173,8 @@ begin
 	FOnClose := OnCloseEvent;
 	FOnInput := OnInputEvent;
 	FOnOutput := OnOutputEvent;
+	
+	state := CON_NAME;
 end;
 
 procedure GPlayerConnection.OnOpenEvent();
@@ -333,6 +336,7 @@ begin
   rank := 'an apprentice';
   snooping := nil;
   switching := nil;
+  reply := nil;
 
   cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI or CFG_AUTOPEEK;
   bankgold := 500;

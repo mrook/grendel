@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.71 2003/10/17 12:39:57 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.72 2003/10/17 16:34:39 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -75,7 +75,7 @@ type
       inventory : GDLinkedList;
       equipment : GHashTable;
 
-      reply, master, leader : GCharacter;
+      master, leader : GCharacter;
       fighting, hunting : GCharacter;
       snooped_by : GCharacter;
 
@@ -326,7 +326,6 @@ begin
   equipment := GHashTable.Create(32);
   affects := GDLinkedList.Create();
 
-  reply := nil;
   master := nil;
   snooped_by := nil;
   leader := Self;

@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.4 2003/06/24 21:41:27 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.5 2003/10/17 16:34:35 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -41,8 +41,9 @@ begin
 end;
 
 procedure do_tell(ch:GCharacter;param:string);
-var vict:GCharacter;
-    sub : string;
+var 
+	vict : GPlayer;
+	sub : string;
 begin
   if (length(param)=0) then
     begin
@@ -51,56 +52,56 @@ begin
     end;
 
   param := one_argument(param, sub);
-  vict := findCharWorld(ch,sub);
+  vict := GPlayer(findPlayerWorld(ch,sub));
 
-  if vict=nil then
+  if (vict = nil) then
     begin
     ch.sendBuffer('They are not here.'#13#10);
     exit;
     end;
 
-  if vict=ch then
+  if (vict = ch) then
     begin
     ch.sendBuffer('You talk to yourself and are surprised that you receive no answer.'#13#10);
     exit;
     end;
 
-  if (vict.conn<>nil) and (GConnection(vict.conn).afk) then
+  if (vict.afk) then
     begin
     ch.sendBuffer('That player is away from the keyboard right now.'#13#10);
     exit;
     end;
 
-  vict.reply:=ch;
+  vict.reply := GPlayer(ch);
   act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,vict,TO_CHAR);
   act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,vict,TO_VICT);
 end;
 
-procedure do_reply(ch:GCharacter;param:string);
+procedure do_reply(ch : GCharacter;param:string);
 begin
-  if (length(param)=0) then
+  if (ch.IS_NPC) or (length(param)=0) then
     begin
     ch.sendBuffer('Reply what?'#13#10);
     exit;
     end;
 
-  if (ch.reply.CHAR_DIED) then
+  if (GPlayer(ch).reply.CHAR_DIED) then
     begin
-    ch.reply:=nil;
+    GPlayer(ch).reply := nil;
     ch.sendBuffer('They are not here.'#13#10);
     exit;
     end;
 
-  if (ch.reply.conn <> nil) and (GConnection(ch.reply.conn).afk) then
+  if (GPlayer(ch).reply.afk) then
     begin
     ch.sendBuffer('That player is away from the keyboard right now.'#13#10);
     exit;
     end;
 
-  ch.reply.reply:=ch;
+  GPlayer(ch).reply.reply := GPlayer(ch);
 
-  act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,ch.reply,TO_CHAR);
-  act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,ch.reply,TO_VICT);
+  act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,GPlayer(ch).reply,TO_CHAR);
+  act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,GPlayer(ch).reply,TO_VICT);
 end;
 
 procedure do_suggest(ch:GCharacter;param:string);
@@ -196,7 +197,7 @@ begin
     ch.sendBuffer('Add who to the clan?'#13#10)
   else
     begin
-    vict := findPlayerWorld(ch,param);
+    vict := GPlayer(findPlayerWorld(ch,param));
 
     if (vict=nil) or (vict.IS_NPC) then
       ch.sendBuffer('That character does not exist.'#13#10)
@@ -241,7 +242,7 @@ begin
     ch.sendBuffer('Remove who from the clan?'#13#10)
   else
     begin
-    vict := findPlayerWorld(ch,param);
+    vict := GPlayer(findPlayerWorld(ch,param));
 
     if (vict=nil) or (vict.IS_NPC) then
       ch.sendBuffer('That character is not online.'#13#10)

@@ -1,118 +1,122 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.44 2003/10/16 16:07:30 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.45 2003/10/17 16:34:40 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
 
 interface
+
+
 uses
 {$IFDEF Win32}
-    Winsock2,
+	Winsock2,
 {$ENDIF}
 {$IFDEF LINUX}
-    Libc,
+	Libc,
 {$ENDIF}
-    SysUtils,
-    Classes,
-    constants,
-    strip,
-    clean,
-    dtypes,
-    FastStringFuncs,
-    util;
+	SysUtils,
+	Classes,
+	constants,
+	strip,
+	clean,
+	dtypes,
+	FastStringFuncs,
+	util;
 
-const BOOTTYPE_SHUTDOWN = 1;
-      BOOTTYPE_REBOOT   = 2;
-      BOOTTYPE_COPYOVER = 3;
+
+const 
+	BOOTTYPE_SHUTDOWN = 1;
+	BOOTTYPE_REBOOT   = 2;
+	BOOTTYPE_COPYOVER = 3;
+
 
 type
-    GTime = record
-      hour, day, month, year : integer;
-      sunlight : integer;
-    end;
+	GTime = record
+		hour, day, month, year : integer;
+		sunlight : integer;
+	end;
 
-    GBoot = record
-       timer : integer;
-       boot_type : integer;
-       started_by : pointer;
-     end;
+	GBoot = record
+		timer : integer;
+		boot_type : integer;
+		started_by : pointer;
+	end;
 
-    GSystem = record
-      admin_email : string;        { email address of the administration }
-      mud_name : string;           { name of the MUD Grendel is serving }
-      port : integer;              { port on which Grendel runs }
-      port6 : integer;		         { ipv6 port on which Grendel runs }
-      log_all : boolean;           { log all player activity? }
-      bind_ip : integer;           { IP the server should bind to (when using multiple interfaces) }
-      level_forcepc : integer;     { level to force players }
-      level_log : integer;         { level to get log messages }
-      lookup_hosts : boolean;      { lookup host names of clients? }
-      deny_newconns : boolean;     { deny new connections? }
-      deny_newplayers : boolean;   { disable 'CREATE', e.g. no new players }
-      max_conns : integer;         { max. concurrent connections on this server }
-      show_clan_abbrev : boolean;  { show clan name abbreviations in who list(s) }
-      
-      arena_start, 
-      arena_end : integer;         { vnum start/end of arena (battleground) }
+	GSystem = record
+		admin_email : string;        { email address of the administration }
+		mud_name : string;           { name of the MUD Grendel is serving }
+		port : integer;              { port on which Grendel runs }
+		port6 : integer;		         { ipv6 port on which Grendel runs }
+		log_all : boolean;           { log all player activity? }
+		bind_ip : integer;           { IP the server should bind to (when using multiple interfaces) }
+		level_forcepc : integer;     { level to force players }
+		level_log : integer;         { level to get log messages }
+		lookup_hosts : boolean;      { lookup host names of clients? }
+		deny_newconns : boolean;     { deny new connections? }
+		deny_newplayers : boolean;   { disable 'CREATE', e.g. no new players }
+		max_conns : integer;         { max. concurrent connections on this server }
+		show_clan_abbrev : boolean;  { show clan name abbreviations in who list(s) }
 
-      user_high, user_cur : integer;
-      
-      terminated : boolean;
-     end;
+		arena_start, 
+		arena_end : integer;         { vnum start/end of arena (battleground) }
 
-     GSocial = class
-       name : string;
-       char_no_arg, others_no_arg: string;
-       char_found, others_found, vict_found : string;
-       char_auto, others_auto : string;
-       char_object : string;      // Xenon (19/Feb/2001) : for objects (e.g. 'lick rapier')
-       others_object : string;
-     end;
+		user_high, user_cur : integer;
 
-     GDamMessage = class
-       msg : array[1..3] of string;
-       min, max : integer;
-     end;
+		terminated : boolean;
+	end;
 
-     GBattleground = record
-       prize : pointer;
-       lo_range, hi_range : integer;      { level range }
-       winner : pointer;               { who has won the bg }
-       count : integer;                   { seconds to start, -1 for running, -2 for no bg}
-     end;
+	GSocial = class
+		name : string;
+		char_no_arg, others_no_arg: string;
+		char_found, others_found, vict_found : string;
+		char_auto, others_auto : string;
+		char_object : string;      // Xenon (19/Feb/2001) : for objects (e.g. 'lick rapier')
+		others_object : string;
+	end;
 
-     GAuction = class
-       item : pointer;
-       seller, buyer : pointer;
-       going : integer;         { 1,2, sold}
-       bid : integer;
-       pulse : integer;
-       start : integer;
+	GDamMessage = class
+		msg : array[1..3] of string;
+		min, max : integer;
+	end;
 
-       procedure update;
+	GBattleground = record
+		prize : pointer;
+		lo_range, hi_range : integer;      { level range }
+		winner : pointer;               { who has won the bg }
+		count : integer;                   { seconds to start, -1 for running, -2 for no bg}
+	end;
 
-       constructor Create;
-     end;
+	GAuction = class
+		item : pointer;
+		seller, buyer : pointer;
+		going : integer;         { 1,2, sold}
+		bid : integer;
+		pulse : integer;
+		start : integer;
 
-var
-   system_info : GSystem;
-   time_info : GTime;
-   boot_info : GBoot;
-   bg_info : GBattleground;
+		procedure update;
 
-   socials : GHashTable;
-   dm_msg : GDLinkedList;
-
-   clean_thread : GCleanThread;
-   timer_thread : TThread;
-
-   auction_good, auction_evil : GAuction;
-
-   banned_masks, banned_names : TStringList;
+		constructor Create;
+	end;
 
 
 var
+	system_info : GSystem;
+	time_info : GTime;
+	boot_info : GBoot;
+	bg_info : GBattleground;
+
+	socials : GHashTable;
+	dm_msg : GDLinkedList;
+
+	clean_thread : GCleanThread;
+	timer_thread : TThread;
+
+	auction_good, auction_evil : GAuction;
+
+	banned_masks, banned_names : TStringList;
+
   OldExit : pointer;
 
   { system data }
@@ -149,14 +153,15 @@ procedure cleanupSystem();
 implementation
 
 uses
-    commands,
-    chars,
-    area,
-    fsys,
-    conns,
-    console,
-    Channels,
-    RegExpr;
+	commands,
+	chars,
+	player,
+	area,
+	fsys,
+	conns,
+	console,
+	Channels,
+	RegExpr;
 
 
 procedure bugreport(func, pasfile, bug : string);

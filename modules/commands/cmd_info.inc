@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.12 2003/06/24 21:41:28 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.13 2003/10/17 16:34:36 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -635,13 +635,14 @@ end;
 { Xenon 22/Feb/2001: changed the format of WHO some more, still needs some more features (later) }
 { Xenon 23/Feb/2001: added 'who good' 'who evil' 'who imm' 'who clan' 'who <race>' 'who <name>' (code could be a bit cleaner still)}
 procedure do_who(ch:GCharacter;param:string);
-var num, num_good, num_evil, numImms :integer;
-    buf1 : string;
-    buf_imm, buf_good, buf_evil, buf_result : string;
-    conn : GConnection;
-    node : GListNode;
-    arg : string;
-    normarg, specarg : boolean;
+var 
+	num, num_good, num_evil, numImms :integer;
+	buf1 : string;
+	buf_imm, buf_good, buf_evil, buf_result : string;
+	conn : GPlayerConnection;
+	iterator : GIterator;
+	arg : string;
+	normarg, specarg : boolean;
 begin
   conn := nil;
   param := one_argument(param, arg);
@@ -661,19 +662,19 @@ begin
   buf_good := add_chars(80, '$3---- Visible Mortals of the Creatures of Light ', '-')  + #13#10 + #13#10;
   buf_evil := add_chars(80, '$3---- Visible Mortals of the Creatures of Darkness ', '-')  + #13#10 + #13#10;
 
-  node := connection_list.head;
+  iterator := connection_list.iterator();
 
-  while (node <> nil) do
-  begin
-    conn := node.element;
+  while (iterator.hasNext()) do
+	  begin
+    conn := GPlayerConnection(iterator.next());
     
     if (conn.state in [CON_PLAYING,CON_EDITING,CON_EDIT_HANDLE]) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
-    begin
+    	begin
       if not(specarg) or
         isName(conn.ch.race.name, arg) or
         isName(conn.ch.name, arg) or
         ((arg = 'CLAN') and (ch.clan <> nil) and (ch.clan = conn.ch.clan)) then
-      begin
+      	begin
         inc(num);
         if (conn.ch.IS_GOOD) then
           inc(num_good)
@@ -682,7 +683,7 @@ begin
           inc(num_evil);
         
         if (conn.ch.IS_IMMORT) then
-        begin
+        	begin
           inc(numImms);
 
           if (conn.ch.IS_WIZINVIS) then
@@ -712,16 +713,16 @@ begin
 
           buf_imm := buf_imm +  pad_string(imm_types[conn.ch.level],12) + '$A$7> ';
 
-          if (conn.afk) then
+          if (conn.ch.afk) then
             buf_imm := buf_imm + '$B$7<AFK> $A$7';
 
           buf_imm := buf_imm + conn.ch.name + ' ' + GPlayer(conn.ch).title;
 
           buf_imm := buf_imm + #13#10;
 
-        end
+	        end
         else
-        begin
+        	begin
           delete(buf1, 1, length(buf1));
         
           if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
@@ -740,7 +741,7 @@ begin
 
           buf1 := buf1 + '$A$7> ';
 
-          if (conn.afk) then
+          if (conn.ch.afk) then
             buf1 := buf1 + '$B$7<AFK> $A$7';
 
           buf1 := buf1 + conn.ch.name + ' ' + GPlayer(conn.ch).title;
@@ -754,90 +755,90 @@ begin
             buf_evil := buf_evil + buf1
           else
             bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name);
-        end;
-      end;
-    end;
-
-    node := node.next;
-  end;
+        	end;
+      	end;
+    	end;
+	  end;
+  
+  iterator.Free();
 
   if normarg or (arg = 'CLAN') then
-  begin
+	  begin
     if (arg = 'GOOD') and (ch.IS_GOOD or ch.IS_IMMORT) then
-    begin
+	    begin
       buf_result := buf_good;
       num := num_good;
-    end
+    	end
     else
     if (arg = 'EVIL') and (ch.IS_EVIL or ch.IS_IMMORT) then
-    begin
+	    begin
       buf_result := buf_evil;
       num := num_evil;
-    end
+	    end
     else
     if (arg = 'CLAN') then
-    begin
+	    begin
       if (numImms > 0) then
         buf_result := buf_imm + #13#10;
         
       if (ch.IS_IMMORT) then          // in case imm is in a mortal clan
-      begin
+      	begin
         if (num_good > 0) then
           buf_result := buf_result + buf_good;
         if (num_evil > 0) then
           buf_result := buf_result + buf_evil;
-      end
+      	end
       else
       if (ch.IS_GOOD) then
-      begin
+      	begin
         buf_result := buf_result + buf_good
-      end
+      	end
       else
       if (ch.IS_EVIL) then
-      begin
+      	begin
         buf_result := buf_result + buf_evil
-      end;
-    end
+      	end;
+    	end
     else
     if (pos('IMM', arg) = 1) and (numImms > 0) then
-    begin
+    	begin
       buf_result := buf_imm;
       num := numImms;
-    end
+	    end
     else
-    begin
+	    begin
       num := 0;
-    end;
-  end
+	    end;
+	  end
   else
-  begin
+	  begin
     if (numImms > 0) then
-    begin
+	    begin
       buf_result := buf_imm;
       if ((num_good > 0) or (num_evil > 0)) then
         buf_result := buf_result + #13#10;
-    end;
+	    end;
       
-    if ch.IS_IMMORT then
-    begin
+    if (ch.IS_IMMORT) then
+	    begin
       if (num_good > 0) then
         buf_result := buf_result + buf_good;
       if (num_good > 0) and (num_evil > 0) then
         buf_result := buf_result + #13#10;
       if (num_evil > 0) then
         buf_result := buf_result + buf_evil;
-    end
+    	end
     else
-    begin
-      if ch.IS_GOOD then
+    	begin
+      if (ch.IS_GOOD) then
         buf_result := buf_result + buf_good
       else
-      if ch.IS_EVIL then
+      if (ch.IS_EVIL) then
         buf_result := buf_result + buf_evil
       else
-          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name);
-    end;
-  end;
+				bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name);
+    	end;
+	  end;
         
   act(AT_REPORT,buf_result,false,ch,nil,nil,TO_CHAR);
 

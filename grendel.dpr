@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.79 2003/10/16 16:07:33 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.80 2003/10/17 16:34:35 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -80,11 +80,13 @@ uses
   skills,
   clean,
   chars,
+  player,
   Channels,
   Bulletinboard,
   progs,
   area,
   race;
+
 
 const pipeName : pchar = '\\.\pipe\grendel';
 
@@ -110,14 +112,14 @@ end;
 
 procedure flushConnections;
 var
-   conn : GConnection;
+   conn : GPlayerConnection;
    iterator : GIterator;
 begin
   iterator := connection_list.iterator();
   
   while (iterator.hasNext()) do
     begin
-    conn := GConnection(iterator.next());
+    conn := GPlayerConnection(iterator.next());
     
     if (conn.state = CON_PLAYING) and (not conn.ch.IS_NPC) then
       GPlayer(conn.ch).quit
@@ -255,7 +257,7 @@ var
    PI: TProcessInformation;
    pipe : THandle;
    node, node_next : GListNode;
-   conn : GConnection;
+   conn : GPlayerConnection;
    w, len : cardinal;
    prot : TWSAProtocol_Info;
    name : array[0..1023] of char;
@@ -602,7 +604,7 @@ begin
       sk.socketAddress := client_addr;
       sk.resolve(system_info.lookup_hosts);
 
-      GConnection.Create(sk, true, g);
+      GPlayerConnection.Create(sk, true, g);
       end;
   until (not suc);
 

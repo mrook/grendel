@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.22 2003/10/16 16:07:31 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.23 2003/10/17 16:34:40 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -9,44 +9,48 @@ interface
 
 uses
 {$IFDEF Win32}
-    Windows,
+	Windows,
 {$ENDIF}
-    Classes;
+	Classes;
 
 { This is the misc. thread function, also known as the 'simple task thread'.
   This thread takes care of autosaves and autocleans,
   and serves as a watchdog for both the timer thread and the individual
   user threads. }
 
-type GCleanThread = class(TThread)
-     protected
-       procedure AutoSave;
-       procedure Execute; override;
+type 
+	GCleanThread = class(TThread)
+	protected
+		procedure AutoSave();
+		procedure Execute; override;
 
-     public
-       constructor Create;
-     end;
+	public
+		constructor Create();
+	end;
+
 
 implementation
 
 uses
-    SysUtils,
-    chars,
-    conns,
-    constants,
-    console,
-    dtypes,
-    area,
-    util,
-    timers,
+	SysUtils,
+	chars,
+	player,
+	conns,
+	constants,
+	console,
+	dtypes,
+	area,
+	util,
+	timers,
 {$IFDEF WIN32}
-    Winsock2,
+	Winsock2,
 {$ENDIF}
 {$IFDEF LINUX}
-    Libc,
+	Libc,
 {$ENDIF}
-    commands,
-    mudsystem;
+	commands,
+	mudsystem;
+	
 
 constructor GCleanThread.Create;
 begin
@@ -87,7 +91,7 @@ procedure GCleanThread.Execute;
 var
    a : integer;
    node, node_next : GListNode;
-   conn : GConnection;
+   conn : GPlayerConnection;
 begin
   a := 0;
   repeat

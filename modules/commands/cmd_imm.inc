@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.23 2003/10/16 16:07:31 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.24 2003/10/17 16:34:35 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -598,7 +598,7 @@ end;
 procedure do_connections(ch:GCharacter;param:string);
 var
   s:string;
-  conn: GConnection;
+  conn: GPlayerConnection;
   iterator : GIterator;
 begin
   act(AT_REPORT, '$8[$B$1Nr.$A$8] [$B$1State           $A$8] [$B$1' + pad_string('IP', 32) + '$A$8] [$B$1Name$A$8]'#13#10,false,ch,nil,nil,TO_CHAR);
@@ -607,7 +607,7 @@ begin
   
   while (iterator.hasNext()) do
     begin
-    conn := GConnection(iterator.next());
+    conn := GPlayerConnection(iterator.next());
     
     if (conn.ch <> nil) and (not conn.ch.IS_NPC) and (IS_SET(GPlayer(conn.ch).flags, PLR_CLOAK)) then
       continue;
@@ -744,7 +744,7 @@ begin
 
   act(AT_REPORT,'Loading '+param+'...',false,ch,nil,nil,TO_CHAR);
 
-  vict := GPlayer.Create;
+  vict := GPlayer.Create(nil);
   vict.load(param);
   SET_BIT(vict.flags,PLR_LOADED);
   SET_BIT(vict.flags,PLR_LINKLESS);
@@ -1161,7 +1161,8 @@ end;
 
 { Xenon 12/Apr/2001: freeze now only works on players lowerlevel than you and you cannot freeze yourself anymore :P }
 procedure do_freeze(ch:GCharacter;param:string);
-var victim : GPlayer;
+var 
+	victim : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -1170,8 +1171,8 @@ begin
     exit;
     end;
 
-  victim := findPlayerWorld(ch,param);
-  if (victim=nil) then
+  victim := GPlayer(findPlayerWorld(ch,param));
+  if (victim = nil) then
     begin
     ch.sendBuffer('That character isn''t online.'#13#10);
     exit;
@@ -1204,7 +1205,8 @@ begin
 end;
 
 procedure do_silence(ch:GCharacter;param:string);
-var victim : GPlayer;
+var 
+	victim : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -1213,7 +1215,7 @@ begin
     exit;
     end;
 
-  victim := findPlayerWorld(ch,param);
+  victim := GPlayer(findPlayerWorld(ch,param));
   if (victim=nil) then
     begin
     ch.sendBuffer('That character does not exist.'#13#10);
@@ -1492,7 +1494,7 @@ begin
   else
     { Nourish single char }
     begin
-    victim := findPlayerWorld(ch,param);
+    victim := GPlayer(findPlayerWorld(ch,param));
 
     if (victim = nil) then
       begin
@@ -1513,13 +1515,14 @@ end;
 
 { Revive player when killed - Nemesis }
 procedure do_revive(ch:GCharacter; param:string);
-var obj : GObject;
-    corpseroom : GRoom;
-    victim : GCharacter;
-    number,count : integer;
-    conn : GConnection;
-    conn_node : GListNode;
-    buf : string;
+var 
+	obj : GObject;
+	corpseroom : GRoom;
+	victim : GCharacter;
+	number,count : integer;
+	conn : GPlayerConnection;
+	iterator : GIterator;
+	buf : string;
 begin
   // Without argument shows existing corpses, decay timer and VNUM.
 
@@ -1529,12 +1532,11 @@ begin
 
     count := 0;
 
-    conn_node := connection_list.head;
+    iterator := connection_list.iterator();
 
-    while (conn_node <> nil) do
+    while (iterator.hasNext()) do
       begin
-
-      conn := GConnection(conn_node.element);
+      conn := GPlayerConnection(iterator.next());
 
       obj := findObjectWorld('the corpse of ' + conn.ch.name);
 
@@ -1546,9 +1548,9 @@ begin
                ansiColor(2,0) + ') ' + obj.name + ' in room: ' + ansiColor(6,0) +
                inttostr(obj.room.vnum) + ansiColor(2,0) + '.' + #13#10;
         end;
-
-      conn_node := conn_node.next;
       end;
+      
+    iterator.Free();
 
     if (count = 0) then
       buf := ' None.' + #13#10;
@@ -1718,7 +1720,7 @@ begin
   curr_name := cap(curr_name);
   new_name := cap(new_name);
 
-  vict := findPlayerWorld(ch, curr_name);
+  vict := GPlayer(findPlayerWorld(ch, curr_name));
 
   if (vict = nil) then
   begin
