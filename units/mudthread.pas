@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.72 2001/10/05 15:47:38 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.73 2001/11/15 20:42:49 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -991,10 +991,10 @@ begin
     begin
     writeConsole('('+inttostr(conn.sock.getDescriptor)+') Closed banned IP (' + conn.sock.host_string + ')');
 
-    conn.sock.send(system_info.mud_name+#13#10#13#10);
-    conn.sock.send('Your site has been banned from this server.'#13#10);
-    conn.sock.send('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10);
-    
+    conn.send(system_info.mud_name+#13#10#13#10);
+    conn.send('Your site has been banned from this server.'#13#10);
+    conn.send('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10);
+
     conn.Free();
     exit;
     end;
@@ -1007,7 +1007,7 @@ begin
     begin
     conn.state := CON_NAME;
 
-    conn.sock.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
+    conn.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
 
     temp_buf := AnsiColor(6,0) + #13#10;
 
@@ -1016,9 +1016,9 @@ begin
     temp_buf := temp_buf + #13#10'This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.';
     temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
 
-    conn.sock.send(temp_buf);
+    conn.send(temp_buf);
 
-    conn.sock.send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
+    conn.send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
     end
   else
     begin
@@ -1026,8 +1026,8 @@ begin
 
     conn.ch.name := hash_string(copyover_name);
     conn.ch.load(copyover_name);
-    conn.sock.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
-    conn.sock.send('Copyover complete!'#13#10);
+    conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
+    conn.send('Copyover complete!'#13#10);
 
     nanny(conn, '');
     end;
