@@ -2,7 +2,7 @@
   Summary:
     System events
   
-  ##  $Id: events.pas,v 1.3 2003/11/07 21:03:29 ***REMOVED*** Exp $
+  ##  $Id: events.pas,v 1.4 2003/11/10 09:27:56 ***REMOVED*** Exp $
 }
 
 unit events;
@@ -156,9 +156,13 @@ begin
 	// default events
 	registerEvent('char-login');
 	registerEvent('char-logout');
+	registerEvent('char-look-char');
+	registerEvent('char-look-object');
+	registerEvent('char-look-room');
 	registerEvent('mud-boot');
 	registerEvent('mud-shutdown');
 	registerEvent('room-enter');
+	registerEvent('room-leave');
 end;
 
 procedure cleanupEvents();
