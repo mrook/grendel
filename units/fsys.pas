@@ -1,6 +1,6 @@
 {
   @abstract(Buffered filereader & writer)
-  @lastmod($Id: fsys.pas,v 1.16 2003/09/12 14:21:33 ***REMOVED*** Exp $)
+  @lastmod($Id: fsys.pas,v 1.17 2003/12/09 22:37:38 ***REMOVED*** Exp $)
 }
 
 unit fsys;
@@ -86,7 +86,7 @@ begin
   //  raise Exception.Create(fn + ': 0 length file');
 
   fpos := 0;
-  line := 1;
+  line := 0;
   feol := false;
 end;
 
