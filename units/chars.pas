@@ -1737,6 +1737,9 @@ begin
   if (bashing > 0) then
     buf := buf +  '[' + inttostr(bashing) + '] ';
 
+  if (IS_AFK) then
+    buf := buf +  '(AFK) ';
+
   if (position = POS_CASTING) then
     buf := buf + '+';
 
