@@ -292,9 +292,17 @@ begin
     begin
     conn := node.element;
 
-    stopfighting(conn.ch);
-		conn.ch.emptyBuffer;
-    conn.send(#13#10'Slowly, you feel the world as you know it fading away in wisps of steam...'#13#10#13#10);
+    if (conn.state = CON_PLAYING) then
+      begin
+      stopfighting(conn.ch);
+  		conn.ch.emptyBuffer;
+      conn.send(#13#10'Slowly, you feel the world as you know it fading away in wisps of steam...'#13#10#13#10);
+      end
+    else
+      begin
+      conn.send(#13#10'This server is rebooting, please continue in a few minutes.'#13#10#13#10);
+      conn.thread.terminate;
+      end;
 
     node := node.next;
     end;
