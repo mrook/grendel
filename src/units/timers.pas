@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.12 2004/04/01 13:04:32 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.13 2004/05/11 15:04:47 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -13,6 +13,7 @@ interface
 uses
 {$IFDEF WIN32}
 	Windows,
+	JclDebug,
 {$ENDIF}
 	SysUtils,
 	Classes,
@@ -51,7 +52,11 @@ type
 		constructor Create(const name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
 	end;
 
-	GTimerThread = class (TThread)
+	{$IFDEF WIN32}
+	GTimerThread = class(TJclDebugThread)
+	{$ELSE}
+	GTimerThread = class(TThread)
+	{$ENDIF}
 	private
 		last_update : TDateTime;
 
@@ -139,59 +144,76 @@ end;
 { TODO remove nodes }
 procedure GTimerThread.Execute();
 var
-   node, node_next : GListNode;
-   timer : GTimer;
-   spec : GSpecTimer;
+	node, node_next : GListNode;
+	timer : GTimer;
+	spec : GSpecTimer;
 begin
-  while (not Terminated) do
-    begin
-    last_update := Now();
+	try
+		while (not Terminated) do
+			begin
+			last_update := Now();
 
-    node := timer_list.head;
+			node := timer_list.head;
 
-    while (node <> nil) do
-      begin
-      timer := GTimer(node.element);
-      node_next := node.next;
+			while (node <> nil) do
+				begin
+				timer := GTimer(node.element);
+				node_next := node.next;
 
-      try
-        dec(timer._counter);
+				try
+					dec(timer._counter);
 
-        if (timer._counter = 0) then
-          begin
-          if (timer is GSpecTimer) then
-            begin
-            spec := GSpecTimer(timer);
+					if (timer._counter = 0) then
+						begin
+						if (timer is GSpecTimer) then
+							begin
+							spec := GSpecTimer(timer);
 
-            if (assigned(spec.spec_func)) then
-              spec.spec_func(spec.ch, spec.victim, spec.sn);
-            end
-          else
-            if (assigned(timer.timer_func)) then
-              timer.timer_func;
+							if (assigned(spec.spec_func)) then
+							spec.spec_func(spec.ch, spec.victim, spec.sn);
+							end
+						else
+						if (assigned(timer.timer_func)) then
+							timer.timer_func;
 
-          if (not timer.looping) then
-            begin
-            timer_list.remove(node);
-            timer.Free();
-            end
-          else
-            timer._counter := timer.timeout;
-          end;
-      except
-        on E : Exception do	
-        	begin
-        	reportException(E, 'GTimerThread.Execute');
-            timer_list.remove(node);
-            timer.Free();
-        	end;
-      end;
+						if (not timer.looping) then
+							begin
+							timer_list.remove(node);
+							timer.Free();
+							end
+						else
+							timer._counter := timer.timeout;
+						end;
+				except
+					on E : Exception do	
+						begin
+						{$IFDEF WIN32}
+						HandleException();
+						{$ELSE}
+						reportException(E, 'timers.pas:GTimerThread.Execute()');
+						{$ENDIF}
+						timer_list.remove(node);
+						timer.Free();
+						end;
+				end;
 
-      node := node_next;
-      end;
+				node := node_next;
+				end;
 
-    Sleep(250);
-    end;
+			Sleep(250);
+			end;
+	except
+		on E : Exception do	
+			begin
+			{$IFDEF WIN32}
+			HandleException();
+			{$ELSE}
+			reportException(E, 'timers.pas:GTimerThread.Execute()');
+			{$ENDIF}
+			timer_list.remove(node);
+			timer.Free();
+			end;
+	end;	
 end;
 
 procedure registerTimer(const name : string; func : TIMER_FUNC; timeout : integer; looping : boolean);
