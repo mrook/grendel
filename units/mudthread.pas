@@ -18,6 +18,7 @@ uses
     skills,
     strip,
     util,
+    bulletinboard,
     mudhelp,
     mudsystem;
 
@@ -1053,6 +1054,7 @@ begin
                        if (not conn.ch.CHAR_DIED) then
                          conn.ch.in_command := false;
                        end;
+          CON_EDIT_HANDLE: conn.ch.editBuffer(cmdline);
           CON_EDITING: conn.ch.editBuffer(cmdline);
           else
             nanny(conn, cmdline);
@@ -1301,6 +1303,7 @@ begin
   registerCommand('do_prompt', do_prompt);
   registerCommand('do_at', do_at);
   registerCommand('do_namegen', do_namegen);
+  registerCommand('do_note', do_note);
 end;
 
 begin

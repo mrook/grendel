@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.33 2001/04/16 17:21:32 xenon Exp $
+// $Id: chars.pas,v 1.34 2001/04/20 12:17:02 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -17,7 +17,8 @@ uses
     fsys,
     util,
     clan,
-    dtypes;
+    dtypes,
+    bulletinboard;
 
 
 type
@@ -75,6 +76,10 @@ type
       // profession:PROF_DATA;
 
       ld_timer : integer;
+
+      active_board : integer;
+      boards : array[BOARD1..BOARD_MAX-1] of integer;
+      subject : string;
     end;
 
     GAbility = record
@@ -152,6 +157,7 @@ type
       procedure startEditing(text : string);
       procedure stopEditing;
       procedure editBuffer(text : string);
+      procedure sendEdit(text : string);
 
       function ansiColor(color : integer) : string;
 
@@ -182,6 +188,7 @@ type
       function IS_HOLYLIGHT : boolean;
       function IS_AFK : boolean;
       function IS_KEYLOCKED : boolean;
+      function IS_EDITING : boolean;
       function CAN_FLY : boolean;
       function CAN_SEE(vict : GCharacter) : boolean;
 
@@ -189,7 +196,7 @@ type
       procedure SET_LEARNED(perc : integer; skill : pointer);
       function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
       function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
-      
+
       procedure extract(pull : boolean);
       procedure quit;
       procedure fromRoom;
@@ -652,6 +659,17 @@ begin
     IS_KEYLOCKED := GConnection(conn).keylock = true;
 end;
 
+function GCharacter.IS_EDITING : boolean;
+begin
+  if (IS_NPC) then
+    begin
+    Result := false;
+    exit;
+    end;
+
+  IS_EDITING := GConnection(conn).state = CON_EDITING;
+end;
+
 function GCharacter.CAN_FLY : boolean;
 begin
   CAN_FLY := false;
@@ -837,6 +855,13 @@ begin
     skills_learned := GDLinkedList.Create;
     max_skills := 0;
     max_spells := 0;
+
+    active_board := 1;
+    boards[BOARD1] := 0;
+    boards[BOARD2] := 0;
+    boards[BOARD3] := 0;
+    boards[BOARD_NEWS] := 0;
+    boards[BOARD_IMM] := 0;
     end;
 
   with point do
@@ -1132,7 +1157,24 @@ begin
           player^.taunt := right(a, ' ')
         else
         if (g = 'PROMPT') then
-          player^.prompt := right(a, ' ');
+          player^.prompt := right(a, ' ')
+        else
+        if (g = 'ACTIVE_BOARD') then
+          player^.active_board := strtoint(right(a,' '))
+        else
+        if (g = 'READ-NOTES') then
+          begin
+          a := right(a,' ');
+          player^.boards[BOARD1] := strtoint(left(a,' '));
+          a := right(a,' ');
+          player^.boards[BOARD2] := strtoint(left(a,' '));
+          a := right(a,' ');
+          player^.boards[BOARD3] := strtoint(left(a,' '));
+          a := right(a,' ');
+          player^.boards[BOARD_NEWS] := strtoint(left(a,' '));
+          a := right(a,' ');
+          player^.boards[BOARD_IMM] := strtoint(left(a,' '));
+          end;
       until (uppercase(a)='#END') or (af.eof);
 
       if (uppercase(a)='#END') then
@@ -1425,6 +1467,8 @@ begin
     writeln(f,'Bamfout: ',bamfout);
     writeln(f,'Taunt: ', taunt);
     writeln(f,'Prompt: ', prompt);
+    writeln(f,'Active_board: ', active_board);
+    writeln(f,'Read-notes: ', boards[BOARD1], ' ', boards[BOARD2], ' ', boards[BOARD3], ' ', boards[BOARD_NEWS], ' ', boards[BOARD_IMM]);
 
     fl := flags;
     REMOVE_BIT(fl, PLR_LINKLESS);
@@ -1571,6 +1615,9 @@ begin
   if (conn = nil) {or (not IS_NPC and (player^.snooping <> nil))} then
     exit;
 
+  if (IS_EDITING) then
+    exit;
+
   c := conn;
 
   if ((length(c.sendbuffer) + length(s)) > 2048) then
@@ -1629,21 +1676,65 @@ begin
   if (conn = nil) then
     exit;
 
-  sendBuffer('Editing: Use /c to clear, /s to save, /a to abort'#13#10);
-  sendBuffer('---------------------------------------------------------------------->'#13#10);
+  if (substate = SUB_SUBJECT) then
+    begin
+    sendBuffer(ansiColor(2) + #13#10 + 'Subject: ');
+    GConnection(conn).state := CON_EDITING;
+    exit;
+    end;
+
+  GConnection(conn).send(ansiColor(2) + #13#10 + 'Use ~ on a blank line to end.'#13#10);
+  GConnection(conn).send(ansiColor(2) + '----------------------------------------------------------------------'#13#10'>');
 
   edit_buffer := text;
+  GConnection(conn).afk := true;
   GConnection(conn).state := CON_EDITING;
 end;
 
 procedure GCharacter.stopEditing;
 begin
-  sendBuffer('Done.'#13#10);
+  sendBuffer('Ok.'#13#10);
 
   edit_buffer := '';
-  edit_dest := nil;
   substate := SUB_NONE;
-  GConnection(conn).state:=CON_PLAYING;
+  GConnection(conn).afk := false;
+  GConnection(conn).state := CON_PLAYING;
+
+  sendBuffer('You are now back at your keyboard.'#13#10);
+  act(AT_REPORT,'$n has returned to $s keyboard.',false,Self,nil,nil,to_room);
+end;
+
+procedure GCharacter.sendEdit(text : string);
+var note : GNote;
+begin
+  if (substate = SUB_NOTE) then
+    begin
+    postNote(Self, text);
+
+    edit_buffer := '';
+    substate := SUB_NONE;
+
+    GConnection(conn).state := CON_PLAYING;
+    GConnection(conn).afk := false;
+
+    sendBuffer('Note posted.'#13#10);
+
+    act(AT_REPORT,'You are now back at your keyboard.',false,Self,nil,nil,TO_CHAR);
+    act(AT_REPORT,'$n finished $s note and is now back at the keyboard.',false,Self,nil,nil,TO_ROOM);
+
+    if (player^.active_board = BOARD_IMM) then
+      begin
+      act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_IMM);
+      act(AT_REPORT,'Written by ' + name^ + '.',false,Self,nil,nil,TO_IMM);
+      end
+    else
+      begin
+      act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_ALL);
+      act(AT_REPORT,'Written by ' + name^ + '.', false, Self, nil, nil, TO_ALL);
+      end;
+
+    exit;
+    end;
 end;
 
 procedure GCharacter.editBuffer(text : string);
@@ -1651,51 +1742,64 @@ begin
   if (conn = nil) then
     exit;
 
-  if (GConnection(conn).state <> CON_EDITING) then
+  if (substate = SUB_SUBJECT) then
     begin
-    sendBuffer('You are not editing.'#13#10);
+    if (length(text) = 0) then
+      player^.subject := 'nil'
+    else
+      player^.subject := text;
+
+    substate := SUB_NOTE;
+    startEditing('');
     exit;
     end;
 
-  if (text = '/c') then
+  if (GConnection(conn).state = CON_EDIT_HANDLE) then
     begin
-    sendBuffer('Buffer cleared.'#13#10);
-    edit_buffer := '';
+    if (uppercase(text) = 'A') then
+      begin
+      stopEditing;
+      exit;
+      end;
+
+    if (uppercase(text) = 'V') then
+      begin
+      GConnection(conn).send(ansiColor(2) + 'Current text:' + #13#10);
+      GConnection(conn).send(ansiColor(2) + '----------------------------------------------------------------------' + #13#10);
+      GConnection(conn).send(ansiColor(2) + edit_buffer + #13#10);
+      GConnection(conn).send(ansiColor(2) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
+      exit;
+      end;
+
+    if (uppercase(text) = 'C') then
+      begin
+      GConnection(conn).send(ansiColor(2) + 'Ok. Continue writing...' + #13#10);
+      GConnection(conn).send(ansiColor(2) + '----------------------------------------------------------------------' + #13#10);
+      GConnection(conn).send(ansiColor(2) + edit_buffer);
+      GConnection(conn).state := CON_EDITING;
+      sendPrompt;
+      exit;
+      end;
+
+    if (uppercase(text) = 'S') then
+      begin
+      sendEdit(edit_buffer);
+      exit;
+      end;
+
+    GConnection(conn).send(#13#10 + ansiColor(2) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
     exit;
     end;
 
-  if (text = '/s') then
+  if (text = '~') then
     begin
-    GConnection(conn).state := CON_PLAYING;
-
-    if (assigned(last_cmd)) then
-      COMMAND_FUNC(last_cmd^)(Self, '');
-
+    GConnection(conn).state := CON_EDIT_HANDLE;
+    GConnection(conn).send(#13#10 + ansiColor(2) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
     exit;
     end;
 
-  if (text = '/a') then
-    begin
-    sendBuffer('Aborting...'#13#10);
-    stopEditing;
-    exit;
-    end;
-
-  { if (strlen(text) + cardinal(ch.editor.size) >= MAX_STR_LENGTH) then
-    begin
-    sendtobuffer(ch,'Buffer is full.'#13#10);
-    strlcopy(strend(ch.editor.buffer),text,MAX_STR_LENGTH-ch.editor.size-2);
-    strcat(ch.editor.buffer,#13#10);
-    ch.descr.state:=CON_PLAYING;
-    if (assigned(ch.last_cmd)) then
-      ch.last_cmd(ch,'');
-    exit;
-    end
-  else }
-    begin
-    edit_buffer := edit_buffer + text + #13#10;
-    GConnection(conn).send('> ');
-    end;
+  edit_buffer := edit_buffer + text + #13#10;
+  GConnection(conn).send(ansiColor(2) + '> ');
 end;
 
 function GCharacter.ansiColor(color : integer) : string;
@@ -1740,6 +1844,30 @@ begin
 
   if (IS_AFK) then
     buf := buf +  '(AFK) ';
+
+  if (not IS_NPC) then
+    begin
+    if (substate = SUB_SUBJECT) then
+      begin
+      c.send(' ');
+      exit;
+      end;
+
+    if (c.state = CON_EDITING) then
+      begin
+      c.send('> ');
+      exit;
+      end;
+
+    if (c.state = CON_EDIT_HANDLE) then
+      begin
+      c.send(' ');
+      exit;
+      end;
+
+    if (c.pagepoint > 0) then
+      exit;
+    end;
 
   if (position = POS_CASTING) then
     buf := buf + '+';

@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.24 2001/04/16 17:08:52 xenon Exp $
+  $Id: grendel.dpr,v 1.25 2001/04/20 12:17:03 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -73,7 +73,8 @@ uses
   debug in 'units\debug.pas',
   mudspell in 'units\mudspell.pas',
   LibXmlParser in 'units\LibXmlParser.pas',
-  NameGen in 'units\NameGen.pas';
+  NameGen in 'units\NameGen.pas',
+  bulletinboard in 'units\bulletinboard.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -274,7 +275,9 @@ begin
     clan_list.clean;
     help_files.clean;
     dm_msg.clean;
+    notes.clean;
 
+    notes.Free;
     area_list.Free;
     room_list.Free;
     shop_list.Free;
@@ -612,6 +615,8 @@ begin
   load_help('help.dat');
   write_console('Loading namegenerator data...');
   loadNameTables(NameTablesDataFile);
+  write_console('Loading noteboards...');
+  load_notes('boards.dat');
 
   write_console('String hash stats: ');
   str_hash.hashStats;

@@ -398,19 +398,37 @@ const CON_PLAYING=0;
       CON_EDITING=11;
       CON_LOGGED_OUT=12;
       CON_CHECK_PASSWORD=13;
+      CON_EDIT_HANDLE=14;
       CON_MAX=14;
 
-      con_states:array[CON_PLAYING..CON_MAX-1] of string =(
+      con_states:array[CON_PLAYING..CON_MAX] of string =(
                 'CON_PLAYING','CON_ACCEPTED','CON_NAME',
                 'CON_PASSWORD','CON_NEW_NAME','CON_NEW_PASSWORD',
                 'CON_NEW_SEX','CON_NEW_RACE','CON_NEW_STATS',
                 'CON_PRESS_ENTER','CON_MOTD','CON_EDITING',
-                'CON_LOGGED_OUT','CON_CHECK_PASSWORD');
+                'CON_LOGGED_OUT','CON_CHECK_PASSWORD','CON_EDIT_HANDLE');
 
-{ character substate }
-const SUB_NONE = 0;
+{ Bulletinboards - Nemesis }
+const BOARD1     = 1;
+      BOARD2     = 2;
+      BOARD3     = 3;
+      BOARD_NEWS = 4;
+      BOARD_IMM  = 5;
+      BOARD_MAX  = 6;
+
+      board_names : array [BOARD1..BOARD_MAX-1] of string =
+      ('General', 'Bugs', 'Quests', 'News', 'Immortal');
+
+      board_descr : array [BOARD1..BOARD_MAX-1] of string =
+      ('General discussion', 'Bugs, Typos', 'Information about quests', 'News from the Immortals', 'Immortal business');
+
+
+{ character substates }
+const SUB_NONE        = 0;
       SUB_PLAYER_DESC = 1;
-      SUB_ROOM_DESC = 2;
+      SUB_ROOM_DESC   = 2;
+      SUB_NOTE        = 3;
+      SUB_SUBJECT     = 4;
 
 { act targets }
 const TO_ROOM=0;
@@ -418,6 +436,7 @@ const TO_ROOM=0;
       TO_NOTVICT=2;
       TO_CHAR=3;
       TO_ALL=4;
+      TO_IMM=5;
 
 { act colors }
 const AT_BLACK=0;

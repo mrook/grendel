@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.19 2001/04/16 17:21:49 xenon Exp $
+// $Id: conns.pas,v 1.20 2001/04/20 12:17:02 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -739,6 +739,8 @@ begin
       goto wind;
     if (typ = TO_NOTVICT) and ((to_ch = ch) or (to_ch = vch)) then
       goto wind;
+    if (typ = TO_IMM) and ((to_ch = ch) or (not to_ch.IS_IMMORT)) then
+     goto wind;
 
     txt := act_string(acts, to_ch, ch, arg1, arg2);
 

@@ -1,4 +1,4 @@
-// $Id: command.inc,v 1.12 2001/04/16 17:19:44 xenon Exp $
+// $Id: command.inc,v 1.13 2001/04/20 12:17:03 ***REMOVED*** Exp $
 
 {$F+}
 
@@ -379,6 +379,243 @@ begin
 
   ch.sendBuffer('You are now away from keyboard.'#13#10);
   ch.sendBuffer('Enter your password to unlock.'#13#10);
+end;
+
+// Handle Notes - Nemesis
+procedure do_note(ch : GCharacter; param : string);
+var arg1, arg2, buf : string;
+    number, counter : integer;
+    note : GNote;
+    node : GListNode;
+begin
+  if (ch.IS_NPC) then
+    exit;
+
+  param := one_argument(param, arg1);
+  one_argument(param, arg2);
+
+  if (length(arg1) = 0) then
+    begin
+    ch.sendBuffer('Usage: NOTE READ <number>'#13#10);
+    ch.sendBuffer('       NOTE WRITE'#13#10);
+    ch.sendBuffer('       NOTE LIST'#13#10);
+
+    if (ch.IS_IMMORT) then
+      ch.sendBuffer('       NOTE DELETE <number>'#13#10);
+
+    exit;
+    end
+  else
+  if (uppercase(arg1) = 'WRITE') then
+    begin
+    ch.substate := SUB_SUBJECT;
+
+    ch.sendBuffer('You are now away from keyboard.'#13#10#13#10);
+    act(AT_REPORT,'$n has left $s keyboard and starts writing a note.',false,ch,nil,nil,to_room);
+
+    ch.sendBuffer('You start writing a note on the ' + board_names[ch.player^.active_board] + ' board.'#13#10);
+    ch.startEditing('');
+    exit;
+    end
+  else
+  if (uppercase(arg1) = 'LIST') then
+    begin
+    counter := 0;
+    node := notes.head;
+
+    if (node = nil) then
+      begin
+      ch.sendBuffer('There are no notes on this board.'#13#10);
+      exit;
+      end;
+
+    while (node <> nil) do
+      begin
+      note := node.element;
+
+      if (note.board = ch.player^.active_board) then
+        begin
+        inc(counter);
+        buf := buf + ansiColor(2,0) + pad_integer_front(note.number,3) + '>  ' + pad_string(note.author,20) + note.subject + #13#10;
+        end;
+
+      node := node.next;
+      end;
+
+    if (counter = 0) then
+      buf := ansiColor(2,0) + 'There are no notes on this board.' + #13#10;
+
+    buf := ansiColor(2,0) + 'Num   Author              Subject' + #13#10 +
+           ansiColor(2,0) + '===   ==================  ======================' + #13#10 + buf;
+
+    ch.sendPager(buf);
+    exit;
+    end
+  else
+  if (uppercase(arg1) = 'READ') then
+    begin
+    if (length(arg2) = 0) then
+      begin
+      ch.sendBuffer('Usage: NOTE READ <number>'#13#10);
+      exit;
+      end;
+
+    try
+      number := strtoint(arg2);
+    except
+      ch.sendBuffer('Usage: NOTE READ <number>'#13#10);
+      exit;
+    end;
+
+    note := findNote(ch.player^.active_board, number);
+
+    if (note = nil) then
+      begin
+      ch.sendBuffer('That is not a valid number.'#13#10);
+      exit;
+      end;
+
+    buf := ansiColor(2,0) + add_chars(77, '=== NOTE ', '=') + #13#10 +
+           ansiColor(2,0) + 'Number:  ' + ansiColor(7,0) + inttostr(note.number) + #13#10 +
+           ansiColor(2,0) + 'Date:    ' + ansiColor(7,0) + note.date + #13#10 +
+           ansiColor(2,0) + 'Author:  ' + ansiColor(7,0) + note.author + #13#10 +
+           ansiColor(2,0) + 'Subject: ' + ansiColor(7,0) + note.subject + #13#10 +
+           ansiColor(2,0) + add_chars(77, '-', '-') + #13#10 +
+           ansiColor(7,0) + note.text +
+           ansiColor(2,0) + add_chars(77, '=', '=') + #13#10;
+
+    ch.sendPager(buf);
+
+    ch.player^.boards[ch.player^.active_board] := number;
+    exit;
+    end
+  else
+  if (uppercase(arg1) = 'DELETE') then
+    begin
+    if (length(arg2) = 0) then
+      begin
+      ch.sendBuffer('Usage: NOTE DELETE <number>'#13#10);
+      exit;
+      end;
+
+    try
+      number := strtoint(arg2);
+    except
+      ch.sendBuffer('Usage: NOTE DELETE <number>'#13#10);
+      exit;
+    end;
+
+    node := notes.head;
+
+    if (node = nil) then
+      begin
+      ch.sendBuffer('There are no notes to delete.'#13#10);
+      exit;
+      end;
+
+    while (node <> nil) do
+      begin
+      note := node.element;
+
+      if (note.board = ch.player^.active_board) and (note.number = number) then
+        begin
+        notes.remove(node);
+        save_notes;
+        ch.sendBuffer('Note succesfully deleted.'#13#10);
+        exit;
+        end;
+
+      node := node.next;
+      end;
+
+    ch.sendBuffer('Not a valid number.'#13#10);
+    exit;
+    end
+  else
+    begin
+    ch.sendBuffer('Usage: NOTE READ <number>'#13#10);
+    ch.sendBuffer('       NOTE WRITE'#13#10);
+    ch.sendBuffer('       NOTE LIST'#13#10);
+
+    if (ch.IS_IMMORT) then
+      ch.sendBuffer('       NOTE DELETE <number>'#13#10);
+
+    exit;
+    end
+end;
+
+// Bulletinboard - Nemesis
+procedure do_board(ch : GCharacter; param : string);
+var node : GListNode;
+    i, counter, boardnumber : integer;
+    note : GNote;
+    arg1 : string;
+begin
+  if (ch.IS_NPC) then
+    exit;
+
+  param := one_argument(param, arg1);
+
+  if (length(arg1) > 0) then
+    begin
+    try
+      boardnumber := strtoint(arg1);
+
+      if (boardnumber < BOARD1) or (boardnumber >= BOARD_MAX) or ((boardnumber = BOARD_IMM) and (not ch.IS_IMMORT)) then
+        begin
+        ch.sendBuffer('That board is not available.'#13#10);
+        exit;
+        end;
+
+      ch.player^.active_board := boardnumber;
+      ch.sendBuffer('Current board changed to ' + board_names[ch.player^.active_board] + '.'#13#10);
+      exit;
+    except
+      arg1 := '';
+    end;
+    end;
+
+  if (length(arg1) = 0) then
+    begin
+    ch.sendBuffer(ansiColor(2,0) + 'Num       Name New Description'#13#10);
+    ch.sendBuffer(ansiColor(2,0) + '=== ========== === ================'#13#10);
+
+    for i:=1 to BOARD_MAX-1 do
+      begin
+      counter := 0;
+      node := notes.head;
+
+      while (node <> nil) do
+        begin
+        note := node.element;
+
+        if (note.board = i) then
+          begin
+          if (note.number > counter) then
+            counter := note.number;
+          end;
+
+        node := node.next;
+        end;
+
+      counter := counter - ch.player^.boards[i];
+
+      if (i = BOARD_IMM) then
+        begin
+        if (ch.IS_IMMORT) then
+          ch.sendBuffer(ansiColor(2,0) + ' ' + inttostr(i) + '> ' + pad_string_front(board_names[i],10) + ' ' + pad_integer_front(counter,3) + ' ' + board_descr[i] + #13#10);
+        end
+      else
+        ch.sendBuffer(ansiColor(2,0) + ' ' + inttostr(i) + '> ' + pad_string_front(board_names[i],10) + ' ' + pad_integer_front(counter,3) + ' ' + board_descr[i] + #13#10);
+      end;
+
+    ch.sendBuffer(#13#10 + ansiColor(2,0) + 'Your current board is ' + board_names[ch.player^.active_board] + '.'#13#10);
+
+    if (ch.player^.active_board = BOARD_NEWS) and (not ch.IS_IMMORT) then
+      ch.sendBuffer(ansiColor(2,0) + 'You can only read from this board.'#13#10)
+    else
+      ch.sendBuffer(ansiColor(2,0) + 'You can both read and write on this board.'#13#10);
+    end;
 end;
 
 {$I include\cmd_imm.inc}
