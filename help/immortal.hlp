@@ -295,7 +295,7 @@ It will also remove any affects such as High and Drunk.
 #End=990
 #Keyword=AT
 
-[ 991] Nourish
+[ 991] At
 Syntax: AT <player> <command>
 
 This will execute given command at the players location.

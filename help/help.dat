@@ -34,3 +34,9 @@ You -< { { : : : DISINTEGRATE : : : } } >- a bit with your GODLY punch!!!!
 %INFO%, %VERSION%. %COPYRIGHT%.
 Additional code by Oscar Martin and Hemko de Visser.
 #End=0
+#Keyword=RACEINFO
+Syntax: RACEINFO [<racename>]
+
+Raceinfo without any parameters gives a list of races available to players.
+Raceinfo <racename> will give information on that particular race.
+#End=0

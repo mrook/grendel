@@ -1,23 +1,5 @@
 #Keyword=SKILLS
-[  2]  Slashing Weapons
-[  4]  Piercing Weapons
-[  5]  Kick
-[  5]  Whipping Weapons
-[  6]  Bash
-[  6]  Concussion Weapons
-[  9]  Sneaking
-[ 10]  Searching
-[ 10]  Dodge
-[ 12]  Second Attack
-[ 13]  Swim
-[ 15]  Rescue
-[ 16]  Backstab
-[ 18]  Dual Wield
-[ 18]  Circle
-[ 24]  Third Attack
-[ 28]  Enhanced Damage
-[ 32]  Fourth Attack
-[ 42]  Fifth Attack
+%SKILL_LIST%
 #End=0
 
 #Keyword='SLASHING WEAPONS'

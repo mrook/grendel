@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.23 2001/04/15 16:29:13 xenon Exp $
+  $Id: grendel.dpr,v 1.24 2001/04/16 17:08:52 xenon Exp $
 }
 
 program grendel;
@@ -231,7 +231,6 @@ end;
 
 procedure cleanup_mud;
 var
-   n : integer;
    node : GListNode;
 begin
   mud_booted := false;

@@ -1,37 +1,5 @@
 #Keyword=SPELLS
-[  1]  Magic Missile
-[  3]  Dust Devil
-[  5]  Burning Hands
-[  5]  Heal Light
-[  5]  Protection
-[  6]  Sandstorm
-[  8]  Acid Arrow
-[ 10]  Puncture
-[ 12]  Barrier
-[ 16]  Blindness
-[ 16]  Poison
-[ 16]  Word of Recall
-[ 18]  Vortex
-[ 18]  Cold
-[ 18]  Refresh
-[ 20]  Levitation
-[ 22]  Cure Blindness
-[ 25]  Lightning
-[ 28]  Aqua Breath
-[ 30]  Winds of Chaos
-[ 30]  Detect Invisible
-[ 34]  Healing
-[ 35]  Invisibility
-[ 37]  Identify
-[ 40]  Rain of Energy
-[ 40]  Enchantment
-[ 45]  Creeping Doom
-[ 50]  Aura of Enlightment
-[ 50]  Mass Funk
-[ 56]  Avalanche
-[ 60]  Voice of Thunder
-[ 80]  Summon
-[ 85]  Ray of Sunlight
+%SPELL_LIST%
 #End=0
 
 #Keyword='MAGIC MISSILE'
