@@ -33,6 +33,8 @@ type
       procedure Execute; override;
 
     public
+      last_update : TDateTime;
+      
       constructor Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
     end;
 
@@ -81,6 +83,7 @@ begin
   client_addr := a;
   copyover := copy;
   copyover_name := name;
+  last_update := Now();
 end;
 
 {$I include\command.inc}
@@ -491,7 +494,7 @@ begin
 
                     ch.player^.ld_timer := 0;
 
-                    act(AT_REPORT, 'You have reconnected.', false, ch, nil, nil, TO_CHAR);
+                    conn.send('You have reconnected.'#13#10);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.player^.flags, PLR_LINKLESS);
                     write_console('(' + inttostr(conn.socket) + ') ' + ch.name^ + ' has reconnected');
@@ -996,6 +999,8 @@ begin
 
     conn.fcommand:=false;
     sleep(100);
+
+    last_update := Now();
 
     conn.checkReceive;
 

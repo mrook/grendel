@@ -55,10 +55,12 @@ function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
 implementation
 
 uses
+    Winsock2,
     constants,
     mudsystem,
     skills,
     util,
+    mudthread,
     update,
     debug,
     area,
@@ -278,10 +280,15 @@ begin
     end;
 end;
 
+// kill a non-responsive thread after 30 seconds
+const
+     THREAD_TIMEOUT = 0.5 / 1440.0;
+
 procedure update_main;
 var
    node, node_next : GListNode;
    conn : GConnection;
+   ret : boolean;
 begin
   node := connection_list.head;
 
@@ -291,6 +298,34 @@ begin
     conn := node.element;
 
     inc(conn.idle);
+
+    if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
+      begin
+      bugreport('update_main', 'timers.pas', 'Thread of ' + conn.ch.name^ + ' probably died',
+                'The server has detected a malfunctioning user thread and will terminate it.');
+
+      conn.ch.emptyBuffer;
+
+      conn.send('Your previous command possibly triggered an illegal action on this server.'#13#10);
+      conn.send('The administration has been notified, and you have been disconnected'#13#10);
+      conn.send('to prevent any data loss.'#13#10);
+      conn.send('Your character is linkless, and it would be wise to reconnect as soon'#13#10);
+      conn.send('as possible.'#13#10);
+
+      closesocket(conn.socket);
+
+      conn.ch.conn := nil;
+
+      act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
+      SET_BIT(conn.ch.player^.flags,PLR_LINKLESS);
+
+      conn.Free;
+
+      TerminateThread(conn.thread.handle, 1);
+
+      node := node_next;
+      continue;
+      end;
 
     if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
      ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
