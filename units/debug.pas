@@ -303,7 +303,7 @@ begin
     writeConsole('Call stack follows:');
     showAddress(addr);
 
-    FillCallStack(st, false);
+    FillCallStack(st, 0);
 
     for a := 0 to 1 do
       begin
