@@ -3,6 +3,7 @@ unit dtypes;
 interface
 
 uses
+    SysUtils,
     SyncObjs;
 
 type
@@ -68,6 +69,13 @@ type
       procedure hashStats; override;
     end;
 
+    GException = class(Exception)
+      e_location : string;
+
+      constructor Create(location, msg : string);
+      procedure show;
+    end;
+
 const STR_HASH_SIZE = 1024;
 
 var
@@ -80,7 +88,6 @@ function defaultHash(size, prime : cardinal; key : string) : integer;
 implementation
 
 uses
-    SysUtils,
     mudsystem;
 
 // GListNode
@@ -471,6 +478,19 @@ begin
     hash_string := src;
     end;
 end;
+
+
+// GException
+constructor GException.Create(location, msg : string);
+begin
+  inherited Create(msg);
+end;
+
+procedure GException.show;
+begin
+  write_console('Exception ' + Message + ' @ ' + e_location);
+end;
+
 
 begin
   str_hash := GHashString.Create(STR_HASH_SIZE);
