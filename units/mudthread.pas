@@ -38,6 +38,11 @@ type
 
     COMMAND_FUNC = procedure(ch : GCharacter; param : string);
 
+    GCommandFunc = class
+      name : string;
+      func : COMMAND_FUNC;
+    end;
+
     GCommand = class
       name : string;
       func_name : string;
@@ -48,9 +53,13 @@ type
 
 var
    commands : GHashObject;
+   func_list : GDLinkedList;
 
 procedure load_commands;
 procedure interpret(ch : GCharacter; line : string);
+
+procedure registerCommand(name : string; func : COMMAND_FUNC);
+procedure registerCommands;
 
 implementation
 
@@ -90,492 +99,25 @@ end;
 function findCommand(s : string) : COMMAND_FUNC;
 var
    g : COMMAND_FUNC;
+   node : GListNode;
+   f : GCommandFunc;
 begin
-  if (comparestr(s, 'do_quit') = 0) then
-    g := do_quit
-  else
-  if (comparestr(s, 'do_save') = 0) then
-    g := do_save
-  else
-  if (comparestr(s, 'do_afk') = 0) then
-    g := do_afk
-  else
-  if (comparestr(s, 'do_help') = 0) then
-    g := do_help
-  else
-  if (comparestr(s, 'do_remort') = 0) then
-    g := do_remort
-  else
-  if (comparestr(s, 'do_delete') = 0) then
-    g := do_delete
-  else
-  if (comparestr(s, 'do_wimpy') = 0) then
-    g := do_wimpy
-  else
-  if (comparestr(s, 'do_time') = 0) then
-    g := do_time
-  else
-  if (comparestr(s, 'do_weather') = 0) then
-    g := do_weather
-  else
-  if (comparestr(s, 'do_look') = 0) then
-    g := do_look
-  else
-  if (comparestr(s, 'do_inventory') = 0) then
-    g := do_inventory
-  else
-  if (comparestr(s, 'do_equipment') = 0) then
-    g := do_equipment
-  else
-  if (comparestr(s, 'do_score') = 0) then
-    g := do_score
-  else
-  if (comparestr(s, 'do_stats') = 0) then
-    g := do_stats
-  else
-  if (comparestr(s, 'do_who') = 0) then
-    g := do_who
-  else
-  if (comparestr(s, 'do_title') = 0) then
-    g := do_title
-  else
-  if (comparestr(s, 'do_group') = 0) then
-    g := do_group
-  else
-  if (comparestr(s, 'do_follow') = 0) then
-    g := do_follow
-  else
-  if (comparestr(s, 'do_armor') = 0) then
-    g := do_armor
-  else
-  if (comparestr(s, 'do_config') = 0) then
-    g := do_config
-  else
-  if (comparestr(s, 'do_visible') = 0) then
-    g := do_visible
-  else
-  if (comparestr(s, 'do_trophy') = 0) then
-    g := do_trophy
-  else
-  if (comparestr(s, 'do_ditch') = 0) then
-    g := do_ditch
-  else
-  if (comparestr(s, 'do_world') = 0) then
-    g := do_world
-  else
-  if (comparestr(s, 'do_where') = 0) then
-    g := do_where
-  else
-  if (comparestr(s, 'do_kill') = 0) then
-    g := do_kill
-  else
-  if (comparestr(s, 'do_north') = 0) then
-    g := do_north
-  else
-  if (comparestr(s, 'do_south') = 0) then
-    g := do_south
-  else
-  if (comparestr(s, 'do_east') = 0) then
-    g := do_east
-  else
-  if (comparestr(s, 'do_west') = 0) then
-    g := do_west
-  else
-  if (comparestr(s, 'do_up') = 0) then
-    g := do_up
-  else
-  if (comparestr(s, 'do_down') = 0) then
-    g := do_down
-  else
-  if (comparestr(s, 'do_sleep') = 0) then
-    g := do_sleep
-  else
-  if (comparestr(s, 'do_wake') = 0) then
-    g := do_wake
-  else
-  if (comparestr(s, 'do_meditate') = 0) then
-    g := do_meditate
-  else
-  if (comparestr(s, 'do_rest') = 0) then
-    g := do_rest
-  else
-  if (comparestr(s, 'do_sit') = 0) then
-    g := do_sit
-  else
-  if (comparestr(s, 'do_stand') = 0) then
-    g := do_stand
-  else
-  if (comparestr(s, 'do_flee') = 0) then
-    g := do_flee
-  else
-  if (comparestr(s, 'do_flurry') = 0) then
-    g := do_flurry
-  else
-  if (comparestr(s, 'do_assist') = 0) then
-    g := do_assist
-  else
-  if (comparestr(s, 'do_disengage') = 0) then
-    g := do_disengage
-  else
-  if (comparestr(s, 'do_cast') = 0) then
-    g := do_cast
-  else
-  if (comparestr(s, 'do_bash') = 0) then
-    g := do_bash
-  else
-  if (comparestr(s, 'do_kick') = 0) then
-    g := do_kick
-  else
-  if (comparestr(s, 'do_fly') = 0) then
-    g := do_fly
-  else
-  if (comparestr(s, 'do_sneak') = 0) then
-    g := do_sneak
-  else
-  if (comparestr(s, 'do_spells') = 0) then
-    g := do_spells
-  else
-  if (comparestr(s, 'do_skills') = 0) then
-    g := do_skills
-  else
-  if (comparestr(s, 'do_learn') = 0) then
-    g := do_learn
-  else
-  if (comparestr(s, 'do_practice') = 0) then
-    g := do_practice
-  else
-  if (comparestr(s, 'do_enter') = 0) then
-    g := do_enter
-  else
-  if (comparestr(s, 'do_search') = 0) then
-    g := do_search
-  else
-  if (comparestr(s, 'do_backstab') = 0) then
-    g := do_backstab
-  else
-  if (comparestr(s, 'do_circle') = 0) then
-    g := do_circle
-  else
-  if (comparestr(s, 'do_chat') = 0) then
-    g := do_chat
-  else
-  if (comparestr(s, 'do_raid') = 0) then
-    g := do_raid
-  else
-  if (comparestr(s, 'do_immtalk') = 0) then
-    g := do_immtalk
-  else
-  if (comparestr(s, 'do_say') = 0) then
-    g := do_say
-  else
-  if (comparestr(s, 'do_tell') = 0) then
-    g := do_tell
-  else
-  if (comparestr(s, 'do_reply') = 0) then
-    g := do_reply
-  else
-  if (comparestr(s, 'do_yell') = 0) then
-    g := do_yell
-  else
-  if (comparestr(s, 'do_suggest') = 0) then
-    g := do_suggest
-  else
-  if (comparestr(s, 'do_pray') = 0) then
-    g := do_pray
-  else
-  if (comparestr(s, 'do_emote') = 0) then
-    g := do_emote
-  else
-  if (comparestr(s, 'do_auctalk') = 0) then
-    g := do_auctalk
-  else
-  if (comparestr(s, 'do_babbel') = 0) then
-    g := do_babbel
-  else
-  if (comparestr(s, 'do_shutdown') = 0) then
-    g := do_shutdown
-  else
-  if (comparestr(s, 'do_echo') = 0) then
-    g := do_echo
-  else
-  if (comparestr(s, 'do_thunder') = 0) then
-    g := do_thunder
-  else
-  if (comparestr(s, 'do_wizinvis') = 0) then
-    g := do_wizinvis
-  else
-  if (comparestr(s, 'do_sla') = 0) then
-    g := do_sla
-  else
-  if (comparestr(s, 'do_slay') = 0) then
-    g := do_slay
-  else
-  if (comparestr(s, 'do_affects') = 0) then
-    g := do_affects
-  else
-  if (comparestr(s, 'do_socials') = 0) then
-    g := do_socials
-  else
-  if (comparestr(s, 'do_advance') = 0) then
-    g := do_advance
-  else
-  if (comparestr(s, 'do_get') = 0) then
-    g := do_get
-  else
-  if (comparestr(s, 'do_wear') = 0) then
-    g := do_wear
-  else
-  if (comparestr(s, 'do_remove') = 0) then
-    g := do_remove
-  else
-  if (comparestr(s, 'do_drop') = 0) then
-    g := do_drop
-  else
-  if (comparestr(s, 'do_sacrificee') = 0) then
-    g := do_sacrifice
-  else
-  if (comparestr(s, 'do_swap') = 0) then
-    g := do_swap
-  else
-  if (comparestr(s, 'do_drink') = 0) then
-    g := do_drink
-  else
-  if (comparestr(s, 'do_eat') = 0) then
-    g := do_eat
-  else
-  if (comparestr(s, 'do_scalp') = 0) then
-    g := do_scalp
-  else
-  if (comparestr(s, 'do_give') = 0) then
-    g := do_give
-  else
-  if (comparestr(s, 'do_throw') = 0) then
-    g := do_throw
-  else
-  if (comparestr(s, 'do_alias') = 0) then
-    g := do_alias
-  else
-  if (comparestr(s, 'do_clanadd') = 0) then
-    g := do_clanadd
-  else
-  if (comparestr(s, 'do_clanremove') = 0) then
-    g := do_clanremove
-  else
-  if (comparestr(s, 'do_clantalk') = 0) then
-    g := do_clantalk
-  else
-  if (comparestr(s, 'do_clan') = 0) then
-    g := do_clan
-  else
-  if (comparestr(s, 'do_brag') = 0) then
-    g := do_brag
-  else
-  if (comparestr(s, 'do_force') = 0) then
-    g := do_force
-  else
-  if (comparestr(s, 'do_restore') = 0) then
-    g := do_restore
-  else
-  if (comparestr(s, 'do_goto') = 0) then
-    g := do_goto
-  else
-  if (comparestr(s, 'do_transfer') = 0) then
-    g := do_transfer
-  else
-  if (comparestr(s, 'do_peace') = 0) then
-    g := do_peace
-  else
-  if (comparestr(s, 'do_areas') = 0) then
-    g := do_areas
-  else
-  if (comparestr(s, 'do_connections') = 0) then
-    g := do_connections
-  else
-  if (comparestr(s, 'do_uptime') = 0) then
-    g := do_uptime
-  else
-  if (comparestr(s, 'do_grace') = 0) then
-    g := do_grace
-  else
-  if (comparestr(s, 'do_open') = 0) then
-    g := do_open
-  else
-  if (comparestr(s, 'do_close') = 0) then
-    g := do_close
-  else
-  if (comparestr(s, 'do_consider') = 0) then
-    g := do_consider
-  else
-  if (comparestr(s, 'do_scan') = 0) then
-    g := do_scan
-  else
-  if (comparestr(s, 'do_sacrifice') = 0) then
-    g := do_sacrifice
-  else
-  if (comparestr(s, 'do_bgset') = 0) then
-    g := do_bgset
-  else
-  if (comparestr(s, 'do_battle') = 0) then
-    g := do_battle
-  else
-  if (comparestr(s, 'do_auction') = 0) then
-    g := do_auction
-  else
-  if (comparestr(s, 'do_bid') = 0) then
-    g := do_bid
-  else
-  if (comparestr(s, 'do_balance') = 0) then
-    g := do_balance
-  else
-  if (comparestr(s, 'do_withdraw') = 0) then
-    g := do_withdraw
-  else
-  if (comparestr(s, 'do_deposit') = 0) then
-    g := do_deposit
-  else
-  if (comparestr(s, 'do_list') = 0) then
-    g := do_list
-  else
-  if (comparestr(s, 'do_buy') = 0) then
-    g := do_buy
-  else
-  if (comparestr(s, 'do_sell') = 0) then
-    g := do_sell
-  else
-  if (comparestr(s, 'do_rescue') = 0) then
-    g := do_rescue
-  else
-  if (comparestr(s, 'do_disconnect') = 0) then
-    g := do_disconnect
-  else
-  if (comparestr(s, 'do_wizhelp') = 0) then
-    g := do_wizhelp
-  else
-  if (comparestr(s, 'do_rstat') = 0) then
-    g := do_rstat
-  else
-  if (comparestr(s, 'do_mstat') = 0) then
-    g := do_mstat
-  else
-  if (comparestr(s, 'do_ostat') = 0) then
-    g := do_ostat
-  else
-  if (comparestr(s, 'do_report') = 0) then
-    g := do_report
-  else
-  if (comparestr(s, 'do_destroy') = 0) then
-    g := do_destroy
-  else
-  if (comparestr(s, 'do_loadup') = 0) then
-    g := do_loadup
-  else
-  if (comparestr(s, 'do_freeze') = 0) then
-    g := do_freeze
-  else
-  if (comparestr(s, 'do_silence') = 0) then
-    g := do_silence
-  else
-  if (comparestr(s, 'do_log') = 0) then
-    g := do_log
-  else
-  if (comparestr(s, 'do_snoop') = 0) then
-    g := do_snoop
-  else
-  if (comparestr(s, 'do_switch') = 0) then
-    g := do_switch
-  else
-  if (comparestr(s, 'do_return') = 0) then
-    g := do_return
-  else
-  if (comparestr(s, 'do_sconfig') = 0) then
-    g := do_sconfig
-  else
-  if (comparestr(s, 'do_track') = 0) then
-    g := do_track
-  else
-  if (comparestr(s, 'do_bamfin') = 0) then
-    g := do_bamfin
-  else
-  if (comparestr(s, 'do_bamfout') = 0) then
-    g := do_bamfout
-  else
-  if (comparestr(s, 'do_mload') = 0) then
-    g := do_mload
-  else
-  if (comparestr(s, 'do_oload') = 0) then
-    g := do_oload
-  else
-  if (comparestr(s, 'do_mfind') = 0) then
-    g := do_mfind
-  else
-  if (comparestr(s, 'do_ofind') = 0) then
-    g := do_ofind
-  else
-  if (comparestr(s, 'do_put') = 0) then
-    g := do_put
-  else
-  if (comparestr(s, 'do_sset') = 0) then
-    g := do_sset
-  else
-  if (comparestr(s, 'do_taunt') = 0) then
-    g := do_taunt
-  else
-  if (comparestr(s, 'do_nourish') = 0) then
-    g := do_nourish
-  else
-  if (comparestr(s, 'do_mana') = 0) then
-    g := do_mana
-  else
-  if (comparestr(s, 'do_fill') = 0) then
-    g := do_fill
-  else
-  if (comparestr(s, 'do_unlock') = 0) then
-    g := do_unlock
-  else
-  if (comparestr(s, 'do_lock') = 0) then
-    g := do_lock
-  else
-  if (comparestr(s, 'do_ascore') = 0) then
-    g := do_ascore
-  else
-  if (comparestr(s, 'do_revive') = 0) then
-    g := do_revive
-  else
-  if (comparestr(s, 'do_setpager') = 0) then
-    g := do_setpager
-  else
-  if (comparestr(s, 'do_autoloot') = 0) then
-    g := do_autoloot
-  else
-  if (comparestr(s, 'do_autosac') = 0) then
-    g := do_autosac
-  else
-  if (comparestr(s, 'do_password') = 0) then
-    g := do_password
-  else
-  if (comparestr(s, 'do_ban') = 0) then
-    g := do_ban
-  else
-  if (comparestr(s, 'do_allow') = 0) then
-    g := do_allow
-  else
-  if (comparestr(s, 'do_last') = 0) then
-    g := do_last
-  else
-  if (comparestr(s, 'do_unlearn') = 0) then
-    g := do_unlearn
-  else
-  if (comparestr(s, 'do_hashstats') = 0) then
-    g := do_hashstats
-  else
+  Result := nil;
+
+  node := func_list.head;
+
+  while (node <> nil) do
     begin
-    g := nil;
+    f := node.element;
 
-    //bugreport('findCommand', 'mudthread.pas', s + ' unknown',
-    //          'This command has not been found. Please check your settings.');
+    if (f.name = s) then
+      begin
+      Result := f.func;
+      break;
+      end;
+
+    node := node.next;
     end;
-
-  findCommand := g;
 end;
 
 procedure load_commands;
@@ -1504,5 +1046,198 @@ begin
   conn.Free;
 end;
 
+// command stuff
+procedure registerCommand(name : string; func : COMMAND_FUNC);
+var
+   g : GCommandFunc;
+   node : GListNode;
+begin
+  node := func_list.head;
+
+  while (node <> nil) do
+    begin
+    g := node.element;
+
+    if (g.name = name) or (pointer(@g.func) = pointer(@func)) then
+      begin
+      bugreport('registerCommand', 'mudthread.pas', 'Command ' + name + ' registered twice.', 'Command ' + name + ' registered twice.');
+      exit;
+      end;
+
+    node := node.next;
+    end;
+
+  g := GCommandFunc.Create;
+
+  g.name := name;
+  g.func := func;
+
+  func_list.insertLast(g);
+end;
+
+procedure registerCommands;
+begin
+  registerCommand('do_quit', do_quit);
+  registerCommand('do_save', do_save);
+  registerCommand('do_afk', do_afk);
+  registerCommand('do_help', do_help);
+  registerCommand('do_remort', do_remort);
+  registerCommand('do_delete', do_delete);
+  registerCommand('do_wimpy', do_wimpy);
+  registerCommand('do_time', do_time);
+  registerCommand('do_weather', do_weather);
+  registerCommand('do_look', do_look);
+  registerCommand('do_inventory', do_inventory);
+  registerCommand('do_equipment', do_equipment);
+  registerCommand('do_score', do_score);
+  registerCommand('do_stats', do_stats);
+  registerCommand('do_who', do_who);
+  registerCommand('do_title', do_title);
+  registerCommand('do_group', do_group);
+  registerCommand('do_follow', do_follow);
+  registerCommand('do_armor', do_armor);
+  registerCommand('do_config', do_config);
+  registerCommand('do_visible', do_visible);
+  registerCommand('do_trophy', do_trophy);
+  registerCommand('do_ditch', do_ditch);
+  registerCommand('do_world', do_world);
+  registerCommand('do_where', do_where);
+  registerCommand('do_kill', do_kill);
+  registerCommand('do_north', do_north);
+  registerCommand('do_south', do_south);
+  registerCommand('do_east', do_east);
+  registerCommand('do_west', do_west);
+  registerCommand('do_up', do_up);
+  registerCommand('do_down', do_down);
+  registerCommand('do_sleep', do_sleep);
+  registerCommand('do_wake', do_wake);
+  registerCommand('do_meditate', do_meditate);
+  registerCommand('do_rest', do_rest);
+  registerCommand('do_sit', do_sit);
+  registerCommand('do_stand', do_stand);
+  registerCommand('do_flee', do_flee);
+  registerCommand('do_flurry', do_flurry);
+  registerCommand('do_assist', do_assist);
+  registerCommand('do_disengage', do_disengage);
+  registerCommand('do_cast', do_cast);
+  registerCommand('do_bash', do_bash);
+  registerCommand('do_kick', do_kick);
+  registerCommand('do_fly', do_fly);
+  registerCommand('do_sneak', do_sneak);
+  registerCommand('do_spells', do_spells);
+  registerCommand('do_skills', do_skills);
+  registerCommand('do_learn', do_learn);
+  registerCommand('do_practice', do_practice);
+  registerCommand('do_enter', do_enter);
+  registerCommand('do_search', do_search);
+  registerCommand('do_backstab', do_backstab);
+  registerCommand('do_circle', do_circle);
+  registerCommand('do_chat', do_chat);
+  registerCommand('do_raid', do_raid);
+  registerCommand('do_immtalk', do_immtalk);
+  registerCommand('do_say', do_say);
+  registerCommand('do_tell', do_tell);
+  registerCommand('do_reply', do_reply);
+  registerCommand('do_yell', do_yell);
+  registerCommand('do_suggest', do_suggest);
+  registerCommand('do_pray', do_pray);
+  registerCommand('do_emote', do_emote);
+  registerCommand('do_auctalk', do_auctalk);
+  registerCommand('do_babbel', do_babbel);
+  registerCommand('do_shutdown', do_shutdown);
+  registerCommand('do_echo', do_echo);
+  registerCommand('do_thunder', do_thunder);
+  registerCommand('do_wizinvis', do_wizinvis);
+  registerCommand('do_sla', do_sla);
+  registerCommand('do_slay', do_slay);
+  registerCommand('do_affects', do_affects);
+  registerCommand('do_socials', do_socials);
+  registerCommand('do_advance', do_advance);
+  registerCommand('do_get', do_get);
+  registerCommand('do_wear', do_wear);
+  registerCommand('do_remove', do_remove);
+  registerCommand('do_drop', do_drop);
+  registerCommand('do_swap', do_swap);
+  registerCommand('do_drink', do_drink);
+  registerCommand('do_eat', do_eat);
+  registerCommand('do_scalp', do_scalp);
+  registerCommand('do_give', do_give);
+  registerCommand('do_throw', do_throw);
+  registerCommand('do_alias', do_alias);
+  registerCommand('do_clanadd', do_clanadd);
+  registerCommand('do_clanremove', do_clanremove);
+  registerCommand('do_clantalk', do_clantalk);
+  registerCommand('do_clan', do_clan);
+  registerCommand('do_brag', do_brag);
+  registerCommand('do_force', do_force);
+  registerCommand('do_restore', do_restore);
+  registerCommand('do_goto', do_goto);
+  registerCommand('do_transfer', do_transfer);
+  registerCommand('do_peace', do_peace);
+  registerCommand('do_areas', do_areas);
+  registerCommand('do_connections', do_connections);
+  registerCommand('do_uptime', do_uptime);
+  registerCommand('do_grace', do_grace);
+  registerCommand('do_open', do_open);
+  registerCommand('do_close', do_close);
+  registerCommand('do_consider', do_consider);
+  registerCommand('do_scan',  do_scan);
+  registerCommand('do_sacrifice', do_sacrifice);
+  registerCommand('do_bgset', do_bgset);
+  registerCommand('do_battle', do_battle);
+  registerCommand('do_auction', do_auction);
+  registerCommand('do_bid', do_bid);
+  registerCommand('do_balance', do_balance);
+  registerCommand('do_withdraw', do_withdraw);
+  registerCommand('do_deposit', do_deposit);
+  registerCommand('do_list', do_list);
+  registerCommand('do_buy', do_buy);
+  registerCommand('do_sell', do_sell);
+  registerCommand('do_rescue', do_rescue);
+  registerCommand('do_disconnect', do_disconnect);
+  registerCommand('do_wizhelp', do_wizhelp);
+  registerCommand('do_rstat', do_rstat);
+  registerCommand('do_mstat', do_mstat);
+  registerCommand('do_ostat', do_ostat);
+  registerCommand('do_report', do_report);
+  registerCommand('do_destroy', do_destroy);
+  registerCommand('do_loadup', do_loadup);
+  registerCommand('do_freeze', do_freeze);
+  registerCommand('do_silence', do_silence);
+  registerCommand('do_log', do_log);
+  registerCommand('do_snoop', do_snoop);
+  registerCommand('do_switch', do_switch);
+  registerCommand('do_return', do_return);
+  registerCommand('do_sconfig', do_sconfig);
+  registerCommand('do_track', do_track);
+  registerCommand('do_bamfin', do_bamfin);
+  registerCommand('do_bamfout', do_bamfout);
+  registerCommand('do_mload', do_mload);
+  registerCommand('do_oload', do_oload);
+  registerCommand('do_mfind', do_mfind);
+  registerCommand('do_ofind', do_ofind);
+  registerCommand('do_put', do_put);
+  registerCommand('do_sset', do_sset);
+  registerCommand('do_taunt', do_taunt);
+  registerCommand('do_nourish', do_nourish);
+  registerCommand('do_mana', do_mana);
+  registerCommand('do_fill', do_fill);
+  registerCommand('do_unlock', do_unlock);
+  registerCommand('do_lock', do_lock);
+  registerCommand('do_ascore', do_ascore);
+  registerCommand('do_revive', do_revive);
+  registerCommand('do_setpager', do_setpager);
+  registerCommand('do_autoloot', do_autoloot);
+  registerCommand('do_autosac', do_autosac);
+  registerCommand('do_password', do_password);
+  registerCommand('do_ban', do_ban);
+  registerCommand('do_allow', do_allow);
+  registerCommand('do_last', do_last);
+  registerCommand('do_unlearn', do_unlearn);
+  registerCommand('do_hashstats', do_hashstats);
+end;
+
+begin
+  func_list := GDLinkedList.Create;
 end.
 

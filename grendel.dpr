@@ -593,6 +593,7 @@ begin
   write_console('Loading skills...');
   load_skills;
   write_console('Loading texts...');
+  registerCommands;
   load_commands;
   load_socials;
   load_damage;
