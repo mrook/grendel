@@ -313,6 +313,12 @@ begin
     txt_room := 'stumbles';
     end
   else
+  if (IS_SET(ch.room.flags, ROOM_NOFLOOR)) then
+    begin
+    txt_ch := 'fall';
+    txt_room := 'falls';
+    end
+  else
     begin
     txt_ch := 'walk';
     txt_room := 'walks';
@@ -404,6 +410,19 @@ begin
       end;
 
     node := node.next;
+    end;
+    
+  if (IS_SET(ch.room.flags, ROOM_NOFLOOR)) and (not ch.IS_FLYING) then
+    begin
+    pexit := ch.room.findExit(DIR_DOWN);
+    
+    if (pexit <> nil) then
+      begin   
+      ch.sendBuffer(#13#10'Suddenly you discover that the floor underneath you is missing!'#13#10);  
+      act(AT_GREY, 'Unable to fly, $n plummets into the depths below.', false, ch, nil, nil, TO_ROOM);
+      
+      do_move(ch, pexit);     
+      end;
     end;
 
   do_move := true;
