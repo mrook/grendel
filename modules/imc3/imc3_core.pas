@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.21 2003/11/02 20:41:27 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.22 2003/11/04 16:41:23 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -543,16 +543,24 @@ var
 begin
 	username := GString(packet.fields[6]).value;
 	
-	pl := findPlayerWorldEx(nil, username);
-	
-	if (pl <> nil) then
+	if (existsPlayer(username)) then
 		begin
+		pl := findPlayerWorldEx(nil, username);
+	
 		writeHeader('locate-reply', this_mud.name, '', packet.originator_mudname, packet.originator_username);
 		writeBuffer('"');
 		writeBuffer(this_mud.name);
 		writeBuffer('","');
 		writeBuffer(pl.name);
-		writeBuffer('",0,"",})'#13);
+		writeBuffer('",0,"');
+		
+		if (pl <> nil) then
+			writeBuffer('Online')
+		else
+			writeBuffer('Offline');
+		
+		writeBuffer('",})'#13);
+		
 		sendPacket();
 		end;
 end;
