@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.4 2004/01/25 16:36:28 hemko Exp $
+  ## $Id: area.pas,v 1.5 2004/01/26 22:21:22 hemko Exp $
 }
 
 unit area;
@@ -1593,17 +1593,21 @@ begin
           end;
       'D':begin
           room := findRoom(reset.arg1);
+
           if (room = nil) then
             begin
             bugreport('GArea.reset (D) area: ' + name, 'area.pas', 'room #' + IntToStr(reset.arg1) + ' null');
-            exit;
+	    node_reset := node_reset.next;
+            continue;
             end;
 
           pexit := room.findExit(reset.arg2);
+
           if (pexit = nil) then
             begin
             bugreport('GArea.reset (D) area: ' + name, 'area.pas', 'direction ' + IntToStr(reset.arg2) + ' has no exit in room ' + IntToStr(reset.arg1));
-            exit;
+            node_reset := node_reset.next;
+            continue;
             end;
 
           // Added reverse exits - Nemesis
