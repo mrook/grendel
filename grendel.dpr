@@ -21,13 +21,15 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.25 2001/04/20 12:17:03 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.26 2001/04/26 21:01:08 xenon Exp $
 }
 
 program grendel;
 
 {$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000,2001 by Michiel Rook.'}
 {$APPTYPE CONSOLE}
+
+{$DEFINE Grendel}
 
 {$W+}
 
@@ -74,7 +76,8 @@ uses
   mudspell in 'units\mudspell.pas',
   LibXmlParser in 'units\LibXmlParser.pas',
   NameGen in 'units\NameGen.pas',
-  bulletinboard in 'units\bulletinboard.pas';
+  bulletinboard in 'units\bulletinboard.pas',
+  Channels in 'units\Channels.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -299,6 +302,14 @@ begin
     auction_evil.Free;
     banned_masks.Free;
 
+    if (namegenerator_enabled) then
+    begin
+      PhonemeList.Clean();
+      PhonemeList.Free();
+      NameTemplateList.Clean();
+      NameTemplateList.Free();
+    end;
+    
     connection_list.clean;
     connection_list.Free;
     commands.Free;
@@ -609,6 +620,8 @@ begin
   load_commands;
   load_socials;
   load_damage;
+  write_console('Loading channels...');
+  load_channels();
   write_console('Loading areas...');
   load_areas;
   write_console('Loading help...');
