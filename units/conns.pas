@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.55 2003/10/29 12:57:50 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.56 2003/10/30 19:50:20 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -70,7 +70,7 @@ type
       _idle : integer;
       
       input_buf : string;
-      _comm_buf : string;
+      comm_buf : string;
       last_line : string;
       sendbuffer : string;
 
@@ -111,8 +111,6 @@ type
 
     	property idle : integer read _idle write _idle;
 
-			property comm_buf : string read _comm_buf write _comm_buf;
-    	    	
     	property last_update : TDateTime read _lastupdate;
     	
     	property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
@@ -148,10 +146,16 @@ uses
 // GConnection
 constructor GConnection.Create(socket : GSocket);
 begin
-  inherited Create(false);
+  inherited Create(true);
 
   _socket := socket;
+
   _idle := 0;
+
+	comm_buf := '';
+	input_buf := '';
+	last_line := '';
+	sendbuffer := '';
   
   compress := false;
 
@@ -174,11 +178,11 @@ begin
   sendIAC(IAC_WILL, [IAC_COMPRESS2]);
 
   read();
-  
+
   if (Assigned(FOnOpen)) then
   	FOnOpen();
 
-  writeConsole('(' + IntToStr(socket.getDescriptor) + ') New connection (' + socket.host_string + ')');
+  writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.host_string + ')');
    
   while (not Terminated) do
   	begin
@@ -203,8 +207,7 @@ begin
 	if (Assigned(FOnClose)) then
 		FOnClose();
 		
-	socket.disconnect();
-
+  _socket.disconnect();
   connection_list.remove(node);  
 end;
 
@@ -214,7 +217,7 @@ var
 	compress_buf : array[0..4095] of char;
 begin
 	try
-		while (not socket.canWrite()) do;
+		while (not _socket.canWrite()) do;
 		
 		if (compress) then
 			begin
@@ -227,10 +230,10 @@ begin
 
 			compress_size := 4096 - strm.avail_out;
 			
-			socket.send(compress_buf, compress_size);
+			_socket.send(compress_buf, compress_size);
   		end
   	else
-			socket.send(s^, len);
+			_socket.send(s^, len);
   except
     Terminate();
   end;
@@ -241,7 +244,7 @@ begin
 	send(@s[1], length(s));
 end;
 
-procedure GConnection.read;
+procedure GConnection.read();
 var s, read : integer;
     buf : array[0..MAX_RECEIVE-1] of char;
 begin
@@ -249,20 +252,23 @@ begin
     exit;
 
   try
-    if (not socket.canRead()) then
+    if (not _socket.canRead()) then
       exit;
   except
-    try
-      Terminate();
-    except
-			writeConsole('(' + IntToStr(socket.getDescriptor) + ') could not terminate thread');
-    end;
+	on E : Exception do
+	begin
+	Terminate();
+	exit;
+	end;
   end;
   
   idle := 0;
 
   repeat
-    read := recv(socket.getDescriptor, buf, MAX_RECEIVE - 10, 0);
+	if (not _socket.canRead()) then
+		break;
+
+    read := recv(_socket.getDescriptor, buf, MAX_RECEIVE - 10, 0);
 
     if (read > 0) then
       begin
@@ -274,12 +280,7 @@ begin
     else
     if (read = 0) then
       begin
-      try
         Terminate();
-      except
-          writeConsole('(' + IntToStr(socket.getDescriptor) + ') could not terminate thread');
-      end;
-
       exit;
       end
     else
@@ -292,12 +293,7 @@ begin
         break
       else
         begin
-        try
           Terminate();
-        except
-          writeConsole('(' + IntToStr(socket.getDescriptor) + ') could not terminate thread');
-        end;
-
         exit;
         end;
 {$ELSE}
@@ -318,7 +314,7 @@ begin
 	for i := 0 to length(params) - 1 do
 		buf[2 + i] := chr(params[i]);
   	
-	while (not socket.canWrite()) do;
+	while (not _socket.canWrite()) do;
   	
   send(buf, 2 + length(params));
 end;
@@ -350,7 +346,7 @@ begin
 										inc(i);
     								case byte(input_buf[i]) of
     									IAC_COMPRESS2:	begin
-    																	writeConsole('(' + IntToStr(socket.getDescriptor) + ') Client has MCCPv2');
+    																	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') Client has MCCPv2');
     																	sendIAC(IAC_SB, [IAC_COMPRESS2]);
     																	sendIAC(IAC_SE, []);
     																	compress := true;
@@ -395,7 +391,7 @@ begin
   while (i <= length(input_buf)) and (input_buf[i] <> #13) and (input_buf[i] <> #10) do
     begin
     if ((input_buf[i] = #8) or (input_buf[i] = #127)) then
-      delete(_comm_buf, length(_comm_buf), 1)
+      delete(comm_buf, length(comm_buf), 1)
     else
     //if (byte(input_buf[i]) > 31) and (byte(input_buf[i]) < 127) then
       begin

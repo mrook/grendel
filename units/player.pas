@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.12 2003/10/29 15:35:28 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.13 2003/10/30 19:50:20 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -248,6 +248,8 @@ begin
 	ch := GPlayer.Create(Self);
 
   node := connection_list.insertLast(Self);
+
+	Resume();
 end;
 
 procedure GPlayerConnection.OnOpenEvent();
