@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.16 2004/03/04 19:44:20 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.17 2004/03/06 18:29:30 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -525,8 +525,11 @@ begin
           end;
         end;
       end;
-
-    room_list.put(vnum, room);
+     
+		if (room_list.get(vnum) <> nil) then
+			areaBug('loadRooms()', 'room #' + IntToStr(vnum) + ' defined at least twice')
+		else
+    	room_list.put(vnum, room);
   until (uppercase(s) = '#END');
 end;
 
