@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.9 2001/04/28 16:06:26 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.10 2001/04/28 19:05:20 ***REMOVED*** Exp $
 
 unit update;
 
@@ -426,7 +426,7 @@ begin
 
     while (node_room <> nil) do
       begin
-      room := node_room.element;
+      room := GRoom(GHashValue(node_room.element).value);
       node_track := room.tracks.head;
 
       while (node_track <> nil) do

@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.25 2001/04/28 16:06:26 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.26 2001/04/28 19:05:19 ***REMOVED*** Exp $
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
@@ -1546,7 +1546,7 @@ begin
 
     while (node <> nil) do
       begin
-      room := node.element;
+      room := GRoom(GHashValue(node.element).value);
 
       if (room.vnum > vnum) and (room.vnum<=ch.player^.r_hi) then
         vnum:=room.vnum;
@@ -2031,7 +2031,7 @@ begin
 
     while (node <> nil) do
       begin
-      room := node.element;
+      room := GRoom(GHashValue(node.element).value);
 
       if (room.area = area) then
         begin
