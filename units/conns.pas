@@ -74,7 +74,7 @@ implementation
 uses
     progs;
 
-procedure parse_line(p : string);
+(* procedure parse_line(p : string);
 var a : word;
     s1, s2 : string;
 begin
@@ -94,10 +94,10 @@ begin
           dec(a);
           end;
  #127,#8: begin
-          (* if (a + 1 > (length(p) - 1)) then
+          { if (a + 1 > (length(p) - 1)) then
             s1 := ' '
           else
-            s1 := @p[a + 1]; *)
+            s1 := @p[a + 1]; }
 
           if (integer(a) - 1 >= 1) then
             delete(p, a - 1, 1);
@@ -113,7 +113,7 @@ begin
 
     inc(a);
   until (a > length(p));
-end;
+end; *)
 
 // GConnection
 constructor GConnection.Create(sock : TSocket; addr : TSockAddr_Storage; thr : TThread);
@@ -170,15 +170,18 @@ begin
       end;
     end;
 
-  (* if (system_info.lookup_hosts) then
+  if (system_info.lookup_hosts) then
     begin
-    h := gethostbyaddr(@a.sin_addr.s_addr, 4, PF_INET);
+    { h := gethostbyaddr(@a.sin_addr.s_addr, 4, PF_INET);
 
     if (h <> nil) then
       host_string := h.h_name
     else
-      host_string := inet_ntoa(a.sin_addr);
-    end; *)
+      host_string := inet_ntoa(a.sin_addr); }
+    host_string := '';
+    end
+  else
+    host_string := ip_string;
 
   new(tel_val);
 
@@ -397,15 +400,6 @@ begin
       inc(lines);
 
     dec(pagepoint);
-    end;
-
-  if (pagepoint >= 1) and (pagebuf[pagepoint] = #13) then
-    begin
-    repeat
-      inc(pagepoint);
-    until (pagebuf[pagepoint] = #10);
-
-    inc(pagepoint);
     end;
 
   if (pagepoint < 1) then
