@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.15 2004/03/18 09:57:07 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.16 2004/03/18 15:14:32 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -328,7 +328,6 @@ end;
 procedure serverExitProc; far;
 var
 	f : TextFile;
-	serverInstance : GServer;
 begin
 	ExitProc := oldExitProc;
 	
@@ -350,7 +349,9 @@ begin
 		Sleep(1000);
 
 		// give operator/logfile a message
-		writeConsole('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
+		{$IFDEF CONSOLEBUILD}
+		writeln('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
+		{$ENDIF}
 
 		rebootServer();
 		end;
