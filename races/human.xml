@@ -4,6 +4,9 @@
 <race xmlns="http://www.grendelproject.nl/xml/">
 	<name>Human</name>
 	<short>Hum</short>
+	<avgheight_adjust>16</avgheight_adjust>
+	<avgheight_female>170</avgheight_female>
+	<avgheight_male>178</avgheight_male>
 	<alignment>0</alignment>
 	<convert>true</convert>
 	<skills>15</skills>

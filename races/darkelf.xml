@@ -4,6 +4,9 @@
 <race xmlns="http://www.grendelproject.nl/xml/">
 	<name>Dark-Elf</name>
 	<short>Del</short>
+	<avgheight_adjust>15</avgheight_adjust>
+	<avgheight_female>183</avgheight_female>
+	<avgheight_male>187</avgheight_male>
 	<alignment>-1000</alignment>
 	<convert>true</convert>
 	<skills>10</skills>
