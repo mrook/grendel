@@ -722,30 +722,101 @@ begin
   act(AT_REPORT,'You draw your weapon and rip off $p.',false,ch,scalp,nil,TO_CHAR);
 end;
 
+{ Added give ALL and give <amount> COINS <char> - Nemesis }
 procedure do_give(ch:GCharacter;param:string);
-var arg,arg2:string;
-    obj:GObject;
-    vict:GCharacter;
+var arg, arg2, arg3 : string;
+    obj : GObject;
+    vict : GCharacter;
+    value : integer;
+    node : GListNode;
 begin
-  param:=one_argument(param,arg);
-  one_argument(param,arg2);
+  param := one_argument(param,arg);
+  param := one_argument(param,arg2);
+  one_argument(param,arg3);
 
-  if (length(arg)=0) or (length(arg2)=0) then
+  if (length(arg) = 0) or (length(arg2) = 0) then
     begin
     ch.sendBuffer('Give what to whom?'#13#10);
+    exit;
+    end;
+
+  if (length(arg) > 0) and (length(arg2) > 0) and (uppercase(arg2) <> 'COINS') and (length(arg3) > 0) then
+    begin
+    ch.sendBuffer('Give what to whom?'#13#10);
+    exit;
+    end;
+
+  if (length(arg) > 0) and (uppercase(arg2) = 'COINS') and (length(arg3) > 0) then
+    begin
+    vict := ch.room.findChar(ch,arg3);
+
+    if (vict = nil) then
+      begin
+      ch.sendBuffer('They are not here.'#13#10);
+      exit;
+      end;
+
+    try
+      value := strtoint(arg);
+    except
+      begin
+      ch.sendBuffer('You must type a value.'#13#10);
+      exit;
+      end;
+    end;
+
+    if (value > ch.gold) then
+      begin
+      ch.sendBuffer('You don''t have that much money.'#13#10);
+      exit;
+      end;
+
+    dec(ch.gold, value);
+    inc(vict.gold, value);
+
+    act(AT_REPORT,'You give ' + inttostr(value) + ' coins to $N.',false,ch,nil,vict,TO_CHAR);
+    act(AT_REPORT,'$n gives you ' + inttostr(value) + ' coins.',false,ch,nil,vict,TO_VICT);
+    act(AT_REPORT,'$N gives $n some coins.',false,vict,nil,ch,TO_NOTVICT);
+    exit;
+    end;
+
+  if (uppercase(arg) = 'ALL') and (length(arg2) > 0) then
+    begin
+    vict := ch.room.findChar(ch,arg2);
+
+    if (vict = nil) then
+      begin
+      ch.sendBuffer('They are not here.'#13#10);
+      exit;
+      end;
+
+    repeat
+      node := ch.objects.tail;
+
+      obj := node.element;
+
+      act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
+      act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
+
+      obj.seperate;
+      obj.fromChar;
+      obj.toChar(vict);
+
+    until (ch.objects.tail = nil);
+
     exit;
     end;
 
   obj := ch.findInventory(arg);
   vict := ch.room.findChar(ch,arg2);
 
-  if (obj=nil) then
+  if (obj = nil) then
     begin
     ch.sendBuffer('You are not carrying that.'#13#10);
     exit;
     end;
 
-  if (vict=nil) then
+  if (vict = nil) then
     begin
     ch.sendBuffer('They are not here.'#13#10);
     exit;
