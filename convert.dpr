@@ -157,10 +157,10 @@ begin
     s := af.readLine;
 
     if (pos('#AREA',s) > 0) then
-      are.name := trim(stripl(striprbeg(s, ' '), '~'))
+      are.name := trim(left(right(s, ' '), '~'))
     else
     if (pos('#AUTHOR',s) > 0) then
-      are.author := trim(stripl(striprbeg(s, ' '), '~'))
+      are.author := trim(left(right(s, ' '), '~'))
     else
     if (s = '#ROOMS') then
       repeat
@@ -169,14 +169,14 @@ begin
         if (s <> '#0') then
           begin
           // vnum
-          act_flags := strtoint(striprbeg(s, '#'));
+          act_flags := strtoint(right(s, '#'));
 
           room := GRoom.Create(act_flags, are);
-          room_list.insertLast(room);
+          room_list.put(act_flags, room);
 
           // name
           s := af.readLine;
-          room.name := hash_string(stripl(s, '~'));
+          room.name := hash_string(left(s, '~'));
 
           // description
           room.description := '';
@@ -191,14 +191,14 @@ begin
           room.description := copy(room.description, 1, length(room.description) - 2);
 
           // area room-flags sector-type (teledelay televnum)
-          s := af.readWord;
-          act_flags := af.readCardinal;
-          act_flags := af.readInteger;
+          s := af.readToken();
+          act_flags := af.readCardinal();
+          act_flags := af.readInteger();
 
           if (not af.feol) then
             begin
-            room.teledelay := af.readInteger;
-            room.televnum := af.readInteger;
+            room.teledelay := af.readInteger();
+            room.televnum := af.readInteger();
             end;
 
           repeat
@@ -210,19 +210,19 @@ begin
               room.exits.insertLast(ex);
 
               // direction
-              ex.direction := strtoint(stripr(s, 'D')) + 1;
+              ex.direction := strtoint(right(s, 'D')) + 1;
 
               // description
               repeat
-                s := af.readLine;
+                s := af.readLine();
               until (s = '~');
 
               // keyword(s)
-              s := af.readLine;
-              ex.keywords := hash_string(stripl(s, '~'));
+              s := af.readLine();
+              ex.keywords := hash_string(left(s, '~'));
 
               // exit_flags key to_room
-              act_flags := af.readCardinal;
+              act_flags := af.readCardinal();
               ex.flags := 0;
 
               if (IS_SET(act_flags, SMAUG_EX_ISDOOR)) then
@@ -258,18 +258,18 @@ begin
               if (IS_SET(act_flags, SMAUG_EX_NOMOB)) then
                 SET_BIT(ex.flags, EX_NOMOB);
 
-              tmp := af.readInteger;
-              ex.vnum := af.readInteger;
+              tmp := af.readInteger();
+              ex.vnum := af.readInteger();
               end
             else
             if (s = 'E') then
               begin
               // keyword(s)
-              s := af.readLine;
+              s := af.readLine();
 
               // description
               repeat
-                s := af.readLine;
+                s := af.readLine();
               until (s = '~');
               end;
           until (s = 'S');
@@ -278,7 +278,7 @@ begin
     else
     if (s = '#MOBILES') then
       repeat
-        s := af.readLine;
+        s := af.readLine();
 
         if (s <> '#0') then
           begin
@@ -286,19 +286,19 @@ begin
           npc_list.insertLast(npcindex);
 
           // vnum
-          npcindex.vnum := strtoint(striprbeg(s, '#'));
+          npcindex.vnum := strtoint(right(s, '#'));
 
           // name and short name
-          s := af.readLine;
-          s := af.readLine;
+          s := af.readLine();
+          s := af.readLine();
 
-          npcindex.name := hash_string(stripl(s, '~'));
+          npcindex.name := hash_string(left(s, '~'));
           npcindex.short := npcindex.name;
 
           // long name
           g := '';
           repeat
-            s := af.readLine;
+            s := af.readLine();
 
             if (s <> '~') then
               g := g + s + #13#10;
@@ -311,15 +311,12 @@ begin
 
           // description
           repeat
-            s := af.readLine;
+            s := af.readLine();
           until (s = '~');
 
           // act_flags aff_flags alignment type
-          act_flags := af.readCardinal;
+          act_flags := af.readCardinal();
           npcindex.act_flags := 0;
-
-          if (IS_SET(act_flags, SMAUG_ACT_NPC)) then
-            SET_BIT(npcindex.act_flags, ACT_NPC);
 
           if (IS_SET(act_flags, SMAUG_ACT_SENTINEL) or IS_SET(act_flags, SMAUG_ACT_NOWANDER)) then
             SET_BIT(npcindex.act_flags, ACT_SENTINEL);
@@ -336,9 +333,6 @@ begin
           if (IS_SET(act_flags, SMAUG_ACT_TRAIN) or IS_SET(act_flags, SMAUG_ACT_PRACTICE)) then
             SET_BIT(npcindex.act_flags, ACT_TEACHER);
 
-          if (IS_SET(act_flags, SMAUG_ACT_NPC)) then
-            SET_BIT(npcindex.act_flags, ACT_NPC);
-
           if (IS_SET(act_flags, SMAUG_ACT_IMMORTAL)) then
             SET_BIT(npcindex.act_flags, ACT_IMMORTAL);
 
@@ -354,43 +348,43 @@ begin
           if (IS_SET(act_flags, SMAUG_ACT_PROTOTYPE)) then
             SET_BIT(npcindex.act_flags, ACT_PROTO);
 
-          act_flags := af.readCardinal;
-          npcindex.alignment := af.readInteger;
-          typ := af.readWord;
+          act_flags := af.readCardinal();
+          npcindex.alignment := af.readInteger();
+          typ := af.readToken();
 
           // level hitroll armor hitdie damdie
-          npcindex.level := af.readInteger;
-          npcindex.hitroll := af.readInteger;
-          npcindex.natural_ac := af.readInteger;
-          s := af.readWord;
-          s := af.readWord;
+          npcindex.level := af.readInteger();
+          npcindex.hitroll := af.readInteger();
+          npcindex.natural_ac := af.readInteger();
+          s := af.readToken();
+          s := af.readToken();
 
           // gold xp
-          npcindex.gold := af.readInteger;
-          act_flags := af.readInteger;
+          npcindex.gold := af.readInteger();
+          act_flags := af.readInteger();
 
           // position position sex
-          act_flags := af.readInteger;
-          act_flags := af.readInteger;
-          npcindex.sex := af.readInteger;
+          act_flags := af.readInteger();
+          act_flags := af.readInteger();
+          npcindex.sex := af.readInteger();
 
           if (typ = 'C') then
             begin
             // str int wis dex con cha lck
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
 
             // sav1 sav2 sav3 sav4 sav5
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
-            act_flags := af.readInteger;
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
+            act_flags := af.readInteger();
 
             // race class height weight speaks speaking numattacks
             act_flags := af.readInteger;
@@ -424,17 +418,17 @@ begin
           reset.area := are;
           are.resets.insertLast(reset);
 
-          reset.reset_type := stripl(s, ' ')[1];
-          s := striprbeg(s, ' ');
+          reset.reset_type := left(s, ' ')[1];
+          s := right(s, ' ');
 
-          s := striprbeg(s, ' ');
-          arg1 := strtointdef(stripl(s, ' '), 0);
+          s := right(s, ' ');
+          arg1 := strtointdef(left(s, ' '), 0);
 
-          s := striprbeg(s, ' ');
-          arg2 := strtointdef(stripl(s, ' '), 0);
+          s := right(s, ' ');
+          arg2 := strtointdef(left(s, ' '), 0);
 
-          s := striprbeg(s, ' ');
-          arg3 := strtointdef(stripl(s, ' '), 0);
+          s := right(s, ' ');
+          arg3 := strtointdef(left(s, ' '), 0);
 
           case reset.reset_type of
             'M' : begin
