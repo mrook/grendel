@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.2 2003/12/12 23:01:17 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $)
 }
 
 unit fight;
@@ -86,6 +86,7 @@ uses
 var
   dual_flip : boolean;
 
+// Stop the fighting
 procedure stopfighting(ch : GCharacter);
 var 
 	vict : GCharacter;
@@ -109,12 +110,14 @@ begin
   ch.state := STATE_IDLE;
 end;
 
+// Death cry
 procedure death_cry(ch, killer : GCharacter);
-var chance:integer;
-    s_room : GRoom;
-    vict : GCharacter;
-    pexit : GExit;
-    iterator_exit, iterator_char : GIterator;
+var
+	chance : integer;
+  s_room : GRoom;
+  vict : GCharacter;
+  pexit : GExit;
+  iterator_exit, iterator_char : GIterator;
 begin
 	iterator_exit := ch.room.exits.iterator();
 
@@ -150,9 +153,10 @@ begin
   act(AT_REPORT,'You hear $n''s death cry.',false,ch,nil,killer,TO_NOTVICT);
 end;
 
+// Gain XP
 procedure gain_xp(ch : GPlayer; xp : cardinal);
 var
-   hp_gain,mv_gain,ma_gain : integer;
+   hp_gain, mv_gain, ma_gain : integer;
    pracs_gain : integer;
 begin
   if (ch.IS_IMMORT) then exit;
@@ -212,19 +216,20 @@ begin
   get_exp_worth := longint(ch.level) * longint(ch.max_hp);
 end;
 
+// XP formula
 function xp_compute(ch, victim : GCharacter) : cardinal;
 var
    xp, range : cardinal;
 begin
   if (not ch.IS_NPC) and (not victim.IS_NPC) and (ch.IS_SAME_ALIGN(victim)) then
     begin
-    xp_compute:=1;
+    xp_compute := 1;
     exit;
     end;
 
   if (ch.IS_IMMORT) or (ch.IS_NPC) or (ch = victim) then
     begin
-    xp_compute:=0;
+    xp_compute := 0;
     exit;
     end;
 
@@ -235,12 +240,13 @@ begin
 //  xp_compute := UMin((victim.level - ch.level + 1) * 20, 1);
 end;
 
+// Find damage message
 function findDamage(dam : integer) : GDamMessage;
 var
 	iterator : GIterator;
 	dm : GDamMessage;
 begin
-  findDamage := nil;
+  Result := nil;
 
   iterator := dm_msg.iterator();
 
@@ -250,14 +256,15 @@ begin
 
     if (dam >= dm.min) and (dam <= dm.max) then
       begin
-      findDamage := dm;
-      exit;
+      Result := dm;
+      break;
       end;
     end;
     
   iterator.Free();
 end;
 
+// Handle damage
 function damage(ch, oppnt : GCharacter; dam : integer; dt : integer) : integer;
 var
 	xp,r : integer;
@@ -787,7 +794,8 @@ begin
 end;
 
 procedure multi_hit(ch, vict : GCharacter);
-var chance,dual_bonus:integer;
+var
+	chance, dual_bonus : integer;
 begin
   if (ch.fighting <> vict) then
     begin
@@ -883,6 +891,7 @@ begin
     end;
 end;
 
+// Update the fighting
 procedure update_fighting();
 var 
   ch, vch, gch : GCharacter;

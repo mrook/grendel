@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.2 2003/12/12 23:01:20 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $)
 }
 
 unit util;
@@ -24,16 +24,16 @@ function pad_integer(s, num : integer) : string;
 function pad_integer_front(s, num : integer) : string;
 function pad_string(s : string; num : integer) : string;
 function pad_string_front(s : string; num : integer) : string;
-function trail_number(s:integer):string;
-function findNumber(var s:string):integer;
-function add_chars(num:integer; s : string; c : char) : string;
+function trail_number(s : integer) : string;
+function findNumber(var s : string) : integer;
+function add_chars(num : integer; s : string; c : char) : string;
 function cap(s : string) : string;
 
 function one_argument(argument : string; var arg_first : string) : string;
 
 function number_range(val_from, val_to : integer) : integer;
-function number_percent:integer;
-function rolldice(num,size:integer):integer;
+function number_percent : integer;
+function rolldice(num, size : integer):integer;
 
 function mudAnsi(color : integer) : string;
 
@@ -147,8 +147,10 @@ begin
   Result := g;
 end;
 
-function findNumber(var s:string):integer;
-var g:string;
+// Find number in <num>.* format
+function findNumber(var s : string) : integer;
+var
+	g : string;
 begin
   if (pos('.',s) = 0) then
     Result := 1
@@ -177,7 +179,8 @@ begin
 end;
 
 function cap(s : string) : string;
-var g : integer;
+var
+	g : integer;
 begin
   if (length(s) = 0) then
     begin
@@ -198,9 +201,10 @@ begin
 end;
 
 function one_argument(argument : string; var arg_first : string) : string;
-var cEnd : char;
-    count : integer;
-    p : integer;
+var
+	cEnd : char;
+  count : integer;
+  p : integer;
 begin
   count := 0;
   cEnd := ' ';
@@ -247,18 +251,22 @@ begin
   number_range := random(val_to - val_from) + val_from;
 end;
 
-function number_percent:integer;
+// Random number between 1 - 100
+function number_percent : integer;
 begin
-  number_percent:=random(100)+1;
+  number_percent := random(100) + 1;
 end;
 
-function rolldice(num,size:integer):integer;
-var s,a:integer;
+function rolldice(num, size : integer) : integer;
+var
+	s, a : integer;
 begin
-  s:=0;
+  s := 0;
+  
   for a:=1 to num do
     inc(s,random(size)+1);
-  rolldice:=s;
+  
+  Result := s;
 end;
 
 function mudAnsi(color : integer) : string;
@@ -371,6 +379,7 @@ begin
   Result := trim(uppercase(str));
 end;
 
+// Strip quotes from string
 function removeQuotes(str : string) : string;
 var
   s : string;

@@ -186,7 +186,8 @@ begin
 
     keywordlist := GDLinkedList.Create();
     
-    iterator := help_files.iterator();
+    iterator := helpFiles.iterator();
+    
     while (iterator.hasNext()) do
       begin
       help := GHelp(iterator.next());
@@ -209,6 +210,7 @@ begin
     iterator.Free();
 
     iterator := keywordlist.iterator();
+    
     while (iterator.hasNext()) do
       begin
       buf := buf + pad_string(THelpKeyword(iterator.next()).keyword, 19);
@@ -229,7 +231,8 @@ begin
     end;
 
   keywordlist := GDLinkedList.Create();
-  iterator := help_files.iterator();
+  iterator := helpFiles.iterator();
+  
   while (iterator.hasNext()) do
     begin
     help := GHelp(iterator.next());
@@ -288,10 +291,12 @@ begin
     buf := Format('Your help query ''$B$7%s$A$7'' matched $B$7%d$A$7 keywords:'#13#10#13#10, [param, keywordlist.size()]);
     
     iterator := keywordlist.iterator();
+    
     while (iterator.hasNext()) do
       begin
       buf := buf + Format('  $B$7%s$A$7'#13#10, [THelpKeyword(iterator.next()).keyword]);
       end;
+      
     iterator.Free();
 
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
@@ -623,7 +628,8 @@ begin
 
   matchlist := GDLinkedList.Create();
   
-  iterator := help_files.iterator();
+  iterator := helpFiles.iterator();
+  
   while (iterator.hasNext()) do
     begin
     help := GHelp(iterator.next());
@@ -636,6 +642,7 @@ begin
       insertAlphabetical(matchlist, hk);
       end;
     end;
+    
   iterator.Free();
 
   if (matchlist.size() = 0) then

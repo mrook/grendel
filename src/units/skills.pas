@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.3 2004/02/01 12:06:34 ***REMOVED*** Exp $
+  ##	$Id: skills.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $
 }
 
 unit skills;
@@ -61,20 +61,20 @@ type
       affects : GDLinkedList;
       prereqs : GDLinkedList;
 
-      skill_type:integer;
-      min_mana:integer;
-      min_lvl:integer;
-      beats:integer;
-      target:integer;
+      skill_type : integer;
+      min_mana : integer;
+      min_lvl : integer;
+      beats : integer;
+      target : integer;
 
-      dicenum,dicesize,diceadd:integer;
+      dicenum, dicesize, diceadd : integer;
 
-      dam_msg:string;
-      start_char,start_vict,start_room:string;
-      hit_char,hit_vict,hit_room:string;
-      miss_char,miss_vict,miss_room:string;
-      die_char,die_vict,die_room:string;
-      imm_char,imm_vict,imm_room:string;
+      dam_msg : string;
+      start_char, start_vict, start_room : string;
+      hit_char, hit_vict, hit_room : string;
+      miss_char, miss_vict, miss_room : string;
+      die_char, die_vict, die_room : string;
+      imm_char, imm_vict, imm_room : string;
 
       constructor Create();
       destructor Destroy(); override;
@@ -149,6 +149,7 @@ uses
     mudsystem;
 
 
+// Find skill by name
 function findSkill(s : string) : GSkill;
 var
 	iterator : GIterator;
@@ -170,7 +171,6 @@ begin
     end;
   
   iterator.Free();
-  
 end;
 
 function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
@@ -196,11 +196,12 @@ begin
   assign_gsn := gsn;
 end;
 
+// Load the skills
 procedure load_skills();
 var
   af : GFileReader;
-  s,g,a:string;
-  num,x : integer;
+  s, g, a : string;
+  num, x : integer;
   sk, skill : GSkill;
   aff : GAffect;
   modif : integer;
@@ -381,8 +382,10 @@ begin
   gsn_lockpick := assign_gsn('lockpick');
 end;
 
+// Improve skill
 procedure improve_skill(ch : GCharacter; sn : GSkill);
-var chance, percent : integer;
+var
+	chance, percent : integer;
 begin
   if (ch.LEARNED(sn) = 100) then
     exit;
@@ -398,11 +401,13 @@ begin
     end;
 end;
 
+// Check whether a skill is succesful or not
 function skill_success(ch : GCharacter; sn : GSkill) : boolean;
 begin
   skill_success := (number_percent <= ch.LEARNED(sn));
 end;
 
+// Apply modifiers
 procedure GAffect.modify(ch : GCharacter; add : boolean);
 var
   modif : integer;
@@ -457,13 +462,14 @@ begin
   end;
 end;
 
+// Apply affect to char
 procedure GAffect.applyTo(ch : GCharacter);
 var
-   aff : GAffect;
+	aff : GAffect;
 begin
   if (duration > 0) then
     begin
-    aff := GAffect.Create;
+    aff := GAffect.Create();
     aff.name := Self.name;
     aff.wear_msg := Self.wear_msg;
     aff.duration := Self.duration;
@@ -592,6 +598,7 @@ begin
   end;
 end;
 
+// Find affect by name on char
 function findAffect(ch : GCharacter; name : string) : GAffect;
 var
 	iterator : GIterator;
@@ -615,6 +622,7 @@ begin
   iterator.Free();
 end;
 
+// Remove affect <aff> from char
 procedure removeAffect(ch : GCharacter; aff : GAffect);
 begin
   aff.modify(ch, false);
@@ -624,6 +632,7 @@ begin
   aff.Free;
 end;
 
+// Remove affect by name from char
 function removeAffectName(ch : GCharacter; name : string) : boolean;
 var
    aff : GAffect;
@@ -643,7 +652,8 @@ begin
   Result := true;
 end;
 
-function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
+// Remove affect flag from char
+function removeAffectFlag(ch : GCharacter; flag : integer) : boolean;
 var
 	iterator : GIterator;
 	aff, taff : GAffect;
@@ -677,6 +687,7 @@ begin
   removeAffectFlag := true;
 end;
 
+// Update affects
 procedure update_affects();
 var 
 	ch : GCharacter;

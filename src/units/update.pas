@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $
 }
 
 unit update;
@@ -46,6 +46,7 @@ uses
 	Channels;
 
 
+// Regenerate characters
 procedure regenerate_chars();
 var 
 	hp_gain, mv_gain, mana_gain : integer;
@@ -93,9 +94,9 @@ begin
 
       if IS_SET(ch.aff_flags,AFF_POISON) then
         begin
-        hp_gain:=hp_gain div 4;
-        mv_gain:=mv_gain div 3;
-        mana_gain:=mana_gain div 2;
+        hp_gain := hp_gain div 4;
+        mv_gain := mv_gain div 3;
+        mana_gain := mana_gain div 2;
         end;
 
       if (ch.room.flags.isBitSet(ROOM_MANAROOM)) then
@@ -114,6 +115,7 @@ begin
   iterator.Free();
 end;
 
+// Update the time
 procedure update_time();
 var 
 	buf : string;
@@ -189,39 +191,46 @@ begin
     end;
 end;
 
-procedure better_mental_state(ch:GCharacter; modifier:integer);
-var c:integer;
+// Improve mental state
+procedure better_mental_state(ch : GCharacter; modifier : integer);
+var
+	c : integer;
 begin
-  c:=URANGE(0, abs(modifier), 20);
+  c := URANGE(0, abs(modifier), 20);
+  
   if (number_percent < ch.con) then
     inc(c);
   if (ch.mental_state < 0) then
-    ch.mental_state:=URANGE(-MAX_COND, ch.mental_state + c, 0)
+    ch.mental_state := URANGE(-MAX_COND, ch.mental_state + c, 0)
   else
   if (ch.mental_state > 0) then
-    ch.mental_state:=URANGE(0, ch.mental_state-c, MAX_COND);
+    ch.mental_state := URANGE(0, ch.mental_state-c, MAX_COND);
 end;
 
-procedure worsen_mental_state(ch:GCharacter;modifier:integer);
-var c:integer;
+// Worsen mental state
+procedure worsen_mental_state(ch : GCharacter; modifier : integer);
+var
+	c : integer;
 begin
-  c:=URANGE(0, abs(modifier), 20);
+  c := URANGE(0, abs(modifier), 20);
+  
   if (number_percent < ch.con) then
     dec(c);
   if (c<1) then exit;
   if (ch.mental_state < 0) then
-    ch.mental_state:=URANGE(-MAX_COND, ch.mental_state-c, MAX_COND)
+    ch.mental_state := URANGE(-MAX_COND, ch.mental_state-c, MAX_COND)
   else
   if (ch.mental_state > 0) then
-    ch.mental_state:=URANGE(-MAX_COND, ch.mental_state+c, MAX_COND)
+    ch.mental_state := URANGE(-MAX_COND, ch.mental_state+c, MAX_COND)
   else
     dec(ch.mental_state,c);
 end;
 
-procedure gain_condition(ch:GCharacter;iCond,value:integer);
-var condition,retcode:integer;
+procedure gain_condition(ch : GCharacter; iCond, value : integer);
+var
+	condition, retcode : integer;
 begin
-  if (value=0) or (ch.IS_NPC) or (ch.IS_IMMORT) then
+  if (value = 0) or (ch.IS_NPC) or (ch.IS_IMMORT) then
     exit;
 
   condition := GPlayer(ch).condition[iCond];
@@ -305,12 +314,13 @@ begin
     end;
 end;
 
+// Update characters
 procedure update_chars();
 var 
-	p:integer;
+	p : integer;
 	ch : GCharacter;
-	e:GExit;
-	r:GRoom;
+	e : GExit;
+	r : GRoom;
 	iterator : GIterator;
 begin
   iterator := char_list.iterator();
@@ -328,7 +338,7 @@ begin
       
       if (not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL)) and (ch.state = STATE_IDLE) then
         begin
-        p:=random(6)+1;
+        p := random(6)+1;
 
         e := ch.room.findExit(p);
 
@@ -441,6 +451,7 @@ begin
   interpret(ch,'look _AUTO');
 end;
 
+// Update tracks
 procedure update_tracks();
 var
 	iterator_room : GIterator;
@@ -476,10 +487,11 @@ begin
 	iterator_room.Free();
 end;
 
+// Update teleports
 procedure update_teleports();
 var 
 	tele : GTeleport;
-	room,dest : GRoom;
+	room, dest : GRoom;
 	iterator : GIterator;
 begin
   iterator := teleport_list.iterator();
@@ -645,6 +657,7 @@ begin
     end;
 end;
 
+// Update objects
 procedure update_objects();
 var 
   obj : GObject;

@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.4 2004/01/31 12:17:07 hemko Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.5 2004/02/15 18:51:05 hemko Exp $)
 }
 
 unit mudsystem;
@@ -130,17 +130,16 @@ var
 
 
 procedure bugreport(func, pasfile, bug : string);
-procedure calculateonline;
+procedure calculateonline();
 
-procedure load_system;
-procedure save_system;
+procedure loadSystem();
+procedure saveSystem();
 function isMaskBanned(host : string) : boolean;
 function isNameBanned(name : string) : boolean;
 
-procedure load_damage;
+procedure loadDamage();
 
-procedure load_socials;
-
+procedure loadSocials();
 function findSocial(cmd : string) : GSocial;
 function checkSocial(c : pointer; cmd, param : string) : boolean;
 
@@ -169,7 +168,7 @@ begin
   writeConsole('[BUG] ' + func + ' -> ' + bug);
 end;
 
-procedure calculateonline;
+procedure calculateonline();
 var 
 	days, hours, minutes : integer;
 begin
@@ -185,7 +184,7 @@ begin
                  inttostr(minutes) + ' minutes(s)';
 end;
 
-procedure load_system;
+procedure loadSystem();
 var
    s,g : string;
    af : GFileReader;
@@ -289,7 +288,8 @@ begin
     end;
 end;
 
-procedure save_system;
+// Save the current system configuration
+procedure saveSystem();
 var
   af : GFileWriter;
   t : TInAddr;
@@ -347,6 +347,7 @@ begin
   af.Free();
 end;
 
+// Check if mask is banned
 function isMaskBanned(host : string) : boolean;
 var
    a : integer;
@@ -360,6 +361,7 @@ begin
       end;
 end;
 
+// Check if name is banned
 function isNameBanned(name : string) : boolean;
 var
   a : integer;
@@ -386,8 +388,8 @@ begin
     end;
 end;
 
-// socials
-procedure load_socials;
+// Load the socials
+procedure loadSocials();
 var
   af : GFileReader;
   s, g : string;
@@ -585,7 +587,8 @@ begin
   checkSocial := true;
 end;
 
-procedure load_damage;
+// Load damage messages
+procedure loadDamage();
 var
   af : GFileReader;
   s : string;
@@ -621,6 +624,7 @@ begin
   af.Free();
 end;
 
+// Load current mudstate
 procedure loadMudState();
 var
    af : GFileREader;
@@ -672,6 +676,7 @@ begin
   af.Free;
 end;
 
+// Save current mudstate (time, weather)
 procedure saveMudState();
 var
   af : GFileWriter;
@@ -708,7 +713,6 @@ begin
   af.writeLine('$');
   af.Free;
 end;
-
 
 // GAuction
 constructor GAuction.Create;
@@ -773,9 +777,9 @@ begin
           GObject(item).toChar(seller);
           end;
 
-        seller:=nil;
-        buyer:=nil;
-        item:=nil;
+        seller := nil;
+        buyer := nil;
+        item := nil;
         end;
   end;
 end;

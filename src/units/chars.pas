@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.3 2004/01/30 20:45:19 hemko Exp $
+  ## $Id: chars.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $
 }
 
 unit chars;
@@ -313,6 +313,7 @@ begin
   inherited Destroy();
 end;
 
+// GCharacter constructor
 constructor GCharacter.Create();
 begin
   inherited Create();
@@ -328,6 +329,7 @@ begin
   tracking := '';
 end;
 
+// GCharacter destructor
 destructor GCharacter.Destroy();
 begin
   affects.clean();
@@ -426,7 +428,7 @@ begin
     Result := '';
 end;
 
-function GCharacter.getTrust : integer;
+function GCharacter.getTrust() : integer;
 var
    ch : GCharacter;
 begin
@@ -497,6 +499,7 @@ begin
   Result := false;
 end;
 
+// NPC is Immortal
 function GNPC.IS_IMMORT : boolean;
 begin
   Result := inherited IS_IMMORT;
@@ -596,8 +599,7 @@ end;
 
 function GCharacter.IS_OUTSIDE : boolean;
 begin
-  IS_OUTSIDE := (room.sector <> SECT_INSIDE) and
-               (not room.flags.isBitSet(ROOM_INDOORS));
+  IS_OUTSIDE := (room.sector <> SECT_INSIDE) and (not room.flags.isBitSet(ROOM_INDOORS));
 end;
 
 function GCharacter.IS_AFFECT(affect : integer) : boolean;
@@ -610,6 +612,7 @@ begin
 	IS_DRUNK := false;
 end;
 
+// Char is wearing an object of type <item_type>
 function GCharacter.IS_WEARING(item_type : integer) : boolean;
 var
   iterator : GIterator;
@@ -707,6 +710,7 @@ begin
     CAN_SEE := false;
 end;
 
+// Check what percentage char has learned <skill>
 function GCharacter.LEARNED(skill : pointer) : integer;
 var
 	iterator : GIterator;
@@ -771,7 +775,8 @@ begin
   Result := '';
 end;
 
-procedure GCharacter.fromRoom;
+// Char from room
+procedure GCharacter.fromRoom();
 begin
   if (room = nil) then
     begin
@@ -788,9 +793,10 @@ begin
   if (not IS_NPC) then
     dec(room.area.nplayer);
 
-  room:=nil;
+  room := nil;
 end;
 
+// Char to room
 procedure GCharacter.toRoom(to_room : GRoom);
 var
 	tele : GTeleport;
@@ -859,7 +865,8 @@ begin
     end;
 end;
 
-procedure GCharacter.die;
+// Char dies
+procedure GCharacter.die();
 begin
   { snooping/switching immortals should stop doing so when we die }
 	if (snooped_by <> nil) then
@@ -873,7 +880,8 @@ begin
   addCorpse(Self);
 end;
 
-procedure GNPC.die;
+// NPC dies
+procedure GNPC.die();
 begin
   inherited die;
 
@@ -893,6 +901,7 @@ begin
   wait := UMax(wait, ticks);
 end;
 
+// Get object wearing at bodypart <location>
 function GCharacter.getEQ(location : string) : GObject;
 var
 	iterator : GIterator;
@@ -916,6 +925,7 @@ begin
   iterator.Free();
 end;
 
+// Get wielded object by <item_type>
 function GCharacter.getWield(item_type : integer) : GObject;
 var
    obj : GOBject;
@@ -949,6 +959,7 @@ begin
     getDualWield := getEQ('leftwield');
 end;
 
+// Apply/Remove special affects on an object
 procedure GCharacter.affectObject(obj : GObject; remove : boolean);
 var
    iterator : GIterator;
@@ -977,6 +988,7 @@ begin
 		end;
 end;
 
+// Equip object
 function GCharacter.equip(obj : GObject) : boolean;
 var
   bodypart : GBodyPart;
@@ -1128,7 +1140,8 @@ begin
   calcxp2lvl := round((20*power(level,1.2))*(1+(random(2)/10)));
 end;
 
-procedure GCharacter.calcAC;
+// Calculate Armour Class
+procedure GCharacter.calcAC();
 var
   dex_mod:integer;
   iterator : GIterator;
@@ -1160,7 +1173,8 @@ begin
   ac := (hac + bac + aac + lac) div 4;
 end;
 
-procedure GCharacter.startFlying;
+// Start flying
+procedure GCharacter.startFlying();
 begin
   if (not IS_OUTSIDE) then
     begin
@@ -1188,7 +1202,8 @@ begin
     end;
 end;
 
-procedure GCharacter.stopFlying;
+// Stop flying
+procedure GCharacter.stopFlying();
 begin
   if (IS_FLYING) then
     begin
@@ -1199,6 +1214,7 @@ begin
     end;
 end;
 
+// Find object in inventory by name
 function GCharacter.findInventory(s : string) : GObject;
 var 
   obj : GObject;
@@ -1232,6 +1248,7 @@ begin
   iterator.Free();
 end;
 
+// Find object in equipment by name
 function GCharacter.findEquipment(s : string) : GObject;
 var 
   obj : GObject;

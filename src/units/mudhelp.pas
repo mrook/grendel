@@ -1,6 +1,6 @@
 {
   @abstract(Online help interface)
-  @lastmod($Id: mudhelp.pas,v 1.2 2004/02/01 12:06:34 ***REMOVED*** Exp $)
+  @lastmod($Id: mudhelp.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $)
 }
 
 unit mudhelp;
@@ -19,9 +19,9 @@ type
     end;
 
 var
-   help_files : GDLinkedList;
+   helpFiles : GDLinkedList;
 
-procedure load_help(fname:string);
+procedure loadHelp(fname:string);
 function findHelp(text : string) : GHelp;
 
 procedure initHelp();
@@ -122,13 +122,14 @@ begin
 end;
     
 { Xenon 16/Apr/2001: added keywords %SKILL_LIST% and %SPELL_LIST% and their functionality }
-procedure load_help(fname:string);
-var f:textfile;
-    s, g, key : string;
-    keyword : boolean;
-    keys, text, helptype, related, syntax : string;
-    help : GHelp;
-    a, b : integer;
+procedure loadHelp(fname:string);
+var
+	f : textfile;
+  s, g, key : string;
+  keyword : boolean;
+  keys, text, helptype, related, syntax : string;
+  help : GHelp;
+  a, b : integer;
 begin
   assignfile(f, translateFileName('help\'+fname));
   {$I-}
@@ -148,7 +149,7 @@ begin
   help.syntax := '';
   help.related := '';
   help.text := 'This is dummy help.';
-  help_files.insertLast(help);
+  helpFiles.insertLast(help);
 
   keyword := false;
 
@@ -197,11 +198,11 @@ begin
         help.related := related;
         help.text := text;
 
-        help_files.insertLast(help);
+        helpFiles.insertLast(help);
         end
       else
       if g='#INCLUDE' then
-        load_help(right(s, '='));
+        loadHelp(right(s, '='));
       end
     else
     if keyword then
@@ -258,6 +259,7 @@ begin
   closefile(f);
 end;
 
+// Find help by keyword
 function findHelp(text : string) : GHelp;
 var
 	help : GHelp;
@@ -265,12 +267,12 @@ var
 	s, p : integer;
 	iterator : GIterator;
 begin
-  Result := GHelp(help_files.head.element);
+  Result := GHelp(helpFiles.head.element);
   p := high(integer);
 
   text := uppercase(text);
 
-  iterator := help_files.iterator();
+  iterator := helpFiles.iterator();
 
   while (iterator.hasNext()) do
     begin
@@ -296,13 +298,13 @@ end;
 
 procedure initHelp();
 begin
-  help_files := GDLinkedList.Create;
+  helpFiles := GDLinkedList.Create;
 end;
 
 procedure cleanupHelp();
 begin
-  help_files.clean();
-  help_files.Free();
+  helpFiles.clean();
+  helpFiles.Free();
 end;
 
 end.

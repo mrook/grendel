@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.3 2004/02/11 22:15:25 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $
 }
 
 unit race;
@@ -290,6 +290,7 @@ begin
 	parser.Free();
 end;
 
+// Find race by name
 function findRace(name : string) : GRace;
 var
    iterator : GIterator;

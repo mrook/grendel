@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.5 2004/02/11 23:03:30 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.6 2004/02/15 18:51:05 hemko Exp $
 }
 unit player;
 
@@ -202,7 +202,6 @@ type
   	function toString(x : TObject) : string; override;	
 	end;
 
-
 var
 	fieldList : GHashTable;
 
@@ -219,7 +218,6 @@ procedure initPlayers();
 procedure cleanupPlayers();
 
 implementation
-
 
 uses
 	Math,
@@ -1051,7 +1049,7 @@ begin
 end;
 
 
-// GPlayer
+// GPlayer constructor
 constructor GPlayer.Create(conn : GPlayerConnection);
 var
 	iterator : GIterator;
@@ -1140,6 +1138,7 @@ begin
   _fields := GHashTable.Create(PLAYER_FIELDS_HASHSIZE);
 end;
 
+// GPlayer destructor
 destructor GPlayer.Destroy();
 var
 	node, node_next : GListNode;
@@ -1202,6 +1201,7 @@ begin
 	_fields[name] := obj;
 end;
 
+// Quit procedure
 procedure GPlayer.quit();
 var
 	vict : GCharacter;
@@ -1276,7 +1276,7 @@ begin
   extract(true);
 end;
 
-function GPlayer.getAge : integer;
+function GPlayer.getAge() : integer;
 begin
   getAge := 17 + (getPlayed div 1000);
 end;
@@ -1286,6 +1286,7 @@ begin
   getPlayed := trunc(((played + (Now - logon_now)) * MSecsPerDay) / 60000);
 end;
 
+// Player is Immortal
 function GPlayer.IS_IMMORT : boolean;
 begin
   Result := inherited IS_IMMORT;
@@ -1294,11 +1295,13 @@ begin
     IS_IMMORT := true;
 end;
 
+// Player is wizinvis
 function GPlayer.IS_WIZINVIS : boolean;
 begin
   Result := IS_SET(flags, PLR_WIZINVIS);
 end;
 
+// Player has holywalk
 function GPlayer.IS_HOLYWALK : boolean;
 begin
   Result := inherited IS_HOLYWALK;
@@ -1307,6 +1310,7 @@ begin
     Result := true;
 end;
 
+// Player has holylight
 function GPlayer.IS_HOLYLIGHT : boolean;
 begin
   Result := inherited IS_HOLYLIGHT;
@@ -1315,6 +1319,7 @@ begin
     Result := true;
 end;
 
+// Player is AFK
 function GPlayer.IS_AFK : boolean;
 begin
   if IS_SET(flags, PLR_LINKLESS) then
@@ -1323,6 +1328,7 @@ begin
     IS_AFK := afk = true;
 end;
 
+// Player has a locked keyboard
 function GPlayer.IS_KEYLOCKED : boolean;
 begin
   if IS_SET(flags, PLR_LINKLESS) then
@@ -1331,17 +1337,20 @@ begin
     IS_KEYLOCKED := keylock = true;
 end;
 
+// Player is editing (writing a note)
 function GPlayer.IS_EDITING : boolean;
 begin
   IS_EDITING := conn.state = CON_EDITING;
 end;
 
+// Player is drunk
 function GPlayer.IS_DRUNK : boolean;
 begin
 	IS_DRUNK := (condition[COND_DRUNK] > 80);
 end;
 
-function GPlayer.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
+// Returns nr. of skillslots occupied
+function GPlayer.getUsedSkillslots() : integer;
 var
   iterator : GIterator;
   g : GLearned;
@@ -1359,7 +1368,8 @@ begin
 	iterator.Free();
 end;
 
-function GPlayer.getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
+// Returns nr. of spellslots occupied
+function GPlayer.getUsedSpellslots() : integer;
 var
   iterator : GIterator;
   g : GLearned;
@@ -1377,19 +1387,21 @@ begin
 	iterator.Free();
 end;
 
+// Load player file
 function GPlayer.load(fn : string) : boolean;
-var d, x : longint;
-    af : GFileReader;
-    g , a, t : string;
-    obj : GObject;
-    aff : GAffect;
-    len, modif, inner : integer;
-    s: string;
-    sk : GSkill;
-    al : GAlias;
-    node : GListNode;
-    iterator : GIterator;
-    tc : GUserChannel;
+var
+	d, x : longint;
+  af : GFileReader;
+  g , a, t : string;
+  obj : GObject;
+  aff : GAffect;
+  len, modif, inner : integer;
+  s : string;
+  sk : GSkill;
+  al : GAlias;
+  node : GListNode;
+  iterator : GIterator;
+  tc : GUserChannel;
 begin
   inner := 0;
 
@@ -1463,15 +1475,15 @@ begin
         if g='STATS' then
           begin
           a := right(a,' ');
-          str:=strtoint(left(a,' '));
+          str := strtoint(left(a,' '));
           a := right(a,' ');
-          con:=strtoint(left(a,' '));
+          con := strtoint(left(a,' '));
           a := right(a,' ');
-          dex:=strtoint(left(a,' '));
+          dex := strtoint(left(a,' '));
           a := right(a,' ');
-          int:=strtoint(left(a,' '));
+          int := strtoint(left(a,' '));
           a := right(a,' ');
-          wis:=strtoint(left(a,' '));
+          wis := strtoint(left(a,' '));
           end
         else
         if (g = 'MAX_SKILLS') then
@@ -1483,77 +1495,77 @@ begin
         if (g = 'PRACTICES') then
           pracs := strtoint(right(a,' '))
         else
-        if g='APB' then
-          apb:=strtoint(right(a,' '))
+        if (g = 'APB') then
+          apb := strtoint(right(a,' '))
         else
-        if g='MANA' then
+        if (g = 'MANA') then
           begin
-          a:=right(a,' ');
-          mana:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          max_mana:=strtoint(left(a,' '));
+          a := right(a,' ');
+          mana := strtoint(left(a,' '));
+          a := right(a,' ');
+          max_mana := strtoint(left(a,' '));
           end
         else
-        if g='HP' then
+        if (g = 'HP') then
           begin
-          a:=right(a,' ');
-          hp:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          max_hp:=strtoint(left(a,' '));
+          a := right(a,' ');
+          hp := strtoint(left(a,' '));
+          a := right(a,' ');
+          max_hp := strtoint(left(a,' '));
           end
         else
-        if g='MV' then
+        if (g = 'MV') then
           begin
-          a:=right(a,' ');
-          mv:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          max_mv:=strtoint(left(a,' '));
+          a := right(a,' ');
+          mv := strtoint(left(a,' '));
+          a := right(a,' ');
+          max_mv := strtoint(left(a,' '));
           end
         else
-        if g='AC' then
-          ac:=strtoint(right(a,' '))
+        if (g = 'AC') then
+          ac := strtoint(right(a,' '))
         else
-        if g='HAC' then
-          hac:=strtoint(right(a,' '))
+        if (g = 'HAC') then
+          hac := strtoint(right(a,' '))
         else
-        if g='BAC' then
-          bac:=strtoint(right(a,' '))
+        if (g = 'BAC') then
+          bac := strtoint(right(a,' '))
         else
-        if g='AAC' then
-          aac:=strtoint(right(a,' '))
+        if (g = 'AAC') then
+          aac := strtoint(right(a,' '))
         else
-        if g='LAC' then
-          lac:=strtoint(right(a,' '))
+        if (g = 'LAC') then
+          lac := strtoint(right(a,' '))
         else
-        if g='GOLD' then
+        if (g = 'GOLD') then
           begin
-          a:=right(a,' ');
+          a := right(a,' ');
           gold := UMax(strtointdef(left(a, ' '), 0), 0);
-          a:=right(a,' ');
+          a := right(a,' ');
           bankgold := UMax(strtointdef(left(a, ' '), 0), 0);
           end
         else
-        if g='XP' then
+        if (g = 'XP') then
           begin
-          a:=right(a,' ');
-          xptot:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          xptogo:=strtoint(left(a,' '));
+          a := right(a,' ');
+          xptot := strtoint(left(a,' '));
+          a := right(a,' ');
+          xptogo := strtoint(left(a,' '));
           end
         else
-        if g='ROOMVNUM' then
+        if (g = 'ROOMVNUM') then
           room := findRoom(strtoint(right(a, ' ')))
         else
-        if g='KILLS' then
-          kills:=strtoint(right(a,' '))
+        if (g = 'KILLS') then
+          kills := strtoint(right(a,' '))
         else
-        if g='DEATHS' then
-          deaths:=strtoint(right(a,' '))
+        if (g = 'DEATHS') then
+          deaths := strtoint(right(a,' '))
         else
-        if g='FLAGS' then
-          flags:=strtoint(right(a,' '))
+        if (g = 'FLAGS') then
+          flags := strtoint(right(a,' '))
         else
-        if g='CLAN' then
+        if (g = 'CLAN') then
           begin
           clan := findClan(right(a,' '));
 
@@ -1561,21 +1573,21 @@ begin
             clanleader := true;
           end
         else
-        if g='CONFIG' then
-          cfg_flags:=strtoint(right(a,' '))
+        if (g = 'CONFIG') then
+          cfg_flags := strtoint(right(a,' '))
         else
-        if g='AC_MOD' then
-          ac_mod:=strtoint(right(a,' '))
+        if (g = 'AC_MOD') then
+          ac_mod := strtoint(right(a,' '))
         else
         // for backward compatibility only
-        if g='PASSWORD' then
+        if (g = 'PASSWORD') then
           begin
           password := right(a,' ');
           md5_password := MD5String(password);
           end
         else
         // the new md5 encrypted pwd
-        if g='MD5-PASSWORD' then
+        if (g = 'MD5-PASSWORD') then
           begin
           t := right(a,' ');
 
@@ -1590,80 +1602,80 @@ begin
             end;
           end
         else
-        if g='REMORTS' then
-          remorts:=strtoint(right(a,' '))
+        if (g = 'REMORTS') then
+          remorts := strtoint(right(a,' '))
         else
-        if g='WIMPY' then
-          wimpy:=strtoint(right(a,' '))
+        if (g = 'WIMPY') then
+          wimpy := strtoint(right(a,' '))
         else
-        if g='AFF_FLAGS' then
-          aff_flags:=strtoint(right(a,' '))
+        if (g = 'AFF_FLAGS') then
+          aff_flags := strtoint(right(a,' '))
         else
-        if g='MENTALSTATE' then
-          mental_state:=strtoint(right(a,' '))
+        if (g = 'MENTALSTATE') then
+          mental_state := strtoint(right(a,' '))
         else
-        if g='CONDITION' then
+        if (g = 'CONDITION') then
           begin
-          a:=right(a,' ');
-          condition[COND_DRUNK]:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          condition[COND_FULL]:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          condition[COND_THIRST]:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          condition[COND_CAFFEINE]:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          condition[COND_HIGH]:=strtoint(left(a,' '));
+          a := right(a,' ');
+          condition[COND_DRUNK] := strtoint(left(a,' '));
+          a := right(a,' ');
+          condition[COND_FULL] := strtoint(left(a,' '));
+          a := right(a,' ');
+          condition[COND_THIRST] := strtoint(left(a,' '));
+          a := right(a,' ');
+          condition[COND_CAFFEINE] := strtoint(left(a,' '));
+          a := right(a,' ');
+          condition[COND_HIGH] := strtoint(left(a,' '));
           end
         else
-        if g='AREA' then
+        if (g = 'AREA') then
           begin
           area_fname := right(a,' ');
           area := findArea(area_fname);
           end
         else
-        if g='RANGES' then
+        if (g = 'RANGES') then
           begin
-          a:=right(a,' ');
-          r_lo:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          r_hi:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          m_lo:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          m_hi:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          o_lo:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          o_hi:=strtoint(left(a,' '));
+          a := right(a,' ');
+          r_lo := strtoint(left(a,' '));
+          a := right(a,' ');
+          r_hi := strtoint(left(a,' '));
+          a := right(a,' ');
+          m_lo := strtoint(left(a,' '));
+          a := right(a,' ');
+          m_hi := strtoint(left(a,' '));
+          a := right(a,' ');
+          o_lo := strtoint(left(a,' '));
+          a := right(a,' ');
+          o_hi := strtoint(left(a,' '));
           end
         else
-        if g='WIZLEVEL' then
-          wiz_level:=strtoint(right(a,' '))
+        if (g = 'WIZLEVEL') then
+          wiz_level := strtoint(right(a,' '))
         else
-        if g='BGPOINTS' then
-          bg_points:=strtoint(right(a,' '))
+        if (g = 'BGPOINTS') then
+          bg_points := strtoint(right(a,' '))
         else
-        if g='PAGERLEN' then
-          pagerlen:=strtoint(right(a,' '))
+        if (g = 'PAGERLEN') then
+          pagerlen := strtoint(right(a,' '))
         else
-        if g='LOGON' then
+        if (g = 'LOGON') then
           begin
-          a:=right(a,' ');
-          logon_first:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          logon_first:=logon_first + (strtoint(left(a,' '))/MSecsPerDay);
+          a := right(a,' ');
+          logon_first := strtoint(left(a,' '));
+          a := right(a,' ');
+          logon_first := logon_first + (strtoint(left(a,' '))/MSecsPerDay);
+          
           if (logon_first = 0)then
-            logon_first:=Now;
+            logon_first := Now;
           end
         else
-        if g='PLAYED' then
+        if (g = 'PLAYED') then
           begin
-          a:=right(a,' ');
-          played:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          played:=played + (strtoint(left(a,' '))/MSecsPerDay);
-
+          a := right(a,' ');
+          played := strtoint(left(a,' '));
+          a := right(a,' ');
+          played := played + (strtoint(left(a,' ')) / MSecsPerDay);
           end
         else
         if (g = 'BAMFIN') then
@@ -1811,7 +1823,7 @@ begin
 
         if (uppercase(a) <> '#END') and (not af.eof) then
           begin
-          al := GAlias.Create;
+          al := GAlias.Create();
 
           al.alias := left(a, ':');
           al.expand := right(a, ':');
@@ -1832,7 +1844,7 @@ begin
 
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
-          obj := GObject.Create;
+          obj := GObject.Create();
 
           with obj do
             begin
@@ -1842,33 +1854,34 @@ begin
             long := af.readLine();
 
             a := af.readLine;
-            item_type:=StrToInt(left(a,' '));
-            a:=right(a,' ');
+            item_type :=StrToInt(left(a,' '));
+            a := right(a,' ');
             wear_location1 := left(a,' ');
-            a:=right(a,' ');
+            a := right(a,' ');
             wear_location2 := left(a,' ');
 
             a := af.readLine;
-            value[1]:=StrToInt(left(a,' '));
-            a:=right(a,' ');
-            value[2]:=StrToInt(left(a,' '));
-            a:=right(a,' ');
-            value[3]:=StrToInt(left(a,' '));
-            a:=right(a,' ');
-            value[4]:=StrToInt(left(a,' '));
+            value[1] := StrToInt(left(a,' '));
+            a := right(a,' ');
+            value[2] := StrToInt(left(a,' '));
+            a := right(a,' ');
+            value[3] := StrToInt(left(a,' '));
+            a := right(a,' ');
+            value[4] := StrToInt(left(a,' '));
 
             a := af.readLine;
-            weight:=StrToInt(left(a,' '));
-            a:=right(a,' ');
-            flags:=StrToInt(left(a,' '));
-            a:=right(a,' ');
-            cost:=StrToInt(left(a,' '));
+            weight := StrToInt(left(a,' '));
+            a := right(a,' ');
+            flags := StrToInt(left(a,' '));
+            a := right(a,' ');
+            cost := StrToInt(left(a,' '));
             a := right(a, ' ');
             count := strtointdef(left(a, ' '), 1);
+            
             if (count = 0) then
               count := 1;
 
-            room:=nil;
+            room := nil;
             end;
 
 					obj.node_world := objectList.insertLast(obj);
@@ -1895,12 +1908,12 @@ begin
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
           inc(trophysize);
-          g:=right(g,' ');
+          g := right(g,' ');
           trophy[trophysize].name := left(g,' ');
-          g:=right(g,' ');
-          trophy[trophysize].level:=strtoint(left(g,' '));
-          g:=right(g,' ');
-          trophy[trophysize].times:=strtoint(left(g,' '));
+          g := right(g,' ');
+          trophy[trophysize].level := strtoint(left(g,' '));
+          g := right(g,' ');
+          trophy[trophysize].times := strtoint(left(g,' '));
           end;
       until (uppercase(g) = '#END') or (af.eof);
 
@@ -1909,7 +1922,7 @@ begin
       end;
   until (af.eof);
 
-  af.Free;
+  af.Free();
 
   if (inner <> 0) then
     begin
@@ -1949,8 +1962,8 @@ begin
   if (max_spells = 0) then
     max_spells := race.max_spells;
 
-  calcAC;
-  calcRank;
+  calcAC();
+  calcRank();
   
   // backwards compatibility fixes
   REMOVE_BIT(aff_flags, AFF_BASHED);
@@ -1959,6 +1972,7 @@ begin
   load := true;
 end;
 
+// Save player
 function GPlayer.save(fn : string) : boolean;
 var
 	af : GFileWriter;
@@ -2220,7 +2234,7 @@ begin
 			af.writeLine('Trophy: ' + trophy[h].name + ' ' + IntToStr(trophy[h].level) + ' ' + IntToStr(trophy[h].times));
 		af.writeLine('#END');
 	finally
-		af.Free;
+		af.Free();
 	end;
 
 	// re-apply affects to character
@@ -2274,6 +2288,7 @@ begin
 	conn.emptyBuffer();
 end;
 
+// Start editing mode
 procedure GPlayer.startEditing(text : string);
 begin
   if (conn = nil) then
@@ -2294,6 +2309,7 @@ begin
   conn.state := CON_EDITING;
 end;
 
+// Return from editing mode
 procedure GPlayer.stopEditing;
 begin
   sendBuffer('Ok.'#13#10);
@@ -2457,6 +2473,7 @@ begin
     ansiColor := ansiio.ANSIColor(color, 0);
 end;
 
+// Send prompt
 procedure GPlayer.sendPrompt();
 var
    s, pr, buf : string;
@@ -2588,6 +2605,7 @@ begin
   conn.send(buf);
 end;
 
+// Player dies
 procedure GPlayer.die();
 var
    node : GListNode;
@@ -2625,8 +2643,10 @@ begin
     end;
 end;
 
+// Calculate rank
 procedure GPlayer.calcRank();
-var r:string;
+var
+	r : string;
 begin
   if level<30 then
     r:='an apprentice'
@@ -2723,7 +2743,6 @@ begin
 	Result := (x as GString).value;
 end;
 
-
 procedure registerField(field : GPlayerField);
 begin
 	if (fieldList[field.name] <> nil) then
@@ -2737,7 +2756,7 @@ begin
 	fieldList.remove(prep(name));
 end;
 
-
+// Find player by name
 function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
 var
 	iterator : GIterator;

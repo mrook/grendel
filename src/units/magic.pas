@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.3 2004/02/01 12:06:34 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $)
 }
 
 unit magic;
@@ -29,21 +29,26 @@ uses
     util,
     fight;
 
-function saving_throw(level,save:integer; vict: GCharacter):boolean;
-var chance:integer;
+// TODO: Weird function URANGE(5, 50+, 5) always returns 5 imho - Nemesis
+function saving_throw(level, save : integer; vict: GCharacter) : boolean;
+var
+	chance : integer;
 begin
-  chance:=50+(vict.level-level-save)*5;
-  chance:=URANGE(5,chance,5);
-  saving_throw:=number_percent<=chance;
+  chance := 50 + (vict.level - level - save) * 5;
+  chance := URANGE(5, chance, 5);
+  
+  Result := number_percent <= chance;
 end;
 
+// Spell - Acid Arrow (inflicts damage and poison)
 procedure spell_acid_arrow(ch, victim : GCharacter; sn : GSkill);
-var af : GAffect;
+var
+	af : GAffect;
 begin
-  if (saving_throw(ch.level,victim.save_poison,victim)) then
+  if (saving_throw(ch.level, victim.save_poison, victim)) then
     begin
-    act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
-    damage(ch,victim,40, cardinal(sn));
+    act(AT_REPORT,'$N resisted the effects of your spell!', false, ch, nil, victim, TO_CHAR);
+    damage(ch, victim, 40, cardinal(sn));
     end
   else
     begin
@@ -59,34 +64,40 @@ begin
 
     af.applyTo(victim);
 
-    damage(ch,victim,55, cardinal(sn));
+    damage(ch, victim, 55, cardinal(sn));
     end;
 end;
 
+// Spell - Burning Hands (damage)
 procedure spell_burning_hands(ch,victim:GCharacter; sn : GSkill);
 begin
-  damage(ch,victim,45, cardinal(sn));
+  damage(ch, victim, 45, cardinal(sn));
 end;
 
-procedure spell_lightning(ch,victim:GCharacter;sn:GSkill);
+// Spell - Lightning (damage)
+procedure spell_lightning(ch, victim : GCharacter; sn : GSkill);
 begin
-  act(AT_SPELL,'Your hands burst into lightning!', false,ch,nil,nil,TO_CHAR);
-  act(AT_SPELL,'Your ears pop as $n releases $s lightning!', false,ch,nil,nil,TO_ROOM);
-  damage(ch,victim,110,cardinal(sn));
+  act(AT_SPELL,'Your hands burst into lightning!', false, ch, nil, nil, TO_CHAR);
+  act(AT_SPELL,'Your ears pop as $n releases $s lightning!', false, ch, nil, nil, TO_ROOM);
+  
+  damage(ch, victim, 110, cardinal(sn));
 end;
 
-procedure spell_magic_missile(ch,victim:GCharacter;sn:GSkill);
+// Spell - Magic Missile (damage)
+procedure spell_magic_missile(ch, victim : GCharacter; sn : GSkill);
 begin
-  damage(ch,victim,35,cardinal(sn));
+  damage(ch, victim, 35, cardinal(sn));
 end;
 
-procedure spell_poison(ch,victim:GCharacter; sn : GSkill);
-var af:GAffect;
+// Spell - Poison (adds poison)
+procedure spell_poison(ch, victim : GCharacter; sn : GSkill);
+var
+	af : GAffect;
 begin
-  if saving_throw(ch.level,victim.save_poison,victim) then
+  if saving_throw(ch.level, victim.save_poison, victim) then
     begin
-    act(AT_REPORT,'Your spell failed!',false,ch,nil,victim,TO_CHAR);
-    act(AT_REPORT,'You resisted the effects of $n''s poison!',false,ch,nil,victim,TO_VICT);
+    act(AT_REPORT,'Your spell failed!', false, ch, nil, victim, TO_CHAR);
+    act(AT_REPORT,'You resisted the effects of $n''s poison!', false, ch, nil, victim, TO_VICT);
     end
   else
     begin
@@ -102,31 +113,36 @@ begin
 
     af.applyTo(victim);
 
-    act(AT_SPELL,'You have succesfully poisoned $N!',false,ch,nil,victim,TO_CHAR);
-    act(AT_SPELL,'You are poisoned!',false,ch,nil,victim,TO_VICT);
-    act(AT_SPELL,'$N has been poisoned!',false,ch,nil,victim,TO_NOTVICT);
+    act(AT_SPELL,'You have succesfully poisoned $N!', false, ch, nil, victim, TO_CHAR);
+    act(AT_SPELL,'You are poisoned!', false, ch, nil, victim, TO_VICT);
+    act(AT_SPELL,'$N has been poisoned!', false, ch, nil, victim, TO_NOTVICT);
     end;
 end;
 
-procedure spell_vortex(ch,victim:GCharacter;sn:GSkill);
-var dam:integer;
+// Spell - Vortex (damage)
+procedure spell_vortex(ch, victim : GCharacter; sn : GSkill);
+var
+	dam : integer;
 begin
-  dam:=rolldice(4,6);
-  inc(dam,ch.int div 4);
-  damage(ch,victim,dam,cardinal(sn));
+  dam := rolldice(4,6);
+  inc(dam, ch.int div 4);
+  damage(ch, victim, dam, cardinal(sn));
 end;
 
-procedure spell_winds(ch,victim:GCharacter;sn:GSkill);
-var dam:integer;
+// Spell - Winds
+procedure spell_winds(ch, victim : GCharacter; sn : GSkill);
+var
+	dam : integer;
 begin
-  dam:=rolldice(4,10);
-  inc(dam,ch.int div 3);
-  act(AT_SPELL,'You call upon the elements and release your fury!',false,ch,nil,nil,TO_CHAR);
-  act(AT_SPELL,'$n calls upon the elements and releases $s fury!',false,ch,nil,nil,TO_ROOM);
-  damage(ch,victim,dam,cardinal(sn));
+  dam := rolldice(4,10);
+  inc(dam, ch.int div 3);
+  act(AT_SPELL,'You call upon the elements and release your fury!', false, ch, nil, nil, TO_CHAR);
+  act(AT_SPELL,'$n calls upon the elements and releases $s fury!', false, ch, nil, nil, TO_ROOM);
+  damage(ch, victim, dam, cardinal(sn));
 end;
 
-procedure spell_recall(ch,victim:GCharacter;sn:GSkill);
+// Spell - Recall
+procedure spell_recall(ch, victim : GCharacter; sn : GSkill);
 begin
   if (ch.room.flags.isBitSet(ROOM_NORECALL)) then
     begin
@@ -134,24 +150,25 @@ begin
     exit;
     end;
     
-  ch.fromRoom;
+  ch.fromRoom();
 
   if (ch.IS_EVIL) then
     ch.toRoom(findRoom(ROOM_VNUM_EVIL_PORTAL))
   else
     ch.toRoom(findRoom(ROOM_VNUM_GOOD_PORTAL));
 
-  act(AT_REPORT,'You $B$7implore$A$7 the gods for safety.',false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,'$n $B$7implores$A$7 the gods for a safe haven.',false,ch,nil,nil,TO_ROOM);
+  act(AT_REPORT,'You $B$7implore$A$7 the gods for safety.', false, ch, nil, nil, TO_CHAR);
+  act(AT_REPORT,'$n $B$7implores$A$7 the gods for a safe haven.', false, ch, nil, nil, TO_ROOM);
 end;
 
-procedure spell_summon(ch,victim:GCharacter;sn:GSkill);
+// Spell - Summon (summon a pc/npc into the room)
+procedure spell_summon(ch, victim : GCharacter; sn : GSkill);
 begin
   if (ch = victim) then
     begin
-    act(AT_SPELL,'You attempt to summon yourself into the room.',false,ch,nil,victim,TO_CHAR);
-    act(AT_SPELL,'Silly, you''re already here!',false,ch,nil,victim,TO_CHAR);
-    act(AT_SPELL,'$n attempts to summon $N. Duh.',false,victim,nil,ch,TO_ROOM);
+    act(AT_SPELL,'You attempt to summon yourself into the room.', false, ch, nil, victim, TO_CHAR);
+    act(AT_SPELL,'Silly, you''re already here!', false, ch, nil, victim, TO_CHAR);
+    act(AT_SPELL,'$n attempts to summon $N. Duh.', false, victim, nil, ch, TO_ROOM);
     exit;
     end;
 
@@ -162,36 +179,40 @@ begin
   else
   if (victim.state = STATE_IDLE) then
     begin
-    act(AT_SPELL,'You summon $N into the room.',false,ch,nil,victim,TO_CHAR);
-    act(AT_SPELL,'$n is summoned out of here!',false,victim,nil,nil,TO_ROOM);
+    act(AT_SPELL,'You summon $N into the room.', false, ch, nil, victim, TO_CHAR);
+    act(AT_SPELL,'$n is summoned out of here!', false, victim, nil, nil, TO_ROOM);
 
-    victim.fromRoom;
+    victim.fromRoom();
     victim.toRoom(ch.room);
 
-    act(AT_SPELL,'$n has summoned $N!',false,ch,nil,victim,TO_ROOM);
+    act(AT_SPELL,'$n has summoned $N!', false, ch, nil, victim, TO_ROOM);
     
     if (victim.position <> POS_STANDING) then
       interpret(victim, 'stand');
     end
   else
-    act(AT_REPORT,'$N is not in a normal position to be summoned.',false,ch,nil,victim,TO_CHAR);
+    act(AT_REPORT,'$N is not in a normal position to be summoned.', false, ch, nil, victim, TO_CHAR);
 end;
 
-procedure spell_refresh(ch,victim:GCharacter;sn:GSkill);
-var ref:integer;
+// Spell - Refresh (regenerates moves)
+procedure spell_refresh(ch, victim : GCharacter; sn : GSkill);
+var
+	ref : integer;
 begin
-  ref:=(ch.wis div 2) + 20 + rolldice(5,10);
-  victim.mv:=UMax(victim.mv + ref, victim.max_mv);
-  act(AT_SPELL,'You feel refreshed.',false,victim,nil,nil,TO_CHAR);
-  act(AT_SPELL,'$n looks refreshed.',false,victim,nil,nil,TO_ROOM);
+  ref := (ch.wis div 2) + 20 + rolldice(5,10);
+  victim.mv := UMax(victim.mv + ref, victim.max_mv);
+  
+  act(AT_SPELL,'You feel refreshed.', false, victim, nil, nil, TO_CHAR);
+  act(AT_SPELL,'$n looks refreshed.', false, victim, nil, nil, TO_ROOM);
 end;
 
-procedure spell_identify(ch,victim:GCharacter;sn:GSkill);
-var obj : GObject;
-    s:string;
-    liq:integer;
-const ac_types:array[ARMOR_HAC..ARMOR_LAC] of string=
-      ('HAC','BAC','AAC','LAC');
+// Spell - Identify (identify objects)
+procedure spell_identify(ch, victim : GCharacter; sn : GSkill);
+var
+	obj : GObject;
+  s : string;
+  liq : integer;
+const ac_types : array[ARMOR_HAC..ARMOR_LAC] of string = ('HAC','BAC','AAC','LAC');
 begin
   obj := GObject(victim);
 
@@ -275,7 +296,7 @@ begin
     end;
 end;
 
-procedure spell_affect(ch,caster:GCharacter; sn : GSkill);
+procedure spell_affect(ch, caster : GCharacter; sn : GSkill);
 var
 	iterator : GIterator;
 	aff, aff_find : GAffect;
@@ -298,10 +319,12 @@ begin
   iterator.Free();
 end;
 
-procedure spell_generic(ch,victim:GCharacter; sn : GSkill);
-var vict,check:GCharacter;
-    node, node_next : GListNode;
-    dam:integer;
+// Handles default spellcasting
+procedure spell_generic(ch, victim : GCharacter; sn : GSkill);
+var
+	vict, check : GCharacter;
+  node, node_next : GListNode;
+  dam : integer;
 begin
   with sn do
     begin
@@ -477,10 +500,11 @@ begin
     end;
 end;
 
-procedure spell_dummy(ch,victim:GCharacter; sn : GSkill);
+procedure spell_dummy(ch, victim : GCharacter; sn : GSkill);
 begin
 end;
 
+// Find spell function
 function findFunc(s : string) : SPEC_FUNC;
 begin
   findFunc := spell_dummy;
@@ -524,7 +548,8 @@ begin
     bugreport('spell', 'magic.pas', 'spell ' + s + ' not found');
 end;
 
-procedure say_spell(ch:GCharacter; name : string);
+// Verbose spell
+procedure say_spell(ch : GCharacter; name : string);
 const syl_table:array[1..49,1..2] of string=(
         (' ',' '),
         ('ar','abra'),
@@ -584,8 +609,9 @@ begin
   act(AT_PURPLE,'$n utter the words '''+buf+'''',false,ch,nil,nil,TO_ROOM);
 end;
 
-procedure magic_timer(ch,victim:GCharacter;sn:GSkill);
-var func : SPEC_FUNC;
+procedure magic_timer(ch, victim : GCharacter; sn : GSkill);
+var
+	func : SPEC_FUNC;
 begin
   if (sn = nil) then
     exit;

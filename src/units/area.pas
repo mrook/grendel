@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.8 2004/02/11 22:15:25 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.9 2004/02/15 18:51:04 hemko Exp $
 }
 
 unit area;
@@ -95,10 +95,10 @@ type
 
       flags : cardinal;
       item_type : integer;
-      weight:integer;
-      cost:integer;
-      count:integer;
-      timer:integer;
+      weight : integer;
+      cost : integer;
+      count : integer;
+      timer : integer;
       
       child_count : integer; { how many of me were cloned }
 
@@ -148,18 +148,18 @@ type
 
     GNPCIndex = class
     public
-      str,con,dex,int,wis:integer;
-      hp,mv,mana,apb,natural_ac:integer;
-      hitroll:integer;
-      damnumdie,damsizedie:integer;
-      vnum:integer;
-      count:longint;
-      name,short,long : PString;
-      sex:integer;
+      str, con, dex, int, wis : integer;
+      hp, mv, mana, apb, natural_ac : integer;
+      hitroll : integer;
+      damnumdie, damsizedie : integer;
+      vnum : integer;
+      count : longint;
+      name, short, long : PString;
+      sex : integer;
       race : GRace;
-      alignment:integer;
-      level:integer;
-      gold,weight,height:integer;
+      alignment : integer;
+      level : integer;
+      gold, weight, height : integer;
 
       prog : GCodeBlock;
       progfile : string;
@@ -375,7 +375,7 @@ begin
   bugreport(func, 'area.pas', fname + ': ' + problem + ', line ' + inttostr(af.line));
 end;
 
-procedure GArea.loadRooms;
+procedure GArea.loadRooms();
 var s : string;
     vnum : integer;
     room : GRoom;
@@ -399,7 +399,7 @@ begin
     try
       vnum := strtoint(left(s, ' '));
     except
-      areaBug('rooms_load', 'invalid numeric format ' + s);
+      areaBug('loadRooms()', 'invalid numeric format ' + s);
       exit;
     end;
 
@@ -411,7 +411,7 @@ begin
 
       if (pos('#', s) = 1) then
         begin
-        areaBug('rooms_load', 'unexpected new room');
+        areaBug('loadRooms()', 'unexpected new room');
         exit;
         end;
 
@@ -517,10 +517,10 @@ begin
   until (uppercase(s) = '#END');
 end;
 
-procedure GArea.loadNPCs;
+procedure GArea.loadNPCs();
 var 
-	s:string;
-	num:integer;
+	s : string;
+	num : integer;
 	sk : GSkill;
 	npc : GNPCIndex;
 	g : GLearned;
@@ -578,8 +578,8 @@ begin
 
         hp := (level + 1) * ((con div 4) + random(6) - 3);
 
-        damsizedie:=round(sqrt(level));
-        damnumdie:=round(sqrt(level));
+        damsizedie := round(sqrt(level));
+        damnumdie := round(sqrt(level));
 
         sex := af.readInteger;
 
@@ -605,7 +605,7 @@ begin
             progfile := 'progs' + PathDelimiter + right(s, ' ');
             prog := loadCode(progfile);
             if (prog = nil) then
-              areaBug('loadNPCs', 'error loading ''' + progfile + '''; file doesn''t exist?');
+              areaBug('loadNPCs()', 'error loading ''' + progfile + '''; file doesn''t exist?');
             end
           else
             begin
@@ -618,7 +618,7 @@ begin
               g.node := skills_learned.insertLast(g);
               end
             else
-              areaBug('loadNPCs', 'unknown skill '+s);
+              areaBug('loadNPCs()', 'unknown skill '+s);
             end;
 
           s := af.readLine;
@@ -631,16 +631,16 @@ begin
         npc_list.insertLast(npc);
         end;
       except
-        areaBug('GArea.loadMobiles', 'Exception while loading mobile section, please check your area');
+        areaBug('GArea.loadNPCs()', 'Exception while loading mobile section, please check your area');
         npc.Free;
       end;
   until (uppercase(s) = '#END');
 end;
 
-procedure GArea.loadObjects;
+procedure GArea.loadObjects();
 var 
-  s:string;
-  modif, num:integer;
+  s : string;
+  modif, num : integer;
   obj : GObject;
   aff : GAffect;
 begin
@@ -654,13 +654,13 @@ begin
     try
       num:=StrToInt(right(s,'#'));
     except
-      areaBug('load_objects','illegal numeric format '+s);
+      areaBug('loadObjects()','illegal numeric format '+s);
       exit;
     end;
 
     if (objectIndices[num] <> nil) then
       begin
-      areaBug('load_objects','vnum conflict ('+inttostr(num)+')');
+      areaBug('loadObjects()','vnum conflict ('+inttostr(num)+')');
       exit;
       end;
 
@@ -761,7 +761,7 @@ begin
   until (uppercase(s) = '#END');
 end;
 
-procedure GArea.loadResets;
+procedure GArea.loadResets();
 var g : GReset;
     d, s : string;
 begin
@@ -789,7 +789,7 @@ begin
           begin
           if (findNPCIndex(arg1) = nil) then
             begin
-            areaBug('GArea.loadResets', 'npc reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'npc reset ' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -800,7 +800,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets', 'obj reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'obj reset ' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -811,7 +811,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets', 'equip reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'equip reset ' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -822,7 +822,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets', 'insert reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'insert reset ' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -833,7 +833,7 @@ begin
           begin
           if (objectIndices[arg1] = nil) then
             begin
-            areaBug('GArea.loadResets', 'give reset ' + inttostr(arg1) + ' null');
+            areaBug('GArea.loadResets()', 'give reset ' + inttostr(arg1) + ' null');
             g.Free;
             end
           else
@@ -847,7 +847,7 @@ begin
   until (uppercase(s) = '#END');
 end;
 
-procedure GArea.loadShops;
+procedure GArea.loadShops();
 var
    shop : GShop;
    npc : GNPCIndex;
@@ -865,31 +865,31 @@ begin
       npc := findNPCIndex(shop.keeper);
 
       if (npc = nil) then
-        areaBug('GArea.loadShops', 'shopkeeper '+inttostr(shop.keeper)+' null')
+        areaBug('GArea.loadShops()', 'shopkeeper '+inttostr(shop.keeper)+' null')
       else
         npc.shop := shop;
 
       s := af.readLine;
 
-      shop.item_buy[1]:=strtoint(left(s,' '));
+      shop.item_buy[1] := strtoint(left(s,' '));
 
       s:=right(s,' ');
-      shop.item_buy[2]:=strtoint(left(s,' '));
+      shop.item_buy[2] := strtoint(left(s,' '));
 
       s:=right(s,' ');
-      shop.item_buy[3]:=strtoint(left(s,' '));
+      shop.item_buy[3] := strtoint(left(s,' '));
 
       s:=right(s,' ');
-      shop.item_buy[4]:=strtoint(left(s,' '));
+      shop.item_buy[4] := strtoint(left(s,' '));
 
       s:=right(s,' ');
-      shop.item_buy[5]:=strtoint(left(s,' '));
+      shop.item_buy[5] := strtoint(left(s,' '));
 
       s := af.readLine;
-      shop.open_hour:=strtoint(left(s,' '));
+      shop.open_hour := strtoint(left(s,' '));
 
       s:=right(s,' ');
-      shop.close_hour:=strtoint(left(s,' '));
+      shop.close_hour := strtoint(left(s,' '));
 
       repeat
         s := af.readLine;
@@ -961,7 +961,7 @@ begin
       loadShops();
   until (s = '$') or (af.eof());
 
-  af.Free;
+  af.Free();
 end;
 
 procedure loadAreas();
@@ -996,11 +996,11 @@ begin
       with area do
         begin
         if (r_lo <> high(integer)) and (r_hi<>-1) then
-          s:=s+' R '+pad_integer(r_lo,5)+'-'+pad_integer(r_hi,5);
+          s := s + ' R ' + pad_integer(r_lo,5) + '-' + pad_integer(r_hi,5);
         if (m_lo <> high(integer)) and (m_hi<>-1) then
-          s:=s+' M '+pad_integer(m_lo,5)+'-'+pad_integer(m_hi,5);
+          s := s + ' M ' + pad_integer(m_lo,5) + '-' + pad_integer(m_hi,5);
         if (o_lo <> high(integer)) and (o_hi<>-1) then
-          s:=s+' O '+pad_integer(o_lo,5)+'-'+pad_integer(o_hi,5);
+          s := s + ' O ' + pad_integer(o_lo,5) + '-' + pad_integer(o_hi,5);
         end;
 
       writeConsole(s);
@@ -1335,21 +1335,21 @@ begin
     dex := npcindex.dex;
     int := npcindex.int;
     wis := npcindex.wis;
-    hp:=npcindex.hp;
-    max_hp:=npcindex.hp;
-    mv:=npcindex.mv;
-    max_mv:=npcindex.mv;
-    mana:=npcindex.mana;
-    max_mana:=npcindex.mana;
-    natural_ac:=npcindex.natural_ac;
-    ac_mod:=0;
-    hitroll:=npcindex.hitroll;
+    hp := npcindex.hp;
+    max_hp := npcindex.hp;
+    mv := npcindex.mv;
+    max_mv := npcindex.mv;
+    mana := npcindex.mana;
+    max_mana := npcindex.mana;
+    natural_ac := npcindex.natural_ac;
+    ac_mod := 0;
+    hitroll := npcindex.hitroll;
 
-    damnumdie:=npcindex.damnumdie;
-    damsizedie:=npcindex.damsizedie;
-    apb:=npcindex.apb;
+    damnumdie := npcindex.damnumdie;
+    damsizedie := npcindex.damsizedie;
+    apb := npcindex.apb;
     skills_learned := npcindex.skills_learned;
-    clan:=npcindex.clan;
+    clan := npcindex.clan;
     npc.room := nil;
     position := POS_STANDING;
     state := STATE_IDLE;
@@ -1376,7 +1376,7 @@ begin
   Result := npc;
 end;
 
-procedure GArea.reset;
+procedure GArea.reset();
 var 
 	reset : GReset;
 	npc, lastmob : GNPC;
@@ -1437,7 +1437,7 @@ begin
                 end
               else
                 begin
-                npc.calcAC;
+                npc.calcAC();
 
                 npc.toRoom(npc.room);
                 lastmob := npc;
@@ -1686,10 +1686,10 @@ begin
   _age := 0;
 end;
 
-procedure GArea.update;
+procedure GArea.update();
 var 
 	buf : string;
-	diff:integer;
+	diff : integer;
 	conn : GPlayerConnection;
 	iterator : GIterator;
 begin
@@ -1726,7 +1726,7 @@ begin
   weather.change := URange(-12, weather.change, 12);
 
   weather.mmhg := URANGE(960,weather.mmhg + weather.change,1060);
-  weather.temp:=round(sin((time_info.hour-12)*PI/12)*weather.temp_mult)+weather.temp_avg+diff;
+  weather.temp := round(sin((time_info.hour-12)*PI/12)*weather.temp_mult)+weather.temp_avg+diff;
 
   case weather.sky of
     SKY_CLOUDLESS:begin
@@ -1895,27 +1895,28 @@ begin
   Result := room;
 end;
 
-{ 24/02/2001 - Nemesis }
+// Find area by filename
 function findArea(fname : string) : GArea;
-var node : GListNode;
-    area : GArea;
+var
+	iterator : GIterator;
+  area : GArea;
 begin
-  findArea := nil;
+  Result := nil;
 
-  node := area_list.head;
+  iterator := area_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    area := GArea(node.element);
+    area := GArea(iterator.Next());
 
     if (area.fname = fname) then
       begin
-      findArea := area;
-      exit;
+      Result := area;
+      break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 constructor GCoords.Create();
@@ -2009,6 +2010,7 @@ begin
     Result := '';
 end;
 
+// Room is dark
 function GRoom.IS_DARK : boolean;
 begin
   if (light > 0) then
@@ -2038,6 +2040,7 @@ begin
   Result := false;
 end;
 
+// Find char in room by name
 function GRoom.findChar(c : pointer; name : string) : pointer;
 var
 	iterator : GIterator;
@@ -2059,6 +2062,7 @@ begin
     end;
 
   iterator := chars.iterator();
+  
   while (iterator.hasNext()) do
     begin
     vict := GCharacter(iterator.next());
@@ -2081,9 +2085,11 @@ begin
   iterator.Free();
 end;
 
+// Find random char in room
 function GRoom.findRandomChar() : pointer;
-var a, num : integer;
-    node : GListNode;
+var
+	a, num : integer;
+  node : GListNode;
 begin
   Result := nil;
   
@@ -2100,6 +2106,7 @@ begin
     Result := node.element;
 end;
 
+// Find random good aligned char in room
 function GRoom.findRandomGood() : pointer;
 var 
 	a, cnt, num : integer;
@@ -2136,6 +2143,7 @@ begin
   iterator.Free();
 end;
 
+// Find random evil aligned char in room
 function GRoom.findRandomEvil() : pointer;
 var 
 	a, cnt, num : integer;
@@ -2172,6 +2180,7 @@ begin
   iterator.Free();
 end;
 
+// Find object by name in room
 function GRoom.findObject(name : string) : pointer;
 var
 	iterator : GIterator;
@@ -2258,6 +2267,7 @@ begin
 	iterator.Free();
 end;
 
+// Find exit by direction in room
 function GRoom.findExit(dir : integer) : GExit;
 var
 	iterator : GIterator;
@@ -2281,6 +2291,7 @@ begin
 	iterator.Free();
 end;
 
+// Find exit by exit keyword
 function GRoom.findExitKeyword(s : string) : GExit;
 var
 	iterator : GIterator;
@@ -2366,6 +2377,7 @@ begin
   inherited Destroy();
 end;
 
+// Object to room
 procedure GObject.toRoom(to_room : GRoom);
 var
 	iterator : GIterator;
@@ -2399,7 +2411,8 @@ begin
   carried_by := nil;
 end;
 
-procedure Gobject.fromRoom;
+// Object from room
+procedure Gobject.fromRoom();
 begin
   if (room=nil) then
     bugreport('obj_from_room', 'area.pas', 'room null');
@@ -2409,6 +2422,7 @@ begin
   room := nil;
 end;
 
+// Object to char
 procedure GObject.toChar(c : pointer);
 var 
 {	grouped : boolean;
@@ -2451,7 +2465,8 @@ begin
   inc(ch.carried_weight, oweight);
 end;
 
-procedure GObject.fromChar;
+// Object from char
+procedure GObject.fromChar();
 begin
   if (worn <> '') then
     GCharacter(carried_by).equipment.remove(worn)
@@ -2490,14 +2505,16 @@ begin
   in_obj := obj;
 end;
 
-procedure GObject.fromObject;
+// Object from container
+procedure GObject.fromObject();
 begin
   in_obj.contents.remove(node_in);
   node_in := nil;
   in_obj := nil;
 end;
 
-function GObject.getWeight : integer;
+// Get object weight
+function GObject.getWeight() : integer;
 var 
 	we : integer;
 	iterator : GIterator;
@@ -2616,11 +2633,13 @@ begin
 *)
 end;
 
+// Find room by vnum
 function findRoom(vnum : integer) : GRoom;
 begin
   Result := GRoom(room_list.get(vnum));
 end;
 
+// Find npcindex by vnum
 function findNPCIndex(vnum : integer) : GNPCIndex;
 var
 	iterator : GIterator;
@@ -2703,10 +2722,10 @@ begin
   instanceObject:=obj;
 end; }
 
-{ Revised 29/Jan/2001 - Nemesis }
+// Add a corpse
 procedure addCorpse(c : pointer);
 var 
-  obj,obj_in : GObject;
+  obj, obj_in : GObject;
   iterator : GIterator;
   ch : GCharacter;
 begin
@@ -2847,6 +2866,7 @@ begin
   end;
 end;
 
+// Clone object
 function GObject.clone() : GObject;
 var
   obj : GObject;
@@ -2956,6 +2976,7 @@ begin
     end; }
 end;
 
+// Seperate a grouped object
 procedure GObject.seperate;
 begin
   split(1);

@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.5 2004/02/11 23:03:30 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.6 2004/02/15 18:51:04 hemko Exp $
 }
 
 program grendel;
@@ -89,14 +89,11 @@ uses
   area,
   race;
 
-
 const pipeName : pchar = '\\.\pipe\grendel';
-
 
 var
   old_exitproc : pointer;
   listenSockets : GDLinkedList;
-
 
 procedure openListenSockets();
 var
@@ -141,6 +138,7 @@ begin
   iterator.Free();
 end;
 
+// Server cleanup
 procedure cleanupServer();
 var
 	node : GListNode;
@@ -234,6 +232,7 @@ begin
 	{$ENDIF}
 end;
 
+// Reboot procedure
 procedure reboot_mud;
 {$IFDEF WIN32}
 var
@@ -269,6 +268,7 @@ begin
 {$ENDIF}
 end;
 
+// Copyover procedure
 procedure copyover_mud;
 {$IFDEF WIN32}
 var
@@ -381,12 +381,13 @@ begin
 end;
 {$ENDIF}
 
+// Shutdown procedure
 procedure shutdown_mud;
 begin
 	writeConsole('Server shutting down...');
 
 	if (mud_booted) then
-		flushConnections;
+		flushConnections();
 
 	Sleep(250);
 
@@ -426,21 +427,22 @@ begin
     sendtoall('If the server doesn''t auto-reboot, please notify'#13#10);
     sendtoall(pchar('the administration, '+system_info.admin_email+'.'#13#10));
 
-    { save all characters and try to unlog before quitting }
-    flushConnections;
+    // save all characters and try to unlog before quitting
+    flushConnections();
 
     Sleep(1000);
 
-    { give operator/logfile a message }
+    // give operator/logfile a message
     writeConsole('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
 
     { close logfile }
-    if TTextRec(logfile).mode=fmOutput then
+    if (TTextRec(logfile).mode = fmOutput) then
       CloseFile(LogFile);
+      
     boot_type := BOOTTYPE_REBOOT;
     end;
 
-  exitproc:=old_exitproc;
+  exitproc := old_exitproc;
 
   { reboot }
   if (boot_type = BOOTTYPE_REBOOT) then
@@ -458,6 +460,7 @@ begin
     shutdown_mud;
 end;
 
+// Boot the server
 procedure bootServer();
 var
   s : string;
@@ -495,40 +498,50 @@ begin
 	readMapfile('core.bpl', 'core.map'); }
  
 	writeConsole('Booting server...');
-	load_system;
+	loadSystem();
 
 	s := FormatDateTime('ddddd', Now);
 	writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
 	writeConsole('Loading skills...');
 	load_skills();
+	
 	writeConsole('Loading races...');
 	loadRaces();
+	
 	writeConsole('Loading clans...');
 	load_clans;
+	
 	writeConsole('Loading channels...');
 	load_channels();
+	
 	writeConsole('Loading areas...');
 	loadAreas();
+	
 	writeConsole('Loading help...');
-	load_help('help.dat');
+	loadHelp('help.dat');
+	
 	writeConsole('Loading namegenerator data...');
 	loadNameTables(NameTablesDataFile);
+	
 	writeConsole('Loading noteboards...');
 	load_notes('boards.dat');
+	
 	writeConsole('Loading modules...');
 	loadModules();
+	
 	writeConsole('Loading texts...');
 	loadCommands();
-	load_socials;
-	load_damage;
+	loadSocials();
+	loadDamage();
+	
 	writeConsole('Loading mud state...');
 	BootTime := Now;
 
 	boot_type := 0;
 	bg_info.count := -1;
 	boot_info.timer := -1;
-	mud_booted:=true;
+	mud_booted := true;
 
 	update_time;
 
@@ -563,6 +576,7 @@ begin
 	{$ENDIF}
 end;
 
+// Recover from copyover
 procedure from_copyover;
 {$IFDEF WIN32}
 var
