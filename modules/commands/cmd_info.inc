@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.17 2003/11/07 16:45:01 hemko Exp $
+// $Id: cmd_info.inc,v 1.18 2003/11/07 16:58:08 hemko Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1594,7 +1594,48 @@ begin
         '] '+pad_string(GPlayer(ch).trophy[f].name,23)+' '+inttostr(GPlayer(ch).trophy[f].times),false,ch,nil,nil,TO_CHAR);
 end;
 
-procedure do_socials(ch:GCharacter; param:string);
+// All available socials - Nemesis
+procedure do_socials(ch : GCharacter; param : string);
+var
+  iterator : GIterator;
+  social : GSocial;
+  socialList : TStringList;
+  i, cnt : integer;
+  buf : string;
+begin
+  socialList := TStringList.Create();
+  iterator := socials.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    social := GSocial(iterator.next());
+    
+    socialList.Add(lowercase(social.name));
+    end;
+    
+  iterator.Free();
+    
+  // Sort the list
+  socialList.Sort();  
+  
+  buf := #13#10 + ch.ansiColor(3) + ' ' + add_chars(78, '---- Available socials ', '-') + ch.ansiColor(7) + #13#10;
+  
+  for i := 0 to pred(socialList.Count) do
+    begin
+    if (i mod 5 = 0) then
+      buf := buf + #13#10 + pad_string(socialList[i], 15)
+    else
+      buf := buf + pad_string(socialList[i], 15);
+    end;
+  
+  buf := buf + #13#10;
+  
+  socialList.Free();
+ 
+  ch.sendPager(buf);
+end;
+
+(*procedure do_socials(ch:GCharacter; param:string);
 var 
   social : GSocial;
   iterator : GIterator;
@@ -1623,7 +1664,7 @@ begin
 
   if (length(line) > 0) then
     ch.sendBuffer(line + #13#10);
-end;
+end;*)
 
 { Xenon 23/Feb/2001: fixed a small bug; made alias'ing an already existing alias replace it }
 procedure do_alias(ch : GCharacter; param : string);
@@ -2196,6 +2237,8 @@ begin
       cmdList.Add(lowercase(cmd.name));
     end;
     
+  iterator.Free();
+  
   // Sort the list
   cmdList.Sort();  
   
