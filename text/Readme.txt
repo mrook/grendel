@@ -7,21 +7,7 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 1. Introduction
 
-This is a release candidate for Grendel 0.4.0. It has the basic functionality 
-0.4.0 will have (with named affects), and requires a lot of testing.
-
-The final 0.4.0 release will appear in one or two weeks, depending on any
-last-minute bugs and peculiarities popping up.
-
-You can help me by testing this release candiditate, reporting any oddities 
-you find back to us.
-
-A small note about the directory structure:
-
-WinZip doesn't save empty directories, so to have your server run
-correctly, you'll need to create two directores: "backup" and "logs".
-As of this release, a standard immortal character, 'Grendel', is included
-which can be used as a starting point for your own immortal(s).
+Welcome to, at last, a brand new version of Grendel - 0.4.0 final!
 
 
 2. Features
@@ -29,7 +15,10 @@ which can be used as a starting point for your own immortal(s).
 Grendel requires Winsock2 to be installed. Windows 98, Me, NT4 and 2000
 all come with this preinstalled, Windows 95 users will have to download
 an update from the Microsoft site.
-
+ 
+  - GMC, or Grendel MUD C, is a replacement for the original (limited)
+    mobprogs. It's a fully functional languaged based on C, which
+    runs in Grendel using virtual machinecode - very speedy & flexible
   - Copyover system: Grendel can respawn itself without dumping all the
     connections, e.g. users stay online during the reboot process,
     more info below
@@ -57,10 +46,10 @@ an update from the Microsoft site.
 3. The team
 
   Michiel Rook                (Grimlord)		manager, website, code
-  Hemko de Visser	            (Nemesis)			code, field testing
-  Roeland van Houte           (Xenon)			  code
-  Jeremiah Davis              (Woodstock)  	documentation
-  Oscar Martin                (Jago)			  code
+  Hemko de Visser	      (Nemesis)			code, field testing
+  Roeland van Houte           (Xenon)			code
+  Jeremiah Davis              (Woodstock)  	        documentation
+  Oscar Martin                (Jago)			code
 
 
 4. Compiling & running
@@ -134,17 +123,21 @@ and should be removed from your harddisk anyway.
 
 8. Contact information
 
-Announcements on new versions etc. will be made available to:
-	grendel-announce@egroups.com
+Please all subscribe to our mailinglists, as important information,
+discussions about features, bugs, etc. will take place on these
+lists!
+
+Announcements on new versions etc. will be made available on:
+	grendel-announce@yahoogroups.com
 
 For general questions, please refer to the mailinglist: 
-	grendel-mudserver@egroups.com
+	grendel-mudserver@yahoogroups.com
 
-Please use this mailinglist as much as possible, as I do not
-have the time to respond personally to each and every message.
+If you have trouble subscribing, you can go to our website
+(http://grendel.mudcenter.com/) and sign up there.
 
 
-However, for personal contact (and postcards!) use:
+For personal contact, or a postcard (very much appreciated) use:
 
 	***REMOVED***@takeover.nl, or:
 
