@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.5 2004/06/10 18:10:56 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.6 2004/06/10 21:16:42 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -419,7 +419,7 @@ var buf, buf1, arg : string;
     aff_data : GAffect; }
     obj: GObject;
     room :integer;
-    in_obj, carried_by : string;
+    carried_by : string;
 begin
 
   one_argument( param, arg );
@@ -474,11 +474,6 @@ begin
   else
     room := obj.room.vnum;
 
-  if obj.in_obj = nil then
-    in_obj := '(none)'
-  else
-   in_obj := obj.in_obj.name;
-
   if obj.carried_by = nil then
     carried_by := ''
   else
@@ -486,8 +481,8 @@ begin
     
   //carried_by := '(none)';
 
-  buf := Format('In room: %d.  In object: %s.  Carried by: %s.  {Wear_loc: %s %s}.' + #13#10,
-                [room, in_obj, carried_by, obj.wear_location1, obj.wear_location2]);
+  buf := Format('In room: %d. Carried by: %s.  {Wear_loc: %s %s}.' + #13#10,
+                [room, carried_by, obj.wear_location1, obj.wear_location2]);
 
   buf1 := buf1 + buf;
 

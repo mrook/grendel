@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-	## $Id: area.pas,v 1.34 2004/06/10 18:28:09 ***REMOVED*** Exp $
+	## $Id: area.pas,v 1.35 2004/06/10 21:16:42 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -91,13 +91,10 @@ type
       _name, _short, _long : PString;
       _vnum : integer;
     public
-      node_room, node_in, node_carry : GListNode;
-
       area : GArea;
       affects : GDLinkedList;
       contents : GDLinkedList;
       carried_by : pointer;
-      in_obj : GObject;
       room : GRoom;
       value : GObjectValues;
       
@@ -114,9 +111,6 @@ type
       child_count : integer; { how many of me were cloned }
 
   	published
-      procedure toObject(obj : GObject);
-      procedure fromObject();
-
       function getWeight() : integer;
 
       function clone() : GObject;
@@ -1672,7 +1666,7 @@ begin
           if (tempobj.area.nplayer = 0) and (reset.arg3 > tempobj.child_count) then
             begin
             obj := tempobj.clone();
-            obj.toObject(lastobj);
+            lastobj.contents.add(obj);
             end;
           end;
       'D':begin
@@ -2473,9 +2467,6 @@ begin
     obj_in.Free();
     end;
 
-  if (in_obj <> nil) then
-    fromObject();
-
   obj_in := GObject(objectIndices[vnum]);
   
   if (obj_in <> nil) then
@@ -2494,21 +2485,6 @@ begin
   contents.Free();
   
   inherited Destroy();
-end;
-
-// Object to object
-procedure GObject.toObject(obj : GObject);
-begin
-  node_in := obj.contents.insertLast(Self);
-  in_obj := obj;
-end;
-
-// Object from container
-procedure GObject.fromObject();
-begin
-  in_obj.contents.remove(node_in);
-  node_in := nil;
-  in_obj := nil;
 end;
 
 // Get object weight
@@ -2718,7 +2694,7 @@ begin
         if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
           iterator.remove();
-          obj_in.toObject(obj);
+          obj.contents.add(obj_in);
           end;
         end;
         
@@ -2733,7 +2709,7 @@ begin
         if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
           iterator.remove();
-          obj_in.toObject(obj);
+          obj.contents.add(obj_in);
           end;
         end;
         
@@ -2772,7 +2748,7 @@ begin
 
     objectList.add(obj_in);
 
-    obj_in.toObject(obj);
+    obj.contents.add(obj_in);
     
     ch.gold := 0;
     end;

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.33 2004/06/10 18:10:56 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.34 2004/06/10 21:16:42 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -1999,7 +1999,7 @@ begin
           	begin
           	obj := GObject.Create();
           	obj.worn := '';
-          	obj.toObject(lastobj);
+          	lastobj.contents.add(obj);
           	end
           else
           	begin

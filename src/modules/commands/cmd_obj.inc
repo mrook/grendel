@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.12 2004/06/10 20:59:16 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.13 2004/06/10 21:16:42 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -953,7 +953,7 @@ begin
         inc(counter);
 
         ch.removeInventory(obj);
-        obj.toObject(obj_in);
+        obj_in.contents.add(obj);
         end;
 
       node := node.next;
@@ -1001,7 +1001,7 @@ begin
       act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
 
 	  ch.removeInventory(obj);
-      obj.toObject(obj_in);
+      obj_in.contents.add(obj);
       end;
     end;
 end;
@@ -1324,6 +1324,7 @@ begin
 	
 				if (isObjectName(obj.name, param) or isObjectName(obj.short, param)) then
 					begin
+					inner_iterator.remove();
 					bow := obj;
 					break;
 					end;
@@ -1344,7 +1345,6 @@ begin
 	act(AT_REPORT, 'You draw $p.', false, ch, bow, nil, TO_CHAR);
 	act(AT_REPORT, '$n draws $p.', false, ch, bow, nil, TO_ROOM);
 
-	bow.fromObject();
 	ch.addInventory(bow);
 	ch.equip(bow, false, true);
 end;
@@ -1401,5 +1401,5 @@ begin
 	
 	ch.equipment.remove(weapon.worn);
 	weapon.worn := '';
-	weapon.toObject(belt);
+	belt.contents.add(weapon);
 end;
