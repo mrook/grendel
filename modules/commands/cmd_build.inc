@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.9 2003/10/22 14:52:32 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.10 2003/11/07 16:01:30 hemko Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -18,9 +18,9 @@ begin
   param := one_argument( param, arg );
 
   if arg = '' then
-  	location := ch.room
+    location := ch.room
   else
-  	location := findLocation(ch, arg);
+    location := findLocation(ch, arg);
 
   if location = nil then
   begin
@@ -172,11 +172,11 @@ function actBitName(vector : integer) : String;
 begin
   Result := '';
 
-	if (vector and ACT_SENTINEL) = ACT_SENTINEL then Result := Result + 'sentinel';
-	if (vector and ACT_SCAVENGER) = ACT_SCAVENGER then Result := Result + 'scavenger';
-	if (vector and ACT_AGGRESSIVE) = ACT_AGGRESSIVE then Result := Result + 'aggressive';
-	if (vector and ACT_STAY_AREA) = ACT_STAY_AREA then Result := Result + 'stay_area';
-	if (vector and ACT_TEACHER) = ACT_TEACHER then Result := Result + 'teacher';
+  if (vector and ACT_SENTINEL) = ACT_SENTINEL then Result := Result + 'sentinel';
+  if (vector and ACT_SCAVENGER) = ACT_SCAVENGER then Result := Result + 'scavenger';
+  if (vector and ACT_AGGRESSIVE) = ACT_AGGRESSIVE then Result := Result + 'aggressive';
+  if (vector and ACT_STAY_AREA) = ACT_STAY_AREA then Result := Result + 'stay_area';
+  if (vector and ACT_TEACHER) = ACT_TEACHER then Result := Result + 'teacher';
 end;
 
 {Jago 10/Jan/2001 - utility function}
@@ -185,30 +185,30 @@ function affectBitName(vector : integer) : String;
 begin
   Result := '';
 
-	if (vector and AFF_BLIND) = AFF_BLIND then Result := Result + ' blind';
-	if (vector and AFF_INVISIBLE) = AFF_INVISIBLE then Result := Result + 'invisible';
-	if (vector and AFF_DETECT_INVIS) = AFF_DETECT_INVIS then Result := Result +' detect invis';
-	if (vector and AFF_DETECT_HIDDEN) = AFF_DETECT_HIDDEN then Result := Result+ ' detect hidden';
-	if (vector and AFF_SANCTUARY) = AFF_SANCTUARY then Result := Result + 'sanctuary';
-	if (vector and AFF_POISON) = AFF_POISON then Result := Result + ' poison';
-	if (vector and AFF_SNEAK) = AFF_SNEAK then Result := Result + ' sneak';
-	if (vector and AFF_HIDE) = AFF_HIDE then Result := Result + ' hide';
-	if (vector and AFF_FLYING) = AFF_FLYING then Result := Result + ' flying';
-	if (vector and AFF_INFRAVISION) = AFF_INFRAVISION then Result := Result + 'infravision';
-	if (vector and AFF_BERSERK) = AFF_BERSERK then Result := Result + 'beserk';
-	if (vector and AFF_AQUA_BREATH) = AFF_AQUA_BREATH then Result := Result + 'aqua breath';
-	if (vector and AFF_PLAGUE) = AFF_PLAGUE then Result := Result + ' plague';
-	if (vector and AFF_ENCHANT) = AFF_ENCHANT then Result := Result + 'enchant';
+  if (vector and AFF_BLIND) = AFF_BLIND then Result := Result + ' blind';
+  if (vector and AFF_INVISIBLE) = AFF_INVISIBLE then Result := Result + 'invisible';
+  if (vector and AFF_DETECT_INVIS) = AFF_DETECT_INVIS then Result := Result +' detect invis';
+  if (vector and AFF_DETECT_HIDDEN) = AFF_DETECT_HIDDEN then Result := Result+ ' detect hidden';
+  if (vector and AFF_SANCTUARY) = AFF_SANCTUARY then Result := Result + 'sanctuary';
+  if (vector and AFF_POISON) = AFF_POISON then Result := Result + ' poison';
+  if (vector and AFF_SNEAK) = AFF_SNEAK then Result := Result + ' sneak';
+  if (vector and AFF_HIDE) = AFF_HIDE then Result := Result + ' hide';
+  if (vector and AFF_FLYING) = AFF_FLYING then Result := Result + ' flying';
+  if (vector and AFF_INFRAVISION) = AFF_INFRAVISION then Result := Result + 'infravision';
+  if (vector and AFF_BERSERK) = AFF_BERSERK then Result := Result + 'beserk';
+  if (vector and AFF_AQUA_BREATH) = AFF_AQUA_BREATH then Result := Result + 'aqua breath';
+  if (vector and AFF_PLAGUE) = AFF_PLAGUE then Result := Result + ' plague';
+  if (vector and AFF_ENCHANT) = AFF_ENCHANT then Result := Result + 'enchant';
 
   if Result = '' then
-	  Result := 'none';
+    Result := 'none';
 end;
 }
 
 {Jago 10/Jan/2001 - utility function}
 function affectLocName(location : integer) : string;
 begin
-	Result := '';    // dummy func, affect locations not implemented yet??
+  Result := '';    // dummy func, affect locations not implemented yet??
 end;
 
 {Jago 10/Jan/2001
@@ -253,19 +253,19 @@ begin
       vnum := '?';
     end
   else
-  	vnum := '0';
+    vnum := '0';
 
   if victim.sex = 0 then
-  	gender := 'male'
+    gender := 'male'
   else if victim.sex = 1 then
-  	gender := 'female'
+    gender := 'female'
   else if victim.sex = 2 then
-  	gender := 'neutral'
+    gender := 'neutral'
   else
-  	gender := 'unknown!';
+    gender := 'unknown!';
 
   if victim.room = nil then
-  	room_vnum := ''
+    room_vnum := ''
   else
    room_vnum := IntToStr(victim.room.vnum);
 
@@ -291,9 +291,9 @@ begin
   buf1 := buf1 + buf;
 
   if victim.IS_NPC then
-  	exp := 'none'
+    exp := 'none'
   else
-  	exp := IntToStr(GPlayer(victim).xptot);
+    exp := IntToStr(GPlayer(victim).xptot);
 
   buf := Format('Level: %d.  Align: %d.  AC: %d.  Gold: %d.  Exp: %s.' + #13#10,
                 [victim.level, victim.alignment, victim.ac,
@@ -310,9 +310,9 @@ begin
   end;
   
   if victim.IS_NPC then
-  	wimpy := 'none'
+    wimpy := 'none'
   else
-  	wimpy := IntToStr(GPlayer(victim).wimpy);
+    wimpy := IntToStr(GPlayer(victim).wimpy);
 
   buf := Format('Hitroll: %d.  Position: %d.  Wimpy: %s.' + #13#10,
                 [victim.hitroll,
@@ -322,7 +322,7 @@ begin
   buf1 := buf1 + buf;
 
   if not victim.IS_NPC then
-  	buf1 := buf1 + 'Page Lines: ' + IntToStr(GPlayer(victim).pagerlen) + '.' + #13#10;
+    buf1 := buf1 + 'Page Lines: ' + IntToStr(GPlayer(victim).pagerlen) + '.' + #13#10;
 
   if victim.fighting <> nil then
     buf1 := buf1 + 'Fighting: ' + victim.fighting.name + '.' + #13#10
@@ -331,7 +331,7 @@ begin
 
   if not victim.IS_NPC then
   begin
-  	buf := Format('Thirst: %d.  Full: %d.  Drunk: %d.' + #13#10,
+    buf := Format('Thirst: %d.  Full: %d.  Drunk: %d.' + #13#10,
                  [GPlayer(victim).condition[COND_THIRST],
                  GPlayer(victim).condition[COND_FULL],
                  GPlayer(victim).condition[COND_DRUNK]]);
@@ -352,14 +352,14 @@ begin
   end;
 
   if victim.master <> nil then
-  	master := victim.master.name
+    master := victim.master.name
   else
-  	master := '(none)';
+    master := '(none)';
 
   if victim.leader <> nil then
-  	leader := victim.leader.name
+    leader := victim.leader.name
   else
-  	leader := '(none)';
+    leader := '(none)';
 
   buf := Format('Master: %s.  Leader: %s.' + #13#10,
                 [master, leader]);
@@ -372,20 +372,20 @@ begin
   buf1 := buf1 + buf;
 
   if (victim.affects.size() > 0) then
-  	begin
+    begin
     buf := 'Affected by:'#13#10;
     iterator := victim.affects.iterator();
     while (iterator.hasNext()) do
-    	begin
+      begin
       aff := GAffect(iterator.next());
 
       if (aff.name <> nil) then
-        buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name, aff.duration]);
-    	end;
+        buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name^, aff.duration]);
+      end;
     iterator.Free();
     
     buf1 := buf1 + buf + #13#10;
-  	end;
+    end;
 
   if (victim.skills_learned.size() > 0) then
     with victim do
@@ -393,8 +393,8 @@ begin
       buf1 := buf1 + #13#10;
       
       iterator := skills_learned.iterator();
-    	while (iterator.hasNext()) do
-      	begin
+      while (iterator.hasNext()) do
+        begin
         g := GLearned(iterator.next());
         sk := g.skill;
         
@@ -403,8 +403,8 @@ begin
         else
           buf := '  Skill: ';
 
-        buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name, g.perc]);
-      	end;
+        buf1 := buf1 + buf + Format('%20s %d%%'#13#10, [sk.name^, g.perc]);        
+        end;
       iterator.Free();
     end;
   
@@ -471,20 +471,20 @@ begin
   buf1 := buf1 + buf;
 
   if obj.room = nil then
-  	room := 0
+    room := 0
   else
-  	room := obj.room.vnum;
+    room := obj.room.vnum;
 
   if obj.in_obj = nil then
-  	in_obj := '(none)'
+    in_obj := '(none)'
   else
    in_obj := obj.in_obj.name;
 
   if obj.carried_by = nil then
-  	carried_by := ''
+    carried_by := ''
   else
-  	carried_by := GCharacter(obj.carried_by).name;
-  	
+    carried_by := GCharacter(obj.carried_by).name;
+    
   //carried_by := '(none)';
 
   buf := Format('In room: %d.  In object: %s.  Carried by: %s.  {Wear_loc: %s %s}.' + #13#10,
@@ -655,10 +655,10 @@ end;
 { Revised 25/Feb/2001 - Nemesis }
 procedure do_mfind(ch : GCharacter; param : string);
 var 
-	buf : string;
-	found, fAll : boolean;
-	iterator : GIterator;
-	npc : GNPCIndex;
+  buf : string;
+  found, fAll : boolean;
+  iterator : GIterator;
+  npc : GNPCIndex;
 begin
   if (length(param) = 0) then
     begin
@@ -1222,10 +1222,10 @@ end;
 
 procedure do_olist(ch : GCharacter; param : string);
 var 
-	num:integer;
-	area : GArea;
-	obj : GObject;
-	iterator : GIterator;
+  num:integer;
+  area : GArea;
+  obj : GObject;
+  iterator : GIterator;
 begin
   if (GPlayer(ch).area_fname = '') then
     begin
@@ -1243,7 +1243,7 @@ begin
   num:=0;
   act(AT_REPORT, '$B$1[$B$7Nr$B$1] [$B$7VNum$B$1]  [$B$7Name$B$1]$A$7',false,ch,nil,nil,TO_CHAR);
   
-	iterator := objectIndices.iterator();
+  iterator := objectIndices.iterator();
 
   while (iterator.hasNext()) do
     begin
@@ -1256,7 +1256,7 @@ begin
       end;
     end;
     
-	iterator.Free();
+  iterator.Free();
 end;
 
 procedure do_redit(ch : GCharacter; param : string);
@@ -1576,17 +1576,17 @@ var
   node,node2 : GListNode;
 begin
   if (ch.IS_NPC()) then
-  	begin
+    begin
     ch.sendBuffer('This command is not available for mobs.'#13#10);
     exit;
-  	end;
+    end;
   
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Usage: RDELETE <vnum>'#13#10#13#10);
     ch.sendBuffer('Deletes room with given vnum.'#13#10);
     exit;
-  	end;
+    end;
 
   if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
     begin
@@ -1598,41 +1598,41 @@ begin
     room := findRoom(StrToInt(param));
   except
     on E: EConvertError do
-    	begin
+      begin
       ch.sendBuffer('That vnum doesn''t exit.');
       exit;
-    	end;
+      end;
   end;
 
   if (room = ch.room) then
-  	begin
+    begin
     ch.sendBuffer('Removing the room you''re in would not be wise.'#13#10);
     exit;
-  	end;
+    end;
   
   ch.sendBuffer('Unlinking all exits pointing to the room...'#13#10);
   node := room.exits.head;
   while (node <> nil) do
-  	begin
+    begin
     ex := GExit(node.element);
 
     room2 := ex.to_room;
     node2 := room2.exits.head;
     while (node2 <> nil) do
-    	begin
+      begin
       ex2 := GExit(node2.element);
       
       if (ex2.to_room = room) then
-      	begin
+        begin
         ch.sendBuffer(Format('Removing in room #%d the %s-exit.'#13#10, [room2.vnum, headings[ex2.direction]]));
         room2.exits.remove(node2);
         ex2.Free();
-      	end;
+        end;
       node2 := node2.next;
-    	end;
+      end;
     
     node := node.next;
-  	end;
+    end;
 
   room_list.remove(room.vnum);
   
@@ -1731,51 +1731,51 @@ var
   iterator : GIterator;
 begin
   if (ch.IS_NPC()) then
-  	begin
+    begin
     ch.sendBuffer('This command is not available for mobs.'#13#10);
     exit;
-  	end;
+    end;
   
   if (length(param) = 0) then
-  	begin
+    begin
     if ((GPlayer(ch).area = nil) and (ch.level < LEVEL_GOD)) then
-    	begin
+      begin
       if (length(GPlayer(ch).area_fname) = 0) then
         ch.sendBuffer('You don''t have an area assigned to you.'#13#10)
       else
         ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
       exit;
-    	end;
+      end;
 
     if (ch.level < LEVEL_GOD) then
       area := GPlayer(ch).area
     else
       area := ch.room.area;
-  	end
+    end
   else
-  	begin
+    begin
     area := findArea(param);
 
     if (area = nil) then
-    	begin
+      begin
       ch.sendBuffer('That area could not be found.'#13#10);
       exit;
-    	end;
-  	end;
+      end;
+    end;
   
   iterator := room_list.iterator();
   
   while (iterator.hasNext()) do
-		begin
-		room := GRoom(iterator.next());
+    begin
+    room := GRoom(iterator.next());
 
-		if (room.area <> area) then
-			continue;
+    if (room.area <> area) then
+      continue;
 
-		ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name]));
-		end;
-		
-	iterator.Free();
+    ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name]));
+    end;
+    
+  iterator.Free();
 end;
 
 { Re-added area assign - Nemesis }
@@ -2080,11 +2080,11 @@ end;
 
 procedure do_checkarea(ch : GCharacter; param : string);
 var
-	room : GRoom;
-	area : GArea;
-	iterator : GIterator;
-	no_errors : boolean;
-	h : integer;
+  room : GRoom;
+  area : GArea;
+  iterator : GIterator;
+  no_errors : boolean;
+  h : integer;
 begin
   if (GPlayer(ch).area_fname='') then
     begin
@@ -2102,40 +2102,40 @@ begin
   ch.sendBuffer('Checking area '+area.fname+'...'#13#10#13#10);
   no_errors := true;
 
-	iterator := room_list.iterator();
-	
-	while (iterator.hasNext()) do
-		begin
-		room := GRoom(iterator.next());
+  iterator := room_list.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    room := GRoom(iterator.next());
 
-		if (room.area = area) then
-			begin
-			if (length(room.name) = 0) then
-				begin
-				no_errors := false;
-				ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
-				end;
-			{ else
-			if (find_last(room.name) = '.') then
-				begin
-				no_errors:=false;
-				ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
-				end; }
+    if (room.area = area) then
+      begin
+      if (length(room.name) = 0) then
+        begin
+        no_errors := false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
+        end;
+      { else
+      if (find_last(room.name) = '.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
+        end; }
 
-			if (length(room.description) = 0) then
-				begin
-				no_errors := false;
-				ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
-				end;
-			{ else
-			if (find_last(room.description)<>'.') then
-				begin
-				no_errors:=false;
-				ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
-				end; }
-			end;
-		end;
-	iterator.Free();
+      if (length(room.description) = 0) then
+        begin
+        no_errors := false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
+        end;
+      { else
+      if (find_last(room.description)<>'.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
+        end; }
+      end;
+    end;
+  iterator.Free();
 
   { obj := obj_reset_first;
   while (obj <> nil) do
@@ -2286,8 +2286,8 @@ end;
 
 procedure do_reset(ch: GCharacter; param : string);
 var
-	area : GArea;
-	iterator : GIterator;
+  area : GArea;
+  iterator : GIterator;
 begin
   area := nil;
 
@@ -2523,14 +2523,14 @@ begin
 
   iterator := room.chars.iterator();
   while (iterator.hasNext()) do
-  	begin
+    begin
     vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC()) then
       inc(npcs)
     else
       inc(pcs);
-  	end;
+    end;
   iterator.Free();
 
   if (npcs > 0) then
@@ -2540,7 +2540,7 @@ begin
     grid_insert(gr, 0, MAP_PC);
   
   for direction := DIR_NORTH to DIR_UP do
-  	begin
+    begin
     if (direction = DIR_NORTH) and not(gr.curpos.y > 1) then
       continue;
     if (direction = DIR_EAST) and not(gr.curpos.x < MAP_SIZE_X) then
@@ -2551,21 +2551,21 @@ begin
       continue;
 
     if (room.isConnectedTo(direction) <> nil) then
-    	begin
+      begin
       if (direction = DIR_UP) then
-      	begin
+        begin
         grid_insert(gr, 0, MAP_UP);
         continue;
-      	end;
-      	
+        end;
+        
       if (direction = DIR_DOWN) then
-      	begin
+        begin
         grid_insert(gr, 0, MAP_DOWN);
         continue;
-      	end;
-      	  
+        end;
+          
       if not(been_there(gr, direction)) then
-      	begin
+        begin
         pexit := room.findExit(direction);
         if (IS_SET(pexit.flags, EX_ISDOOR)) then
           if (IS_SET(pexit.flags, EX_CLOSED)) then
@@ -2595,9 +2595,9 @@ begin
           inc(gr.curpos.x);
         if (direction = DIR_SOUTH) then
           dec(gr.curpos.y);
-      	end;
-    	end;
-  	end;
+        end;
+      end;
+    end;
 end;
 
 procedure show_legenda();
