@@ -66,11 +66,10 @@ uses
   Winsock2 in 'units\winsock2.pas',
   progs in 'units\progs.pas',
   md5 in 'units\md5.pas',
-{$IFDEF __DEBUG}
   MemCheck in 'units\MemCheck.pas',
-{$ENDIF}
   timers in 'units\timers.pas',
-  debug in 'units\debug.pas';
+  debug in 'units\debug.pas',
+  mudspell in 'units\mudspell.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
