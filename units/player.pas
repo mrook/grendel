@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.11 2003/10/29 13:33:15 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.12 2003/10/29 15:35:28 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -1157,6 +1157,9 @@ end;
 
 function GPlayer.getField(name : string) : TObject;
 begin
+	if (_fields = nil) then
+		Result := GPlayerField(fieldList[name]).default();
+		
   name := prep(name);
   
 	if (_fields[name] = nil) then
@@ -1167,6 +1170,9 @@ end;
 
 procedure GPlayer.putField(name : string; obj : TObject);
 begin
+	if (_fields = nil) then
+		exit;
+
   name := prep(name);
 
 	if (_fields[name] <> nil) then
