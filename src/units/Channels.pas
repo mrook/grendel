@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.4 2004/03/13 15:50:37 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.5 2004/03/19 15:40:07 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -892,10 +892,10 @@ end;
 type 
   GConsoleChannel = class(GConsoleWriter)
   public
-    procedure write(timestamp : TDateTime; const text : string); override;
+    procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
   end;
 
-procedure GConsoleChannel.write(timestamp : TDateTime; const text : string);
+procedure GConsoleChannel.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
   if (channels_loaded) then
     to_channel(nil, FormatDateTime('[hh:nn] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);

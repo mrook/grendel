@@ -23,7 +23,7 @@ type
 	
   	GConsoleCopyover = class(GConsoleWriter)
   	public
-		procedure write(timestamp : TDateTime; const text : string); override;
+		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
   	end;
 	
 
@@ -43,7 +43,7 @@ var
 	cons : GConsole;
 	
 
-procedure GConsoleCopyover.write(timestamp : TDateTime; const text : string);
+procedure GConsoleCopyover.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
 	writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
 end;	

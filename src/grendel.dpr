@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.16 2004/03/18 15:14:32 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.17 2004/03/19 15:40:07 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -361,10 +361,10 @@ end;
 type
   	GConsoleGrendel = class(GConsoleWriter)
   	public
-		procedure write(timestamp : TDateTime; const text : string); override;
+		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
   	end;
   	
-procedure GConsoleGrendel.write(timestamp : TDateTime; const text : string);
+procedure GConsoleGrendel.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
 	writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
 end;	
