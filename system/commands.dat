@@ -771,13 +771,6 @@ position: 0
 #end
 
 #command
-name: oinvoke
-function: do_oinvoke
-level: 993
-position: 0
-#end
-
-#command
 name: oload
 function: do_oload
 level: 993
@@ -1076,6 +1069,13 @@ position: 0
 name: switch
 function: do_switch
 level: 998
+position: 0
+#end
+
+#command
+name: take
+function: do_take
+level: 995
 position: 0
 #end
 
