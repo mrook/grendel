@@ -2,7 +2,7 @@
 	Summary:
 		System tray icon routines
 		
-	## $Id: systray.pas,v 1.4 2004/03/17 00:19:32 ***REMOVED*** Exp $
+	## $Id: systray.pas,v 1.5 2004/04/03 16:04:23 ***REMOVED*** Exp $
 }
 
 unit systray;
@@ -51,13 +51,7 @@ type
        
     procedure windowHandler(var msg : TMessage);
     
-    procedure WMLButtonUp(var Mess: TMessage); message WM_LBUTTONUP;
-    procedure WMLButtonDown(var Mess: TMessage); message WM_LBUTTONDOWN;
-    procedure WMLButtonDblClk(var Mess: TMessage); message WM_LBUTTONDBLCLK;
-    
-    procedure WMRButtonUp(var Mess: TMessage); message WM_RBUTTONUP;
     procedure WMRButtonDown(var Mess: TMessage); message WM_RBUTTONDOWN;
-    procedure WMRButtonDblClk(var Mess: TMessage); message WM_RBUTTONDBLCLK;
     
     procedure WMCommand(var Mess : TMessage); message WM_COMMAND;
 
@@ -124,22 +118,6 @@ begin
   inherited Destroy();
 end;
 
-procedure GSysTray.WMLButtonUp(var Mess: TMessage);
-begin
-end;
-
-procedure GSysTray.WMLButtonDown(var Mess: TMessage);
-begin
-end;
-
-procedure GSysTray.WMLButtonDblClk(var Mess: TMessage);
-begin
-end;
-
-procedure GSysTray.WMRButtonUp(var Mess: TMessage);
-begin
-end;
-
 procedure GSysTray.WMRButtonDown(var Mess: TMessage);
 var
   coord : TPoint;
@@ -153,10 +131,6 @@ begin
   PostMessage(handle, WM_NULL, 0, 0); 
   
   Mess.Result := 0;
-end;
-
-procedure GSysTray.WMRButtonDblClk(var Mess: TMessage);
-begin
 end;
 
 procedure GSysTray.WMCommand(var Mess : TMessage);
