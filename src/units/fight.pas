@@ -2,7 +2,7 @@
 	Summary:
 		Damage & experience routines
 	
-	## $Id: fight.pas,v 1.7 2004/04/21 20:50:31 ***REMOVED*** Exp $
+	## $Id: fight.pas,v 1.8 2004/04/22 18:25:53 hemko Exp $
 }
 
 unit fight;
@@ -57,19 +57,22 @@ const attack_table:array[FG_NONE..FG_STING,1..2] of string=(('nothing','nothings
                                                       ('breath','breaths'),
                                                       ('sting','stings'));
 
+
 procedure stopfighting(ch : GCharacter);
 procedure death_cry(ch, killer : GCharacter);
 
 procedure gain_xp(ch : GPlayer; xp : cardinal);
 
-function damage(ch, oppnt : GCharacter; dam : integer; dt : integer) : integer;
+function damage(ch, oppnt : GCharacter; dam, dt : integer) : integer;
 function one_hit(ch, victim : GCharacter) : integer;
 function in_melee(ch, vict : GCharacter) : boolean;
 procedure multi_hit(ch, vict : GCharacter);
 
 procedure update_fighting;
 
+
 implementation
+
 
 uses
 	timers,
@@ -86,6 +89,7 @@ uses
 
 var
   dual_flip : boolean;
+
 
 // Stop the fighting
 procedure stopfighting(ch : GCharacter);
