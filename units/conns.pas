@@ -481,7 +481,7 @@ function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer)
 var s, i : string;
     t : integer;
     vch : GCharacter;
-    obj1, obj2 : GObject;
+    obj1, obj2 : TObject;
     boldflag:boolean;
     ex : GExit;
 begin
@@ -525,29 +525,49 @@ begin
              else
                i := sex_pm[vch.sex];
              end;
-        'o': begin
+       'o': begin
              if (obj1 = nil) then
                write_console('[BUG]: act() -> obj1 null')
              else
-               i := obj1.name^;
+               begin
+               if (obj1 is GObjectIndex) then
+                 i := GObjectIndex(obj1).name^
+               else
+                 i := GObject(obj1).name^;
+               end;
              end;
         'O': begin
              if (obj2 = nil) then
                write_console('[BUG]: act() -> obj2 null')
              else
-               i := obj2.name^;
+               begin
+               if (obj1 is GObjectIndex) then
+                 i := GObjectIndex(obj2).name^
+               else
+                 i := GObject(obj2).name^;
+               end;
              end;
         'p': begin
              if (obj1 = nil) then
                write_console('[BUG]: act() -> obj1 null')
              else
-               i := obj1.short^;
+               begin
+               if (obj1 is GObjectIndex) then
+                 i := GObjectIndex(obj1).short^
+               else
+                 i := GObject(obj1).short^;
+               end;
              end;
         'P': begin
              if (obj2 = nil) then
                write_console('[BUG]: act() -> obj2 null')
              else
-               i := obj2.short^;
+               begin
+               if (obj2 is GObjectIndex) then
+                 i := GObjectIndex(obj2).short^
+               else
+                 i := GObject(obj2).short^;
+               end;
              end;
         't': begin
              if (arg1 = nil) then
