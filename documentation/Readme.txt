@@ -7,8 +7,9 @@ The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2004 by Michiel Roo
 
 1. Introduction
 
-It's time for a new Grendel release, this one is focused on fixing
-a few licensing issues, kindly pointed out by KaVir (kavir@kavir.org).
+It's time for a new Grendel release! This development release is mainly
+focused on fixing a lot of trivial, annoying and/or serious bugs, slowly
+paving the way towards Grendel 1.0!
 
 Check the file "ChangeLog" for the details.
 
