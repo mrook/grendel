@@ -1409,9 +1409,7 @@ begin
 
     if (length(conn.comm_buf) > 0) then
       begin
-      cmdline := conn.comm_buf;
-
-      trim(cmdline);
+      cmdline := trim(conn.comm_buf);
 
       i := pos(#13, cmdline);
       if (i <> 0) then

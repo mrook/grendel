@@ -351,7 +351,7 @@ end;
 
 procedure GConnection.setPagerInput(argument : string);
 begin
-  trim(argument);
+  argument := trim(argument);
 
   if (length(argument) > 0) then
     pagecmd := argument[1];

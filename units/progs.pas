@@ -236,7 +236,7 @@ var cvar,chck,opr,rval : string;
     chkobj : GObject;
     lhsvl,rhsvl:integer;
 begin
-  trim(ifcheck);
+  ifcheck := trim(ifcheck);
 
   if (length(ifcheck) = 0) then
     begin
@@ -278,7 +278,7 @@ begin
     exit;
     end;
 
-  trim(ifcheck);
+  ifcheck := trim(ifcheck);
 
   if (length(ifcheck) = 0) then
     begin
