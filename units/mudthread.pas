@@ -1288,6 +1288,7 @@ begin
   registerCommand('do_savearea', do_savearea);
   registerCommand('do_loadarea', do_loadarea);
   registerCommand('do_reset', do_reset);
+  registerCommand('do_map', do_map);
 end;
 
 begin

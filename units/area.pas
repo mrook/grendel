@@ -191,6 +191,7 @@ type
       function findObject(name : string) : pointer;
 
       function findDescription(keyword : string) : GExtraDescription;
+      function isConnectedTo(dir : integer) : GRoom;
       function findExit(dir : integer) : GExit;
       function findExitKeyword(s : string) : GExit;
 
@@ -1961,6 +1962,29 @@ begin
 
     node := node.next;
     end;
+end;
+
+{ Xenon 7/6/2001: added isConnectedTo() because I needed it for do_map() :-) }
+function GRoom.isConnectedTo(dir : integer) : GRoom;
+var
+   node : GListNode;
+   pexit : Gexit;
+begin
+  isConnectedTo := nil;
+
+  node := exits.head;
+  while (node <> nil) do
+  begin
+    pexit := node.element;
+
+    if (pexit.direction = dir) then
+    begin
+      isConnectedTo := pexit.to_room;
+      exit;
+    end;
+
+    node := node.next;
+  end;
 end;
 
 function GRoom.findExit(dir : integer) : GExit;

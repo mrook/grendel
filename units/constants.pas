@@ -605,10 +605,12 @@ const MPROG_ACT=BV01;           { mob reacts to act from ch}
       MPROG_RESET=BV10;         { mob is reset }
       MPROG_GIVE=BV11;          { mob gets object }
                                 
+{ constants for do_map() in cmd_build.inc }
+const
+  MAP_SIZE_X = 39;
+  MAP_SIZE_Y = 9;
+
 implementation
 
 end.
-
-
-
 
