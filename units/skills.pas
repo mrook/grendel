@@ -1,3 +1,5 @@
+// $Id: skills.pas,v 1.11 2001/04/16 17:34:52 xenon Exp $
+
 unit skills;
 
 interface
@@ -420,7 +422,6 @@ end;
 procedure GAffect.applyTo(ch : GCharacter);
 var
    aff : GAffect;
-   node : GListNode;
 begin
   if (duration > 0) then
     begin
@@ -613,8 +614,7 @@ begin
 end;
 
 procedure update_affects;
-var i : integer;
-    ch : GCharacter;
+var ch : GCharacter;
     node, node_aff : GListNode;
     aff : GAffect;
 begin

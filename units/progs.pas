@@ -1,3 +1,5 @@
+// $Id: progs.pas,v 1.7 2001/04/16 17:32:41 xenon Exp $
+
 unit progs;
 
 interface
@@ -153,7 +155,7 @@ end;
 
 function parseCode(prog : string; npc, actor : GCharacter; obj : GObject) : string;
 var c : char;
-    prog_c, buf_c : integer;
+    prog_c : integer;
     dest : string;
 begin
   prog_c := 1;
@@ -241,7 +243,6 @@ function GProgram.ifcheck(ifcheck : string; npc, actor : GCharacter; obj : GObje
 var cvar,chck,opr,rval : string;
     chkchar : GCharacter;
     chkobj : GObject;
-    lhsvl,rhsvl:integer;
 begin
   ifcheck := trim(ifcheck);
 
@@ -394,7 +395,6 @@ function GProgram.command(cmd : string; npc,actor : GCharacter; obj : GObject;
                        ignore, ignore_ors : boolean) : integer;
 var
     firstword, rest : string;
-    tmp : string;
     validif : integer;
 begin
   cmd := trim(cmd);

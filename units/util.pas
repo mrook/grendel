@@ -1,3 +1,5 @@
+// $Id: util.pas,v 1.12 2001/04/16 17:35:38 xenon Exp $
+
 unit util;
 
 interface
@@ -31,7 +33,8 @@ function rolldice(num,size:integer):integer;
 
 function mudAnsi(color : integer) : string;
 
-function isName(name , param : string) : boolean;
+function isName(name, substr : string) : boolean;
+function isObjectName(name, substr : string) : boolean;
 
 function DiffMinutes (const D1, D2 : TDateTime) : Integer;
 function DiffHours (const D1, D2 : TDateTime) : Integer;
@@ -257,9 +260,18 @@ begin
 end;
 
 {Jago 10/Jan/2001 - utility function (- move it to util.pas)}
-function isName(name , param : string) : boolean;
+{Xenon 16/Apr/2001: changed code so something like 'eno' doesn''t match xenon }
+{Xenon 16/Apr/2001: reverted last change for now }
+function isName(name, substr : string) : boolean;
 begin
-	Result := (Pos(trim(uppercase(param)), trim(uppercase(name)) ) > 0);
+  Result := (Pos(trim(uppercase(substr)), trim(uppercase(name)) ) > 0);
+//  Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) = 1);
+end;
+
+{Xenon 16/Apr/2001: same as isName() but less strict }
+function isObjectName(name, substr : string) : boolean;
+begin
+  Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) > 0);
 end;
 
 // functions borrowed from the Delphi Fundamentals
@@ -401,3 +413,4 @@ begin
 end;
 
 end.
+
