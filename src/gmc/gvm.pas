@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.10 2004/03/26 17:00:15 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.11 2004/04/21 21:08:59 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -17,7 +17,6 @@ uses
 {$ENDIF}
 	SysUtils, 
 	Variants,
-	fsys,
 	dtypes;
 
 
@@ -116,6 +115,7 @@ implementation
 
 
 uses 
+	fsys,
 	console,
 	gasmdef;
 
