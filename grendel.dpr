@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.34 2001/07/16 13:36:40 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.35 2001/07/16 16:00:17 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -245,7 +245,7 @@ begin
     fillchar(addrv6, sizeof(TSockAddr6), 0);
 
     addrv6.sin6_family := AF_INET6;
-    addrv6.sin6_port := htons(system_info.port);
+    addrv6.sin6_port := htons(system_info.port6);
 
     move(addrv6, ssv6, sizeof(addrv6));
 
@@ -268,7 +268,7 @@ begin
       if (rc > 0) then
         write_console('ERROR: Could not listen on IPv6 socket.')
       else
-        write_console('IPv6 bound on port ' + inttostr(system_info.port) + '.');
+        write_console('IPv6 bound on port ' + inttostr(system_info.port6) + '.');
       end;
     end;
 end;

@@ -1,6 +1,7 @@
 Name: Elven Empire (Grendel ptest)
 EMail: ***REMOVED***@takeover.nl
 Port: 4444
+Port6: 3333
 DenyNewConns: 0
 DenyNewPlayers: 0
 HostLookup: 1

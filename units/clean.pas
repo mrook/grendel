@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.11 2001/07/16 13:36:44 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.12 2001/07/16 16:00:18 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -105,7 +105,7 @@ begin
 
       if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
         begin
-        bugreport('update_main', 'timers.pas', 'Thread of ' + conn.ch.name^ + ' probably died',
+        bugreport('GCleanThread.Execute', 'clean..pas', 'Thread of ' + conn.ch.name^ + ' probably died',
                   'The server has detected a malfunctioning user thread and will terminate it.');
 
         conn.ch.emptyBuffer;
@@ -146,7 +146,7 @@ begin
 
     if (GTimerThread(timer_thread).last_update + THREAD_TIMEOUT < Now()) then
       begin
-      bugreport('update_main', 'timers.pas', 'Timer thread probably died',
+      bugreport('GCleanThread.Execute', 'clean.pas', 'Timer thread probably died',
                 'The server has detected that the timer is malfunctioning and will try to restart it.');
 
 {$IFDEF LINUX}

@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.23 2001/07/14 13:26:20 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.24 2001/07/16 16:00:18 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -37,8 +37,9 @@ type
     GSystem = record
       admin_email : string;        { email address of the administration }
       mud_name : string;           { name of the MUD Grendel is serving }
-      port : integer;             { port on which Grendel runs }
-      log_all : boolean;          { log all player activity? }
+      port : integer;              { port on which Grendel runs }
+      port6 : integer;		   { ipv6 port on which Grendel runs }
+      log_all : boolean;           { log all player activity? }
       bind_ip : integer;           { IP the server should bind to (when using multiple interfaces) }
       level_forcepc : integer;    { level to force players }
       level_log : integer;        { level to get log messages }
@@ -231,6 +232,9 @@ begin
 
     if g='PORT' then
       system_info.port:=strtoint(right(s,' '))
+    else
+    if (g = 'PORT6') then
+      system_info.port6 := strtoint(right(s, ' '))
     else
     if g='NAME' then
       system_info.mud_name := right(s,' ')

@@ -1,4 +1,4 @@
-// $Id: timers.pas,v 1.13 2001/07/14 13:26:25 ***REMOVED*** Exp $
+// $Id: timers.pas,v 1.14 2001/07/16 16:00:18 ***REMOVED*** Exp $
 
 unit timers;
 
@@ -104,6 +104,8 @@ end;
 constructor GTimerThread.Create;
 begin
   inherited Create(false);
+
+  last_update := Now();
 end;
 
 procedure GTimerThread.Execute;
