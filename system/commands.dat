@@ -977,6 +977,12 @@ position: 0
 #end
 
 #command
+name: map
+function: do_map
+level: 990
+#end
+
+#command
 name: log
 function: do_log
 level: 995
