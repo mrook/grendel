@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.5 2004/03/13 17:41:44 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.6 2004/04/27 14:27:30 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -486,7 +486,7 @@ begin
     end;
 end;
 
-(* procedure do_throw(ch:GCharacter;param:string);
+procedure do_throw(ch:GCharacter;param:string);
 var obj:GObject;
     vict:GCharacter;
     dest:GRoom;
@@ -498,8 +498,8 @@ begin
   if (length(param)=0) then
     ch.sendBuffer('Throw <object> <direction> <range>'#13#10)
   else
-  if ch.position=POS_BASHED then
-    ch.sendBuffer('You are bashed!'#13#10)
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
+    ch.sendBuffer('You are immobile!'#13#10)
   else
     begin
     param:=one_argument(param,sub);
@@ -616,7 +616,7 @@ begin
         end;
       end;
     end;
-end; *)
+end;
 
 { Added drink without argument - Nemesis }
 procedure do_drink(ch:GCharacter;param:string);
