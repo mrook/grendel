@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.54 2001/10/05 11:48:28 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.55 2001/10/05 21:48:58 ***REMOVED*** Exp $
 
 unit area;
 
@@ -2662,9 +2662,10 @@ end;
 
 { Revised 29/Jan/2001 - Nemesis }
 procedure addCorpse(c : pointer);
-var obj,obj_in : GObject;
-    node : GListNode;
-    ch : GCharacter;
+var 
+  obj,obj_in : GObject;
+  node : GListNode;
+  ch : GCharacter;
 begin
   ch := c;
 
@@ -2731,6 +2732,42 @@ begin
 
         end;
       end;
+    end;
+    
+  if (ch.gold > 0) then
+    begin
+    obj_in := GObject.Create();
+    
+    with obj_in do
+      begin
+      if (ch.gold = 1) then
+        begin
+        name := hash_string('one gold coin');
+        short := hash_string('one gold coin');
+        long := hash_string('one gold coin');
+        end
+      else
+        begin
+        name := hash_string(IntToStr(ch.gold) + ' gold coins');
+        short := hash_string(IntToStr(ch.gold) + ' gold coins');
+        long := hash_string(IntToStr(ch.gold) + ' gold coins');
+        end;
+
+      item_type := ITEM_MONEY;
+
+      value[1] := ch.gold;
+      
+      wear1 := 0; wear2 := 0;
+      weight := 0;
+      obj_index := nil;
+      timer := 0;
+      end;
+
+    obj_in.node_world := object_list.insertLast(obj_in);
+
+    obj_in.toObject(obj);
+    
+    ch.gold := 0;
     end;
 
   obj.toRoom(ch.room);
