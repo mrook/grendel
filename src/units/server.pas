@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.8 2004/03/22 14:32:15 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.9 2004/03/26 19:55:18 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -26,11 +26,13 @@ type
 		
 		shutdownType : GServerShutdownTypes;
 		shutdownDelay : integer;
+		lastReportedDelay : integer;
 		
 		{ Called for every iteration in GServer.gameLoop() }
 		FOnTick : GServerEvent;
 		
 		procedure openListenSockets();
+		procedure processShutdownDelay();
 		
 	public
 		constructor actualCreate(); override;
@@ -65,6 +67,7 @@ uses
 	Forms,
 	systray,
 {$ENDIF}
+	Math,
 	SysUtils,
 	conns,
 	console,
@@ -349,6 +352,44 @@ begin
 	writeConsole('Cleanup complete.');
 end;
 
+{ Decreases shutdownDelay (if > 0), reports shutdown times to channels/console }
+procedure GServer.processShutdownDelay();
+var
+	delay_sec : integer;
+begin
+	if (shutdownDelay > 0) then
+		begin
+		delay_sec := getShutdownDelay();
+		
+		if (lastReportedDelay <> delay_sec) then
+			begin
+			lastReportedDelay := delay_sec;
+			
+			case delay_sec of
+			  60,30,20,10,5 :  case shutdownType of
+							  SHUTDOWNTYPE_HALT:begin
+												writeConsole('Starting shutdown in ' + IntToStr(delay_sec) + ' seconds...');
+												to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + IntToStr(delay_sec) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+												end;
+							SHUTDOWNTYPE_REBOOT:begin
+												writeConsole('Starting reboot in ' + IntToStr(delay_sec) + ' seconds...');
+												to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + IntToStr(delay_sec) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+												end;
+						  SHUTDOWNTYPE_COPYOVER:begin
+												writeConsole('Starting copyover in ' + IntToStr(delay_sec) + ' seconds...');
+												to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + IntToStr(delay_sec) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+												end;
+							end;
+			end;
+			end;
+		
+		dec(shutdownDelay);
+		end;
+
+	if (shutdownDelay = 0) then
+		running := false;
+end;
+
 { Gameloop, call this from main program or TService.Execute }
 function GServer.gameLoop() : GServerShutdownTypes;
 var
@@ -383,12 +424,8 @@ begin
 		
 			if (Assigned(FOnTick)) then
 				FOnTick();
-		
-			if (shutdownDelay > 0) then
-				dec(shutdownDelay);
-
-			if (shutdownDelay = 0) then
-				running := false;
+				
+			processShutdownDelay();	
 		except
 			{$IFDEF LINUX}
 			on E : EQuit do break;
@@ -422,7 +459,7 @@ end;
 { Returns the shutdown delay (divided by 40 to return to seconds) }
 function GServer.getShutdownDelay() : integer;
 begin
-	Result := (shutdownDelay div SERVER_PULSE_RES);
+	Result := Ceil(shutdownDelay / SERVER_PULSE_RES);
 end;
 
 

@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.9 2004/03/17 00:19:32 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.10 2004/03/26 19:55:18 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -422,46 +422,17 @@ begin
 end;
 
 procedure update_sec();
-var
-	serverInstance : GServer;
-	delay : integer;
 begin
 	calculateonline();
 	
-	if (serverBooted) then
+	if (bg_info.count > 0) then
 		begin
-		serverInstance := GServer.Create();
-		delay := serverInstance.getShutdownDelay();
+		dec(bg_info.count);
 
-		if (delay > 0) then
-			case delay of
-			  60,30,10,5 :  case serverInstance.getShutdownType() of
-							  SHUTDOWNTYPE_HALT:begin
-												writeConsole(inttostr(delay)+' seconds till shutdown');
-												to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + inttostr(delay) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
-												end;
-							SHUTDOWNTYPE_REBOOT:begin
-												writeConsole(inttostr(delay)+' seconds till reboot');
-												to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + inttostr(delay) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
-												end;
-						  SHUTDOWNTYPE_COPYOVER:begin
-												writeConsole(inttostr(delay)+' seconds till reboot');
-												to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + inttostr(delay) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
-												end;
-							end;
-			end;
-
-		serverInstance.Free();
-
-		if (bg_info.count > 0) then
-			begin
-			dec(bg_info.count);
-
-			case bg_info.count of
-				60,30,10,5,2 : battlegroundMessage();
-				0 : startBattleground();
-			end;
-			end;
+		case bg_info.count of
+			60,30,10,5,2 : battlegroundMessage();
+			0 : startBattleground();
+		end;
 		end;
 
 	regenerate_chars();
