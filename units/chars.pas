@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.56 2001/08/14 19:26:48 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.57 2001/08/15 18:28:09 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -2074,7 +2074,7 @@ begin
     exit;
     end
   else
-  if (text[1] = '.') then
+  if (length(text) > 0) and (text[1] = '.') then
   begin
     text := uppercase(text);
     case text[2] of
