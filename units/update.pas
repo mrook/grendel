@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.14 2001/08/16 10:53:58 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.15 2001/08/16 15:40:38 ***REMOVED*** Exp $
 
 unit update;
 
@@ -325,16 +325,13 @@ begin
           end;
         end;
 
-      if (ch.IS_NPC) then
-        begin
-        p := GNPC(ch).context.findSymbol('onTick');
+      p := GNPC(ch).context.findSymbol('onTick');
 
-        if (p <> -1) then
-          begin
-          GNPC(ch).context.push(integer(ch));
-          GNPC(ch).context.setEntryPoint(p);
-          GNPC(ch).context.Execute;
-          end;
+      if (p <> -1) then
+        begin
+        GNPC(ch).context.push(integer(ch));
+        GNPC(ch).context.setEntryPoint(p);
+        GNPC(ch).context.Execute;
         end;
       end
     else
