@@ -39,8 +39,14 @@ unit md5;
 INTERFACE
 // -----------------------------------------------------------------------------------------------
 
+{$IFDEF WIN32}
 uses
 	Windows;
+{$ENDIF}
+{$IFDEF LINUX}
+uses
+	Types;
+{$ENDIF}
 
 type
 	MD5Count = array[0..1] of DWORD;
@@ -56,8 +62,8 @@ type
 	end;
 
 procedure MD5Init(var Context: MD5Context);
-procedure MD5Update(var Context: MD5Context; Input: pChar; Length: longword);
-procedure MD5Final(var Context: MD5Context; var Digest: MD5Digest);
+//procedure MD5Update(var Context: MD5Context; Input: pChar; Length: longword);
+//procedure MD5Final(var Context: MD5Context; var Digest: MD5Digest);
 
 function MD5String(M: string): MD5Digest;
 function MD5Print(D: MD5Digest): string;
@@ -272,7 +278,7 @@ begin
 		State[3] := $10325476;
 		Count[0] := 0;
 		Count[1] := 0;
-		ZeroMemory(@Buffer, SizeOf(MD5Buffer));
+		fillchar(Buffer, SizeOf(MD5Buffer), 0);
 	end;
 end;
 
@@ -291,7 +297,8 @@ begin
 	end;
 	PartLen := 64 - Index;
 	if Length >= PartLen then begin
-		CopyMemory(@Context.Buffer[Index], Input, PartLen);
+//		CopyMemory(@Context.Buffer[Index], Input, PartLen);
+		move(Context.Buffer[Index], Input, PartLen);
 		Transform(@Context.Buffer, Context.State);
 		I := PartLen;
 		while I + 63 < Length do begin
@@ -300,7 +307,9 @@ begin
 		end;
 		Index := 0;
 	end else I := 0;
-	CopyMemory(@Context.Buffer[Index], @Input[I], Length - I);
+
+	move(Context.Buffer[Index], Input[I], Length - I);
+//	CopyMemory(@Context.Buffer[Index], @Input[I], Length - I);
 end;
 
 // Finalize given Context, create Digest and zeroize Context
@@ -316,7 +325,7 @@ begin
 	MD5Update(Context, @PADDING, PadLen);
 	MD5Update(Context, @Bits, 8);
 	Decode(@Context.State, @Digest, 4);
-	ZeroMemory(@Context, SizeOf(MD5Context));
+	fillchar(Context, Sizeof(MD5Context), 0);
 end;
 
 // -----------------------------------------------------------------------------------------------

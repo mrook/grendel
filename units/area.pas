@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.36 2001/07/12 16:37:00 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.37 2001/07/14 13:26:10 ***REMOVED*** Exp $
 
 unit area;
 
@@ -597,8 +597,7 @@ begin
         npc_list.insertLast(npc);
         end;
       except
-        bugreport('GArea.loadMobiles', 'area.pas', 'something went wrong',
-                  'Something went wrong while loading mobiles. Please check your settings.');
+        areaBug('GArea.loadMobiles', 'Exception while loading mobile section, please check your area');
         npc.Free;
       end;
   until (uppercase(s) = '#END');
@@ -936,7 +935,7 @@ var to_room, room : GRoom;
 begin
   tm := Now();
 
-  assignfile(lf, 'areas\area.list');
+  assignfile(lf, translateFileName('areas\area.list'));
 
   {$I-}
   reset(lf);

@@ -30,6 +30,9 @@ procedure init_progs;
 implementation
 
 uses
+{$IFDEF LINUX}
+    Variants,
+{$ENDIF}
     Math,
     Strip,
     SysUtils,

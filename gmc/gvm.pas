@@ -1,10 +1,19 @@
 unit gvm;
 interface
 
-uses SysUtils, dtypes, Windows;
+uses 
+  SysUtils, 
+{$IFDEF WIN32}
+  Windows,
+{$ENDIF}
+{$IFDEF LINUX}
+  Variants,
+{$ENDIF}
+  fsys,
+  dtypes;
 
 const
-	stackSize = 512;
+  stackSize = 512;
 
 type
   GVMError = procedure(owner : TObject; errorMsg : string);
@@ -122,7 +131,7 @@ begin
 
     cb.symbols := GHashTable.Create(128);
 
-    assign(input, fname);
+    assign(input, translateFileName(fname));
     {$I-}
     reset(input, 1);
     {$I+}

@@ -1,16 +1,26 @@
-// $Id: constants.pas,v 1.34 2001/07/12 16:37:01 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.35 2001/07/14 13:26:17 ***REMOVED*** Exp $
 
 unit constants;
 
 interface
 
-const version_number = 'v0.4.0rc2';
-      version_info = 'The Grendel Project - A Win32 MUD Server';
-      version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
+const 
+{$IFDEF LINUX}
+  version_number = 'v0.4.0rc2-linux';
+{$ELSE}
+  version_number = 'v0.4.0rc2';
+{$ENDIF}
+  version_info = 'The Grendel Project - A Win32 MUD Server';
+  version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
 
-const
-     NameTablesDataFile = 'system\NameData.xml';
-      
+{$IFDEF LINUX}
+  PathDelimiter = '/';
+{$ELSE}
+  PathDelimiter = '\';
+{$ENDIF}
+
+  SystemDir = 'system' + PathDelimiter;
+
 { misc. bitvectors }
 const BV00=1 shl 0;
       BV01=1 shl 1;

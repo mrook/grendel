@@ -1,4 +1,4 @@
-// $Id: command.inc,v 1.17 2001/05/11 14:25:08 ***REMOVED*** Exp $
+// $Id: command.inc,v 1.18 2001/07/14 13:26:08 ***REMOVED*** Exp $
 
 {$F+}
 
@@ -609,6 +609,18 @@ begin
   matchlist.Free();
 end;
 
+{$IFDEF LINUX}
+{$I include/cmd_imm.inc}
+{$I include/cmd_info.inc}
+{$I include/cmd_move.inc}
+{$I include/cmd_fight.inc}
+{$I include/cmd_magic.inc}
+{$I include/cmd_skill.inc}
+{$I include/cmd_comm.inc}
+{$I include/cmd_obj.inc}
+{$I include/cmd_shops.inc}
+{$I include/cmd_build.inc}
+{$ELSE}
 {$I include\cmd_imm.inc}
 {$I include\cmd_info.inc}
 {$I include\cmd_move.inc}
@@ -619,4 +631,4 @@ end;
 {$I include\cmd_obj.inc}
 {$I include\cmd_shops.inc}
 {$I include\cmd_build.inc}
-
+{$ENDIF}

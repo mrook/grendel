@@ -1,11 +1,13 @@
-// $Id: clean.pas,v 1.9 2001/05/11 14:25:02 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.10 2001/07/14 13:26:14 ***REMOVED*** Exp $
 
 unit clean;
 
 interface
 
 uses
+{$IFDEF Win32}
     Windows,
+{$ENDIF}
     Classes;
 
 { This is the misc. thread function, also known as the 'simple task thread'.
@@ -38,7 +40,12 @@ uses
     area,
     util,
     timers,
+{$IFDEF WIN32}
     Winsock2,
+{$ENDIF}
+{$IFDEF LINUX}
+    Libc,
+{$ENDIF}
     mudthread,
     mudsystem;
 
@@ -47,7 +54,9 @@ begin
   inherited Create(false);
 
   SyncWritelog('Started cleanup thread.');
+{$IFDEF WIN32}
   SetThreadPriority(Handle, THREAD_PRIORITY_IDLE);
+{$ENDIF}
   freeonterminate := true;
 end;
 
@@ -125,7 +134,11 @@ begin
         conn.send('Your character is linkless, and it would be wise to reconnect as soon'#13#10);
         conn.send('as possible.'#13#10);
 
+{$IFDEF LINUX}
+	__close(conn.socket);
+{$ELSE}
         closesocket(conn.socket);
+{$ENDIF}
 
         conn.ch.conn := nil;
 
@@ -134,7 +147,12 @@ begin
 
         conn.Free;
 
+{$IFDEF LINUX}
+	pthread_kill(conn.thread.handle, 9);
+{$ENDIF}
+{$IFDEF WIN32}
         TerminateThread(conn.thread.handle, 1);
+{$ENDIF}
 
         node := node_next;
         continue;
@@ -149,7 +167,12 @@ begin
       bugreport('update_main', 'timers.pas', 'Timer thread probably died',
                 'The server has detected that the timer is malfunctioning and will try to restart it.');
 
+{$IFDEF LINUX}
+      pthread_kill(timer_thread.handle, 9);
+{$ENDIF}
+{$IFDEF WIN32}
       TerminateThread(timer_thread.handle, 1);
+{$ENDIF}
 
       timer_thread := GTimerThread.Create;
       end;

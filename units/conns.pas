@@ -1,12 +1,17 @@
-// $Id: conns.pas,v 1.25 2001/05/12 14:24:29 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.26 2001/07/14 13:26:14 ***REMOVED*** Exp $
 
 unit conns;
 
 interface
 
 uses
+{$IFDEF WIN32}
     Winsock2,
     Windows,
+{$ENDIF}
+{$IFDEF LINUX}
+    Libc,
+{$ENDIF}
     Classes,
     SysUtils,
     constants,
@@ -18,6 +23,12 @@ uses
 
 
 type
+{$IFDEF LINUX}
+    TSockAddr = sockaddr;
+    TSockAddr6 = sockaddr_in6;
+    TSockAddr_Storage = sockaddr_storage;
+{$ENDIF}
+
     GConnection = class
       node : GListNode;
       socket : TSocket;
@@ -131,7 +142,12 @@ begin
   keylock := false;
   afk := false;
 
+{$IFDEF LINUX}
+  if (addr.__ss__family = AF_INET) then
+{$ENDIF}
+{$IFDEF WIN32}
   if (addr.ss_family = AF_INET) then
+{$ENDIF}
     begin
     move(addr, v4, sizeof(v4));
 
@@ -150,7 +166,12 @@ begin
       host_string := ip_string;
     end
   else
+{$IFDEF LINUX}
+  if (addr.__ss__family = AF_INET6) then
+{$ENDIF}
+{$IFDEF WIN32}
   if (addr.ss_family = AF_INET6) then
+{$ENDIF}
     begin
     move(addr, v6, sizeof(v6));
 
@@ -197,8 +218,8 @@ begin
 end;
 
 procedure GConnection.checkReceive;
-var
-   msg : TMsg;
+{var
+   msg : TMsg;}
 begin
   FD_ZERO(read_set);
   FD_SET(socket, read_set);
@@ -208,11 +229,11 @@ begin
   tel_val^.tv_sec:=0;
   tel_val^.tv_usec:=0;
 
-  if (PeekMessage(msg, 0, 0, 0, PM_REMOVE)) then
+{  if (PeekMessage(msg, 0, 0, 0, PM_REMOVE)) then
     begin
     TranslateMessage(msg);
     DispatchMessage(msg);
-    end;
+    end; }
 
   if (select(0,@read_set,nil,@ex_set,tel_val) = SOCKET_ERROR) then
     try
@@ -264,6 +285,7 @@ begin
     else
     if (read = SOCKET_ERROR) then
       begin
+{$IFDEF WIN32}
       s := WSAGetLastError;
 
       if (s = WSAEWOULDBLOCK) then
@@ -278,6 +300,7 @@ begin
 
         exit;
         end;
+{$ENDIF}
       end
     else
       begin
@@ -329,7 +352,12 @@ var
    res : integer;
 begin
   if (length(s) > 0) then
+{$IFDEF WIN32}
     res := Winsock2.send(socket, s[1], length(s), 0)
+{$ENDIF}
+{$IFDEF LINUX}
+    res := Libc.send(socket, s[1], length(s), 0)
+{$ENDIF}
   else
     res := 0;
 

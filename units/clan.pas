@@ -3,6 +3,7 @@ unit clan;
 interface
 
 uses
+    fsys,
     dtypes;
 
 type
@@ -47,7 +48,7 @@ procedure GClan.load(fname : string);
 var cf : textfile;
     d,r:string;
 begin
-  assignfile(cf,'clans\'+fname);
+  assignfile(cf, translateFileName('clans\'+fname));
   {$I-}
   reset(cf);
   {$I+}
@@ -113,7 +114,7 @@ var clan : GClan;
     s:string;
     f:textfile;
 begin
-  assign(f,'clans\clan.list');
+  assign(f, translateFileName('clans\clan.list'));
   {$I-}
   reset(f);
   {$I+}

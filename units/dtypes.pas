@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.18 2001/06/01 21:10:10 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.19 2001/07/14 13:26:18 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -118,10 +118,11 @@ function firstHash(size, prime : cardinal; key : string) : integer;
 
 implementation
 
-{$IFDEF Grendel}
 uses
-    mudsystem;
+{$IFDEF LINUX}
+    Variants,
 {$ENDIF}
+   mudsystem;
 
 
 // GDLinkedListIterator

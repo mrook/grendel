@@ -3,7 +3,11 @@ unit NameGen;
 interface
 
 uses
+  constants,
   dtypes;
+
+const
+  NameTablesDataFile = SystemDir + 'NameData.xml';
 
 type
   TPhonemePart =
@@ -45,7 +49,6 @@ implementation
 
 uses
   SysUtils,
-  constants,
   mudsystem,
   util,
   LibXmlParser;

@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.35 2001/06/06 18:40:16 xenon Exp $
+// $Id: cmd_imm.inc,v 1.36 2001/07/14 13:26:07 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -937,9 +937,17 @@ begin
   act(AT_REPORT,'Online time:       ' + online_time,false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT,'System time:       ' + DateTimeToStr(Now),false,ch,nil,nil,TO_CHAR);
 
+{$IFDEF WIN32}
   status:=GetHeapStatus;
   act(AT_REPORT,'Heap allocated:    ' + inttostr(status.totalallocated)+' byte(s)',false,ch,nil,nil,TO_CHAR);
+{$ENDIF}
+
+{$IFDEF LINUX}
+  assignfile(f,'grendel');
+{$ELSE}
   assignfile(f,'grendel.exe');
+{$ENDIF}
+
   {$I-}
   filemode:=0;
   reset(f,1);
@@ -1290,7 +1298,11 @@ begin
     exit;
   end;
 
+{$IFDEF LINUX}
+  __close(sock);
+{$ELSE}
   closesocket(sock);
+{$ENDIF}
   ch.sendBuffer( 'Ok.'#13#10);
 end;
 

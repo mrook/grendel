@@ -1,10 +1,15 @@
-// $Id: mudsystem.pas,v 1.22 2001/07/14 13:19:22 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.23 2001/07/14 13:26:20 ***REMOVED*** Exp $
 
 unit mudsystem;
 
 interface
 uses
+{$IFDEF Win32}
     Winsock2,
+{$ENDIF}
+{$IFDEF LINUX}
+    Libc,
+{$ENDIF}
     SysUtils,
     Classes,
     constants,
@@ -34,7 +39,7 @@ type
       mud_name : string;           { name of the MUD Grendel is serving }
       port : integer;             { port on which Grendel runs }
       log_all : boolean;          { log all player activity? }
-      bind_ip : u_long;           { IP the server should bind to (when using multiple interfaces) }
+      bind_ip : integer;           { IP the server should bind to (when using multiple interfaces) }
       level_forcepc : integer;    { level to force players }
       level_log : integer;        { level to get log messages }
       lookup_hosts : boolean;     { lookup host names of clients? }
@@ -104,12 +109,13 @@ var
   mobs_loaded:integer;
   online_time:string;
   status : THeapStatus;
+  mud_booted : boolean;
+  grace_exit : boolean;
+  boot_type : integer;
 
 
-const mud_booted : boolean = false;
-      grace_exit : boolean = false;
-      boot_type : integer = BOOTTYPE_SHUTDOWN;
-      stable_system : boolean = true;
+//const 
+//   stable_system : boolean = true;
 
 
 procedure write_direct(s:string);
@@ -278,7 +284,7 @@ var f : textfile;
 begin
   t.s_addr := system_info.bind_ip;
 
-  assignfile(f,'system\sysdata.dat');
+  assignfile(f, translateFileName('system\sysdata.dat'));
   rewrite(f);
 
   writeln(f,'Name: ',system_info.mud_name);
@@ -293,7 +299,7 @@ begin
   writeln(f,'$');
   closefile(f);
 
-  assignfile(f, 'system\bans.dat');
+  assignfile(f, translateFileName('system\bans.dat'));
   rewrite(f);
 
   for a := 0 to banned_masks.count-1 do
@@ -323,7 +329,7 @@ var f : textfile;
     social : GSocial;
     line_num : integer;
 begin
-  assignfile(f, 'system\socials.dat');
+  assignfile(f, translateFileName('system\socials.dat'));
   {$I-}
   reset(f);
   {$I+}
@@ -530,7 +536,7 @@ var f:textfile;
     s:string;
     dam : GDamMessage;
 begin
-  assignfile(f,'system\damage.dat');
+  assignfile(f, translateFileName('system\damage.dat'));
   {$I-}
   reset(f);
   {$I+}
@@ -638,13 +644,15 @@ begin
   end;
 end;
 
-initialization
-socials := GHashTable.Create(512);
-socials.setHashFunc(firstHash);
-dm_msg := GDLinkedList.Create;
-auction_good := GAuction.Create;
-auction_evil := GAuction.Create;
-banned_masks := TStringList.Create;
-
+initialization 
+  socials := GHashTable.Create(512);
+  socials.setHashFunc(firstHash);
+  dm_msg := GDLinkedList.Create;
+  auction_good := GAuction.Create;
+  auction_evil := GAuction.Create;
+  banned_masks := TStringList.Create;
+  mud_booted := false;
+  grace_exit := false;
+  boot_type := BOOTTYPE_SHUTDOWN;
 end.
 

@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.7 2001/07/04 16:24:02 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.8 2001/07/14 13:26:20 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -37,14 +37,29 @@ type
       destructor Destroy; override;
     end;
 
+
+function translateFileName(fn : string) : string;
+
 implementation
 
 uses
   dtypes;
 
+
+function translateFileName(fn : string) : string;
+begin
+{$IFDEF LINUX}
+  Result := StringReplace(fn, '\', '/', [rfReplaceAll]);
+{$ELSE}
+  Result := fn;
+{$ENDIF}
+end;
+
 constructor GFileReader.Create(fn : string);
 begin
   inherited Create;
+
+  fn := translateFileName(fn);
 
   fp := TFileStream.Create(fn, fmOpenRead);
   fname := fn;
@@ -122,14 +137,14 @@ begin
     begin
     c := readChar;
 
-    if (c <> #13) then
+    if (c <> #13) and (c <> #10) then
       begin
       chars[pos] := c;
       inc(pos);
 
       if (pos >= MAX_LINESIZE) then 
         begin
-		    raise GException.Create('fsys.pas:GFileReader.Create', 'max linesize exceeded in ' + fname);
+	raise GException.Create('fsys.pas:GFileReader.Create', 'max linesize exceeded in ' + fname);
 
         pos := MAX_LINESIZE;
         break;
@@ -141,8 +156,7 @@ begin
 
   chars[pos] := #0;
 
-  readLine := chars
-  ;
+  readLine := chars;
 end;
 
 function GFileReader.readInteger : integer;
@@ -152,7 +166,7 @@ var c : char;
 begin
   c := ' ';
 
-  while (c in [' ', #13]) do
+  while (c in [' ', #13, #10]) do
     begin
     if (eof) then
       begin
@@ -209,7 +223,7 @@ var c : char;
 begin
   c := ' ';
 
-  while (c in [' ', #13]) do
+  while (c in [' ', #13, #10]) do
     begin
     if (eof) then
       begin
@@ -268,7 +282,7 @@ var
 begin
   c := ' ';
 
-  while (c in [' ', #13]) do
+  while (c in [' ', #13, #10]) do
     begin
     if (eof) then
       begin
@@ -301,14 +315,14 @@ begin
 
     pword^ := readChar;
 
-    if (quoted) and (pword^ in ['''', '"', #13]) then
+    if (quoted) and (pword^ in ['''', '"', #13, #10]) then
       begin
       pword^ := #0;
       Result := word;
       exit;
       end
     else
-    if (not quoted) and (pword^ in [' ', #13]) then
+    if (not quoted) and (pword^ in [' ', #13, #10]) then
       begin
       pword^ := #0;
       Result := word;

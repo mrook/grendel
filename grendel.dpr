@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.31 2001/07/14 13:19:21 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.32 2001/07/14 13:26:06 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -47,6 +47,7 @@ program grendel;
 
 uses
   SysUtils,
+{$IFDEF WIN32}
   Windows,
   mudsystem in 'units\mudsystem.pas',
   constants in 'units\constants.pas',
@@ -77,15 +78,53 @@ uses
   NameGen in 'units\NameGen.pas',
   bulletinboard in 'units\bulletinboard.pas',
   Channels in 'units\Channels.pas',
-  progs in 'units\progs.pas';
+  progs in 'units\progs.pas',
+  gasmdef in 'gmc\gasmdef.pas',
+  gvm in 'gmc\gvm.pas';
+{$ENDIF}
+{$IFDEF LINUX}
+  Libc,
+  mudsystem in 'units/mudsystem.pas',
+  constants in 'units/constants.pas',
+  dtypes in 'units/dtypes.pas',
+  conns in 'units/conns.pas',
+  util in 'units/util.pas',
+  Strip in 'units/strip.pas',
+  area in 'units/area.pas',
+  fsys in 'units/fsys.pas',
+  mudthread in 'units/mudthread.pas',
+  AnsiIO in 'units/ansiio.pas',
+  chars in 'units/chars.pas',
+  race in 'units/race.pas',
+  fight in 'units/fight.pas',
+  skills in 'units/skills.pas',
+  mudhelp in 'units/mudhelp.pas',
+  magic in 'units/magic.pas',
+  update in 'units/update.pas',
+  clan in 'units/clan.pas',
+  clean in 'units/clean.pas',
+  md5 in 'units/md5.pas',
+  timers in 'units/timers.pas',
+  debug in 'units/debug.pas',
+  mudspell in 'units/mudspell.pas',
+  LibXmlParser in 'units/LibXmlParser.pas',
+  NameGen in 'units/NameGen.pas',
+  bulletinboard in 'units/bulletinboard.pas',
+  Channels in 'units/Channels.pas',
+  progs in 'units/progs.pas',
+  gasmdef in 'gmc/gasmdef.pas',
+  gvm in 'gmc/gvm.pas';
+{$ENDIF}
 
 const pipeName : pchar = '\\.\pipe\grendel';
-const use_ipv4 : boolean = false;
-      use_ipv6 : boolean = false;
 
 
 var
+{$IFDEF WIN32}
    hWSAData : TWSAData;
+{$ENDIF}
+
+   use_ipv4, use_ipv6 : boolean;
 
    listenv4, listenv6 : TSocket;
 
@@ -100,8 +139,9 @@ var
 
 
 procedure detect_protocols;
+{$IFDEF WIN32}
 var
-   a, t : dword;
+   a, t : DWORD;
    lp : array[0..1] of integer;
    prot : pointer;
    pprot : LPWSAProtocol_Info;
@@ -141,15 +181,23 @@ begin
 
   freemem(prot, t);
 end;
+{$ELSE}
+begin
+  use_ipv4 := true;
+  use_ipv6 := true;
+end;
+{$ENDIF}
 
-procedure startup_winsock;
+procedure startup_tcpip;
 var rc : integer;
     ver : integer;
 begin
+{$IFDEF WIN32}
   ver := WINSOCK_VERSION;
 
   if (WSAStartup(ver, hWSAData) <> 0) then
     write_console('ERROR: WSAStartup failed.');
+{$ENDIF}
 
   detect_protocols;
 
@@ -167,7 +215,12 @@ begin
 
     if (bind(listenv4, TSockaddr(addrv4), sizeof(addrv4)) = -1) then
       begin
+{$IFDEF LINUX}
+      __close(listenv4);
+{$ELSE}
       closesocket(listenv4);
+{$ENDIF}
+
       write_console('ERROR: Could not bind to IPv4, port ' + inttostr(system_info.port));
       halt;
       end;
@@ -199,11 +252,12 @@ begin
 
     if (bind(listenv6, addrv6p^, 128) = -1) then
       begin
-      rc := WSAGetLastError;
-
-      writeln(rc);
-
+{$IFDEF LINUX}
+      __close(listenv6);
+{$ELSE}
       closesocket(listenv6);
+{$ENDIF}
+
       write_console('ERROR: Could not bind to IPv6, port ' + inttostr(system_info.port));
       end;
 
@@ -324,27 +378,39 @@ begin
 
   if (use_ipv4) then
     begin
+{$IFDEF LINUX}
+    __close(listenv4);
+{$ELSE}
     closesocket(listenv4);
+{$ENDIF}
     listenv4 := -1;
     end;
 
   if (use_ipv6) then
     begin
+{$IFDEF LINUX}
+    __close(listenv6);
+{$ELSE}
     closesocket(listenv6);
+{$ENDIF}
     listenv6 := -1;
     end;
 
+{$IFDEF WIN32}
   WSACleanup;
+{$ENDIF}
+
   write_console('Cleanup complete.');
   if (TTextRec(logfile).mode = fmOutput) then
     CloseFile(LogFile);
 end;
 
 procedure reboot_mud;
-var SI: TStartupInfo;
-    PI: TProcessInformation;
-    s : TDateTime;
-    msg:TMsg;
+{$IFDEF WIN32}
+var
+  SI: TStartupInfo;
+  PI: TProcessInformation;
+{$ENDIF}
 begin
   write_console('Server rebooting...');
   try
@@ -353,16 +419,14 @@ begin
       flushConnections;
 
     { wait for users to logout }
-    s := Time+StrToTime('0:0:01');
-    repeat
-      PeekMessage(msg,0,0,0,PM_NOREMOVE);
-    until Time>=s;
+    Sleep(1000);
   except
-    write_console('... wrong');
+    write_console('Exception caught while cleaning up memory');
   end;
 
   cleanup_mud;
 
+{$IFDEF WIN32}
   FillChar(SI, SizeOf(SI), 0);
   SI.cb := SizeOf(SI);
   SI.wShowWindow := sw_show;
@@ -370,9 +434,11 @@ begin
   if not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI) then
     bugreport('reboot_mud', 'grendel.dpr', 'could not execute grendel.exe',
               'The server could not be rebooted! Please check your settings!');
+{$ENDIF}
 end;
 
 procedure copyover_mud;
+{$IFDEF WIN32}
 var
    SI: TStartupInfo;
    PI: TProcessInformation;
@@ -451,7 +517,7 @@ begin
       reboot_mud;
       end;
 
-		strpcopy(name, conn.ch.name^);
+    strpcopy(name, conn.ch.name^);
     len := strlen(name);
 
     if (not WriteFile(pipe, len, 4, w, nil)) then
@@ -478,11 +544,13 @@ begin
 
   cleanup_mud;
 end;
+{$ELSE}
+begin
+  write_console('Copyover not supported on this platform.');
+end;
+{$ENDIF}
 
 procedure shutdown_mud;
-var
-    s : TDateTime;
-    msg:TMsg;
 begin
   write_console('Server shutting down...');
   try
@@ -490,11 +558,7 @@ begin
     if MUD_Booted then
       flushConnections;
 
-    { wait for users to logout }
-    s := Time+StrToTime('0:0:01');
-    repeat
-      PeekMessage(msg,0,0,0,PM_NOREMOVE);
-    until Time>=s;
+    Sleep(1000);
   except
     write_console('... wrong');
   end;
@@ -526,8 +590,6 @@ end;
   and their data is saved properly. Also, this routine makes sure the
   server reboots automatically, no script needed! - Grimlord }
 procedure reboot_exitproc;far;
-var msg:TMsg;
-    s:single;
 begin
   { okay, so we crashed :) }
   if (not grace_exit) then
@@ -540,12 +602,7 @@ begin
     { save all characters and try to unlog before quitting }
     flushConnections;
 
-    { wait for users to logout }
-    s:=Time+StrToTime('0:0:01');
-
-    repeat
-      PeekMessage(msg,0,0,0,PM_NOREMOVE);
-    until Time>=s;
+    Sleep(1000);
 
     { give operator/logfile a message }
     bugreport('CRASH', 'grendel.dpr', 'CRASH WARNING',
@@ -568,7 +625,7 @@ begin
   { copyover }
   if (boot_type = BOOTTYPE_COPYOVER) then
     begin
-		if (connection_list.getSize > 0) then
+    if (connection_list.getSize > 0) then
       copyover_mud
     else
       reboot_mud;
@@ -582,7 +639,7 @@ procedure boot_mud;
 var s : string;
 begin
   { open a standard log file, filename is given by current system time }
-  AssignFile(LogFile, 'log\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log');
+  AssignFile(LogFile, translateFileName('log\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
 
   {$I-}
   rewrite(LogFile);
@@ -591,7 +648,9 @@ begin
   if (IOResult <> 0) then
     write_console('NOTE: Could not open logfile. Messages are not being logged.');
 
+{$IFDEF WIN32}
   SetConsoleTitle(version_info + ', ' + version_number + '(Booting)');
+{$ENDIF}
 
   write_direct(version_info + ', ' + version_number + '.');
   write_direct(version_copyright + '.');
@@ -634,7 +693,9 @@ begin
 
   randomize;
 
-  startup_winsock;
+  use_ipv4 := false;
+  use_ipv6 := false;
+  startup_tcpip;
 
   ExitProc := @reboot_exitproc;
 
@@ -678,12 +739,12 @@ var
 begin
   cl := @client_addr;
   len := 128;
-  ac := accept(list_sock, cl^, len);
+  ac := accept(list_sock, cl, @len);
 
   // set non-blocking mode
 
   len := 1;
-  len := ioctlsocket(ac, FIONBIO, len);
+//  len := ioctlsocket(ac, FIONBIO, len);
 
   if (boot_info.timer >= 0) then
     begin
@@ -691,7 +752,12 @@ begin
     send_to_socket(ac, 'Currently, this server is in the process of a reboot.'#13#10);
     send_to_socket(ac, 'Please try again later.'#13#10);
     send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+{$IFDEF LINUX}
+    __close(ac);
+{$ELSE}
     closesocket(ac);
+{$ENDIF}
     end
   else
   if system_info.deny_newconns then
@@ -700,7 +766,12 @@ begin
     send_to_socket(ac, 'Currently, this server is refusing new connections.'#13#10);
     send_to_socket(ac, 'Please try again later.'#13#10);
     send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+{$IFDEF LINUX}
+    __close(ac);
+{$ELSE}
     closesocket(ac);
+{$ENDIF}
     end
   else
   if (connection_list.getSize >= MAX_CONNS) then
@@ -709,57 +780,55 @@ begin
     send_to_socket(ac, 'Currently, this server is too busy to accept new connections.'#13#10);
     send_to_socket(ac, 'Please try again later.'#13#10);
     send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+{$IFDEF LINUX}
+    __close(ac);
+{$ELSE}
     closesocket(ac);
+{$ENDIF}
     end
   else
     GGameThread.Create(ac, client_addr, false, '');
 end;
 
 procedure game_loop;
-var msg : TMsg;
-    accept_set : PFDSet;
-    accept_val : PTimeVal;
+var
+  accept_set : TFDSet;
+  accept_val : TTimeVal;
 begin
-  new(accept_set);
-  new(accept_val);
-
   while (true) do
     begin
-    if (PeekMessage(msg,0,0,0,PM_REMOVE)) then
-      begin
-      TranslateMessage(msg);
-      DispatchMessage(msg);
-      end;
+    Sleep(5);
 
     if (use_ipv4) and (listenv4 > 0) then
       begin
-      accept_set^.fd_array[0] := listenv4;
-      accept_set^.fd_count:=1;
-      accept_val^.tv_sec:=0;
-      accept_val^.tv_usec:=0;
+      FD_ZERO(accept_set);
+      FD_SET(listenv4, accept_set);
 
-      if (select(1,accept_set,nil,nil,accept_val) <> 0) then
+      accept_val.tv_sec:=0;
+      accept_val.tv_usec:=0;
+
+      if (select(listenv4, @accept_set, nil, nil, @accept_val) <> 0) then
         accept_connection(listenv4);
       end;
 
     if (use_ipv6) and (listenv6 > 0) then
       begin
-      accept_set^.fd_array[0] := listenv6;
-      accept_set^.fd_count:=1;
-      accept_val^.tv_sec:=0;
-      accept_val^.tv_usec:=0;
+      FD_ZERO(accept_set);
+      FD_SET(listenv6, accept_set);
 
-      if (select(1,accept_set,nil,nil,accept_val) <> 0) then
+      accept_val.tv_sec:=0;
+      accept_val.tv_usec:=0;
+
+      if (select(listenv6, @accept_set, nil, nil, @accept_val) <> 0) then
         accept_connection(listenv6);
       end;
 
     sleep(500);
     end;
-
-  dispose(accept_set);
-  dispose(accept_val);
 end;
 
+{$IFDEF WIN32}
 function ctrl_handler(event:dword):boolean;
 begin
   ctrl_handler:=true;
@@ -767,14 +836,16 @@ begin
   SetConsoleCtrlHandler(@ctrl_handler, false);
   halt;
 end;
+{$ENDIF}
 
 procedure from_copyover;
+{$IFDEF WIN32}
 var
    pipe : THandle;
    w, len : cardinal;
    prot : TWSAProtocol_Info;
-	 g : array[0..1023] of char;
-	 suc : boolean;
+   g : array[0..1023] of char;
+   suc : boolean;
    sock : TSocket;
    cl : PSockAddr;
    l : integer;
@@ -785,7 +856,7 @@ begin
     begin
     pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
 
-		if (pipe <> INVALID_HANDLE_VALUE) then
+    if (pipe <> INVALID_HANDLE_VALUE) then
       break;
 
     if (GetLastError() <> ERROR_PIPE_BUSY) then
@@ -803,7 +874,7 @@ begin
               'The copyover could not be completed succesfully.');
 			exit;
       end;
-		end;
+  end;
 
   sock := -1;
 
@@ -811,25 +882,30 @@ begin
     suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
 
     if (suc) then
-  		sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
+      sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
 
     suc := ReadFile(pipe, len, 4, w, nil);
     suc := ReadFile(pipe, g, len, w, nil);
 
-		if (suc) and (sock <> -1) then
+    if (suc) and (sock <> -1) then
       begin
-  		g[len] := #0;
+      g[len] := #0;
 
       cl := @client_addr;
       l := 128;
       getpeername(sock, cl^, l);
 
       GGameThread.Create(sock, client_addr, true, g);
-			end;
+      end;
   until (not suc);
 
   CloseHandle(pipe);
 end;
+{$ELSE}
+begin
+  write_console('Copyover not supported on this platform.');
+end;
+{$ENDIF}
 
 begin
   old_exitproc := ExitProc;
@@ -843,9 +919,15 @@ begin
   if (CmdLine = 'copyover') then
     from_copyover;
 
+{$IFDEF WIN32}
   SetConsoleCtrlHandler(@ctrl_handler, true);
+{$ENDIF}
+
   write_console('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
+
+{$IFDEF WIN32}
   SetConsoleTitle(version_info + ', ' + version_number + '. ' + version_copyright + '.');
+{$ENDIF}
 
   game_loop;
 end.

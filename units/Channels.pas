@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.5 2001/06/14 18:19:41 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.6 2001/07/14 13:26:09 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -16,8 +16,7 @@ uses
   constants;
 
 const
-  channels_loaded : boolean = false;
-  channelDataFile = 'system\channels.xml';
+  channelDataFile = SystemDir + 'channels.xml';
 
   CHANNEL_FLAG_LOG = BV00;
   CHANNEL_FLAG_HISTORY = BV01;
@@ -71,6 +70,7 @@ type
 
 var
   channellist : GDLinkedList;
+  channels_loaded : boolean;
 
 procedure load_channels();
 procedure channelCommunicate(ch : GCharacter; param : string);
@@ -896,5 +896,6 @@ end;
 
 begin
   channellist := GDLinkedList.Create();
+  channels_loaded := false;
 end.
 

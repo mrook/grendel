@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.53 2001/06/06 18:48:41 xenon Exp $
+// $Id: mudthread.pas,v 1.54 2001/07/14 13:26:21 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -6,9 +6,15 @@ interface
 
 uses
     Classes,
+{$IFDEF WIN32}
     Windows,
     Winsock2,
+{$ENDIF}
+{$IFDEF LINUX}
+    Libc,
+{$ENDIF}
     SysUtils,
+    Math,
     ansiio,
     constants,
     conns,
@@ -23,7 +29,7 @@ uses
     bulletinboard,
     mudhelp,
     mudsystem,
-    math,
+    fsys,
     gvm;
 
 type
@@ -93,7 +99,11 @@ begin
   last_update := Now();
 end;
 
+{$IFDEF LINUX}
+{$I include/command.inc}
+{$ELSE}
 {$I include\command.inc}
+{$ENDIF}
 
 procedure do_dummy(ch : GCharacter; param : string);
 begin
@@ -131,7 +141,7 @@ var f:textfile;
     cmd : GCommand;
     alias : GCommand;
 begin
-  assignfile(f, 'system\commands.dat');
+  assignfile(f, translateFileName('system\commands.dat'));
   {$I-}
   reset(f);
   {$I+}
@@ -364,7 +374,7 @@ begin
             write_console('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
           try
-            time := GetTickCount;
+//            time := GetTickCount;
 
             if cmd.addarg0 then
               cmd.ptr(ch, cmdline + ' ' + param)
@@ -377,10 +387,10 @@ begin
               some commands could lag while on a Pentium they would not.
               Uncomment if CPU leaks are to be traced. - Grimlord }
 
-            time := GetTickCount - time;
+{            time := GetTickCount - time;
 
             if (time > 1500) and (not ch.CHAR_DIED) then
-              bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.');
+              bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.'); }
           except
             on E : EExternal do
             begin
@@ -465,7 +475,11 @@ begin
                     if (not MD5Match(MD5String(pwd), GPlayer(vict).md5_password)) then
                       begin
                       conn.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
+{$IFDEF LINUX}
+		      __close(conn.socket);
+{$ELSE}
                       closesocket(conn.socket);
+{$ENDIF}
                       conn.thread.Terminate;
                       end
                     else
@@ -505,7 +519,11 @@ begin
                     begin
                     write_console('(' + inttostr(conn.socket) + ') Failed password');
                     conn.send('Wrong password.'#13#10);
-                    closesocket(conn.socket);
+{$IFDEF LINUX}
+		      __close(conn.socket);
+{$ELSE}
+                      closesocket(conn.socket);
+{$ENDIF}
                     exit;
                     end;
 
@@ -962,7 +980,11 @@ begin
     conn.send(system_info.mud_name+#13#10#13#10);
     conn.send('Your site has been banned from this server.'#13#10);
     conn.send('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10);
-    closesocket(socket);
+{$IFDEF LINUX}
+    __close(conn.socket);
+{$ELSE}
+    closesocket(conn.socket);
+{$ENDIF}
     conn.Free;
     exit;
     end;
@@ -1086,7 +1108,11 @@ begin
     conn.ch.Free;
     end;
 
-  closesocket(socket);
+{$IFDEF LINUX}
+    __close(conn.socket);
+{$ELSE}
+    closesocket(conn.socket);
+{$ENDIF}
 
   conn.Free;
 end;

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.43 2001/07/12 16:37:01 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.44 2001/07/14 13:26:11 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -7,7 +7,12 @@ interface
 uses
     SysUtils,
     Math,
+{$IFDEF WIN32}
     Winsock2,
+{$ENDIF}
+{$IFDEF LINUX}
+    Libc,
+{$ENDIF}
     constants,
     strip,
     area,
@@ -676,7 +681,11 @@ begin
 
     conn := nil;
 
+{$IFDEF LINUX}
+    __close(c.socket);
+{$ELSE}
     closesocket(c.socket);
+{$ENDIF}
     end
   else
   if (not IS_NPC) and (not IS_SET(GPlayer(Self).flags, PLR_LINKLESS)) then

@@ -11,11 +11,13 @@ procedure outputError(E : EExternal);
 implementation
 
 uses
+{$IFDEF WIN32}
     Windows,
+    memcheck,
+{$ENDIF}
     Math,
     Classes,
     strip,
-    memcheck,
     mudsystem;
 
 type
@@ -34,7 +36,7 @@ type
 var
    lines, symbols : TList;
 
-
+{$IFDEF WIN32}
 function IMAGE_FIRST_SECTION(ntheader : PImageNtHeaders) : PImageSectionHeader;
 begin
   Result := pointer(integer(ntheader) + (sizeof(ntheader^.Signature) + sizeof(ntheader^.FileHeader)) + ntheader^.FileHeader.SizeofOptionalHeader);
@@ -94,6 +96,7 @@ begin
 
   Result := false;
 end;
+{$ENDIF}
 
 function findSymbol(section, addr : cardinal) : TSymbol;
 var
@@ -260,6 +263,7 @@ var
    line : TLine;
    symboln, linen : string;
 begin
+{$IFDEF WIN32}
   GetLogicalAddress(addr, modu, 1024, section, offset);
 
   symbol := findSymbol(section, offset);
@@ -276,14 +280,20 @@ begin
     linen := 'no line';
 
   write_console(symboln + ':' + linen + ' (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
+{$ELSE}
+  write_console(IntToHex(integer(addr), 8));
+{$ENDIF}
 end;
 
 procedure outputError(E : EExternal);
 var
+{$IFDEF WIN32}
    st : TCallStack;
+{$ENDIF}
    a : integer;
    addr : pointer;
 begin
+{$IFDEF WIN32}
   addr := E.ExceptionRecord.ExceptionAddress;
   write_console('Win32 exception detected.');
   write_console('Exception message: "' + E.Message + '".');
@@ -299,6 +309,9 @@ begin
 
     showAddress(st[a]);
     end;
+{$ELSE}
+  write_console('Exception detected, debugging disabled on this platform.');
+{$ENDIF}
 end;
 
 begin

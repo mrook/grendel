@@ -165,7 +165,7 @@ Date        Author Version Changes
 
 // --- Delphi Version Numbers
 //     As this is no code, this does *not* blow up your object or executable code at all
-       (*$DEFINE D1_OR_NEWER *)
+{       (*$DEFINE D1_OR_NEWER *)
        (*$IFNDEF VER80 *)
          (*$DEFINE D2_OR_NEWER *)
          (*$IFNDEF VER90 *)
@@ -185,7 +185,7 @@ Date        Author Version Changes
          (*$ENDIF *)
        (*$ELSE *)
          (*$DEFINE WIN16 *)
-       (*$ENDIF *)
+       (*$ENDIF *) }
 
 
 UNIT LibXmlParser;

@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.15 2001/07/12 16:37:02 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.16 2001/07/14 13:26:23 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -191,6 +191,7 @@ begin
   repeat
     repeat
       s := af.readLine();
+//      writeln('line: ', s);
     until (uppercase(s) = '#SKILL') or (af.eof());
 
     if (af.eof()) then

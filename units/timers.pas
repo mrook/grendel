@@ -1,11 +1,13 @@
-// $Id: timers.pas,v 1.12 2001/05/11 14:24:24 ***REMOVED*** Exp $
+// $Id: timers.pas,v 1.13 2001/07/14 13:26:25 ***REMOVED*** Exp $
 
 unit timers;
 
 interface
 
 uses
+{$IFDEF WIN32}
     Windows,
+{$ENDIF}
     SysUtils,
     Classes,
     skills,
@@ -59,7 +61,9 @@ function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
 implementation
 
 uses
+{$IFDEF WIN32}
     Winsock2,
+{$ENDIF}
     constants,
     mudsystem,
     util,
@@ -331,7 +335,9 @@ var
    area : GArea;
    ch : GCharacter;
 begin
+{$IFDEF WIN32}
   status := GetHeapStatus;
+{$ENDIF}
 
   update_affects;
   update_tracks;

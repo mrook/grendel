@@ -55,9 +55,6 @@ const attack_table:array[FG_NONE..FG_STING,1..2] of string=(('nothing','nothings
                                                       ('breath','breaths'),
                                                       ('sting','stings'));
 
-const
-     dual_flip : boolean = false;
-
 procedure stopfighting(ch : GCharacter);
 procedure death_cry(ch, killer : GCharacter);
 
@@ -76,6 +73,9 @@ uses
     timers,
     update,
     Channels;
+
+var
+  dual_flip : boolean;
 
 procedure stopfighting(ch : GCharacter);
 var vict : GCharacter;
@@ -1027,4 +1027,6 @@ begin
     end; }
 end;
 
+begin
+  dual_flip := false;
 end.
