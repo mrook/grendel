@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-	##	$Id: dtypes.pas,v 1.15 2004/06/10 17:54:23 ***REMOVED*** Exp $
+	##	$Id: dtypes.pas,v 1.16 2004/06/10 19:30:42 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -275,8 +275,8 @@ type
 	GHashTableIterator = class(GIterator)
 	private
 		tbl : GHashTable;
-		cursor : integer;
-		current : GListNode;
+		cursor, lastcursor : integer;
+		current, last : GListNode;
 		serial : integer;
 
 	published
@@ -289,19 +289,19 @@ type
 	end;
     
 	{
-    		Singleton info class
-    	}
-    	GSingletonInfo = class
-    	private
-    		_instanceType : TClass;
-    		_instance : TObject;
-    		_refcount : integer;
-    		
-    	published
-    		property instanceType : TClass read _instanceType write _instanceType;
-    		property instance : TObject read _instance write _instance;
-    		property refcount : integer read _refcount write _refcount;	
-    	end;
+		Singleton info class
+	}
+	GSingletonInfo = class
+	private
+		_instanceType : TClass;
+		_instance : TObject;
+		_refcount : integer;
+
+	published
+		property instanceType : TClass read _instanceType write _instanceType;
+		property instance : TObject read _instance write _instance;
+		property refcount : integer read _refcount write _refcount;	
+	end;
     	
 	{
 		Singleton manager class
@@ -475,10 +475,11 @@ end;
 }
 procedure GDLinkedListIterator.remove();
 begin
-	if (current <> nil) then
+	if (last <> nil) then
 		begin
 		list.remove(last);
 		serial := list.serial;
+		last := nil;
 		end;
 end;
 
@@ -496,6 +497,7 @@ begin
   serial := tbl.serial;
   current := nil;
   cursor := 0;
+	last := nil;
 
   while (current = nil) and (cursor < tbl.hashSize) do
     begin
@@ -548,6 +550,9 @@ begin
     begin
     Result := GHashValue(current.element).value;
 
+	lastcursor := cursor;
+	last := current;
+	
     current := current.next;
 
     if (current = nil) then
@@ -572,6 +577,12 @@ end;
 }
 procedure GHashTableIterator.remove();
 begin
+	if (last <> nil) then
+		begin
+		tbl.bucketlist[lastcursor].remove(last);
+		serial := tbl.serial;
+		last := nil;
+		end;
 end;
 
 
