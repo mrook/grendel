@@ -1,3 +1,7 @@
+// experimentje
+// $Id: cmd_skill.inc,v 1.9 2001/04/10 20:34:05 xenon Exp $
+// $Header: /root/oldcvs/Grendel/include/Attic/cmd_skill.inc,v 1.9 2001/04/10 20:34:05 xenon Exp $
+
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
     vict:GCharacter;
@@ -306,6 +310,8 @@ begin
       end;
     end;
 
+  buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(ch.max_spells - ch.getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
+    
   delete(buf, length(buf) - 2, 2);
   ch.sendPager(buf);
 end;
@@ -332,18 +338,24 @@ begin
 
       if (GSkill(g.skill).skill_type <> SKILL_SPELL) then
         begin
-        if (not odd(a)) then
+        inc(a);
+      
+        if (odd(a)) then
           buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name, g.perc]) + '    '
         else
           buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name, g.perc]) + #13#10;
         end;
 
-      inc(a);
       node := node.next;
       end;
 
+    if (odd(a)) then
+      buf := buf + #13#10;
+
+    buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(ch.max_skills - ch.getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
   end;
+
 end;
 
 procedure do_learn(ch:GCharacter;param:string);
@@ -384,7 +396,8 @@ begin
       begin
       g := node.element;
 
-      if (ch.LEARNED(g.skill) = 0) then
+//      if (ch.LEARNED(g.skill) = 0) then
+      if ((ch.level >= GSkill(g.skill).min_lvl) and (ch.LEARNED(g.skill) = 0)) then
         act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name, false, ch, nil, nil, TO_CHAR);
 
       node := node.next;
@@ -397,6 +410,12 @@ begin
     if (sn = nil) or (vict.LEARNED(sn) = 0) then
       act(AT_REPORT, '$N doesn''t teach this skill.',false,ch,nil,vict,TO_CHAR)
     else
+      if ((sn.skill_type <> SKILL_SPELL) and (ch.max_skills - ch.getUsedSkillslots() <= 0)) then
+        act(AT_REPORT, 'You have no more free skillslots!', false, ch, nil, nil, TO_CHAR)
+      else
+      if ((sn.skill_type = SKILL_SPELL) and (ch.max_spells - ch.getUsedSpellslots() <= 0)) then
+        act(AT_REPORT, 'You have no more free spellslots!', false, ch, nil, nil, TO_CHAR)
+      else
 {    if (sn.skill_type = SKILL_SPELL) and (ch.skills_learned.getSize() = ch.race.max_spells) then
       act(AT_REPORT, 'You have reached the maximum number of spells for your race.', false, ch, nil, nil, TO_CHAR)
     else
@@ -460,6 +479,7 @@ procedure do_practice(ch:GCharacter;param:string);
 var sn : GSkill;
     vict,learn:GCharacter;
     node : GListNode;
+    g : GLearned;
 begin
   learn := nil;
   node := ch.room.chars.head;
@@ -492,6 +512,17 @@ begin
       if (vict.learsn] > 0) then
         act(AT_REPORT, '  (Level $B$4' + pad_integer_front(skill_table[sn].min_lvl, 3) + '$A$7) ' + skill_table[sn].name, false, ch, nil, nil, TO_CHAR);
       end; }
+    node := vict.skills_learned.head;
+
+    while (node <> nil) do
+      begin
+      g := node.element;
+
+      if (ch.level >= GSkill(g.skill).min_lvl) then
+        act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
+
+      node := node.next;
+      end;
     end
   else
     begin
