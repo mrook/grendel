@@ -1,6 +1,10 @@
 { 
-  @abstract(ANSI output routines by Gayle Davis)
-  @lastmod($Id: ansiio.pas,v 1.1 2003/12/12 13:19:34 ***REMOVED*** Exp $)
+	Summary:
+		ANSI output library
+		
+		Author:	Gayle Davis
+			
+	## $Id: ansiio.pas,v 1.2 2004/03/31 20:23:56 ***REMOVED*** Exp $
 }
 
 UNIT ansiio;

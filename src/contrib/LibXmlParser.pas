@@ -1,6 +1,16 @@
 {
-  @abstract(LibXmlParser 1.0.16 by Stefan Heymann)
-  @lastmod($Id: LibXmlParser.pas,v 1.1 2003/12/12 13:19:33 ***REMOVED*** Exp $)
+	Summary:
+		XML parser library version 1.0.17
+		
+		Author  : Stefan Heymann
+				  Eschenweg 3
+				  72076 Tübingen
+				  GERMANY
+
+		E-Mail:   stefan@destructor.de
+		URL:      www.destructor.de		
+		
+	## $Id: LibXmlParser.pas,v 1.2 2004/03/31 20:23:56 ***REMOVED*** Exp $
 }
 
 // --- Delphi/Kylix Version Numbers
@@ -324,7 +334,7 @@ FUNCTION  StrSFPas    (Start, Finish : PChar) : STRING;                    // Co
 FUNCTION  TrimWs      (Source : STRING) : STRING;                          // Trim Whitespace
 
 FUNCTION  AnsiToUtf8  (Source : ANSISTRING) : STRING;                            // Convert Win-1252 to UTF-8
-FUNCTION  Utf8ToAnsi  (Source : STRING; UnknownChar : CHAR = 'ï¿½') : ANSISTRING;  // Convert UTF-8 to Win-1252
+FUNCTION  Utf8ToAnsi  (Source : STRING; UnknownChar : CHAR = '¿') : ANSISTRING;  // Convert UTF-8 to Win-1252
 
 
 (*
@@ -479,7 +489,7 @@ CONST
 
    Example
    --------
-   Transforming the Unicode character U+00E4 LATIN SMALL LETTER A WITH DIAERESIS  ("ï¿½"):
+   Transforming the Unicode character U+00E4 LATIN SMALL LETTER A WITH DIAERESIS  ("ä"):
 
          ISO-8859-1,           Decimal  228
          Win1252,              Hex      $E4
@@ -490,7 +500,7 @@ CONST
                                Binary   11000011 10100100
                                Hex      $C3      $A4
                                Decimal  195      164
-                               ANSI     ï¿½        ï¿½         *)
+                               ANSI     Ã        ¤         *)
 
 
 FUNCTION  AnsiToUtf8 (Source : ANSISTRING) : STRING;
@@ -529,7 +539,7 @@ BEGIN
 END;
 
 
-FUNCTION  Utf8ToAnsi (Source : STRING; UnknownChar : CHAR = 'ï¿½') : ANSISTRING;
+FUNCTION  Utf8ToAnsi (Source : STRING; UnknownChar : CHAR = '¿') : ANSISTRING;
           (* Converts the given UTF-8 String to Windows ANSI (Win-1252).
              If a character can not be converted, the "UnknownChar" is inserted. *)
 VAR

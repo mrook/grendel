@@ -1,6 +1,11 @@
 {
-  @abstract(MD5 Message-Digest implementation for Delphi by Matthias Fichtner)
-  @lastmod($Id: md5.pas,v 1.1 2003/12/12 13:19:36 ***REMOVED*** Exp $)
+	Summary:
+		MD5 Message-Digest implementation for Delphi
+		
+		Copyright © 1997-1999 Medienagentur Fichtner & Meyer
+		Written by Matthias Fichtner
+
+	## $Id: md5.pas,v 1.2 2004/03/31 20:23:56 ***REMOVED*** Exp $
 }
 
 unit md5;
