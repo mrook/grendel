@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.25 2003/10/22 13:12:38 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.26 2003/10/23 08:11:44 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -169,7 +169,7 @@ begin
         else }
         on E : Exception do
         	begin
-        	writeConsole('[EX:' + E.ClassName + '] ' + E.Message);
+        	writeConsole('[EX Timer:' + E.ClassName + '] ' + E.Message);
         	bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
         	end;
 
