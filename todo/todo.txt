@@ -7,6 +7,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! taunt messages (configurable by player) will be sent at kill to (dead) target
 ! Mobs can't cast spells > lvl 100           
 ! Area casting on yourself bugs
+! add 'D' (door) reset
+! ability to change password
 
 
 * better damage/xp system (more balanced)
@@ -27,8 +29,6 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - last command (checks last login time for user, only for admins)
 - purge command (strips char of objects, only for admins)
 - unlearn
-- do something with GObject.long?
-- add 'D' (door) reset
 
 
 l abbreviation of clanname (3-4 chars) in who list
