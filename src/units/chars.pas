@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.7 2004/02/27 22:24:20 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.8 2004/03/04 19:44:20 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -251,6 +251,9 @@ type
       context : GContext;
 
     published
+    	constructor Create();
+    	destructor Destroy();
+    	
       function IS_IMMORT : boolean; override;
       function IS_NPC : boolean; override;
       function IS_LEARNER : boolean; override;
@@ -508,33 +511,14 @@ begin
   Result := false;
 end;
 
-// NPC is Immortal
-function GNPC.IS_IMMORT : boolean;
-begin
-  Result := inherited IS_IMMORT;
-
-  if (IS_SET(act_flags, ACT_IMMORTAL)) then
-    IS_IMMORT := true;
-end;
-
 function GCharacter.IS_NPC : boolean;
 begin
   Result := false;
 end;
 
-function GNPC.IS_NPC : boolean;
-begin
-  Result := true;
-end;
-
 function GCharacter.IS_LEARNER : boolean;
 begin
   Result := false;
-end;
-
-function GNPC.IS_LEARNER : boolean;
-begin
-  Result := IS_SET(act_flags, ACT_TEACHER);
 end;
 
 function GCharacter.IS_AWAKE : boolean;
@@ -555,11 +539,6 @@ end;
 function GCharacter.IS_WIZINVIS : boolean;
 begin
   Result := false;
-end;
-
-function GNPC.IS_WIZINVIS : boolean;
-begin
-  Result := IS_SET(act_flags, ACT_MOBINVIS)
 end;
 
 function GCharacter.IS_GOOD : boolean;
@@ -591,19 +570,9 @@ begin
   Result := false;
 end;
 
-function GNPC.IS_BANKER : boolean;
-begin
-  Result := IS_SET(act_flags, ACT_BANKER);
-end;
-
 function GCharacter.IS_SHOPKEEPER : boolean;
 begin
   Result := false;
-end;
-
-function GNPC.IS_SHOPKEEPER : boolean;
-begin
-  Result := IS_SET(act_flags, ACT_SHOPKEEP);
 end;
 
 function GCharacter.IS_OUTSIDE : boolean;
@@ -888,10 +857,58 @@ begin
   addCorpse(Self);
 end;
 
-// NPC dies
+// GNPC
+constructor GNPC.Create();
+begin
+	inherited Create();
+	
+	context := nil;
+end;
+
+destructor GNPC.Destroy();
+begin
+	if (Assigned(context)) then
+		FreeAndNil(context);
+		
+	inherited Destroy();
+end;
+
+function GNPC.IS_SHOPKEEPER : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_SHOPKEEP);
+end;
+
+function GNPC.IS_BANKER : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_BANKER);
+end;
+
+function GNPC.IS_WIZINVIS : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_MOBINVIS)
+end;
+
+function GNPC.IS_LEARNER : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_TEACHER);
+end;
+
+function GNPC.IS_NPC : boolean;
+begin
+  Result := true;
+end;
+
+function GNPC.IS_IMMORT : boolean;
+begin
+  Result := inherited IS_IMMORT;
+
+  if (IS_SET(act_flags, ACT_IMMORTAL)) then
+    IS_IMMORT := true;
+end;
+
 procedure GNPC.die();
 begin
-  inherited die;
+  inherited die();
 
   dec(npc_index.count);
   extract(true);

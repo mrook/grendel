@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.15 2004/03/04 19:27:45 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.16 2004/03/04 19:44:20 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -1350,8 +1350,8 @@ begin
     exit;
     end;
 
-  npc := GNPC.Create;
-  npc.context := GContext.Create;
+  npc := GNPC.Create();
+  npc.context := GContext.Create();
   npc.context.load(npcindex.prog);
   npc.context.owner := npc;
 
