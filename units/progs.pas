@@ -9,6 +9,7 @@ type
 		  function cos(x : single) : single; stdcall;
 		  function sin(x : single) : single; stdcall;
 		  function tan(x : single) : single; stdcall;
+      function random(x : integer) : integer; stdcall;
     end;
 
     GStringLib = class
@@ -49,6 +50,11 @@ end;
 function GMathLib.tan(x : single) : single; stdcall;
 begin
   Result := Math.Tan(x);
+end;
+
+function GMathLib.random(x : integer) : integer; stdcall;
+begin
+  Result := System.Random(x);
 end;
 
 // GStringLib
