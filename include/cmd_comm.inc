@@ -205,16 +205,16 @@ begin
       vict.clan := ch.clan;
       vict.player^.clanleader := false;
 
+      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
+
 			index := findObjectIndex(ch.clan.clanobj);
 
 			if (index <> nil) then
         begin
         obj := instanceObject(index);
         obj.toChar(vict);
+        act(AT_REPORT,'You have received $p.',false,vict,obj,nil,TO_CHAR);
 				end;
-
-      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
-      act(AT_REPORT,'You have received $p.',false,vict,obj,nil,TO_CHAR);
       end;
     end;
 end;
