@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.44 2001/07/30 14:46:53 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.45 2001/07/30 15:50:25 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -208,6 +208,11 @@ begin
 
     if (listenv4 = INVALID_SOCKET) then
       write_console('ERROR: Could not create IPv4 socket.');
+      
+    rc := 1;
+      
+    if (setsockopt(listenv4, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
+      write_console('ERROR: Could not set option on IPv4 socket.');
 
     addrv4.sin_family := AF_INET;
     addrv4.sin_port := htons(system_info.port);
@@ -435,6 +440,10 @@ begin
 
   if not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI) then
     bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel.exe, reboot failed!');
+{$ENDIF}
+{$IFDEF LINUX}
+  if (execv('grendel', nil) = -1) then
+    bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel, reboot failed!');
 {$ENDIF}
 end;
 
