@@ -6,7 +6,7 @@ MODULES=core_commands.bpl
 all:	$(MODULES)
 
 clean:
-      del $(MODULES)
+	rm -f $(MODULES)
 
 core_commands.bpl:	core_commands.dpk commands/*
 	$(DCC) core_commands.dpk $(DCC_FLAGS) -LUcore

@@ -16,16 +16,16 @@ CORE=core.bpl
 CORE_SOURCES=core.dpk units/*.pas
 
 all:	$(GRENDEL) $(COPYOVER) $(CONVERT)
-      cd modules
-      make /f makefile.w32
+	cd modules
+	make /f makefile.w32
       
 clean:
-      del $(GRENDEL) $(COPYOVER) $(CONVERT) $(CORE)
-      cd modules
-      make /f makefile.w32 clean
+	del $(GRENDEL) $(COPYOVER) $(CONVERT) $(CORE)
+	cd modules
+	make /f makefile.w32 clean
 
 $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
-	$(DCC) $(GRENDEL_SOURCES) $(DCC_FLAGS) -GD
+	$(DCC) $(GRENDEL_SOURCES) $(DCC_FLAGS) -GD -LUcore
 	
 $(COPYOVER):	$(COPYOVER_SOURCES) $(CORE)
 	$(DCC) $(COPYOVER_SOURCES) $(DCC_FLAGS) -LUcore
@@ -34,5 +34,5 @@ $(CONVERT):	$(CONVERT_SOURCES) $(CORE)
 	$(DCC) $(CONVERT_SOURCES) $(DCC_FLAGS) -LUcore
 
 $(CORE): $(CORE_SOURCES)
-  $(DCC) core.dpk $(DCC_FLAGS) -Uunits -GD
+	$(DCC) core.dpk $(DCC_FLAGS) -Uunits -GD
 
