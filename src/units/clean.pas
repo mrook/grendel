@@ -2,7 +2,7 @@
 	Summary:
 		Cleaning (system janitor) thread
 	
-	## $Id: clean.pas,v 1.6 2004/03/18 15:13:55 ***REMOVED*** Exp $
+	## $Id: clean.pas,v 1.7 2004/03/18 15:16:56 ***REMOVED*** Exp $
 }
 
 unit clean;
@@ -167,7 +167,9 @@ begin
 
 //      cleanExtractedChars();
     except
+    	{$IFDEF LINUX}
     	on E : EQuit do break;
+    	{$ENDIF}
     	on E : EControlC do break;
 	on E : Exception do reportException(E);
     end;    

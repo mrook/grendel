@@ -363,7 +363,9 @@ begin
 			if (shutdownDelay = 0) then
 				running := false;
 		except
+			{$IFDEF LINUX}
 			on E : EQuit do break;
+			{$ENDIF}
 			on E : EControlC do break;
 			on E : Exception do reportException(E);
 		end;
