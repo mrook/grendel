@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.15 2001/10/06 15:11:27 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.16 2002/01/22 13:18:31 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -149,7 +149,7 @@ procedure spell_summon(ch,victim:GCharacter;sn:GSkill);
 begin
   // Jago 18May2001 : check ch <> vict
   // note: could make the spell not castable on self, but this is more fun ;)
-  if ch = victim then
+  if (ch = victim) then
     begin
     act(AT_SPELL,'You attempt to summon yourself into the room.',false,ch,nil,victim,TO_CHAR);
     act(AT_SPELL,'Silly, you''re already here!',false,ch,nil,victim,TO_CHAR);
@@ -315,6 +315,12 @@ begin
        TARGET_DEF_WORLD:begin
                         node := victim.node_world;
                         vict := victim;
+                        
+                        if (not ch.IS_SAME_ALIGN(vict)) then
+                          begin
+                          ch.sendBuffer('They are not here.'#13#10);
+                          exit;
+                          end;
                         end;
         TARGET_OFF_AREA:begin
                         { check fighting }

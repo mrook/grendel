@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.43 2001/11/24 14:52:42 xenon Exp $
+// $Id: constants.pas,v 1.44 2002/01/22 13:18:31 ***REMOVED*** Exp $
 
 unit constants;
 
@@ -6,9 +6,9 @@ interface
 
 const 
 {$IFDEF LINUX}
-  version_number = 'v0.4.2-linux';
+  version_number = 'v0.4.3pre2-linux';
 {$ELSE}
-  version_number = 'v0.4.2';
+  version_number = 'v0.4.3pre2';
 {$ENDIF}
   version_info = 'The Grendel Project - A Win32 MUD Server';
   version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
@@ -571,7 +571,7 @@ const
       TARGET_DEF_SELF=3;           { only cast this on yourself }
       TARGET_DEF_SINGLE=4;         { defensive spell (e.g. heal) }
       TARGET_DEF_AREA=5;           { area defensive }
-      TARGET_DEF_WORLD=6;          { world defensive (e.g. summon) }
+      TARGET_DEF_WORLD=6;          { same-align (!) world defensive (e.g. summon) }
       TARGET_OBJECT=7;             { ignore target (for object spells) }
 
 { return types }
