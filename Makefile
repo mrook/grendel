@@ -1,8 +1,11 @@
-# Grendel Makefile
 #
-# Use GNU make!
-
-# .autodepend
+# The Grendel Project - A Windows/Linux MUD Server
+# Copyright (c) 2000-2003 by Michiel Rook
+#
+# Main Makefile - Use GNU make!
+#
+# $Id: Makefile,v 1.6 2003/10/30 17:19:00 ***REMOVED*** Exp $
+#
 
 
 ifeq ($(OSTYPE),linux-gnu)
