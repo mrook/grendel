@@ -375,6 +375,11 @@ const CPULSE_PER_SEC = 4;
       CPULSE_GAMETIME = 150 * CPULSE_PER_SEC;
       CPULSE_AUTOSAVE = 250 * CPULSE_PER_SEC;     { autosave all characters }
 
+      IDLE_NAME = 480;                              // disconnect after 2 mins when not responding at login
+      IDLE_NOT_PLAYING = 1200;                      // disconnect after 5 mins when not responding somewhere in nanny()
+      IDLE_PLAYING = 3600;                          // disconnect after 15 mins when playing
+      IDLE_LINKDEAD = 300 / CPULSE_GAMEHOUR;       // quit ld chars after 15 mins
+
 { Connect states for sockets }
 const CON_PLAYING=0;
       CON_ACCEPTED=1;
@@ -450,12 +455,6 @@ const AT_BLACK=0;
       AT_THUNDER=AT_DCYAN;
       AT_YELL=AT_RED;
       AT_BABBEL=AT_DGREEN;
-
-{ idle max times }
-const IDLE_NAME = 480;            // quit after 2 mins when not responding at login
-      IDLE_NOT_PLAYING = 1200;    // quit after 5 mins when not responding somewhere in nanny()
-      IDLE_PLAYING = 3600;        // quit after 15 mins when not playing
-      IDLE_LOGOUT = 7200;         // log the char after 30 mins
 
 { channels }
 const CHANNEL_CHAT=1;
@@ -604,4 +603,7 @@ const MPROG_ACT=BV01;           { mob reacts to act from ch}
 implementation
 
 end.
+
+
+
 
