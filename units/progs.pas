@@ -390,7 +390,7 @@ var
     tmp : string;
     validif : integer;
 begin
-  trim(cmd);
+  cmd := trim(cmd);
 
   firstword := stripl(cmd, ' ');
   rest := striprbeg(cmd, ' ');
@@ -450,6 +450,12 @@ begin
   else
   if (cmd = 'mpreturnfalse') then
     return := false
+  else
+  if (cmd = 'aggrogood') then
+    npc.hunting := npc.room.findRandomGood
+  else
+  if (cmd = 'aggroevil') then
+    npc.hunting := npc.room.findRandomEvil
   else
     interpret(npc, parseCode(cmd, npc, actor, obj));
 
@@ -656,6 +662,14 @@ begin
 
     vmob.emptyBuffer;
 
+    node := node.next;
+    end;
+
+  node := ch.room.chars.head;
+  while (node <> nil) do
+    begin
+    vmob := node.element;
+
     if (not vmob.IS_NPC) or (vmob.fighting <> nil) or
      (not vmob.IS_AWAKE) or (not vmob.CAN_SEE(ch)) then
        begin
@@ -667,13 +681,7 @@ begin
       percentCheck(vmob, ch, nil, MPROG_GREET);
 
     if IS_SET(vmob.act_flags,ACT_AGGRESSIVE) then
-      begin
       interpret(vmob, 'growl ' + ch.name);
-      interpret(vmob, 'kill ' + ch.name);
-      end;
-
-    if (vmob.hunting = ch) then
-      interpret(vmob, 'kill ' + ch.name);
 
     node := node.next;
     end;
