@@ -114,8 +114,7 @@
     <Flags>8|32</Flags>
   </ChannelData>
   <ChannelData Name="grouptell">
-    <Command>grouptell</Command>
-    <Alias>gt</Alias>
+    <Command>gt</Command>
     <Minimumleveluse>1</Minimumleveluse>
     <Minimumlevelsee>1</Minimumlevelsee>
     <Comment>Channel for communication between groupmembers</Comment>
