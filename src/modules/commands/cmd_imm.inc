@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.15 2004/03/23 19:43:42 hemko Exp $
+// $Id: cmd_imm.inc,v 1.16 2004/04/04 22:13:01 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -36,9 +36,6 @@ begin
   else
   if (haltparam = 'reboot') then
     begin
-    if (delay = 0) then
-      to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-      
     act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
 
     serverInstance.shutdown(SHUTDOWNTYPE_REBOOT, delay);
@@ -46,9 +43,6 @@ begin
   else
   if (haltparam = 'halt') then
     begin
-    if (delay = 0) then
-      to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-      
     act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
 
     serverInstance.shutdown(SHUTDOWNTYPE_HALT, delay);
@@ -56,9 +50,6 @@ begin
   else
   if (haltparam = 'copyover') then
     begin
-    if (delay = 0) then
-      to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-      
     act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
 
     serverInstance.shutdown(SHUTDOWNTYPE_COPYOVER, delay);
