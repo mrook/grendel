@@ -146,15 +146,15 @@
 		</bodypart>
 		<bodypart>
 			<name>leftleg</name>
+			<description>left leg</description>
 			<char_message>You strap $p on your left leg.</char_message>
 			<room_message>$n straps $p on $s left leg.</room_message>
-			<description>left leg</description>
 		</bodypart>
 		<bodypart>
 			<name>rightleg</name>
+			<description>right leg</description>
 			<char_message>You strap $p on your right leg.</char_message>
 			<room_message>$n straps $p on $s right leg.</room_message>
-			<description>right leg</description>
 		</bodypart>
 		<bodypart>
 			<name>leftankle</name>

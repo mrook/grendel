@@ -22,13 +22,13 @@
 		<dex>0</dex>
 		<con>0</con>
 	</bonus>
-	<save>
+	<saves>
 		<poison>14</poison>
 		<cold>15</cold>
 		<para>16</para>
 		<breath>17</breath>
 		<spell>17</spell>
-	</save>
+	</saves>
 	<description>
 	Trolls.
 	</description>
@@ -137,15 +137,15 @@
 		</bodypart>
 		<bodypart>
 			<name>leftleg</name>
+			<description>left leg</description>
 			<char_message>You strap $p on your left leg.</char_message>
 			<room_message>$n straps $p on $s left leg.</room_message>
-			<description>left leg</description>
 		</bodypart>
 		<bodypart>
 			<name>rightleg</name>
+			<description>right leg</description>
 			<char_message>You strap $p on your right leg.</char_message>
 			<room_message>$n straps $p on $s right leg.</room_message>
-			<description>right leg</description>
 		</bodypart>
 		<bodypart>
 			<name>leftankle</name>
@@ -174,15 +174,15 @@
 		<!-- NB: there MUST be leftwield/rightwield bodyparts or the race will bug -->    
 		<bodypart>
 			<name>leftwield</name>
+			<description>left hand</description>
 			<char_message>You hold $p in your left claw.</char_message>
 			<room_message>$n holds $p in $s left claw.</room_message>
-			<description>left hand</description>
 		</bodypart>
 		<bodypart>
 			<name>rightwield</name>
+			<description>right hand</description>
 			<char_message>You hold $p in your right claw.</char_message>
 			<room_message>$n holds $p in $s right claw.</room_message>
-			<description>right hand</description>
 		</bodypart>
 	</body>
 </race>  

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT ability (#PCDATA)>
 <!ELEMENT alignment (#PCDATA)>
 <!ELEMENT body (bodypart+)>
-<!ELEMENT bodypart (name, description, char_message, room_message, description)>
+<!ELEMENT bodypart (name?, description?, char_message?, room_message?)>
 <!ELEMENT bonus (str, int, wis, dex, con)>
 <!ELEMENT breath (#PCDATA)>
 <!ELEMENT char_message (#PCDATA)>
@@ -13,7 +14,8 @@
 <!ELEMENT int (#PCDATA)>
 <!ELEMENT para (#PCDATA)>
 <!ELEMENT poison (#PCDATA)>
-<!ELEMENT race (name, short, alignment, convert, skills, spells, statmax, bonus, saves, description, body)>
+<!ELEMENT race (name, short, alignment, convert, skills, spells, statmax, bonus, saves, ability*, description, body)>
+<!ATTLIST race xmlns CDATA "">
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT room_message (#PCDATA)>
 <!ELEMENT saves (poison, cold, para, breath, spell)>
