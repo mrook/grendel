@@ -30,10 +30,6 @@ You < - < ILLUMINATE > - > a bat with your TERRIBLE punch!!
 You ___... DESTROY ...___ a bat with your AGONIZING punch!!!
 You -< { { : : : DISINTEGRATE : : : } } >- a bit with your GODLY punch!!!!
 #End=0
-#Keyword=GRENDEL VERSION COPYRIGHT INFO
-%INFO%, %VERSION%. %COPYRIGHT%.
-Additional code by Roeland van Houte, Oscar Martin and Hemko de Visser.
-#End=0
 #Keyword=RACEINFO
 Syntax: RACEINFO [<racename>]
 

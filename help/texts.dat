@@ -78,7 +78,7 @@ Sorry, you're on your own.
 
 #END=0
 #KEYWORD=SMAUG
-.                               [WWW.SMAUG.ORG]
+                                [WWW.SMAUG.ORG]
          /     _      _            _      _    _____
         /      |\    /|     /\     |      |   /     \     ***************
        /       | \  / |    /  \    |      |  |            *   \\._.//   *
@@ -143,7 +143,7 @@ Merc would like to thank ...
   The Original DIKUMud was Developed at the Department of Computer Science
                      at the University of Copenhagen.
 #END=0
-#KEYWORD=CREDITS ABOUT
+#KEYWORD=CREDITS ABOUT GRENDEL VERSION COPYRIGHT INFO
 %INFO%, %VERSION%. %COPYRIGHT%.
 Additional code by Roeland van Houte, Oscar Martin, Brad Taylor
 and Hemko de Visser.
