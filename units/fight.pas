@@ -457,8 +457,6 @@ begin
 
   if (oppnt.point.hp<0) then
     begin
-    unregisterTimer(ch, TIMER_CAST);
-    unregisterTimer(ch, TIMER_COMBAT);
     unregisterTimer(oppnt, TIMER_CAST);
     unregisterTimer(oppnt, TIMER_COMBAT);
 
@@ -467,11 +465,6 @@ begin
     stopfighting(oppnt);
     oppnt.fighting:=nil;
     ch.fighting:=nil;
-
-    (* r:=ch.fought_by.indexof(oppnt);
-
-    if r<>-1 then
-      ch.fought_by.delete(r); *)
 
     oppnt.bash_timer:=-2;
     death_cry(oppnt,ch);
