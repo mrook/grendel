@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.50 2001/09/02 21:52:59 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.51 2001/09/06 09:33:27 ***REMOVED*** Exp $
 
 unit area;
 
@@ -2298,7 +2298,7 @@ begin
     begin
     pexit := node.element;
 
-    if (pos(s, uppercase(pexit.keywords^)) <> 0) then
+    if (Assigned(pexit.keywords)) and (pos(s, uppercase(pexit.keywords^)) <> 0) then
       begin
       Result := pexit;
       exit;
