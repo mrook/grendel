@@ -173,6 +173,7 @@ type
       function CAN_FLY : boolean;
       function CAN_SEE(vict : GCharacter) : boolean;
       function IS_AFK : boolean;
+      function IS_KEYLOCKED : boolean;
 
       procedure extract(pull : boolean);
       procedure quit;
@@ -603,6 +604,18 @@ begin
     IS_AFK := false
   else
     IS_AFK := GConnection(conn).afk = true;
+end;
+
+{ utility function - Nemesis }
+function GCharacter.IS_KEYLOCKED : boolean;
+begin
+  if (IS_NPC) then
+    IS_KEYLOCKED := false
+  else
+  if IS_SET(player^.flags, PLR_LINKLESS) then
+    IS_KEYLOCKED := false
+  else
+    IS_KEYLOCKED := GConnection(conn).keylock = true;
 end;
 
 function GCharacter.load(fn : string) : boolean;

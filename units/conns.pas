@@ -23,7 +23,7 @@ type
       idle : integer;
 
       ch, original : GCharacter;
-      afk : boolean;
+      keylock, afk : boolean;
       state : integer;
 
       ip_string : string;
@@ -131,6 +131,8 @@ begin
   idle := 0;
   thread := thr;
   ip_string := '';
+  keylock := false;
+  afk := false;
 
   if (addr.ss_family = AF_INET) then
     begin

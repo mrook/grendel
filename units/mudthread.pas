@@ -231,12 +231,39 @@ var
 begin
   with ch do
     begin
-    if (conn <> nil) and (GConnection(conn).afk) and (not IS_NPC) then
+    { Check if keyboard is locked - Nemesis }
+    if (conn <> nil) and (IS_KEYLOCKED) and (not IS_NPC) then
+      begin
+      if (length(line) = 0) then
+        begin
+        sendBuffer('Enter your password to unlock keyboard.'#13#10);
+        exit;
+        end;
+
+      if (not MD5Match(player^.md5_password, MD5String(line))) then
+        begin
+        sendBuffer('Wrong password!'#13#10);
+        exit;
+        end
+      else
+        begin
+        GConnection(conn).afk := false;
+        GConnection(conn).keylock := false;
+
+        act(AT_REPORT,'You are now back at your keyboard.',false,ch,nil,nil,to_char);
+        act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
+        exit;
+        end;
+      end;
+
+    { AFK revised with keylock - Nemesis }
+    if (conn <> nil) and (IS_AFK) and (not IS_NPC) and (not IS_KEYLOCKED) then
       begin
       GConnection(conn).afk := false;
+
       act(AT_REPORT,'You are now back at your keyboard.',false,ch,nil,nil,to_char);
-      act(AT_REPORT,'$n has returned to &s keyboard.',false,ch,nil,nil,to_room);
-    end;
+      act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
+      end;
 
     if (ch.position = POS_CASTING) then
       begin
@@ -1235,6 +1262,7 @@ begin
   registerCommand('do_last', do_last);
   registerCommand('do_unlearn', do_unlearn);
   registerCommand('do_hashstats', do_hashstats);
+  registerCommand('do_keylock', do_keylock);
 end;
 
 begin

@@ -242,6 +242,16 @@ begin
     end;
 end;
 
+{ Allow players to lock their keyboard - Nemesis }
+procedure do_keylock(ch : GCharacter; param: string);
+begin
+  GConnection(ch.conn).afk := true;
+  GConnection(ch.conn).keylock := true;
+
+  ch.sendBuffer('You are now away from keyboard.'#13#10);
+  ch.sendBuffer('Enter your password to unlock.'#13#10);
+end;
+
 {$I include\cmd_imm.inc}
 {$I include\cmd_info.inc}
 {$I include\cmd_move.inc}
