@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.22 2003/11/04 16:41:23 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.23 2003/11/05 15:19:21 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -576,13 +576,17 @@ begin
 	visname := GString(packet.fields[7]).value;
 	status := GString(packet.fields[9]).value;
 	
-	if (pl <> nil) then
+	if (pl = nil) then
 		begin
-		debug('Found player ' + packet.target_username + ' => ' + pl.name, 2);
-		pl.sendBuffer('Player "' + visname + '" was located on "' + mudname + '" (' + status + ').'#13#10);
-		end
-	else
-		debug('Could not find player "' + packet.target_username + '" referenced in locate-reply packet.', 1);
+		if (not existsPlayer(packet.target_username)) then
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'No such player.')
+		else
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+			
+		exit;
+		end;
+		
+	pl.sendBuffer('Player "' + visname + '" was located on "' + mudname + '" (' + status + ').'#13#10);
 end;
 
 procedure GInterMud.handleTell(packet : GPacket_I3);
@@ -595,19 +599,23 @@ begin
 	visname := GString(packet.fields[6]).value;
 	msg := GString(packet.fields[7]).value;
 
+	if (pl = nil) then
+		begin
+		if (not existsPlayer(packet.target_username)) then
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'No such player.')
+		else
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+			
+		exit;
+		end;
+		
 	if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_TELL)) then
 		begin
 		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting tells.');
 		exit;
 		end;
 
-	if (pl <> nil) then
-		pl.sendBuffer(Format('%s@%s tells you: %s' + #13#10, [visname, packet.originator_mudname, msg]))
-	else
-		begin
-		debug('Could not find player "' + packet.target_username + '" referenced in tell packet.', 1);
-		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
-		end;
+	pl.sendBuffer(Format('%s@%s tells you: %s' + #13#10, [visname, packet.originator_mudname, msg]))
 end;
 
 procedure GInterMud.handleBeep(packet : GPacket_I3);
@@ -619,19 +627,23 @@ begin
 	
 	visname := GString(packet.fields[6]).value;
 
+	if (pl = nil) then
+		begin
+		if (not existsPlayer(packet.target_username)) then
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'No such player.')
+		else
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+			
+		exit;
+		end;
+	
 	if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_BEEP)) then
 		begin
 		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting beeps.');
 		exit;
 		end;
 	
-	if (pl <> nil) then
-		pl.sendBuffer(Format('%s@%s beeps you.'#7 + #13#10, [visname, packet.originator_mudname]))
-	else
-		begin
-		debug('Could not find player "' + packet.target_username + '" referenced in beep packet.', 1);
-		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
-		end;
+	pl.sendBuffer(Format('%s@%s beeps you.'#7 + #13#10, [visname, packet.originator_mudname]))
 end;
 
 procedure GInterMud.handleWhoReq(packet : GPacket_I3);
@@ -667,30 +679,32 @@ var
 begin
 	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
 	
-	if (pl <> nil) then
+	if (pl = nil) then
 		begin
-	  list := TList(packet.fields[6]);
-	  i := 0;
-	  
-	  pl.sendBuffer('Who list from "' + packet.originator_mudname + '":'#13#10#13#10);
-	  
-	  while (i < list.count) do
-	  	begin
-	  	child := TList(list[i]);
-	  	
-	  	name := GString(child[0]).value;
-	  	title := GString(child[2]).value;
-	  	
-	  	sendToPlayer(pl, Format('%s %s' + #13#10, [name, title]));
-	  	
-	  	inc(i);
-	  	end;
-		end
-	else
+		if (not existsPlayer(packet.target_username)) then
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'No such player.')
+		else
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+			
+		exit;
+		end;
+	
+	list := TList(packet.fields[6]);
+	i := 0;
+
+	pl.sendBuffer('Who list from "' + packet.originator_mudname + '":'#13#10#13#10);
+
+	while (i < list.count) do
 		begin
-		debug('Could not find player "' + packet.target_username + '" referenced in who-reply packet.', 1);
-		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
-		end;	
+		child := TList(list[i]);
+
+		name := GString(child[0]).value;
+		title := GString(child[2]).value;
+
+		sendToPlayer(pl, Format('%s %s' + #13#10, [name, title]));
+
+		inc(i);
+		end;
 end;
 
 procedure GInterMud.handleFingerReq(packet : GPacket_I3);
@@ -701,52 +715,56 @@ begin
 	username := GString(packet.fields[6]).value;
 	pl := GPlayer(findPlayerWorldEx(nil, username));
 	
-	if (pl <> nil) then
+	if (pl = nil) then
 		begin
-		if (pl.IS_INVIS) then
-			begin
-			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
-			exit;
-			end;
-		
-		if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_DENYFINGER)) or ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_PRIVACY)) then
-			begin
-			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting fingers.');
-			exit;
-			end;
-		
-		writeHeader('finger-reply', this_mud.name, '', packet.originator_mudname, packet.originator_username);
-		writeBuffer('"');
-		writeBuffer(escape(pl.name));
-		writeBuffer('","');
-		writeBuffer(escape(pl.name + ' ' + pl.title));
-		writeBuffer('","","');	
-		
-		// No email info in Grendel (yet)
-		writeBuffer('Not supported');
-		
-		writeBuffer('","');
-		writeBuffer('-1');
-		writeBuffer('",');
-		writeBuffer('-1');
-		writeBuffer(',"');
-		writeBuffer('[PRIVATE]');
-		writeBuffer('","');
-		
-		if (pl.IS_IMMORT) then
-			writeBuffer(imm_types[pl.level])
+		if (not existsPlayer(username)) then
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'No such player.')
 		else
-			writeBuffer(pl.rank);
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
 			
-		writeBuffer('","Not supported",})'#13);
+		exit;
+		end;
 		
-		sendPacket();
-		end
-	else
+	if (pl.IS_INVIS) then
 		begin
-		debug('Could not find player "' + username + '" referenced in finger-req packet.', 1);
 		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
-		end;	
+		exit;
+		end;
+
+	if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_DENYFINGER)) or ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_PRIVACY)) then
+		begin
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting fingers.');
+		exit;
+		end;
+		
+	pl.sendBuffer(Format('%s@%s just requested your i3 finger information.'#13#10, [packet.originator_mudname, packet.originator_username]));
+
+	writeHeader('finger-reply', this_mud.name, '', packet.originator_mudname, packet.originator_username);
+	writeBuffer('"');
+	writeBuffer(escape(pl.name));
+	writeBuffer('","');
+	writeBuffer(escape(pl.name + ' ' + pl.title));
+	writeBuffer('","","');	
+
+	// No email info in Grendel (yet)
+	writeBuffer('Not supported');
+
+	writeBuffer('","');
+	writeBuffer('-1');
+	writeBuffer('",');
+	writeBuffer('-1');
+	writeBuffer(',"');
+	writeBuffer('[PRIVATE]');
+	writeBuffer('","');
+
+	if (pl.IS_IMMORT) then
+		writeBuffer(imm_types[pl.level])
+	else
+		writeBuffer(pl.rank);
+
+	writeBuffer('","Not supported",})'#13);
+
+	sendPacket();
 end;
 
 procedure GInterMud.handleFingerReply(packet : GPacket_I3);
@@ -763,22 +781,25 @@ begin
 	extra := GString(packet.fields[14]).value;
 	
 	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+
 	
-	if (pl <> nil) then
+	if (pl = nil) then
 		begin
-		sendToPlayer(pl, Format('I3 finger information for %s@%s:'#13#10#13#10, [visname, packet.originator_mudname]));
-		sendToPlayer(pl, 'Title: ' + title + #13#10);
-		sendToPlayer(pl, 'Real name: ' + realname + #13#10);
-		sendToPlayer(pl, 'Level: ' + level + #13#10);
-		sendToPlayer(pl, 'E-mail: ' + email + #13#10);
-		sendToPlayer(pl, 'Extra info: ' + extra + #13#10);
-		sendToPlayer(pl, 'Last on: ' + last + #13#10);
-		end
-	else
-		begin
-		debug('Could not find player "' + packet.target_username + '" referenced in finger-reply packet.', 1);
-		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
-		end;	
+		if (not existsPlayer(packet.target_username)) then
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'No such player.')
+		else
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+			
+		exit;
+		end;
+		
+	sendToPlayer(pl, Format('I3 finger information for %s@%s:'#13#10#13#10, [visname, packet.originator_mudname]));
+	sendToPlayer(pl, 'Title: ' + title + #13#10);
+	sendToPlayer(pl, 'Real name: ' + realname + #13#10);
+	sendToPlayer(pl, 'Level: ' + level + #13#10);
+	sendToPlayer(pl, 'E-mail: ' + email + #13#10);
+	sendToPlayer(pl, 'Extra info: ' + extra + #13#10);
+	sendToPlayer(pl, 'Last on: ' + last + #13#10);
 end;
 
 procedure GInterMud.handlePacket(packet : GPacket_I3);
