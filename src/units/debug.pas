@@ -1,6 +1,6 @@
 {
   @abstract(Internal debug routines)
-  @lastmod($Id: debug.pas,v 1.2 2004/02/19 14:38:12 ***REMOVED*** Exp $)
+  @lastmod($Id: debug.pas,v 1.3 2004/02/19 14:39:51 ***REMOVED*** Exp $)
 }
 
 unit debug;
@@ -18,12 +18,13 @@ implementation
 uses
 {$IFDEF WIN32}
 	Windows,
-  JclHookExcept,
-  JclDebug,
+	JclHookExcept,
+	JclDebug,
 {$ENDIF}
 	SysUtils,
 	Classes,
-	console;
+	console,
+	mudsystem;
 
 
 {$IFDEF WIN32}
