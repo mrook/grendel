@@ -32,8 +32,9 @@ type
          destructor Destroy(); override;
        end;
 
-function generateName(nametemplate : string) : string;
+procedure loadNameTables(dfile : string);
 procedure reloadNameTables();
+function generateName(nametemplate : string) : string;
 
 var
   PhonemeList : GDLinkedList = nil;
@@ -44,6 +45,7 @@ implementation
 
 uses
   SysUtils,
+  constants,
   mudsystem,
   util,
   LibXmlParser;
@@ -302,7 +304,7 @@ begin
   NameTemplateList.Clean();
   NameTemplateList.Free();
   namegenerator_enabled := false;
-  write_console('Reloading ' + dataFile +'.');
+  write_console('Reloading ' + NameTablesDataFile + '.');
   loadNameTables(NameTablesDataFile);
 end;
 
