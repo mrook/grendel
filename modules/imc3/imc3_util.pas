@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_util.pas,v 1.1 2003/10/31 15:18:16 ***REMOVED*** Exp $
+	$Id: imc3_util.pas,v 1.2 2003/11/02 20:21:23 ***REMOVED*** Exp $
 }
 
 unit imc3_util;
@@ -66,7 +66,6 @@ begin
 		
 		if (len = 4) then
 			begin
-			len := 2;
 			col := '%^';
 			end
 		else
