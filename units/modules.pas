@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.16 2003/10/29 12:53:18 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.17 2003/10/31 15:19:09 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -87,6 +87,7 @@ begin
     if (arg = 'load') then
       try
         addModule(param);
+		    ch.sendBuffer('Module ' + param + ' was loaded.'#13#10);
       except
         on E : Exception do
           ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
@@ -95,10 +96,11 @@ begin
     if (arg = 'unload') then
       try
         removeModule(param);
+		    ch.sendBuffer('Module ' + param + ' was unloaded.'#13#10);
       except
         on E : Exception do
           ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
-      end;
+      end;    
     end;
 end;
 
