@@ -167,6 +167,18 @@ position: 4
 #end
 
 #command
+name: clanadd
+function: do_clanadd
+position: 4
+#end
+
+#command
+name: clanremove
+function: do_clanremove
+position: 4
+#end
+
+#command
 name: clantalk
 function: do_clantalk
 position: 4
