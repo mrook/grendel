@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.9 2003/09/18 22:09:19 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.10 2003/09/19 09:03:48 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -45,7 +45,7 @@ type
     function canWrite() : boolean;
     function read(var Buf; len : integer) : integer;
     function send(s : string) : integer; overload;
-    function send(s : PChar; len : integer) : integer; overload;
+    function send(var s; len : integer) : integer; overload;
     
     function acceptConnection(lookup_hosts : boolean) : GSocket;
     
@@ -326,13 +326,13 @@ begin
 end;
 
 
-function GSocket.send(s : PChar; len : integer) : integer;
+function GSocket.send(var s; len : integer) : integer;
 var
    res : integer;
 begin
   res := 0;
   
-  if (length(s) > 0) then
+  if (len > 0) then
 {$IFDEF WIN32}
     res := Winsock2.send(fd, s, len, 0);
 {$ENDIF}
