@@ -182,11 +182,13 @@ end;
 
 {Jago 10/Jan/2001
 MSTAT : return data about a mobile - can also be used on players}
-procedure do_mstat(ch : GCharacter; param : string);
+{ Xenon 20/Feb/2001: renamed do_mstat() to do_pstat() }
+
+procedure do_pstat(ch : GCharacter; param : string);
 var
 	buf, buf1, arg, gender, exp, vnum, room_vnum, wimpy : string;
-fighting, master, leader : string;
-affect_node, victim_node, paf_node : GListNode;
+{fighting,} master, leader : string;
+{affect_node, victim_node,} paf_node : GListNode;
 paf : GAffect;
 victim : GCharacter;
 begin
@@ -195,7 +197,7 @@ begin
 
   if length(arg) = 0 then
   begin
-    ch.SendBuffer('Mstat whom?' + #13#10);
+    ch.SendBuffer('Pstat whom?' + #13#10);
     exit;
   end;
 
@@ -261,8 +263,7 @@ begin
   else
   	exp := IntToStr(victim.player.xptot);
 
-  buf := Format('Level: %d.  Align: %d.  AC: %d.  Gold: %d.  Exp: %s.' + 
-#13#10,
+  buf := Format('Level: %d.  Align: %d.  AC: %d.  Gold: %d.  Exp: %s.' + #13#10,
                 [victim.level, victim.alignment, victim.point.ac,
                 victim.gold, exp]);
 
@@ -281,8 +282,7 @@ begin
   buf1 := buf1 + buf;
 
   if not victim.IS_NPC then
-  	buf1 := buf1 + 'Page Lines: ' + IntToStr(victim.player.pagerlen) + '.' + 
-#13#10;
+  	buf1 := buf1 + 'Page Lines: ' + IntToStr(victim.player.pagerlen) + '.' + #13#10;
 
   if victim.fighting <> nil then
     buf1 := buf1 + 'Fighting: ' + victim.fighting.name^ + '.' + #13#10
@@ -291,11 +291,10 @@ begin
 
   if not victim.IS_NPC then
   begin
-  	buf := Format('Thirst: %d.  Full: %d.  Drunk: %d.  Saving throw: %d.' + 
-#13#10,
-                 [victim.player.condition[COND_THIRST],
-                 victim.player.condition[COND_FULL],
-                 victim.player.condition[COND_DRUNK]]);
+  	buf := Format('Thirst: %d.  Full: %d.  Drunk: %d.' + #13#10,
+                 [victim.player^.condition[COND_THIRST],
+                 victim.player^.condition[COND_FULL],
+                 victim.player^.condition[COND_DRUNK]]);
    buf1 := buf1 + buf;
 
    // how to get # of items carried?
@@ -328,9 +327,8 @@ begin
 
   buf1 := buf1 + buf;
 
-  buf := Format('Short description: %s.' + #13#10 + 'Long  description: %s' 
-+ #13#10,
-                [victim.short, victim.long]);
+  buf := Format('Short description: %s.' + #13#10 + 'Long description: %s' + #13#10,
+                [victim.short^, victim.long^]);
 
   buf1 := buf1 + buf;
 
@@ -367,8 +365,8 @@ end;
 { 19/Feb/2001 - Xenon : fixed bug that made grendel crash on ostat <object> }
 procedure do_ostat(ch : GCharacter; param : string);
 var buf, buf1, arg : string;
-    aff_node, obj_node : GListNode;
-    aff_data : GAffect;
+{    aff_node, obj_node : GListNode;
+    aff_data : GAffect; }
     obj: GObject;
     room :integer;
     in_obj, carried_by : string;
@@ -749,7 +747,8 @@ begin
 end;
 
 { Adjust scores NPC's and PC's - Nemesis }
-procedure do_ascore(ch:GCharacter;param:string);
+{ Xenon 20/Feb/2001: renamed do_ascore() to do_pset() }
+procedure do_pset(ch:GCharacter;param:string);
 var arg,arg2,arg3 : string;
     vict : GCharacter;
     value : integer;
@@ -761,7 +760,7 @@ begin
 
   if (length(arg) = 0) then
     begin
-    ch.sendBuffer('Usage:  ASCORE <victim> <type> <value>'#13#10#13#10);
+    ch.sendBuffer('Usage:  PSET <victim> <type> <value>'#13#10#13#10);
     ch.sendBuffer('Types for both NPC and PC: hp, mana, moves, strength,'#13#10);
     ch.sendBuffer('wisdom, intelligence, dexterity, constitution, ac, apb,'#13#10);
     ch.sendBuffer('hitroll, alignment, gold, sex.'#13#10#13#10);
@@ -781,15 +780,18 @@ begin
     exit;
     end;
 
-  if (arg3[1] in ['0'..'9']) then
+  try                            // Xenon 21/Feb/2001: added try..except block
+    value := StrToInt(arg3);
+  except
+    on EConvertError do
     begin
-    value := strtoint(arg3);
-    end
-  else
-    begin
-    ch.sendBuffer('Value must be a number.'#13#10);
-    exit;
+      ch.sendBuffer('Value must be a number.'#13#10);
+      exit;
     end;
+  else
+    ch.sendBuffer('Couldn''t convert value.'#13#10);
+    exit;
+  end;
 
   if (uppercase(arg) = 'SELF') then
     vict := ch
@@ -983,7 +985,7 @@ begin
     end
   else
     begin
-    ch.sendBuffer('Wrong <type>, use ASCORE to see available types.'#13#10);
+    ch.sendBuffer('Wrong <type>, use PSET to see available types.'#13#10);
     exit;
     end;
 
