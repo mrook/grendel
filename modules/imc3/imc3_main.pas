@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.8 2003/10/20 16:01:08 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.9 2003/10/21 09:31:52 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -20,6 +20,7 @@ uses
 	dtypes,
 	util,
 	modules,
+	strip,
 	imc3_chan,
 	imc3_mud,
 	imc3_core;
@@ -41,7 +42,7 @@ var
 	iterator : GIterator;
 	mud : GMud_I3;
 	channel : GChannel_I3;
-	cmd, arg : string;
+	cmd, arg, s, t : string;
 begin
 	param := one_argument(param, cmd);
 	param := one_argument(param, arg);
@@ -133,14 +134,55 @@ begin
 	if (prep(cmd) = 'LOCATE') then
 		begin
 		if (length(arg) = 0) then
-			ch.sendBuffer('Locate whom?'#13#10)
-		else
 			begin
-			ch.sendBuffer('Trying to locate "' + arg + '". If you do not got any results within the next minute,'#13#10);
-			ch.sendBuffer('you can safely assume this player is not online.'#13#10);
-			
-			i3.sendLocateRequest(ch.name, arg);
+			ch.sendBuffer('Usage: I3 locate <username>'#13#10);
+			exit;
 			end;
+
+		ch.sendBuffer('Trying to locate "' + arg + '". If you do not got any results within the next minute,'#13#10);
+		ch.sendBuffer('you can safely assume this player is not online.'#13#10);
+
+		i3.sendLocateRequest(ch.name, arg);
+		end
+	else
+	if (prep(cmd) = 'TELL') then
+		begin
+		if (length(arg) = 0) or (length(param) = 0) then
+			begin
+			ch.sendBuffer('Usage: I3 tell <user@mud> <message>'#13#10);
+			exit;
+			end;
+
+		if (pos('@', arg) = 0) then
+			begin
+			ch.sendBuffer('You should specify a person and a mud. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		s := right(arg, '@');
+		t := lowercase(left(arg, '@'));
+		mud := findMud(s);
+		
+		if (mud = nil) then
+			begin
+			ch.sendBuffer('No such mud known. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		if (mud.status >= 0) then
+			begin
+			ch.sendBuffer('Mud is down.'#13#10);
+			exit;
+			end;
+			
+		if (not mud.tell) then
+			begin
+			ch.sendBuffer('Mud does not support the ''tell'' command.'#13#10);
+			exit
+			end;
+		
+		i3.sendTell(ch.name, t, mud, param);
+		ch.sendBuffer(Format('You tell %s@%s: %s', [cap(t), mud.name, param]) + #13#10);
 		end
 	else
 		ch.sendBuffer('Unimplemented.'#13#10);

@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.10 2003/10/20 16:01:07 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.11 2003/10/21 09:31:51 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -25,10 +25,10 @@ uses
 type
 	GInterMud = class(TThread)
 	private
-		mud : GMud_I3;
+		this_mud : GMud_I3;
 		router : GRouter_I3;
 		packet : GPacket_I3;
-		sock : GSocket;
+		socket : GSocket;
 		connected : boolean;
 		
 		debugLevel : integer;
@@ -37,6 +37,7 @@ type
 	 	inputBuffer : array[0..MAX_IPS - 1] of char;
  		inputPointer : integer;
 		
+		procedure handleError(packet : GPacket_I3);
 		procedure handleStartupReply(packet : GPacket_I3);
 		procedure handleMudList(packet : GPacket_I3);
 		procedure handleChanList(packet : GPacket_I3);
@@ -44,6 +45,7 @@ type
 		procedure handleChannelEmote(packet : GPacket_I3);
 		procedure handleLocateReply(packet : GPacket_I3);
 		procedure handleLocateRequest(packet : GPacket_I3);
+		procedure handleTell(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -58,11 +60,13 @@ type
 		procedure writeBuffer(msg : string);
 		procedure writeHeader(identifier, originator_mudname, originator_username, target_mudname, target_username : string);
 		
+		procedure sendError(mud, user, code, msg : string);
 		procedure sendChannelListen(channel : GChannel_I3; lconnect : boolean);
 		procedure sendChannelMessage(channel : GChannel_I3; name, msg : string);
 		procedure sendChannelEmote(channel : GChannel_I3; name, msg : string);
 		procedure sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
 		procedure sendLocateRequest(originator, user : string);
+		procedure sendTell(from_user, to_user : string; mud : GMud_I3; msg : string);
 		
 		procedure shutdown();
 		
@@ -95,16 +99,16 @@ begin
 	
 	Self.debugLevel := debugLevel;
 	
-	mud := GMud_I3.Create();
-	mud.readConfig();
+	this_mud := GMud_I3.Create();
+	this_mud.readConfig();
 	
-	sock := GSocket4.Create();
+	socket := GSocket4.Create();
 end;
 
 destructor GInterMud.Destroy();
 begin
-	sock.Free();
-	mud.Free();
+	socket.Free();
+	this_mud.Free();
 	
 	inherited Destroy();
 end;
@@ -139,7 +143,7 @@ begin
   		end;
     end;
 	
-	x := sock.send(s[0], oldsize + 4);
+	x := socket.send(s[0], oldsize + 4);
 	
 	if (x <= 0) then
 		raise Exception.Create('Write error on socket');
@@ -226,82 +230,100 @@ begin
 
    i3log( "Sending startup_packet to %s", this_mud->routerName ); *)
 
-  writeHeader('startup-req-3', mud.name, '', router.name, '');
+  writeHeader('startup-req-3', this_mud.name, '', router.name, '');
 
-  writeBuffer(IntToStr(mud.password));
+  writeBuffer(IntToStr(this_mud.password));
   writeBuffer(',');
-  writeBuffer(IntToStr(mud.mudlist_id));
+  writeBuffer(IntToStr(this_mud.mudlist_id));
   writeBuffer(',');
-  writeBuffer(IntToStr(mud.chanlist_id));
+  writeBuffer(IntToStr(this_mud.chanlist_id));
   writeBuffer(',');
-  writeBuffer(IntToStr(mud.player_port));
+  writeBuffer(IntToStr(this_mud.player_port));
   writeBuffer(',0,0,"');
 
-	writeBuffer(mud.mudlib);
+	writeBuffer(this_mud.mudlib);
   writeBuffer('","');
-	writeBuffer(mud.base_mudlib);
+	writeBuffer(this_mud.base_mudlib);
   writeBuffer('","');
-  writeBuffer(mud.driver);
+  writeBuffer(this_mud.driver);
   writeBuffer('","');
-  writeBuffer(mud.mud_type);
+  writeBuffer(this_mud.mud_type);
   writeBuffer('","');
-  writeBuffer(mud.open_status);
+  writeBuffer(this_mud.open_status);
   writeBuffer('","');
-  writeBuffer(mud.admin_email);
+  writeBuffer(this_mud.admin_email);
   writeBuffer('",');
 
   { Begin first mapping set }
   writeBuffer('([');
 
-  if (mud.emoteto) then
+  if (this_mud.emoteto) then
 		writeBuffer('"emoteto":1,');
-  if (mud.news) then
+  if (this_mud.news) then
 		writeBuffer('"news":1,');
-  if (mud.ucache) then
+  if (this_mud.ucache) then
 		writeBuffer('"ucache":1,');
-  if (mud.auth) then
+  if (this_mud.auth) then
 		writeBuffer('"auth":1,');
-  if (mud.locate) then
+  if (this_mud.locate) then
 		writeBuffer('"locate":1,');
-  if (mud.finger) then
+  if (this_mud.finger) then
 		writeBuffer('"finger":1,');
-  if (mud.channel) then
+  if (this_mud.channel) then
 		writeBuffer('"channel":1,');
-  if (mud.who) then
+  if (this_mud.who) then
 		writeBuffer('"who":1,');
-  if (mud.tell) then
+  if (this_mud.tell) then
 		writeBuffer('"tell":1,');
-  if (mud.beep) then
+  if (this_mud.beep) then
 		writeBuffer('"beep":1,');
-  if (mud.mail) then
+  if (this_mud.mail) then
 		writeBuffer('"mail":1,');
-  if (mud.mfile) then
+  if (this_mud.mfile) then
 		writeBuffer('"file":1,');
-  if (mud.http > 0) then
-  	writeBuffer('"http":' + IntToStr(mud.http) + ',');
-  if (mud.smtp > 0) then
-  	writeBuffer('"smtp":' + IntToStr(mud.smtp) + ',');
-  if (mud.pop3 > 0) then
-  	writeBuffer('"pop3":' + IntToStr(mud.pop3) + ',');
-  if (mud.ftp > 0) then
-  	writeBuffer('"ftp":' + IntToStr(mud.ftp) + ',');
-  if (mud.nntp > 0) then
-  	writeBuffer('"nntp":' + IntToStr(mud.nntp) + ',');
-  if (mud.rcp > 0) then
-  	writeBuffer('"rcp":' + IntToStr(mud.rcp) + ',');
-  if (mud.amrcp > 0) then
-  	writeBuffer('"amrcp":' + IntToStr(mud.amrcp) + ',');
+  if (this_mud.http > 0) then
+  	writeBuffer('"http":' + IntToStr(this_mud.http) + ',');
+  if (this_mud.smtp > 0) then
+  	writeBuffer('"smtp":' + IntToStr(this_mud.smtp) + ',');
+  if (this_mud.pop3 > 0) then
+  	writeBuffer('"pop3":' + IntToStr(this_mud.pop3) + ',');
+  if (this_mud.ftp > 0) then
+  	writeBuffer('"ftp":' + IntToStr(this_mud.ftp) + ',');
+  if (this_mud.nntp > 0) then
+  	writeBuffer('"nntp":' + IntToStr(this_mud.nntp) + ',');
+  if (this_mud.rcp > 0) then
+  	writeBuffer('"rcp":' + IntToStr(this_mud.rcp) + ',');
+  if (this_mud.amrcp > 0) then
+  	writeBuffer('"amrcp":' + IntToStr(this_mud.amrcp) + ',');
 
   writeBuffer(']),([');
 
   { END first set of "mappings", start of second set }
-  if (mud.web <> '') then
-  	writeBuffer('"url":"' + mud.web + '",');
+  if (this_mud.web <> '') then
+  	writeBuffer('"url":"' + this_mud.web + '",');
 
   writeBuffer('"time":"' + DateTimeToStr(Now) + '",');
   writeBuffer(']),})' + #13);
 
 	sendPacket();
+end;
+
+procedure GInterMud.handleError(packet : GPacket_I3);
+var
+	code, msg, error : string;
+	pl : GPlayer;
+begin
+	code := GString(packet.fields[6]).value;
+	msg := GString(packet.fields[7]).value;
+	
+	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+	
+	error := Format('Error: from %s to %s@%s: %s (%s)', [packet.originator_mudname, packet.target_username, packet.target_mudname, msg, code]);
+	
+ 	debug(error);
+
+	if (pl <> nil) then
+		pl.sendBuffer(error + #13#10);
 end;
 
 procedure GInterMud.handleStartupReply(packet : GPacket_I3);
@@ -507,9 +529,9 @@ begin
 	
 	if (pl <> nil) then
 		begin
-		writeHeader('locate-reply', mud.name, '', packet.originator_mudname, packet.originator_username);
+		writeHeader('locate-reply', this_mud.name, '', packet.originator_mudname, packet.originator_username);
 		writeBuffer('"');
-		writeBuffer(mud.name);
+		writeBuffer(this_mud.name);
 		writeBuffer('","');
 		writeBuffer(pl.name);
 		writeBuffer('",0,"",})'#13);
@@ -536,6 +558,10 @@ begin
 		debug('Could not find player "' + packet.target_username + '" referenced in locate-reply packet.', 1);
 end;
 
+procedure GInterMud.handleTell(packet : GPacket_I3);
+begin
+end;
+
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
@@ -559,8 +585,11 @@ begin
   if (packet.packet_type = 'locate-reply') then
   	handleLocateReply(packet)
   else
+  if (packet.packet_type = 'tell') then
+  	handleTell(packet)
+  else
   if (packet.packet_type = 'error') then
-  	writeConsole('I3: Received error "' + GString(packet.fields[7]).value + '"')
+  	handleError(packet)
   else
   	writeConsole('I3: unknown packet "' + packet.packet_type + '"');
 end;
@@ -570,7 +599,7 @@ begin
 	saveMudList();
 	saveChanList();
 	
-  writeHeader('shutdown', mud.name, '', router.name, '');
+  writeHeader('shutdown', this_mud.name, '', router.name, '');
   writeBuffer('0');
 	writeBuffer(',})' + #13);  
 
@@ -587,20 +616,20 @@ begin
 	Sleep(1000);
 	inputPointer := 0;
 
-	if (mud.preferredRouter = nil) then	
+	if (this_mud.preferredRouter = nil) then	
 		begin
 		writeConsole('I3: Impossible to connect to non-existing router');
 		Terminate();
 		end;
 		
-	router := mud.preferredRouter;
+	router := this_mud.preferredRouter;
 	
 	while (not Terminated) do
 		begin
 		try
 			if (not connected) then
 				begin
-				if (sock.connect(router.ipaddress, router.port)) then
+				if (socket.connect(router.ipaddress, router.port)) then
 					begin
 					writeConsole('I3: Connected to ' + router.ipaddress + ' port ' + IntToStr(router.port));
 
@@ -618,9 +647,9 @@ begin
 				end
 			else
 				begin
-				if (sock.canRead()) then
+				if (socket.canRead()) then
 					begin
-					ret := sock.read(buf, MAX_READ);
+					ret := socket.read(buf, MAX_READ);
 
 					if (ret > 0) then
 						begin
@@ -691,14 +720,26 @@ begin
 		begin
 		shutdown();
 		connected := false;
-		sock.disconnect();
+		socket.disconnect();
 		end;
+end;
+
+// void I3_send_error( char *mud, char *user, char *code, char *message ) 
+procedure GInterMud.sendError(mud, user, code, msg : string);
+begin
+	writeHeader('error', this_mud.name, '', mud, user);
+	writeBuffer('"');
+	writeBuffer(code);
+	writeBuffer('","');
+	writeBuffer(msg);
+	writeBuffer('",0,})'#13);
+	sendPacket();
 end;
 
 // void I3_send_channel_message( I3_CHANNEL *channel, char *name, char *message ) 
 procedure GInterMud.sendChannelMessage(channel : GChannel_I3; name, msg : string);
 begin
-	writeHeader('channel-m', mud.name, name, '', '');
+	writeHeader('channel-m', this_mud.name, name, '', '');
 	writeBuffer('"');
 	writeBuffer(channel.I3_name);
 	writeBuffer('","');
@@ -715,7 +756,7 @@ begin
 	if (Pos('$N', msg) = 0) then
 		msg := '$N ' + msg;
 		
-	writeHeader('channel-e', mud.name, name, '', '');
+	writeHeader('channel-e', this_mud.name, name, '', '');
 	writeBuffer('"');
 	writeBuffer(channel.I3_name);
 	writeBuffer('","');
@@ -729,7 +770,7 @@ end;
 // void I3_send_channel_t( I3_CHANNEL *channel, char *name, char *tmud, char *tuser, char *msg_o, char *msg_t, char *tvis )
 procedure GInterMud.sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
 begin
-	writeHeader('channel-t', mud.name, name, '', '');
+	writeHeader('channel-t', this_mud.name, name, '', '');
 	writeBuffer('"');
 	writeBuffer(channel.I3_name);
 	writeBuffer('","');
@@ -751,7 +792,7 @@ end;
 // void I3_send_channel_listen( I3_CHANNEL *channel, bool lconnect ) 
 procedure GInterMud.sendChannelListen(channel : GChannel_I3; lconnect : boolean);
 begin
-	writeHeader('channel-listen', mud.name, '', router.name, '');
+	writeHeader('channel-listen', this_mud.name, '', router.name, '');
 	writeBuffer('"');
 	writeBuffer(channel.I3_name);
 	writeBuffer('",');
@@ -767,9 +808,21 @@ end;
 // void I3_send_locate( CHAR_DATA *ch, char *user )
 procedure GInterMud.sendLocateRequest(originator, user : string);
 begin
-	writeHeader('locate-req', mud.name, originator, '', '');
+	writeHeader('locate-req', this_mud.name, originator, '', '');
 	writeBuffer('"');
 	writeBuffer(user);
+	writeBuffer('",})'#13);
+	sendPacket();
+end;
+
+// void I3_send_tell( CHAR_DATA *ch, char *to, I3_MUD *mud, char *message )
+procedure GInterMud.sendTell(from_user, to_user : string; mud : GMud_I3; msg : string);
+begin
+	writeHeader('tell', this_mud.name, from_user, mud.name, escape(to_user));
+	writeBuffer('"');
+	writeBuffer(from_user);
+	writeBuffer('","');
+	writeBuffer(escape(msg));
 	writeBuffer('",})'#13);
 	sendPacket();
 end;
