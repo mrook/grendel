@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.29 2001/05/11 14:24:24 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.30 2001/05/12 14:25:12 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -605,6 +605,8 @@ begin
   s := FormatDateTime('ddddd', Now);
   write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
+  write_console('Initializing GMC contexts...');
+  init_progs;
   write_console('Loading races...');
   load_races;
   // write_console('Loading professions...');
@@ -628,8 +630,6 @@ begin
   loadNameTables(NameTablesDataFile);
   write_console('Loading noteboards...');
   load_notes('boards.dat');
-  write_console('Initializing GMC contexts...');
-  init_progs;
 
   write_console('String hash stats: ');
   str_hash.hashStats;
