@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.6 2003/10/04 09:40:51 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.7 2003/10/09 14:54:43 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -63,6 +63,7 @@ type
 		procedure shutdown();
 		
 		constructor Create(debugLevel : integer = 0);
+		destructor Destroy;
 		
 		procedure Execute(); override;
 	end;
@@ -93,6 +94,14 @@ begin
 	mud.readConfig();
 	
 	sock := GSocket4.Create();
+end;
+
+destructor GInterMud.Destroy();
+begin
+	sock.Free();
+	mud.Free();
+	
+	inherited Destroy();
 end;
 
 // bool I3_write_packet( char *msg )
@@ -477,7 +486,7 @@ begin
 	
 	message := FastReplace(message, '$N', visname);
 	
-	text := Format('[%s] s$7', [channel_name, message]);
+	text := Format('[%s] %s$7', [channel_name, message]);
 	
 	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;
@@ -634,8 +643,6 @@ begin
 		connected := false;
 		sock.disconnect();
 		end;
-
-	sock.Free();
 end;
 
 // void I3_send_channel_message( I3_CHANNEL *channel, char *name, char *message ) 
