@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.17 2003/10/31 12:34:18 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.18 2003/10/31 15:19:50 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -93,6 +93,7 @@ uses
 	SysUtils,
 	FastStrings,
 	Channels,
+	imc3_util,
 	constants,
 	console,
 	chars,
@@ -638,7 +639,7 @@ begin
 	  	begin
 	  	child := TList(list[i]);
 	  	
-	  	pl.sendBuffer(GString(child[0]).value + #13#10);
+	  	sendToPlayer(pl, GString(child[0]).value + #13#10);
 	  	
 	  	inc(i);
 	  	end;
