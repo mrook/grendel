@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.23 2004/05/11 14:55:37 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.24 2004/05/18 12:07:08 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -194,6 +194,9 @@ begin
   	except
 		on E : Exception do
 			begin
+          	send('Your previous command possibly triggered an illegal instruction.'#13#10);
+          	send('To prevent data loss you have been disconnected.'#13#10);
+
 			Terminate();
 		
 			{$IFDEF WIN32}

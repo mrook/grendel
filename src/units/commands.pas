@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.15 2004/04/22 17:58:23 hemko Exp $
+  ##  $Id: commands.pas,v 1.16 2004/05/18 12:07:08 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -388,20 +388,17 @@ begin
         end
       else
         begin
-        try
-          if (system_info.log_all) or (ch.logging) then
-            writeConsole(ch.name + ': ' + line);
-          if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
-            writeConsole(ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+        if (system_info.log_all) or (ch.logging) then
+          writeConsole(ch.name + ': ' + line);
+        if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
+          writeConsole(ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
-          if (cmd.addarg0) then
-            cmd.ptr(ch, cmdline + ' ' + param)
-          else
-            cmd.ptr(ch, param);
+        if (cmd.addarg0) then
+          cmd.ptr(ch, cmdline + ' ' + param)
+        else
+          cmd.ptr(ch, param);
 
-          ch.last_cmd := @cmd.ptr;
-        except
-        end;
+        ch.last_cmd := @cmd.ptr;
         end;
       end
     else
