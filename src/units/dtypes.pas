@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.9 2004/03/13 15:32:09 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.10 2004/03/13 15:43:34 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -99,6 +99,7 @@ type
 		_serial : integer;
 		_head : GListNode;					{ Pointer to head of list }
 		_tail : GListnode;					{ Pointer to tail of list }
+		_owns : boolean;
 		
 	public
 		procedure remove(node : GListNode); overload;
@@ -111,8 +112,7 @@ type
 
 		procedure add(element : TObject);
 		procedure remove(element : TObject); overload;
-		procedure clean();
-		procedure smallClean();
+		procedure clear();
 
 		function size() : integer;
 
@@ -123,6 +123,8 @@ type
 
 		property head : GListNode read _head;
 		property tail : GListNode read _tail;
+		
+		property ownsObjects : boolean read _owns write _owns;
 	end;
 
 	{
@@ -165,6 +167,8 @@ type
 	}
 	GHashTable = class
 	private
+		_owns : boolean;
+
 		hashprime : integer;
 		hashsize : integer;										{ Size of hash table }
 		bucketList : GDLinkedListArray;				{ Array of double linked lists }
@@ -193,6 +197,8 @@ type
 
 		constructor Create(size : integer);
 		destructor Destroy(); override;
+
+		property ownsObjects : boolean read _owns write _owns;
 
 	public
 		property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
@@ -383,7 +389,7 @@ end;
 }
 constructor GDLinkedListIterator.Create(list : GDLinkedList);
 begin
-  inherited Create;
+  inherited Create();
 
   current := list.head;
 end;
@@ -432,7 +438,7 @@ end;
 }
 constructor GHashTableIterator.Create(table : GHashTable);
 begin
-  inherited Create;
+  inherited Create();
 
   tbl := table;
 
@@ -508,8 +514,10 @@ end;
 }
 constructor GDLinkedList.Create();
 begin
-  inherited Create;
+  inherited Create();
 
+	_owns := true;
+	
   _head := nil;
   _tail := nil;
   _size := 0;
@@ -680,9 +688,9 @@ end;
 
 {
 	Summary:
-		Clean up list (remove/free elements, remove nodes)
+		Remove all items from list, if ownsObject is true items are freed as well
 }
-procedure GDLinkedList.clean();
+procedure GDLinkedList.clear();
 var
    node : GListNode;
 begin
@@ -693,26 +701,8 @@ begin
     if (node = nil) then
       exit;
 
-    TObject(node.element).Free;
-
-    remove(node);
-    end;
-end;
-
-{
-	Summary:
-		Clean up list (remove elements, remove nodes)
-}
-procedure GDLinkedList.smallClean();
-var
-   node : GListNode;
-begin
-  while (true) do
-    begin
-    node := _head;
-
-    if (node = nil) then
-      exit;
+		if (ownsObjects) then
+    	TObject(node.element).Free;
 
     remove(node);
     end;
@@ -1098,7 +1088,7 @@ end;
 
 {
 	Summary:
-		Clear hash table (See GDLinkedList.clean())
+		Remove all items from hash table (See GDLinkedList.clear())
 }
 procedure GHashTable.clear();
 var
@@ -1106,7 +1096,8 @@ var
 begin
   for i := 0 to hashsize - 1 do
     begin
-    bucketList[i].clean;
+    bucketList[i].ownsObjects := ownsObjects;
+    bucketList[i].clear();
     end;
 end;
 
@@ -1119,7 +1110,7 @@ var
    n : integer;
    primes : GPrimes;
 begin
-  inherited Create;
+  inherited Create();
 
   primes := findPrimes(size + 32);
 
@@ -1133,25 +1124,26 @@ begin
     bucketList[n] := GDLinkedList.Create;
 
   hashFunc := defaultHash;
+
+	_owns := true;
 end;
 
 {
 	Summary:
 		GHashTable destructor
 }
-destructor GHashTable.Destroy;
+destructor GHashTable.Destroy();
 var
 	n : integer;
 begin
+	clear();
+	
   for n := 0 to hashsize - 1 do
-    begin
-    bucketList[n].clean;
     bucketList[n].Free;
-    end;
 
   setlength(bucketList, 0);
 
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 {
