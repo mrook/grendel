@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.15 2003/10/31 15:19:24 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.16 2003/10/31 16:18:03 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -48,11 +48,10 @@ var
 	cmd, arg, s, t : string;
 begin
 	param := one_argument(param, cmd);
-	param := one_argument(param, arg);
 	
 	if (length(cmd) = 0) then
 		begin
-		ch.sendBuffer('Usage: I3 <mudlist/chanlist/chat/listen/tell>'#13#10);
+		ch.sendBuffer('Usage: I3 <mudlist/chanlist/chat/listen/tell/locate/beep/who>'#13#10);
 		exit;
 		end;
 		
@@ -97,6 +96,14 @@ begin
 	else
 	if (prep(cmd) = 'CHAT') then
 		begin
+		param := one_argument(param, arg);
+		
+		if (length(arg) = 0) and (length(param) = 0) then
+			begin
+			ch.sendBuffer('Usage: I3 chat <channel> <message>'#13#10);
+			exit;
+			end;
+			
 		channel := GChannel_I3(chanList.get(arg));
 		
 		if (channel <> nil) then
@@ -109,6 +116,12 @@ begin
 	else
 	if (prep(cmd) = 'LISTEN') then
 		begin
+		if (length(param) = 0) then
+			begin
+			ch.sendBuffer('Usage: I3 listen [all]/<channel>'#13#10);
+			exit;
+			end;
+
 		if (prep(arg) = 'ALL') then
 			begin
 			iterator := chanList.iterator();
@@ -139,20 +152,22 @@ begin
 	else
 	if (prep(cmd) = 'LOCATE') then
 		begin
-		if (length(arg) = 0) then
+		if (length(param) = 0) then
 			begin
 			ch.sendBuffer('Usage: I3 locate <username>'#13#10);
 			exit;
 			end;
 
-		ch.sendBuffer('Trying to locate "' + arg + '". If you do not got any results within'#13#10);
+		ch.sendBuffer('Trying to locate "' + param + '". If you do not got any results within'#13#10);
 		ch.sendBuffer('the next minute, you can safely assume this player is not online.'#13#10);
 
-		i3.sendLocateRequest(ch.name, arg);
+		i3.sendLocateRequest(ch.name, param);
 		end
 	else
 	if (prep(cmd) = 'TELL') then
 		begin
+		param := one_argument(param, arg);
+
 		if (length(arg) = 0) then
 			begin
 			ch.sendBuffer('Usage: I3 tell <user@mud> <message>'#13#10);
@@ -214,20 +229,20 @@ begin
 	else
 	if (prep(cmd) = 'BEEP') then
 		begin
-		if (length(arg) = 0) then
+		if (length(param) = 0) then
 			begin
 			ch.sendBuffer('Usage: I3 beep <user@mud>'#13#10);
 			exit;
 			end;
 
-		if (pos('@', arg) = 0) then
+		if (pos('@', param) = 0) then
 			begin
 			ch.sendBuffer('You should specify a person and a mud. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
 			exit;
 			end;
 			
-		s := right(arg, '@');
-		t := lowercase(left(arg, '@'));
+		s := right(param, '@');
+		t := lowercase(left(param, '@'));
 		mud := findMud(s);
 		
 		if (mud = nil) then
@@ -254,13 +269,13 @@ begin
 	else
 	if (prep(cmd) = 'WHO') then
 		begin
-		if (length(arg) = 0) then
+		if (length(param) = 0) then
 			begin
 			ch.sendBuffer('Usage: I3 who <mud>'#13#10);
 			exit;
 			end;
 
-		mud := findMud(arg);
+		mud := findMud(param);
 		
 		if (mud = nil) then
 			begin
@@ -276,7 +291,7 @@ begin
 			
 		if (not mud.who) then
 			begin
-			ch.sendBuffer('Mud does not support the ''beep'' command.'#13#10);
+			ch.sendBuffer('Mud does not support the ''who'' command.'#13#10);
 			exit
 			end;
 		

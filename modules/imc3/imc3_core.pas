@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.18 2003/10/31 15:19:50 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.19 2003/10/31 16:18:03 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -98,6 +98,7 @@ uses
 	console,
 	chars,
 	player,
+	conns,
 	mudsystem,
 	util;
 
@@ -619,7 +620,27 @@ begin
 end;
 
 procedure GInterMud.handleWhoReq(packet : GPacket_I3);
+var
+	conn : GPlayerConnection;
+	iterator : GIterator;
 begin
+	writeHeader('who-reply', this_mud.name, '', packet.originator_mudname, packet.originator_username);
+	writeBuffer('({');
+	
+	iterator := connection_list.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		conn := GPlayerConnection(iterator.next());
+		
+		if (conn.state = CON_PLAYING) and (not conn.ch.IS_INVIS) then
+			writeBuffer('({"' + escape(conn.ch.name) + '",0,"",}),');
+		end;
+	
+	iterator.Free();
+
+	writeBuffer('}),})'#13);
+	sendPacket();	
 end;
 
 procedure GInterMud.handleWhoReply(packet : GPacket_I3);
@@ -627,6 +648,7 @@ var
 	pl : GPlayer;
 	list, child : TList;
 	i : integer;
+	name, title : string;
 begin
 	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
 	
@@ -635,11 +657,16 @@ begin
 	  list := TList(packet.fields[6]);
 	  i := 0;
 	  
+	  pl.sendBuffer('Who list from "' + packet.originator_mudname + '":'#13#10#13#10);
+	  
 	  while (i < list.count) do
 	  	begin
 	  	child := TList(list[i]);
 	  	
-	  	sendToPlayer(pl, GString(child[0]).value + #13#10);
+	  	name := GString(child[0]).value;
+	  	title := GString(child[2]).value;
+	  	
+	  	sendToPlayer(pl, Format('%s %s' + #13#10, [name, title]));
 	  	
 	  	inc(i);
 	  	end;
