@@ -33,6 +33,18 @@ program grendel;
 {$O-}
 {$ENDIF}
 
+{%File 'include\command.inc'}
+{%File 'include\cmd_comm.inc'}
+{%File 'include\cmd_fight.inc'}
+{%File 'include\cmd_imm.inc'}
+{%File 'include\cmd_info.inc'}
+{%File 'include\cmd_magic.inc'}
+{%File 'include\cmd_move.inc'}
+{%File 'include\cmd_obj.inc'}
+{%File 'include\cmd_shops.inc'}
+{%File 'include\cmd_skill.inc'}
+{%File 'include\cmd_build.inc'}
+
 uses
   SysUtils,
   Windows,
@@ -816,7 +828,7 @@ begin
     from_copyover;
 
   SetConsoleCtrlHandler(@ctrl_handler, true);
-  write_console('Grendel ' + version_number + ' ready...');
+  write_console('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
   SetConsoleTitle(version_info + ', ' + version_number + '. ' + version_copyright + '.');
 
   game_loop;
