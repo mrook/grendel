@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.3 2004/02/11 20:03:25 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.4 2004/02/18 23:10:36 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -280,6 +280,9 @@ end;
 function GSocket.canRead() : boolean;
 begin
 	Result := false;
+	
+	if (not isValid) then
+		exit;
   
 	FD_ZERO(rw_set);
 	FD_SET(fd, rw_set);
@@ -302,6 +305,9 @@ end;
 function GSocket.canWrite() : boolean;
 begin
 	Result := false;
+
+	if (not isValid) then
+		exit;
   
 	FD_ZERO(rw_set);
 	FD_SET(fd, rw_set);
@@ -323,6 +329,12 @@ end;
 
 function GSocket.send(s : string) : integer;
 begin
+	if (not isValid) then
+		begin
+		Result := -1;
+		exit;
+		end;
+		
 	Result := send(s[1], length(s));
 end;
 
@@ -330,6 +342,12 @@ function GSocket.send(var s; len : integer) : integer;
 var
 	res : integer;
 begin
+	if (not isValid) then
+		begin
+		Result := -1;
+		exit;
+		end;
+
 	res := 0;
   
 	if (len > 0) then	
@@ -368,6 +386,9 @@ procedure GSocket.setNonBlocking();
 var
 	x : integer;
 begin
+	if (not isValid) then
+		exit;
+
 {$IFDEF WIN32}
 	x := 1;
 	ioctlsocket(fd, FIONBIO, x);
