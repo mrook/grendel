@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.30 2004/04/10 22:24:03 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.31 2004/04/21 21:42:47 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -1207,7 +1207,7 @@ var
    shop : GShop;
    obj : GObject;
 begin
-  assign(f, 'areas\' + fn);
+  assign(f, fn);
   {$I-}
   rewrite(f);
   {$I+}

@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.3 2004/02/01 12:06:33 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.4 2004/04/21 21:42:47 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -2226,7 +2226,7 @@ begin
 
   ch.sendBuffer('Saving ' + area.fname + '...');
 
-  area.save(area.fname);
+  area.save('areas\' + area.fname);
 
   ch.sendBuffer('Done.'#13#10);
 end;
