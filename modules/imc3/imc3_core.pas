@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.7 2003/10/09 14:54:43 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.8 2003/10/09 20:33:54 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -41,6 +41,7 @@ type
 		procedure handleChanList(packet : GPacket_I3);
 		procedure handleChannelMessage(packet : GPacket_I3);
 		procedure handleChannelEmote(packet : GPacket_I3);
+		procedure handleLocate(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -78,6 +79,7 @@ uses
 	Channels,
 	constants,
 	console,
+	chars,
 	mudsystem,
 	util;
 
@@ -139,7 +141,7 @@ begin
 	if (x <= 0) then
 		raise Exception.Create('Write error on socket');
 	
-	debug('Sent packet: ' + msg, 1);
+	debug('Sent packet: ' + msg, 2);
 	
 	outputBuffer := '';
 end;
@@ -301,7 +303,7 @@ end;
 
 procedure GInterMud.handleStartupReply(packet : GPacket_I3);
 begin
-	debug('Accepted by router, new password is ' + GString(packet.fields[7]).value, 2);
+	debug('Accepted by router', 1);
 end;
 
 procedure GInterMud.handleMudList(packet : GPacket_I3);
@@ -491,6 +493,27 @@ begin
 	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;
 
+procedure GInterMud.handleLocate(packet : GPacket_I3);
+var
+	username : string;
+	pl : GPlayer;
+begin
+	username := GString(packet.fields[6]).value;
+	
+	pl := findPlayerWorldEx(nil, username);
+	
+	if (pl <> nil) then
+		begin
+		writeHeader('locate-reply', mud.name, '', packet.originator_mudname, packet.originator_username);
+		writeBuffer('"');
+		writeBuffer(mud.name);
+		writeBuffer('","');
+		writeBuffer(pl.name);
+		writeBuffer('",0,"",})'#13);
+		sendPacket();
+		end;
+end;
+
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
@@ -508,8 +531,13 @@ begin
   if (packet.packet_type = 'channel-e') then
   	handleChannelEmote(packet)
   else
+  if (packet.packet_type = 'locate-req') then
+  	handleLocate(packet)
+  else
   if (packet.packet_type = 'error') then
-  	writeConsole('I3: Received error "' + GString(packet.fields[7]).value + '"');
+  	writeConsole('I3: Received error "' + GString(packet.fields[7]).value + '"')
+  else
+  	writeConsole('I3: unknown packet "' + packet.packet_type + '"');
 end;
 
 procedure GInterMud.shutdown();
@@ -618,7 +646,7 @@ begin
 						debug(packet.toString(), 2);
 						debug(#13#10, 2);
 
-						debug('Got packet: ' + packet.packet_type, 1); 
+						debug('Got packet: ' + packet.packet_type, 2); 
 
 						debug('Removing head ' + IntToStr(size + 4) + ' bytes from buffer', 2); 
 					
