@@ -56,6 +56,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
 - have mudstatus save when shutting down (mudstatus defined as: mudtime, weather(?), etc.)
+- add copyright etc. notice for LibXmlParser to text\Credits.txt?
 
 l implementation of the mud sound protocol
 l new area format using XML
