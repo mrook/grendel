@@ -39,7 +39,7 @@ type
     COMMAND_FUNC = procedure(ch : GCharacter; param : string);
 
     GCommand = class
-      name, alias : string;
+      name : string;
       func_name : string;
       ptr : COMMAND_FUNC;
       level : integer;             { minimum level }
@@ -564,6 +564,9 @@ begin
   if (comparestr(s, 'do_unlearn') = 0) then
     g := do_unlearn
   else
+  if (comparestr(s, 'do_hashstats') = 0) then
+    g := do_hashstats
+  else
     begin
     g := nil;
 
@@ -577,7 +580,7 @@ end;
 procedure load_commands;
 var f:textfile;
     s,g:string;
-    cmd : GCommand;
+    cmd, alias : GCommand;
 begin
   assignfile(f, 'system\commands.dat');
   {$I-}
@@ -590,7 +593,7 @@ begin
     exit;
     end;
 
-  commands := GHashObject.Create(164);
+  commands := GHashObject.Create(32);
   commands.setHashFunc(commandHash);
 
   repeat
@@ -601,9 +604,9 @@ begin
     if (eof(f)) then
       break;
 
+    alias := nil;
     cmd := GCommand.Create;
     cmd.position := POS_MEDITATE;
-    cmd.alias := '';
 
     with cmd do
       repeat
@@ -614,7 +617,11 @@ begin
         name := uppercase(striprbeg(s,' '))
       else
       if g='ALIAS' then
-        alias := uppercase(striprbeg(s,' '))
+        begin
+        // create an alias
+        alias := GCommand.Create;
+        alias.name := uppercase(striprbeg(s,' '));
+        end
       else
       if g='LEVEL' then
         level:=strtoint(striprbeg(s,' '))
@@ -633,11 +640,24 @@ begin
       begin
       commands.hashObject(cmd, cmd.name);
 
-      if (cmd.alias <> '') and (pos(cmd.alias, cmd.name) = 0) then
-        commands.hashObject(cmd, cmd.alias);
+      if (alias <> nil) then
+        begin
+        // update settings
+        alias.level := cmd.level;
+        alias.ptr := cmd.ptr;
+        alias.func_name := cmd.func_name;
+        alias.position := cmd.position;
+
+        commands.hashObject(alias, alias.name);
+        end;
       end
     else
+      begin
       cmd.Free;
+
+      if (alias <> nil) then
+        alias.Free;
+      end;
   until eof(f);
 
   closefile(f);
@@ -727,7 +747,7 @@ begin
 
     while (node <> nil) do
       begin
-      if (pos(cmdline, GCommand(node.element).name) = 1) or (pos(cmdline, GCommand(node.element).alias) = 1) then
+      if (pos(cmdline, GCommand(node.element).name) = 1) then
         begin
         cmd := GCommand(node.element);
         break;
@@ -753,10 +773,10 @@ begin
         else
           begin
           if (system_info.log_all) or (IS_SET(ch.act_flags, ACT_LOG)) then
-            write_log(ch.name + ': ' + line);
+            write_log(ch.name^ + ': ' + line);
 
           if (cmd.level >= LEVEL_IMMORTAL) then
-            write_console('[LOG] ' + ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+            write_console('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
           try
             time := GetTickCount;
@@ -771,10 +791,10 @@ begin
             time := GetTickCount - time;
 
             if (time > 1500) and (not ch.CHAR_DIED) then
-              bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name + ' lagged', 'The command took over 1.5 sec to complete.');
+              bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.');
           except
             if (ch.CHAR_DIED) then
-              bugreport('interpret', 'mudthread.pas', cmd.func_name + ', ch ' + ch.name + ' bugged',
+              bugreport('interpret', 'mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' bugged',
                         'The specified command caused an error and has been terminated.');
           end;
           end;
@@ -893,7 +913,7 @@ begin
                     exit;
                     end;
 
-                  vict := findCharWorld(nil, ch.name);
+                  vict := findCharWorld(nil, ch.name^);
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin
@@ -908,7 +928,7 @@ begin
                     act(AT_REPORT, 'You have reconnected.', false, ch, nil, nil, TO_CHAR);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.player^.flags, PLR_LINKLESS);
-                    write_console('(' + inttostr(conn.socket) + ') ' + ch.name + ' has reconnected');
+                    write_console('(' + inttostr(conn.socket) + ') ' + ch.name^ + ' has reconnected');
 
                     ch.sendPrompt;
                     conn.state := CON_PLAYING;
@@ -924,7 +944,7 @@ begin
                   conn.state := CON_MOTD;
                   end;
         CON_MOTD: begin
-                  conn.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name + ', to this MUD. May your stay be pleasant.'#13#10);
+                  conn.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name^ + ', to this MUD. May your stay be pleasant.'#13#10);
 
                   with system_info do
                     begin
@@ -936,7 +956,7 @@ begin
                   ch.toRoom(ch.room);
 
                   act(AT_WHITE, '$n enters through a magic portal.', true, ch, nil, nil, TO_ROOM);
-                  write_console('(' + inttostr(conn.socket) + ') '+ ch.name +' has logged in');
+                  write_console('(' + inttostr(conn.socket) + ') '+ ch.name^ +' has logged in');
 
                   ch.node_world := char_list.insertLast(ch);
                   ch.player^.logon_now := Now;
@@ -978,9 +998,9 @@ begin
                     exit;
                     end;
 
-                  ch.name := cap(argument);
+                  ch.name := hash_string(cap(argument));
                   conn.state := CON_NEW_PASSWORD;
-                  conn.send(#13#10'Allright, '+ch.name+', choose a password: ');
+                  conn.send(#13#10'Allright, '+ch.name^+', choose a password: ');
                   end;
 CON_NEW_PASSWORD: begin
                   if (length(argument)=0) then
@@ -1218,9 +1238,9 @@ CON_CHECK_PASSWORD: begin
                     'C':begin
                         digest := ch.player^.md5_password;
 
-                        ch.load(ch.name);
+                        ch.load(ch.name^);
                         ch.player^.md5_password := digest;
-                        ch.save(ch.name);
+                        ch.save(ch.name^);
 
                         conn.send(#13#10'Thank you. You have completed your entry.'#13#10);
 
@@ -1391,7 +1411,7 @@ begin
     begin
     conn.state := CON_MOTD;
 
-    conn.ch.name := copyover_name;
+    conn.ch.name := hash_string(copyover_name);
     conn.ch.load(copyover_name);
     conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
     conn.send('Copyover complete!'#13#10);
@@ -1464,7 +1484,7 @@ begin
 
   if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
     begin
-    write_console('(' + inttostr(conn.socket) + ') '+conn.ch.name+' has lost the link');
+    write_console('(' + inttostr(conn.socket) + ') '+conn.ch.name^+' has lost the link');
 
     conn.ch.conn := nil;
 

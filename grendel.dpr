@@ -24,8 +24,14 @@
 
 program grendel;
 
-{$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000 by Michiel Rook.'}
+{$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000,2001 by Michiel Rook.'}
 {$APPTYPE CONSOLE}
+
+// set suitable options when using debugging and mem checking
+{$IFDEF __DEBUG}
+{$W+}
+{$O-}
+{$ENDIF}
 
 uses
   SysUtils,
@@ -51,8 +57,11 @@ uses
   clean in 'units\clean.pas',
   Winsock2 in 'units\winsock2.pas',
   progs in 'units\progs.pas',
-  md5 in 'units\md5.pas',
-  MemCheck in 'units\MemCheck.pas';
+  md5 in 'units\md5.pas'
+{$IFDEF __DEBUG}
+  ,MemCheck in 'units\MemCheck.pas'
+{$ENDIF}
+  ;
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -285,6 +294,10 @@ begin
     auction_good.Free;
     auction_evil.Free;
     banned_masks.Free;
+
+    connection_list.clean;
+    connection_list.Free;
+    commands.Free;
   except
     bugreport('cleanup', 'grendel.dpr', 'something went wrong',
               'A procedure in the cleanup cycle failed. Contact Grimlord.');
@@ -418,7 +431,7 @@ begin
       reboot_mud;
       end;
 
-		strpcopy(name, conn.ch.name);
+		strpcopy(name, conn.ch.name^);
     len := strlen(name);
 
     if (not WriteFile(pipe, len, 4, w, nil)) then
@@ -433,7 +446,7 @@ begin
       reboot_mud;
       end;
 
-    conn.ch.save(conn.ch.name);
+    conn.ch.save(conn.ch.name^);
     closesocket(conn.socket);
 
     node := node.next;
@@ -990,11 +1003,12 @@ begin
   CloseHandle(pipe);
 end;
 
-
 begin
   old_exitproc := ExitProc;
 
+{$IFDEF __DEBUG}
   MemChk;
+{$ENDIF}
 
   boot_mud;
 
