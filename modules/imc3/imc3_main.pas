@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.18 2003/11/10 09:27:42 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.19 2003/11/11 19:35:06 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -25,6 +25,7 @@ uses
 	imc3_const,
 	imc3_chan,
 	imc3_mud,
+	imc3_util,
 	imc3_core;
 
 
@@ -367,44 +368,40 @@ begin
 	if (prep(cmd) = 'HELP') then
 		begin
 		ch.sendBuffer('General Usage:'#13#10);
-		ch.sendBuffer('------------------------------------------------'#13#10);
-		ch.sendBuffer('List channels available                : i3chanlist [all] [filter]'#13#10);
-		ch.sendBuffer('To tune into a channel                 : i3listen <localchannel>'#13#10);
-		ch.sendBuffer('To see who is listening on another mud : i3chanwho <channel> <mud>'#13#10);
-		ch.sendBuffer('List muds connected to I3              : i3mudlist [filter]'#13#10);
-		ch.sendBuffer('Information on another mud             : i3mudinfo <mud>'#13#10);
-		ch.sendBuffer('Ignore someone who annoys you          : i3ignore <string>'#13#10);
-		ch.sendBuffer('Make yourself invisible to I3          : i3invis'#13#10);
-		ch.sendBuffer('Toggle I3 color                        : i3color'#13#10);
+		ch.sendBuffer('------------------------------------------------'#13#10#13#10);
+		ch.sendBuffer('List channels available                : i3 chanlist [all] [filter]'#13#10);
+		ch.sendBuffer('To tune into a channel                 : i3 listen <channel>'#13#10);
+		ch.sendBuffer('To see who is listening on another mud : i3 chanwho <channel> <mud>'#13#10);
+		ch.sendBuffer('List muds connected to I3              : i3 mudlist [filter]'#13#10);
+		ch.sendBuffer('Information on another mud             : i3 mudinfo <mud>'#13#10);
+		ch.sendBuffer('Ignore someone who annoys you          : i3 ignore <string>'#13#10);
+		ch.sendBuffer('Make yourself invisible to I3          : i3 invis'#13#10);
+		ch.sendBuffer('Toggle I3 color                        : i3 color'#13#10);
 
-		{ if (I3PERM(ch) >= I3PERM_IMM) then
+		if (I3PERM(ch) >= I3PERM_IMM) then
 			begin
-			ch.sendBuffer('\n\r&YImmortal functions'#13#10);
-			ch.sendBuffer('&Y------------------------------------------------\n\r'#13#10);
-			ch.sendBuffer('&YGeneral statistics:'#13#10);
-			ch.sendBuffer('&wi3ucache'#13#10);
-			ch.sendBuffer('&wi3user <person@mud>'#13#10);
-			ch.sendBuffer('&wi3perms <user>\n\r'#13#10);
-			ch.sendBuffer('&YChannel control:'#13#10);
-			ch.sendBuffer('&wi3deny <person> <local channel>'#13#10);
+			ch.sendBuffer(#13#10'Immortal functions'#13#10);
+			ch.sendBuffer('------------------------------------------------'#13#10#13#10);
+			ch.sendBuffer('General statistics:'#13#10);
+			ch.sendBuffer('i3 ucache'#13#10);
+			ch.sendBuffer('i3 user <person@mud>'#13#10);
+			ch.sendBuffer('i3 perms <user>'#13#10#13#10);
+			ch.sendBuffer('Channel control:'#13#10);
+			ch.sendBuffer('i3 deny <person> <local channel>'#13#10);
 			end;
 
 		if (I3PERM(ch) >= I3PERM_ADMIN) then
 			begin
-			ch.sendBuffer('\n\r&RAdministrative functions'#13#10);
-			ch.sendBuffer('&R------------------------------------------------\n\r'#13#10);
-			ch.sendBuffer('&RLocal channel setup and editing:'#13#10);
-			ch.sendBuffer('&wi3setchan <i3channelname> <localname> [level]'#13#10);
-			ch.sendBuffer('&wi3editchan <localchannel>'#13#10);
-			ch.sendBuffer('&wi3chanlayout <localchannel> <message> <emote>\n\r'#13#10);
-			ch.sendBuffer('&RNew channel creation and administration:'#13#10);
-			ch.sendBuffer('&wi3addchan <channelname> <localname> <type>'#13#10);
-			ch.sendBuffer('&wi3removechan <channel>'#13#10);
-			ch.sendBuffer('&wi3adminchan <localchannel> <add|remove> <mudname>\n\r'#13#10);
-			ch.sendBuffer('&RTraffic control and permissions:'#13#10);
-			ch.sendBuffer('&wi3ban <string>'#13#10);
-			ch.sendBuffer('&wi3permset <user> <permission>'#13#10);
-			end; }
+			ch.sendBuffer(#13#10'Administrative functions'#13#10);
+			ch.sendBuffer('------------------------------------------------'#13#10#13#10);
+			ch.sendBuffer('New channel creation and administration:'#13#10);
+			ch.sendBuffer('i3 addchan <channelname> <type>'#13#10);
+			ch.sendBuffer('i3 removechan <channel>'#13#10);
+			ch.sendBuffer('i3 adminchan <channel> <add|remove> <mudname>'#13#10#13#10);
+			ch.sendBuffer('Traffic control and permissions:'#13#10);
+			ch.sendBuffer('i3 ban <string>'#13#10);
+			ch.sendBuffer('i3 permset <user> <permission>'#13#10);
+			end;
 		end
 	else
 		ch.sendBuffer('Not implemented.'#13#10);
