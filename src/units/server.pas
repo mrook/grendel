@@ -1,3 +1,9 @@
+{
+	Summary:
+		Main server class
+	
+	## $Id: server.pas,v 1.5 2004/03/18 15:22:06 ***REMOVED*** Exp $
+}
 unit server;
 
 interface
