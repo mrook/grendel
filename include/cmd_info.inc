@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.31 2001/04/16 17:13:19 xenon Exp $
+// $Id: cmd_info.inc,v 1.32 2001/04/20 18:26:10 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -109,6 +109,7 @@ var vict:GCharacter;
     cnt:integer;
     brief:boolean;
     act_str:string;
+    where_str : string;
 begin
   if (IS_SET(ch.aff_flags,AFF_BLIND)) then
     begin
@@ -132,8 +133,22 @@ begin
     begin
     { Check if it is a user }
     vict := ch.room.findChar(ch, param);
-    obj := ch.room.findObject(param);
     s_extra := ch.room.findDescription(param);
+    obj := ch.room.findObject(param);
+    if (obj <> nil) then
+      where_str := 'on the ground'
+    else
+    begin
+      obj := ch.findInventory(param);
+      if (obj <> nil) then
+        where_str := 'in your inventory'
+      else
+      begin
+        obj := ch.findEquipment(param);
+        if (obj <> nil) then
+          where_str := 'that you''re wearing';
+      end
+    end;
 
     if (vict <> nil) then
       begin
@@ -182,7 +197,7 @@ begin
     else
     if obj<>nil then
       begin
-      act(AT_REPORT,'You look at $p.'#13#10,false,ch,obj,nil,TO_CHAR);
+      act(AT_REPORT,'You look at $p ' + where_str + '.'#13#10,false,ch,obj,nil,TO_CHAR);
 
       if (obj.item_type=ITEM_CONTAINER) or (obj.item_type=ITEM_CORPSE) then
         begin
@@ -441,9 +456,13 @@ begin
   act(AT_REPORT,'   Stamina:  $B$3'+pad_integer(ch.point.mv,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mv,5)+
                 '$A$7     Hitroll:            $B$3'+pad_integer(ch.point.hitroll,4)+
                 '$A$7     Alignment:   $B$3'+inttostr(ch.alignment),false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.point.mana,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mana,5)+
-                '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+
-                '$A$7     Wimpy:       $B$3'+inttostr(ch.player^.wimpy)+#13#10,false,ch,nil,nil,TO_CHAR);
+  if (ch.IS_NPC) then
+    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.point.mana,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mana,5)+
+                  '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+#13#10,false,ch,nil,nil,TO_CHAR)
+  else
+    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.point.mana,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mana,5)+
+                  '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+
+                  '$A$7     Wimpy:       $B$3'+inttostr(ch.player^.wimpy)+#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (ch.IS_IMMORT) and (ch.IS_WIZINVIS) then
     act(AT_REPORT,'   WizLevel: $B$3'+pad_integer(ch.player^.wiz_level,3)+#13#10,false,ch,nil,nil,TO_CHAR);
