@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.5 2004/02/17 11:41:19 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.6 2004/02/18 23:10:57 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -216,7 +216,7 @@ end;
 
 procedure GConnection.disableCompression();
 var
-	t, compress_size : integer;
+	compress_size : integer;
 	compress_buf : array[0..4095] of char;
 begin
   if (compress) then
@@ -226,7 +226,7 @@ begin
 		strm.next_out := compress_buf;
 		strm.avail_out := 4096;
 
-		t := deflate(strm, Z_FINISH);
+		deflate(strm, Z_FINISH);
 
 		compress_size := 4096 - strm.avail_out;
 
@@ -253,7 +253,7 @@ begin
 			strm.next_out := compress_buf;
 			strm.avail_out := 4096;
 
-			t := deflate(strm, Z_SYNC_FLUSH);
+			deflate(strm, Z_SYNC_FLUSH);
 
 			compress_size := 4096 - strm.avail_out;
 
@@ -272,8 +272,9 @@ begin
 end;
 
 procedure GConnection.read();
-var s, read : integer;
-    buf : array[0..MAX_RECEIVE-1] of char;
+var
+	read : integer;
+	buf : array[0..MAX_RECEIVE-1] of char;
 begin
   if (length(comm_buf) > 0) then
     exit;
@@ -282,11 +283,11 @@ begin
     if (not _socket.canRead()) then
       exit;
   except
-	on E : Exception do
-	begin
-	Terminate();
-	exit;
-	end;
+		on E : Exception do
+			begin
+			Terminate();
+			exit;
+			end;
   end;
   
   idle := 0;
@@ -314,14 +315,12 @@ begin
     if (read = SOCKET_ERROR) then
       begin
 {$IFDEF WIN32}
-      s := WSAGetLastError;
-
-      if (s = WSAEWOULDBLOCK) then
+      if (WSAGetLastError() = WSAEWOULDBLOCK) then
         break
       else
         begin
-          Terminate();
-        exit;
+				Terminate();
+				exit;
         end;
 {$ELSE}
       break;
