@@ -1,3 +1,4 @@
+// source: yyparse.cod line# 1
 
 (* Yacc parser template (TP Yacc V3.0), V1.2 6-17-91 AG *)
 
@@ -219,12 +220,15 @@ const _FLOAT = 289;
 const _STRING = 290;
 const _EXTERNAL = 291;
 
-type YYSType = record case Integer of
-                 1 : ( yyExpr : Expr );
-                 2 : ( yyInteger : Integer );
-                 3 : ( yyShortString : ShortString );
-                 4 : ( yySingle : Single );
+// If you have defined your own YYSType then put an empty  %union { } in
+// your .y file. Or you can put your type definition within the curly braces.
+type YYSType = record
+                 yyExpr : Expr;
+                 yyInteger : Integer;
+                 yyShortString : ShortString;
+                 yySingle : Single;
                end(*YYSType*);
+// source: yyparse.cod line# 6
 
 var yylval : YYSType;
 
@@ -239,66 +243,86 @@ var yystate, yysp, yyn : Integer;
 
 procedure yyaction ( yyruleno : Integer );
   (* local definitions: *)
+// source: yyparse.cod line# 21
 begin
   (* actions: *)
   case yyruleno of
-   1 : begin
+1 : begin
        end;
-   2 : begin
+2 : begin
+         // source: gmcc.y line#238
          yyaccept; 
        end;
-   3 : begin
+3 : begin
+         // source: gmcc.y line#239
          startCompiler(yyv[yysp-0].yyExpr); 
        end;
-   4 : begin
+4 : begin
+         // source: gmcc.y line#240
          yyerrok; 
        end;
-   5 : begin
+5 : begin
+         // source: gmcc.y line#243
          yyval.yyExpr := nil; 
        end;
-   6 : begin
+6 : begin
+         // source: gmcc.y line#244
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-   7 : begin
+7 : begin
+         // source: gmcc.y line#245
          yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-0].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-   8 : begin
+8 : begin
+         // source: gmcc.y line#248
          yyval.yyExpr := nil; 
        end;
-   9 : begin
+9 : begin
+         // source: gmcc.y line#249
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  10 : begin
+10 : begin
+         // source: gmcc.y line#250
          yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-0].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  11 : begin
+11 : begin
+         // source: gmcc.y line#253
          yyval.yyExpr := nil; 
        end;
-  12 : begin
+12 : begin
+         // source: gmcc.y line#254
          yyval.yyExpr := nil; 
        end;
-  13 : begin
+13 : begin
+         // source: gmcc.y line#255
          yyval.yyExpr := nil; 
        end;
-  14 : begin
+14 : begin
+         // source: gmcc.y line#256
          yyval.yyExpr := Expr_Return.Create; Expr_Return(yyval.yyExpr).ret := nil; Expr_Return(yyval.yyExpr).id := curFunction; 
        end;
-  15 : begin
+15 : begin
+         // source: gmcc.y line#257
          yyval.yyExpr := Expr_Return.Create; Expr_Return(yyval.yyExpr).ret := yyv[yysp-1].yyExpr; Expr_Return(yyval.yyExpr).id := curFunction; 
        end;
-  16 : begin
+16 : begin
+         // source: gmcc.y line#258
          yyval.yyExpr := Expr_Return.Create; Expr_Return(yyval.yyExpr).ret := yyv[yysp-2].yyExpr; Expr_Return(yyval.yyExpr).id := curFunction; 
        end;
-  17 : begin
+17 : begin
+         // source: gmcc.y line#261
          yyval.yyExpr := nil; 
        end;
-  18 : begin
+18 : begin
+         // source: gmcc.y line#262
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  19 : begin
+19 : begin
+         // source: gmcc.y line#263
          yyval.yyExpr := nil; lookupEnv(varName, true); 
        end;
-  20 : begin
+20 : begin
+         // source: gmcc.y line#264
          	yyval.yyExpr := nil;
          											if (not FileExists(varName)) then
          												compilerError(yylineno, yyfname, 'could not open include file ' + varName)
@@ -313,125 +337,159 @@ begin
          													end;
          												end;	
        end;
-  21 : begin
+21 : begin
+         // source: gmcc.y line#279
          yyval.yyExpr := nil; 
        end;
-  22 : begin
+22 : begin
+         // source: gmcc.y line#280
          yyval.yyExpr := yyv[yysp-0].yyExpr; if (yyval.yyExpr <> nil) then yyval.yyExpr.lineNum := yylineno; 
        end;
-  23 : begin
+23 : begin
+         // source: gmcc.y line#281
          yyval.yyExpr := yyv[yysp-1].yyExpr; if (yyval.yyExpr <> nil) then yyval.yyExpr.lineNum := yylineno; 
        end;
-  24 : begin
+24 : begin
+         // source: gmcc.y line#282
          yyval.yyExpr := Expr_If.Create; Expr_If(yyval.yyExpr).ce := yyv[yysp-4].yyExpr;	
          																														Expr_If(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_If(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
          																														Expr_If(yyval.yyExpr).lThen := labelNum; inc(labelNum); 
          																														Expr_If(yyval.yyExpr).lElse := labelNum; inc(labelNum); 
          																														Expr_If(yyval.yyExpr).lAfter := labelNum; inc(labelNum); 
        end;
-  25 : begin
+25 : begin
+         // source: gmcc.y line#287
          yyval.yyExpr := Expr_If.Create; Expr_If(yyval.yyExpr).ce := yyv[yysp-2].yyExpr; 
          																														Expr_If(yyval.yyExpr).le := yyv[yysp-0].yyExpr; Expr_If(yyval.yyExpr).re := nil; 
          																														Expr_If(yyval.yyExpr).lThen := labelNum; inc(labelNum); 
          																														Expr_If(yyval.yyExpr).lAfter := labelNum; inc(labelNum); 
        end;
-  26 : begin
+26 : begin
+         // source: gmcc.y line#291
          yyval.yyExpr := Expr_Loop.Create; Expr_Loop(yyval.yyExpr).init := yyv[yysp-6].yyExpr;
          				                                                    Expr_Loop(yyval.yyExpr).ce := yyv[yysp-4].yyExpr;
          				                                                    Expr_Loop(yyval.yyExpr).lStart := labelNum; inc(labelNum);
          				                                                    Expr_Loop(yyval.yyExpr).step := yyv[yysp-2].yyExpr; Expr_Loop(yyval.yyExpr).body := yyv[yysp-0].yyExpr; 
        end;
-  27 : begin
+27 : begin
+         // source: gmcc.y line#295
          yyval.yyExpr := Expr_Special.Create; Expr_Special(yyval.yyExpr).spec := SPECIAL_TRAP; Expr_Special(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  28 : begin
+28 : begin
+         // source: gmcc.y line#296
          yyval.yyExpr := Expr_Special.Create; Expr_Special(yyval.yyExpr).spec := SPECIAL_SLEEP; Expr_Special(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  29 : begin
+29 : begin
+         // source: gmcc.y line#297
          yyval.yyExpr := Expr_Special.Create; Expr_Special(yyval.yyExpr).spec := SPECIAL_WAIT; Expr_Special(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  30 : begin
+30 : begin
+         // source: gmcc.y line#298
          yyval.yyExpr := Expr_Special.Create; Expr_Special(yyval.yyExpr).spec := SPECIAL_SIGNAL; Expr_Special(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  31 : begin
+31 : begin
+         // source: gmcc.y line#299
          yyval.yyExpr := yyv[yysp-1].yyExpr; 
        end;
-  32 : begin
+32 : begin
+         // source: gmcc.y line#300
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  33 : begin
+33 : begin
+         // source: gmcc.y line#301
          yyval.yyExpr := nil; 
        end;
-  34 : begin
+34 : begin
+         // source: gmcc.y line#304
          yyval.yyExpr := nil; 
        end;
-  35 : begin
+35 : begin
+         // source: gmcc.y line#305
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  36 : begin
+36 : begin
+         // source: gmcc.y line#306
          yyval.yyExpr := nil; 
        end;
-  37 : begin
+37 : begin
+         // source: gmcc.y line#309
          yyval.yyExpr := nil; addEnvironment(curFunction + ':' + varName, varType, -1, VARTYPE_PARAM); 
        end;
-  38 : begin
+38 : begin
+         // source: gmcc.y line#312
          yyval.yyExpr := nil; 
        end;
-  39 : begin
+39 : begin
+         // source: gmcc.y line#313
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  40 : begin
+40 : begin
+         // source: gmcc.y line#314
          yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-2].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-0].yyExpr; 
        end;
-  41 : begin
+41 : begin
+         // source: gmcc.y line#317
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  42 : begin
+42 : begin
+         // source: gmcc.y line#318
          yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-0].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  43 : begin
+43 : begin
+         // source: gmcc.y line#321
          yyval.yyExpr := Expr_Asm.Create; Expr_Asm(yyval.yyExpr).line := varName; 
        end;
-  44 : begin
+44 : begin
+         // source: gmcc.y line#324
          yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := nil; Expr_Seq(yyval.yyExpr).ex := nil; 
        end;
-  45 : begin
+45 : begin
+         // source: gmcc.y line#325
          yyval.yyExpr := yyv[yysp-1].yyExpr;  
        end;
-  46 : begin
+46 : begin
+         // source: gmcc.y line#328
          yyval.yyExpr := nil; 
        end;
-  47 : begin
+47 : begin
+         // source: gmcc.y line#329
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  48 : begin
+48 : begin
+         // source: gmcc.y line#330
          yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-0].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-1].yyExpr; 
        end;
-  49 : begin
+49 : begin
+         // source: gmcc.y line#333
          curFunction := varName;	 yyval.yyExpr := Expr_Func.Create; Expr_Func(yyval.yyExpr).id := curFunction;
          																				Expr_Func(yyval.yyExpr).lStart := labelNum; inc(labelNum);
          																				addEnvironment(varName, varType, Expr_Func(yyval.yyExpr).lStart, VARTYPE_FUNCTION); 
        end;
-  50 : begin
+50 : begin
+         // source: gmcc.y line#338
          yyval.yyExpr := nil; 
        end;
-  51 : begin
+51 : begin
+         // source: gmcc.y line#339
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  52 : begin
+52 : begin
+         // source: gmcc.y line#342
          yyval.yyExpr := nil; 
        end;
-  53 : begin
+53 : begin
+         // source: gmcc.y line#343
          yyval.yyExpr := yyv[yysp-4].yyExpr; Expr_Func(yyval.yyExpr).body := yyv[yysp-0].yyExpr; 
          if (yyv[yysp-0].yyExpr = nil) then updateLabel(curFunction, -1);  curFunction := ''; 
        end;
-  54 : begin
+54 : begin
          yyval := yyv[yysp-0];
        end;
-  55 : begin
+55 : begin
          yyval := yyv[yysp-2];
        end;
-  56 : begin
+56 : begin
+         // source: gmcc.y line#351
          varName := curFunction + ':' + varName; 
          yyval.yyShortString := varName; 
          if (curFunction = '') then
@@ -439,67 +497,88 @@ begin
          else
          addEnvironment(varName, varType, -1, VARTYPE_LOCAL); 
        end;
-  57 : begin
+57 : begin
+         // source: gmcc.y line#358
          varType := _VOID; yyval.yyInteger := _VOID; 
        end;
-  58 : begin
+58 : begin
+         // source: gmcc.y line#359
          varType := _INT; yyval.yyInteger := _INT; 
        end;
-  59 : begin
+59 : begin
+         // source: gmcc.y line#360
          varType := _FLOAT; yyval.yyInteger := _FLOAT; 
        end;
-  60 : begin
+60 : begin
+         // source: gmcc.y line#361
          varType := _STRING; yyval.yyInteger := _STRING; 
        end;
-  61 : begin
+61 : begin
+         // source: gmcc.y line#362
          varType := _EXTERNAL; yyval.yyInteger := _EXTERNAL; 
        end;
-  62 : begin
+62 : begin
+         // source: gmcc.y line#365
          yyval.yyExpr := nil; 
        end;
-  63 : begin
+63 : begin
+         // source: gmcc.y line#366
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '+'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  64 : begin
+64 : begin
+         // source: gmcc.y line#367
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '-'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  65 : begin
+65 : begin
+         // source: gmcc.y line#368
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '*'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  66 : begin
+66 : begin
+         // source: gmcc.y line#369
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '/'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  67 : begin
+67 : begin
+         // source: gmcc.y line#370
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '%'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  68 : begin
+68 : begin
+         // source: gmcc.y line#371
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '&'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  69 : begin
+69 : begin
+         // source: gmcc.y line#372
          yyval.yyExpr := Expr_Op.Create; Expr_Op(yyval.yyExpr).op := '|'; Expr_Op(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Op(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  70 : begin
+70 : begin
+         // source: gmcc.y line#373
          yyval.yyExpr := yyv[yysp-1].yyExpr; 
        end;
-  71 : begin
+71 : begin
+         // source: gmcc.y line#374
          yyval.yyExpr := Expr_Neg.Create; Expr_Neg(yyval.yyExpr).ex := yyv[yysp-0].yyExpr; 
        end;
-  72 : begin
+72 : begin
+         // source: gmcc.y line#376
          yyval.yyExpr := Expr_ConstInt.Create; Expr_ConstInt(yyval.yyExpr).value := yyv[yysp-0].yyInteger; 
        end;
-  73 : begin
+73 : begin
+         // source: gmcc.y line#377
          yyval.yyExpr := Expr_ConstFloat.Create; Expr_ConstFloat(yyval.yyExpr).value := yyv[yysp-0].yySingle; 
        end;
-  74 : begin
+74 : begin
+         // source: gmcc.y line#378
          yyval.yyExpr := Expr_String.Create; Expr_String(yyval.yyExpr).value := ''; 
        end;
-  75 : begin
+75 : begin
+         // source: gmcc.y line#379
          yyval.yyExpr := Expr_String.Create; Expr_String(yyval.yyExpr).value := varName; 
        end;
-  76 : begin
+76 : begin
+         // source: gmcc.y line#380
          yyval.yyExpr := Expr_Cast.Create; Expr_Cast(yyval.yyExpr).ex := yyv[yysp-0].yyExpr; Expr_Cast(yyval.yyExpr).desttype := yyv[yysp-2].yyInteger; 
        end;
-  77 : begin
+77 : begin
+         // source: gmcc.y line#381
          if (yyv[yysp-2].yyExpr <> nil) then
          								begin
          								yyval.yyExpr := Expr_Assign.Create; 
@@ -509,10 +588,12 @@ begin
          							else
          								yyval.yyExpr := nil; 
        end;
-  78 : begin
+78 : begin
+         // source: gmcc.y line#389
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
-  79 : begin
+79 : begin
+         // source: gmcc.y line#390
          	if (lookupEnv(yyv[yysp-3].yyShortString) = nil) then 
          																	begin
          																		compilerError(yylineno, yyfname, 'undefined function "' + yyv[yysp-3].yyShortString + '"');
@@ -521,40 +602,52 @@ begin
          																		end;
          																	yyval.yyExpr := Expr_Call.Create; Expr_Call(yyval.yyExpr).id := yyv[yysp-3].yyShortString; Expr_Call(yyval.yyExpr).params := yyv[yysp-1].yyExpr; 
        end;
-  80 : begin
+80 : begin
+         // source: gmcc.y line#397
          yyval.yyExpr := Expr_Rel.Create; Expr_Rel(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Rel(yyval.yyExpr).op := '>';  Expr_Rel(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  81 : begin
+81 : begin
+         // source: gmcc.y line#398
          yyval.yyExpr := Expr_Rel.Create; Expr_Rel(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Rel(yyval.yyExpr).op := '<';  Expr_Rel(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  82 : begin
+82 : begin
+         // source: gmcc.y line#399
          yyval.yyExpr := Expr_Rel.Create; Expr_Rel(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Rel(yyval.yyExpr).op := '>=';  Expr_Rel(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  83 : begin
+83 : begin
+         // source: gmcc.y line#400
          yyval.yyExpr := Expr_Rel.Create; Expr_Rel(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Rel(yyval.yyExpr).op := '=<';  Expr_Rel(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  84 : begin
+84 : begin
+         // source: gmcc.y line#401
          yyval.yyExpr := Expr_Rel.Create; Expr_Rel(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Rel(yyval.yyExpr).op := '==';  Expr_Rel(yyval.yyExpr).re := yyv[yysp-0].yyExpr; 
        end;
-  85 : begin
+85 : begin
+         // source: gmcc.y line#402
          yyval.yyExpr := Expr_And.Create; Expr_And(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_And(yyval.yyExpr).re := yyv[yysp-0].yyExpr; yyval.yyExpr.lineNum := yylineno;
        end;
-  86 : begin
+86 : begin
+         // source: gmcc.y line#403
          yyval.yyExpr := Expr_Or.Create; Expr_Or(yyval.yyExpr).le := yyv[yysp-2].yyExpr; Expr_Or(yyval.yyExpr).re := yyv[yysp-0].yyExpr; yyval.yyExpr.lineNum := yylineno;
        end;
-  87 : begin
+87 : begin
+         // source: gmcc.y line#404
          yyval.yyExpr := Expr_Not.Create; Expr_Not(yyval.yyExpr).ex := yyv[yysp-0].yyExpr; 
        end;
-  88 : begin
+88 : begin
+         // source: gmcc.y line#405
          yyval.yyExpr := Expr_ConstInt.Create; Expr_ConstInt(yyval.yyExpr).value := 1; 
        end;
-  89 : begin
+89 : begin
+         // source: gmcc.y line#406
          yyval.yyExpr := Expr_ConstInt.Create; Expr_ConstInt(yyval.yyExpr).value := 0; 
        end;
-  90 : begin
+90 : begin
+         // source: gmcc.y line#409
          yyval.yyShortString := varName; 
        end;
-  91 : begin
+91 : begin
+         // source: gmcc.y line#412
          varGlob := ':' + yyv[yysp-0].yyShortString;
          tmp := curFunction + varGlob;
          varGlob := left(varGlob, '.');
@@ -594,14 +687,17 @@ begin
          													yyabort;
          													end; 
        end;
-  92 : begin
+92 : begin
        end;
-  93 : begin
+93 : begin
+         // source: gmcc.y line#453
          yyval.yyShortString := varName; 
        end;
-  94 : begin
+94 : begin
+         // source: gmcc.y line#454
          yyval.yyShortString := yyv[yysp-2].yyShortString + '.' + varName; 
        end;
+// source: yyparse.cod line# 25
   end;
 end(*yyaction*);
 
@@ -620,6 +716,7 @@ yynacts   = 1771;
 yyngotos  = 198;
 yynstates = 163;
 yynrules  = 94;
+yymaxtoken = 291;
 
 yya : array [1..yynacts] of YYARec = (
 { 0: }
@@ -3849,6 +3946,7 @@ yyr : array [1..yynrules] of YYRRec = (
 { 94: } ( len: 3; sym: -23 )
 );
 
+// source: yyparse.cod line# 30
 
 const _error = 256; (* error token *)
 
