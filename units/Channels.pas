@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.7 2001/07/17 15:24:10 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.8 2001/07/31 16:32:49 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -410,6 +410,7 @@ begin
         end;
         node := node.next;
       end;
+      ch.sendBuffer(#13#10);
     end;
   end
   else
