@@ -90,15 +90,6 @@ var
 
    auction_good, auction_evil : GAuction;
 
-(* var time_info:TIME_DATA;
-    system_info:SYSTEM_DATA;
-    auction:AUCTION_DATA;
-    bgdata:BATTLEGROUND_DATA;
-
-    { these names cannot be used when creating characters }
-    banned_names:TStringList;
-    { from these sites nobody can log on }
-    banned_sites:TStringList; *)
 
 var
   OldExit : pointer;
@@ -112,8 +103,9 @@ var
 
 
 const mud_booted : boolean = false;
-const grace_exit : boolean = false;
-const boot_type : integer = BOOTTYPE_SHUTDOWN;
+      grace_exit : boolean = false;
+      boot_type : integer = BOOTTYPE_SHUTDOWN;
+      stable_system : boolean = true;
 
 
 procedure write_direct(s:string);
