@@ -7,7 +7,7 @@ uses
     SysUtils;
 
 const
-    BUFSIZE = 65536;
+    BUFSIZE = 65536 * 16;
 
 type
     GFileReader = class
