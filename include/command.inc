@@ -51,18 +51,67 @@ begin
   ch.sendBuffer('You are now listed as AFK. Hitting ENTER will cease this.'#13#10);
 end;
 
+{ Revised help - Nemesis }
 procedure do_help(ch : GCharacter; param : string);
-var
-   help : GHelp;
+var buf, s, keyword : string;
+    help : GHelp;
+    counter : integer;
+    node : GListNode;
 begin
+  if (length(param) = 0) then
+    begin
+    buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Available help keywords ', '-') + ch.ansiColor(7) + #13#10#13#10;
+
+    counter := 0;
+    node := help_files.head;
+
+    while (node <> nil) do
+      begin
+      help := node.element;
+
+      keyword := help.keywords;
+
+      while (length(keyword) > 0) do
+        begin
+        keyword := one_argument(keyword, s);
+
+        if (s[length(s)] <> '_') then
+          begin
+          buf := buf + pad_string(lowercase(s), 15);
+
+          inc(counter);
+
+          if (counter = 5) then
+            begin
+            buf := buf + #13#10;
+            counter := 0;
+            end;
+          end;
+        end;
+
+      node := node.next;
+      end;
+
+    ch.sendPager(buf + #13#10);
+    exit;
+    end;
+
   help := findHelp(param);
 
-  if (help = nil) then
+  if (help = nil) or (help = help_files.head.element) then
     ch.sendBuffer('No help on that word.'#13#10)
   else
-    ch.sendPager(help.text);
-end;
+    begin
+    buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Help topic ', '-') + ch.ansiColor(7) + #13#10#13#10 +
+           'Name:    ' + ansiColor(3,0) + help.keywords + #13#10 + ansiColor(7,0) +
+           'Type:    ' + ansiColor(3,0) + help.helptype + #13#10 + ansiColor(7,0) +
+           'Syntax:  ' + ansiColor(3,0) + help.syntax + #13#10 + ansiColor(7,0) +
+           'Related: ' + ansiColor(3,0) + help.related + #13#10 + ansiColor(7,0) +
+           #13#10 + help.text;
 
+    ch.sendPager(buf);
+    end;
+end;
 procedure do_remort(ch : GCharacter; param : string);
 var a:integer;
     str,con,dex,int,wis,dam,pracs:integer;
