@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.63 2002/08/03 19:13:51 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.64 2002/08/06 21:53:28 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -548,12 +548,11 @@ begin
 end;
 
 // GPlayer
-constructor GPlayer.Create;
+constructor GPlayer.Create();
 var
-   node : GListNode;
+   iterator : GIterator;
    chan : TChannel;
    tc : TChannel;
-
 begin
   inherited Create;
 
@@ -587,14 +586,13 @@ begin
   pracs := 10; // default for new players(?)
 
   channels := GDLinkedList.Create();
-  node := channellist.head;
-
-  while (node <> nil) do
+  iterator := channellist.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    chan := node.element;
+    chan := TChannel(iterator.next());
     tc := TChannel.Create(chan.channelname);
     channels.insertLast(tc);
-    node := node.next;
     end;
 
   active_board := 1;
@@ -628,7 +626,7 @@ begin
   fighting := nil;
 end;
 
-destructor GPlayer.Destroy;
+destructor GPlayer.Destroy();
 var
    node, node_next : GListNode;
    tc : TChannel;
@@ -1114,6 +1112,7 @@ var d, x : longint;
     al : GAlias;
     node : GListNode;
     chan : GChannel;
+    iterator : GIterator;
     tc : TChannel;
 begin
   inner := 0;
@@ -1412,6 +1411,19 @@ begin
           boards[BOARD_NEWS] := strtoint(left(a,' '));
           a := right(a,' ');
           boards[BOARD_IMM] := strtoint(left(a,' '));
+          end
+        else
+        if (g = 'IGNORE') then
+          begin
+          iterator := channels.iterator();
+          
+          while (iterator.hasNext()) do
+            begin
+            tc := TChannel(iterator.next());
+            
+            if (tc.channelname = right(a, ' ')) then
+              tc.ignored := true;
+            end;
           end;
       until (uppercase(a)='#END') or (af.eof);
 
@@ -1666,12 +1678,13 @@ var
    af : GFileWriter;
    temp : TDateTime;
    h : integer;
-   node : GListNode;
    obj : GObject;
    al : GAlias;
    g : GLearned;
    aff : GAffect;
    fl : cardinal;
+   tc : TChannel;
+   iterator : GIterator;
 begin
   if (IS_NPC) then
     begin
@@ -1687,15 +1700,13 @@ begin
   end;
 
   // reset the character to a basic state (without affects) before writing
-  node := affects.head;
+  iterator := affects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    aff := node.element;
+    aff := GAffect(iterator.next());
 
     aff.modify(Self, false);
-
-    node := node.next;
     end;
 
   af.writeLine('#PLAYER');
@@ -1769,30 +1780,41 @@ begin
   af.writeLine('LAC: ' + IntToStr(lac));
   af.writeLine('AC_mod: ' + IntToStr(ac_mod));
   af.writeLine('RoomVNum: ' + IntToStr(room.vnum));
+  
+  iterator := channels.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    tc := TChannel(iterator.next());
+    
+    if (tc.ignored) then
+      af.writeLine('Ignore: ' + tc.channelname);
+    end;
+  
   af.writeLine('#END');
   af.writeLine('');
 
   af.writeLine('#SKILLS');
-  node := skills_learned.head;;
-
-  while (node <> nil) do
+  
+  iterator := skills_learned.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    g := node.element;
+    g := GLearned(iterator.next());
 
     af.writeLine( 'Skill: ''' + GSkill(g.skill).name^ + ''' ' + IntToStr(g.perc));
-
-    node := node.next;
     end;
 
   af.writeLine('#END');
   af.writeLine('');
 
   af.writeLine('#AFFECTS');
-  node := affects.head;
 
-  while (node <> nil) do
+  iterator := affects.iterator();
+
+  while (iterator.hasNext()) do
     begin
-    aff := node.element;
+    aff := GAffect(iterator.next());
 
     with aff do
       begin
@@ -1816,33 +1838,32 @@ begin
 
       af.writeLine('');
       end;
-
-    node := node.next;
     end;
+    
   af.writeLine('#END');
   af.writeLine('');
 
   af.writeLine( '#ALIASES');
-  node := aliases.head;
+  
+  iterator := aliases.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    al := node.element;
+    al := GAlias(iterator.next());
 
     af.writeLine(al.alias + ':' + al.expand);
-
-    node := node.next;
     end;
 
   af.writeLine( '#END');
   af.writeLine('');
 
   af.writeLine('#OBJECTS');
-  node := objects.head;
+  
+  iterator := objects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     af.writeLine(IntToStr(obj.wear_location));
 
@@ -1857,8 +1878,6 @@ begin
     af.writeLine(IntToStr(obj.item_type) + ' ' + IntToStr(obj.wear1) + ' ' + IntToStr(obj.wear2));
     af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
     af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
-
-    node := node.next;
     end;
 
   af.writeLine('#END');
@@ -1872,15 +1891,13 @@ begin
   af.Free;
 
   // re-apply affects to character
-  node := affects.head;
+  iterator := affects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    aff := node.element;
+    aff := GAffect(iterator.next());
 
     aff.modify(Self, true);
-    
-    node := node.next;
     end;
 
   save := true;

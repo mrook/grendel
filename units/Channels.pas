@@ -1,6 +1,6 @@
 {
   @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.15 2002/08/03 19:13:49 ***REMOVED*** Exp $)
+  @lastmod($Id: Channels.pas,v 1.16 2002/08/06 21:53:28 ***REMOVED*** Exp $)
 }
 
 unit Channels;
@@ -212,24 +212,23 @@ end;
 
 function chan_ignored(ch : GPlayer; chanstr : string) : boolean;
 var
-  node : GListNode;
+  iterator : GIterator;
   tc : TChannel;
 begin
   Result := false;
     
-  node := ch.channels.head;
+  iterator := ch.channels.iterator();
   
-  while (node <> nil) do
-  begin
-    tc := node.element;
-    if ((pos(prep(chanstr), prep(tc.channelname)) = 1)) then
+  while (iterator.hasNext()) do
     begin
+    tc := TChannel(iterator.next());
+    
+    if ((pos(prep(chanstr), prep(tc.channelname)) = 1)) then
+      begin
       Result := tc.ignored;
       break;
-    end;
-    node := node.next;
-  end;
-  
+      end;
+    end; 
 end;
 
 procedure channelAddHistory(vict, actor : GPlayer; channel : GChannel; str : string);
@@ -818,8 +817,7 @@ begin
 
   if (length(arg1) = 0) then
   begin
-    ch.sendBuffer('Usage: CHANNEL <list>|[<channelname> <on/off>] '#13#10);
-    ch.sendBuffer('Note: on/off feature not implemented yet.'#13#10);
+    ch.sendBuffer('Usage: CHANNEL <list> | [<channelname> <on/off>] '#13#10);
     exit;
   end
   else
