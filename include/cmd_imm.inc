@@ -956,8 +956,6 @@ begin
     vict.emptyBuffer;
 end;
 
-{Jago 6/Jan/2001 - reimplemented wizhelp
-										... simply read back the help for "wizhelp", EASY!!!}
 procedure do_wizhelp(ch:GCharacter;param:string);
 var
   lev, a : integer;
@@ -966,7 +964,7 @@ var
   buf : string;
   count : integer;
 begin
-  buf := ch.ansiColor(3) + ' ' + add_chars(70, '---- Available immortal commands ', '-') + ch.ansiColor(7) + #13#10#13#10;
+  buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Available immortal commands ', '-') + ch.ansiColor(7) + #13#10#13#10;
   ch.sendBuffer(buf);
 
   lev := ch.getTrust;
