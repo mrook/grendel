@@ -37,6 +37,7 @@ Grendel's TODO list with probable release date/version
 ! (0.4.0) add named affects
 ! (0.4.0) have mudstatus save when shutting down (mudstatus defined as: mudtime, weather, etc.)
 ! (0.4.0) bugtrack/report system (webbased)
+! (0.4.0) racial abilities
 
 
 * (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
@@ -51,8 +52,6 @@ Grendel's TODO list with probable release date/version
   isSpellName() and enforce their use throughout the code
 - (0.4.1) add some checks to do_give, do_get, do_drop with respect to inter-align trading,
           ROOM_NODROP etc.
-- (0.4.1) race specifics
-          -> add field to race format for racial abilities like Infravision etc.
 - (0.4.1) expand tracking system
 
 - (0.4.2) some form of classes/professions/guilds/religions/whatever

@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.38 2001/07/18 14:15:56 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.39 2001/07/23 15:53:47 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -665,12 +665,12 @@ begin
 
     write_console('Initializing GMC contexts...');
     init_progs;
+    write_console('Loading skills...');
+    load_skills;
     write_console('Loading races...');
     load_races;
     write_console('Loading clans...');
     load_clans;
-    write_console('Loading skills...');
-    load_skills;
     write_console('Loading texts...');
     registerCommands;
     load_commands;

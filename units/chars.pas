@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.47 2001/07/18 14:15:57 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.48 2001/07/23 15:53:48 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -563,16 +563,8 @@ begin
   aliases := GDLinkedList.Create;
   skills_learned := GDLinkedList.Create;
 
-  if (race <> nil) then
-    begin
-    max_skills := race.max_skills;
-    max_spells := race.max_spells;
-    end
-  else
-    begin
-    max_skills := 0;
-    max_spells := 0;
-    end;
+  max_skills := 0;
+  max_spells := 0;
 
   pracs := 10; // default for new players(?)
 
@@ -1117,11 +1109,6 @@ begin
   short := hash_string(s + ' is here');
   long := hash_string(s + ' is standing here');
 
-  if (race <> nil) then
-    alignment := race.def_alignment
-  else
-    alignment := 0;
-
   try
     af := GFileReader.Create('players\' + fn + '.usr');
   except
@@ -1150,7 +1137,15 @@ begin
           sex := strtoint(right(a, ' '))
         else
         if g='RACE' then
-          race := findRace(right(a, ' '))
+          begin
+          race := findRace(right(a, ' '));
+          
+          if (race = nil) then
+            begin
+            bugreport('GCharacter.load', 'chars.pas', 'Unknown race ' + right(a, ' ') + ', reverting to default instead');
+            race := race_list.head.element;
+            end;
+          end
         else
         if (g = 'ALIGNMENT') then
           alignment := strtoint(right(a, ' '))
@@ -1373,6 +1368,7 @@ begin
           played:=strtoint(left(a,' '));
           a:=right(a,' ');
           played:=played + (strtoint(left(a,' '))/MSecsPerDay);
+
           end
         else
         if (g = 'BAMFIN') then
@@ -1616,12 +1612,21 @@ begin
 
   if (race <> nil) then
     begin
-    save_poison:=race.save_poison;
-    save_cold:=race.save_cold;
-    save_para:=race.save_para;
-    save_breath:=race.save_breath;
-    save_spell:=race.save_spell;
-    hitroll:=UMax((level div 5)+50,100);
+    save_poison := race.save_poison;
+    save_cold := race.save_cold;
+    save_para := race.save_para;
+    save_breath := race.save_breath;
+    save_spell := race.save_spell;
+    hitroll := UMax((level div 5)+50,100);
+    
+    node := race.abilities.head;
+    
+    while (node <> nil) do
+      begin
+      SET_LEARNED(100, GSkill(node.element));
+      
+      node := node.next;
+      end;
     end;
 
   if (max_skills = 0) then

@@ -5,6 +5,7 @@ interface
 uses
     SysUtils,
     mudsystem,
+    constants,
     strip,
     util,
     dtypes,
@@ -19,6 +20,7 @@ type
       str_bonus, con_bonus, dex_bonus, int_bonus, wis_bonus : integer;
       save_poison, save_cold, save_para, save_breath, save_spell : integer;
       max_skills, max_spells : integer;
+      abilities : GDLinkedList;
 
       constructor Create;
     end;
@@ -31,6 +33,9 @@ procedure load_races;
 function findRace(name : string) : GRace;
 
 implementation
+
+uses
+    skills;
 
 constructor GRace.Create;
 begin
@@ -49,8 +54,9 @@ begin
   save_para := 0;
   save_breath := 0;
   save_spell := 0;
-  max_skills := 0;
-  max_spells := 0;
+  max_skills := 10;
+  max_spells := 10;
+  abilities := GDLinkedList.Create();
 end;
 
 { Xenon 21/Feb/2001: revamped racefile format; made load_races() less error prone }
@@ -59,9 +65,11 @@ var t : TSearchRec;
     race : GRace;
     rf : GFileReader;
     full, lab, arg, str : string;  // lab short for label
+    sk : GSkill;
 begin
   rf := nil;
-  if (FindFirst('races\*.race',faAnyFile,t) = 0) then
+  
+  if (FindFirst('races' + PathDelimiter + '*.race', faAnyFile, t) = 0) then
     repeat
       race := GRace.Create;
 
@@ -148,6 +156,16 @@ begin
                     description := description + str + #13#10;
                 until (str = '~');
               end
+              else
+              if (lab = 'ABILITY') then
+                begin
+                sk := findSkill(arg);
+                
+                if (sk = nil) then
+                  bugreport('load_races()', 'race.pas', 'Could not find racial ability ' + arg)
+                else
+                  abilities.insertLast(sk);
+                end;
 
             until (rf.eof);
           except
@@ -178,6 +196,8 @@ begin
 
   if (race_list.getSize() = 0) then
     begin
+    bugreport('load_races()', 'race.pas', 'No races loaded, adding default one');
+    
     race := GRace.Create;
     race.name := 'Creature';
     race.node := race_list.insertLast(race);

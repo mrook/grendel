@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.14 2001/07/12 16:37:03 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.15 2001/07/23 15:53:47 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -285,9 +285,9 @@ begin
               inc(num);
 
               if (odd(num)) then
-                str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name, GSkill(g.skill).min_mana, g.perc]) + '    '
+                str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + '    '
               else
-                str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name, GSkill(g.skill).min_mana, g.perc]) + #13#10;
+                str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + #13#10;
               end;
           end;
 
@@ -340,9 +340,9 @@ begin
         inc(a);
       
         if (odd(a)) then
-          buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name, g.perc]) + '    '
+          buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + '    '
         else
-          buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name, g.perc]) + #13#10;
+          buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + #13#10;
         end;
 
       node := node.next;
