@@ -39,6 +39,7 @@ Grendel's TODO list with probable release date/version
 ! (0.4.0) bugtrack/report system (webbased)
 ! (0.4.0) racial abilities
 ! (0.4.0) modularized mud, pluggable objects (like timers, sets of commands, etc.)
+! (0.4.0) minimize to systray
 
 
 * (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
