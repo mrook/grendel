@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.20 2001/05/11 14:24:23 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.21 2001/06/06 18:59:54 xenon Exp $
 
 unit mudsystem;
 
@@ -412,6 +412,7 @@ var social : GSocial;
     chance : integer;
     ch, vict : GCharacter;
     obj : GObject;
+    t : integer;
 begin
   social := findSocial(cmd);
 
@@ -466,7 +467,7 @@ begin
     if vict=nil then            // victim not there, e.g. 'lick blablablabla'
       act(AT_SOCIAL,'They are not here.',false,ch,nil,nil,TO_CHAR)
     else
-      begin                     // victim, e.g. 'lick grimlord'
+    begin                     // victim, e.g. 'lick grimlord'
       if (length(char_found) = 0) then
         ch.sendBuffer(' ')
       else
@@ -476,34 +477,49 @@ begin
       if (length(vict_found) <> 0) then
         act(AT_SOCIAL,vict_found,false,ch,nil,vict,TO_VICT);
 
-      if ((not ch.IS_NPC)) and (vict.IS_NPC) and
-       (vict.IS_AWAKE) then
+      if ((not ch.IS_NPC)) and (vict.IS_NPC) and (vict.IS_AWAKE) then
+      begin
+        if (ch <> vict) then
         begin
-        chance:=random(10);
-        case chance of
-          1,2,3,4,5,6:begin
-                      if (length(vict_found) <> 0) then
-                        act(AT_SOCIAL,vict_found,false,vict,nil,ch,TO_VICT);
-                      if (length(others_found) <> 0) then
-                        act(AT_SOCIAL,others_found,false,vict,nil,ch,TO_NOTVICT);
-                      if (length(char_found) = 0) then
-                        ch.sendBuffer(' ')
-                      else
-                        act(AT_SOCIAL,char_found,false,vict,nil,ch,TO_CHAR);
-                      end;
-                  7,8:begin     // Xenon (19/Feb/2001) : kinda odd, this one ;)
-                      interpret(vict,'say Cut it out!');
-                      interpret(vict,'sigh');
-                      end;
+          t := GNPC(vict).context.findSymbol('onEmoteTarget');
+
+          if (t <> -1) then
+          begin
+            GNPC(vict).context.push(name);
+            GNPC(vict).context.push(integer(ch));   // actor
+            GNPC(vict).context.push(integer(vict)); // vict
+            GNPC(vict).context.setEntryPoint(t);
+            GNPC(vict).context.Execute;
+          end
           else
-                      begin
-                      act(AT_SOCIAL,'$n slaps you.',false,vict,nil,ch,TO_VICT);
-                      act(AT_SOCIAL,'$n slaps $N.',false,vict,nil,ch,TO_NOTVICT);
-                      act(AT_SOCIAL,'You slap $N.',false,vict,nil,ch,TO_CHAR);
-                      end;
-        end;
+          begin
+            chance:=random(10);
+            case chance of
+              1,2,3,4,5,6:begin
+                          if (length(vict_found) <> 0) then
+                            act(AT_SOCIAL,vict_found,false,vict,nil,ch,TO_VICT);
+                          if (length(others_found) <> 0) then
+                            act(AT_SOCIAL,others_found,false,vict,nil,ch,TO_NOTVICT);
+                          if (length(char_found) = 0) then
+                            ch.sendBuffer(' ')
+                          else
+                            act(AT_SOCIAL,char_found,false,vict,nil,ch,TO_CHAR);
+                          end;
+                      7,8:begin     // Xenon (19/Feb/2001) : kinda odd, this one ;)
+                          interpret(vict,'say Cut it out!');
+                          interpret(vict,'sigh');
+                          end;
+              else
+                          begin
+                          act(AT_SOCIAL,'$n slaps you.',false,vict,nil,ch,TO_VICT);
+                          act(AT_SOCIAL,'$n slaps $N.',false,vict,nil,ch,TO_NOTVICT);
+                          act(AT_SOCIAL,'You slap $N.',false,vict,nil,ch,TO_CHAR);
+                          end;
+            end;
+          end;
         end;
       end;
+    end;
     end;
 
   checkSocial := true;
