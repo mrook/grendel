@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.8 2003/10/22 13:12:37 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.9 2003/10/23 08:15:30 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -227,6 +227,9 @@ end;
 
 procedure GPlayerConnection.OnCloseEvent();
 begin
+	if (state = CON_LOGGED_OUT) then
+		dec(system_info.user_cur)
+	else
 	if (not ch.CHAR_DIED) and ((state = CON_PLAYING) or (state = CON_EDITING)) then
 		begin
 		writeConsole('(' + IntToStr(socket.getDescriptor) + ') ' + ch.name + ' has lost the link');
@@ -239,9 +242,6 @@ begin
 		act(AT_REPORT,'$n has lost $s link.',false,ch,nil,nil,TO_ROOM);
 		SET_BIT(ch.flags,PLR_LINKLESS);
 		end
-	else
-	if (state = CON_LOGGED_OUT) then
-		dec(system_info.user_cur)
 	else
 		begin
 		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
@@ -1108,7 +1108,7 @@ begin
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
     begin
-    state := CON_LOGGED_OUT;
+    conn.state := CON_LOGGED_OUT;
 
     try
       conn.Terminate();
