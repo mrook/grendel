@@ -582,3 +582,4 @@ begin
   else
     spell.CustomDictionary := 'custom.dic';
 end.
+

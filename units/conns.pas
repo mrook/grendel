@@ -59,6 +59,8 @@ type
 var
    connection_list : GDLinkedList;
 
+function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
+
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);
 
@@ -447,7 +449,6 @@ begin
 
   send(#13#10'(C)ontinue, (R)efresh, (B)ack, (Q)uit: ');
 end;
-
 
 function playername(from_ch, to_ch : GCharacter) : string;
 begin

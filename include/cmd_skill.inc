@@ -234,32 +234,87 @@ begin
     end;
 end;
 
-procedure do_spells(ch:GCharacter;param:string);
-var a:integer;
-begin
-  with ch do
-    begin
-    act(AT_REPORT,'Spells learned:'#13#10,false,ch,nil,nil,TO_CHAR);
-    for a:=0 to MAX_SKILLS-1 do
-     if learned[a]>0 then
-      with skill_table[a] do
-       if skill_type=SKILL_SPELL then
-        act(AT_REPORT,pad_integer(min_mana,2)+'Ma    '+name+' ('+inttostr(learned[a])+'%)',false,ch,nil,nil,TO_CHAR);
+procedure do_spells(ch : GCharacter; param : string);
+var
+  a, targ : integer;
+  buf : string;
+  arr : array[TARGET_OFF_ATTACK..TARGET_OBJECT] of
+    record
+      num : integer;
+      str : string;
     end;
+begin
+  for a := TARGET_OFF_ATTACK to TARGET_OBJECT do
+  begin
+    arr[a].num := 0;
+    arr[a].str := '';
+  end;
+
+  arr[TARGET_OFF_ATTACK].str :=  add_chars(88, '$A$3--- $B$7[Offensive spells]$A$3 -', '-') + '$A$7'#13#10;
+  arr[TARGET_OFF_AREA].str := add_chars(88, '$A$3--- $B$7[Offensive area spells]$A$3 -', '-') + '$A$7'#13#10;
+  arr[TARGET_DEF_SELF].str := add_chars(88, '$A$3--- $B$7[Self-only spells]$A$3 -', '-') + '$A$7'#13#10;
+  arr[TARGET_DEF_SINGLE].str := add_chars(88, '$A$3--- $B$7[Defensive spells]$A$3 -', '-') + '$A$7'#13#10;
+  arr[TARGET_DEF_AREA].str := add_chars(88, '$A$3--- $B$7[Defensive area spells]$A$3 -', '-') + '$A$7'#13#10;
+  arr[TARGET_DEF_WORLD].str := add_chars(88, '$A$3--- $B$7[World spells]$A$3 -', '-') + '$A$7'#13#10;
+  arr[TARGET_OBJECT].str := add_chars(88, '$A$3--- $B$7[Object spells]$A$3 -', '-') + '$A$7'#13#10;
+  
+  with ch do
+  begin
+    for a := 0 to (MAX_SKILLS - 1) do
+      if (learned[a] > 0) then
+        with skill_table[a] do
+          if (skill_type = SKILL_SPELL) then
+            for targ := TARGET_OFF_ATTACK to TARGET_OBJECT do
+            begin
+              if (target = targ) then
+                with arr[targ] do
+                begin
+                  inc(num);
+                  if odd(num) then
+                    str := str + Format('%25s %3dMa %3d%%', [name, min_mana, learned[a]]) + '    '
+                  else
+                    str := str + Format('%-25s %3dMa %3d%%', [name, min_mana, learned[a]]) + #13#10;
+                end;
+            end;
+  end;
+  buf := act_string(add_chars(80, '$A$3---- Known spells -', '-') + #13#10 + #13#10, ch, nil, nil, nil);
+
+  for a := TARGET_OFF_ATTACK to TARGET_OBJECT do
+  begin
+    if (arr[a].num <> 0) then
+    begin
+      if odd(arr[a].num) then
+        buf := buf + act_string(arr[a].str + #13#10#13#10, ch, nil, nil, nil)
+      else
+        buf := buf + act_string(arr[a].str + #13#10, ch, nil, nil, nil);
+    end;
+  end;
+
+  delete(buf, length(buf) - 2, 2);
+  ch.sendPager(buf);
 end;
 
-procedure do_skills(ch:GCharacter;param:string);
-var a:integer;
+procedure do_skills(ch : GCharacter; param : string);
+var
+  a : integer;
+  buf : string;
 begin
+  buf := '';
   with ch do
-    begin
-    act(AT_REPORT,'Skills learned:'#13#10,false,ch,nil,nil,TO_CHAR);
-    for a:=0 to MAX_SKILLS-1 do
-     if learned[a]>0 then
-      with skill_table[a] do
-       if skill_type<>SKILL_SPELL then
-        act(AT_REPORT,'        '+name+' ('+inttostr(learned[a])+'%)',false,ch,nil,nil,TO_CHAR);
-    end;
+  begin
+    ch.sendPager(act_string(add_chars(80, '$A$3---- Known skills -', '-') + '$A$7'#13#10#13#10, ch, nil, nil, nil));
+    for a:=0 to (MAX_SKILLS - 1) do
+      if (learned[a] > 0) then
+        with skill_table[a] do
+          if (skill_type <> SKILL_SPELL) then
+          begin
+            if odd(a) then
+              buf := buf + Format('%25s  %3d%%', [name, learned[a]]) + '    '
+            else
+              buf := buf + Format('%-25s  %3d%%', [name, learned[a]]) + #13#10;
+          end;
+    ch.sendPager(act_string(buf, ch, nil, nil, nil));
+  end;
 end;
 
 procedure do_learn(ch:GCharacter;param:string);
