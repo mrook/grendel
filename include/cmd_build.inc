@@ -1377,3 +1377,48 @@ begin
   interpret(ch,headings[dir]);
 end;
 
+{ Re-added area assign - Nemesis }
+procedure do_aassign(ch:GCharacter;param:string);
+var vict : GCharacter;
+    area : GArea;
+    sub : string;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: AASSIGN <player> <filename>'#13#10#13#10);
+    ch.sendBuffer('Assigns an area to a player for online construction.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+  vict := findCharWorld(ch,sub);
+
+  if (vict = nil) or (vict.IS_NPC) then
+    ch.sendBuffer('That player cannot be found.'#13#10)
+  else
+  if (vict.level < LEVEL_BUILD) then
+    ch.sendBuffer('That character has not attained the proper level.'#13#10)
+  else
+    begin
+    area := findArea(param);
+
+    if (area <> nil) then
+      begin
+      act(AT_REPORT,'Area ' + param + ' assigned to $N.',false,ch,nil,vict,TO_CHAR);
+
+      if (vict <> ch) then
+        act(AT_REPORT,ch.name^ + ' has assigned ' + param + ' to you.',false,vict,nil,ch,TO_CHAR);
+
+      vict.player^.area := area;
+      vict.player^.area_fname := param;
+      vict.player^.r_lo := area.r_lo;
+      vict.player^.r_hi := area.r_hi;
+      vict.player^.m_lo := area.m_lo;
+      vict.player^.m_hi := area.m_hi;
+      vict.player^.o_lo := area.o_lo;
+      vict.player^.o_hi := area.o_hi;
+      end
+    else
+      ch.sendBuffer('That area cannot be found.'#13#10);
+    end;
+end;

@@ -218,6 +218,8 @@ var
 
 procedure load_areas;
 
+function findArea(fname : string) : GArea;
+
 function findRoom(vnum : integer) : GRoom;
 function findLocation(ch : pointer; param : string) : GRoom;
 function findNPCIndex(vnum : integer) : GNPCIndex;
@@ -1583,6 +1585,29 @@ begin
                       damage(conn.ch,conn.ch,25,TYPE_SILENT);
                       end;
       end;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+{ 24/02/2001 - Nemesis }
+function findArea(fname : string) : GArea;
+var node : GListNode;
+    area : GArea;
+begin
+  findArea := nil;
+
+  node := area_list.head;
+
+  while (node <> nil) do
+    begin
+    area := GArea(node.element);
+
+    if (area.fname = fname) then
+      begin
+      findArea := area;
+      exit;
       end;
 
     node := node.next;
