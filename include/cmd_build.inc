@@ -19,7 +19,7 @@ const exit_flags:array[0..12] of string = ('isdoor','closed','locked',
 {RSTAT : return data about a room}
 procedure do_rstat(ch : GCharacter; param : string);
 var
-	buf, buf1, arg : string;
+  buf, buf1, arg, buf_flags : string;
   location : GRoom;
   location_node : GListNode;
   obj_data : GObject;
@@ -48,7 +48,7 @@ begin
 
   buf1 := '';
   buf := Format('Name: %s.' + #13#10 + 'Area: %s.' + #13#10 + 'Author: %s' + #13#10#13#10,
-                 [location.name, location.area.name, location.area.author]);
+                 [location.name^, location.area.name, location.area.author]);
 
   buf1 := buf1 + buf;
 
@@ -110,26 +110,37 @@ begin
     inc(door);
 
     if (exit_data.flags = 0) then
-      buf := 'none'
+      buf_flags := 'none'
     else
       begin
-      buf := '';
+      buf_flags := '';
       for a:=0 to High(exit_flags) do
        if IS_SET(exit_data.flags,1 shl a) then
-        buf := buf + exit_flags[a] + ' ';
+        buf_flags := buf_flags + exit_flags[a] + ' ';
       end;
 
-    buf := Format('Door: %d.  To: %d.  Key: %d.  Exit flags: [%s].' +
+(*    buf := Format('Door: %d.  To: %d.  Key: %d.  Exit flags: [%s].', +
     							 #13#10 + 'Keyword: "%s".',
                   [door,
                   exit_data.to_room.vnum,
                   exit_data.key,
-                  buf,
-                  exit_data.keywords^]);
+                  buf_flags,
+                  exit_data.keywords^]);*)
 
-    buf1 := buf1 + buf;
-    buf1 := buf1 + #13#10;
+    buf := Format('Door: %d.  To: %d.  Key: %d.  Exit flags: [%s].',
+                  [door,
+                  exit_data.to_room.vnum,
+                  exit_data.key,
+                  buf_flags]);
 
+    buf1 := buf1 + buf + #13#10;
+
+    if (exit_data.keywords <> nil) then
+    begin
+      buf := Format('Keyword: "%s".', [exit_data.keywords^]);
+      buf1 := buf1 + buf + #13#10;
+    end;
+                  
     exit_node := exit_node.next;
   end;
 
@@ -2145,5 +2156,314 @@ begin
 
   act(AT_WHITE, 'Area '+area.fname+' reset.',false,ch,nil,nil,TO_CHAR);
   area.reset();
+end;
+
+procedure do_map(ch : GCharacter; param : string);
+{
+
+^
+|
+y
+
+x ->
+
+lower left corner : (1, 1)
+
+}
+         
+type
+  TPos = record
+           x, y : integer;
+         end;
+  TMapString = string[10];
+  TGrid = record
+            curpos : TPos;
+            grid : array[1..(MAP_SIZE_X * 2 + 1), 1..(MAP_SIZE_Y * 2)] of TMapString;
+          end;
+         
+const
+  MAP_EXIT_N_S : TMapString = '|';
+  MAP_EXIT_W_E : TMapString = '-';
+  MAP_NOT_CONNECTED : TMapString = ' ';
+  MAP_ROOM_EXIST : TMapString = '*';
+  MAP_ROOM_NOT_EXIST : TMapString = '$B$0.$A$7';
+  MAP_EMPTY : TMapString = ' ';
+  MAP_CHAR_POSITION : TMapString = '$B$6@$A$7';
+  MAP_NIL : TMapString = ' ';
+  MAP_UP : TMapString = '$B$6U$A$7';
+  MAP_DOWN : TMapString = '$B$6D$A$7';
+  MAP_NPC : TMapString = '$B$6*$A$7';
+  MAP_PC : TMapString = '$B$4*$A$7';
+  MAP_DOOR_CLOSED : TMapString = '$B$4+$A$7';
+  MAP_DOOR_OPEN : TMapString = '$B$1+$A$7';
+  MAP_ROOM = -1;
+  
+function build_grid() : TGrid;
+var
+  gr : TGrid;
+  xpos, ypos : integer;
+begin
+  fillchar(gr.grid, sizeof(gr.grid), 0);
+
+  for ypos := 1 to (MAP_SIZE_Y * 2) do
+  begin
+    for xpos := 1 to (MAP_SIZE_X) do
+    begin
+      if (odd(ypos)) then
+      begin
+        gr.grid[(xpos * 2), ypos] := MAP_ROOM_NOT_EXIST;
+        gr.grid[(xpos * 2) + 1, ypos] := MAP_EMPTY;
+      end
+      else
+      begin
+        gr.grid[(xpos * 2), ypos] := MAP_EMPTY;
+        gr.grid[(xpos * 2) + 1, ypos] := MAP_EMPTY;
+      end;
+    end;
+  end;
+  
+  gr.curpos.x := (MAP_SIZE_X div 2) + 1;
+  gr.curpos.y := (MAP_SIZE_Y div 2) + 1;
+  
+  build_grid := gr;
+end;
+         
+procedure grid_insert(var gr : TGrid; dir : integer; what : TMapString);
+var
+  hor, vert : integer;
+  ch : TMapString;
+begin
+  hor := 0;
+  vert := 0;
+  ch := '';
+
+  if (what <> MAP_NIL) then
+    ch := what;
+  
+  case dir of
+    0:
+      begin
+        ch := what;
+      end;
+    DIR_NORTH:
+      begin
+        if (what = MAP_NIL) then
+          ch := MAP_EXIT_N_S;
+        vert := -1;
+      end;
+    DIR_SOUTH:
+      begin
+        if (what = MAP_NIL) then
+          ch := MAP_EXIT_N_S;
+        vert := 1;
+      end;
+    DIR_WEST:
+      begin
+        if (what = MAP_NIL) then
+          ch := MAP_EXIT_W_E;
+        hor := -1;
+      end;
+    DIR_EAST:
+      begin
+        if (what = MAP_NIL) then
+          ch := MAP_EXIT_W_E;
+        hor := 1;
+      end;
+  end;
+  with gr do
+    grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] := ch;
+end;
+
+function been_there(var gr : TGrid; dir : integer) : boolean;
+var
+  hor, vert : integer;
+  ch : TMapString;
+begin
+  hor := 0;
+  vert := 0;
+  been_there := false;
+
+  case dir of
+    DIR_NORTH:
+      begin
+        ch := MAP_EXIT_N_S;
+        vert := -1;
+      end;
+    DIR_SOUTH:
+      begin
+        ch := MAP_EXIT_N_S;
+        vert := 1;
+      end;
+    DIR_WEST:
+      begin
+        ch := MAP_EXIT_W_E;
+        hor := -1;
+      end;
+    DIR_EAST:
+      begin
+        ch := MAP_EXIT_W_E;
+        hor := 1;
+      end
+{    else
+      begin
+        write_console('None of expected dirs found.');
+        exit;
+      end;}
+  end;
+  with gr do
+    if (grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] = ch) or
+       (grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] = MAP_DOOR_CLOSED) or
+       (grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] = MAP_DOOR_OPEN) then
+      been_there := true
+    else
+      been_there := false;
+end;
+
+procedure build_map(var gr : TGrid; var room : GRoom);
+var
+  new_room : GRoom;
+  node : GListNode;
+  vict : GCharacter;
+  pcs, npcs : integer;
+  pexit : GExit;
+  direction : integer;
+begin
+  if (room = nil) then
+    exit;
+
+  pcs := 0;
+  npcs := 0;
+  
+  grid_insert(gr, 0, MAP_ROOM_EXIST);
+
+  node := room.chars.head;
+  while (node <> nil) do
+  begin
+    vict := node.element;
+
+    if (vict.IS_NPC()) then
+      inc(npcs)
+    else
+      inc(pcs);
+    
+    node := node.next;
+  end;
+
+  if (npcs > 0) then
+    grid_insert(gr, 0, MAP_NPC);
+
+  if (pcs > 0) then
+    grid_insert(gr, 0, MAP_PC);
+  
+  for direction := DIR_NORTH to DIR_UP do
+  begin
+    if (direction = DIR_NORTH) and not(gr.curpos.y > 1) then
+      continue;
+    if (direction = DIR_EAST) and not(gr.curpos.x < MAP_SIZE_X) then
+      continue;
+    if (direction = DIR_WEST) and not(gr.curpos.x > 1) then
+      continue;
+    if (direction = DIR_SOUTH) and not(gr.curpos.y < MAP_SIZE_Y) then
+      continue;
+
+    if (room.isConnectedTo(direction) <> nil) then
+    begin
+      if (direction = DIR_UP) then
+      begin
+        grid_insert(gr, 0, MAP_UP);
+        continue;
+      end;
+      if (direction = DIR_DOWN) then
+      begin
+        grid_insert(gr, 0, MAP_DOWN);
+        continue;
+      end;
+        
+      if not(been_there(gr, direction)) then
+      begin
+        pexit := room.findExit(direction);
+        if (IS_SET(pexit.flags, EX_ISDOOR)) then
+          if (IS_SET(pexit.flags, EX_CLOSED)) then
+            grid_insert(gr, direction, MAP_DOOR_CLOSED)
+          else
+            grid_insert(gr, direction, MAP_DOOR_OPEN)
+        else
+          grid_insert(gr, direction, MAP_NIL);
+
+        if (direction = DIR_NORTH) then
+          dec(gr.curpos.y);
+        if (direction = DIR_EAST) then
+          inc(gr.curpos.x);
+        if (direction = DIR_WEST) then
+          dec(gr.curpos.x);
+        if (direction = DIR_SOUTH) then
+          inc(gr.curpos.y);
+          
+        new_room := room.isConnectedTo(direction);
+        build_map(gr, new_room);
+
+        if (direction = DIR_NORTH) then
+          inc(gr.curpos.y);
+        if (direction = DIR_EAST) then
+          dec(gr.curpos.x);
+        if (direction = DIR_WEST) then
+          inc(gr.curpos.x);
+        if (direction = DIR_SOUTH) then
+          dec(gr.curpos.y);
+      end;
+    end;
+  end;
+end;
+
+procedure show_legenda();
+var
+  buf : string;
+begin
+  buf := Format('Legenda:' + #13#10 + #13#10 +
+                '  %s %s    Passage' + #13#10 +
+                '  %s      Open door' + #13#10 +
+                '  %s      Closed door' + #13#10 +
+                '  %s      You' + #13#10 +
+                '  %s      Room with a mob' + #13#10 +
+                '  %s      Room with a player' + #13#10 +
+                '  %s      Up exit' + #13#10 +
+                '  %s      Down exit',
+                [MAP_EXIT_N_S, MAP_EXIT_W_E,
+                 MAP_DOOR_OPEN, MAP_DOOR_CLOSED,
+                 MAP_CHAR_POSITION, MAP_NPC, MAP_PC,
+                 MAP_UP, MAP_DOWN]);
+  act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+end;
+
+var
+  buf : string;
+  i : integer;
+  gr : TGrid;
+  xpos, ypos : integer;
+begin
+  if length(param) <> 0 then
+  begin
+    show_legenda();
+    exit;
+  end;
+
+  gr := build_grid();
+
+  gr.curpos.x := (MAP_SIZE_X div 2) + 1;
+  gr.curpos.y := (MAP_SIZE_Y div 2) + 1;
+  build_map(gr, ch.room);
+  gr.curpos.x := (MAP_SIZE_X div 2) + 1;
+  gr.curpos.y := (MAP_SIZE_Y div 2) + 1;
+  grid_insert(gr, 0, MAP_CHAR_POSITION);
+
+  for ypos := 1 to (MAP_SIZE_Y * 2 - 1) do
+  begin
+    buf := '';
+    for xpos := 1 to (MAP_SIZE_X * 2) do
+    begin
+      buf := buf + gr.grid[xpos, ypos];
+    end;
+    act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+  end;
 end;
 
