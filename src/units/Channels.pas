@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.3 2004/02/27 22:24:20 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.4 2004/03/13 15:50:37 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -902,6 +902,8 @@ begin
 end;
 
 procedure initChannels();
+var
+	console : GConsole;
 begin
   channellist := GDLinkedList.Create();
   channels_loaded := false;
@@ -909,20 +911,21 @@ begin
   suggestHistory := GDLinkedList.Create();
   prayHistory := GDLinkedList.Create();
   
-  registerConsoleDriver(GConsoleChannel.Create());
+  console := GConsole.Create();
+  console.attachWriter(GConsoleChannel.Create());
 end;
 
 procedure cleanupChannels();
 begin
   channels_loaded := false;
 
-  suggestHistory.clean();
+  suggestHistory.clear();
   suggestHistory.Free();
 
-  prayHistory.clean();
+  prayHistory.clear();
   prayHistory.Free();
 
-  channellist.clean();
+  channellist.clear();
   channellist.Free();
 end;
 

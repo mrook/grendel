@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.12 2004/03/11 17:18:47 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.13 2004/03/13 15:50:37 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -210,14 +210,10 @@ begin
 	writeConsole('Cleaning events...');
 	cleanupEvents();
 
-	str_hash.Free();
-	
-	listenSockets.clean();
+	listenSockets.clear();
 	listenSockets.Free();
 
 	writeConsole('Cleanup complete.');
-
-	cleanupConsole();
 
 	{$IFDEF WIN32}      
 		{$IFNDEF CONSOLEBUILD}
@@ -439,10 +435,6 @@ begin
     // give operator/logfile a message
     writeConsole('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
 
-    { close logfile }
-    if (TTextRec(logfile).mode = fmOutput) then
-      CloseFile(LogFile);
-      
     boot_type := BOOTTYPE_REBOOT;
     end;
 
@@ -469,8 +461,6 @@ procedure bootServer();
 var
   s : string;
 begin
-	initConsole();
-
 	writeConsole(version_info + ', ' + version_number + '.');
 	writeConsole(version_copyright + '.');
 

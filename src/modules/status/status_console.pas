@@ -55,6 +55,8 @@ begin
 end;
 
 procedure GConsoleModule.registerModule();
+var
+	console : GConsole;
 begin
 	Application.Title := 'Grendel ' + version_number;
 
@@ -83,14 +85,18 @@ begin
 
   registerMenuItem('Show console', showConsoleProc);
 
-  fetchConsoleHistory(0, consoleDriver);
-  
-  registerConsoleDriver(consoleDriver);
+  console := GConsole.Create();
+
+  console.fetchHistory(consoleDriver);  
+  console.attachWriter(consoleDriver);
 end;
 
 procedure GConsoleModule.unregisterModule();
+var
+	console : GConsole;
 begin
-  unregisterConsoleDriver(consoleDriver);
+  console := GConsole.Create();
+  console.detachWriter(consoleDriver);
 
   FreeAndNil(consoleMemo);
 	FreeAndNil(consoleFont);
