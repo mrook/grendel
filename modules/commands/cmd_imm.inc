@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.17 2002/09/16 21:01:46 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.18 2002/10/13 18:58:47 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -2270,6 +2270,7 @@ begin
     ch.sendBuffer('This is a command to test the pathfinding functions.'#13#10);
     ch.sendBuffer('Supply a vnum as destination, and to optional keyword GO to'#13#10);
     ch.sendBuffer('follow a path if one is found.'#13#10);
+    ch.sendBuffer(#13#10'IMPORTANT: don''t forget you need to create areacoordinates first (using immcommand ''coordgen'').'#13#10);
     exit;
   end;
   
@@ -2296,9 +2297,9 @@ begin
     bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)');
     exit;
   end;
-  
+
   ch.sendBuffer(Format('Distance: %g'#13#10, [goalDistEstimate(ch.room, goalroom)]));
-  
+
   found := mpFindPath(ch.room, goalroom, dirs);
   if (found) then
   begin
