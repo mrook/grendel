@@ -304,7 +304,7 @@ begin
 
     if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
      ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
-      (conn.idle > IDLE_PLAYING)) and (not conn.ch.IS_IMMORT) then
+      (conn.idle > IDLE_PLAYING)) and ((conn.ch <> nil) and (not conn.ch.IS_IMMORT)) then
        begin
        conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
        conn.thread.terminate;
