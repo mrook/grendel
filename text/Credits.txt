@@ -11,9 +11,10 @@ Additional code by Oscar Martin and Hemko de Visser.
 Additional documentation and FAQs by Jeremiah Davis.
 
 
-Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
 Uses the Delphi Implementation of MD5 Algorithm (c) Matthias Fichtner.
-Uses MemCheck (c) Jean Marc Eber & Vincent Mahon.
+Uses the MemCheck unit (c) Jean Marc Eber & Vincent Mahon.
+Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
+Uses a modified version of the AnsiIO unit (c) Gayle Davis.
 Uses parts of the Delphi Fundamentals library (c) David Butler.
 Uses parts of the FastStrings library (c) Peter Morris.
 
