@@ -21,13 +21,22 @@ this update from the Microsoft site:
   - GMC, or Grendel MUD C, is a replacement for the original (limited)
     mobprogs. It's a fully functional languaged based on C, which
     runs in Grendel using virtual machinecode - very speedy & flexible
+  - Modularized mud: most functionality has been place inside seperate
+    modules which can be loaded/unloaded at will - this opens up
+    the possibility of arbitrary code that can be loaded even
+    while your server is running!
+  - Linux support: Grendel now runs on Linux, using the new Kylix
+    compiler from Borland (the Linux version of Delphi). 
+    Note: this is entirely experimental, some features are missing
+    (like copyover), and we will not provide any binaries
   - Copyover system: Grendel can respawn itself without dumping all the
     connections, e.g. users stay online during the reboot process,
     more info below
   - IPv6 support: Grendel natively supports the new internet protocol,
-    however, only on NT4/2000 machines that have the MSRIPv6 preview
-    from Microsoft installed. Don't worry if you don't have this,
-    Grendel will auto-detect your settings and use them appropiately
+    however, on all Linux machines with a IPv6 enabled kernel, and on 
+    NT4/2000 machines that have the MSRIPv6 preview from Microsoft 
+    installed. Don't worry if you don't have this, Grendel will auto-detect 
+    your settings and use them appropiately
   - Way better OOP design: greatly increases stability, looks better,
     works better
   - Old code removed: no more pchars, thus no more buffer overflows,
