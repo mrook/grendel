@@ -15,7 +15,7 @@
 				<email>nemesis@grendelproject.nl</email>
 			</author>
 		</authorgroup>
-		<releaseinfo>$Id: manual.xml,v 1.1 2004/04/06 22:19:26 ***REMOVED*** Exp $</releaseinfo>
+		<releaseinfo>$Id: manual.xml,v 1.2 2004/04/19 22:24:05 ***REMOVED*** Exp $</releaseinfo>
 	</articleinfo>
 	<section id="intro">
 		<title>Introduction</title>
@@ -223,15 +223,15 @@
 			installation of Grendel. Administrators are allowed to remove and add to their command-set as they see fit.
 			</para>
 		</note>
-		<section id="apropos">
+		<section id="commands_apropos">
 			<title>APROPOS</title>
 			<cmdsynopsis>
 				<command>apropos</command>
 				<arg choice="req"><replaceable>text</replaceable></arg>
 			</cmdsynopsis>
 			<para>
-			APROPOS searches through all helpfiles for '<replaceable>text</replaceable>' and returns
-			a list of matching entries.
+			<literal>APROPOS <replaceable>text</replaceable></literal> searches through all helpfiles for 
+			<replaceable>text</replaceable> and returns list of matching entries.
 			</para>
 		</section>
 		<section id="damage">
@@ -278,8 +278,33 @@ You -&lt; { { : : : DISINTEGRATE : : : } } &gt;- a bit with your GODLY punch!!!!
 			</cmdsynopsis>
 
 			<para>
-			RACEINFO without any parameters gives a list of races available to players.
-			RACEINFO '<replaceable>race</replaceable>' will give information on that particular race.
+			<literal>RACEINFO</literal> (without any parameters gives) a list of races available to players.
+			<literal>RACEINFO <replaceable>race</replaceable></literal> will give information on that particular race.
+			</para>
+		</section>
+		<section id="shutdown">
+			<title>SHUTDOWN</title>
+
+			<cmdsynopsis>
+				<command>shutdown</command>
+				<group choice="req">
+					<arg>stop</arg>
+					<arg>halt</arg>
+					<arg>reboot</arg>
+					<arg>copyover</arg>
+				</group>
+				<group choice="req">
+					<arg>now</arg>
+					<arg><replaceable>delay</replaceable></arg>
+				</group>
+			</cmdsynopsis>
+
+			<para>
+			<literal>SHUTDOWN</literal> starts a server shutdown. The parameters <literal>halt</literal>, 
+			<literal>reboot</literal> and <literal>copyover</literal> start a full shutdown,
+			reboot and copyover (hot reboot), respectively. The second parameter indicates
+			the time (in seconds) to wait before starting the shutdown.
+			<literal>SHUTDOWN stop</literal> stops any existing shutdown timer.
 			</para>
 		</section>
 	</section>
@@ -619,6 +644,17 @@ exports
 			file that is shipped with Grendel). Attentive readers will notice that the
 			format of the area is quite similar to the format used in the SMAUG codebase.
 			</para>
+			<para>
+			A Grendel area file consists of several sections: <literal>#AREA</literal>, 
+			<literal>#ROOMS</literal>, <literal>#OBJECTS</literal>, <literal>#MOBILES</literal> 
+			and <literal>#RESETS</literal>. Of these, only the <literal>#AREA</literal> section is
+			required.</para>
+			<note>
+			<para>
+			An integrated GUI area builder is currently in development, and a prototype can be found in the
+			(highly experimental) Grendel Management Console.
+			</para>
+			</note>
 			<note>
 			<para>
 			Since a switch to an XML area format is planned, this section is subject to change.
@@ -627,7 +663,7 @@ exports
 			<para>
 			<example>
 				<title>An example area</title>
-<screen>#RANGES
+<programlisting linenumbering='numbered'>#RANGES
 100 199 100 199 100 199                                                         <lineannotation>Hints for min/max rooms/mobiles/objects</lineannotation>
 
 #AREA
@@ -635,8 +671,7 @@ Central Ruia                                                                    
 Grimlord                                                                        <lineannotation>Name of the owner/builder</lineannotation>
 A fresh wind blows through your hair.                                           <lineannotation>Message to display when area resets</lineannotation>
 35                                                                              <lineannotation>Number of gamerounds (roughly 75 secs) between resets</lineannotation>
-8 18 0                                                                          <lineannotation>Temp. multiplier, avg. temperature, flags 
-                                                                                (see: <xref linkend="table.areaflags"/>)</lineannotation>
+8 18 0                                                                          <lineannotation>Temp. multiplier, avg. temperature, flags (see: <xref linkend="table.areaflags"/>)</lineannotation>
 
 #ROOMS
 #100                                                                            <lineannotation>Number (vnum) of room</lineannotation>
@@ -647,11 +682,11 @@ To the south, the road to Southaven. To the north, the road to Gailen and
 Castle Pakthan. To the east, you see the Warriors School.
 ~                                                                               <lineannotation>Separator</lineannotation>
 0 0 500 3
-D 101 3 0 0
+D 101 3 0 0                                                                     <lineannotation>An exit to room #101, direction (see: <xref linkend="table.directions"/>), flags (see: (<xref linkend="table.exitflags"/>)</lineannotation>
 E sign                                                                          <lineannotation>Extra description "sign"</lineannotation>
 The sign says 'Southaven south'.                                                <lineannotation>Multiline extra description</lineannotation>
 ~                                                                               <lineannotation>Separator</lineannotation>
-S
+S                                                                               <lineannotation>End of room #100</lineannotation>
 #101
 Southaven Road
 This road is one of the main roads leading through Ruia. It takes you
@@ -675,22 +710,22 @@ D 101 1 0 0
 S
 #END
 
-#MOBILES
-#100
-Syra
-Syra is here
-Syra, protectress of Southaven, patrols for danger
-800 1
-15 521 0 0 0
-skill: Burning Hands
+#MOBILES                                                                        <lineannotation>Mobiles (NPC's) section</lineannotation>
+#100                                                                            <lineannotation>Number (vnum) of NPC</lineannotation>
+Syra                                                                            <lineannotation>Name</lineannotation>
+Syra is here                                                                    <lineannotation>Short description</lineannotation>
+Syra, protectress of Southaven, patrols for danger                              <lineannotation>Long description</lineannotation>
+800 1                                                                           <lineannotation>Level, sex (see <xref linkend="table.sex"/>)</lineannotation>
+15 521 0 0 0                                                                    <lineannotation>Armour, flags (see <xref linkend="table.npcflags"/>), gold carried, height, weight</lineannotation>
+skill: Burning Hands                                                            <lineannotation>NPC has skill "Burning Hands"</lineannotation>
 skill: Magic Missile
 skill: Slashing Weapons
 skill: Second Attack
-> give.cod
+> give.cod                                                                      <lineannotation>Use GMC program "give.cod"</lineannotation>
 #END
 
 #OBJECTS
-#100
+#100                                                                          
 a fountain
 a sparkling fountain
 a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
@@ -713,13 +748,88 @@ G 101 100 0
 O 100 101 1
 #END
 
-$</screen>
+$</programlisting>
+			</example>
+			</para>
+		</section>
+		<section id="building_notes">
+			<title>Some notes on NPC's</title>
+			<para>
+			Non-Player Characters (NPC's) are the artificially intelligent (sic) population,
+			possibly even the core, of a mud. They are sometimes called "Mobiles", which, apart from the
+			unfortunate name collision with certain wireless devices, wrongfully suggests that NPC's can't
+			be forced to stay in one place.
+			</para>
+			<para>
+			NPC's can be quite a challenge for your players, so try to be careful when tinkering with the 
+			various values that define a NPC: balance is everything.
+			</para>
+		</section>
+		<section id="building_install">
+			<title>Installing a new area</title>
+			<para>
+			Start a text editor (such as Notepad), and open the file <literal>areas\area.list</literal>. 
+			Add a line with the filename of your new area to the top of the file, save the file, and 
+			reboot (or copyover) the server.
+			</para>
+		</section>
+		<section id="building_ansi">
+			<title>Using ANSI color codes</title>
+			<para>
+			Grendel supports the formatting and sending of ANSI (color) control codes.
+			This can be very helpful, especially when constructing objects, where
+			the intensity of the coloring usually determines the value and worth of the object.
+			</para>
+			<para>
+			<example>
+				<title>Using colors</title>
+				<screen>$A$0black
+$A$1blue
+$A$2green
+$A$3turquoise
+$A$4red
+$A$5purple
+$A$6yellow
+$A$7gray
+$B$0dark gray
+$B$1bright blue
+$B$2bright green
+$B$3bright turquoise
+$B$4bright red
+$B$5bright purple
+$B$6bright yellow
+$B$7white</screen>
 			</example>
 			</para>
 		</section>
 		<section id="building_tables">
 			<title>Tables, constants and structures</title>
 			<para>
+			<table id="table.sex">
+				<title>Sexes</title>
+				<tgroup cols='2'>
+					<thead>
+						<row>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>Male</entry>
+						<entry>0</entry>
+						</row>
+						<row>
+						<entry>Female</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>Genderless (It)</entry>
+						<entry>2</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
 			<table id="table.areaflags">
 				<title>Area flags</title>
 				<tgroup cols='4'>
@@ -753,6 +863,247 @@ $</screen>
 					</tbody>
 				</tgroup>
 			</table>
+			<table id="table.directions">
+				<title>Directions</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>DIR_NORTH</entry>
+						<entry>North</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>DIR_EAST</entry>
+						<entry>East</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>DIR_SOUTH</entry>
+						<entry>South</entry>
+						<entry>3</entry>
+						</row>
+						<row>
+						<entry>DIR_WEST</entry>
+						<entry>West</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>DIR_DOWN</entry>
+						<entry>Down</entry>
+						<entry>5</entry>
+						</row>
+						<row>
+						<entry>DIR_UP</entry>
+						<entry>Up</entry>
+						<entry>6</entry>
+						</row>
+						<row>
+						<entry>DIR_SOMEWHERE</entry>
+						<entry>Somewhere (i.e. for portals)</entry>
+						<entry>7</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.exitflags">
+				<title>Exit flags</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>EX_ISDOOR</entry>
+						<entry>Exit is a door</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>EX_CLOSED</entry>
+						<entry>Closed</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>EX_LOCKED</entry>
+						<entry>Locked</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>EX_PICKPROOF</entry>
+						<entry>Lockpick will fail</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>EX_SECRET</entry>
+						<entry>Hidden exit</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>EX_SWIM</entry>
+						<entry>Character needs to swim to enter</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>EX_FLY</entry>
+						<entry>Character needs to fly to enter</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>EX_CLIMB</entry>
+						<entry>Inclination</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>EX_PORTAL</entry>
+						<entry>Portal</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>EX_NOBREAK</entry>
+						<entry>Can't break door</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>EX_NOMOB</entry>
+						<entry>NPC's not allowed</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>EX_ENTER</entry>
+						<entry>Use "enter" command to enter</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>EX_UNDERWATER</entry>
+						<entry>Under water</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.npcflags">
+				<title>NPC flags</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>ACT_AGGRESSIVE</entry>
+						<entry>Aggressive (auto-attack) npc</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>ACT_SENTINEL</entry>
+						<entry>Does not wander (guard)</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>ACT_SCAVENGER</entry>
+						<entry>Picks up stray objects</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>ACT_STAY_AREA</entry>
+						<entry>Does not wander beyond area boundaries</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>ACT_HUNTING</entry>
+						<entry>Actively hunts opponents when attacked</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>ACT_FASTHUNT</entry>
+						<entry>Fast hunter</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>ACT_MOBINVIS</entry>
+						<entry>Invisible</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>ACT_TEACHER</entry>
+						<entry>Can teach skills/spells</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>ACT_BANKER</entry>
+						<entry>Banker</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>ACT_SPIRIT</entry>
+						<entry>Non-magic weapons are ineffective</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>ACT_NOBASH</entry>
+						<entry>Impossible to bash</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+						<row>
+						<entry>ACT_SHOPKEEP</entry>
+						<entry>Shopkeeper</entry>
+						<entry>BV13</entry>
+						<entry>8192</entry>
+						</row>
+						<row>
+						<entry>ACT_IMMORTAL</entry>
+						<entry>Immortal</entry>
+						<entry>BV14</entry>
+						<entry>16384</entry>
+						</row>
+						<row>
+						<entry>ACT_PROTO</entry>
+						<entry>Prototype NPC</entry>
+						<entry>BV31</entry>
+						<entry>2147483648</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>	
 			<table id="table.roomflags">
 				<title>Room flags</title>
 				<tgroup cols='4'>
