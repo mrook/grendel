@@ -185,7 +185,13 @@ unit FastStrings;
 interface
 
 uses
-   Windows, SysUtils;
+{$IFDEF WIN32}
+	Windows,
+{$ENDIF}
+{$IFDEF LINUX}
+	Libc,
+{$ENDIF}
+	SysUtils;
 
 //This TYPE declaration will become apparent later
 type
@@ -875,7 +881,7 @@ end;
 var
   I: Integer;
 initialization
-  for I:=0 to 255 do GUpcaseTable[I] := Chr(I);
-  CharUpperBuff(@GUpcaseTable[0], 256);
+  for I:=0 to 255 do GUpcaseTable[I] := UpCase(Chr(I));
+//  CharUpperBuff(@GUpcaseTable[0], 256);
   GUpcaseLUT := @GUpcaseTable[0];
 end.

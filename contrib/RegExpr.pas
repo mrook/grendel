@@ -1,6 +1,6 @@
 {
   @abstract(Regular expression library 0.947 by Andrey Sorokin)
-  @lastmod($Id: RegExpr.pas,v 1.2 2003/06/24 21:41:15 ***REMOVED*** Exp $)
+  @lastmod($Id: RegExpr.pas,v 1.3 2003/10/30 19:53:32 ***REMOVED*** Exp $)
 }
 
 unit RegExpr;
@@ -555,7 +555,12 @@ function RegExprSubExpressions (const ARegExpr : string;
 implementation
 
 uses
- Windows; // CharUpper/Lower
+{$IFDEF WIN32}
+	Windows; // CharUpper/Lower
+{$ENDIF}
+{$IFDEF LINUX}
+	Libc;
+{$ENDIF}
 
 const
  TRegExprVersionMajor : integer = 0;
@@ -1093,9 +1098,9 @@ class function TRegExpr.InvertCaseFunction (const Ch : REChar) : REChar;
   else
   {$ENDIF}
    begin
-    Result := REChar (CharUpper (pointer (Ch)));
+    Result := REChar (AnsiUpperCase(Ch)[1]);
     if Result = Ch
-     then Result := REChar (CharLower (pointer (Ch)));
+     then Result := REChar (AnsiLowerCase(Ch)[1]);
    end;
  end; { of function TRegExpr.InvertCaseFunction
 --------------------------------------------------------------}

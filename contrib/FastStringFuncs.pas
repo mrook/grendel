@@ -91,7 +91,7 @@ unit FastStringFuncs;
 interface
 
 Uses
-  FastStrings, Graphics, Sysutils, Classes;
+  FastStrings, Sysutils, Classes;
 
 const
   cHexChars = '0123456789ABCDEF';
@@ -118,7 +118,7 @@ function RandomFileName(aFilename : string) : string;
 function RandomStr(aLength : Longint) : string;
 function ReverseStr(const aSourceString : string) : string;
 function RightStr(const aSourceString : string; Size : Integer) : string;
-function RGBToColor(aRGB : string) : TColor;
+function RGBToColor(aRGB : string) : integer;
 function StringCount(const aSourceString, aFindString : string; Const CaseSensitive : Boolean = TRUE) : Integer;
 function SoundEx(const aSourceString: string): Integer;
 function UniqueFilename(aFilename : string) : string;
@@ -620,7 +620,7 @@ begin
 end;
 
 //Converts a typical HTML RRGGBB color to a TColor
-function RGBToColor(aRGB : string) : TColor;
+function RGBToColor(aRGB : string) : integer;
 begin
   if Length(aRGB) < 6 then raise EConvertError.Create('Not a valid RGB value');
   if aRGB[1] = '#' then aRGB := Copy(aRGB,2,Length(aRGB));
