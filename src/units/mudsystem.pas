@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.11 2004/03/17 00:19:32 ***REMOVED*** Exp $
+	## $Id: mudsystem.pas,v 1.12 2004/03/22 14:18:21 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -185,60 +185,63 @@ begin
   system_info.bind_ip := INADDR_ANY;
   system_info.max_conns := 200;
 
-  if (fileExists(SystemDir + 'sysdata.dat')) then
-    begin
-    af := GFileReader.Create(SystemDir + 'sysdata.dat');
+  if (not fileExists(SystemDir + 'sysdata.dat')) then
+  	begin
+  	writeConsole('Could not find main system configuration (sysdata.dat), halting.');
+  	Halt(1);
+  	end;
+  	
+	af := GFileReader.Create(SystemDir + 'sysdata.dat');
 
-    repeat
-      s := af.readLine();
+	repeat
+	  s := af.readLine();
 
-      g := uppercase(left(s,':'));
+	  g := uppercase(left(s,':'));
 
-      if (g = 'PORT') then
-        system_info.port:=strtoint(right(s,' '))
-      else
-      if (g = 'PORT6') then
-        system_info.port6 := strtoint(right(s, ' '))
-      else
-      if (g = 'NAME') then
-        system_info.mud_name := right(s,' ')
-      else
-      if (g = 'EMAIL') then
-        system_info.admin_email := right(s,' ')
-      else
-      if (g = 'HOSTLOOKUP') then
-        system_info.lookup_hosts:=strtoint(right(s,' '))<>0
-      else
-      if (g = 'DENYNEWCONNS') then
-        system_info.deny_newconns:=strtoint(right(s,' '))<>0
-      else
-      if (g = 'DENYNEWPLAYERS') then
-        system_info.deny_newplayers:=strtoint(right(s,' '))<>0
-      else
-      if (g = 'LEVELFORCEPC') then
-        system_info.level_forcepc:=strtoint(right(s,' '))
-      else
-      if (g = 'LEVELLOG') then
-        system_info.level_log:=strtoint(right(s,' '))
-      else
-      if (g = 'BINDIP') then
-        system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
-      else
-      if (g = 'MAXCONNS') then
-        system_info.max_conns := strtoint(right(s, ' '))
-      else
-      if (g = 'ARENASTART') then
-        system_info.arena_start := strtoint(right(s, ' '))
-      else
-      if (g = 'ARENAEND') then
-        system_info.arena_end := strtoint(right(s, ' '))
-      else
-      if (g = 'SHOWCLANABBREV') then
-        system_info.show_clan_abbrev := strtoint(right(s, ' ')) <> 0;
-    until (s = '$') or (af.eof);
+	  if (g = 'PORT') then
+		system_info.port:=strtoint(right(s,' '))
+	  else
+	  if (g = 'PORT6') then
+		system_info.port6 := strtoint(right(s, ' '))
+	  else
+	  if (g = 'NAME') then
+		system_info.mud_name := right(s,' ')
+	  else
+	  if (g = 'EMAIL') then
+		system_info.admin_email := right(s,' ')
+	  else
+	  if (g = 'HOSTLOOKUP') then
+		system_info.lookup_hosts:=strtoint(right(s,' '))<>0
+	  else
+	  if (g = 'DENYNEWCONNS') then
+		system_info.deny_newconns:=strtoint(right(s,' '))<>0
+	  else
+	  if (g = 'DENYNEWPLAYERS') then
+		system_info.deny_newplayers:=strtoint(right(s,' '))<>0
+	  else
+	  if (g = 'LEVELFORCEPC') then
+		system_info.level_forcepc:=strtoint(right(s,' '))
+	  else
+	  if (g = 'LEVELLOG') then
+		system_info.level_log:=strtoint(right(s,' '))
+	  else
+	  if (g = 'BINDIP') then
+		system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
+	  else
+	  if (g = 'MAXCONNS') then
+		system_info.max_conns := strtoint(right(s, ' '))
+	  else
+	  if (g = 'ARENASTART') then
+		system_info.arena_start := strtoint(right(s, ' '))
+	  else
+	  if (g = 'ARENAEND') then
+		system_info.arena_end := strtoint(right(s, ' '))
+	  else
+	  if (g = 'SHOWCLANABBREV') then
+		system_info.show_clan_abbrev := strtoint(right(s, ' ')) <> 0;
+	until (s = '$') or (af.eof);
 
-    af.Free();
-    end;
+	af.Free();
 
   if (fileExists(SystemDir + 'bans.dat')) then
     begin
