@@ -51,6 +51,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
   some rooms (with beds) have better sleep ratios etc.
 - expand tracking system
 - when rapier in inv and rapier in eq, make 2.rapier match the one in eq
+- implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
+  isSpellName() and enforce their use throughout the code
 
 l implementation of the mud sound protocol
 l new area format using XML
