@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.7 2004/03/19 15:40:07 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.8 2004/03/19 20:55:03 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -107,7 +107,8 @@ procedure setExternalTrap(method : GExternalTrap);
 procedure setSignalTrap(method : GSignalTrap);
 procedure setWaitTrap(method : GWaitTrap);
 
-procedure registerExternalMethod(const name : string; classAddr, methodAddr : pointer; const signature : GSignature);
+procedure registerExternalMethod(const name : string; classAddr, methodAddr : pointer; const signature : GSignature); overload;
+procedure registerExternalMethod(const name : string; classAddr : TObject; resultType : integer; paramTypes : array of integer); overload;
 
 
 implementation
@@ -709,6 +710,21 @@ begin
   meth.signature := signature;
 
   externalMethods.put(name, meth);
+end;
+
+procedure registerExternalMethod(const name : string; classAddr : TObject; resultType : integer; paramTypes : array of integer);
+var
+	sig : GSignature;
+	x : integer;
+begin
+	sig.resultType := resultType;
+	
+	SetLength(sig.paramTypes, Length(paramTypes));
+	
+	for x := 0 to High(paramTypes) do
+		sig.paramTypes[x] := paramTypes[x];
+	
+	registerExternalMethod(name, classAddr, classAddr.MethodAddress(name), sig);
 end;
 
 begin
