@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.11 2004/03/26 21:14:27 hemko Exp $
+  ## $Id: timers.pas,v 1.12 2004/04/01 13:04:32 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -96,6 +96,7 @@ uses
 	commands,
 	update,
 	area,
+	debug,
 	conns,
 	player,
 	server,
@@ -178,27 +179,12 @@ begin
             timer._counter := timer.timeout;
           end;
       except
-{        on E : EExternal do
-          begin
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
-          outputError(E);
-          end;
-        on E : Exception do
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed: ' + E.Message)
-        else }
-        on E : Exception do
-          begin
-          writeConsole('[EX Timer:' + E.ClassName + '] ' + E.Message);
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
-          end;
-
-{        if (timer is GSpecTimer) then
-          begin
-          timer_list.remove(node);
-          timer.Free();
-          end
-        else
-          timer.counter := timer.timeout; }
+        on E : Exception do	
+        	begin
+        	reportException(E, 'GTimerThread.Execute');
+            timer_list.remove(node);
+            timer.Free();
+        	end;
       end;
 
       node := node_next;
