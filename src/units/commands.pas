@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.14 2004/04/10 22:24:03 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.15 2004/04/22 17:58:23 hemko Exp $
 }
 
 unit commands;
@@ -382,7 +382,7 @@ begin
           STATE_MEDITATING: ch.sendBuffer('You must break out of your trance first.'#13#10);
              STATE_RESTING: ch.sendBuffer('You are resting.'#13#10);
             STATE_FIGHTING: ch.sendBuffer('You are fighting!'#13#10);
-            		STATE_IDLE: ch.sendBuffer('You can not do that now.'#13#10);
+            		STATE_IDLE: ch.sendBuffer('You cannot do that now.'#13#10);
           else
             writeConsole('Illegal state ' + IntToStr(ch.state) + '!');
         end
