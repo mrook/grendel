@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.6 2001/04/20 20:09:30 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.7 2001/04/26 21:31:53 xenon Exp $
 
 unit magic;
 
@@ -44,6 +44,7 @@ begin
     end
   else
     begin
+    af := GAffect.Create();
     af.skill := sn;
     af.duration := (ch.level div 8);
     af.apply_type := APPLY_AFFECT;
@@ -83,6 +84,7 @@ begin
     end
   else
     begin
+    af := GAffect.Create();
     af.skill := sn;
     af.duration := (ch.level div 8);
     af.apply_type := APPLY_AFFECT;
