@@ -57,11 +57,9 @@ uses
   clean in 'units\clean.pas',
   Winsock2 in 'units\winsock2.pas',
   progs in 'units\progs.pas',
-  md5 in 'units\md5.pas'
-{$IFDEF __DEBUG}
-  ,MemCheck in 'units\MemCheck.pas'
-{$ENDIF}
-  ;
+  md5 in 'units\md5.pas' {$IFDEF __DEBUG},
+  MemCheck in 'units\MemCheck.pas' {$ENDIF},
+  timers in 'units\timers.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -80,7 +78,6 @@ var
 
    client_addr : TSockAddr_Storage;
 
-   timer_ident : UINT;
    old_exitproc : pointer;
 
 
@@ -226,7 +223,6 @@ begin
   mud_booted := false;
 
   clean_thread.Terminate;
-  KillTimer(0, timer_ident);
 
   write_console('Releasing allocated memory...');
 
@@ -260,7 +256,6 @@ begin
     extracted_chars.clean;
     npc_list.clean;
     obj_list.Clean;
-    timers.clean;
     race_list.clean;
     clan_list.clean;
     help_files.clean;
@@ -274,7 +269,6 @@ begin
     extracted_chars.Free;
     npc_list.Free;
     obj_list.Free;
-    timers.Free;
     race_list.Free;
     clan_list.Free;
     help_files.Free;
@@ -364,7 +358,6 @@ var
    prot : TWSAProtocol_Info;
    name : array[0..1023] of char;
 begin
-  KillTimer(0, timer_ident);
   write_console('Server starting copyover...');
 
   node := connection_list.head;
@@ -625,12 +618,16 @@ begin
   boot_info.timer := -1;
   mud_booted:=true;
 
-  pulse_sec := CPULSE_PER_SEC;
-  pulse_violence := CPULSE_VIOLENCE;
-  pulse_tick := CPULSE_TICK;
-  pulse_gamehour := CPULSE_GAMEHOUR;
-  pulse_gametime := CPULSE_GAMETIME;
-  pulse_autosave := CPULSE_AUTOSAVE;
+
+  registerTimer('teleports', update_teleports, 1, true);
+  registerTimer('timers', update_timers, 1, true);
+  registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
+  registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
+  registerTimer('objects', update_objects, CPULSE_TICK, true);
+  registerTimer('characters', update_chars, CPULSE_TICK, true);
+  registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
+
+  timer_thread := GTimerThread.Create;
 
   calculateonline;
 end;
@@ -682,7 +679,7 @@ begin
     closesocket(ac);
     end
   else
-    GThread.Create(ac, client_addr, false, '');
+    GGameThread.Create(ac, client_addr, false, '');
 end;
 
 procedure game_loop;
@@ -723,7 +720,7 @@ begin
         accept_connection(listenv6);
       end;
 
-    sleep(250);
+    sleep(500);
     end;
 
   dispose(accept_set);
@@ -736,209 +733,6 @@ begin
   grace_exit:=true;
   SetConsoleCtrlHandler(@ctrl_handler, false);
   halt;
-end;
-
-procedure game_timer(wnd: HWND; msg: UINT; event: UINT; time: DWORD); stdcall;
-var ch : GCharacter;
-    conn : GConnection;
-    area : GArea;
-    node, node_next : GListNode;
-begin
-  try
-    dec(pulse_violence);
-    dec(pulse_tick);
-    dec(pulse_gamehour);
-    dec(pulse_autosave);
-    dec(pulse_sec);
-    dec(pulse_gametime);
-
-    { update system statistics }
-    if (pulse_sec = 0) then
-      begin
-      calculateonline;
-
-      if (boot_info.timer>=0) then
-        begin
-        dec(boot_info.timer);
-
-        case boot_info.timer of
-          60,30,10,5 : clean_thread.SetMessage(CLEAN_BOOT_MSG);
-          0 : clean_thread.SetMessage(CLEAN_MUD_STOP);
-        end;
-        end;
-
-      if (bg_info.count > 0) then
-        begin
-        dec(bg_info.count);
-
-        case bg_info.count of
-          60,30,10,5,2 : battlegroundMessage;
-          0 : startBattleground;
-        end;
-        end;
-
-      pulse_sec := CPULSE_PER_SEC;
-      regenerate_chars;
-      end;
-
-    if (pulse_violence = 0) then
-      begin
-      update_fighting;
-      update_battleground;
-
-      pulse_violence := CPULSE_VIOLENCE;
-      end;
-
-    if (pulse_tick = 0) then
-      begin
-      pulse_tick := number_range((3 * CPULSE_TICK) div 4, (5 * CPULSE_TICK) div 4);
-
-      update_objects;
-      update_chars;
-      end;
-
-    if (pulse_gamehour = 0) then
-      begin
-      pulse_gamehour := CPULSE_GAMEHOUR;
-
-      update_affects;
-      update_tracks;
-
-      { update age of areas and reset if hit timer }
-      node := area_list.head;
-
-      while (node <> nil) do
-        begin
-        area := node.element;
-
-        area.update;
-
-        node := node.next;
-        end;
-
-      node := char_list.head;
-
-      while (node <> nil) do
-        begin
-        ch := node.element;
-
-        if (not ch.IS_NPC) and (IS_SET(ch.player^.flags, PLR_LINKLESS)) then
-          begin
-          inc(ch.player^.ld_timer);
-
-          if (ch.player^.ld_timer > IDLE_LINKDEAD) then
-            begin
-            node := node_next;
-            ch.quit;
-            continue;
-            end;
-          end;
-
-        node := node.next;
-        end;
-      end;
-
-    if (pulse_gametime = 0) then
-      begin
-      pulse_gametime := CPULSE_GAMETIME;
-
-      update_time;
-      end;
-
-    try
-      if (auction_good.pulse > 0) then
-        dec(auction_good.pulse)
-      else
-      if (auction_good.item <> nil) then
-        begin
-        auction_good.update;
-        auction_good.pulse := CPULSE_AUCTION;
-        end;
-
-      if (auction_evil.pulse > 0) then
-        dec(auction_evil.pulse)
-      else
-      if (auction_evil.item <> nil) then
-        begin
-        auction_evil.update;
-        auction_evil.pulse := CPULSE_AUCTION;
-        end;
-    except
-      raise GException.Create('Auction update', '');
-    end;
-
-    if (pulse_autosave = 0) then
-      begin
-      status := GetHeapStatus;
-
-      clean_thread.SetMessage(CLEAN_AUTOSAVE);
-
-      pulse_autosave := CPULSE_AUTOSAVE;
-      end;
-
-    try
-      update_teleports;
-      update_timers;
-
-      node := connection_list.head;
-
-      while (node <> nil) do
-        begin
-        node_next := node.next;
-        conn := node.element;
-
-        inc(conn.idle);
-
-        if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
-         ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
-          (conn.idle > IDLE_PLAYING)) and (not conn.ch.IS_IMMORT) then
-           begin
-           conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
-           conn.thread.terminate;
-
-           node := node_next;
-           continue;
-           end;
-
-        if (conn.state=CON_PLAYING) and (not conn.ch.in_command) then
-          conn.ch.emptyBuffer;
-
-        if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
-          dec(conn.ch.wait);
-
-        node := node_next;
-        end;
-
-      cleanChars;
-      cleanObjects;
-    except
-      raise GException.Create('timerMain', '');
-    end;
-  except
-    on E: GException do
-      begin
-      E.show;
-      end
-    else
-      begin
-      if (stable_system) then
-        begin
-        stable_system := false;
-        bugreport('game_timer', 'grendel.dpr', 'Timer crash',
-                  'An error occured in the main timer.');
-
-        write_console('System is unstable - prepare for a rough ride');
-        end;
-      end;
-
-    // reset all the timers
-    pulse_violence := CPULSE_VIOLENCE;
-    pulse_tick := CPULSE_TICK;
-    pulse_gamehour := CPULSE_GAMEHOUR;
-    pulse_sec := CPULSE_PER_SEC;
-    pulse_autosave := CPULSE_AUTOSAVE;
-    pulse_gametime := CPULSE_GAMETIME;
-  end;
 end;
 
 procedure from_copyover;
@@ -997,7 +791,7 @@ begin
       l := 128;
       getpeername(sock, cl^, l);
 
-      GThread.Create(sock, client_addr, true, g);
+      GGameThread.Create(sock, client_addr, true, g);
 			end;
   until (not suc);
 
@@ -1019,8 +813,6 @@ begin
   SetConsoleCtrlHandler(@ctrl_handler, true);
   write_console('Grendel ' + version_number + ' ready...');
   SetConsoleTitle(version_info + ', ' + version_number + '. ' + version_copyright + '.');
-
-  timer_ident := settimer(0, 0, 250, @game_timer);
 
   game_loop;
 end.
