@@ -942,11 +942,11 @@ begin
 
   conn := GConnection.Create(socket, client_addr, Self);
 
-  write_console('(' + inttostr(socket) + ') New connection (' + conn.ip_string + ')');
+  write_console('(' + inttostr(socket) + ') New connection (' + conn.host_string + ')');
 
   if (isMaskBanned(conn.host_string)) then
     begin
-    write_console('('+inttostr(socket)+') Closed banned IP ('+conn.host_string+')');
+    write_console('('+inttostr(socket)+') Closed banned IP (' + conn.host_string + ')');
 
     conn.send(system_info.mud_name+#13#10#13#10);
     conn.send('Your site has been banned from this server.'#13#10);
@@ -1057,6 +1057,8 @@ begin
   if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
     begin
     write_console('(' + inttostr(conn.socket) + ') '+conn.ch.name^+' has lost the link');
+
+    interpret(conn.ch, 'return');
 
     conn.ch.conn := nil;
 
@@ -1290,6 +1292,7 @@ begin
   registerCommand('do_reset', do_reset);
   registerCommand('do_map', do_map);
   registerCommand('do_holylight', do_holylight);
+  registerCommand('do_prompt', do_prompt);
 end;
 
 begin
