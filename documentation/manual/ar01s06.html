@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>GMC introductory guide and specification</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.64.1"><link rel="home" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="previous" href="ar01s05.html" title="Races"><link rel="next" href="ar01s07.html" title="Developer information"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">GMC introductory guide and specification</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s07.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gmc"></a>GMC introductory guide and specification</h2></div></div><div></div></div><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>GMC introductory guide and specification</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.66.1"><link rel="start" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="prev" href="ar01s05.html" title="Races"><link rel="next" href="ar01s07.html" title="Developer information"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">GMC introductory guide and specification</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s07.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="gmc"></a>GMC introductory guide and specification</h2></div></div></div><p>
 		GMC (or Grendel MUD C if you will) is a language similar to C, devised for
 		the sole purpose of powering the scripted parts of the Grendel MUD Server.
 		</p><p>
@@ -7,29 +7,42 @@
 		</p><p>
 		The system consists of a compiler, an assembler and a virtual machine setup
 		which can be called from an application, in this case Grendel.
-		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_syntax"></a>Syntax</h3></div></div><div></div></div><p>
+		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_syntax"></a>Syntax</h3></div></div></div><p>
 			The GMC language is in many respects quite like C, with some
 			simplifications and exceptions.
 			</p><p>
 			The most important supported language constructs:
 			</p><div class="itemizedlist"><ul type="disc"><li><p>global and local variables</p></li><li><p>function definitions</p></li><li><p>loops (only for currently)</p></li><li><p>'include' files</p></li><li><p>basic flow control (if statements)</p></li><li><p>valid integer and boolean expressions</p></li></ul></div><p>
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_compiler"></a>Compiler</h3></div></div><div></div></div><p>
-			The GMC compiler works in four distinct passes.
 			</p><p>
-			In the first pass, the source files are scanned and parsed,
-			and basic syntax checking is performed.
+			</p><div class="example"><a name="id2529290"></a><p class="title"><b>Example&#160;4.&#160;GMC Example</b></p><pre class="programlisting">void onEmoteTarget(external ch, external target, string name)
+{
+	if ((name == "BOW") &amp;&amp; (ch.name == "Syra"))
+	{
+		do("say Good day, " + target.name + "!");
+	}
+}
+
+void onAct(external ch, external target, string arg)
+{
+}
+
+export onEmoteTarget
+export onAct</pre></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_compiler_assembler"></a>Compiler and assembler</h3></div></div></div><p>
+			The GMC compiler works in four distinct passes:
+			</p><div class="itemizedlist"><ul type="disc"><li><p>
+				In the first pass, the source files are scanned and parsed,
+				and basic syntax checking is performed.
+				</p></li><li><p>The second pass performs type checking and coercion.</p></li><li><p>
+				In the third pass an optimizer performs some basic
+				optimizations: dead-code elimination, algebraic
+				simplication (constant elimination) and some flow-of-
+				control optimizations.</p></li><li><p>
+				The fourth and final pass is the code generator,
+				where assembly code for the stack machine is written
+				to a file.
+				</p></li></ul></div><p>
 			</p><p>
-			The second pass performs type checking and coercion.
-			</p><p>
-			In the third pass an optimizer performs some basic
-			optimizations: dead-code elimination, algebraic
-			simplication (constant elimination) and some flow-of-
-			control optimizations.
-			</p><p>
-			The fourth and final pass is the code generator,
-			where assembly code for the stack machine is written
-			to a file.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_assembler"></a>Assembler</h3></div></div><div></div></div><p>
 			The assembler simply converts the "human readable"
 			assembly code to a binary format (this includes translating
 			the labels for jumps/calls).
@@ -37,7 +50,16 @@
 			Additionally, the assembler performs some simple optimizations
 			(in a section commonly known as the 'peephole optimizer'),
 			to reduce the number of instructions.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_vm"></a>Virtual Machine</h3></div></div><div></div></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_compiling"></a>Compiling your own code</h3></div></div></div><p>
+			</p><div class="example"><a name="id2529387"></a><p class="title"><b>Example&#160;5.&#160;Compiling <tt class="literal">give.c</tt></b></p><pre class="screen">
+<tt class="prompt">C:\Development\Grendel\progs&gt;</tt><b class="userinput"><tt>..\gmcc give.c</tt></b>
+GMCC - GMC 'Elise' compiler v0.3
+			
+Output file written, datasize is 0 element(s).
+GASM - GMC 'Elise' v0.3
+			
+Saved 100 byte(s) of code, 0 element(s) data.</pre></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_vm"></a>Virtual Machine</h3></div></div></div><p>
 			The VM of the GMC language is a fully functional stack machine processor
 			with some 40+ opcodes in its instruction set.
 			</p><p>
@@ -50,33 +72,33 @@
 			</p><p>
 			Lastly there is a data segment present. Its size is defined through
 			the assembler directive '$DATA'.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_out"></a>'Getting out' of the VM</h3></div></div><div></div></div><p>
+			</p><p>
 			The VM has support for a number of mechanisms to help a program 'get out' of the 
 			environment and have some interaction with the calling application.
 			</p><p>
 			These mechanisms are:
-			</p><div class="itemizedlist"><ul type="disc"><li><p>System traps</p></li><li><p>Signals and sleep</p></li><li><p>External variables</p></li><li><p>External methods</p></li></ul></div><p>
-			</p><p>
-			The system trap (in the form of <tt class="literal">do("some expression")</tt>) can be set to a
-			userspecified function by the calling application. The trap can do with
-			the string expression as it sees fit.
-			</p><p>
-			Signals are used to "suspend" the execution of the program until
-			some condition has been met (e.g. a signal has been raised) in another
-			part of the server (wether that be native or scripted code).
-			The sleep function suspends the program until a certain tickcount has
-			been reached.
-			</p><p>
-			External variables are a construct to associate external data with names
-			or expressions in the GMC language.
-			</p><p>
-			External methods are methods within a class, that are registered
-			before a script is executed. In a script they are represented
-			by a function without a body ('float cos(float x);' for example).
-			These 'callbacks' are somewhat dangerous, as there is no mechanism
-			to check the validity of the parameters specified in the declaration, nor 
-			the values provided at the time of calling.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_types"></a>Types</h3></div></div><div></div></div><p>
+			</p><div class="itemizedlist"><ul type="disc"><li><p>System traps</p><p>
+					The system trap (in the form of <tt class="literal">do("some expression")</tt>) can be set to a
+					userspecified function by the calling application. The trap can do with
+					the string expression as it sees fit.
+					</p></li><li><p>Signals and sleep</p><p>
+					Signals are used to "suspend" the execution of the program until
+					some condition has been met (e.g. a signal has been raised) in another
+					part of the server (wether that be native or scripted code).
+					The sleep function suspends the program until a certain tickcount has
+					been reached.
+					</p></li><li><p>External variables</p><p>
+					External variables are a construct to associate external data with names
+					or expressions in the GMC language.
+					</p></li><li><p>External methods</p><p>
+					External methods are methods within a class, that are registered
+					before a script is executed. In a script they are represented
+					by a function without a body ('float cos(float x);' for example).
+					These 'callbacks' are somewhat dangerous, as there is no mechanism
+					to check the validity of the parameters specified in the declaration, nor 
+					the values provided at the time of calling.
+					</p></li></ul></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_types"></a>Types</h3></div></div></div><p>
 			GMC only allows basic (primitive) types - thus compound and structured types
 			or arrays are not included in the language.
 			</p><p>
@@ -88,19 +110,19 @@
 					return a value associated with the external.
 					</p></li></ul></div><p>
 			</p><p>
-			</p><div class="example"><a name="id2508965"></a><p class="title"><b>Example&#160;4.&#160;Associating a variable with the environment</b></p><pre class="programlisting">external ch;
+			</p><div class="example"><a name="id2529652"></a><p class="title"><b>Example&#160;6.&#160;Associating a variable with the environment</b></p><pre class="programlisting">external ch;
 ch = "Grimlord";</pre></div><p>
 			</p><p>
 			Executing this snippet will have the external callback trying to associate the string
 			value "Grimlord" with some enviroment. If this association succeeds, the resulting value
 			will be placed in 'ch'.
 			</p><p>
-			</p><div class="example"><a name="id2508991"></a><p class="title"><b>Example&#160;5.&#160;De-referencing an external value</b></p><pre class="programlisting">x = ch.alignment;</pre></div><p>
+			</p><div class="example"><a name="id2529678"></a><p class="title"><b>Example&#160;7.&#160;De-referencing an external value</b></p><pre class="programlisting">x = ch.alignment;</pre></div><p>
 			</p><p>
 			Again, this will have the callback trying to associate the member variable 'alignment'
 			with the (already associated) variable 'ch'. Care must be taken that this member variable
 			does actually exist, or hell will fall down and chaos will ensue.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_entrypoints"></a>Common entry points</h3></div></div><div></div></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="gmc_entrypoints"></a>Common entry points</h3></div></div></div><p>
 			An 'entry point' is a position in your script code that has a common syntax or structure,
 			and can be easily identified by the calling process. These entry points can be viewed
 			as seperate blocks of code that are called when a particular event is triggered.

@@ -1,7 +1,7 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Building areas</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.64.1"><link rel="home" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="previous" href="ar01s03.html" title="Command Reference"><link rel="next" href="ar01s05.html" title="Races"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Building areas</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s03.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="building"></a>Building areas</h2></div></div><div></div></div><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Building areas</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.66.1"><link rel="start" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="prev" href="ar01s03.html" title="Command Reference"><link rel="next" href="ar01s05.html" title="Races"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Building areas</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s03.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s05.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="building"></a>Building areas</h2></div></div></div><p>
 		This section discusses the area format used by Grendel, common practices when building,
 		as well as various structures and constants used in areas.
-		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_areaformat"></a>Area format</h3></div></div><div></div></div><p>
+		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_areaformat"></a>Area format</h3></div></div></div><p>
 			Listed below is a sample area (actually a trimmed-down version of the <tt class="literal">roads.area</tt>
 			file that is shipped with Grendel). Attentive readers will notice that the
 			format of the area is quite similar to the format used in the SMAUG codebase.
@@ -15,7 +15,7 @@
 			</p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 			Since a switch to an XML area format is planned, this section is subject to change.
 			</p></div><p>
-			</p><div class="example"><a name="id2444032"></a><p class="title"><b>Example&#160;2.&#160;An example area</b></p><pre class="programlisting">#RANGES
+			</p><div class="example"><a name="id2464805"></a><p class="title"><b>Example&#160;2.&#160;An example area</b></p><pre class="programlisting">#RANGES
 100 199 100 199 100 199                                                         <i class="lineannotation"><span class="lineannotation">Hints for min/max rooms/mobiles/objects</span></i>
 
 #AREA
@@ -101,7 +101,7 @@ O 100 101 1
 #END
 
 $</pre></div><p>
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_notes"></a>Some notes on NPC's</h3></div></div><div></div></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_notes"></a>Some notes on NPC's</h3></div></div></div><p>
 			Non-Player Characters (NPC's) are the artificially intelligent (sic) population,
 			possibly even the core, of a mud. They are sometimes called "Mobiles", which, apart from the
 			unfortunate name collision with certain wireless devices, wrongfully suggests that NPC's can't
@@ -109,16 +109,16 @@ $</pre></div><p>
 			</p><p>
 			NPC's can be quite a challenge for your players, so try to be careful when tinkering with the 
 			various values that define a NPC: balance is everything.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_install"></a>Installing a new area</h3></div></div><div></div></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_install"></a>Installing a new area</h3></div></div></div><p>
 			Start a text editor (such as Notepad), and open the file <tt class="literal">areas\area.list</tt>. 
 			Add a line with the filename of your new area to the top of the file, save the file, and 
 			reboot (or copyover) the server.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_ansi"></a>Using ANSI color codes</h3></div></div><div></div></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_ansi"></a>Using ANSI color codes</h3></div></div></div><p>
 			Grendel supports the formatting and sending of ANSI (color) control codes.
 			This can be very helpful, especially when constructing objects, where
 			the intensity of the coloring usually determines the value and worth of the object.
 			</p><p>
-			</p><div class="example"><a name="id2506027"></a><p class="title"><b>Example&#160;3.&#160;Using colors</b></p><pre class="screen">$A$0black
+			</p><div class="example"><a name="id2526651"></a><p class="title"><b>Example&#160;3.&#160;Using colors</b></p><pre class="screen">$A$0black
 $A$1blue
 $A$2green
 $A$3turquoise
@@ -134,7 +134,7 @@ $B$4bright red
 $B$5bright purple
 $B$6bright yellow
 $B$7white</pre></div><p>
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_tables"></a>Tables, constants and structures</h3></div></div><div></div></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_tables"></a>Tables, constants and structures</h3></div></div></div><p>
 			</p><div class="table"><a name="table.sex"></a><p class="title"><b>Table&#160;1.&#160;Sexes</b></p><table summary="Sexes" border="1"><colgroup><col><col></colgroup><thead><tr><th>Description</th><th>Value</th></tr></thead><tbody><tr><td>Male</td><td>0</td></tr><tr><td>Female</td><td>1</td></tr><tr><td>Genderless (It)</td><td>2</td></tr></tbody></table></div><p>
 			</p><div class="table"><a name="table.areaflags"></a><p class="title"><b>Table&#160;2.&#160;Area flags</b></p><table summary="Area flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>AREA_NORESET</td><td>Do not reset area</td><td>BV00</td><td>1</td></tr><tr><td>AREA_NOPC</td><td>No players allowed</td><td>BV01</td><td>2</td></tr><tr><td>AREA_PROTO</td><td>Prototype</td><td>BV02</td><td>4</td></tr></tbody></table></div><p>
 			</p><div class="table"><a name="table.itemtypes"></a><p class="title"><b>Table&#160;3.&#160;Item types and values</b></p><table summary="Item types and values" border="1"><colgroup><col><col><col><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Value</th><th>Use of value[1]</th><th>Use of value[2]</th><th>Use of value[3]</th><th>Use of value[4]</th></tr></thead><tbody><tr><td>ITEM_WEAPON</td><td>Weapon</td><td>1</td><td>condition</td><td>number of dice</td><td>size of dice</td><td>type of weapon (see: <a href="ar01s04.html#table.weapontypes" title="Table&#160;9.&#160;Weapon types">Table&#160;9, &#8220;Weapon types&#8221;</a>)</td></tr><tr><td>ITEM_ARMOR</td><td>Armor</td><td>2</td><td>condition</td><td>type of armor (see: <a href="ar01s04.html#table.armortypes" title="Table&#160;10.&#160;Armor types">Table&#160;10, &#8220;Armor types&#8221;</a>)</td><td>modifier</td><td>unused</td></tr><tr><td>ITEM_FOOD</td><td>Something edible</td><td>3</td><td>condition</td><td>poisoned</td><td>hours of value</td><td>unused</td></tr><tr><td>ITEM_DRINK</td><td>Container filled with some liquid</td><td>4</td><td>capacity</td><td>current quantity</td><td>liquid type (see: <a href="ar01s04.html#table.liquidtypes" title="Table&#160;11.&#160;Liquids">Table&#160;11, &#8220;Liquids&#8221;</a>)</td><td>poisoned</td></tr><tr><td>ITEM_LIGHT</td><td>Light (i.e. torch)</td><td>5</td><td>hours of light remaining (0 = out)</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_TRASH</td><td>Trah</td><td>6</td><td>unused</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_MONEY</td><td>Gold coins</td><td>7</td><td>amount</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_SPECIAL</td><td>Special item</td><td>8</td><td>unused</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_GEM</td><td>Magical gem</td><td>9</td><td>mana type (unused)</td><td>spell level</td><td>mana when charged</td><td>unused</td></tr><tr><td>ITEM_CONTAINER</td><td>Contains other objects</td><td>10</td><td>unused</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_CORPSE</td><td>Corpse of killed (N)PC</td><td>11</td><td>unused</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_FOUNTAIN</td><td>Fountain</td><td>12</td><td>unused</td><td>unused</td><td>liquid type (see: <a href="ar01s04.html#table.liquidtypes" title="Table&#160;11.&#160;Liquids">Table&#160;11, &#8220;Liquids&#8221;</a>)</td><td>unused</td></tr><tr><td>ITEM_BLOOD</td><td>Blood trail</td><td>13</td><td>direction of blood trail (see: <a href="ar01s04.html#table.directions" title="Table&#160;4.&#160;Directions">Table&#160;4, &#8220;Directions&#8221;</a>)</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_PORTAL</td><td>Portal</td><td>14</td><td>unused</td><td>unused</td><td>unused</td><td>unused</td></tr><tr><td>ITEM_KEY</td><td>Key</td><td>15</td><td>unique key number</td><td>unused</td><td>unused</td><td>unused</td></tr></tbody></table></div><p>

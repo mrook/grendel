@@ -1,6 +1,6 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Developer information</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.64.1"><link rel="home" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="previous" href="ar01s06.html" title="GMC introductory guide and specification"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Developer information</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s06.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;</td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="developers"></a>Developer information</h2></div></div><div></div></div><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Developer information</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.66.1"><link rel="start" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="prev" href="ar01s06.html" title="GMC introductory guide and specification"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Developer information</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s06.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;</td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="developers"></a>Developer information</h2></div></div></div><p>
 		This section contains information for developers that want to modify or add to the Grendel sourcecode.
-		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="developers_modules"></a>Modules</h3></div></div><div></div></div><p>
+		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="developers_modules"></a>Modules</h3></div></div></div><p>
 			As of 0.4.0, the Grendel sourcecode contains so called 'modules'. These
 			modules (or plugins, if you will) can be loaded on demand by the server,
 			and can contain arbitrary functionality that you may wish to enable.
@@ -22,7 +22,7 @@
 			Each module should define a class which implements <tt class="classname">IModuleInterface</tt>,
 			and export that class, as per the following example.
 			
-			</p><div class="example"><a name="id2509407"></a><p class="title"><b>Example&#160;6.&#160;Implementing IModuleInterface</b></p><pre class="programlisting">type
+			</p><div class="example"><a name="id2530094"></a><p class="title"><b>Example&#160;8.&#160;Implementing IModuleInterface</b></p><pre class="programlisting">type
 	GExampleModule = class(TInterfacedObject, IModuleInterface)
 	published
 		procedure registerModule();
