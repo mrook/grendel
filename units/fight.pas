@@ -885,15 +885,16 @@ begin
 end;
 
 procedure update_fighting;
-var ch, vch, gch : GCharacter;
-    node_world, node_room : GListNode;
-    conn : GConnection;
+var 
+  ch, vch, gch : GCharacter;
+  iter_world, iter_room : GIterator;
+  conn : GConnection;
 begin
-  node_world := char_list.head;
+  iter_world := char_list.iterator();
 
-  while (node_world <> nil) do
+  while (iter_world.hasNext()) do
     begin
-    ch := node_world.element;
+    ch := GCharacter(iter_world.next());
 
     if (ch.bash_timer > -2) then
       dec(ch.bash_timer);
@@ -925,11 +926,11 @@ begin
         break;
 
       { Group members AUTO-assist other group members }
-      node_room := ch.room.chars.head;
+      iter_room := ch.room.chars.iterator();
 
-      while (node_room <> nil) do
+      while (iter_room.hasNext()) do
         begin
-        gch := node_room.element;
+        gch := GCharacter(iter_room.next());
 
         if (gch <> ch) and (gch.leader=ch.leader) and (gch.room = ch.room) then
          if (gch.fighting = nil) and (gch.position = POS_STANDING) then
@@ -944,23 +945,21 @@ begin
             gch.fighting := vch;
             gch.position := POS_FIGHTING;
             end;
-
-        node_room := node_room.next;
         end;
 
       { NPC's of same type assist each other }
       if (ch.IS_NPC) then
         begin
-        node_room := ch.room.chars.head;
+        iter_room := ch.room.chars.iterator();
 
-        while (node_room <> nil) do
+        while (iter_room.hasNext()) do
           begin
-          gch := node_room.element;
+          gch := GCharacter(iter_room.next());
 
           if (vch.CHAR_DIED) then
             break;
 
-          if (gch.IS_NPC) and (gch.IS_AWAKE) then
+          if (gch <> ch) and (gch.IS_NPC) and (gch.IS_AWAKE) then
            if (gch.position = POS_STANDING) and (GNPC(gch).npc_index.vnum = GNPC(ch).npc_index.vnum) then
             if (number_percent <= 25) then
              begin
@@ -977,8 +976,6 @@ begin
 
              multi_hit(gch,vch);
              end;
-
-          node_room := node_room.next;
           end;
         end;
       end
@@ -997,20 +994,16 @@ begin
           interpret(ch, 'kill ' + vch.name^);
         end;
       end;
-
-    node_world := node_world.next;
     end;
 
-  node_world := connection_list.head;
+  iter_world := connection_list.iterator();
 
-  while (node_world <> nil) do
+  while (iter_world.hasNext()) do
     begin
-    conn := node_world.element;
+    conn := GConnection(iter_world.next());
 
     if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
       GPlayer(conn.ch).emptyBuffer;
-
-    node_world := node_world.next;
     end;
 
 {  node_world := char_list.head;
