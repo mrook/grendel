@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.24 2004/03/30 12:29:18 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.25 2004/03/30 12:49:31 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -98,15 +98,29 @@ begin
 	iterator.Free();
 end;
 
+procedure waitConnections();
+begin
+	// Wait for connection_list to clean itself
+	while (connection_list.size() > 0) do
+		begin
+		{$IFDEF WIN32}
+		Application.ProcessMessages();
+		{$ENDIF}
+		
+		Sleep(25);
+		end;
+end;
+
 // Reboot procedure
 procedure rebootServer();
 var
-{$IFDEF WIN32}
+	{$IFDEF WIN32}
 	SI: TStartupInfo;
 	PI: TProcessInformation;
-{$ENDIF}
+	{$ELSE}
 	pid : cardinal;
 	args : array[1..2] of PChar;
+	{$ENDIF}
 begin
 	{$IFDEF WIN32}
 	FillChar(SI, SizeOf(SI), 0);
@@ -250,12 +264,7 @@ begin
 		node := node_next;
 		end;
 
-	// Wait for connection_list to clean itself
-	while (connection_list.size() > 0) do
-		begin
-		Application.ProcessMessages();
-		Sleep(25);
-		end;
+	waitConnections();
 		
 	CloseHandle(pipe);
 {$ELSE}
@@ -285,11 +294,7 @@ begin
 		
 	CloseFile(output);
 
-	// Wait for connection_list to clean itself
-	while (connection_list.size() > 0) do
-		begin
-		Sleep(25);
-		end; 
+	waitConnections();
 	
 	if (FileExists('grendel.run')) then
 		begin
@@ -316,111 +321,117 @@ begin
 end;
 
 // Recover from copyover
-procedure from_copyover;
-{$IFDEF WIN32}
-var
-   pipe : THandle;
-   w, len : cardinal;
-   prot : TWSAProtocol_Info;
-   g : array[0..1023] of char;
-   suc : boolean;
-   sock : TSocket;
-   sk : GSocket;
-   client_addr : TSockAddr_Storage;
-   cl : PSockAddr;
-   l : integer;
-begin
-  pipe := INVALID_HANDLE_VALUE;
-  
-  while (true) do
-    begin
-    pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
-
-    if (pipe <> INVALID_HANDLE_VALUE) then
-      break;
-
-    if (GetLastError() <> ERROR_PIPE_BUSY) then
-      begin
-      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
-			exit;
-      end;
-
-    // All pipe instances are busy, so wait a second
-    if (not WaitNamedPipe(pipeName, 1000)) then
-      begin
-      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
-			exit;
-      end;
-  end;
-  
-  sock := -1;
-
-  repeat
-    suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
-
-    if (suc) then
-      sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
-
-    suc := ReadFile(pipe, len, 4, w, nil);
-    
-    if (not suc) then
-    	break;
-    	
-    suc := ReadFile(pipe, g, len, w, nil);
-
-    if (suc) and (sock <> -1) then
-      begin
-      g[len] := #0;
-      
-      cl := @client_addr;
-      l := 128;
-      getpeername(sock, cl^, l);
-      
-      sk := createSocket(prot.iAddressFamily, sock);
-      sk.setNonBlocking();     
-      sk.socketAddress := client_addr;
-      sk.resolve(system_info.lookup_hosts);
-
-      GPlayerConnection.Create(sk, true, g);
-      end;
-  until (not suc);
-
-  CloseHandle(pipe);
-end;
-{$ELSE}
+procedure copyoverRecover();
 var
 	client_addr : TSockAddr_Storage;
 	cl : PSockaddr;
-	l : socklen_t;
+	sk : GSocket;
+	
+	{$IFDEF WIN32}
+	pipe : THandle;
+	w, len : cardinal;
+	prot : TWSAProtocol_Info;
+	g : array[0..1023] of char;
+	suc : boolean;
+	sock : TSocket;
+	l : integer;
+	{$ELSE}
 	input : TextFile;
 	name : string;
+	l : socklen_t;
 	fd, af : integer;
-	sk : GSocket;
+	{$ENDIF}	
 begin
-	AssignFile(input, 'copyover.temp');
-	Reset(input);
+	writeConsole('Recovering from copyover...');
 	
-	while (not Eof(input)) do
+	{$IFDEF WIN32}
+	pipe := INVALID_HANDLE_VALUE;
+
+	while (true) do
 		begin
-		readln(input, name);
-		readln(input, fd);
-		readln(input, af);
-		
-		cl := @client_addr;
-		l := 128;
-		getpeername(fd, cl^, l);
-      
-		sk := createSocket(af, fd);
-		sk.setNonBlocking();     
-		sk.socketAddress := client_addr;
-		sk.resolve(system_info.lookup_hosts);
-		
-		GPlayerConnection.Create(sk, true, name);
+		pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
+
+		if (pipe <> INVALID_HANDLE_VALUE) then
+			break;
+
+		if (GetLastError() <> ERROR_PIPE_BUSY) then
+			begin
+			bugreport('copyoverRecover', 'grendel.dpr', 'Could not restart from copyover');
+			exit;
+			end;
+
+		// All pipe instances are busy, so wait a second
+		if (not WaitNamedPipe(pipeName, 1000)) then
+			begin
+			bugreport('copyoverRecover', 'grendel.dpr', 'Could not restart from copyover');
+			exit;
+			end;
 		end;
+
+	sock := -1;
+
+	repeat
+		suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
+
+		if (suc) then
+			sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
+
+		suc := ReadFile(pipe, len, 4, w, nil);
+
+		if (not suc) then
+			break;
+
+		suc := ReadFile(pipe, g, len, w, nil);
+
+		if (suc) and (sock <> -1) then
+			begin
+			g[len] := #0;
+
+			cl := @client_addr;
+			l := 128;
+			getpeername(sock, cl^, l);
+
+			sk := createSocket(prot.iAddressFamily, sock);
+			sk.setNonBlocking();     
+			sk.socketAddress := client_addr;
+			sk.resolve(system_info.lookup_hosts);
+
+			GPlayerConnection.Create(sk, true, g);
+			end;
+	until (not suc);
+
+	CloseHandle(pipe);
+	{$ELSE}
+	try
+		AssignFile(input, 'copyover.temp');
+		Reset(input);
+
+		while (not Eof(input)) do
+			begin
+			readln(input, name);
+			readln(input, fd);
+			readln(input, af);
+
+			cl := @client_addr;
+			l := 128;
+			getpeername(fd, cl^, l);
+
+			sk := createSocket(af, fd);
+			sk.setNonBlocking();     
+			sk.socketAddress := client_addr;
+			sk.resolve(system_info.lookup_hosts);
+
+			GPlayerConnection.Create(sk, true, name);
+			end;
+
+		CloseFile(input);
 		
-	CloseFile(input);
+		Erase(input);
+	except
+		on E : Exception do reportException(E);
+	end;
+	{$ENDIF}
 end;
-{$ENDIF}
 
 {$IFDEF WIN32}
 {$IFDEF CONSOLEBUILD}
@@ -511,31 +522,31 @@ begin
 	
 	{ setup the signal handlers }
 	new(aOld);
-        new(aHup);
-        new(aTerm);
-        
-        aTerm^.__sigaction_handler := @handleSignal;
-        aTerm^.sa_flags := 0;
-        aTerm^.sa_restorer := nil;
-        
-        aHup^.__sigaction_handler:= @handleSignal;
-        aHup^.sa_flags := 0;
-        aHup^.sa_restorer := nil;
-        
-        SigAction(SIGTERM,aTerm,aOld);
-        SigAction(SIGHUP,aHup,aOld);
-        
-        case fork() of
-		0:	begin
-			Close(input);  { close standard in }
-                        AssignFile(output,'/dev/null');
-                        ReWrite(output);
-                        AssignFile(ErrOutPut,'/dev/null');
-                        ReWrite(ErrOutPut);
-                        end;
-		-1: 	begin
-			writeln('fork() failed, continuing on foreground');
-			end;
+	new(aHup);
+	new(aTerm);
+
+	aTerm^.__sigaction_handler := @handleSignal;
+	aTerm^.sa_flags := 0;
+	aTerm^.sa_restorer := nil;
+
+	aHup^.__sigaction_handler:= @handleSignal;
+	aHup^.sa_flags := 0;
+	aHup^.sa_restorer := nil;
+
+	SigAction(SIGTERM,aTerm,aOld);
+	SigAction(SIGHUP,aHup,aOld);
+
+	case fork() of
+	0:	begin
+		Close(input);  { close standard in }
+					AssignFile(output,'/dev/null');
+					ReWrite(output);
+					AssignFile(ErrOutPut,'/dev/null');
+					ReWrite(ErrOutPut);
+					end;
+	-1: 	begin
+		writeln('fork() failed, continuing on foreground');
+		end;
 	else
 		begin
 		Halt(0);
@@ -598,7 +609,7 @@ begin
 	serverInstance.init();
 	
 	if (ParamStr(1) = 'copyover') then
-		from_copyover();
+		copyoverRecover();
 
 	tm := Now() - tm;
 
@@ -612,7 +623,10 @@ begin
 		copyoverServer();
 		end
 	else
-		flushConnections();	
+		begin
+		flushConnections();
+		waitConnections();
+		end;
 		
 	serverInstance.cleanup();
 	
