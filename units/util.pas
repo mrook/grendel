@@ -171,7 +171,7 @@ begin
     inc(g);
     if (s[g] = '$') then
       inc(g, 2);
-  until (byte(s[g]) in [33..126]);
+  until (byte(s[g]) in [33..126]) or (length(s) <= g);
 
   s[g] := upcase(s[g]);
   cap := s;
