@@ -12,6 +12,10 @@ Wishlist for the new 0.5.x tree
     introduce new ones, such as experience formulas, experience per level, 
     damage formulas, number of stats, stat maximums, etc.   
     
+  - GHL (working title): Grendel Help Language, use XML to describe
+    help/manual content, in cooperation with system configuration elements
+    to describe visual properties (colors, etc.)
+    
 * revise grouping system: generalize GObject to some form of object 'list'
   (possibly named GItem), which can contain 1 or more GItems or subsets
   of GItem, something along those lines
