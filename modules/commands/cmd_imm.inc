@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.19 2002/10/14 15:32:12 xenon Exp $
+// $Id: cmd_imm.inc,v 1.20 2002/10/14 18:28:20 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -431,8 +431,8 @@ begin
         ch.sendBuffer('You must be a higher level to force players.'#13#10);
         exit;
         end;
-      act(AT_WHITE,'You force $N to "'+param+'".',false,ch,nil,vict,TO_CHAR);
-    	 act(AT_WHITE,'$n forces you to "' + param + '"',false,ch,nil,vict,TO_VICT);
+      act(AT_WHITE,'You force $N to "'+param+'".$A$7',false,ch,nil,vict,TO_CHAR);
+      act(AT_WHITE,'$n forces you to "' + param + '"',false,ch,nil,vict,TO_VICT);
       interpret(vict,param);
 
       end;
@@ -2379,7 +2379,7 @@ begin
     while (node <> nil) do
     begin
       vict := node.element;
-      if (vict.IS_NPC()) then
+      if (vict.IS_NPC() and (GNPC(vict).npc_index <> nil)) then
       begin
         if (length(GNPC(vict).npc_index.progfile) = 0) then
         begin
