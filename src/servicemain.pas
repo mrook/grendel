@@ -2,7 +2,7 @@
 	Summary:
 		NT Service main unit
 	
-	## $Id: servicemain.pas,v 1.2 2004/03/22 16:01:36 ***REMOVED*** Exp $
+	## $Id: servicemain.pas,v 1.3 2004/03/22 22:52:17 ***REMOVED*** Exp $
 }
 
 unit servicemain;
@@ -96,7 +96,7 @@ begin
 	ChDir(path);
 
 	cons := GConsole.Create();
-	cons.attachWriter(GConsoleLogWriter.Create('grendel'));
+	cons.attachWriter(GConsoleLogWriter.Create('grendelservice'));
 	cons.Free();
 
 	serverInstance := GServer.Create();
@@ -111,6 +111,8 @@ end;
 
 procedure TServiceGrendel.ServiceStop(Sender : TService; var Stopped: Boolean);
 begin
+	writeConsole('NT service halting...');
+	
 	serverInstance.shutdown(SHUTDOWNTYPE_HALT, 0);
 end;
 
