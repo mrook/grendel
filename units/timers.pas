@@ -1,4 +1,4 @@
-// $Id: timers.pas,v 1.10 2001/04/26 21:44:42 xenon Exp $
+// $Id: timers.pas,v 1.11 2001/05/10 17:30:38 xenon Exp $
 
 unit timers;
 
@@ -148,7 +148,6 @@ begin
         on E : EExternal do
           begin
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
-//          outputError(E.ExceptionRecord.ExceptionAddress);
           outputError(E);
           end
         else

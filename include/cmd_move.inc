@@ -74,7 +74,7 @@ begin
 end;
 
 function do_move(ch : GCharacter; pexit : GExit) : boolean;
-var vict,vict_next:GCharacter;
+var vict : GCharacter;
     sneaking:boolean;
     txt_ch,txt_room:array[0..32] of char;
     room_pos,room_to : GRoom;

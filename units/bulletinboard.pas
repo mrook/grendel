@@ -107,7 +107,6 @@ procedure save_notes;
 var node : GListNode;
     f : textfile;
     note : GNote;
-    buf : string;
     i : integer;
 begin
   for i:=1 to BOARD_MAX-1 do
@@ -187,8 +186,7 @@ begin
 end;
 
 procedure postNote(c : pointer; text : string);
-var node : GListNode;
-    note : GNote;
+var note : GNote;
     ch : GCharacter;
 begin
   ch := c;

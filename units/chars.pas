@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.38 2001/04/30 16:22:33 xenon Exp $
+// $Id: chars.pas,v 1.39 2001/05/10 17:28:01 xenon Exp $
 
 unit chars;
 
@@ -1796,7 +1796,6 @@ begin
 end;
 
 procedure GCharacter.sendEdit(text : string);
-var note : GNote;
 begin
   case substate of
     SUB_NOTE:

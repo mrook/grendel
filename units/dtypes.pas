@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.16 2001/05/01 20:14:35 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.17 2001/05/10 17:29:09 xenon Exp $
 
 unit dtypes;
 
@@ -649,7 +649,6 @@ end;
 procedure unhash_string(var src : PString);
 var
   hv : GHashValue;
-  g : GString;
 begin
   if (src = nil) then
     exit;
