@@ -10,6 +10,30 @@ The system consists of a compiler, an assembler and a virtual machine setup
 which can be called from an application, in this case Grendel.
 
 
+- The compiler
+
+The compiler scans & parses the source files and translates them
+into assembly code.
+
+
+
+- The virtual machine
+
+The VM of the GMC language is a fully functional stack machine processor
+with some 30-odd opcodes in its instruction set.
+
+Internally the machine consists of two stacks utilizing the Delphi 'variant'
+type. One stack is for data, the other stack holds the return addresses
+for function calls.
+
+Apart from the stacks there are a number of registers - the stack pointer,
+the program counter (or instruction pointer) and the loop counter.
+These cannot be accessed directly from the assembler.
+
+Lastly there is a data segment present. Its size is defined through
+the assembler directive '$DATA'.
+
+
 - Getting out of the VM
 
 The VM has support for a number of mechanisms to help a program 'get out' of the 
@@ -18,18 +42,27 @@ environment and have some interaction with the calling application.
 These mechanisms are:
 
    - System traps
-   - Wait statement
+   - Signals
    - External variables
+   - External methods
 
 The system trap (in the form of do <string expression>) can be set to a
 userspecified function by the calling application. The trap can do with
 the string expression as it sees fit.
 
-A wait statement suspends the execution of the program until one of its
-conditions are met.
+Signals are used to "suspend" the execution of the program until
+some condition has been met (e.g. a signal has been raised) in another
+part of the server (wether that be native or scripted code).
 
 External variables are a construct to associate external data with names
 or expressions in the GMC language.
+
+External methods are methods within a class, that are registered
+before a script is executed. In a script they are represented
+by a function without a body ('float cos(float x);' for example).
+These 'callbacks' are somewhat dangerous, as there is no mechanism
+to check the validity of the parameters specified in the declaration, nor 
+the values provided at the time of calling.
 
 
 - Types
@@ -39,13 +72,12 @@ or arrays are not included in the language.
 
 The following basic types are supported:
 
-   char, int, float, string, void, bool and external
+   int, float, string, void, bool and external
 
 'void' should not be used for basic identifiers, as these have no semantic
 meaning - any operations with these identifiers can be considered unsafe.
 'int', 'float' and 'bool' exhibit the normal behaviour you would expect.
 'string' works the same as the pascal type LongString.
-'char' is possibly obsolete and should therefor be considered deprecated.
 'external' is a special type - it has no strict semantic meaning in itself, but will evaluate
 to a callback to the shell surrounding (or calling, if you will) the VM.
 This callback will take care of the necessary checks (including or excluding typing)

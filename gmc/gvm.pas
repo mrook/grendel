@@ -7,7 +7,8 @@ const
 	stackSize = 512;
 
 type
-	GSystemTrap = procedure(msg : string);
+  GVMError = procedure(owner : TObject; errorMsg : string);
+	GSystemTrap = procedure(owner : TObject; msg : string);
 	GExternalTrap = function(obj : variant; member : string) : variant;
 	GSignalTrap = procedure(owner : TObject; signal : string);
 	GWaitTrap = function(owner : TObject; signal : string) : boolean;
@@ -22,27 +23,30 @@ type
     classAddr, methodAddr : pointer;
     signature : GSignature;
   end;
-  
+
   GSymbol = class
     id : string;
     addr : integer;
   end;
 
-	GCodeBlock = class
-	  owner : TObject;
+  GCodeBlock = class
 		code : array of char;
 		codeSize, dataSize : integer;
 		symbols : GHashTable;
-		
-		function findSymbol(id : string) : integer;
-	end;
+  end;
 
-	GContext = class	
+	GContext = class
   	stack, returns : array[0..stackSize] of variant;
 	  data : array of variant;
 	  pc, rp, sp : integer;
 
-		block : GCodeBlock;
+    clockTick : integer;
+
+	  owner : TObject;
+    block : GCodeBlock;
+
+		function findSymbol(id : string) : integer;
+    function setEntryPoint(id : string) : boolean;
 
 		procedure push(v : variant);
 		function pop : variant;
@@ -51,23 +55,24 @@ type
 
 		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 
-    procedure Load(blck : GCodeBlock);
-    procedure SingleStep;
-		procedure Execute;
+    procedure load(cb : GCodeBlock);
+		procedure execute;
 	end;
 
 var
   cmdline : string;
   input : file;
+  vmError : GVMError;
   systemTrap : GSystemTrap;
   externalTrap : GExternalTrap;
   signalTrap : GSignalTrap;
   waitTrap : GWaitTrap;
   externalMethods : GHashTable;
-	codeCache : GHashTable;
+  codeCache : GHashTable;
 
 function loadCode(fname : string) : GCodeBlock;
 
+procedure setVMError(method : GVMError);
 procedure setSystemTrap(method : GSystemTrap);
 procedure setExternalTrap(method : GExternalTrap);
 procedure setSignalTrap(method : GSignalTrap);
@@ -79,13 +84,12 @@ implementation
 
 uses gasmdef;
 
-procedure vmError(msg : string);
+procedure dummyError(owner : TObject; msg : string);
 begin
   writeln('fatal vm error: ', msg);
-  exit;
 end;
 
-procedure dummySystemTrap(msg : string);
+procedure dummySystemTrap(owner : TObject; msg : string);
 begin
   writeln('Trap: ', msg);
 end;
@@ -106,70 +110,94 @@ end;
 
 function loadCode(fname : string) : GCodeBlock;
 var
-	cb : GCodeBlock;
+  cb : GCodeBlock;
+	i : integer;
   input : file;
   sym : GSymbol;
   t : byte;
 begin
+  Result := nil;
   cb := GCodeBlock(codeCache.get(fname));
 
   if (cb = nil) then
     begin
-	  assign(input, fname);
-	  {$I-}
-	  reset(input, 1);
-	  {$I+}
-  
-	  if (IOResult <> 0) then
-			vmError('Could not open ' + fname);
-
     cb := GCodeBlock.Create;
 
-	  blockread(input, cb.codeSize, 4);
-	  blockread(input, cb.dataSize, 4);
+    cb.symbols := GHashTable.Create(128);
 
-	  setLength(cb.code, cb.codeSize);
-  
-	  blockread(input, cb.code[0], cb.codeSize);
-	  
-	  cb.symbols := GHashTable.Create(128);
-	  
-	  while (not eof(input)) do
-	    begin
-	    sym := GSymbol.Create;
-	    
-	    blockread(input, t, 1);
-	    setLength(sym.id, t);
-	    blockread(input, sym.id[1], t);
-	    blockread(input, sym.addr, 4);
-	    
-	    cb.symbols.put(sym.id, sym);
-	    end;
+    assign(input, fname);
+    {$I-}
+    reset(input, 1);
+    {$I+}
 
-	  closefile(input);
-	  codeCache.put(fname, cb);
+    if (IOResult <> 0) then
+      exit;
+
+    blockread(input, cb.codeSize, 4);
+    blockread(input, cb.dataSize, 4);
+
+    setLength(cb.code, cb.codeSize);
+
+    blockread(input, cb.code[0], cb.codeSize);
+
+    while (not eof(input)) do
+      begin
+      sym := GSymbol.Create;
+
+      blockread(input, t, 1);
+      setLength(sym.id, t);
+      blockread(input, sym.id[1], t);
+      blockread(input, sym.addr, 4);
+
+      cb.symbols.put(sym.id, sym);
+      end;
+
+    closefile(input);
     end;
 
-	Result := cb;
+  Result := cb;
 end;
 
-// GCodeBlock
-function GCodeBlock.findSymbol(id : string) : integer;
+// GContext
+function GContext.findSymbol(id : string) : integer;
 var
   sym : GSymbol;
 begin
   Result := -1;
-  sym := GSymbol(symbols.get(id));
-  
+
+  if (block = nil) then
+    exit;
+
+  sym := GSymbol(block.symbols.get(id));
+
   if (sym <> nil) then
     Result := sym.addr;
 end;
 
-// GContext
+function GContext.setEntryPoint(id : string) : boolean;
+var
+	i : integer;
+begin
+  Result := false;
+
+  if (block = nil) then
+    exit;
+
+  i := findSymbol(id);
+
+  if (i >= 0) then
+    begin
+    Result := true;
+    pushr(block.codeSize);
+    end;
+
+  pc := i;
+end;
+
 procedure GContext.push(v : variant);
 begin
   if (sp > stackSize) then
-    vmError('data stack overflow');
+    vmError(owner, 'data stack overflow');
 
   stack[sp] := v;
   inc(sp);
@@ -178,7 +206,7 @@ end;
 function GContext.pop : variant;
 begin
   if (sp < 0) then
-    vmError('data stack underflow');
+    vmError(owner, 'data stack underflow');
 
   dec(sp);
 
@@ -188,7 +216,7 @@ end;
 procedure GContext.pushr(v : variant);
 begin
   if (rp > stackSize) then
-    vmError('address stack overflow');
+    vmError(owner, 'address stack overflow');
 
   returns[rp] := v;
   inc(rp);
@@ -197,27 +225,33 @@ end;
 function GContext.popr : variant;
 begin
   if (rp < 0) then
-    vmError('address stack underflow');
+    vmError(owner, 'address stack underflow');
 
   dec(rp);
 
   Result := returns[rp];
 end;
 
-procedure GContext.Load(blck : GCodeBlock);
+procedure GContext.load(cb : GCodeBlock);
 var
 	i : integer;
 begin
   sp := 0;
   rp := 0;
-  pc := 0;
+  pc := -1;
 
-  setLength(data, blck.dataSize);
+  block := cb;
+  clockTick := 0;
 
-  for i := 0 to blck.dataSize-1 do
-    data[i] := 0;
+  if (cb <> nil) then
+    begin
+    setLength(data, cb.dataSize);
 
-  block := blck;
+    for i := 0 to cb.dataSize-1 do
+      data[i] := 0;
+    end
+  else
+    setLength(data, 0);
 end;
 
 procedure GContext.callMethod(classAddr, methodAddr : pointer; signature : GSignature);
@@ -293,7 +327,8 @@ begin
     push(vd);
 end;
 
-procedure GContext.SingleStep;
+
+procedure GContext.Execute;
 var
 	i : integer;
   f : single;
@@ -302,242 +337,241 @@ var
 	v1, v2 : variant;
   meth : GExternalMethod;
 begin
-  case ord(block.code[pc]) of
-		_GETC		: begin
-							push(cmdline);
-							inc(pc);
-							end;
-    _ITOF   : begin
-              VarCast(v1, pop(), varSingle);
-              push(v1);
-							inc(pc);
-              end;
-    _FTOI   : begin
-              VarCast(v1, pop(), varInteger);
-              push(v1);
-							inc(pc);
-              end;
-    _ITOS		: begin
-              push(IntToStr(pop()));
-              inc(pc);
-              end;
-    _BTOS		: begin
-              push(IntToStr(pop()));
-              inc(pc);
-              end;
-    _FTOS   : begin
-              VarCast(v1, pop(), varString);
-              push(v1);
-							inc(pc);
-              end;
-    _PUSHI 	: begin
-              move(block.code[pc + 1], i, 4);
-              inc(pc, 5);
-              push(i);
-              end;
-    _PUSHF  : begin
-              move(block.code[pc + 1], f, 4);
-              inc(pc, 5);
-              push(f);
-              end;
-    _PUSHS  : begin
-              p := @block.code[pc + 1];
-              inc(pc, strlen(p) + 2);
-
-              push(string(p));
-              end;
-    _PUSHR  : begin
-              move(block.code[pc + 1], r, 1);
-              inc(pc, 2);
-              push(data[r]);
-              end;
-    _POPR   : begin
-              move(block.code[pc + 1], r, 1);
-              inc(pc, 2);
-              data[r] := pop();
-              end;
-    _ADD		: begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 + v2);
-              inc(pc);
-              end;
-    _SUB		: begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 - v2);
-              inc(pc);
-              end;
-    _MUL		: begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 * v2);
-              inc(pc);
-              end;
-    _DIV		: begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 / v2);
-              inc(pc);
-              end;
-    _AND    : begin
-              push(pop() and pop());
-              inc(pc);
-              end;
-    _OR     : begin
-              push(pop() or pop());
-              inc(pc);
-              end;
-    _LT     : begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 < v2);
-              inc(pc);
-              end;
-    _GT     : begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 > v2);
-              inc(pc);
-              end;
-    _LTE    : begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 <= v2);
-              inc(pc);
-              end;
-    _GTE    : begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 >= v2);
-              inc(pc);
-              end;
-    _EQ     : begin
-              v2 := pop();
-              v1 := pop();
-              push(v1 = v2);
-              inc(pc);
-              end;
-    _GET		: begin
-              v2 := pop();
-              v1 := pop();
-              push(externalTrap(v1, v2));
-              inc(pc);
-              end;
-    _GETR		: begin
-              move(block.code[pc + 1], r, 1);
-              inc(pc, 2);
-              pop();
-              end;
-    _TRAP		: begin
-              systemTrap(pop());
-              inc(pc);
-              end;
-    _SLEEP  : begin
-              Sleep(pop() * 1000);
-							inc(pc);
-              end;
-    _WAIT   : begin
-              v1 := pop();
-  
-              if (not waitTrap(block.owner, v1)) then
-                push(v1)
-              else
-  							inc(pc);
-              end;
-    _SIGNAL : begin
-              v1 := pop();
-              inc(pc);
-              signalTrap(block.owner, v1);
-              end;
-    _RET		: begin
-              i := popr();
-              pc := i;
-              end;
-    _CALL 	: begin
-              move(block.code[pc + 1], i, 4);
-
-              if (i < 0) or (i > block.codeSize) then
-                vmError('procedure call outside of boundary');
-
-              pushr(pc + 5);					// save return address
-              pc := i;
-              end;
-    _CALLE  : begin
-              p := @block.code[pc + 1];
-              inc(pc, strlen(p) + 2);
-
-              meth := GExternalMethod(externalMethods.get(string(p)));
-
-              if (meth <> nil) then
-								callMethod(meth.classAddr, meth.methodAddr, meth.signature)
-              else
-                vmError('unregistered external method "' + p + '"');
-              end;
-    _JMP    : begin
-              move(block.code[pc + 1], i, 4);
-
-              if (i < 0) or (i > block.codeSize) then
-                vmError('jump outside of boundary');
-
-              pc := i;
-              end;
-    _JZ     : begin
-              move(block.code[pc + 1], i, 4);
-              v1 := pop();
-
-              if (i < 0) or (i > block.codeSize) then
-                vmError('jump outside of boundary');
-
-              if (integer(v1) = 0) then
-                pc := i
-              else
-                inc(pc, 5);
-              end;
-    _JNZ    : begin
-              move(block.code[pc + 1], i, 4);
-              v1 := pop();
-
-              if (i < 0) or (i > block.codeSize) then
-                vmError('jump outside of boundary');
-
-              if (integer(v1) <> 0) then
-                pc := i
-              else
-                inc(pc, 5);
-              end;
-    _HALT : pc := block.codeSize;
-  else
-    inc(pc);
-  end;
-end;
-
-procedure GContext.Execute;
-var
-	i : integer;
-begin
-  i := block.findSymbol('main');
-  
-  if (i = -1) then
-    begin
-    writeln('Unable to find entrypoint for "main".');
+  if (block = nil) or (pc < 0) or (pc >= block.codeSize) then
     exit;
-    end
-  else
-    pc := i;    
-  
-	writeln('Starting execution, codesize is ', block.codeSize, ' byte(s), datasize is ', block.dataSize, ' element(s).');
+
+  writeln('GMC DEBUG: executing ', integer(owner), ' at ', pc);
 
   try
     while (pc < block.codeSize) do
-      SingleStep;
+    case ord(block.code[pc]) of
+      _GETC		: begin
+                push(cmdline);
+                inc(pc);
+                end;
+      _ITOF   : begin
+                VarCast(v1, pop(), varSingle);
+                push(v1);
+                inc(pc);
+                end;
+      _FTOI   : begin
+                VarCast(v1, pop(), varInteger);
+                push(v1);
+                inc(pc);
+                end;
+      _ITOS		: begin
+                push(IntToStr(pop()));
+                inc(pc);
+                end;
+      _BTOS		: begin
+                push(IntToStr(pop()));
+                inc(pc);
+                end;
+      _FTOS   : begin
+                VarCast(v1, pop(), varString);
+                push(v1);
+                inc(pc);
+                end;
+      _PUSHI 	: begin
+                move(block.code[pc + 1], i, 4);
+                inc(pc, 5);
+                push(i);
+                end;
+      _PUSHF  : begin
+                move(block.code[pc + 1], f, 4);
+                inc(pc, 5);
+                push(f);
+                end;
+      _PUSHS  : begin
+                p := @block.code[pc + 1];
+                inc(pc, strlen(p) + 2);
 
+                push(string(p));
+                end;
+      _PUSHR  : begin
+                move(block.code[pc + 1], r, 1);
+                inc(pc, 2);
+                push(data[r]);
+                end;
+      _POPR   : begin
+                move(block.code[pc + 1], r, 1);
+                inc(pc, 2);
+                data[r] := pop();
+                end;
+      _ADD		: begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 + v2);
+                inc(pc);
+                end;
+      _SUB		: begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 - v2);
+                inc(pc);
+                end;
+      _MUL		: begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 * v2);
+                inc(pc);
+                end;
+      _DIV		: begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 / v2);
+                inc(pc);
+                end;
+      _AND    : begin
+                push(pop() and pop());
+                inc(pc);
+                end;
+      _OR     : begin
+                push(pop() or pop());
+                inc(pc);
+                end;
+      _LT     : begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 < v2);
+                inc(pc);
+                end;
+      _GT     : begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 > v2);
+                inc(pc);
+                end;
+      _LTE    : begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 <= v2);
+                inc(pc);
+                end;
+      _GTE    : begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 >= v2);
+                inc(pc);
+                end;
+      _EQ     : begin
+                v2 := pop();
+                v1 := pop();
+                push(v1 = v2);
+                inc(pc);
+                end;
+      _GET		: begin
+                v2 := pop();
+                v1 := pop();
+                push(externalTrap(v1, v2));
+                inc(pc);
+                end;
+      _GETR		: begin
+                move(block.code[pc + 1], r, 1);
+                inc(pc, 2);
+                pop();
+                end;
+      _TRAP		: begin
+                systemTrap(owner, pop());
+                inc(pc);
+                end;
+      _SLEEP  : begin
+                v1 := pop();
+
+                if (clockTick >= v1) then
+                  begin
+                  clockTick := 0;
+                  inc(pc);
+                  end
+                else
+                  begin
+                  inc(clockTick);
+                  push(v1);
+                  break;
+                  end;
+                end;
+      _WAIT   : begin
+                v1 := pop();
+
+                if (not waitTrap(owner, v1)) then
+                  begin
+                  push(v1);
+                  break;
+                  end
+                else
+                  inc(pc);
+                end;
+      _SIGNAL : begin
+                v1 := pop();
+                inc(pc);
+                signalTrap(owner, v1);
+                end;
+      _RET		: begin
+                i := popr();
+                pc := i;
+                end;
+      _CALL 	: begin
+                move(block.code[pc + 1], i, 4);
+
+                if (i < 0) or (i > block.codeSize) then
+                  vmError(owner, 'procedure call outside of boundary');
+
+                pushr(pc + 5);					// save return address
+                pc := i;
+                end;
+      _CALLE  : begin
+                p := @block.code[pc + 1];
+                inc(pc, strlen(p) + 2);
+
+                meth := GExternalMethod(externalMethods.get(string(p)));
+
+                if (meth <> nil) then
+                  callMethod(meth.classAddr, meth.methodAddr, meth.signature)
+                else
+                  vmError(owner, 'unregistered external method "' + p + '"');
+                end;
+      _JMP    : begin
+                move(block.code[pc + 1], i, 4);
+
+                if (i < 0) or (i > block.codeSize) then
+                  vmError(owner, 'jump outside of boundary');
+
+                pc := i;
+                end;
+      _JZ     : begin
+                move(block.code[pc + 1], i, 4);
+                v1 := pop();
+
+                if (i < 0) or (i > block.codeSize) then
+                  vmError(owner, 'jump outside of boundary');
+
+                if (integer(v1) = 0) then
+                  pc := i
+                else
+                  inc(pc, 5);
+                end;
+      _JNZ    : begin
+                move(block.code[pc + 1], i, 4);
+                v1 := pop();
+
+                if (i < 0) or (i > block.codeSize) then
+                  vmError(owner, 'jump outside of boundary');
+
+                if (integer(v1) <> 0) then
+                  pc := i
+                else
+                  inc(pc, 5);
+                end;
+      _HALT : pc := block.codeSize;
+    else
+      inc(pc);
+    end;
   except
     on E : EVariantError do
-      vmError('stack error: ' + E.Message);
+      vmError(owner, 'stack error: ' + E.Message);
   end;
 
-  writeln('Execution halted.');
+{  writeln('Execution halted.');
 
   if (sp > 0) then
     begin
@@ -551,12 +585,17 @@ begin
 
   writeln(#13#10'Data segment:'#13#10);
 
-  for i := 0 to block.dataSize - 1 do
+  for i := 0 to dataSize - 1 do
     begin
     writeln('[R', i, '] ', data[i]);
-    end;
+    end; }
 end;
 
+procedure setVMError(method : GVMError);
+begin
+  if (Assigned(method)) then
+    vmError := method;
+end;
 
 procedure setSystemTrap(method : GSystemTrap);
 begin
@@ -599,11 +638,12 @@ end;
 begin
   DecimalSeparator := '.';
 
+  setVMError(dummyError);
   setSystemTrap(dummySystemTrap);
   setExternalTrap(dummyExternalTrap);
   setSignalTrap(dummySignalTrap);
   setWaitTrap(dummyWaitTrap);
 
-  codeCache := GHashTable.Create(1024);
+  codeCache := GHashTable.Create(128);
   externalMethods := GHashTable.Create(256);
 end.

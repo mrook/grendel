@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.19 2001/04/27 14:14:43 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.20 2001/05/11 14:24:23 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -477,7 +477,6 @@ begin
         act(AT_SOCIAL,vict_found,false,ch,nil,vict,TO_VICT);
 
       if ((not ch.IS_NPC)) and (vict.IS_NPC) and
-        not IS_SET(vict.npc_index.mpflags,MPROG_ACT) and
        (vict.IS_AWAKE) then
         begin
         chance:=random(10);
@@ -604,8 +603,8 @@ begin
           act(AT_REPORT,'You have won the auction! '+cap(GObject(item).name^)+' at '+
               inttostr(bid)+' coins.',false,buyer,nil,nil,TO_CHAR);
 
-          dec(GCharacter(buyer).player^.bankgold, bid);
-          inc(GCharacter(seller).player^.bankgold, bid);
+          dec(GPlayer(buyer).bankgold, bid);
+          inc(GPlayer(seller).bankgold, bid);
           end
         else
           begin

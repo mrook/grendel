@@ -61,7 +61,7 @@ const
 procedure stopfighting(ch : GCharacter);
 procedure death_cry(ch, killer : GCharacter);
 
-procedure gain_xp(ch : GCharacter; xp : cardinal);
+procedure gain_xp(ch : GPlayer; xp : cardinal);
 
 function damage(ch, oppnt : GCharacter; dam : integer; dt : integer) : integer;
 function one_hit(ch, victim : GCharacter) : integer;
@@ -73,7 +73,6 @@ procedure update_fighting;
 implementation
 
 uses
-    progs,
     timers,
     update,
     Channels;
@@ -143,46 +142,44 @@ begin
   act(AT_REPORT,'You hear $n''s death cry.',false,ch,nil,killer,TO_NOTVICT);
 end;
 
-procedure gain_xp(ch : GCharacter; xp : cardinal);
+procedure gain_xp(ch : GPlayer; xp : cardinal);
 var
    hp_gain,mv_gain,ma_gain : integer;
    pracs_gain : integer;
 begin
-  if (ch.IS_NPC) or (ch.IS_IMMORT) then exit;
+  if (ch.IS_IMMORT) then exit;
 
   { no message here, could spam a level 500 off the floor - Grimlord }
 
   if (ch.level >= LEVEL_MAX) then
     exit;
 
-  with ch do
+  with GPlayer(ch) do
     begin
-    inc(player^.xptot,xp);
-    dec(player^.xptogo,xp);
+    inc(xptot,xp);
+    dec(xptogo,xp);
 
-    while (player^.xptogo<=0) do
+    while (xptogo<=0) do
       begin
-      pracs_gain := round(ability.wis / 20) + random(6) - 1; // base prac gain on wis
-      hp_gain:=(ability.con div 4)+random(6)-3;
-      mv_gain:=ability.dex div 4;
+      pracs_gain := round(wis / 20) + random(6) - 1; // base prac gain on wis
+      hp_gain := (con div 4)+random(6)-3;
+      mv_gain := dex div 4;
+
       if odd(level) then
-        ma_gain:=round((ability.int+ability.wis)/10) // base mana gain on int and wis
-//        ma_gain:=round(ability.wis / 5) // base mana gain on wis
+        ma_gain := round((int + wis) / 10) // base mana gain on int and wis
       else
-        ma_gain:=0;
+        ma_gain := 0;
 
-      inc(player^.pracs, pracs_gain);
-      with point do
-        begin
-        inc(max_hp,hp_gain);
-        inc(max_mv,mv_gain);
-        inc(max_mana,ma_gain);
-        hp:=max_hp;
-        mv:=max_mv;
-        end;
+      inc(pracs, pracs_gain);
 
-      inc(level);
-      
+      inc(max_hp,hp_gain);
+      inc(max_mv,mv_gain);
+      inc(max_mana,ma_gain);
+      hp:=max_hp;
+      mv:=max_mv;
+
+      level := level + 1;
+
       act(AT_WHITE,Format('>> You have advanced to level %d!', [level]),false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT, 'You gain $B$1' + inttostr(hp_gain) + '$A$7 health, $B$1' + inttostr(mv_gain) + '$A$7 moves, $B$1' + inttostr(ma_gain) + '$A$7 mana and $B$1' + inttostr(pracs_gain) + '$A$7 practice sessions.', false, ch, nil, nil, TO_CHAR);
 
@@ -192,9 +189,9 @@ begin
         act(AT_WHITE,'>> You have achieved the maximum level possible!',false,ch,nil,nil,TO_CHAR);
         end;
 
-      inc(player^.xptogo, ch.calcxp2lvl);
+      inc(xptogo, ch.calcxp2lvl);
 
-      point.hitroll := UMax((level div 5)+50,100);
+      hitroll := UMax((level div 5)+50,100);
 
       ch.calcRank;
       end;
@@ -203,7 +200,7 @@ end;
 
 function get_exp_worth(ch : GCharacter) : integer;
 begin
-  get_exp_worth := longint(ch.level) * longint(ch.point.max_hp);
+  get_exp_worth := longint(ch.level) * longint(ch.max_hp);
 end;
 
 function xp_compute(ch, victim : GCharacter) : cardinal;
@@ -434,8 +431,8 @@ begin
     end;
 
   { in a battleground, immortals should receive damage - Grimlord }
-  if (not oppnt.IS_IMMORT) or ((not oppnt.IS_NPC) and oppnt.IS_IMMORT) and (oppnt.player^.bg_status = BG_PARTICIPATE) then
-    dec(oppnt.point.hp, dam);
+  if (not oppnt.IS_IMMORT) or ((not oppnt.IS_NPC) and oppnt.IS_IMMORT) and (GPlayer(oppnt).bg_status = BG_PARTICIPATE) then
+    dec(oppnt.hp, dam);
 
   { ermmz... you shouldn't receive xp when damaged by poison - Grimlord }
   if (oppnt <> ch) then
@@ -453,8 +450,8 @@ begin
     begin
     if (not ch.IS_IMMORT) and (not ch.IS_NPC) then
       begin
-      gain_xp(ch,xp);
-      inc(ch.player^.fightxp,xp);
+      gain_xp(GPlayer(ch),xp);
+      inc(GPlayer(ch).fightxp,xp);
       end;
     end
   else
@@ -463,7 +460,7 @@ begin
     exit;
     end;
 
-  if (oppnt.point.hp<0) then
+  if (oppnt.hp<0) then
     begin
     unregisterTimer(oppnt, TIMER_CAST);
     unregisterTimer(oppnt, TIMER_COMBAT);
@@ -487,14 +484,15 @@ begin
       xp := xp_compute(ch, oppnt);
 
       if (not ch.IS_NPC) then
-        act(AT_REPORT,'You gain ' + inttostr(xp)+' XP for the kill and '+IntToStr(ch.player^.fightxp)+' XP for fighting.',false,ch,nil,nil,TO_CHAR);
-
-      gain_xp(ch,xp);
+        begin
+        act(AT_REPORT,'You gain ' + inttostr(xp)+' XP for the kill and '+IntToStr(GPlayer(ch).fightxp)+' XP for fighting.',false,ch,nil,nil,TO_CHAR);
+        gain_xp(GPlayer(ch),xp);
+        end;
       end;
 
     if (oppnt.IS_NPC) then
       begin
-      deathTrigger(oppnt, ch);
+//      deathTrigger(oppnt, ch);
 
       { if switched, let go }
       if (oppnt.conn <> nil) then
@@ -504,10 +502,10 @@ begin
 
      if (not ch.IS_NPC) then
         begin
-        if (IS_SET(ch.player^.cfg_flags,CFG_AUTOLOOT)) then
+        if (IS_SET(GPlayer(ch).cfg_flags,CFG_AUTOLOOT)) then
           interpret(ch, 'get all ''corpse of ' + oppnt.name^ + '''');
 
-        if (IS_SET(ch.player^.cfg_flags,CFG_AUTOSAC)) then
+        if (IS_SET(GPlayer(ch).cfg_flags,CFG_AUTOSAC)) then
           interpret(ch, 'sac ''corpse of ' + oppnt.name^ + '''');
         end;
       end
@@ -519,22 +517,22 @@ begin
         4% when killed by PC  - Grimlord}
       if (ch.IS_NPC) then
         begin
-        inc(oppnt.player^.xptogo, oppnt.calcxp2lvl div 10);
+        inc(GPlayer(oppnt).xptogo, oppnt.calcxp2lvl div 10);
         ch.hunting := nil;
-        REMOVE_BIT(ch.act_flags, ACT_HUNTING);
+        REMOVE_BIT(GNPC(ch).act_flags, ACT_HUNTING);
         end
       else
         begin
         inc(ch.kills);
 
         { get a point when killing one in bg - Grimlord }
-        if (ch.player^.bg_status = BG_PARTICIPATE) then
-          inc(ch.player^.bg_points);
+        if (GPlayer(ch).bg_status = BG_PARTICIPATE) then
+          inc(GPlayer(ch).bg_points);
 
-        if (oppnt.player^.bg_status <> BG_PARTICIPATE) then
-          inc(oppnt.player^.xptogo,  oppnt.calcxp2lvl div 4);
+        if (GPlayer(oppnt).bg_status <> BG_PARTICIPATE) then
+          inc(GPlayer(oppnt).xptogo,  oppnt.calcxp2lvl div 4);
 
-        if (IS_SET(ch.player^.cfg_flags, CFG_AUTOSCALP)) then
+        if (IS_SET(GPlayer(ch).cfg_flags, CFG_AUTOSCALP)) then
           interpret(ch, 'scalp corpse of '+oppnt.name^);
         end;
 
@@ -550,8 +548,8 @@ begin
 
         if not (ch.IS_SAME_ALIGN(oppnt)) then
           begin
-          if (ch.player^.taunt <> '') then
-            act(AT_WHITE, '$N taunts: ' + ch.player^.taunt, false, oppnt, nil, ch, TO_CHAR);
+          if (GPlayer(ch).taunt <> '') then
+            act(AT_WHITE, '$N taunts: ' + GPlayer(ch).taunt, false, oppnt, nil, ch, TO_CHAR);
 
           // update_trophy(ch,oppnt);
           end;
@@ -563,7 +561,7 @@ begin
     end;
 
   if (not oppnt.IS_NPC) then
-   if (oppnt.point.hp <= oppnt.player^.wimpy) then
+   if (oppnt.hp <= GPlayer(oppnt).wimpy) then
     interpret(oppnt,'flee');
 end;
 
@@ -636,8 +634,8 @@ begin
     victim.fighting:=ch;
     end;
 
-  vict_ac := victim.point.ac;
-  hit_roll := ch.point.hitroll;
+  vict_ac := victim.ac;
+  hit_roll := ch.hitroll;
 
   if (not ch.CAN_SEE(victim)) then          { -10 penalty to hitroll when not able to see target }
     dec(hit_roll,10);
@@ -651,7 +649,7 @@ begin
   roll := rolldice(1,100);
 
   { undead or spirits: attack will go right through them if it's non-magical - Grimlord }
-  if (victim.IS_NPC) and (IS_SET(victim.act_flags, ACT_SPIRIT)) and (not ch.IS_AFFECT(AFF_ENCHANT)) then
+  if (victim.IS_NPC) and (IS_SET(GNPC(victim).act_flags, ACT_SPIRIT)) and (not ch.IS_AFFECT(AFF_ENCHANT)) then
     begin
     act(AT_REPORT,'Your attack goes right through your victim as if it was not there!', false,ch,nil,victim,TO_CHAR);
     act(AT_REPORT,'$n''s attack just doesn''t seem to have any effect!', false,ch,nil,victim,TO_ROOM);
@@ -691,12 +689,12 @@ begin
     if (wield <> nil) then
       dam := rolldice(wield.value[2],wield.value[3])
     else
-    if (ch.point.damnumdie<>0) and (ch.point.damsizedie<>0) then
-      dam := rolldice(ch.point.damnumdie,ch.point.damsizedie)
+    if (ch.damnumdie<>0) and (ch.damsizedie<>0) then
+      dam := rolldice(ch.damnumdie,ch.damsizedie)
     else
       dam := rolldice(1,3);
 
-    inc(dam,ch.point.apb);
+    inc(dam,ch.apb);
     inc(dam,prof_bonus div 4);
 
     chance := ch.LEARNED(gsn_enhanced_damage);
@@ -707,12 +705,12 @@ begin
       inc(dam, 10);
       end;
 
-    dam := (dam * ch.ability.str) div 50;
+    dam := (dam * ch.str) div 50;
 
     one_hit:=damage(ch,victim,dam, TYPE_HIT + ds);
     end
   else
-  if (roll+((victim.ability.dex-50) div 12)<=hit_roll) then
+  if (roll+((victim.dex-50) div 12)<=hit_roll) then
     begin
     if (victim.IS_FLYING) then
       begin
@@ -831,7 +829,7 @@ begin
     else
       dual_bonus := 0;
 
-    if (ch.point.mv < 10) then
+    if (ch.mv < 10) then
       dec(dual_bonus, 20);
 
     chance := ch.LEARNED(gsn_second_attack) + dual_bonus;
@@ -925,7 +923,7 @@ begin
 
         if (gch <> ch) and (gch.leader=ch.leader) and (gch.room = ch.room) then
          if (gch.fighting = nil) and (gch.position = POS_STANDING) then
-          if (gch.IS_NPC) or (IS_SET(gch.player^.cfg_flags, CFG_ASSIST)) then
+          if (gch.IS_NPC) or (IS_SET(GPlayer(gch).cfg_flags, CFG_ASSIST)) then
             begin
             if (vch.CHAR_DIED) then
               break;
@@ -953,7 +951,7 @@ begin
             break;
 
           if (gch.IS_NPC) and (gch.IS_AWAKE) then
-           if (gch.position = POS_STANDING) and (gch.npc_index.vnum = ch.npc_index.vnum) then
+           if (gch.position = POS_STANDING) and (GNPC(gch).npc_index.vnum = GNPC(ch).npc_index.vnum) then
             if (number_percent <= 25) then
              begin
              if (vch.CHAR_DIED) then
@@ -981,7 +979,7 @@ begin
       if (ch.hunting <> nil) and (ch.hunting.room = ch.room) then
         interpret(ch, 'kill '+ch.hunting.name^);
 
-      if (IS_SET(ch.act_flags, ACT_AGGRESSIVE)) then
+      if (IS_SET(GNPC(ch).act_flags, ACT_AGGRESSIVE)) then
         begin
         vch := ch.room.findRandomChar;
 
@@ -1000,12 +998,12 @@ begin
     conn := node_world.element;
 
     if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
-      conn.ch.emptyBuffer;
+      GPlayer(conn.ch).emptyBuffer;
 
     node_world := node_world.next;
     end;
 
-  node_world := char_list.head;
+{  node_world := char_list.head;
 
   while (node_world <> nil) do
     begin
@@ -1015,7 +1013,7 @@ begin
       fightTrigger(ch, ch.fighting);
 
     node_world := node_world.next;
-    end;
+    end; }
 end;
 
 end.

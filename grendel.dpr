@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.28 2001/04/28 16:06:27 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.29 2001/05/11 14:24:24 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -68,7 +68,6 @@ uses
   clan in 'units\clan.pas',
   clean in 'units\clean.pas',
   Winsock2 in 'units\winsock2.pas',
-  progs in 'units\progs.pas',
   md5 in 'units\md5.pas',
   MemCheck in 'units\MemCheck.pas',
   timers in 'units\timers.pas',
@@ -77,7 +76,8 @@ uses
   LibXmlParser in 'units\LibXmlParser.pas',
   NameGen in 'units\NameGen.pas',
   bulletinboard in 'units\bulletinboard.pas',
-  Channels in 'units\Channels.pas';
+  Channels in 'units\Channels.pas',
+  progs in 'units\progs.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -229,7 +229,7 @@ begin
     node := node.next;
 
     if (not ch.IS_NPC) then
-      ch.quit;
+      GPlayer(ch).quit;
     end;
 end;
 
@@ -628,6 +628,8 @@ begin
   loadNameTables(NameTablesDataFile);
   write_console('Loading noteboards...');
   load_notes('boards.dat');
+  write_console('Initializing GMC contexts...');
+  init_progs;
 
   write_console('String hash stats: ');
   str_hash.hashStats;

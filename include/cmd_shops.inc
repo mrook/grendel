@@ -22,7 +22,7 @@ begin
   if banker=nil then
     ch.sendBuffer('If only there was a banker in sight!'#13#10)
   else
-    ch.sendBuffer('You currently have '+inttostr(ch.player^.bankgold)+
+    ch.sendBuffer('You currently have '+inttostr(GPlayer(ch).bankgold)+
                  ' coins stored at a bank.'#13#10);
 end;
 
@@ -65,25 +65,25 @@ begin
         ch.sendBuffer('You must type a number.'#13#10);
         exit;
       end;
-      if s>ch.player^.bankgold then
+      if s>GPlayer(ch).bankgold then
         begin
         ch.sendBuffer('You don''t have that much money!'#13#10);
         exit;
         end;
-      dec(ch.player^.bankgold,s);
+      dec(GPlayer(ch).bankgold,s);
       inc(ch.gold,s);
       ch.sendBuffer('You get '+inttostr(s)+' coins from your account.'#13#10);
       end
     else
     if (param = 'all') then
       begin
-      s:=ch.player^.bankgold;
+      s:=GPlayer(ch).bankgold;
       if s=0 then
         begin
         ch.sendBuffer('You don''t have anything in your account!'#13#10);
         exit;
         end;
-      ch.player^.bankgold:=0;
+      GPlayer(ch).bankgold:=0;
       inc(ch.gold,s);
       ch.sendBuffer('You get '+inttostr(s)+' coins from your account.'#13#10);
       end
@@ -142,7 +142,7 @@ begin
         exit;
         end;
       dec(ch.gold,s);
-      inc(ch.player^.bankgold,s);
+      inc(GPlayer(ch).bankgold,s);
       ch.sendBuffer('You store '+inttostr(s)+' coins at the bank.'#13#10);
       end
     else
@@ -153,7 +153,7 @@ begin
         ch.sendBuffer('You are not carrying any money!'#13#10);
         exit;
         end;
-      inc(ch.player^.bankgold,ch.gold);
+      inc(GPlayer(ch).bankgold,ch.gold);
       ch.sendBuffer('You store '+inttostr(ch.gold)+' coins at the bank.'#13#10);
       ch.gold:=0;
       end
@@ -313,7 +313,7 @@ begin
     exit;
     end;
 
-  shop := keeper.npc_index.shop;
+  shop := GNPC(keeper).npc_index.shop;
 
   if (time_info.hour < shop.open_hour) or (time_info.hour > shop.close_hour) then
     begin

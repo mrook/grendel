@@ -187,17 +187,17 @@ end;
 
 procedure postNote(c : pointer; text : string);
 var note : GNote;
-    ch : GCharacter;
+    ch : GPlayer;
 begin
   ch := c;
 
   note := GNote.Create;
 
-  note.board := ch.player^.active_board;
-  note.number := noteNumber(ch.player^.active_board);
+  note.board := ch.active_board;
+  note.number := noteNumber(ch.active_board);
   note.date := DateTimeToStr(Now);
   note.author := ch.name^;
-  note.subject := ch.player^.subject;
+  note.subject := ch.subject;
   note.text := text;
 
   notes.insertLast(note);

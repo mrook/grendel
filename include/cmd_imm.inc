@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.33 2001/05/10 17:21:07 xenon Exp $
+// $Id: cmd_imm.inc,v 1.34 2001/05/11 14:25:04 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -81,12 +81,15 @@ end;
 procedure do_wizinvis(ch:GCharacter;param:string);
 var level:integer;
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (ch.IS_WIZINVIS) then
     begin
     act(AT_REPORT,'You feel yourself brightening.',false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'A light shines and $n appears.',false,ch,nil,nil,TO_ROOM);
-    REMOVE_BIT(ch.player^.flags,PLR_WIZINVIS);
-    ch.player^.wiz_level:=0;
+    REMOVE_BIT(GPlayer(ch).flags,PLR_WIZINVIS);
+    GPlayer(ch).wiz_level:=0;
     end
   else
     begin
@@ -99,10 +102,11 @@ begin
       end
     else
       level:=ch.level;
+
     act(AT_REPORT,'You wave your hand and disappear.',false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n waves $s hand and disappears in a storm of colors.',false,ch,nil,nil,TO_ROOM);
-    SET_BIT(ch.player^.flags,PLR_WIZINVIS);
-    ch.player^.wiz_level:=level;
+    SET_BIT(GPlayer(ch).flags,PLR_WIZINVIS);
+    GPlayer(ch).wiz_level:=level;
     end;
 end;
 
@@ -131,7 +135,7 @@ begin
       act(AT_SLAY,'You slay $N in cold blood!',false,ch,nil,t,TO_CHAR);
       act(AT_SLAY,'$n slays you in cold blood!',false,ch,nil,t,TO_VICT);
       act(AT_SLAY,'$n slays $N in cold blood!',false,ch,nil,t,TO_NOTVICT);
-      dam := UMax(t.point.max_hp, 800);
+      dam := UMax(t.max_hp, 800);
       damage(ch,t,dam,TYPE_SLAY);
       end;
     end;
@@ -142,11 +146,12 @@ var vict:GCharacter;
     lvl,num,a:integer;
     vict_nm:string;
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
     ch.sendBuffer('Advance whom?'#13#10);
     exit;
     end;
+
   param:=one_argument(param,vict_nm);
   vict:=findcharworld(ch,vict_nm);
 
@@ -155,26 +160,29 @@ begin
     ch.sendBuffer('This command does not work on NPCs.'#13#10);
     exit;
   end;
-  
+
   try
     lvl:=strtoint(param);
   except
     ch.sendBuffer('Invalid numeric format.'#13#10);
     exit;
   end;
-  if (lvl>LEVEL_MAX) then
+  if (lvl > LEVEL_MAX) then
     ch.sendBuffer('Use GRACE to give a character immortal status.'#13#10)
   else
-  if vict=nil then
+  if (vict = nil) then
     ch.sendBuffer('That character is not online right now.'#13#10)
   else
   begin
     num := lvl - vict.level;
     vict.in_command:=true;
+
     for a:=1 to num do
-      gain_xp(vict,vict.player^.xptogo);
+      gain_xp(GPlayer(vict), GPlayer(vict).xptogo);
+
     act(AT_REPORT,'You have advanced $N to level '+inttostr(vict.level)+'.',false,ch,nil,vict,TO_CHAR);
     act(AT_REPORT,'$N has advanced you to level '+inttostr(vict.level)+'!',false,vict,nil,ch,TO_CHAR);
+
     vict.in_command:=false;
   end;
 end;
@@ -229,17 +237,17 @@ begin
     if ((lev > LEVEL_MAX) and (lev <= LEVEL_MAX_IMMORTAL)) then         // Xenon 20/Feb/2001 : replaced vict.level = 500 with lev = 1000
       begin
       { Set hps etc. to immortal level }
-      vict.point.max_hp:=15000;
-      vict.point.max_mv:=15000;
-      vict.point.max_mana:=15000;
-      vict.point.hp:=15000;
-      vict.point.mv:=15000;
-      vict.point.mana:=15000;
-      vict.ability.str:=100;
-      vict.ability.con:=100;
-      vict.ability.dex:=100;
-      vict.ability.int:=100;
-      vict.ability.wis:=100;
+      vict.max_hp := 15000;
+      vict.max_mv := 15000;
+      vict.max_mana := 15000;
+      vict.hp := 15000;
+      vict.mv := 15000;
+      vict.mana := 15000;
+      vict.str := 100;
+      vict.con := 100;
+      vict.dex := 100;
+      vict.int := 100;
+      vict.wis := 100;
       vict.sendBuffer(findHelp('M_IMMORTALIZE_').text);
       end
     else
@@ -299,7 +307,7 @@ begin
       stopfighting(vict);
       vict.sendBuffer(#13#10 + findHelp('M_DESTROY_').text);
       vict.emptyBuffer;
-      vict.quit;
+      GPlayer(vict).quit;
 
       ch.sendBuffer('Ok.'#13#10);
       write_console(vict.name^ + ' has been destroyed.');
@@ -529,24 +537,24 @@ begin
 
  location := findLocation(ch, locn_name);
 
- if (location = nil) then // if vnum doesn't exist yet and vnum is in builders range, create the room
- begin
+ if (not ch.IS_NPC) and (location = nil) then // if vnum doesn't exist yet and vnum is in builders range, create the room
+   begin
    try
-     if (length(ch.player^.area_fname) = 0) then
-     begin
+     if (length(GPlayer(ch).area_fname) = 0) then
        raise GException.Create('cmd_imm.inc:do_goto', 'no area assigned');
-     end;
+
      vnum := StrToInt(locn_name);
-     if (vnum >= ch.player^.r_lo) and (vnum < ch.player^.r_hi) then
-       if (ch.player^.area = nil) then
-       begin
+     
+     if (vnum >= GPlayer(ch).r_lo) and (vnum < GPlayer(ch).r_hi) then
+       if (GPlayer(ch).area = nil) then
+         begin
          ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
          exit;
-       end
+         end
        else
-       begin
+         begin
          ch.sendBuffer(ch.ansiColor(15) + 'Creating room #' + inttostr(vnum) + '.' + ch.ansiColor(7) + #13#10#13#10);
-         new_room := createRoom(vnum, ch.player^.area);
+         new_room := createRoom(vnum, GPlayer(ch).area);
          ch.fromRoom();
          ch.toRoom(new_room);
          interpret(ch, 'look');
@@ -567,12 +575,12 @@ begin
    begin
    ch.sendBuffer('That room is private right now.' + #13#10);
    exit;
- end;
+   end;
 
  if ch.fighting <> nil then
- begin
- 	stopFighting(ch);
- end;
+   begin
+   stopFighting(ch);
+   end;
 
  {goto while hunting not tested! - result may be unpredictable!!}
  {if ch.hunting <> nil then
@@ -581,24 +589,24 @@ begin
   REMOVE_BIT(ch.act_flags, ACT_HUNTING);
  end;}
 
-  if not ch.IS_WIZINVIS then
-  begin
-    if (ch.player^.bamfout <> '') then
-      act(AT_WHITE, ch.player^.bamfout,false,ch,nil,nil,TO_ROOM)
+  if (not ch.IS_WIZINVIS) and (not ch.IS_NPC) then
+    begin
+    if (GPlayer(ch).bamfout <> '') then
+      act(AT_WHITE, GPlayer(ch).bamfout,false,ch,nil,nil,TO_ROOM)
     else
       act(AT_WHITE,'$n leaves in a swirling mist.',false,ch,nil,nil,TO_ROOM);
-  end;
+    end;
 
   ch.fromRoom;
   ch.toRoom(location);
 
-  if not ch.IS_WIZINVIS then
-  begin
-    if (ch.player^.bamfin <> '') then
-      act(AT_WHITE, ch.player^.bamfin,false,ch,nil,nil,TO_ROOM)
+  if (not ch.IS_WIZINVIS) and (not ch.IS_NPC) then
+    begin
+    if (GPlayer(ch).bamfin <> '') then
+      act(AT_WHITE, GPlayer(ch).bamfin,false,ch,nil,nil,TO_ROOM)
     else
       act(AT_WHITE,'$n appears in a swirling mist.',false,ch,nil,nil,TO_ROOM);
-  end;
+    end;
 
   interpret(ch, 'look _AUTO');
 end;
@@ -698,19 +706,19 @@ begin
   else
   if (vict = ch) then
     begin
-    ch.player^.snooping.snooped_by := nil;
-    ch.player^.snooping := nil;
+    GPlayer(ch).snooping.snooped_by := nil;
+    GPlayer(ch).snooping := nil;
     ch.sendBuffer('No longer snooping.'#13#10);
     exit;
     end;
 
   act(AT_YELLOW,'Started snooping $N.',false,ch,nil,vict,TO_CHAR);
-  ch.player^.snooping := vict;
+  GPlayer(ch).snooping := vict;
   vict.snooped_by:=ch;
 end;
 
 procedure do_loadup(ch:GCharacter;param:string);
-var vict : GCharacter;
+var vict : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -732,10 +740,10 @@ begin
 
   act(AT_REPORT,'Loading '+param+'...',false,ch,nil,nil,TO_CHAR);
 
-  vict := GCharacter.Create;
+  vict := GPlayer.Create;
   vict.load(param);
-  SET_BIT(vict.player^.flags,PLR_LOADED);
-  SET_BIT(vict.player^.flags,PLR_LINKLESS);
+  SET_BIT(vict.flags,PLR_LOADED);
+  SET_BIT(vict.flags,PLR_LINKLESS);
 
   vict.node_world := char_list.insertLast(vict);
 
@@ -900,20 +908,22 @@ begin
       ch.sendBuffer('Log ALL has been disabled.'#13#10);
     exit;
     end;
-  victim:=FindCharWorld(ch,param);
-  if (victim=nil) then
+
+  victim := findCharWorld(ch,param);
+  if (victim = nil) then
     begin
     ch.sendBuffer('That character does not exist.'#13#10);
     exit;
     end;
-  if (IS_SET(victim.act_flags,ACT_LOG)) then
+
+  if (victim.logging) then
     begin
-    REMOVE_BIT(victim.act_flags,ACT_LOG);
+    victim.logging := false;
     act(AT_REPORT,'No longer logging $N.',false,ch,nil,victim,TO_CHAR);
     end
   else
     begin
-    SET_BIT(victim.act_flags,ACT_LOG);
+    victim.logging := true;
     act(AT_REPORT,'Started logging $N.',false,ch,nil,victim,TO_CHAR);
     end;
 end;
@@ -946,7 +956,10 @@ end;
 procedure do_switch(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
-  if (length(param)=0) then
+  ch.sendBuffer('Temporarily disabled.'#13#10);
+  exit;
+
+{  if (length(param)=0) then
     begin
     ch.sendBuffer('Usage:  SWITCH <character>'#13#10);
     exit;
@@ -977,13 +990,16 @@ begin
   GConnection(ch.conn).original := ch;
   vict.conn := ch.conn;
   ch.conn := nil;
-  ch.player^.switched := vict;
+  ch.player^.switched := vict; }
 end;
 
 procedure do_return(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
-  if (ch.conn = nil) then
+  ch.sendBuffer('Temporarily disabled.'#13#10);
+  exit;
+
+{  if (ch.conn = nil) then
     exit;
     
   if (GConnection(ch.conn).original = nil) then
@@ -1002,7 +1018,7 @@ begin
   ch.sendBuffer('Ok.'#13#10);
 
   if (param = 'sub') then
-    vict.emptyBuffer;
+    vict.emptyBuffer; }
 end;
 
 procedure do_wizhelp(ch:GCharacter;param:string);
@@ -1066,17 +1082,19 @@ begin
   begin
     vict_node := char_list.head;
 
-    while vict_node <> nil do begin
+    while vict_node <> nil do
+      begin
       victim  := GCharacter(vict_node.element);
       if (victim <> ch) and (not victim.IS_NPC) then
-      begin
-        victim.point.hp:=victim.point.max_hp;
-        victim.point.mv:=victim.point.max_mv;
-        victim.point.mana:=victim.point.max_mana;
+        begin
+        victim.hp := victim.max_hp;
+        victim.mv := victim.max_mv;
+        victim.mana := victim.max_mana;
         act(AT_REPORT,'$N has restored you.',false,victim,nil,ch,TO_CHAR);
-      end;
+        end;
+
       vict_node := vict_node.next;
-    end; {while}
+      end; {while}
   	 ch.sendBuffer('Ok.'#13#10);
   end
   else // restore single char
@@ -1089,9 +1107,9 @@ begin
       exit;
     end;
 
-    victim.point.hp:=victim.point.max_hp;
-    victim.point.mv:=victim.point.max_mv;
-    victim.point.mana:=victim.point.max_mana;
+    victim.hp := victim.max_hp;
+    victim.mv := victim.max_mv;
+    victim.mana := victim.max_mana;
 
     ch.sendBuffer('Ok.'#13#10);
     act(AT_REPORT,'$N has restored you.',false,victim,nil,ch,TO_CHAR);
@@ -1100,7 +1118,7 @@ end;
 
 { Xenon 12/Apr/2001: freeze now only works on players lowerlevel than you and you cannot freeze yourself anymore :P }
 procedure do_freeze(ch:GCharacter;param:string);
-var victim:GCharacter;
+var victim : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -1109,47 +1127,41 @@ begin
     exit;
     end;
 
-  victim := findCharWorld(ch,param);
+  victim := findPlayerWorld(ch,param);
   if (victim=nil) then
     begin
     ch.sendBuffer('That character isn''t online.'#13#10);
     exit;
     end;
 
-  if (victim.IS_NPC) then
+  if (victim = ch) then
     begin
-    ch.sendBuffer('Can only freeze players.'#13#10);
+    ch.sendBuffer('You cannot freeze yourself.'#13#10);
     exit;
     end;
 
-  if (victim = ch) then
-  begin
-    ch.sendBuffer('You cannot freeze yourself.'#13#10);
-    exit;
-  end;
-
   if (victim.level >= ch.level) then
-  begin
+    begin
     ch.sendBuffer('Can only freeze players lower level than you.'#13#10);
     exit;
-  end;
+    end;
 
-  if (IS_SET(victim.player^.flags,PLR_FROZEN)) then
+  if (IS_SET(victim.flags,PLR_FROZEN)) then
     begin
     act(AT_REPORT,Format('You have defrosted $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been un-frozen by $N.',false,victim,nil,ch,TO_CHAR);
-    REMOVE_BIT(victim.player^.flags,PLR_FROZEN);
+    REMOVE_BIT(victim.flags,PLR_FROZEN);
     end
   else
     begin
     act(AT_REPORT,Format('You have frozen $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been frozen by $N.',false,victim,nil,ch,TO_CHAR);
-    SET_BIT(victim.player^.flags,PLR_FROZEN);
+    SET_BIT(victim.flags,PLR_FROZEN);
     end;
 end;
 
 procedure do_silence(ch:GCharacter;param:string);
-var victim:GCharacter;
+var victim : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -1158,24 +1170,18 @@ begin
     exit;
     end;
 
-  victim := findCharWorld(ch,param);
+  victim := findPlayerWorld(ch,param);
   if (victim=nil) then
     begin
     ch.sendBuffer('That character does not exist.'#13#10);
     exit;
     end;
 
-  if (victim.IS_NPC) then
-    begin
-    ch.sendBuffer('Can only silence players.'#13#10);
-    exit;
-    end;
-
   if (victim = ch) then
-  begin
+    begin
     ch.sendBuffer('You cannot silence yourself.'#13#10);
     exit;
-  end;
+    end;
 
   if (victim.level >= ch.level) then
   begin
@@ -1184,17 +1190,17 @@ begin
   end;
 
 //  ch.sendBuffer('Ok.'#13#10);
-  if (IS_SET(victim.player^.flags,PLR_SILENCED)) then
+  if (IS_SET(victim.flags,PLR_SILENCED)) then
     begin
     act(AT_REPORT,Format('You have unsilenced $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been un-silenced by $N.',false,victim,nil,ch,TO_CHAR);
-    REMOVE_BIT(victim.player^.flags,PLR_SILENCED);
+    REMOVE_BIT(victim.flags,PLR_SILENCED);
     end
   else
     begin
     act(AT_REPORT,Format('You have silenced $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been silenced by $N.',false,victim,nil,ch,TO_CHAR);
-    SET_BIT(victim.player^.flags,PLR_SILENCED);
+    SET_BIT(victim.flags,PLR_SILENCED);
     end;
 end;
 
@@ -1290,36 +1296,44 @@ end;
 
 procedure do_bamfin(ch : GCharacter; param : string);
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage:  BAMFIN <line or NULL to reset>'#13#10);
-    if (ch.player^.bamfin <> '') then
-      ch.sendBuffer('Currently: ' + ch.player^.bamfin + #13#10);
+
+    if (GPlayer(ch).bamfin <> '') then
+      ch.sendBuffer('Currently: ' + GPlayer(ch).bamfin + #13#10);
     exit;
     end;
 
   if (uppercase(param) = 'NULL') then
-    ch.player^.bamfin := ''
+    GPlayer(ch).bamfin := ''
   else
-    ch.player^.bamfin := param;
+    GPlayer(ch).bamfin := param;
 
   ch.sendBuffer('Ok.'#13#10);
 end;
 
 procedure do_bamfout(ch : GCharacter; param : string);
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage:  BAMFOUT <line or NULL to reset>'#13#10);
-    if (ch.player^.bamfout <> '') then
-      ch.sendBuffer('Currently: ' + ch.player^.bamfout + #13#10);
+
+    if (GPlayer(ch).bamfout <> '') then
+      ch.sendBuffer('Currently: ' + GPlayer(ch).bamfout + #13#10);
     exit;
     end;
 
   if (uppercase(param) = 'NULL') then
-    ch.player^.bamfout := ''
+    GPlayer(ch).bamfout := ''
   else
-    ch.player^.bamfout := param;
+    GPlayer(ch).bamfout := param;
 
   ch.sendBuffer('Ok.'#13#10);
 end;
@@ -1394,33 +1408,36 @@ end;
 
 { Nourish - Nemesis }
 procedure do_nourish(ch:GCharacter;param:string);
-var victim: GCharacter;
+var victim: GPlayer;
     vict_node: GListnode;
 begin
   if (length(param) = 0) then
-  begin
+    begin
     ch.sendBuffer('Usage:  NOURISH <[character]/ALL>'#13#10);
     exit;
-  end;
+    end;
 
   { nourish ALL }
   if uppercase(param) = 'ALL' then
   begin
     vict_node := char_list.head;
 
-    while vict_node <> nil do
+    while (vict_node <> nil) do
       begin
-      victim  := GCharacter(vict_node.element);
-      if (victim <> ch) and (not victim.IS_NPC) then
+      if (vict_node.element <> ch) and (TObject(vict_node.element) is GPlayer) then
         begin
-        victim.player^.condition[COND_FULL]:=100;
-        victim.player^.condition[COND_THIRST]:=100;
-        victim.player^.condition[COND_DRUNK]:=0;
-        victim.player^.condition[COND_HIGH]:=0;
-        victim.player^.condition[COND_CAFFEINE]:=0;
+        victim := GPlayer(vict_node.element);
+
+        victim.condition[COND_FULL]:=100;
+        victim.condition[COND_THIRST]:=100;
+        victim.condition[COND_DRUNK]:=0;
+        victim.condition[COND_HIGH]:=0;
+        victim.condition[COND_CAFFEINE]:=0;
+
         act(AT_REPORT,'You have nourished $N.',false,ch,nil,victim,TO_CHAR);
         act(AT_REPORT,'$N has nourished you.',false,victim,nil,ch,TO_CHAR);
         end;
+
       vict_node := vict_node.next;
       end; {while}
 
@@ -1429,19 +1446,19 @@ begin
   else
     { Nourish single char }
     begin
-    victim := findCharWorld(ch,param);
+    victim := findPlayerWorld(ch,param);
 
-    if (victim = nil) or (victim.IS_NPC) then
+    if (victim = nil) then
       begin
       ch.sendBuffer('That player does not exist.'#13#10);
       exit;
       end;
     
-    victim.player^.condition[COND_FULL]:=100;
-    victim.player^.condition[COND_THIRST]:=100;
-    victim.player^.condition[COND_DRUNK]:=0;
-    victim.player^.condition[COND_HIGH]:=0;
-    victim.player^.condition[COND_CAFFEINE]:=0;
+    victim.condition[COND_FULL]:=100;
+    victim.condition[COND_THIRST]:=100;
+    victim.condition[COND_DRUNK]:=0;
+    victim.condition[COND_HIGH]:=0;
+    victim.condition[COND_CAFFEINE]:=0;
 
     act(AT_REPORT,'You have nourished $N.',false,ch,nil,victim,TO_CHAR);
     act(AT_REPORT,'$N has nourished you.',false,victim,nil,ch,TO_CHAR);
@@ -1559,29 +1576,35 @@ end;
 
 procedure do_holywalk(ch : GCharacter; param : string);
 begin
-  if (IS_SET(ch.player^.flags, PLR_HOLYWALK)) then
+  if (ch.IS_NPC) then
+    exit;
+
+  if (IS_SET(GPlayer(ch).flags, PLR_HOLYWALK)) then
     begin
     ch.sendBuffer('Holy walk off.'#13#10);
-    REMOVE_BIT(ch.player^.flags, PLR_HOLYWALK);
+    REMOVE_BIT(GPlayer(ch).flags, PLR_HOLYWALK);
     end
   else
     begin
     ch.sendBuffer('Holy walk on.'#13#10);
-    SET_BIT(ch.player^.flags, PLR_HOLYWALK);
+    SET_BIT(GPlayer(ch).flags, PLR_HOLYWALK);
     end;
 end;
 
 procedure do_holylight(ch : GCharacter; param : string);
 begin
-  if (IS_SET(ch.player^.flags, PLR_HOLYLIGHT)) then
+  if (ch.IS_NPC) then
+    exit;
+
+  if (IS_SET(GPlayer(ch).flags, PLR_HOLYLIGHT)) then
     begin
     ch.sendBuffer('Holy light off.'#13#10);
-    REMOVE_BIT(ch.player^.flags, PLR_HOLYLIGHT);
+    REMOVE_BIT(GPlayer(ch).flags, PLR_HOLYLIGHT);
     end
   else
     begin
     ch.sendBuffer('Holy light on.'#13#10);
-    SET_BIT(ch.player^.flags, PLR_HOLYLIGHT);
+    SET_BIT(GPlayer(ch).flags, PLR_HOLYLIGHT);
     end;
 end;
 
@@ -1634,7 +1657,7 @@ end;
 procedure do_prename(ch : GCharacter; param : string);
 var
    curr_name, new_name : string;
-   vict : GCharacter;
+   vict : GPlayer;
    buf : string;
 begin
   if (length(param) = 0) then
@@ -1649,7 +1672,7 @@ begin
   curr_name := cap(curr_name);
   new_name := cap(new_name);
 
-  vict := findCharWorld(ch, curr_name);
+  vict := findPlayerWorld(ch, curr_name);
 
   if (vict = nil) then
   begin

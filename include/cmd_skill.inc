@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.12 2001/04/16 17:16:09 xenon Exp $
+// $Id: cmd_skill.inc,v 1.13 2001/05/11 14:25:07 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -55,7 +55,7 @@ begin
     act(AT_REPORT,'$n looks silly as $e tries to bash $mself.',false,ch,nil,nil,TO_ROOM);
     end
   else
-  if (vict.IS_NPC) and (IS_SET(vict.act_flags, ACT_SPIRIT) or IS_SET(vict.act_flags,ACT_NOBASH)) then
+  if (vict.IS_NPC) and (IS_SET(GNPC(vict).act_flags, ACT_SPIRIT) or IS_SET(GNPC(vict).act_flags, ACT_NOBASH)) then
     ch.sendBuffer('You can''t bash that kind of creature!'#13#10)
   else
    with ch do
@@ -72,7 +72,7 @@ begin
         fighting:=vict;
 
         if (not ch.IS_NPC) then
-          player^.fightxp:=0;
+          GPlayer(ch).fightxp:=0;
         end;
       end;
 
@@ -165,7 +165,7 @@ begin
   else
    with ch do
     begin
-    if point.mv<12 then
+    if mv<12 then
       begin
       ch.sendBuffer('You don''t have enough energy to kick.'#13#10);
       exit;
@@ -186,7 +186,7 @@ begin
         fighting:=vict;
 
         if (not ch.IS_NPC) then
-          player^.fightxp:=0;
+          GPlayer(ch).fightxp:=0;
         end;
       end;
 
@@ -194,7 +194,7 @@ begin
 
     chance := ch.LEARNED(gsn_kick);
 
-    if (vict.IS_NPC) and (IS_SET(vict.act_flags,ACT_SPIRIT)) then
+    if (vict.IS_NPC) and (IS_SET(GNPC(vict).act_flags, ACT_SPIRIT)) then
       begin
       ch.sendBuffer('You swing your leg and kick high, but it goes right through your victim!'#13#10);
 
@@ -210,8 +210,8 @@ begin
       //improve_skill(ch,gsn_kick);
 
       dam:=urange(1,rolldice(4,18),level div 6)*3;
-      inc(dam,ch.point.apb);
-      dam:=(dam*ch.ability.str) div 50;
+      inc(dam,ch.apb);
+      dam:=(dam*ch.str) div 50;
 
       damage(ch,ch.fighting,dam, integer(gsn_kick));
       end
@@ -309,7 +309,7 @@ begin
     end;
 
   if (not ch.IS_NPC()) then
-    buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(ch.player^.max_spells - ch.getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
+    buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(GPlayer(ch).max_spells - GPlayer(ch).getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
     
   delete(buf, length(buf) - 2, 2);
   ch.sendPager(buf);
@@ -352,7 +352,8 @@ begin
       buf := buf + #13#10;
 
     if (not ch.IS_NPC()) then
-      buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(ch.player^.max_skills - ch.getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
+      buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(GPlayer(ch).max_skills - GPlayer(ch).getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
+
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
   end;
 
@@ -417,10 +418,10 @@ begin
     if (sn = nil) or (vict.LEARNED(sn) = 0) then
       act(AT_REPORT, '$N doesn''t teach this skill.',false,ch,nil,vict,TO_CHAR)
     else
-      if ((sn.skill_type <> SKILL_SPELL) and (ch.player^.max_skills - ch.getUsedSkillslots() <= 0)) then
+      if ((sn.skill_type <> SKILL_SPELL) and (GPlayer(ch).max_skills - GPlayer(ch).getUsedSkillslots() <= 0)) then
         act(AT_REPORT, 'You have no more free skillslots!', false, ch, nil, nil, TO_CHAR)
       else
-      if ((sn.skill_type = SKILL_SPELL) and (ch.player^.max_spells - ch.getUsedSpellslots() <= 0)) then
+      if ((sn.skill_type = SKILL_SPELL) and (GPlayer(ch).max_spells - GPlayer(ch).getUsedSpellslots() <= 0)) then
         act(AT_REPORT, 'You have no more free spellslots!', false, ch, nil, nil, TO_CHAR)
       else
 {    if (sn.skill_type = SKILL_SPELL) and (ch.skills_learned.getSize() = ch.race.max_spells) then
@@ -543,17 +544,17 @@ begin
       else
       if (ch.LEARNED(sn) < 50) then
         begin
-        if (ch.player^.pracs < 1) then
+        if (GPlayer(ch).pracs < 1) then
         begin
           ch.sendBuffer('You don''t have enough practice sessions left!'#13#10);
           exit;
         end
         else
-          dec(ch.player^.pracs);
+          dec(GPlayer(ch).pracs);
         
 //        ch.SET_LEARNED(ch.LEARNED(sn) + 8, sn);
         // base skill gain on int
-        ch.SET_LEARNED(ch.LEARNED(sn) + round(ch.ability.int / 10) + random(4) - 2, sn);
+        ch.SET_LEARNED(ch.LEARNED(sn) + round(ch.int / 10) + random(4) - 2, sn);
 
         if (ch.LEARNED(sn) > 50) then
           begin
@@ -632,9 +633,9 @@ begin
 
   wield := ch.getWield(ITEM_WEAPON);
 
-  to_hit:=ch.point.hitroll + 10;             { +10 bonus because of backstab }
+  to_hit:=ch.hitroll + 10;             { +10 bonus because of backstab }
 
-  inc(to_hit,victim.point.ac);
+  inc(to_hit,victim.ac);
   inc(to_hit,(ch.LEARNED(sn) - 50) div 5);
   roll:=rolldice(1,100);
 

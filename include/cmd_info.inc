@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.38 2001/05/10 17:24:42 xenon Exp $
+// $Id: cmd_info.inc,v 1.39 2001/05/11 14:25:05 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -126,7 +126,7 @@ begin
   brief:=false;
 
   if (comparestr('_AUTO',param) = 0) then
-   if (not ch.IS_NPC) and IS_SET(ch.player^.cfg_flags, CFG_BRIEF) then
+   if (not ch.IS_NPC) and IS_SET(GPlayer(ch).cfg_flags, CFG_BRIEF) then
     brief:=true;
 
   if (length(param) > 0) and (comparestr('_AUTO',param)<>0) then
@@ -153,11 +153,11 @@ begin
     if (vict <> nil) then
       begin
       if (not vict.IS_NPC) then
-        act(AT_REPORT,vict.name^+'$7 is known as $B$6'+vict.player^.rank+'$A$7 amongst'+
+        act(AT_REPORT,vict.name^+'$7 is known as $B$6' + GPlayer(vict).rank+'$A$7 amongst'+
         ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR);
 
-      w1 := UMin(round((vict.point.hp/vict.point.max_hp)*5),0);
-      w2 := UMin(round((vict.point.mv/vict.point.max_mv)*5),0);
+      w1 := UMin(round((vict.hp / vict.max_hp)*5),0);
+      w2 := UMin(round((vict.mv / vict.max_mv)*5),0);
 
       act(AT_REPORT,vict.name^+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
 
@@ -188,7 +188,7 @@ begin
       if (cnt = 0) then
         ch.sendBuffer('  nothing.'#13#10);
 
-      if (not ch.IS_NPC) and (IS_SET(ch.player^.cfg_flags, CFG_AUTOPEEK)) then
+      if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).cfg_flags, CFG_AUTOPEEK)) then
       begin
         ch.sendBuffer(#13#10);
         interpret(ch, 'peek ' + vict.name^);
@@ -323,23 +323,23 @@ begin
          POS_SEARCHING: act_str := '$N is here, searching for something.';
         end;
 
-        if (IS_SET(vict.act_flags, ACT_FLYING)) then
+        if (vict.IS_FLYING) then
           act_str := act_str + ' (Flying)';
 
         if (vict.IS_INVIS) then
           act_str := act_str + ' (Invis)';
 
-        if (not vict.IS_NPC) and (IS_SET(vict.player^.flags, PLR_LINKLESS)) then
+        if (not vict.IS_NPC) and (IS_SET(GPlayer(vict).flags, PLR_LINKLESS)) then
           act_str := act_str + ' (Linkless)';
 
-        if (ch.IS_IMMORT) and (not vict.IS_NPC) and (IS_SET(vict.player^.flags, PLR_LOADED)) then
+        if (ch.IS_IMMORT) and (not vict.IS_NPC) and (IS_SET(GPlayer(vict).flags, PLR_LOADED)) then
           act_str := act_str + ' (Loaded)';
 
-        if (ch.IS_IMMORT) and (not vict.IS_NPC) and (vict.player^.switched <> nil) then
-          act_str := act_str + ' (Switched: '+ vict.player^.switched.name^ + ')';
+        if (ch.IS_IMMORT) and (not vict.IS_NPC) and (GPlayer(vict).switched <> nil) then
+          act_str := act_str + ' (Switched: '+ GPlayer(vict).switched.name^ + ')';
 
         if (not vict.IS_NPC) and (vict.IS_WIZINVIS) then
-          act_str := act_str + ' (WizInvis: ' + inttostr(vict.player^.wiz_level) + ')';
+          act_str := act_str + ' (WizInvis: ' + inttostr(GPlayer(vict).wiz_level) + ')';
 
         if (vict.IS_NPC) then
           act(AT_NPC,act_str,true,ch,nil,vict,TO_CHAR)
@@ -438,40 +438,41 @@ begin
 
   if (not ch.IS_NPC) and (not ch.IS_IMMORT) then
     begin
-    act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art known as $B$6'+ch.player^.rank+'$A$7 amongst'+
+    act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art known as $B$6' + GPlayer(ch).rank+'$A$7 amongst'+
         ' thy $B$4'+ch.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(ch.player^.xptot)+'$A$7 experience points'+
-        ' and need $B$3'+inttostr(ch.player^.xptogo)+'$A$7 to level.',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).xptot)+'$A$7 experience points'+
+        ' and need $B$3'+inttostr(GPlayer(ch).xptogo)+'$A$7 to level.',false,ch,nil,nil,TO_CHAR);
     end
   else
   if (ch.IS_IMMORT) then
     act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
-    act(AT_REPORT,'   Thou art $B$3'+inttostr(ch.getAge)+'$A$7 years of age ('+inttostr(ch.getPlayed div 60)+' hours).'#13#10,false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'   Thou art $B$3'+inttostr(GPlayer(ch).getAge)+'$A$7 years of age ('+inttostr(GPlayer(ch).getPlayed div 60)+' hours).'#13#10,false,ch,nil,nil,TO_CHAR);
 
-  act(AT_REPORT,'   Health:   $B$3'+pad_integer(ch.point.hp,5)+'$A$7/$B$3'+pad_integer(ch.point.max_hp,5)+
-                '$A$7     Attack Power Bonus: $B$3'+pad_integer(ch.point.apb,4)+
+  act(AT_REPORT,'   Health:   $B$3'+pad_integer(ch.hp,5)+'$A$7/$B$3'+pad_integer(ch.max_hp,5)+
+                '$A$7     Attack Power Bonus: $B$3'+pad_integer(ch.apb,4)+
                 '$A$7     Total kills: $B$3'+inttostr(ch.kills),false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,'   Stamina:  $B$3'+pad_integer(ch.point.mv,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mv,5)+
-                '$A$7     Hitroll:            $B$3'+pad_integer(ch.point.hitroll,4)+
+  act(AT_REPORT,'   Stamina:  $B$3'+pad_integer(ch.mv,5)+'$A$7/$B$3'+pad_integer(ch.max_mv,5)+
+                '$A$7     Hitroll:            $B$3'+pad_integer(ch.hitroll,4)+
                 '$A$7     Alignment:   $B$3'+inttostr(ch.alignment),false,ch,nil,nil,TO_CHAR);
+
   if (ch.IS_NPC) then
-    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.point.mana,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mana,5)+
+    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.mana,5)+'$A$7/$B$3'+pad_integer(ch.max_mana,5)+
                   '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+#13#10,false,ch,nil,nil,TO_CHAR)
   else
-    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.point.mana,5)+'$A$7/$B$3'+pad_integer(ch.point.max_mana,5)+
+    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.mana,5)+'$A$7/$B$3'+pad_integer(ch.max_mana,5)+
                   '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+
-                  '$A$7     Wimpy:       $B$3'+inttostr(ch.player^.wimpy)+#13#10,false,ch,nil,nil,TO_CHAR);
+                  '$A$7     Wimpy:       $B$3'+inttostr(GPlayer(ch).wimpy)+#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (ch.IS_IMMORT) and (ch.IS_WIZINVIS) then
-    act(AT_REPORT,'   WizLevel: $B$3'+pad_integer(ch.player^.wiz_level,3)+#13#10,false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'   WizLevel: $B$3'+pad_integer(GPlayer(ch).wiz_level,3)+#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
-    act(AT_REPORT,'   You have $B$3'+IntToStr(ch.player^.pracs)+'$A$7 practice sessions left.',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'   You have $B$3'+IntToStr(GPlayer(ch).pracs)+'$A$7 practice sessions left.',false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
-    act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(ch.player^.bg_points)+'$A$7 battleground points.',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).bg_points)+'$A$7 battleground points.',false,ch,nil,nil,TO_CHAR);
 
   if (ch.getTrust > ch.level) then
     act(AT_REPORT,'   Thou art trusted by the gods at level '+inttostr(ch.getTrust)+'.',false,ch,nil,nil,TO_CHAR);
@@ -482,10 +483,10 @@ begin
     if (ch.IS_DRUNK) then
       ch.sendBuffer('   Thou art drunk.'#13#10);
 
-    if (ch.player^.condition[COND_THIRST]=0) then
+    if (GPlayer(ch).condition[COND_THIRST]=0) then
       ch.sendBuffer('   Thou art dehydrating.'#13#10);
 
-    if (ch.player^.condition[COND_FULL]=0) then
+    if (GPlayer(ch).condition[COND_FULL]=0) then
       ch.sendBuffer('   Thou art starving to death.'#13#10);
     end;
 
@@ -531,9 +532,9 @@ begin
   if (not ch.IS_NPC) then
     begin
     act(AT_REPORT,'   Thou art carrying $B$2'+inttostr(ch.gold)+'$A$7 coins and hast $B$2'+
-                  inttostr(ch.player^.bankgold)+'$A$7 coins stored at a bank.',false,ch,nil,nil,TO_CHAR);
+                  inttostr(GPlayer(ch).bankgold)+'$A$7 coins stored at a bank.',false,ch,nil,nil,TO_CHAR);
 
-    i := (ch.carried_weight*10) div ((ch.ability.str div 2) + 10);
+    i := (ch.carried_weight*10) div ((ch.str div 2) + 10);
 
     if i<25 then
       buf1 := 'You are unburdened'
@@ -564,18 +565,18 @@ begin
     act(AT_REPORT,'   Thou art carrying a weight of $B$2'+inttostr(ch.carried_weight)+'$A$7 kg(s). ($B$7'+buf1+'$A$7)',false,ch,nil,nil,TO_CHAR);
     end;
 
-  if (not ch.IS_NPC) and (ch.player^.clanleader) then
+  if (not ch.IS_NPC) and (GPlayer(ch).clanleader) then
     act(AT_REPORT,'   Thou art the great leader of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR)
   else
   if (ch.clan <> nil) then
     act(AT_REPORT,'   Thou art a proud member of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
-   if ch.player^.area_fname<>'' then
-    act(AT_REPORT,'   Thou hast been assigned $B$7'+ch.player^.area_fname+'$A$7. '#13#10+
-        '   Thee construction ranges art: '+inttostr(ch.player^.r_lo)+' '+inttostr(ch.player^.r_hi)+' '+
-        inttostr(ch.player^.m_lo)+' '+inttostr(ch.player^.m_hi)+' '+
-        inttostr(ch.player^.o_lo)+' '+inttostr(ch.player^.o_hi)+'.',false,ch,nil,nil,TO_CHAR);
+   if GPlayer(ch).area_fname<>'' then
+    act(AT_REPORT,'   Thou hast been assigned $B$7'+GPlayer(ch).area_fname+'$A$7. '#13#10+
+        '   Thee construction ranges art: '+inttostr(GPlayer(ch).r_lo)+' '+inttostr(GPlayer(ch).r_hi)+' '+
+        inttostr(GPlayer(ch).m_lo)+' '+inttostr(GPlayer(ch).m_hi)+' '+
+        inttostr(GPlayer(ch).o_lo)+' '+inttostr(GPlayer(ch).o_hi)+'.',false,ch,nil,nil,TO_CHAR);
 
   buf1 := #13#10' $8[$4*$8]$3 ' + add_chars(70, '', '-') + ' $8[$4*$8]';
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
@@ -585,11 +586,11 @@ procedure do_stats(ch:GCharacter;param:string);
 var buf : string;
 begin
   buf := 'Stats:'#13#10#13#10 +
-         'Strength:       ' + inttostr(ch.ability.str) + #13#10 +
-         'Constitution:   ' + inttostr(ch.ability.con) + #13#10 +
-         'Dexterity:      ' + inttostr(ch.ability.dex) + #13#10 +
-         'Intelligence:   ' + inttostr(ch.ability.int) + #13#10 +
-         'Wisdom:         ' + inttostr(ch.ability.wis);
+         'Strength:       ' + inttostr(ch.str) + #13#10 +
+         'Constitution:   ' + inttostr(ch.con) + #13#10 +
+         'Dexterity:      ' + inttostr(ch.dex) + #13#10 +
+         'Intelligence:   ' + inttostr(ch.int) + #13#10 +
+         'Wisdom:         ' + inttostr(ch.wis);
 
   act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
 end;
@@ -673,7 +674,7 @@ begin
           if (conn.afk) then
             buf_imm := buf_imm + '$B$7<AFK> $A$7';
 
-          buf_imm := buf_imm + conn.ch.name^ + ' ' + conn.ch.player^.title;
+          buf_imm := buf_imm + conn.ch.name^ + ' ' + GPlayer(conn.ch).title;
 
           buf_imm := buf_imm + #13#10;
 
@@ -701,7 +702,7 @@ begin
           if (conn.afk) then
             buf1 := buf1 + '$B$7<AFK> $A$7';
 
-          buf1 := buf1 + conn.ch.name^ + ' ' + conn.ch.player^.title;
+          buf1 := buf1 + conn.ch.name^ + ' ' + GPlayer(conn.ch).title;
 
           buf1 := buf1 + #13#10;
 
@@ -804,17 +805,16 @@ end;
 
 procedure do_title(ch:GCharacter;param:string);
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (length(param)=0) then
     begin
     ch.sendBuffer('Set title to what?'#13#10);
     exit;
     end;
-  if (ch.IS_NPC) then
-    begin
-    ch.sendBuffer('NPCs cannot set title.'#13#10);
-    exit;
-    end;
-  ch.player^.title := param;
+
+  GPlayer(ch).title := param;
 end;
 
 procedure do_group(ch:GCharacter;param:string);
@@ -857,12 +857,12 @@ begin
 
         buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name^,12);
 
-        buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMin(round((vict.point.hp / vict.point.max_hp) * 5), 0)], 10);
+        buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMin(round((vict.hp / vict.max_hp) * 5), 0)], 10);
 
-        buf1 := buf1 + '$B$1' + pad_string(mv_perc[UMin(round((vict.point.mv / vict.point.max_mv) * 5), 0)], 12);
+        buf1 := buf1 + '$B$1' + pad_string(mv_perc[UMin(round((vict.mv / vict.max_mv) * 5), 0)], 12);
 
         if (not vict.IS_NPC) then
-          buf1 := buf1 + inttostr(vict.player^.xptogo);
+          buf1 := buf1 + inttostr(GPlayer(vict).xptogo);
 
         act(AT_REPORT,buf1,false,ch,nil,nil,TO_CHAR);
         end;
@@ -1098,9 +1098,9 @@ begin
     else
       dam1 := obj.value[2]*obj.value[3];
 
-    inc(dam1, ch.point.apb);
+    inc(dam1, ch.apb);
 
-    dam1:=(dam1 * ch.ability.str) div 50;
+    dam1:=(dam1 * ch.str) div 50;
 
     obj := vict.getWield(ITEM_WEAPON);
 
@@ -1109,20 +1109,20 @@ begin
     else
       dam2 := obj.value[2]*obj.value[3];
 
-    inc(dam2,vict.point.apb);
+    inc(dam2,vict.apb);
 
-    dam2:=(dam2 * ch.ability.str) div 50;
+    dam2:=(dam2 * ch.str) div 50;
 
-    end1:=ch.point.hp;
-    end2:=vict.point.hp;
+    end1:=ch.hp;
+    end2:=vict.hp;
 
     repeat
       dec(end1,dam2);
       dec(end2,dam1);
     until (end1<=0) or (end2<=0);
 
-    proc1:=URange(0,(100*end1) div ch.point.hp,100);
-    proc2:=URange(0,(100*end2) div vict.point.hp,100);
+    proc1:=URange(0,(100*end1) div ch.hp,100);
+    proc2:=URange(0,(100*end2) div vict.hp,100);
 
     if dam1>dam2 then
       act(AT_REPORT,'You look stronger than $N.',false,ch,nil,vict,TO_CHAR)
@@ -1265,13 +1265,17 @@ begin
 
   if (ch.IS_FLYING) then
     ch.sendBuffer('You are flying.'#13#10);
+
   if (IS_SET(ch.aff_flags, AFF_SNEAK)) then
     ch.sendBuffer('You attempt to sneak.'#13#10);
+
   if (IS_SET(ch.aff_flags, AFF_HIDE)) then
     ch.sendBuffer('You attempt to hide.'#13#10);
-  if (IS_SET(ch.player^.flags, PLR_HOLYWALK)) then
+
+  if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).flags, PLR_HOLYWALK)) then
     ch.sendBuffer('Holy walk is on.'#13#10);
-  if (IS_SET(ch.player^.flags, PLR_HOLYLIGHT)) then
+
+  if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).flags, PLR_HOLYLIGHT)) then
     ch.sendBuffer('Holy light is on.'#13#10);
 
   h:=0;
@@ -1359,7 +1363,7 @@ begin
 end;
 
 begin
-  with ch.point do
+  with ch do
     begin
     ch.sendBuffer('Your armor: '#13#10#13#10);
     ch.sendBuffer('Head:    ');
@@ -1400,10 +1404,14 @@ end;
 
 begin
   turn_on := false;
+  if (ch.IS_NPC) then
+    exit;
+
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Current configuration:'#13#10#13#10);
-    with ch.player^ do
+
+    with GPlayer(ch) do
       begin
       if IS_SET(cfg_flags,CFG_ASSIST) then
         hi_type('assist','You automatically assist people in your group.')
@@ -1489,7 +1497,8 @@ begin
       ch.sendBuffer('Unknown option.'#13#10);
       exit;
       end;
-    with ch.player^ do
+
+    with GPlayer(ch) do
     begin
       if not_switch then
       begin
@@ -1533,12 +1542,15 @@ end;
 procedure do_trophy(ch:GCharacter;param:string);
 var f:integer;
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   act(AT_REPORT,'Your trophy bandolier carries the following heads:'#13#10,false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT,'$3[Lvl] [Name]                  [Times]',false,ch,nil,nil,TO_CHAR);
 
-  for f:=1 to ch.player^.trophysize do
-    act(AT_REPORT,'['+pad_integer(ch.player^.trophy[f].level,3)+
-        '] '+pad_string(ch.player^.trophy[f].name,23)+' '+inttostr(ch.player^.trophy[f].times),false,ch,nil,nil,TO_CHAR);
+  for f:=1 to GPlayer(ch).trophysize do
+    act(AT_REPORT,'['+pad_integer(GPlayer(ch).trophy[f].level,3)+
+        '] '+pad_string(GPlayer(ch).trophy[f].name,23)+' '+inttostr(GPlayer(ch).trophy[f].times),false,ch,nil,nil,TO_CHAR);
 end;
 
 procedure do_socials(ch:GCharacter; param:string);
@@ -1597,7 +1609,7 @@ begin
   if (length(alname) > 0) then
     begin
     al := nil;
-    node := ch.player^.aliases.head;
+    node := GPlayer(ch).aliases.head;
 
     while (node <> nil) do
       begin
@@ -1614,7 +1626,7 @@ begin
     begin
       if (al <> nil) then
       begin        
-        ch.player^.aliases.remove(al.node);
+        GPlayer(ch).aliases.remove(al.node);
         al.Free;
         replaced := true;
       end;
@@ -1622,7 +1634,7 @@ begin
       al := GAlias.Create;
 
       al.expand := one_argument(param, al.alias);
-      al.node := ch.player^.aliases.insertLast(al);
+      al.node := GPlayer(ch).aliases.insertLast(al);
 
       if replaced then
         ch.sendBuffer('Alias replaced.'#13#10)
@@ -1635,7 +1647,7 @@ begin
         ch.sendBuffer('No such alias.'#13#10)
       else
         begin
-        ch.player^.aliases.remove(al.node);
+        GPlayer(ch).aliases.remove(al.node);
         al.Free;
 
         ch.sendBuffer('Alias removed.'#13#10);
@@ -1645,13 +1657,13 @@ begin
     exit;
     end;
 
-  if (ch.player^.aliases.getSize = 0) then
+  if (GPlayer(ch).aliases.getSize = 0) then
     begin
     ch.sendBuffer('No aliases.'#13#10);
     exit;
     end;
 
-  node := ch.player^.aliases.head;
+  node := GPlayer(ch).aliases.head;
   count := 0;
 
   while (node <> nil) do
@@ -1668,14 +1680,17 @@ end;
 
 procedure do_brag(ch : GCharacter; param : string);
 begin
-  act(AT_REPORT, 'You are level $B$6' + inttostr(ch.level) + '$A$7, $B$6' + ch.player^.rank + '$A$7 of the $B$6' + ch.race.name + '$A$7 race.', false, ch, nil, nil, TO_CHAR);
-  act(AT_REPORT, '$n is level $B$6' + inttostr(ch.level) + '$A$7, $B$6' + ch.player^.rank + '$A$7 of the $B$6' + ch.race.name + '$A$7 race.', false, ch, nil, nil, TO_ROOM);
+  if (ch.IS_NPC) then
+    exit;
 
-  act(AT_REPORT, 'You have $B$6' + inttostr(ch.player^.war_points) + '$A$7 warpoints, $B$6' + inttostr(ch.player^.quest_points) + '$A$7 questpoints and $B$6' + inttostr(ch.player^.bg_points) + '$A$7 battlepoints.', false, ch, nil, nil, TO_CHAR);
-  act(AT_REPORT, '$n has $B$6' + inttostr(ch.player^.war_points) + '$A$7 warpoints, $B$6' + inttostr(ch.player^.quest_points) + '$A$7 questpoints and $B$6' + inttostr(ch.player^.bg_points) + '$A$7 battlepoints.', false, ch, nil, nil, TO_ROOM);
+  act(AT_REPORT, 'You are level $B$6' + inttostr(ch.level) + '$A$7, $B$6' + GPlayer(ch).rank + '$A$7 of the $B$6' + ch.race.name + '$A$7 race.', false, ch, nil, nil, TO_CHAR);
+  act(AT_REPORT, '$n is level $B$6' + inttostr(ch.level) + '$A$7, $B$6' + GPlayer(ch).rank + '$A$7 of the $B$6' + ch.race.name + '$A$7 race.', false, ch, nil, nil, TO_ROOM);
 
-  act(AT_REPORT, 'You have $B$6' + inttostr(ch.point.max_hp) + '$A$7 max hitponts, $B$6' + inttostr(ch.point.max_mv) + '$A$7 max moves and $B$6' + inttostr(ch.point.max_mana) + '$A$7 max mana.', false, ch, nil, nil, TO_CHAR);
-  act(AT_REPORT, '$n has $B$6' + inttostr(ch.point.max_hp) + '$A$7 max hitponts, $B$6' + inttostr(ch.point.max_mv) + '$A$7 max moves and $B$6' + inttostr(ch.point.max_mana) + '$A$7 max mana.', false, ch, nil, nil, TO_ROOM);
+  act(AT_REPORT, 'You have $B$6' + inttostr(GPlayer(ch).war_points) + '$A$7 warpoints, $B$6' + inttostr(GPlayer(ch).quest_points) + '$A$7 questpoints and $B$6' + inttostr(GPlayer(ch).bg_points) + '$A$7 battlepoints.', false, ch, nil, nil, TO_CHAR);
+  act(AT_REPORT, '$n has $B$6' + inttostr(GPlayer(ch).war_points) + '$A$7 warpoints, $B$6' + inttostr(GPlayer(ch).quest_points) + '$A$7 questpoints and $B$6' + inttostr(GPlayer(ch).bg_points) + '$A$7 battlepoints.', false, ch, nil, nil, TO_ROOM);
+
+  act(AT_REPORT, 'You have $B$6' + inttostr(ch.max_hp) + '$A$7 max hitponts, $B$6' + inttostr(ch.max_mv) + '$A$7 max moves and $B$6' + inttostr(ch.max_mana) + '$A$7 max mana.', false, ch, nil, nil, TO_CHAR);
+  act(AT_REPORT, '$n has $B$6' + inttostr(ch.max_hp) + '$A$7 max hitponts, $B$6' + inttostr(ch.max_mv) + '$A$7 max moves and $B$6' + inttostr(ch.max_mana) + '$A$7 max mana.', false, ch, nil, nil, TO_ROOM);
 end;
 
 { Jago 7/Jan/2001}
@@ -1685,12 +1700,12 @@ var
   max_hp, max_mana, max_mv : string;
   sReport : string;
 begin
-  hp := IntToStr(ch.point.hp);
-  max_hp := IntToStr(ch.point.max_hp);
-  mana := IntToStr(ch.point.mana);
-  max_mana := IntToStr(ch.point.max_mana);
-  mv := IntToStr(ch.point.mv);
-  max_mv := IntToStr(ch.point.max_mv);
+  hp := IntToStr(ch.hp);
+  max_hp := IntToStr(ch.max_hp);
+  mana := IntToStr(ch.mana);
+  max_mana := IntToStr(ch.max_mana);
+  mv := IntToStr(ch.mv);
+  max_mv := IntToStr(ch.max_mv);
 
   sReport := '"' + hp + '/' + max_hp + ' hp, ' +
              mana + '/' + max_mana + ' mana, ' +
@@ -1702,18 +1717,23 @@ end;
 
 procedure do_taunt(ch : GCharacter; param : string);
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage:  TAUNT <line or NULL to reset>'#13#10);
-    if (ch.player^.taunt <> '') then
-      ch.sendBuffer('Currently: ' + ch.player^.taunt + #13#10);
+
+    if (GPlayer(ch).taunt <> '') then
+      ch.sendBuffer('Currently: ' + GPlayer(ch).taunt + #13#10);
+
     exit;
     end;
 
   if (uppercase(param) = 'NULL') then
-    ch.player^.taunt := ''
+    GPlayer(ch).taunt := ''
   else
-    ch.player^.taunt := param;
+    GPlayer(ch).taunt := param;
 
   ch.sendBuffer('Ok.'#13#10);
 end;
@@ -1722,6 +1742,9 @@ end;
 procedure do_setpager(ch:GCharacter;param:string);
 var value : integer;
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage: SETPAGER <nr. of lines>'#13#10);
@@ -1749,14 +1772,14 @@ begin
     exit;
     end;
 
-  ch.player^.pagerlen := value;
+  GPlayer(ch).pagerlen := value;
   act(AT_REPORT,'Pager set to ' + inttostr(value) + ' lines.',false,ch,nil,nil,TO_CHAR);
 end;
 
 { shortcut command - Nemesis }
 procedure do_autoloot(ch:GCharacter;param:string);
 begin
-  with ch.player^ do
+  with GPlayer(ch) do
     begin
     if IS_SET(cfg_flags,CFG_AUTOLOOT) then
       begin
@@ -1776,7 +1799,7 @@ end;
 { shortcut command - Nemesis }
 procedure do_autosac(ch:GCharacter;param:string);
 begin
-  with ch.player^ do
+  with GPlayer(ch) do
     begin
     if IS_SET(cfg_flags,CFG_AUTOSAC) then
       begin
@@ -1797,21 +1820,24 @@ end;
 procedure do_password(ch : GCharacter; param: string);
 var arg1, arg2 : string;
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   param := one_argument(param,arg1);
   one_argument(param,arg2);
 
   if (length(param) = 0) or ((length(arg1) > 0) and (length(arg2) = 0)) then
     ch.sendBuffer('Usage:  PASSWORD <old password> <new password>'#13#10)
   else
-  if (not MD5Match(ch.player^.md5_password, MD5String(arg1))) then
+  if (not MD5Match(GPlayer(ch).md5_password, MD5String(arg1))) then
     begin
     ch.sendBuffer('Your password did not match!'#13#10);
     exit;
     end
   else
     begin
-    ch.player^.md5_password := MD5String(arg2);
-    ch.save(ch.name^);
+    GPlayer(ch).md5_password := MD5String(arg2);
+    GPlayer(ch).save(ch.name^);
     ch.sendBuffer('Ok, password changed.'#13#10);
     end;
 end;
@@ -2034,10 +2060,10 @@ end;
 procedure do_prompt(ch : GCharacter; param : string);
 begin
   if (ch.IS_NPC()) then
-  begin
+    begin
     ch.sendBuffer('This command is not available for NPCs.'#13#10);
     exit;
-  end;
+    end;
   
   if (length(param) = 0) then
     begin
@@ -2053,11 +2079,11 @@ begin
     ch.sendBuffer('%f - status of opponent (when fighting)'#13#10);
     ch.sendBuffer('%k - status of tank (when fighting)'#13#10);
     ch.sendBuffer(#13#10'Default prompt is %hhp %mmv %ama (%l)'#13#10#13#10);
-    ch.sendBuffer('Your prompt is: ' + ch.player^.prompt + #13#10);
+    ch.sendBuffer('Your prompt is: ' + GPlayer(ch).prompt + #13#10);
     exit;
     end;
 
-  ch.player^.prompt := param;
+  GPlayer(ch).prompt := param;
   ch.sendBuffer('Ok.'#13#10);
 end;
 

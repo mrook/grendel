@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.15 2001/04/16 17:15:35 xenon Exp $
+// $Id: cmd_obj.inc,v 1.16 2001/05/11 14:25:07 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -296,7 +296,7 @@ begin
     if (ch.level < 50) and (not ch.IS_NPC) then
       begin
       act(AT_REPORT,'You get 1 $6copper$7 coin on your bank for your donation.',false,ch,nil,nil,TO_CHAR);
-      inc(ch.player^.bankgold);
+      inc(GPlayer(ch).bankgold);
       end;
 
     node := obj.contents.head;
@@ -633,7 +633,7 @@ begin
 
       if (obj.item_type = ITEM_FOUNTAIN) then
         begin
-        if (not ch.IS_NPC) and (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+        if (not ch.IS_NPC) and (GPlayer(ch).condition[COND_THIRST] > (MAX_COND - 15)) then
           begin
           act(AT_REPORT,'Ow yeah? And spill your ruptured bladder all over the clean floor?',false,ch,nil,nil,TO_CHAR);
           exit;
@@ -652,7 +652,7 @@ begin
         gain_condition(ch,COND_CAFFEINE,liq_types[liq].affect[COND_CAFFEINE]);
 
         if (not ch.IS_NPC) then
-         if (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+         if (GPlayer(ch).condition[COND_THIRST] > (MAX_COND - 15)) then
           ch.sendBuffer('You are no longer thirsty.'#13#10);
 
         exit;
@@ -687,7 +687,7 @@ begin
   if (obj.item_type=ITEM_DRINK) and (obj.value[2]=0) then
     act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR)
   else
-  if (not ch.IS_NPC) and (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+  if (not ch.IS_NPC) and (GPlayer(ch).condition[COND_THIRST] > (MAX_COND - 15)) then
     act(AT_REPORT,'Ow yeah? And spill your ruptured bladder all over the clean floor?',false,ch,nil,nil,TO_CHAR)
   else
    with obj do
@@ -711,7 +711,7 @@ begin
     gain_condition(ch,COND_CAFFEINE,liq_types[liq].affect[COND_CAFFEINE]);
 
     if (not ch.IS_NPC) then
-     if (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+     if (GPlayer(ch).condition[COND_THIRST] > (MAX_COND - 15)) then
       ch.sendBuffer('You are no longer thirsty.'#13#10);
     end;
 end;
@@ -736,7 +736,7 @@ begin
   if (obj.item_type=ITEM_FOOD) and (obj.value[3]=0) then
     act(AT_REPORT,'$p is no longer edible.',false,ch,obj,nil,TO_CHAR)
   else
-  if (not ch.IS_NPC) and (ch.player^.condition[COND_FULL] > (MAX_COND - 15)) then
+  if (not ch.IS_NPC) and (GPlayer(ch).condition[COND_FULL] > (MAX_COND - 15)) then
     act(AT_REPORT,'Your stomach would not respond nicely when eating this!',false,ch,nil,nil,TO_CHAR)
   else
     begin
@@ -750,7 +750,7 @@ begin
       gain_condition(ch,COND_FULL,25);
 
       if (not ch.IS_NPC) then
-       if (ch.player^.condition[COND_FULL] > (MAX_COND - 15)) then
+       if (GPlayer(ch).condition[COND_FULL] > (MAX_COND - 15)) then
         ch.sendBuffer('You are full.'#13#10);
       end;
 
@@ -951,7 +951,7 @@ begin
   act(AT_REPORT,'You give $N $p.',false, ch, obj, vict, TO_CHAR);
   act(AT_REPORT,'$n gives $N $p.',false, ch, obj, vict, TO_ROOM);
 
-  giveTrigger(vict, ch, obj);
+//  giveTrigger(vict, ch, obj);
 end;
 
 { Put objects into container - Nemesis }

@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.3 2001/04/27 21:23:46 xenon Exp $
+// $Id: Channels.pas,v 1.4 2001/05/11 14:25:00 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -205,14 +205,14 @@ begin
   until (i = 0);
 end;
 
-function chan_ignored(ch : GCharacter; chanstr : string) : boolean;
+function chan_ignored(ch : GPlayer; chanstr : string) : boolean;
 var
   node : GListNode;
   tc : TChannel;
 begin
   Result := false;
   
-  node := ch.player^.channels.head;
+  node := ch.channels.head;
   while (node <> nil) do
   begin
     tc := node.element;
@@ -225,13 +225,13 @@ begin
   end;
 end;
 
-procedure channelAddHistory(vict, actor : GCharacter; channel : GChannel; str : string);
+procedure channelAddHistory(vict, actor : GPlayer; channel : GChannel; str : string);
 var
   node : GListNode;
   he : THistoryElement;
   tc : TChannel;
 begin
-  node := vict.player^.channels.head;
+  node := vict.channels.head;
   while (node <> nil) do
   begin
     tc := node.element;
@@ -316,11 +316,12 @@ begin
 
     if (vict <> nil) and (not vict.IS_NPC()) and channel.HISTORY() then
     begin
-      channelAddHistory(vict, ch, channel, arg);
+      channelAddHistory(GPlayer(vict), GPlayer(ch), channel, arg);
     end;
+
     if (vict <> nil) and (not vict.IS_NPC()) then
     begin
-      if (not chan_ignored(vict, channel.channelname)) or (ch.IS_IMMORT()) then
+      if (not chan_ignored(GPlayer(vict), channel.channelname)) or (ch.IS_IMMORT()) then
         act(color, arg, false, vict, nil, ch, TO_CHAR)
     end
     else
@@ -378,10 +379,10 @@ begin
   end;
 
   if (chan.CLAN() and (ch.clan = nil)) then
-  begin
+    begin
     ch.sendBuffer('But you aren''t in a clan!'#13#10);
     exit;
-  end;
+    end;
   
   if ((length(param) = 0) and chan.HISTORY()) then
   begin
@@ -392,7 +393,7 @@ begin
     end;
     if chan.HISTORY() then
     begin
-      node := ch.player^.channels.head;
+      node := GPlayer(ch).channels.head;
       while (node <> nil) do
       begin
         tc := node.element;
@@ -419,12 +420,14 @@ begin
     end;
     
     if (not ch.IS_IMMORT()) then
-      inc(ch.point.mv, chan.cost);
+      inc(ch.mv, chan.cost);
     
     buf := Format('You ' + chan.verbyou, [param]);
     act(chan.channelcolor, buf, false, ch, nil, nil, TO_CHAR);
+
     if (not ch.IS_NPC() and chan.HISTORY()) then // add text to own history
-      channelAddHistory(ch, nil, chan, buf);
+      channelAddHistory(GPlayer(ch), nil, chan, buf);
+
     buf := Format('$N ' + chan.verbother, [param]);
     to_channel(ch, buf, chan, chan.channelcolor, false);
   end;
@@ -821,11 +824,13 @@ begin
       if (ch.level >= chan.minleveluse) then
       begin
         buf := '';
+
         if (not ch.IS_NPC()) then
-          if (chan_ignored(ch, chan.channelname)) then
+          if (chan_ignored(GPlayer(ch), chan.channelname)) then
             buf := '$B$7ignored$A$7'
           else
             buf := '$B$7not ignored$A$7';
+
         with chan do
         begin
           if (ch.IS_IMMORT()) then
@@ -851,7 +856,8 @@ begin
       ch.sendBuffer('This command is not available for NPCs.'#13#10);
       exit;
     end;
-    node := ch.player^.channels.head;
+
+    node := GPlayer(ch).channels.head;
     while (node <> nil) do
     begin
       tc := node.element;

@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.7 2001/04/26 21:31:53 xenon Exp $
+// $Id: magic.pas,v 1.8 2001/05/11 14:24:22 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -37,7 +37,7 @@ procedure spell_acid_arrow(ch, victim : GCharacter; sn : GSkill);
 var af : GAffect;
 begin
   af := nil;
-  if (saving_throw(ch.level,victim.point.save_poison,victim)) then
+  if (saving_throw(ch.level,victim.save_poison,victim)) then
     begin
     act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
     damage(ch,victim,40, cardinal(sn));
@@ -77,7 +77,7 @@ procedure spell_poison(ch,victim:GCharacter; sn : GSkill);
 var af:GAffect;
 begin
   af := nil;
-  if saving_throw(ch.level,victim.point.save_poison,victim) then
+  if saving_throw(ch.level,victim.save_poison,victim) then
     begin
     act(AT_REPORT,'Your spell failed!',false,ch,nil,victim,TO_CHAR);
     act(AT_REPORT,'You resisted the effects of $n''s poison!',false,ch,nil,victim,TO_VICT);
@@ -102,7 +102,7 @@ procedure spell_vortex(ch,victim:GCharacter;sn:GSkill);
 var dam:integer;
 begin
   dam:=rolldice(4,6);
-  inc(dam,ch.ability.int div 4);
+  inc(dam,ch.int div 4);
   damage(ch,victim,dam,cardinal(sn));
 end;
 
@@ -110,7 +110,7 @@ procedure spell_winds(ch,victim:GCharacter;sn:GSkill);
 var dam:integer;
 begin
   dam:=rolldice(4,10);
-  inc(dam,ch.ability.int div 3);
+  inc(dam,ch.int div 3);
   act(AT_SPELL,'You call upon the elements and release your fury!',false,ch,nil,nil,TO_CHAR);
   act(AT_SPELL,'$n calls upon the elements and releases $s fury!',false,ch,nil,nil,TO_ROOM);
   damage(ch,victim,dam,cardinal(sn));
@@ -150,8 +150,8 @@ end;
 procedure spell_refresh(ch,victim:GCharacter;sn:GSkill);
 var ref:integer;
 begin
-  ref:=(ch.ability.wis div 2) + 20 + rolldice(5,10);
-  victim.point.mv:=UMax(victim.point.mv + ref, victim.point.max_mv);
+  ref:=(ch.wis div 2) + 20 + rolldice(5,10);
+  victim.mv:=UMax(victim.mv + ref, victim.max_mv);
   act(AT_SPELL,'You feel refreshed.',false,victim,nil,nil,TO_CHAR);
   act(AT_SPELL,'$n looks refreshed.',false,victim,nil,nil,TO_ROOM);
 end;
@@ -584,7 +584,7 @@ begin
        if (not ch.IS_IMMORT) and (not ch.IS_NPC) then
          begin
          ch.cast_timer := 1;
-         dec(ch.point.mana, sn.min_mana);
+         dec(ch.mana, sn.min_mana);
          end;
 
        if (ch.fighting <> nil) then
@@ -594,7 +594,7 @@ begin
        end
      else
        begin
-       dec(ch.point.mana, sn.min_mana div 2);
+       dec(ch.mana, sn.min_mana div 2);
 
        if (sn.target < TARGET_OFF_AREA) then
          begin

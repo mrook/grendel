@@ -1,11 +1,11 @@
-require "glib.c"
-require "grendel.c"
-
+void onTick()
 {
-  if ((cos(1.0) / cos(5)) > 0.5) 
-  {
-    do "blabla!";
-  }
-  else
-    do "boeboe!";
+  do("mutter");
+  
+  sleep(5);
+  do("sigh");
+  
+  sleep(2);
+  do("say does it *really* have to be this way?");
 }
+

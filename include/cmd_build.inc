@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.29 2001/05/10 17:18:36 xenon Exp $
+// $Id: cmd_build.inc,v 1.30 2001/05/11 14:25:02 ***REMOVED*** Exp $
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
@@ -154,7 +154,6 @@ function actBitName(vector : integer) : String;
 begin
   Result := '';
 
-	if (vector and ACT_NPC) = ACT_NPC then Result := Result + ' npc';
 	if (vector and ACT_SENTINEL) = ACT_SENTINEL then Result := Result + 'sentinel';
 	if (vector and ACT_SCAVENGER) = ACT_SCAVENGER then Result := Result + 'scavenger';
 	if (vector and ACT_AGGRESSIVE) = ACT_AGGRESSIVE then Result := Result + 'aggressive';
@@ -229,12 +228,12 @@ begin
   buf1 := buf1 + buf;
 
   if victim.IS_NPC then
-  begin
-   if victim.npc_index <> nil then
-    vnum := IntToStr(victim.npc_index.vnum)
-   else
-    vnum := '?';
-  end
+    begin
+    if GNPC(victim).npc_index <> nil then
+      vnum := IntToStr(GNPC(victim).npc_index.vnum)
+    else
+      vnum := '?';
+    end
   else
   	vnum := '0';
 
@@ -258,28 +257,28 @@ begin
   buf1 := buf1 + buf;
 
   buf := Format('Str: %d.  Int: %d.  Wis: %d.  Dex: %d.  Con: %d.' + #13#10,
-                [victim.ability.str,
-                victim.ability.int,
-                victim.ability.wis,
-                victim.ability.dex,
-                victim.ability.con]);
+                [victim.str,
+                victim.int,
+                victim.wis,
+                victim.dex,
+                victim.con]);
 
   buf1 := buf1 + buf;
 
   buf := Format('Hp: %d/%d.  Mana: %d/%d.  Move: %d/%d.' + #13#10,
-                [victim.point.hp, victim.point.max_hp,
-                victim.point.mana, victim.point.max_mana,
-                victim.point.mv, victim.point.max_mv]);
+                [victim.hp, victim.max_hp,
+                victim.mana, victim.max_mana,
+                victim.mv, victim.max_mv]);
 
   buf1 := buf1 + buf;
 
   if victim.IS_NPC then
   	exp := 'none'
   else
-  	exp := IntToStr(victim.player.xptot);
+  	exp := IntToStr(GPlayer(victim).xptot);
 
   buf := Format('Level: %d.  Align: %d.  AC: %d.  Gold: %d.  Exp: %s.' + #13#10,
-                [victim.level, victim.alignment, victim.point.ac,
+                [victim.level, victim.alignment, victim.ac,
                 victim.gold, exp]);
 
   buf1 := buf1 + buf;
@@ -287,7 +286,7 @@ begin
   if (not victim.IS_NPC) then
   begin
     buf := Format('Max skillslots: %d.  Max spellslots: %d.  Practices left: %d.' + #13#10,
-                  [victim.player^.max_skills, victim.player^.max_spells, victim.player^.pracs]);
+                  [GPlayer(victim).max_skills, GPlayer(victim).max_spells, GPlayer(victim).pracs]);
 
     buf1 := buf1 + buf;
   end;
@@ -295,17 +294,17 @@ begin
   if victim.IS_NPC then
   	wimpy := 'none'
   else
-  	wimpy := IntToStr(victim.player.wimpy);
+  	wimpy := IntToStr(GPlayer(victim).wimpy);
 
   buf := Format('Hitroll: %d.  Position: %d.  Wimpy: %s.' + #13#10,
-                [victim.point.hitroll,
+                [victim.hitroll,
                 victim.position,
                 wimpy]);
 
   buf1 := buf1 + buf;
 
   if not victim.IS_NPC then
-  	buf1 := buf1 + 'Page Lines: ' + IntToStr(victim.player.pagerlen) + '.' + #13#10;
+  	buf1 := buf1 + 'Page Lines: ' + IntToStr(GPlayer(victim).pagerlen) + '.' + #13#10;
 
   if victim.fighting <> nil then
     buf1 := buf1 + 'Fighting: ' + victim.fighting.name^ + '.' + #13#10
@@ -315,9 +314,9 @@ begin
   if not victim.IS_NPC then
   begin
   	buf := Format('Thirst: %d.  Full: %d.  Drunk: %d.' + #13#10,
-                 [victim.player^.condition[COND_THIRST],
-                 victim.player^.condition[COND_FULL],
-                 victim.player^.condition[COND_DRUNK]]);
+                 [GPlayer(victim).condition[COND_THIRST],
+                 GPlayer(victim).condition[COND_FULL],
+                 GPlayer(victim).condition[COND_DRUNK]]);
    buf1 := buf1 + buf;
 
    // how to get # of items carried?
@@ -326,11 +325,10 @@ begin
 
    buf1 := buf1 + buf;
 
-   buf := Format('Age: %d.  Played: %d.  Timer: %d.  Act: %s.' + #13#10,
-                [victim.player.age,
-                round(victim.player.played),
-                victim.wait,
-                actBitName(victim.act_flags)]);
+   buf := Format('Age: %d.  Played: %d.  Timer: %d. ' + #13#10,
+                [GPlayer(victim).age,
+                round(GPlayer(victim).played),
+                victim.wait]);
 
    buf1 := buf1 + buf;
   end;
@@ -354,11 +352,6 @@ begin
                 [victim.short^, victim.long^]);
 
   buf1 := buf1 + buf;
-
-  if victim.IS_NPC then
-     if victim.npc_index <> nil then
-     	if (victim.npc_index.programs.getSize > 0) then
-       	buf1 := buf1 + 'Mobile has mobprogs.' + #13#10;
 
   if (victim.affects.getSize() > 0) then
   begin
@@ -564,7 +557,7 @@ end;
 {jago - utility func, move to area.pas}
 function instanceNPC(npcindex : GNPCIndex) : GCharacter;
 var
-npc : GCharacter;
+  npc : GNPC;
 begin
 
   // note : this func doesnt check
@@ -582,28 +575,29 @@ begin
     exit;
   end;
 
-  npc := GCharacter.Create;
+  npc := GNPC.Create;
 
   with npc do
   begin
-    ability.str:=npcindex.str;
-    ability.con:=npcindex.con;
-    ability.dex:=npcindex.dex;
-    ability.int:=npcindex.int;
-    ability.wis:=npcindex.wis;
-    point.hp:=npcindex.hp;
-    point.max_hp:=npcindex.hp;
-    point.mv:=npcindex.mv;
-    point.max_mv:=npcindex.mv;
-    point.mana:=npcindex.mana;
-    point.max_mana:=npcindex.mana;
-    point.natural_ac:=npcindex.natural_ac;
-    point.ac_mod:=0;
-    point.hitroll:=npcindex.hitroll;
+    str:=npcindex.str;
+    con:=npcindex.con;
+    dex:=npcindex.dex;
+    int:=npcindex.int;
+    wis:=npcindex.wis;
 
-    point.damnumdie:=npcindex.damnumdie;
-    point.damsizedie:=npcindex.damsizedie;
-    point.apb:=npcindex.apb;
+    hp:=npcindex.hp;
+    max_hp:=npcindex.hp;
+    mv:=npcindex.mv;
+    max_mv:=npcindex.mv;
+    mana:=npcindex.mana;
+    max_mana:=npcindex.mana;
+    natural_ac:=npcindex.natural_ac;
+    ac_mod:=0;
+    hitroll:=npcindex.hitroll;
+
+    damnumdie:=npcindex.damnumdie;
+    damsizedie:=npcindex.damsizedie;
+    apb:=npcindex.apb;
     skills_learned := npcindex.skills_learned;
     clan:=npcindex.clan;
     conn:=nil;
@@ -826,7 +820,7 @@ begin
       exit;
       end;
 
-    vict.point.max_hp := value;
+    vict.max_hp := value;
     buf := 'Max HP';
     end
   else
@@ -838,7 +832,7 @@ begin
       exit;
       end;
 
-    vict.point.max_mana := value;
+    vict.max_mana := value;
     buf := 'Max MANA';
     end
   else
@@ -850,7 +844,7 @@ begin
       exit;
       end;
       
-    vict.point.max_mv := value;
+    vict.max_mv := value;
     buf := 'Max STAMINA';
     end
   else
@@ -862,7 +856,7 @@ begin
       exit;
       end;
 
-    vict.ability.str := value;
+    vict.str := value;
     buf := 'STRENGTH';
     end
   else
@@ -874,7 +868,7 @@ begin
       exit;
       end;
 
-    vict.ability.wis := value;
+    vict.wis := value;
     buf := 'WISDOM';
     end
   else
@@ -886,7 +880,7 @@ begin
       exit;
       end;
 
-    vict.ability.dex := value;
+    vict.dex := value;
     buf := 'DEXTERITY';
     end
   else
@@ -898,7 +892,7 @@ begin
       exit;
       end;
 
-    vict.ability.int := value;
+    vict.int := value;
     buf := 'INTELLIGENCE';
     end
   else
@@ -910,19 +904,19 @@ begin
       exit;
       end;
 
-    vict.ability.con:=value;
+    vict.con:=value;
     buf := 'CONSTITUTION';
     end
   else
   if (uppercase(arg2) = 'AC') then
     begin
-    vict.point.ac := value;
+    vict.ac := value;
     buf := 'AC';
     end
   else
   if (uppercase(arg2) = 'HITROLL') then
     begin
-    vict.point.hitroll := value;
+    vict.hitroll := value;
     buf := 'HITROLL';
     end
   else
@@ -934,7 +928,7 @@ begin
   else
   if (uppercase(arg2) = 'APB') then
     begin
-    vict.point.apb := value;
+    vict.apb := value;
     buf := 'APB';
     end
   else
@@ -952,7 +946,7 @@ begin
       exit;
       end;
 
-    vict.player^.bankgold := value;
+    GPlayer(vict).bankgold := value;
     buf := 'BANK';
     end
   else
@@ -982,7 +976,7 @@ begin
       exit;
       end;
       
-    vict.player^.xptogo := value;
+    GPlayer(vict).xptogo := value;
     buf := 'XP TNL';
     end
   else
@@ -1000,7 +994,7 @@ begin
       exit;
     end;
 
-    vict.player^.max_skills := value;
+    GPlayer(vict).max_skills := value;
     buf := 'MAXSKILLS';
   end
   else
@@ -1018,7 +1012,7 @@ begin
       exit;
     end;
     
-    vict.player^.max_spells := value;
+    GPlayer(vict).max_spells := value;
     buf := 'MAXSPELLS';
   end
   else
@@ -1036,7 +1030,7 @@ begin
       exit;
     end;
     
-    vict.player^.pracs := value;
+    GPlayer(vict).pracs := value;
     buf := 'PRACS';
   end
   else
@@ -1089,13 +1083,13 @@ var
    sub : string;
    vnum : integer;
 begin
-  if (ch.player^.area_fname='') then
+  if (GPlayer(ch).area_fname='') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if (ch.player^.area=nil) then
+  if (GPlayer(ch).area=nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
@@ -1117,7 +1111,7 @@ begin
     exit;
   end;
 
-  if (vnum < ch.player^.o_lo) or (vnum > ch.player^.o_hi) then
+  if (vnum < GPlayer(ch).o_lo) or (vnum > GPlayer(ch).o_hi) then
     begin
     ch.sendBuffer('That vnum is outside your range.'#13#10);
     exit;
@@ -1130,7 +1124,7 @@ begin
     end;
 
   oindex := GObjectIndex.Create;
-  oindex.area := ch.player^.area;
+  oindex.area := GPlayer(ch).area;
   oindex.vnum := vnum;
   oindex.name := hash_string(param);
   oindex.short := hash_string(param);
@@ -1203,7 +1197,7 @@ begin
 
   { make sure builders don't overwrite other areas }
   if (obj.obj_index <>nil) and
-   ((obj.obj_index.vnum < ch.player^.o_lo) or (obj.obj_index.vnum > ch.player^.o_hi)) then
+   ((obj.obj_index.vnum < GPlayer(ch).o_lo) or (obj.obj_index.vnum > GPlayer(ch).o_hi)) then
     begin
     ch.sendBuffer('This vnum is not in your range.'#13#10);
     exit;
@@ -1315,13 +1309,13 @@ var num:integer;
     obj : GObjectIndex;
     node : GListNode;
 begin
-  if (ch.player^.area_fname = '') then
+  if (GPlayer(ch).area_fname = '') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  area := ch.player^.area;
+  area := GPlayer(ch).area;
   if (area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
@@ -1354,11 +1348,14 @@ var
    a : integer;
    pexit : GExit;
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (ch.substate = SUB_ROOM_DESC) then
     begin
-    location := ch.edit_dest;
-    location.description := ch.edit_buffer;
-    ch.stopEditing;
+    location := GPlayer(ch).edit_dest;
+    location.description := GPlayer(ch).edit_buffer;
+    GPlayer(ch).stopEditing;
 
     ch.substate := SUB_NONE;
     exit;
@@ -1375,7 +1372,7 @@ begin
     end;
 
   { make sure builders don't overwrite other areas }
-  if (ch.room.vnum < ch.player^.r_lo) or (ch.room.vnum > ch.player^.r_hi) then
+  if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
     begin
     ch.sendBuffer('This vnum is not in your range.'#13#10);
     exit;
@@ -1394,8 +1391,8 @@ begin
   if (sub = 'desc') then
     begin
     ch.substate := SUB_ROOM_DESC;
-    ch.edit_dest := ch.room;
-    ch.startEditing(ch.room.description);
+    GPlayer(ch).edit_dest := ch.room;
+    GPlayer(ch).startEditing(ch.room.description);
     exit;
     end
   else
@@ -1477,13 +1474,13 @@ begin
     ch.sendBuffer('Creates a double linked exit to the designated vnum.'#13#10);
     exit;
     end;
-  if (ch.getTrust < LEVEL_GOD) and (ch.player^.area_fname = '') then
+  if (ch.getTrust < LEVEL_GOD) and (GPlayer(ch).area_fname = '') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if (ch.getTrust < LEVEL_GOD) and (ch.player^.area = nil) then
+  if (ch.getTrust < LEVEL_GOD) and (GPlayer(ch).area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
@@ -1543,7 +1540,7 @@ var
    node : GListNode;
    vnum, h : integer;
 begin
-  vnum := ch.player^.r_lo;
+  vnum := GPlayer(ch).r_lo;
 
   for h := 0 to room_list.hashsize - 1 do
     begin
@@ -1553,7 +1550,7 @@ begin
       begin
       room := GRoom(GHashValue(node.element).value);
 
-      if (room.vnum > vnum) and (room.vnum<=ch.player^.r_hi) then
+      if (room.vnum > vnum) and (room.vnum <= GPlayer(ch).r_hi) then
         vnum:=room.vnum;
 
       node := node.next;
@@ -1562,7 +1559,7 @@ begin
 
   inc(vnum);
 
-  if (vnum = ch.player^.r_hi) then
+  if (vnum = GPlayer(ch).r_hi) then
     Result := -1
   else
     Result := vnum;
@@ -1582,13 +1579,13 @@ begin
     exit;
     end;
 
-  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname='') then
+  if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area_fname='') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area=nil) then
+  if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area=nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
@@ -1718,13 +1715,13 @@ begin
     exit;
     end;
 
-  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname = '') then
+  if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area_fname = '') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area = nil) then
+  if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
@@ -1753,7 +1750,7 @@ begin
 
   ch.sendBuffer('Creating room #'+inttostr(new_vnum)+'.'#13#10);
 
-  area := ch.player^.area;
+  area := GPlayer(ch).area;
   new_room := createRoom(new_vnum, area);
   new_room.name := hash_string(ch.room.name);
   new_room.description := ch.room.description;
@@ -1796,9 +1793,9 @@ begin
   
   if (length(param) = 0) then
   begin
-    if ((ch.player^.area = nil) and (ch.level < LEVEL_GOD)) then
+    if ((GPlayer(ch).area = nil) and (ch.level < LEVEL_GOD)) then
     begin
-      if (length(ch.player^.area_fname) = 0) then
+      if (length(GPlayer(ch).area_fname) = 0) then
         ch.sendBuffer('You don''t have an area assigned to you.'#13#10)
       else
         ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
@@ -1806,7 +1803,7 @@ begin
     end;
 
     if (ch.level < LEVEL_GOD) then
-      area := ch.player^.area
+      area := GPlayer(ch).area
     else
       area := ch.room.area;
   end
@@ -1875,31 +1872,33 @@ begin
       if (vict <> ch) then
         act(AT_REPORT,ch.name^ + ' has assigned ' + param + ' to you.',false,vict,nil,ch,TO_CHAR);
 
-      vict.player^.area := area;
-      vict.player^.area_fname := param;
-      vict.player^.r_lo := area.r_lo;
-      vict.player^.r_hi := area.r_hi;
-      vict.player^.m_lo := area.m_lo;
-      vict.player^.m_hi := area.m_hi;
-      vict.player^.o_lo := area.o_lo;
-      vict.player^.o_hi := area.o_hi;
+      GPlayer(vict).area := area;
+      GPlayer(vict).area_fname := param;
+      GPlayer(vict).r_lo := area.r_lo;
+      GPlayer(vict).r_hi := area.r_hi;
+      GPlayer(vict).m_lo := area.m_lo;
+      GPlayer(vict).m_hi := area.m_hi;
+      GPlayer(vict).o_lo := area.o_lo;
+      GPlayer(vict).o_hi := area.o_hi;
       end
     else
       if (length(param) = 0) then
       begin
-        if (vict.player^.area_fname <> '') then
+        if (GPlayer(vict).area_fname <> '') then
         begin
-          act(AT_REPORT,'Unassigned area ' + vict.player^.area_fname + ' from $N.',false,ch,nil,vict,TO_CHAR);
+          act(AT_REPORT,'Unassigned area ' + GPlayer(vict).area_fname + ' from $N.',false,ch,nil,vict,TO_CHAR);
+
           if (vict <> ch) then
-            act(AT_REPORT,ch.name^ + ' has unassigned area ' + vict.player^.area_fname + ' from you.',false,vict,nil,ch,TO_CHAR);
-          vict.player^.area := nil;
-          vict.player^.area_fname := '';
-          vict.player^.r_lo := High(integer);
-          vict.player^.r_hi := -1;
-          vict.player^.m_lo := High(integer);
-          vict.player^.m_hi := -1;
-          vict.player^.o_lo := High(integer);
-          vict.player^.o_hi := -1;
+            act(AT_REPORT,ch.name^ + ' has unassigned area ' + GPlayer(vict).area_fname + ' from you.',false,vict,nil,ch,TO_CHAR);
+
+          GPlayer(vict).area := nil;
+          GPlayer(vict).area_fname := '';
+          GPlayer(vict).r_lo := High(integer);
+          GPlayer(vict).r_hi := -1;
+          GPlayer(vict).m_lo := High(integer);
+          GPlayer(vict).m_hi := -1;
+          GPlayer(vict).o_lo := High(integer);
+          GPlayer(vict).o_hi := -1;
         end
         else
         begin
@@ -1937,7 +1936,7 @@ begin
   else
     begin
     try
-      with vict.player^ do
+      with GPlayer(vict) do
         begin
         param := one_argument(param,sub);
         r_lo := strtoint(sub);
@@ -2043,19 +2042,19 @@ begin
     exit;
     end;
 
-  if (ch.player^.area_fname='') then
+  if (GPlayer(ch).area_fname='') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if (ch.player^.area=nil) then
+  if (GPlayer(ch).area=nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
     end;
 
-  area := ch.player^.area;
+  area := GPlayer(ch).area;
   param := one_argument(param,sub);
 
   if (sub = 'author') then
@@ -2096,13 +2095,13 @@ var
    buf : string;
    a : integer;
 begin
-  if (ch.player^.area_fname='') then
+  if (GPlayer(ch).area_fname='') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  area:=ch.player^.area;
+  area := GPlayer(ch).area;
   if (area=nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
@@ -2151,12 +2150,13 @@ var
    no_errors : boolean;
    h : integer;
 begin
-  if (ch.player^.area_fname='') then
+  if (GPlayer(ch).area_fname='') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
-  area:=ch.player^.area;
+
+  area := GPlayer(ch).area;
   if (area=nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
@@ -2282,20 +2282,20 @@ procedure do_savearea(ch : GCharacter; param : string);
 var
    area : GArea;
 begin
-  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname = '') then
+  if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area_fname = '') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if ((ch.getTrust() < LEVEL_GOD) or (length(param) = 0)) and (ch.player^.area = nil) then
+  if ((ch.getTrust() < LEVEL_GOD) or (length(param) = 0)) and (GPlayer(ch).area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
     end;
 
   if (length(param) = 0) then
-    area:=ch.player^.area
+    area:=GPlayer(ch).area
   else
     begin
     if (ch.getTrust() < LEVEL_GOD) then
@@ -2327,13 +2327,13 @@ var
 begin
   if (length(param) = 0) then
   begin
-    if (ch.player^.area_fname = '') then
+    if (GPlayer(ch).area_fname = '') then
     begin
       ch.sendBuffer('You have not yet been assigned an area.'#13#10);
       exit;
     end;
 
-    fn := ch.player^.area_fname
+    fn := GPlayer(ch).area_fname
   end
   else
     begin
@@ -2355,7 +2355,7 @@ begin
 
   area := GArea.Create;
   area.load(fn);
-  ch.player^.area := area;
+  GPlayer(ch).area := area;
   act(AT_REPORT,'Area ' + fn + ' loaded.',false,ch,nil,nil,TO_CHAR);
 end;
 
@@ -2372,20 +2372,20 @@ begin
     exit;
     end;
 
-  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname = '') then
+  if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area_fname = '') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
     exit;
     end;
 
-  if ((ch.getTrust() < LEVEL_GOD) or (length(param) = 0)) and (ch.player^.area = nil) then
+  if ((ch.getTrust() < LEVEL_GOD) or (length(param) = 0)) and (GPlayer(ch).area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
     end;
 
   if (length(param) = 0) then
-    area := ch.player^.area
+    area := GPlayer(ch).area
   else
   if (length(param) > 0) and (param = 'all') then
     begin

@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.5 2001/04/29 16:56:59 xenon Exp $
+// $Id: fsys.pas,v 1.6 2001/05/11 14:24:22 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -40,7 +40,6 @@ type
 implementation
 
 uses
-  mudsystem,
   dtypes;
 
 constructor GFileReader.Create(fn : string);
@@ -123,9 +122,9 @@ begin
       chars[pos] := c;
       inc(pos);
 
-      if (pos >= MAX_LINESIZE) then
+      if (pos >= MAX_LINESIZE) then 
         begin
-        bugreport('GFileReader.readLine', 'fsys.pas', 'max linesize exceeded in ' + fname, 'max linesize exceeded in ' + fname);
+		    raise GException.Create('fsys.pas:GFileReader.Create', 'max linesize exceeded in ' + fname);
 
         pos := MAX_LINESIZE;
         break;
@@ -137,7 +136,8 @@ begin
 
   chars[pos] := #0;
 
-  readLine := chars;
+  readLine := chars
+  ;
 end;
 
 function GFileReader.readInteger : integer;

@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.6 2001/04/26 21:10:02 xenon Exp $
+// $Id: cmd_comm.inc,v 1.7 2001/05/11 14:25:04 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -131,18 +131,21 @@ begin
 end;
 
 procedure do_clanadd(ch:GCharacter;param:string);
-var vict : GCharacter;
+var vict : GPlayer;
     obj : GObject;
     index : GObjectIndex;
 begin
-  if (not ch.player^.clanleader) then
+  if (ch.IS_NPC) then
+    exit;
+
+  if (not GPlayer(ch).clanleader) then
     ch.sendBuffer('You are not a clanleader!'#13#10)
   else
   if (length(param) = 0) then
     ch.sendBuffer('Add who to the clan?'#13#10)
   else
     begin
-    vict := findCharWorld(ch,param);
+    vict := findPlayerWorld(ch,param);
 
     if (vict=nil) or (vict.IS_NPC) then
       ch.sendBuffer('That character does not exist.'#13#10)
@@ -158,7 +161,7 @@ begin
     else
       begin
       vict.clan := ch.clan;
-      vict.player^.clanleader := false;
+      GPlayer(vict).clanleader := false;
 
       to_channel(ch, '*CLAN NOTIFY*: ' + vict.name^+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
 
@@ -175,16 +178,19 @@ begin
 end;
 
 procedure do_clanremove(ch:GCharacter;param:string);
-var vict:GCharacter;
+var vict : GPlayer;
 begin
-  if (not ch.player^.clanleader) then
+  if (ch.IS_NPC) then
+    exit;
+
+  if (not GPlayer(ch).clanleader) then
     ch.sendBuffer('You are not a clanleader!'#13#10)
   else
   if (length(param)=0) then
     ch.sendBuffer('Remove who from the clan?'#13#10)
   else
     begin
-    vict := findCharWorld(ch,param);
+    vict := findPlayerWorld(ch,param);
 
     if (vict=nil) or (vict.IS_NPC) then
       ch.sendBuffer('That character is not online.'#13#10)
@@ -198,7 +204,7 @@ begin
       begin
       to_channel(ch, '*CLAN NOTIFY*: ' + vict.name^+' is no longer a member of the clan!',CHANNEL_CLAN,AT_WHITE);
       vict.clan:=nil;
-      vict.player^.clanleader:=false;
+      vict.clanleader:=false;
       end;
     end;
 end;
@@ -382,7 +388,7 @@ begin
     exit;
   end;
 
-  if (bid>ch.player^.bankgold) then
+  if (bid > GPlayer(ch).bankgold) then
     begin
     ch.sendBuffer('You do not have enough money in the bank.'#13#10);
     exit;
@@ -418,22 +424,22 @@ begin
     exit;
     end;
 
-  if (ch.player^.bg_status=BG_PARTICIPATE) then
+  if (GPlayer(ch).bg_status=BG_PARTICIPATE) then
     begin
     ch.sendBuffer('You are already participating in a battleground!'#13#10);
     exit;
     end;
 
-  if (ch.player^.bg_status=BG_NOJOIN) then
+  if (GPlayer(ch).bg_status=BG_NOJOIN) then
     begin
-    ch.player^.bg_status:=BG_JOIN;
+    GPlayer(ch).bg_status:=BG_JOIN;
     ch.sendBuffer('You will join a battleground when it starts.'#13#10);
     exit;
     end;
     
-  if (ch.player^.bg_status=BG_JOIN) then
+  if (GPlayer(ch).bg_status=BG_JOIN) then
     begin
-    ch.player^.bg_status:=BG_NOJOIN;
+    GPlayer(ch).bg_status:=BG_NOJOIN;
     ch.sendBuffer('You will no longer join a battleground when it starts.'#13#10);
     exit;
     end;

@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.51 2001/05/10 17:29:55 xenon Exp $
+// $Id: mudthread.pas,v 1.52 2001/05/11 14:24:23 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -74,7 +74,6 @@ uses
     magic,
     md5,
     update,
-    progs,
     timers,
     debug,
     mudspell,
@@ -245,7 +244,7 @@ begin
   with ch do
     begin
     { Check if keyboard is locked - Nemesis }
-    if (conn <> nil) and (IS_KEYLOCKED) and (not IS_NPC) then
+    if (conn <> nil) and (not IS_NPC) and (IS_KEYLOCKED) then
       begin
       if (length(line) = 0) then
         begin
@@ -253,7 +252,7 @@ begin
         exit;
         end;
 
-      if (not MD5Match(player^.md5_password, MD5String(line))) then
+      if (not MD5Match(GPlayer(ch).md5_password, MD5String(line))) then
         begin
         sendBuffer('Wrong password!'#13#10);
         exit;
@@ -302,7 +301,7 @@ begin
     // check for aliases first
     if (not ch.IS_NPC) then
       begin
-      node := ch.player^.aliases.head;
+      node := GPlayer(ch).aliases.head;
 
       while (node <> nil) do
         begin
@@ -357,7 +356,7 @@ begin
           end
         else
           begin
-          if (system_info.log_all) or (IS_SET(ch.act_flags, ACT_LOG)) then
+          if (system_info.log_all) or (ch.logging) then
             write_log(ch.name^ + ': ' + line);
 
           if (cmd.level >= LEVEL_IMMORTAL) then
@@ -432,7 +431,7 @@ begin
 end;
 
 procedure nanny(conn : GConnection; argument : string);
-var ch, vict : GCharacter;
+var ch, vict : GPlayer;
     node : GListNode;
     race : GRace;
     digest : MD5Digest;
@@ -458,11 +457,11 @@ begin
                     exit;
                     end;
 
-                  vict := findCharWorld(nil, argument);
+                  vict := findPlayerWorld(nil, argument);
 
                   if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) and (cap(vict.name^) = cap(argument)) then
                     begin
-                    if (not MD5Match(MD5String(pwd), vict.player^.md5_password)) then
+                    if (not MD5Match(MD5String(pwd), GPlayer(vict).md5_password)) then
                       begin
                       conn.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
                       closesocket(conn.socket);
@@ -472,12 +471,12 @@ begin
                       begin
                       GConnection(vict.conn).thread.Terminate;
 
-                      while (not IS_SET(vict.player^.flags, PLR_LINKLESS)) do;
+                      while (not IS_SET(vict.flags, PLR_LINKLESS)) do;
 
                       vict.conn := conn;
                       conn.ch := vict;
                       ch := vict;
-                      REMOVE_BIT(conn.ch.player^.flags,PLR_LINKLESS);
+                      REMOVE_BIT(conn.ch.flags,PLR_LINKLESS);
                       conn.state := CON_PLAYING;
                       conn.ch.sendPrompt;
                       end;
@@ -501,7 +500,7 @@ begin
                     exit;
                     end;
 
-                  if (not MD5Match(MD5String(argument), ch.player^.md5_password)) then
+                  if (not MD5Match(MD5String(argument), ch.md5_password)) then
                     begin
                     write_console('(' + inttostr(conn.socket) + ') Failed password');
                     conn.send('Wrong password.'#13#10);
@@ -509,7 +508,7 @@ begin
                     exit;
                     end;
 
-                  vict := findCharWorld(nil, ch.name^);
+                  vict := findPlayerWorld(nil, ch.name^);
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin
@@ -519,11 +518,11 @@ begin
                     ch := vict;
                     vict.conn := conn;
 
-                    ch.player^.ld_timer := 0;
+                    ch.ld_timer := 0;
 
                     conn.send('You have reconnected.'#13#10);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
-                    REMOVE_BIT(ch.player^.flags, PLR_LINKLESS);
+                    REMOVE_BIT(ch.flags, PLR_LINKLESS);
                     write_console('(' + inttostr(conn.socket) + ') ' + ch.name^ + ' has reconnected');
 
                     ch.sendPrompt;
@@ -555,7 +554,7 @@ begin
                   write_console('(' + inttostr(conn.socket) + ') '+ ch.name^ +' has logged in');
 
                   ch.node_world := char_list.insertLast(ch);
-                  ch.player^.logon_now := Now;
+                  ch.logon_now := Now;
 
                   if (ch.level = LEVEL_RULER) then
                     do_uptime(ch, '')
@@ -579,8 +578,8 @@ begin
                     exit;
                     end;
 
-                  vict := findCharWorld(nil, argument);
-                  (* if ((banned_names.indexof(uppercase(argument)) <> -1) or ((vict <> nil) and (uppercase(vict.name) = uppercase(argument)))) then
+                  (* vict := findCharWorld(nil, argument);
+                  if ((banned_names.indexof(uppercase(argument)) <> -1) or ((vict <> nil) and (uppercase(vict.name) = uppercase(argument)))) then
                     begin
                     send_to_conn(conn,'That name cannot be used.'#13#10);
                      send_to_conn(conn,'By what name do you wish to be known? ');
@@ -605,8 +604,7 @@ CON_NEW_PASSWORD: begin
                     exit;
                     end;
 
-                  new(ch.player);
-                  ch.player^.md5_password := MD5String(argument);
+                  ch.md5_password := MD5String(argument);
                   conn.state := CON_CHECK_PASSWORD;
                   conn.send(#13#10'Please retype your password: ');
                   end;
@@ -617,7 +615,7 @@ CON_CHECK_PASSWORD: begin
                       exit;
                       end;
 
-                    if (not MD5Match(MD5String(argument), ch.player^.md5_password)) then
+                    if (not MD5Match(MD5String(argument), ch.md5_password)) then
                       begin
                       conn.send(#13#10'Password did not match!'#13#10'Choose a password: ');
                       conn.state := CON_NEW_PASSWORD;
@@ -734,7 +732,7 @@ CON_CHECK_PASSWORD: begin
                   conn.send('250 stat points will be randomly distributed over your five attributes.'#13#10);
                   conn.send('It is impossible to get a lower or a higher total of stat points.'#13#10);
 
-                  with ch.ability do
+                  with ch do
                     begin
                     top:=250;
 
@@ -763,7 +761,7 @@ CON_CHECK_PASSWORD: begin
                           if (temp>0) then
                             begin
                             dec(top,temp);
-                            inc(str,temp);
+                            str := str + temp;
                             end;
                           end;
                         1:begin
@@ -771,7 +769,7 @@ CON_CHECK_PASSWORD: begin
                           if (temp>0) then
                             begin
                             dec(top,temp);
-                            inc(con,temp);
+                            con := con + temp;
                             end;
                           end;
                         2:begin
@@ -779,7 +777,7 @@ CON_CHECK_PASSWORD: begin
                           if (temp>0) then
                             begin
                             dec(top,temp);
-                            inc(dex,temp);
+                            dex := dex + temp;
                             end;
                           end;
                         3:begin
@@ -787,38 +785,31 @@ CON_CHECK_PASSWORD: begin
                           if (temp>0) then
                             begin
                             dec(top,temp);
-                            inc(int,temp);
+                            int := int + temp;
                             end;
                           end;
                         4:begin
                           temp:=UMax(75-wis,top);
                           if (temp>0) then
-                           begin
+                            begin
                             dec(top,temp);
-                            inc(wis,temp);
+                            wis := wis + temp;
                             end;
                           end;
                       end;
-                    end;
+                      end;
 
                     top:=str+con+dex+int+wis;
-
-                    // temporarily disabled this one - Grimlord [31/01/2000]
-                    { if (top<250) then
-                      bugreport('roll_char','total stats lower than 250')
-                    else
-                    if (top>250) then
-                      bugreport('roll_char','total stats more than 250'); }
-
-                    conn.send(#13#10'Your character statistics are: '#13#10#13#10);
-
-                    buf := 'Strength:     '+ANSIColor(10,0)+inttostr(str)+ANSIColor(7,0)+#13#10 +
-                           'Constitution: '+ANSIColor(10,0)+inttostr(con)+ANSIColor(7,0)+#13#10 +
-                           'Dexterity:    '+ANSIColor(10,0)+inttostr(dex)+ANSIColor(7,0)+#13#10 +
-                           'Intelligence: '+ANSIColor(10,0)+inttostr(int)+ANSIColor(7,0)+#13#10 +
-                           'Wisdom:       '+ANSIColor(10,0)+inttostr(wis)+ANSIColor(7,0)+#13#10;
-                    conn.send(buf);
                     end;
+
+                  conn.send(#13#10'Your character statistics are: '#13#10#13#10);
+
+                  buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
+                         'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
+                         'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
+                         'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
+                         'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
+                  conn.send(buf);
 
                   conn.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                   conn.state:=CON_NEW_STATS;
@@ -832,10 +823,10 @@ CON_CHECK_PASSWORD: begin
 
                   case (upcase(argument[1])) of
                     'C':begin
-                        digest := ch.player^.md5_password;
+                        digest := ch.md5_password;
 
                         ch.load(ch.name^);
-                        ch.player^.md5_password := digest;
+                        ch.md5_password := digest;
                         ch.save(ch.name^);
 
                         conn.send(#13#10'Thank you. You have completed your entry.'#13#10);
@@ -851,7 +842,7 @@ CON_CHECK_PASSWORD: begin
                         conn.state:=CON_MOTD;
                         end;
                     'R':begin
-                        with ch.ability do
+                        with ch do
                           begin
                           top:=250;
 
@@ -880,7 +871,7 @@ CON_CHECK_PASSWORD: begin
                                 if (temp>0) then
                                   begin
                                   dec(top,temp);
-                                  inc(str,temp);
+                                  str := str + temp;
                                   end;
                                 end;
                               1:begin
@@ -888,7 +879,7 @@ CON_CHECK_PASSWORD: begin
                                 if (temp>0) then
                                   begin
                                   dec(top,temp);
-                                  inc(con,temp);
+                                  con := con + temp;
                                   end;
                                 end;
                               2:begin
@@ -896,7 +887,7 @@ CON_CHECK_PASSWORD: begin
                                 if (temp>0) then
                                   begin
                                   dec(top,temp);
-                                  inc(dex,temp);
+                                  dex := dex + temp;
                                   end;
                                 end;
                               3:begin
@@ -904,38 +895,31 @@ CON_CHECK_PASSWORD: begin
                                 if (temp>0) then
                                   begin
                                   dec(top,temp);
-                                  inc(int,temp);
+                                  int := int + temp;
                                   end;
                                 end;
                               4:begin
                                 temp:=UMax(75-wis,top);
                                 if (temp>0) then
-                                 begin
+                                  begin
                                   dec(top,temp);
-                                  inc(wis,temp);
+                                  wis := wis + temp;
                                   end;
                                 end;
                             end;
-                          end;
+                            end;
 
                           top:=str+con+dex+int+wis;
-
-                          // temporarily disabled this one - Grimlord [31/01/2000]
-                          { if (top<250) then
-                            bugreport('roll_char','total stats lower than 250')
-                          else
-                          if (top>250) then
-                            bugreport('roll_char','total stats more than 250'); }
-
-                          conn.send(#13#10'Your character statistics are: '#13#10#13#10);
-
-                          buf := 'Strength:     '+ANSIColor(10,0)+inttostr(str)+ANSIColor(7,0)+#13#10 +
-                                 'Constitution: '+ANSIColor(10,0)+inttostr(con)+ANSIColor(7,0)+#13#10 +
-                                 'Dexterity:    '+ANSIColor(10,0)+inttostr(dex)+ANSIColor(7,0)+#13#10 +
-                                 'Intelligence: '+ANSIColor(10,0)+inttostr(int)+ANSIColor(7,0)+#13#10 +
-                                 'Wisdom:       '+ANSIColor(10,0)+inttostr(wis)+ANSIColor(7,0)+#13#10;
-                          conn.send(buf);
                           end;
+
+                        conn.send(#13#10'Your character statistics are: '#13#10#13#10);
+
+                        buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
+                               'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
+                               'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
+                               'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
+                               'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
+                        conn.send(buf);
 
                         conn.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                         end;
@@ -959,7 +943,7 @@ procedure GGameThread.Execute;
 var conn : GConnection;
     cmdline : string;
     temp_buf : string;
-    ch : GCharacter;
+    ch : GPlayer;
     i : integer;
 
 label nameinput,stopthread;
@@ -982,7 +966,7 @@ begin
     exit;
     end;
 
-  ch := GCharacter.Create;
+  ch := GPlayer.Create;
   conn.ch := ch;
   ch.conn := conn;
 
@@ -1060,7 +1044,7 @@ begin
       else
         case conn.state of
           CON_PLAYING: begin
-                       if (not conn.ch.IS_NPC) and (IS_SET(conn.ch.player^.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
+                       if (not conn.ch.IS_NPC) and (IS_SET(conn.ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
                          begin
                          conn.ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
                          conn.ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
@@ -1090,7 +1074,7 @@ begin
     conn.ch.conn := nil;
 
     act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
-    SET_BIT(conn.ch.player^.flags,PLR_LINKLESS);
+    SET_BIT(conn.ch.flags,PLR_LINKLESS);
     end
   else
   if (conn.state = CON_LOGGED_OUT) then

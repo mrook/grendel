@@ -128,14 +128,14 @@ begin
          end;
 
     if (sn.target <= TARGET_OFF_AREA) and (not ch.IS_NPC) then
-      ch.player^.fightxp := 0;
+      GPlayer(ch).fightxp := 0;
 
     obj := ch.getWield(ITEM_GEM);
 
     if (obj <> nil) and (obj.item_type = ITEM_GEM) then
       spell_lvl := obj.value[2]
     else
-      spell_lvl := (ch.ability.int + ch.ability.wis) div 2;
+      spell_lvl := (ch.int + ch.wis) div 2;
 
     if (victim = nil) then
       act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR)
@@ -146,7 +146,7 @@ begin
     if (spell_lvl < sn.min_lvl) and (not ch.IS_NPC) then
       act(AT_REPORT,'That spell is too powerful!',false,ch,nil,nil,TO_CHAR)
     else
-    if (ch.point.mana >= sn.min_mana) or (ch.IS_NPC) then
+    if (ch.mana >= sn.min_mana) or (ch.IS_NPC) then
       begin
       if (sn.target = TARGET_OFF_ATTACK) and (ch.fighting<>nil) then
         ch.fighting := victim;
@@ -183,9 +183,9 @@ begin
   if (obj <> nil) and (obj.item_type = ITEM_GEM) then
     spell_lvl := obj.value[2]
   else
-    spell_lvl := (ch.ability.int + ch.ability.wis) div 2;
+    spell_lvl := (ch.int + ch.wis) div 2;
 
   act(AT_REPORT,'Your current spell-level: $B$1[$B$7' + inttostr(spell_lvl) + '$B$1]',false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,'Your current mana:        $B$1[$B$7' + inttostr(ch.point.mana) + '$B$1]',false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT,'Your current mana:        $B$1[$B$7' + inttostr(ch.mana) + '$B$1]',false,ch,nil,nil,TO_CHAR);
 end;
 

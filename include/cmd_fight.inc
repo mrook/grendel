@@ -21,7 +21,7 @@ begin
   if (vict.position<>POS_FIGHTING) then
     begin
     if (not ch.IS_NPC) then
-      ch.player^.fightxp:=0;
+      GPlayer(ch).fightxp:=0;
 
     ch.position:=POS_FIGHTING;
     ch.fighting:=vict;
@@ -39,7 +39,7 @@ begin
   if (vict.position=POS_FIGHTING) and (ch.position<>POS_FIGHTING) then
     begin
     if (not ch.IS_NPC) then
-      ch.player^.fightxp:=0;
+      GPlayer(ch).fightxp:=0;
 
     ch.position:=POS_FIGHTING;
     ch.fighting:=vict;
@@ -55,7 +55,7 @@ begin
     //ch.fighting.fought_by.delete(ch.fighting.fought_by.indexof(ch));
 
     if (not ch.IS_NPC) then
-      ch.player^.fightxp:=0;
+      GPlayer(ch).fightxp:=0;
 
     ch.fighting:=vict;
     //vict.fought_by.add(ch);
@@ -125,8 +125,8 @@ begin
 
     if (ch.fighting.IS_NPC) then
       begin
-      ch.fighting.hunting:=ch;
-      SET_BIT(ch.fighting.act_flags,ACT_HUNTING);
+      ch.fighting.hunting := ch;
+      SET_BIT(GNPC(ch.fighting).act_flags, ACT_HUNTING);
       end;
 
     if (ch.fighting.fighting = ch) then
@@ -164,7 +164,7 @@ begin
     exit;
     end
   else
-  if (ch.point.mv < 15 + (ch.level div 10)+1) then
+  if (ch.mv < 15 + (ch.level div 10)+1) then
     begin
     ch.sendBuffer('You don''t have enough energy to flurry.'#13#10);
     exit;
@@ -175,7 +175,7 @@ begin
     act(AT_REPORT,'You go crazy and open up in a flurry of attacks!',false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n screams out a warcry and opens up in a flurry of attacks!',false,ch,nil,nil,TO_ROOM);
 
-    dec(point.mv, 15 + (ch.level div 10));
+    dec(mv, 15 + (ch.level div 10));
 
     ch.setWait(8);
 

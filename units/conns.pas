@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.23 2001/04/26 21:21:22 xenon Exp $
+// $Id: conns.pas,v 1.24 2001/05/11 14:24:22 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -24,7 +24,7 @@ type
       thread : TThread;
       idle : integer;
 
-      ch, original : GCharacter;
+      ch : GPlayer;                 // only players can be connected
       keylock, afk : boolean;
       state : integer;
 
@@ -70,9 +70,6 @@ procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharact
 function playername(from_ch, to_ch : GCharacter) : string;
 
 implementation
-
-uses
-    progs;
 
 (* procedure parse_line(p : string);
 var a : word;
@@ -368,19 +365,20 @@ end;
 
 procedure GConnection.outputPager;
 var last : cardinal;
-    c : GCharacter;
+    c : GPlayer;
     pclines,lines:integer;
     buf:string;
 begin
   if (pagepoint = 0) then
     exit;
 
-  if (original <> nil) then
+{  if (original <> nil) then
     c := original
   else
-    c := ch;
+    c := ch; }
+  c := ch;
 
-  pclines := UMax(ch.player^.pagerlen, 5) - 2;
+  pclines := UMax(c.pagerlen, 5) - 2;
 
   c.emptyBuffer;
 
@@ -723,7 +721,7 @@ begin
     begin
     to_ch := GCharacter(node.element);
 
-    if (to_ch.IS_NPC) and (not IS_SET(to_ch.npc_index.mpflags,MPROG_ACT)) and (ch.conn = nil)// and (ch.snooped_by=nil))
+    if (to_ch.IS_NPC) //and (not IS_SET(GNPC(to_ch.npc_index.mpflags,MPROG_ACT)) and (ch.conn = nil)// and (ch.snooped_by=nil))
       or ((not to_ch.IS_AWAKE) and (to_ch <> ch)) then goto wind;
 
     if (typ = TO_CHAR) and (to_ch <> ch) then
@@ -743,11 +741,11 @@ begin
 
     to_ch.sendBuffer(to_ch.ansiColor(atype) + txt + #13#10);
 
-    if (to_ch.IS_NPC) and (IS_SET(to_ch.npc_index.mpflags, MPROG_ACT)) then
-       actTrigger(to_ch, ch, txt);
+//    if (to_ch.IS_NPC) and (GNPC(to_ch).) then
+//       actTrigger(to_ch, ch, txt);
 
 wind:
-     if (typ = TO_CHAR) or (typ = TO_VICT) then
+     if (typ = TO_CHAR) or (typ = TO_VICT) or (typ = TO_IMM) then
        node := nil
      else
      if (typ = TO_ROOM) or (typ = TO_NOTVICT) or (typ = TO_ALL) then

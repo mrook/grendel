@@ -1,4 +1,4 @@
-// $Id: timers.pas,v 1.11 2001/05/10 17:30:38 xenon Exp $
+// $Id: timers.pas,v 1.12 2001/05/11 14:24:24 ***REMOVED*** Exp $
 
 unit timers;
 
@@ -316,7 +316,7 @@ begin
        end;
 
     if (conn.state=CON_PLAYING) and (not conn.ch.in_command) then
-      conn.ch.emptyBuffer;
+      GPlayer(conn.ch).emptyBuffer;
 
     if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
       dec(conn.ch.wait);
@@ -355,14 +355,14 @@ begin
     ch := node.element;
     node_next := node.next;
 
-    if (not ch.IS_NPC) and (IS_SET(ch.player^.flags, PLR_LINKLESS)) then
+    if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).flags, PLR_LINKLESS)) then
       begin
-      inc(ch.player^.ld_timer);
+      inc(GPlayer(ch).ld_timer);
 
-      if (ch.player^.ld_timer > IDLE_LINKDEAD) then
+      if (GPlayer(ch).ld_timer > IDLE_LINKDEAD) then
         begin
         node := node_next;
-        ch.quit;
+        GPlayer(ch).quit;
         continue;
         end;
       end;

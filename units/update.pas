@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.10 2001/04/28 19:05:20 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.11 2001/05/11 14:24:24 ***REMOVED*** Exp $
 
 unit update;
 
@@ -35,7 +35,6 @@ uses
     mudsystem,
     mudthread,
     fight,
-    progs,
     conns,
     Channels;
 
@@ -54,7 +53,6 @@ begin
 
     if (not ch.IS_NPC) then
     with ch do
-     with point do
       begin
       case position of
         POS_SLEEPING:begin
@@ -93,11 +91,15 @@ begin
 
       if IS_SET(ch.room.flags,ROOM_MANAROOM) then
         mana_gain:=mana_gain*2;
-        
+
       hp := UMin(hp + hp_gain, max_hp);
       mv := UMin(mv + mv_gain, max_mv);
       mana := UMin(mana + mana_gain, max_mana);
       end;
+
+    // progress the script
+    if (ch.IS_NPC) and (GNPC(ch).npc_index.prog <> nil) then
+      GNPC(ch).context.Execute;
 
     node := node.next;
     end;
@@ -179,7 +181,7 @@ procedure better_mental_state(ch:GCharacter; modifier:integer);
 var c:integer;
 begin
   c:=URANGE(0, abs(modifier), 20);
-  if (number_percent < ch.ability.con) then
+  if (number_percent < ch.con) then
     inc(c);
   if (ch.mental_state < 0) then
     ch.mental_state:=URANGE(-MAX_COND, ch.mental_state + c, 0)
@@ -192,7 +194,7 @@ procedure worsen_mental_state(ch:GCharacter;modifier:integer);
 var c:integer;
 begin
   c:=URANGE(0, abs(modifier), 20);
-  if (number_percent < ch.ability.con) then
+  if (number_percent < ch.con) then
     dec(c);
   if (c<1) then exit;
   if (ch.mental_state < 0) then
@@ -210,12 +212,12 @@ begin
   if (value=0) or (ch.IS_NPC) or (ch.IS_IMMORT) then
     exit;
 
-  condition:=ch.player^.condition[iCond];
-  ch.player^.condition[iCond]:=URANGE(0, condition+value, MAX_COND);
+  condition := GPlayer(ch).condition[iCond];
+  GPlayer(ch).condition[iCond]:=URANGE(0, condition+value, MAX_COND);
 
   retcode := RESULT_NONE;
 
-  if (ch.player^.condition[iCond]=0) then
+  if (GPlayer(ch).condition[iCond]=0) then
     case iCond of
        COND_FULL:begin
                  act(AT_REPORT,'You are STARVING!',false,ch,nil,nil,TO_CHAR);
@@ -251,9 +253,11 @@ begin
            retcode:=RESULT_NONE;
            end;
     end;
+
   if (retcode<>RESULT_NONE) then               { don't want to continue when ch is dead }
     exit;
-  if (ch.player^.condition[iCond]=3) then
+
+  if (GPlayer(ch).condition[iCond]=3) then
     case iCond of
        COND_FULL:begin
                  act(AT_REPORT,'You are getting really hungry.',false,ch,nil,nil,TO_CHAR);
@@ -271,7 +275,8 @@ begin
        COND_HIGH:if condition<>0 then
                    act(AT_REPORT,'You are slowly returning from outer space...',false,ch,nil,nil,TO_CHAR);
     end;
-  if (ch.player^.condition[iCond]=8) then
+
+  if (GPlayer(ch).condition[iCond]=8) then
     case iCond of
        COND_FULL:act(AT_REPORT,'You are hungry.',false,ch,nil,nil,TO_CHAR);
      COND_THIRST:act(AT_REPORT,'You are thirsty.',false,ch,nil,nil,TO_CHAR);
@@ -280,7 +285,8 @@ begin
        COND_HIGH:if condition<>0 then
                    act(AT_REPORT,'Slowly but surely, your high is starting to wear off.',false,ch,nil,nil,TO_CHAR);
     end;
-  if (ch.player^.condition[iCond]=16) then
+
+  if (GPlayer(ch).condition[iCond]=16) then
     case iCond of
        COND_FULL:act(AT_REPORT,'You could use a bite of something.',false,ch,nil,nil,TO_CHAR);
      COND_THIRST:act(AT_REPORT,'A drink would be nice.',false,ch,nil,nil,TO_CHAR);
@@ -304,7 +310,7 @@ begin
     { switched mobs don't wander }
     if (ch.IS_NPC) and (ch.conn = nil) then
       begin
-      if not IS_SET(ch.act_flags, ACT_SENTINEL) then
+      if not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL) then
        if ch.position=POS_STANDING then
         begin
         p:=random(6)+1;
@@ -315,20 +321,25 @@ begin
           begin
           r := findRoom(e.vnum);
 
-          if (r <> nil) and not (IS_SET(ch.act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
+          if (r <> nil) and not (IS_SET(GNPC(ch).act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
             interpret(ch, headings[p]);
           end;
         end;
 
-      randTrigger(ch);
+      if (ch.IS_NPC) and (GNPC(ch).npc_index.prog <> nil) then
+        begin
+        GNPC(ch).context.setEntryPoint('onTick');
+        GNPC(ch).context.Execute;
+        end;
+//      randTrigger(ch);
       end
     else
     if (not ch.IS_NPC) then
       begin
-      if (ch.player^.condition[COND_DRUNK]>8) then
-        worsen_mental_state(ch,ch.player^.condition[COND_DRUNK] div 8);
+      if (GPlayer(ch).condition[COND_DRUNK]>8) then
+        worsen_mental_state(ch,GPlayer(ch).condition[COND_DRUNK] div 8);
 
-      if (ch.player^.condition[COND_FULL]>1) then
+      if (GPlayer(ch).condition[COND_FULL]>1) then
         case ch.position of
           POS_SLEEPING:better_mental_state(ch,4);
            POS_RESTING:better_mental_state(ch,3);
@@ -337,7 +348,8 @@ begin
           POS_FIGHTING:if random(4)=0 then
                          better_mental_state(ch,1);
         end;
-      if (ch.player^.condition[COND_THIRST]>1) then
+
+      if (GPlayer(ch).condition[COND_THIRST]>1) then
         case ch.position of
           POS_SLEEPING:better_mental_state(ch,5);
            POS_RESTING:better_mental_state(ch,3);
@@ -532,7 +544,7 @@ begin
     begin
     conn := node.element;
 
-    if (conn.state=CON_PLAYING) and (conn.ch.player^.bg_status=BG_JOIN)
+    if (conn.state = CON_PLAYING) and (GPlayer(conn.ch).bg_status=BG_JOIN)
      and (conn.ch.level >= bg_info.lo_range) and (conn.ch.level <= bg_info.hi_range) then
       begin
       act(AT_REPORT,'You are transfered into the arena.',false,conn.ch,nil,nil,TO_CHAR);
@@ -541,12 +553,12 @@ begin
       s:=random(ROOM_VNUM_ARENA_END-ROOM_VNUM_ARENA_START+1)+ROOM_VNUM_ARENA_START;
       vnum:=URange(ROOM_VNUM_ARENA_START,s,ROOM_VNUM_ARENA_END);
 
-      conn.ch.player^.bg_room:=conn.ch.room;
+      GPlayer(conn.ch).bg_room:=conn.ch.room;
 
       conn.ch.fromRoom;
       conn.ch.toRoom(findRoom(vnum));
 
-      conn.ch.player^.bg_status:=BG_PARTICIPATE;
+      GPlayer(conn.ch).bg_status:=BG_PARTICIPATE;
       interpret(conn.ch,'look');
       end;
 
@@ -572,7 +584,7 @@ begin
       begin
       conn := node.element;
 
-      if (conn.state=CON_PLAYING) and (conn.ch.player^.bg_status=BG_PARTICIPATE) then
+      if (conn.state = CON_PLAYING) and (GPlayer(conn.ch).bg_status=BG_PARTICIPATE) then
         begin
         inc(s);
         last:=conn.ch;
@@ -583,18 +595,19 @@ begin
 
     if s=0 then
       begin
-      to_channel(nil,pchar('[$B$7Battleground stopped without a winner.$A$7]'),CHANNEL_ALL,AT_REPORT);
+      to_channel(nil,'[$B$7Battleground stopped without a winner.$A$7]',CHANNEL_ALL,AT_REPORT);
       bg_info.count:=-1;
       end
     else
     if s=1 then
       begin
-      to_channel(nil,pchar('[$B$3'+last.name^+'$B$7 has won the battleground!$A$7]'),CHANNEL_ALL,AT_REPORT);
+      to_channel(nil,'[$B$3'+last.name^+'$B$7 has won the battleground!$A$7]',CHANNEL_ALL,AT_REPORT);
       act(AT_REPORT,'Congratulations! You have won the battleground!',false,last,nil,nil,TO_CHAR);
-      inc(last.player^.bg_points,3);
+
+      inc(GPlayer(last).bg_points,3);
 
       last.fromRoom;
-      last.toRoom(last.player^.bg_room);
+      last.toRoom(GPlayer(last).bg_room);
 
       if (bg_info.prize<>nil) then
         begin
@@ -604,8 +617,8 @@ begin
         end;
 
       interpret(last, 'look');
-      last.player^.bg_status:=BG_NOJOIN;
-      last.point.hp:=last.point.max_hp;
+      GPlayer(last).bg_status:=BG_NOJOIN;
+      last.hp := last.max_hp;
 
       bg_info.winner:=last;
       bg_info.count:=-1;

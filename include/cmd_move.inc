@@ -229,13 +229,13 @@ begin
     exit;
     end;
 
-  node := ch.room.chars.head;
+  { when a mob blocks ch, we don't want to continue - Grimlord }
 
+(*  node := ch.room.chars.head;
   while (node <> nil) do
     begin
-    { when this mob blocks ch, we don't want to continue - Grimlord }
     vict := node.element;
-    
+
     if (blockTrigger(vict, ch, pexit.vnum)) and (not ch.IS_HOLYWALK) then
       begin
       ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
@@ -243,14 +243,14 @@ begin
       end;
 
     node := node.next;
-    end;
+    end; *)
 
   if (not ch.IS_FLYING) then
     mv_cost := movement_loss[room_pos.sector]
   else
     mv_cost := 1;
 
-  if (ch.point.mv < mv_cost) then
+  if (ch.mv < mv_cost) then
     begin
     ch.sendBuffer('You are too exhausted.'#13#10);
     exit;
@@ -258,7 +258,7 @@ begin
 
   if (not ch.IS_NPC) then
     begin
-    if (ch.point.hp < ch.point.max_hp div 2) then
+    if (ch.hp < ch.max_hp div 2) then
       makeblood(ch, pexit);
 
     maketrack(ch, pexit);
@@ -315,8 +315,8 @@ begin
   ch.fromRoom;
   ch.toRoom(room_to);
 
-  dec(ch.point.mv, mv_cost);
-  if (ch.point.mv < 15) then
+  dec(ch.mv, mv_cost);
+  if (ch.mv < 15) then
     act(AT_REPORT,'You start breathing heavily... you are very tired.',false,ch,nil,nil,TO_CHAR);
 
   if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
@@ -370,8 +370,8 @@ begin
     node := node_next;
     end;
 
-  if (not ch.IS_NPC) then
-    greetTrigger(ch);
+//  if (not ch.IS_NPC) then
+//    greetTrigger(ch);
 
   do_move := true;
 end;

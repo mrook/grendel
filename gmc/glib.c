@@ -7,4 +7,3 @@ void terminate()
 }
 
 float cos(float x);
-

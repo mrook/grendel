@@ -1,11 +1,10 @@
-// $Id: constants.pas,v 1.31 2001/05/10 17:28:58 xenon Exp $
+// $Id: constants.pas,v 1.32 2001/05/11 14:24:22 ***REMOVED*** Exp $
 
 unit constants;
 
 interface
-uses dtypes;
 
-const version_number = 'v0.3.5';
+const version_number = 'v0.3.6pre15';
       version_info = 'The Grendel Project - A Win32 MUD Server';
       version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
 
@@ -169,17 +168,18 @@ const AFF_BLIND = BV00;
       AFF_SANCTUARY = BV04;
       AFF_INFRAVISION = BV05;
       AFF_POISON = BV06;
-      AFF_FLYING = BV07;
+      AFF_LEVITATION = BV07;
       AFF_BERSERK = BV08;
       AFF_AQUA_BREATH = BV09;
       AFF_PLAGUE = BV10;
       AFF_HIDE = BV11;
       AFF_SNEAK = BV12;
       AFF_ENCHANT = BV13;             { magical attacks }
+      AFF_FLYING = BV14;              
 
 { PC status flags}
 const PLR_NPC=BV00;
-      PLR_FLYCAP=BV01;          { can fly }
+//      PLR_FLYCAP=BV01;          { can fly }
       PLR_WIZINVIS=BV02;        { is wizinvis? }
       PLR_LINKLESS=BV04;        { linkless dude? }
       PLR_LOADED=BV05;          { loaded up by immo }
@@ -201,9 +201,7 @@ const CFG_ASSIST=BV01;
       CFG_AUTOPEEK = BV09;      { peek automatically on look }
 
 { NPC/PC flags }
-const ACT_NPC=BV00;             { doh... never set with PC's! }
-      ACT_FLYING=BV01;          { flying NPC/PC? }
-      ACT_AGGRESSIVE=BV02;      { aggressive NPC? }
+const ACT_AGGRESSIVE=BV02;      { aggressive NPC? }
       ACT_SENTINEL=BV03;        { stays in room, guard }
       ACT_SCAVENGER=BV04;       { picks up trash }
       ACT_STAY_AREA=BV05;       { stays in area }
@@ -216,9 +214,8 @@ const ACT_NPC=BV00;             { doh... never set with PC's! }
       ACT_NOBASH=BV12;          { cannot be bashed (dragon?) }
       ACT_SHOPKEEP=BV13;        { shop keeper }
       ACT_IMMORTAL=BV14;        { immortal NPC }
-      ACT_LOG=BV15;             { actions are logged }
       ACT_PROTO = cardinal(BV31);
-      
+
 { Item Types }
 const ITEM_WEAPON=1;
       ITEM_ARMOR=2;

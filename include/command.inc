@@ -1,4 +1,4 @@
-// $Id: command.inc,v 1.16 2001/04/22 23:24:37 xenon Exp $
+// $Id: command.inc,v 1.17 2001/05/11 14:25:08 ***REMOVED*** Exp $
 
 {$F+}
 
@@ -7,6 +7,9 @@ procedure do_quit(ch : GCharacter; param : string);
 var
    timer : GTimer;
 begin
+  if (ch.IS_NPC) then
+    exit;
+
   if (ch.position = POS_FIGHTING) then
     begin
     ch.sendBuffer('You are fighting! You can''t quit!'#13#10);
@@ -39,12 +42,15 @@ begin
   if (ch.conn <> nil) then
     GConnection(ch.conn).send('Thanks for playing! Please visit this MUD again!'#13#10);
 
-  ch.quit;
+  GPlayer(ch).quit;
 end;
 
 procedure do_save(ch : GCharacter; param : string);
 begin
-  ch.save(ch.name^);
+  if (ch.IS_NPC) then
+    exit;
+
+  GPlayer(ch).save(ch.name^);
   ch.sendBuffer('Ok.'#13#10);
 end;
 
@@ -243,97 +249,8 @@ begin
 end;
 
 procedure do_remort(ch : GCharacter; param : string);
-var a:integer;
-    str,con,dex,int,wis,dam,pracs:integer;
-    sub : string;
 begin
-  if (ch.IS_IMMORT) then
-    ch.sendBuffer('You don''t want to remort!'#13#10)
-  else
-  if (ch.player^.remorts >= 6) then
-    ch.sendBuffer('You have had enough remorts.'#13#10)
-  else
-  if (length(param) = 0) then
-  begin
-    ch.sendBuffer('REMORT <stat> <stat> <stat> <stat> <stat> <extra>' + #13#10 +
-                  '' + #13#10 +
-                  '   where <stat> is one of str, con, dex, int or wis and <extra> one of dam or pracs.'#13#10);
-  end
-  else
-    begin
-    str:=0; con:=0; dex:=0; int:=0; wis:=0;
-    dam:=0; pracs:=10;
-    for a:=0 to 4 do
-      begin
-      param:=one_argument(param,sub);
-      if (comparestr('str', sub) = 0) then
-        inc(str)
-      else
-      if (comparestr('con',sub)=0) then
-        inc(con)
-      else
-      if (comparestr('dex',sub)=0) then
-        inc(dex)
-      else
-      if (comparestr('int',sub)=0) then
-        inc(int)
-      else
-      if (comparestr('wis',sub)=0) then
-        inc(wis)
-      else
-        begin
-        ch.sendBuffer('Unknown <stat> in parameter list.'#13#10);
-        exit;
-        end;
-      end;
-
-    param := one_argument(param,sub);
-
-    if (comparestr('dam',sub)=0) then
-      inc(dam,2)
-    else
-    if (comparestr('pracs',sub)=0) then
-//      inc(pracs,25)
-      pracs := 25
-    else
-      begin
-      ch.sendBuffer('Illegal <extra> in parameter list.'#13#10);
-      exit;
-      end;
-
-    if (length(param) <> 0) then
-    begin
-      ch.sendBuffer('Unrecognized option ''' + param + ''' in remort command.'#13#10);
-      exit;
-    end;
-
-    with ch do
-      begin
-      inc(player^.remorts);
-      inc(ability.str,str);
-      inc(ability.con,con);
-      inc(ability.dex,dex);
-      inc(ability.int,int);
-      inc(ability.wis,wis);
-      inc(point.apb,dam);
-      inc(player^.max_skills, 1);
-      inc(player^.max_spells, 2);
-      player^.pracs := pracs;
-      
-      level := 1;
-
-      point.max_hp:=50;
-      point.max_mv:=40;
-      point.max_mana:=25;
-      point.hitroll:=50;
-
-      skills_learned.clean;
-      end;
-
-    act(AT_WHITE,'Congratulations! This is remort '+inttostr(ch.player^.remorts)+
-                 ' for your character!',false,ch,nil,nil,TO_CHAR);
-    interpret(ch, 'save');
-    end;
+  ch.sendBuffer('Disfunctional. Sorry.'#13#10);
 end;
 
 { Revised - Nemesis }
@@ -346,7 +263,7 @@ begin
     exit;
     end;
 
-  if (not MD5Match(ch.player^.md5_password, MD5String(param))) then
+  if (not MD5Match(GPlayer(ch).md5_password, MD5String(param))) then
     begin
     ch.sendBuffer('Type DELETE <password> to delete. WARNING: This is irreversible!'#13#10);
     exit;
@@ -355,7 +272,7 @@ begin
   GConnection(ch.conn).send('You feel yourself dissolving, atom by atom...'#13#10);
 
   write_console(ch.name^ + ' has deleted');
-  ch.quit;
+  GPlayer(ch).quit;
 
   assignfile(f, 'players\' + ch.name^ + '.usr');
   rename(f, 'backup\' + ch.name^ + '.usr');
@@ -364,7 +281,7 @@ end;
 procedure do_wimpy(ch : GCharacter; param : string);
 var wimpy:integer;
 begin
-  if (length(param) = 0) then
+  if (length(param) = 0) or (ch.IS_NPC) then
     begin
     ch.sendBuffer('Set wimpy to what?'#13#10);
     exit;
@@ -377,12 +294,12 @@ begin
     exit;
   end;
 
-  if (wimpy > ch.point.max_hp div 3) then
+  if (wimpy > ch.max_hp div 3) then
     ch.sendBuffer('Your wimpy cannot be higher than 1/3 of your total hps!'#13#10)
   else
     begin
-    ch.player^.wimpy := wimpy;
-    ch.sendBuffer(pchar('Wimpy set to '+inttostr(wimpy)+'.'+#13#10));
+    GPlayer(ch).wimpy := wimpy;
+    ch.sendBuffer('Wimpy set to '+inttostr(wimpy)+'.'+#13#10);
     end;
 end;
 
@@ -428,8 +345,8 @@ begin
     ch.sendBuffer('You are now away from keyboard.'#13#10#13#10);
     act(AT_REPORT,'$n has left $s keyboard and starts writing a note.',false,ch,nil,nil,to_room);
 
-    ch.sendBuffer('You start writing a note on the ' + board_names[ch.player^.active_board] + ' board.'#13#10);
-    ch.startEditing('');
+    ch.sendBuffer('You start writing a note on the ' + board_names[GPlayer(ch).active_board] + ' board.'#13#10);
+    GPlayer(ch).startEditing('');
     exit;
     end
   else
@@ -448,7 +365,7 @@ begin
       begin
       note := node.element;
 
-      if (note.board = ch.player^.active_board) then
+      if (note.board = GPlayer(ch).active_board) then
         begin
         inc(counter);
         buf := buf + ch.ansiColor(15) + ' ' + pad_integer_front(note.number,3) + ch.ansiColor(7) + '>   ' + pad_string(note.author,20) + ' ' + note.subject + #13#10;
@@ -483,7 +400,7 @@ begin
       exit;
     end;
 
-    note := findNote(ch.player^.active_board, number);
+    note := findNote(GPlayer(ch).active_board, number);
 
     if (note = nil) then
       begin
@@ -500,7 +417,7 @@ begin
 
     ch.sendPager(buf);
 
-    ch.player^.boards[ch.player^.active_board] := number;
+    GPlayer(ch).boards[GPlayer(ch).active_board] := number;
     exit;
     end
   else
@@ -531,7 +448,7 @@ begin
       begin
       note := node.element;
 
-      if (note.board = ch.player^.active_board) and (note.number = number) then
+      if (note.board = GPlayer(ch).active_board) and (note.number = number) then
         begin
         notes.remove(node);
         save_notes;
@@ -581,8 +498,8 @@ begin
         exit;
         end;
 
-      ch.player^.active_board := boardnumber;
-      ch.sendBuffer('Current board changed to ' + board_names[ch.player^.active_board] + '.'#13#10);
+      GPlayer(ch).active_board := boardnumber;
+      ch.sendBuffer('Current board changed to ' + board_names[GPlayer(ch).active_board] + '.'#13#10);
       exit;
     except
       arg1 := '';
@@ -611,7 +528,7 @@ begin
         node := node.next;
         end;
 
-      counter := counter - ch.player^.boards[i];
+      counter := counter - GPlayer(ch).boards[i];
 
       if (i = BOARD_IMM) then
         begin
@@ -622,9 +539,9 @@ begin
         act(AT_REPORT, '$B$7 ' + pad_integer_front(i, 2) + '$A$7>   ' + pad_string(board_names[i],10) + '   ' + pad_integer(counter,3) + '   ' + board_descr[i],false,ch,nil,nil,TO_CHAR);
       end;
 
-    ch.sendBuffer(#13#10 + ch.ansiColor(7) + 'Your current board is ' + board_names[ch.player^.active_board] + '.'#13#10);
+    ch.sendBuffer(#13#10 + ch.ansiColor(7) + 'Your current board is ' + board_names[GPlayer(ch).active_board] + '.'#13#10);
 
-    if (ch.player^.active_board = BOARD_NEWS) and (not ch.IS_IMMORT) then
+    if (GPlayer(ch).active_board = BOARD_NEWS) and (not ch.IS_IMMORT) then
       ch.sendBuffer(ch.ansiColor(7) + 'You can only read from this board.'#13#10)
     else
       ch.sendBuffer(ch.ansiColor(7) + 'You can both read and write on this board.'#13#10);

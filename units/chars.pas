@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.39 2001/05/10 17:28:01 xenon Exp $
+// $Id: chars.pas,v 1.40 2001/05/11 14:25:01 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -18,6 +18,7 @@ uses
     util,
     clan,
     dtypes,
+    gvm,
     bulletinboard;
 
 
@@ -43,7 +44,7 @@ type
         constructor Create(txt : string);
         destructor Destroy(); override;
       end;
-      
+
     TChannel =
       class
         channelname : string;
@@ -53,7 +54,162 @@ type
         destructor Destroy(); override;
       end;
 
-    GPlayer = record
+    GLearned = class
+      skill : pointer;
+      perc : integer;
+
+      constructor Create(perc_ : integer; skill_ : pointer);
+    end;
+
+    {$M+}
+    GCharacter = class
+      node_world, node_room : GListNode;
+      objects : GDLinkedList;
+
+      reply, master, leader : GCharacter;
+      fighting , hunting : GCharacter;
+      snooped_by : GCharacter;
+
+    private
+      _level : integer;
+      _str, _con, _dex, _int, _wis : integer;
+
+    public
+      mana, max_mana : integer;      { Current mana and maximum mana }
+      hp, max_hp : integer;          { Current hp and maximum hp }
+      mv, max_mv : integer;          { Current move and maximum move }
+      apb : integer;                { Attack Power Bonus }
+      ac_mod : integer;             { AC modifier (spells?) }
+      natural_ac : integer;         { Natural AC (race based for PC's) }
+      hac, bac, aac, lac, ac : integer; { head, body, arm, leg and overall ac }
+      hitroll : integer;            { the hit roll }
+      damnumdie, damsizedie : integer;
+      save_poison, save_cold, save_para,  { saving throws }
+      save_breath, save_spell :integer;
+      tracking : string;
+
+      logging : boolean;
+
+      position : integer;
+      gold : longint;               { Gold carried }
+      mental_state : integer;
+      room : GRoom;
+      substate : integer;
+      trust : integer;
+      kills : integer;
+      wait : integer;
+      skills_learned : GDLinkedList;
+      cast_timer, bash_timer, bashing : integer;
+      in_command : boolean;
+      name, short, long : PString;
+      sex : integer;
+      race : GRace;
+      alignment : integer;
+      carried_weight : integer;             { weight of items carried }
+      weight, height : integer;       { weight/height of (N)PC }
+      last_cmd : pointer;
+      affects : GDLinkedList;
+      aff_flags : cardinal;
+      clan : GClan;                 { joined a clan? }
+      conn : pointer;
+
+    published
+      procedure sendPrompt; virtual;
+      procedure sendBuffer(s : string); virtual;
+      procedure sendPager(txt : string); virtual;
+      procedure emptyBuffer; virtual;
+
+      function ansiColor(color : integer) : string; virtual;
+
+      function getTrust : integer;
+
+      function CHAR_DIED : boolean;
+
+      function IS_IMMORT : boolean; virtual;
+      function IS_NPC : boolean; virtual;
+      function IS_LEARNER : boolean; virtual;
+      function IS_AWAKE : boolean; virtual;
+      function IS_INVIS : boolean; virtual;
+      function IS_HIDDEN : boolean; virtual;
+      function IS_WIZINVIS : boolean; virtual;
+      function IS_GOOD : boolean; virtual;
+      function IS_EVIL : boolean; virtual;
+      function IS_SAME_ALIGN(vict : GCharacter) : boolean; virtual;
+      function IS_FLYING : boolean; virtual;
+      function IS_BANKER : boolean; virtual;
+      function IS_SHOPKEEPER : boolean; virtual;
+      function IS_OUTSIDE : boolean; virtual;
+      function IS_AFFECT(affect : integer) : boolean; virtual;
+      function IS_DRUNK : boolean; virtual;
+      function IS_WEARING(item_type : integer) : boolean; virtual;
+      function IS_HOLYWALK : boolean; virtual;
+      function IS_HOLYLIGHT : boolean; virtual;
+      function IS_AFK : boolean; virtual;
+      function IS_KEYLOCKED : boolean; virtual;
+      function IS_EDITING : boolean; virtual;
+      function CAN_FLY : boolean; virtual;
+      function CAN_SEE(vict : GCharacter) : boolean; virtual;
+
+      function LEARNED(skill : pointer) : integer;
+      procedure SET_LEARNED(perc : integer; skill : pointer);
+
+      procedure extract(pull : boolean);
+      procedure fromRoom;
+      procedure toRoom(to_room : GRoom);
+
+      function getEQ(location : integer) : GObject;
+      function getWield(item_type : integer) : GObject;
+      function getDualWield : GObject;
+      procedure affectObject(obj : GObject; remove: boolean);
+      function equip(obj : GObject) : boolean;
+
+      procedure die; virtual;
+
+      procedure setWait(ticks : integer);
+
+      function calcxp2lvl : cardinal;
+
+      procedure calcAC;
+
+      procedure startFlying;
+      procedure stopFlying;
+
+      function findInventory(s : string) : GObject;
+      function findEquipment(s : string) : GObject;
+
+      constructor Create;
+      destructor Destroy; override;
+
+      property level : integer read _level write _level;
+      property str : integer read _str write _str;
+      property con : integer read _str write _str;
+      property dex : integer read _str write _str;
+      property int : integer read _str write _str;
+      property wis : integer read _str write _str;
+    end;
+
+    GNPC = class(GCharacter)
+    public
+      npc_index : GNPCIndex;
+      act_flags : cardinal;
+      context : GContext;
+
+    published
+      function IS_IMMORT : boolean; override;
+      function IS_NPC : boolean; override;
+      function IS_LEARNER : boolean; override;
+      function IS_WIZINVIS : boolean; override;
+      function IS_BANKER : boolean; override;
+      function IS_SHOPKEEPER : boolean; override;
+
+      procedure die; override;
+    end;
+
+    GPlayer = class(GCharacter)
+    public
+      edit_buffer : string;
+      edit_dest : pointer;
+
       pagerlen : integer;
       title : string;                     { Title of PC }
       hometown : integer;                { Hometown (vnum of portal) }
@@ -98,152 +254,46 @@ type
       active_board : integer;
       boards : array[BOARD1..BOARD_MAX-1] of integer;
       subject : string;
-    end;
 
-    GAbility = record
-      str, con, dex, int, wis : integer;
-    end;
+      constructor Create;
+      destructor Destroy; override;
 
-    GPoint = record
-      mana, max_mana : integer;      { Current mana and maximum mana }
-      hp, max_hp : integer;          { Current hp and maximum hp }
-      mv, max_mv : integer;          { Current move and maximum move }
-      apb : integer;                { Attack Power Bonus }
-      ac_mod : integer;             { AC modifier (spells?) }
-      natural_ac : integer;         { Natural AC (race based for PC's) }
-      hac, bac, aac, lac, ac : integer; { head, body, arm, leg and overall ac }
-      hitroll : integer;            { the hit roll }
-      damnumdie, damsizedie : integer;
-      save_poison, save_cold, save_para,  { saving throws }
-      save_breath, save_spell :integer;
-    end;
+    published
+      function ansiColor(color : integer) : string; override;
 
-    GLearned = class
-      skill : pointer;
-      perc : integer;
+      function IS_IMMORT : boolean; override;
+      function IS_WIZINVIS : boolean; override;
+      function IS_HOLYWALK : boolean; override;
+      function IS_HOLYLIGHT : boolean; override;
+      function IS_AFK : boolean; override;
+      function IS_KEYLOCKED : boolean; override;
+      function IS_EDITING : boolean; override;
 
-      constructor Create(perc_ : integer; skill_ : pointer);
-    end;
-
-    GCharacter = class
-      node_world, node_room : GListNode;
-      objects : GDLinkedList;
-
-      reply, master, leader : GCharacter;
-      fighting , hunting : GCharacter;
-      snooped_by : GCharacter;
-      edit_buffer : string;
-      edit_dest : pointer;
-
-      ability : GAbility;
-      point : GPoint;
-      conn : pointer;
-      player : ^GPlayer; { Only players have this record }
-      position : integer;
-      gold : longint;               { Gold carried }
-      mental_state : integer;
-      room : GRoom;
-      substate : integer;
-      trust : integer;
-      kills : integer;
-      wait : integer;
-      skills_learned : GDLinkedList;
-      cast_timer, bash_timer, bashing : integer;
-      in_command : boolean;
-      npc_index : GNPCIndex;
-      name, short, long : PString;
-      sex : integer;
-      race : GRace;
-      alignment : integer;
-      level : integer;
-      carried_weight : integer;             { weight of items carried }
-      weight, height : integer;       { weight/height of (N)PC }
-      last_cmd : pointer;
-      affects : GDLinkedList;
-      act_flags, aff_flags : cardinal;
-      clan : GClan;                 { joined a clan? }
-      tracking : string;
+      function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
+      function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
 
       function load(fn : string) : boolean;
       function save(fn : string) : boolean;
 
-      procedure sendPrompt;
-      procedure sendBuffer(s : string);
-      procedure sendPager(txt : string);
-      procedure emptyBuffer;
+      function getAge : integer;
+      function getPlayed : integer;
+
+      procedure die; override;
+      procedure calcRank;
+
+      procedure quit;
+
+      procedure sendPrompt; override;
+      procedure sendBuffer(s : string); override;
+      procedure sendPager(txt : string); override;
+      procedure emptyBuffer; override;
 
       procedure startEditing(text : string);
       procedure stopEditing;
       procedure editBuffer(text : string);
       procedure sendEdit(text : string);
-
-      function ansiColor(color : integer) : string;
-
-      function getAge : integer;
-      function getPlayed : integer;
-      function getTrust : integer;
-
-      function CHAR_DIED : boolean;
-
-      function IS_IMMORT : boolean;
-      function IS_NPC : boolean;
-      function IS_LEARNER : boolean;
-      function IS_AWAKE : boolean;
-      function IS_INVIS : boolean;
-      function IS_HIDDEN : boolean;
-      function IS_WIZINVIS : boolean;
-      function IS_GOOD : boolean;
-      function IS_EVIL : boolean;
-      function IS_SAME_ALIGN(vict : GCharacter) : boolean;
-      function IS_FLYING : boolean;
-      function IS_BANKER : boolean;
-      function IS_SHOPKEEPER : boolean;
-      function IS_OUTSIDE : boolean;
-      function IS_AFFECT(affect : integer) : boolean;
-      function IS_DRUNK : boolean;
-      function IS_WEARING(item_type : integer) : boolean;
-      function IS_HOLYWALK : boolean;
-      function IS_HOLYLIGHT : boolean;
-      function IS_AFK : boolean;
-      function IS_KEYLOCKED : boolean;
-      function IS_EDITING : boolean;
-      function CAN_FLY : boolean;
-      function CAN_SEE(vict : GCharacter) : boolean;
-
-      function LEARNED(skill : pointer) : integer;
-      procedure SET_LEARNED(perc : integer; skill : pointer);
-      function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
-      function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
-
-      procedure extract(pull : boolean);
-      procedure quit;
-      procedure fromRoom;
-      procedure toRoom(to_room : GRoom);
-
-      function getEQ(location : integer) : GObject;
-      function getWield(item_type : integer) : GObject;
-      function getDualWield : GObject;
-      procedure affectObject(obj : GObject; remove: boolean);
-      function equip(obj : GObject) : boolean;
-
-      procedure die;
-
-      procedure setWait(ticks : integer);
-
-      function calcxp2lvl : cardinal;
-
-      procedure calcAC;
-      procedure calcRank;
-
-      procedure startFlying;
-      procedure stopFlying;
-
-      function findInventory(s : string) : GObject;
-      function findEquipment(s : string) : GObject;
-
-      constructor Create;
-      destructor Destroy; override;
     end;
+    {$M-}
 
     GExtractedCharacter = class
       node : GListNode;
@@ -257,6 +307,7 @@ var
    extracted_chars : GDLinkedList;
 
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
+function findPlayerWorld(ch : GCharacter; name : string) : GPlayer;
 
 procedure cleanChars;
 
@@ -315,16 +366,11 @@ begin
   objects := GDLinkedList.Create;
   affects := GDLinkedList.Create;
 
-  SET_BIT(act_flags, ACT_NPC);
-
-  player := nil;
   reply := nil;
   master := nil;
   snooped_by := nil;
   leader := Self;
   tracking := '';
-  edit_buffer := '';
-  edit_dest := nil;
 end;
 
 destructor GCharacter.Destroy;
@@ -333,23 +379,6 @@ var
    node : GListNode;
    tc : TChannel;
 begin
-  if (player <> nil) then
-    begin
-    player^.aliases.clean;
-    player^.aliases.Free;
-    node := player^.channels.head;
-    while (node <> nil) do
-    begin
-      tc := node.element;
-      player^.channels.remove(node);
-      tc.Free();
-      node := node.next;
-    end;
-    player^.channels.clean();
-    player^.channels.Free();
-    dispose(player);
-    end;
-
   affects.clean;
   affects.Free;
 
@@ -408,113 +437,13 @@ begin
     end;
 end;
 
-procedure GCharacter.quit;
-var
-   vict : GCharacter;
-   node : GListNode;
-   c : GConnection;
-begin
-  emptyBuffer;
-
-  c := conn;
-
-  if (IS_NPC) then
-    begin
-    if (c <> nil) then
-      c.send('You''re an NPC, you can''t quit!'#13#10);
-    exit;
-    end;
-
-  if (c = nil) then
-    write_console('(Linkless) '+ name^+ ' has logged out')
-  else
-  if (c <> nil) then
-    write_console('(' + inttostr(c.socket) + ') ' + name^ + ' has logged out');
-
-  { switched check}
-  if (conn <> nil) and (not IS_NPC) then
-    begin
-    c.state := CON_LOGGED_OUT;
-    c.ch := nil;
-
-    try
-      c.thread.terminate;
-    except
-      write_console('could not delete thread of ' + name^);
-    end;
-
-    conn := nil;
-
-    closesocket(c.socket);
-    end
-  else
-  if (not IS_NPC) and (not IS_SET(player^.flags, PLR_LINKLESS)) then
-    interpret(Self, 'return sub');
-
-  { perform the cleanup }
-  if (not IS_NPC) and (player^.snooping <> nil) then
-    begin
-    player^.snooping.snooped_by := nil;
-    player^.snooping := nil;
-    end;
-
-  if (snooped_by <> nil) then
-    begin
-    snooped_by.player^.snooping := nil;
-    snooped_by.sendBuffer('No longer snooping.'#13#10);
-    snooped_by := nil;
-    end;
-
-  if (leader <> Self) then
-    begin
-//    to_group(leader, '$B$7[Group]: ' + name^ + ' has left the group.');
-    to_channel(leader, '$B$7[Group]: ' + name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
-    leader := nil;
-    end
-  else
-    begin
-    node := char_list.head;
-
-    while (node <> nil) do
-      begin
-      vict := node.element;
-
-      if (vict <> Self) and ((vict.leader = Self) or (vict.master = Self)) then
-        begin
-        act(AT_REPORT,'You stop following $N.',false,vict,nil,Self,TO_CHAR);
-        vict.master := nil;
-        vict.leader := vict;
-        end;
-
-      node := node.next;
-      end;
-    end;
-
-  if (not IS_NPC) then
-    save(name^)
-  else
-    dec(npc_index.count);
-
-  extract(true);
-end;
-
-function GCharacter.getAge : integer;
-begin
-  getAge := 17 + (getPlayed div 1000);
-end;
-
-function GCharacter.getPlayed : integer;
-begin
-  getPlayed := trunc(((player^.played + (Now - player^.logon_now)) * MSecsPerDay) / 60000);
-end;
-
 function GCharacter.getTrust : integer;
 var
    ch : GCharacter;
 begin
-  if (conn <> nil) and (GConnection(conn).original <> nil) then
+{  if (conn <> nil) and (GConnection(conn).original <> nil) then
     ch := GConnection(conn).original
-  else
+  else }
     ch := Self;
 
   if (ch.trust <> 0) then
@@ -558,25 +487,270 @@ begin
     end;
 end;
 
+procedure GCharacter.sendPrompt;
+begin
+end;
+
+procedure GCharacter.sendBuffer(s : string);
+begin
+end;
+
+procedure GCharacter.sendPager(txt : string);
+begin
+end;
+
+procedure GCharacter.emptyBuffer;
+begin
+end;
+
+// GPlayer
+constructor GPlayer.Create;
+var
+   node : GListNode;
+   chan : TChannel;
+   tc : TChannel;
+
+begin
+  inherited Create;
+
+  pagerlen := 25;
+  xptogo := round((20 * power(level, 1.2)) * (1 + (random(3) / 10)));
+
+  title := 'the Newbie Adventurer';
+  snooping := nil;
+
+  cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI or CFG_AUTOPEEK;
+  bankgold := 500;
+  clan := nil;
+  clanleader := false;
+  condition[COND_FULL] := 100;
+  condition[COND_THIRST] := 100;
+  condition[COND_DRUNK] := 0;
+  condition[COND_HIGH] := 0;
+  condition[COND_CAFFEINE] := 0;
+  logon_first := Now;
+  ld_timer := 0;
+  edit_buffer := '';
+  edit_dest := nil;
+
+  aliases := GDLinkedList.Create;
+  skills_learned := GDLinkedList.Create;
+
+  if (race <> nil) then
+    begin
+    max_skills := race.max_skills;
+    max_spells := race.max_spells;
+    end
+  else
+    begin
+    max_skills := 0;
+    max_spells := 0;
+    end;
+
+  pracs := 10; // default for new players(?)
+
+  channels := GDLinkedList.Create();
+  node := channellist.head;
+
+  while (node <> nil) do
+    begin
+    chan := node.element;
+    tc := TChannel.Create(chan.channelname);
+    channels.insertLast(tc);
+    node := node.next;
+    end;
+
+  active_board := 1;
+  boards[BOARD1] := 0;
+  boards[BOARD2] := 0;
+  boards[BOARD3] := 0;
+  boards[BOARD_NEWS] := 0;
+  boards[BOARD_IMM] := 0;
+
+  apb := 7;
+  hp := 50 + con + random(11); max_hp:=hp;
+  mv := 40 + (dex div 4); max_mv := mv;
+  mana := 25; max_mana := 25;
+  ac_mod := 0;
+  natural_ac := 0;
+  hitroll := 50;
+
+  position := POS_STANDING;
+  bash_timer := -2;
+  cast_timer := 0;
+  bashing := -2;
+  mental_state := -10;
+  in_command := false;
+
+  if (IS_GOOD) then
+    room := findRoom(ROOM_VNUM_GOOD_PORTAL)
+  else
+  if (IS_EVIL) then
+    room := findRoom(ROOM_VNUM_EVIL_PORTAL);
+
+  fighting := nil;
+end;
+
+destructor GPlayer.Destroy;
+var
+   node, node_next : GListNode;
+   tc : TChannel;
+begin
+  aliases.clean;
+  aliases.Free;
+
+  node := channels.head;
+  while (node <> nil) do
+    begin
+    node_next := node.next;
+    tc := node.element;
+    channels.remove(node);
+    tc.Free();
+
+    node := node_next;
+    end;
+
+  channels.clean();
+  channels.Free();
+
+  inherited Destroy;
+end;
+
+procedure GPlayer.quit;
+var
+   vict : GCharacter;
+   node : GListNode;
+   c : GConnection;
+begin
+  emptyBuffer;
+
+  c := conn;
+
+  if (IS_NPC) then
+    begin
+    if (c <> nil) then
+      c.send('You''re an NPC, you can''t quit!'#13#10);
+    exit;
+    end;
+
+  if (c = nil) then
+    write_console('(Linkless) '+ name^+ ' has logged out')
+  else
+  if (c <> nil) then
+    write_console('(' + inttostr(c.socket) + ') ' + name^ + ' has logged out');
+
+  { switched check}
+  if (conn <> nil) and (not IS_NPC) then
+    begin
+    c.state := CON_LOGGED_OUT;
+    c.ch := nil;
+
+    try
+      c.thread.terminate;
+    except
+      write_console('could not delete thread of ' + name^);
+    end;
+
+    conn := nil;
+
+    closesocket(c.socket);
+    end
+  else
+  if (not IS_NPC) and (not IS_SET(GPlayer(Self).flags, PLR_LINKLESS)) then
+    interpret(Self, 'return sub');
+
+  { perform the cleanup }
+  if (snooping <> nil) then
+    begin
+    snooping.snooped_by := nil;
+    snooping := nil;
+    end;
+
+{  if (snooped_by <> nil) then
+    begin
+    snooped_by.player^.snooping := nil;
+    snooped_by.sendBuffer('No longer snooping.'#13#10);
+    snooped_by := nil;
+    end; }
+
+  if (leader <> Self) then
+    begin
+    to_channel(leader, '$B$7[Group]: ' + name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
+    leader := nil;
+    end
+  else
+    begin
+    node := char_list.head;
+
+    while (node <> nil) do
+      begin
+      vict := node.element;
+
+      if (vict <> Self) and ((vict.leader = Self) or (vict.master = Self)) then
+        begin
+        act(AT_REPORT,'You stop following $N.',false,vict,nil,Self,TO_CHAR);
+        vict.master := nil;
+        vict.leader := vict;
+        end;
+
+      node := node.next;
+      end;
+    end;
+
+  save(name^);
+
+  extract(true);
+end;
+
+function GPlayer.getAge : integer;
+begin
+  getAge := 17 + (getPlayed div 1000);
+end;
+
+function GPlayer.getPlayed : integer;
+begin
+  getPlayed := trunc(((played + (Now - logon_now)) * MSecsPerDay) / 60000);
+end;
+
 function GCharacter.IS_IMMORT : boolean;
 begin
-  IS_IMMORT := false;
+  Result := false;
+end;
 
-  if (not IS_NPC) and (level >= LEVEL_IMMORTAL) then
+function GNPC.IS_IMMORT : boolean;
+begin
+  Result := inherited IS_IMMORT;
+
+  if (IS_SET(act_flags, ACT_IMMORTAL)) then
     IS_IMMORT := true;
+end;
 
-  if (IS_NPC) and (IS_SET(act_flags, ACT_IMMORTAL)) then
+function GPlayer.IS_IMMORT : boolean;
+begin
+  Result := inherited IS_IMMORT;
+
+  if (level >= LEVEL_IMMORTAL) then
     IS_IMMORT := true;
 end;
 
 function GCharacter.IS_NPC : boolean;
 begin
-  IS_NPC := IS_SET(act_flags, ACT_NPC);
+  Result := false;
+end;
+
+function GNPC.IS_NPC : boolean;
+begin
+  Result := true;
 end;
 
 function GCharacter.IS_LEARNER : boolean;
 begin
-  IS_LEARNER := IS_SET(act_flags, ACT_TEACHER);
+  Result := false;
+end;
+
+function GNPC.IS_LEARNER : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_TEACHER);
 end;
 
 function GCharacter.IS_AWAKE : boolean;
@@ -596,10 +770,17 @@ end;
 
 function GCharacter.IS_WIZINVIS : boolean;
 begin
-  if (IS_NPC) then
-    IS_WIZINVIS := IS_SET(act_flags, ACT_MOBINVIS)
-  else
-    IS_WIZINVIS := IS_SET(player^.flags, PLR_WIZINVIS);
+  Result := false;
+end;
+
+function GNPC.IS_WIZINVIS : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_MOBINVIS)
+end;
+
+function GPlayer.IS_WIZINVIS : boolean;
+begin
+  Result := IS_SET(flags, PLR_WIZINVIS);
 end;
 
 function GCharacter.IS_GOOD : boolean;
@@ -623,17 +804,27 @@ end;
 
 function GCharacter.IS_FLYING : boolean;
 begin
-  IS_FLYING := IS_SET(act_flags, ACT_FLYING);
+  Result := IS_SET(aff_flags, AFF_FLYING);
 end;
 
 function GCharacter.IS_BANKER : boolean;
 begin
-  IS_BANKER := IS_SET(act_flags, ACT_BANKER);
+  Result := false;
+end;
+
+function GNPC.IS_BANKER : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_BANKER);
 end;
 
 function GCharacter.IS_SHOPKEEPER : boolean;
 begin
-  IS_SHOPKEEPER := IS_SET(act_flags, ACT_SHOPKEEP);
+  Result := false;
+end;
+
+function GNPC.IS_SHOPKEEPER : boolean;
+begin
+  Result := IS_SET(act_flags, ACT_SHOPKEEP);
 end;
 
 function GCharacter.IS_OUTSIDE : boolean;
@@ -652,7 +843,7 @@ begin
   if (IS_NPC) then
     IS_DRUNK := false
   else
-    IS_DRUNK := (player^.condition[COND_DRUNK] > 80);
+    IS_DRUNK := (GPlayer(Self).condition[COND_DRUNK] > 80);
 end;
 
 function GCharacter.IS_WEARING(item_type : integer) : boolean;
@@ -680,38 +871,38 @@ end;
 function GCharacter.IS_HOLYWALK : boolean;
 begin
   Result := false;
+end;
 
-  if (IS_NPC) then
-    exit;
+function GPlayer.IS_HOLYWALK : boolean;
+begin
+  Result := inherited IS_HOLYWALK;
 
-  if (IS_SET(player^.flags, PLR_HOLYWALK)) then
-    begin
+  if (IS_SET(flags, PLR_HOLYWALK)) then
     Result := true;
-    exit;
-    end;
 end;
 
 function GCharacter.IS_HOLYLIGHT : boolean;
 begin
   Result := false;
+end;
 
-  if (IS_NPC) then
-    exit;
+function GPlayer.IS_HOLYLIGHT : boolean;
+begin
+  Result := inherited IS_HOLYLIGHT;
 
-  if (IS_SET(player^.flags, PLR_HOLYLIGHT)) then
-    begin
+  if (IS_SET(flags, PLR_HOLYLIGHT)) then
     Result := true;
-    exit;
-    end;
 end;
 
 { Utility function - Nemesis }
 function GCharacter.IS_AFK : boolean;
 begin
-  if (IS_NPC) then
-    IS_AFK := false
-  else
-  if IS_SET(player^.flags, PLR_LINKLESS) then
+  Result := false;
+end;
+
+function GPlayer.IS_AFK : boolean;
+begin
+  if IS_SET(flags, PLR_LINKLESS) then
     IS_AFK := false
   else
     IS_AFK := GConnection(conn).afk = true;
@@ -720,10 +911,12 @@ end;
 { utility function - Nemesis }
 function GCharacter.IS_KEYLOCKED : boolean;
 begin
-  if (IS_NPC) then
-    IS_KEYLOCKED := false
-  else
-  if IS_SET(player^.flags, PLR_LINKLESS) then
+  Result := false;
+end;
+
+function GPlayer.IS_KEYLOCKED : boolean;
+begin
+  if IS_SET(flags, PLR_LINKLESS) then
     IS_KEYLOCKED := false
   else
     IS_KEYLOCKED := GConnection(conn).keylock = true;
@@ -731,24 +924,20 @@ end;
 
 function GCharacter.IS_EDITING : boolean;
 begin
-  if (IS_NPC) then
-    begin
-    Result := false;
-    exit;
-    end;
+   Result := false;
+end;
 
+function GPlayer.IS_EDITING : boolean;
+begin
   IS_EDITING := GConnection(conn).state = CON_EDITING;
 end;
 
 function GCharacter.CAN_FLY : boolean;
 begin
-  CAN_FLY := false;
+  Result := false;
 
-  if (IS_SET(aff_flags, AFF_FLYING)) then
-    CAN_FLY := true;
-
-  if (not IS_NPC) and (IS_SET(player^.flags, PLR_FLYCAP)) then
-    CAN_FLY := true;
+  if (IS_SET(aff_flags, AFF_LEVITATION)) then
+    Result := true;
 end;
 
 { can ch see vict? }
@@ -770,7 +959,7 @@ begin
    or IS_IMMORT)) then
     CAN_SEE := false;
 
-  if (vict.IS_WIZINVIS) and (level < vict.player^.wiz_level) then
+  if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
     CAN_SEE := false;
 
   if (IS_SET(aff_flags, AFF_BLIND)) then
@@ -829,7 +1018,7 @@ begin
       skills_learned.remove(node);
 end;
 
-function GCharacter.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
+function GPlayer.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
 var
   node : GListNode;
   g : GLearned;
@@ -846,7 +1035,7 @@ begin
   end;
 end;
 
-function GCharacter.getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
+function GPlayer.getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
 var
   node : GListNode;
   g : GLearned;
@@ -863,7 +1052,7 @@ begin
   end;
 end;
 
-function GCharacter.load(fn : string) : boolean;
+function GPlayer.load(fn : string) : boolean;
 var d, x : longint;
     af : GFileReader;
     g , a, t : string;
@@ -892,96 +1081,6 @@ begin
   else
     alignment := 0;
 
-  if (player <> nil) then
-    begin
-    dispose(player);
-
-    player := nil;
-    end;
-
-  new(player);
-  fillchar(player^, sizeof(GPlayer), 0);
-
-  // fill in default values
-  with player^ do
-    begin
-    pagerlen := 25;
-    xptogo := round((20 * power(level, 1.2)) * (1 + (random(3) / 10)));
-
-    title := 'the Newbie Adventurer';
-    snooping := nil;
-
-    cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI or CFG_AUTOPEEK;
-    bankgold := 500;
-    clan := nil;
-    clanleader := false;
-    condition[COND_FULL] := 100;
-    condition[COND_THIRST] := 100;
-    condition[COND_DRUNK] := 0;
-    condition[COND_HIGH] := 0;
-    condition[COND_CAFFEINE] := 0;
-    logon_first := Now;
-    ld_timer := 0;
-
-    aliases := GDLinkedList.Create;
-    skills_learned := GDLinkedList.Create;
-    if (race <> nil) then
-    begin
-      max_skills := race.max_skills;
-      max_spells := race.max_spells;
-    end
-    else
-    begin
-      max_skills := 0;
-      max_spells := 0;
-    end;
-    pracs := 10; // default for new players(?)
-
-    channels := GDLinkedList.Create();
-    node := channellist.head;
-    while (node <> nil) do
-    begin
-      chan := node.element;
-      tc := TChannel.Create(chan.channelname);
-      channels.insertLast(tc);
-      node := node.next;
-    end;
-
-    active_board := 1;
-    boards[BOARD1] := 0;
-    boards[BOARD2] := 0;
-    boards[BOARD3] := 0;
-    boards[BOARD_NEWS] := 0;
-    boards[BOARD_IMM] := 0;
-    end;
-
-  with point do
-    begin
-    apb := 7;
-    hp := 50 + ability.con+random(11); max_hp:=hp;
-    mv := 40 + (ability.dex div 4); max_mv:=mv;
-    mana := 25; max_mana := 25;
-    ac_mod := 0;
-    natural_ac := 0;
-    hitroll := 50;
-    end;
-
-  act_flags := 0;
-  position := POS_STANDING;
-  bash_timer := -2;
-  cast_timer := 0;
-  bashing := -2;
-  mental_state := -10;
-  in_command := false;
-
-  if (IS_GOOD) then
-    room := findRoom(ROOM_VNUM_GOOD_PORTAL)
-  else
-  if (IS_EVIL) then
-    room := findRoom(ROOM_VNUM_EVIL_PORTAL);
-
-  fighting := nil;
-
   try
     af := GFileReader.Create('players\' + fn + '.usr');
   except
@@ -1004,7 +1103,7 @@ begin
         g := uppercase(left(a,':'));
 
         if (g = 'TITLE') then
-          player^.title := right(a,' ')
+          title := right(a,' ')
         else
         if (g ='SEX') then
           sex := strtoint(right(a, ' '))
@@ -1019,10 +1118,10 @@ begin
           level := strtoint(right(a, ' '))
         else
         if g='HOMETOWN' then
-          player^.hometown:=strtoint(right(a,' '))
+          hometown:=strtoint(right(a,' '))
         else
         if g='AGE' then
-          player^.age:=strtoint(right(a,' '))
+          age:=strtoint(right(a,' '))
         else
         if g='WEIGHT' then
           weight:=strtoint(right(a,' '))
@@ -1032,83 +1131,83 @@ begin
         else
         if g='STATS' then
           begin
-          a:=right(a,' ');
-          ability.str:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          ability.con:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          ability.dex:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          ability.int:=strtoint(left(a,' '));
-          a:=right(a,' ');
-          ability.wis:=strtoint(left(a,' '));
+          a := right(a,' ');
+          str:=strtoint(left(a,' '));
+          a := right(a,' ');
+          con:=strtoint(left(a,' '));
+          a := right(a,' ');
+          dex:=strtoint(left(a,' '));
+          a := right(a,' ');
+          int:=strtoint(left(a,' '));
+          a := right(a,' ');
+          wis:=strtoint(left(a,' '));
           end
         else
         if (g = 'MAX_SKILLS') then
-          player^.max_skills := strtoint(right(a,' '))
+          max_skills := strtoint(right(a,' '))
         else
         if (g = 'MAX_SPELLS') then
-          player^.max_spells := strtoint(right(a,' '))
+          max_spells := strtoint(right(a,' '))
         else
         if (g = 'PRACTICES') then
-          player^.pracs := strtoint(right(a,' '))
+          pracs := strtoint(right(a,' '))
         else
         if g='APB' then
-          point.apb:=strtoint(right(a,' '))
+          apb:=strtoint(right(a,' '))
         else
         if g='MANA' then
           begin
           a:=right(a,' ');
-          point.mana:=strtoint(left(a,' '));
+          mana:=strtoint(left(a,' '));
           a:=right(a,' ');
-          point.max_mana:=strtoint(left(a,' '));
+          max_mana:=strtoint(left(a,' '));
           end
         else
         if g='HP' then
           begin
           a:=right(a,' ');
-          point.hp:=strtoint(left(a,' '));
+          hp:=strtoint(left(a,' '));
           a:=right(a,' ');
-          point.max_hp:=strtoint(left(a,' '));
+          max_hp:=strtoint(left(a,' '));
           end
         else
         if g='MV' then
           begin
           a:=right(a,' ');
-          point.mv:=strtoint(left(a,' '));
+          mv:=strtoint(left(a,' '));
           a:=right(a,' ');
-          point.max_mv:=strtoint(left(a,' '));
+          max_mv:=strtoint(left(a,' '));
           end
         else
         if g='AC' then
-          point.ac:=strtoint(right(a,' '))
+          ac:=strtoint(right(a,' '))
         else
         if g='HAC' then
-          point.hac:=strtoint(right(a,' '))
+          hac:=strtoint(right(a,' '))
         else
         if g='BAC' then
-          point.bac:=strtoint(right(a,' '))
+          bac:=strtoint(right(a,' '))
         else
         if g='AAC' then
-          point.aac:=strtoint(right(a,' '))
+          aac:=strtoint(right(a,' '))
         else
         if g='LAC' then
-          point.lac:=strtoint(right(a,' '))
+          lac:=strtoint(right(a,' '))
         else
         if g='GOLD' then
           begin
           a:=right(a,' ');
           gold := UMax(strtointdef(left(a, ' '), 0), 0);
           a:=right(a,' ');
-          player^.bankgold := UMax(strtointdef(left(a, ' '), 0), 0);
+          bankgold := UMax(strtointdef(left(a, ' '), 0), 0);
           end
         else
         if g='XP' then
           begin
           a:=right(a,' ');
-          player^.xptot:=strtoint(left(a,' '));
+          xptot:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.xptogo:=strtoint(left(a,' '));
+          xptogo:=strtoint(left(a,' '));
           end
         else
         if g='ROOMVNUM' then
@@ -1118,30 +1217,30 @@ begin
           kills:=strtoint(right(a,' '))
         else
         if g='DEATHS' then
-          player^.deaths:=strtoint(right(a,' '))
+          deaths:=strtoint(right(a,' '))
         else
         if g='FLAGS' then
-          player^.flags:=strtoint(right(a,' '))
+          flags:=strtoint(right(a,' '))
         else
         if g='CLAN' then
           begin
           clan := findClan(right(a,' '));
 
           if (clan <> nil) and(clan.leader = name^) then
-            player^.clanleader := true;
+            clanleader := true;
           end
         else
         if g='CONFIG' then
-          player^.cfg_flags:=strtoint(right(a,' '))
+          cfg_flags:=strtoint(right(a,' '))
         else
         if g='AC_MOD' then
-          point.ac_mod:=strtoint(right(a,' '))
+          ac_mod:=strtoint(right(a,' '))
         else
         // for backward compatibility only
         if g='PASSWORD' then
           begin
-          player^.password := right(a,' ');
-          player^.md5_password := MD5String(player^.password);
+          password := right(a,' ');
+          md5_password := MD5String(password);
           end
         else
         // the new md5 encrypted pwd
@@ -1154,17 +1253,17 @@ begin
 
           while (d <= length(t)) do
             begin
-            player^.md5_password[x] := strtoint('$' + t[d] + t[d+1]);
+            md5_password[x] := strtoint('$' + t[d] + t[d+1]);
             inc(x);
             inc(d, 2);
             end;
           end
         else
         if g='REMORTS' then
-          player^.remorts:=strtoint(right(a,' '))
+          remorts:=strtoint(right(a,' '))
         else
         if g='WIMPY' then
-          player^.wimpy:=strtoint(right(a,' '))
+          wimpy:=strtoint(right(a,' '))
         else
         if g='AFF_FLAGS' then
           aff_flags:=strtoint(right(a,' '))
@@ -1175,96 +1274,93 @@ begin
         if g='CONDITION' then
           begin
           a:=right(a,' ');
-          player^.condition[COND_DRUNK]:=strtoint(left(a,' '));
+          condition[COND_DRUNK]:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.condition[COND_FULL]:=strtoint(left(a,' '));
+          condition[COND_FULL]:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.condition[COND_THIRST]:=strtoint(left(a,' '));
+          condition[COND_THIRST]:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.condition[COND_CAFFEINE]:=strtoint(left(a,' '));
+          condition[COND_CAFFEINE]:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.condition[COND_HIGH]:=strtoint(left(a,' '));
+          condition[COND_HIGH]:=strtoint(left(a,' '));
           end
         else
         if g='AREA' then
           begin
-          player^.area_fname := right(a,' ');
-          player^.area := findArea(player^.area_fname);
+          area_fname := right(a,' ');
+          area := findArea(area_fname);
           end
         else
         if g='RANGES' then
           begin
           a:=right(a,' ');
-          player^.r_lo:=strtoint(left(a,' '));
+          r_lo:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.r_hi:=strtoint(left(a,' '));
+          r_hi:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.m_lo:=strtoint(left(a,' '));
+          m_lo:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.m_hi:=strtoint(left(a,' '));
+          m_hi:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.o_lo:=strtoint(left(a,' '));
+          o_lo:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.o_hi:=strtoint(left(a,' '));
+          o_hi:=strtoint(left(a,' '));
           end
         else
         if g='WIZLEVEL' then
-          player^.wiz_level:=strtoint(right(a,' '))
+          wiz_level:=strtoint(right(a,' '))
         else
         if g='BGPOINTS' then
-          player^.bg_points:=strtoint(right(a,' '))
-        else
-        if g='ACTFLAGS' then
-          act_flags:=strtoint(right(a,' '))
+          bg_points:=strtoint(right(a,' '))
         else
         if g='PAGELEN' then
-          player^.pagerlen:=strtoint(right(a,' '))
+          pagerlen:=strtoint(right(a,' '))
         else
         if g='LOGON' then
           begin
           a:=right(a,' ');
-          player^.logon_first:=strtoint(left(a,' '));
+          logon_first:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.logon_first:=player^.logon_first + (strtoint(left(a,' '))/MSecsPerDay);
-          if (player^.logon_first = 0) then
-            player^.logon_first:=Now;
+          logon_first:=logon_first + (strtoint(left(a,' '))/MSecsPerDay);
+          if (logon_first = 0)then
+            logon_first:=Now;
           end
         else
         if g='PLAYED' then
           begin
           a:=right(a,' ');
-          player^.played:=strtoint(left(a,' '));
+          played:=strtoint(left(a,' '));
           a:=right(a,' ');
-          player^.played:=player^.played + (strtoint(left(a,' '))/MSecsPerDay);
+          played:=played + (strtoint(left(a,' '))/MSecsPerDay);
           end
         else
         if (g = 'BAMFIN') then
-          player^.bamfin := right(a, ' ')
+          bamfin := right(a, ' ')
         else
         if (g = 'BAMFOUT') then
-          player^.bamfout := right(a, ' ')
+          bamfout := right(a, ' ')
         else
         if (g = 'TAUNT') then
-          player^.taunt := right(a, ' ')
+          taunt := right(a, ' ')
         else
         if (g = 'PROMPT') then
-          player^.prompt := right(a, ' ')
+          prompt := right(a, ' ')
         else
         if (g = 'ACTIVE_BOARD') then
-          player^.active_board := strtoint(right(a,' '))
+          active_board := strtoint(right(a,' '))
         else
         if (g = 'READ-NOTES') then
           begin
           a := right(a,' ');
-          player^.boards[BOARD1] := strtoint(left(a,' '));
+          boards[BOARD1] := strtoint(left(a,' '));
           a := right(a,' ');
-          player^.boards[BOARD2] := strtoint(left(a,' '));
+          boards[BOARD2] := strtoint(left(a,' '));
           a := right(a,' ');
-          player^.boards[BOARD3] := strtoint(left(a,' '));
+          boards[BOARD3] := strtoint(left(a,' '));
           a := right(a,' ');
-          player^.boards[BOARD_NEWS] := strtoint(left(a,' '));
+          boards[BOARD_NEWS] := strtoint(left(a,' '));
           a := right(a,' ');
-          player^.boards[BOARD_IMM] := strtoint(left(a,' '));
+          boards[BOARD_IMM] := strtoint(left(a,' '));
           end;
       until (uppercase(a)='#END') or (af.eof);
 
@@ -1347,7 +1443,7 @@ begin
           al.alias := left(a, ':');
           al.expand := right(a, ':');
 
-          al.node := player^.aliases.insertLast(al);
+          al.node := aliases.insertLast(al);
           end;
       until (uppercase(a)='#END') or (af.eof);
 
@@ -1441,13 +1537,13 @@ begin
 
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
-          inc(player^.trophysize);
+          inc(trophysize);
           g:=right(g,' ');
-          player^.trophy[player^.trophysize].name := left(g,' ');
+          trophy[trophysize].name := left(g,' ');
           g:=right(g,' ');
-          player^.trophy[player^.trophysize].level:=strtoint(left(g,' '));
+          trophy[trophysize].level:=strtoint(left(g,' '));
           g:=right(g,' ');
-          player^.trophy[player^.trophysize].times:=strtoint(left(g,' '));
+          trophy[trophysize].times:=strtoint(left(g,' '));
           end;
       until (uppercase(g) = '#END') or (af.eof);
 
@@ -1468,30 +1564,30 @@ begin
 
   if (race <> nil) then
     begin
-    point.save_poison:=race.save_poison;
-    point.save_cold:=race.save_cold;
-    point.save_para:=race.save_para;
-    point.save_breath:=race.save_breath;
-    point.save_spell:=race.save_spell;
-    point.hitroll:=UMax((level div 5)+50,100);
+    save_poison:=race.save_poison;
+    save_cold:=race.save_cold;
+    save_para:=race.save_para;
+    save_breath:=race.save_breath;
+    save_spell:=race.save_spell;
+    hitroll:=UMax((level div 5)+50,100);
     end;
 
-  if (player^.max_skills = 0) then
+  if (max_skills = 0) then
   begin
     bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
               'The pfile of this character lacks a Max_skills field. ' +
               'Fixing this *now* by setting these fields to race-max value. ' +
               'Make sure to (force) save this player.');
-    player^.max_skills := race.max_skills;
+    max_skills := race.max_skills;
   end;
   
-  if (player^.max_spells = 0) then
+  if (max_spells = 0) then
   begin
     bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
               'The pfile of this character lacks a Max_spells field. ' +
               'Fixing this *now* by setting these fields to race-max value. ' +
               'Make sure to (force) save this player.');
-    player^.max_spells := race.max_spells;
+    max_spells := race.max_spells;
   end;
   
   calcAC;
@@ -1500,7 +1596,7 @@ begin
   load := true;
 end;
 
-function GCharacter.save(fn : string) : boolean;
+function GPlayer.save(fn : string) : boolean;
 var
    f : textfile;
    temp : TDateTime;
@@ -1532,7 +1628,7 @@ begin
 
   writeln(f,'#PLAYER');
   writeln(f,'User: '+name^);
-  writeln(f,'MD5-Password: '+MD5Print(player^.md5_password));
+  writeln(f,'MD5-Password: '+MD5Print(md5_password));
   writeln(f,'Sex: ',sex);
   writeln(f,'Race: ',race.name);
   writeln(f,'Alignment: ',alignment);
@@ -1541,73 +1637,65 @@ begin
   writeln(f,'Height: ',height);
   writeln(f,'aff_flags: ',aff_flags);
   writeln(f,'Mentalstate: ',mental_state);
-  writeln(f,'act_flags: ',act_flags);
   writeln(f,'Last-login: ', DateTimeToStr(Now));
 
-  with player^ do
-    begin
-    writeln(f,'Title: ',title);
-    writeln(f,'Home: ',hometown);
-    writeln(f,'Age: ',age);
-    writeln(f,'Gold: ',gold,' ',bankgold);
-    writeln(f,'XP: ',xptot,' ',xptogo);
-    writeln(f,'Kills: ',kills);
-    writeln(f,'Deaths: ',deaths);
-    writeln(f,'Practices: ', pracs);
-    writeln(f,'Bamfin: ',bamfin);
-    writeln(f,'Bamfout: ',bamfout);
-    writeln(f,'Taunt: ', taunt);
-    writeln(f,'Prompt: ', prompt);
-    writeln(f,'Active_board: ', active_board);
-    writeln(f,'Read-notes: ', boards[BOARD1], ' ', boards[BOARD2], ' ', boards[BOARD3], ' ', boards[BOARD_NEWS], ' ', boards[BOARD_IMM]);
+  writeln(f,'Title: ',title);
+  writeln(f,'Home: ',hometown);
+  writeln(f,'Age: ',age);
+  writeln(f,'Gold: ',gold,' ',bankgold);
+  writeln(f,'XP: ',xptot,' ',xptogo);
+  writeln(f,'Kills: ',kills);
+  writeln(f,'Deaths: ',deaths);
+  writeln(f,'Practices: ', pracs);
+  writeln(f,'Bamfin: ',bamfin);
+  writeln(f,'Bamfout: ',bamfout);
+  writeln(f,'Taunt: ', taunt);
+  writeln(f,'Prompt: ', prompt);
+  writeln(f,'Active_board: ', active_board);
+  writeln(f,'Read-notes: ', boards[BOARD1], ' ', boards[BOARD2], ' ', boards[BOARD3], ' ', boards[BOARD_NEWS], ' ', boards[BOARD_IMM]);
 
-    fl := flags;
-    REMOVE_BIT(fl, PLR_LINKLESS);
-    REMOVE_BIT(fl, PLR_LOADED);
+  fl := flags;
+  REMOVE_BIT(fl, PLR_LINKLESS);
+  REMOVE_BIT(fl, PLR_LOADED);
 
-    writeln(f,'Flags: ', fl);
-    writeln(f,'Config: ',cfg_flags);
-    writeln(f,'Remorts: ',remorts);
-    writeln(f,'Wimpy: ',wimpy);
-    writeln(f,'Logon: ',trunc(logon_first),' ',trunc(frac(logon_first)*MSecsPerDay));
+  writeln(f,'Flags: ', fl);
+  writeln(f,'Config: ',cfg_flags);
+  writeln(f,'Remorts: ',remorts);
+  writeln(f,'Wimpy: ',wimpy);
+  writeln(f,'Logon: ',trunc(logon_first),' ',trunc(frac(logon_first)*MSecsPerDay));
 
-    temp:=played + (Now - logon_now);
-    writeln(f,'Played: ',trunc(temp),' ',trunc(frac(temp)*MSecsPerDay));
-    writeln(f,'Condition: ',condition[COND_DRUNK],' ',condition[COND_FULL],
-            ' ',condition[COND_THIRST],' ',condition[COND_CAFFEINE],' ',condition[COND_HIGH]);
+  temp:=played + (Now - logon_now);
+  writeln(f,'Played: ',trunc(temp),' ',trunc(frac(temp)*MSecsPerDay));
+  writeln(f,'Condition: ',condition[COND_DRUNK],' ',condition[COND_FULL],
+          ' ',condition[COND_THIRST],' ',condition[COND_CAFFEINE],' ',condition[COND_HIGH]);
 
-    if clan<>nil then
-      writeln(f,'Clan: ',clan.name);
+  if clan<>nil then
+    writeln(f,'Clan: ',clan.name);
 
-    if area_fname<>'' then
-      writeln(f,'Area: ',area_fname);
+  if area_fname<>'' then
+    writeln(f,'Area: ',area_fname);
 
-    writeln(f,'Ranges: ',r_lo,' ',r_hi,' ',m_lo,' ',m_hi,' ',o_lo,' ',o_hi);
+  writeln(f,'Ranges: ',r_lo,' ',r_hi,' ',m_lo,' ',m_hi,' ',o_lo,' ',o_hi);
 
-    writeln(f,'Wizlevel: ',wiz_level);
-    writeln(f,'BGpoints: ',bg_points);
-    writeln(f,'Pagerlen: ',pagerlen);
-    end;
+  writeln(f,'Wizlevel: ',wiz_level);
+  writeln(f,'BGpoints: ',bg_points);
+  writeln(f,'Pagerlen: ',pagerlen);
 
-  with ability do
-    writeln(f,'Stats: ',str,' ',con,' ',dex,' ',int,' ',wis);
+  writeln(f,'Stats: ',str,' ',con,' ',dex,' ',int,' ',wis);
 
-  writeln(f, 'Max_skills: ', player^.max_skills);
-  writeln(f, 'Max_spells: ', player^.max_spells);
-  
-  with point do
-    begin
-    writeln(f,'APB: ',apb);
-    writeln(f,'Mana: ',mana,' ',max_mana);
-    writeln(f,'HP: ',hp,' ',max_hp);
-    writeln(f,'Mv: ',mv,' ',max_mv);
-    writeln(f,'AC: ',ac);
-    writeln(f,'HAC: ',hac);
-    writeln(f,'BAC: ',bac);
-    writeln(f,'AAC: ',aac);
-    writeln(f,'LAC: ',lac);
-    writeln(f,'AC_mod: ',ac_mod);
-    end;
+  writeln(f, 'Max_skills: ', max_skills);
+  writeln(f, 'Max_spells: ', max_spells);
+
+  writeln(f,'APB: ',apb);
+  writeln(f,'Mana: ',mana,' ',max_mana);
+  writeln(f,'HP: ',hp,' ',max_hp);
+  writeln(f,'Mv: ',mv,' ',max_mv);
+  writeln(f,'AC: ',ac);
+  writeln(f,'HAC: ',hac);
+  writeln(f,'BAC: ',bac);
+  writeln(f,'AAC: ',aac);
+  writeln(f,'LAC: ',lac);
+  writeln(f,'AC_mod: ',ac_mod);
   writeln(f,'RoomVNum: ',room.vnum);
   writeln(f,'#END');
   writeln(f);
@@ -1644,7 +1732,7 @@ begin
   writeln(f);
 
   writeln(f, '#ALIASES');
-  node := player^.aliases.head;
+  node := aliases.head;
 
   while (node <> nil) do
     begin
@@ -1686,8 +1774,8 @@ begin
   writeln(f);
 
   writeln(f,'#TROPHY');
-  for h:=1 to player^.trophysize do
-    writeln(f,'Trophy: ',player^.trophy[h].name,' ',player^.trophy[h].level,' ',player^.trophy[h].times);
+  for h:=1 to trophysize do
+    writeln(f,'Trophy: ',trophy[h].name,' ',trophy[h].level,' ',trophy[h].times);
   writeln(f,'#END');
 
   closefile(f);
@@ -1695,7 +1783,7 @@ begin
   save := true;
 end;
 
-procedure GCharacter.sendBuffer(s : string);
+procedure GPlayer.sendBuffer(s : string);
 var
    c : GConnection;
 begin
@@ -1723,7 +1811,7 @@ begin
   c.sendbuffer := c.sendbuffer + s;
 end;
 
-procedure GCharacter.sendPager(txt : string);
+procedure GPlayer.sendPager(txt : string);
 var
    c : GConnection;
 begin
@@ -1732,13 +1820,13 @@ begin
 
   c := conn;
 
-  if (IS_NPC) or (not IS_SET(player^.cfg_flags,CFG_PAGER)) then
+  if (IS_NPC) or (not IS_SET(cfg_flags,CFG_PAGER)) then
     sendBuffer(txt)
   else
     c.writePager(txt);
 end;
 
-procedure GCharacter.emptyBuffer;
+procedure GPlayer.emptyBuffer;
 var
    c : GConnection;
 begin
@@ -1762,7 +1850,7 @@ begin
   c.empty_busy := false;
 end;
 
-procedure GCharacter.startEditing(text : string);
+procedure GPlayer.startEditing(text : string);
 begin
   if (conn = nil) then
     exit;
@@ -1782,7 +1870,7 @@ begin
   GConnection(conn).state := CON_EDITING;
 end;
 
-procedure GCharacter.stopEditing;
+procedure GPlayer.stopEditing;
 begin
   sendBuffer('Ok.'#13#10);
 
@@ -1795,7 +1883,8 @@ begin
   act(AT_REPORT,'$n has returned to $s keyboard.',false,Self,nil,nil,to_room);
 end;
 
-procedure GCharacter.sendEdit(text : string);
+procedure GPlayer.sendEdit(text : string);
+var note : GNote;
 begin
   case substate of
     SUB_NOTE:
@@ -1813,14 +1902,14 @@ begin
         act(AT_REPORT,'You are now back at your keyboard.',false,Self,nil,nil,TO_CHAR);
         act(AT_REPORT,'$n finished $s note and is now back at the keyboard.',false,Self,nil,nil,TO_ROOM);
 
-        if (player^.active_board = BOARD_IMM) then
+        if (active_board = BOARD_IMM) then
           begin
-          act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_IMM);
+          act(AT_REPORT,'There is a new note on the ' + board_names[active_board] + ' board.', false, Self, nil, nil, TO_IMM);
           act(AT_REPORT,'Written by ' + name^ + '.',false,Self,nil,nil,TO_IMM);
           end
         else
           begin
-          act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_ALL);
+          act(AT_REPORT,'There is a new note on the ' + board_names[active_board] + ' board.', false, Self, nil, nil, TO_ALL);
           act(AT_REPORT,'Written by ' + name^ + '.', false, Self, nil, nil, TO_ALL);
           end;
 
@@ -1842,7 +1931,7 @@ begin
   end;
 end;
 
-procedure GCharacter.editBuffer(text : string);
+procedure GPlayer.editBuffer(text : string);
 begin
   if (conn = nil) then
     exit;
@@ -1850,9 +1939,9 @@ begin
   if (substate = SUB_SUBJECT) then
     begin
     if (length(text) = 0) then
-      player^.subject := 'nil'
+      subject := 'nil'
     else
-      player^.subject := text;
+      subject := text;
 
     substate := SUB_NOTE;
     startEditing('');
@@ -1939,15 +2028,20 @@ end;
 
 function GCharacter.ansiColor(color : integer) : string;
 begin
-  if (IS_NPC) or (not IS_SET(player^.cfg_flags, CFG_ANSI)) then
+  Result := '';
+end;
+
+function GPlayer.ansiColor(color : integer) : string;
+begin
+  if (not IS_SET(cfg_flags, CFG_ANSI)) then
     ansiColor := ''
   else
     ansiColor := ansiio.ANSIColor(color, 0);
 end;
 
-procedure GCharacter.sendPrompt;
+procedure GPlayer.sendPrompt;
 var
-   s, prompt, buf : string;
+   s, pr, buf : string;
    c : GConnection;
    t : integer;
 begin
@@ -1964,10 +2058,10 @@ begin
      exit;
     end;
 
-  if (IS_NPC) or (player^.prompt = '') then
-    prompt := '%hhp %mmv %ama (%l)> '
+  if (prompt = '') then
+    pr := '%hhp %mmv %ama (%l)> '
   else
-    prompt := player^.prompt;
+    pr := prompt;
 
   buf := ansiColor(7);
 
@@ -2021,21 +2115,21 @@ begin
     if (prompt[t] = '%') then
       begin
       case prompt[t + 1] of
-        'h':  s := s + inttostr(point.hp);
-        'H':  s := s + inttostr(point.max_hp);
-        'm':  s := s + inttostr(point.mv);
-        'M':  s := s + inttostr(point.max_mv);
-        'a':  s := s + inttostr(point.mana);
-        'A':  s := s + inttostr(point.max_mana);
+        'h':  s := s + inttostr(hp);
+        'H':  s := s + inttostr(max_hp);
+        'm':  s := s + inttostr(mv);
+        'M':  s := s + inttostr(max_mv);
+        'a':  s := s + inttostr(mana);
+        'A':  s := s + inttostr(max_mana);
         'l':  s := s + inttostr(level);
-        'x':  s := s + inttostr(player^.xptogo);
+        'x':  s := s + inttostr(xptogo);
         'f':  begin
               if (fighting <> nil) and (position >= POS_FIGHTING) then
                 begin
                 s := s + ' [Oppnt: ';
 
                 with fighting do
-                  s := s + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
+                  s := s + hp_perc[UMax(round((hp / max_hp) * 5), 0)];
 
                 s := s + ']';
                 end;
@@ -2047,7 +2141,7 @@ begin
                  s := s + ' [' + fighting.fighting.name^ + ': ';
 
                  with fighting.fighting do
-                   s := s + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
+                   s := s + hp_perc[UMax(round((hp / max_hp) * 5), 0)];
 
                  s := s + ']';
                  end;
@@ -2065,15 +2159,14 @@ begin
 
   buf := buf + act_color(Self, s, '%') + '> ';
 
-  if (snooped_by <> nil) then
+{  if (snooped_by <> nil) then
     begin
-    if IS_SET(snooped_by.player^.cfg_flags,CFG_BLANK) then   // Xenon 21/Feb/2001: send extra blank line if config says so
+    if IS_SET(snooped_by.cfg_flags,CFG_BLANK) then   // Xenon 21/Feb/2001: send extra blank line if config says so
       GConnection(snooped_by.conn).send(#13#10);
     GConnection(snooped_by.conn).send(buf);
-    end;
+    end; }
 
-  if (not IS_NPC) then
-   if IS_SET(player^.cfg_flags,CFG_BLANK) then
+  if IS_SET(cfg_flags,CFG_BLANK) then
     c.send(#13#10);
 
   c.send(buf);
@@ -2176,49 +2269,54 @@ begin
 end;
 
 procedure GCharacter.die;
+begin
+  addCorpse(Self);
+end;
+
+procedure GPlayer.die;
 var
    node : GListNode;
 begin
-  addCorpse(Self);
+  inherited die;
 
   { when ch died in bg, get him back to room - Grimlord }
-  if (not IS_NPC) then
+  if (bg_status = BG_PARTICIPATE) then
     begin
-    if (player^.bg_status = BG_PARTICIPATE) then
-      begin
-      point.hp := point.max_hp;
-      player^.bg_status := BG_NOJOIN;
-      fromRoom;
-      toRoom(player^.bg_room);
-      exit;
-      end;
-
-    extract(false);
-    point.hp := 5;
-    point.mana := 0;
-    player^.condition[COND_FULL] := 100;
-    player^.condition[COND_THIRST] := 100;
-    player^.condition[COND_DRUNK] := 0;
-    player^.condition[COND_HIGH] := 0;
-    player^.condition[COND_CAFFEINE] := 0;
-    point.mv := point.max_mv;
-
-    while (true) do
-      begin
-      node := affects.head;
-      
-      if (node = nil) then
-        break;
-
-      removeAffect(Self, node.element);
-      end;
-    end
-  else
-    begin
-    dec(npc_index.count);
-    extract(true);
-    dec(mobs_loaded);
+    hp := max_hp;
+    bg_status := BG_NOJOIN;
+    fromRoom;
+    toRoom(bg_room);
+    exit;
     end;
+
+  extract(false);
+  hp := 5;
+  mana := 0;
+  condition[COND_FULL] := 100;
+  condition[COND_THIRST] := 100;
+  condition[COND_DRUNK] := 0;
+  condition[COND_HIGH] := 0;
+  condition[COND_CAFFEINE] := 0;
+  mv := max_mv;
+
+  while (true) do
+    begin
+    node := affects.head;
+
+    if (node = nil) then
+      break;
+
+    removeAffect(Self, node.element);
+    end;
+end;
+
+procedure GNPC.die;
+begin
+  inherited die;
+
+  dec(npc_index.count);
+  extract(true);
+  dec(mobs_loaded);
 end;
 
 procedure GCharacter.setWait(ticks : integer);
@@ -2294,9 +2392,9 @@ begin
                   else
                     inc(Self.room.light);
       ITEM_GEM: if (remove) then
-                  dec(point.max_mana, obj.value[3])
+                  dec(max_mana, obj.value[3])
                 else
-                  inc(point.max_mana, obj.value[3]);
+                  inc(max_mana, obj.value[3]);
     end;
 
   if (obj.obj_index <> nil) then
@@ -2398,11 +2496,11 @@ var
    node : GListNode;
    obj : GObject;
 begin
-  dex_mod := (ability.dex-50) div 12;
-  point.hac := point.natural_ac - dex_mod - point.ac_mod;
-  point.bac := point.natural_ac - dex_mod - point.ac_mod;
-  point.aac := point.natural_ac - dex_mod - point.ac_mod;
-  point.lac := point.natural_ac - dex_mod - point.ac_mod;
+  dex_mod := (dex-50) div 12;
+  hac := natural_ac - dex_mod - ac_mod;
+  bac := natural_ac - dex_mod - ac_mod;
+  aac := natural_ac - dex_mod - ac_mod;
+  lac := natural_ac - dex_mod - ac_mod;
 
   node := objects.head;
   while (node <> nil) do
@@ -2411,24 +2509,21 @@ begin
 
     if (obj.wear_location > WEAR_NULL) and (obj.item_type = ITEM_ARMOR) then
       case obj.value[2] of
-        ARMOR_HAC : dec(point.hac, obj.value[3]);
-        ARMOR_BAC : dec(point.bac, obj.value[3]);
-        ARMOR_AAC : dec(point.aac, obj.value[3]);
-        ARMOR_LAC : dec(point.lac, obj.value[3]);
+        ARMOR_HAC : dec(hac, obj.value[3]);
+        ARMOR_BAC : dec(bac, obj.value[3]);
+        ARMOR_AAC : dec(aac, obj.value[3]);
+        ARMOR_LAC : dec(lac, obj.value[3]);
       end;
 
     node := node.next;
     end;
 
-  point.ac:=(point.hac+point.bac+point.aac+point.lac) div 4;
+  ac := (hac + bac + aac + lac) div 4;
 end;
 
-procedure GCharacter.calcRank;
+procedure GPlayer.calcRank;
 var r:string;
 begin
-  if (IS_NPC) then
-    exit;
-
   if level<30 then
     r:='an apprentice'
   else
@@ -2464,7 +2559,7 @@ begin
   else
     r:='a god';
 
-  player^.rank := r;
+  rank := r;
 end;
 
 procedure GCharacter.startFlying;
@@ -2483,7 +2578,8 @@ begin
   else
   if (CAN_FLY) then
     begin
-    SET_BIT(act_flags, ACT_FLYING);
+    SET_BIT(aff_flags, AFF_FLYING);
+
     act(AT_REPORT,'You begin to fly again!',false,Self,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n gently floats up in the air.',false,Self,nil,nil,TO_ROOM);
     end
@@ -2498,8 +2594,8 @@ procedure GCharacter.stopFlying;
 begin
   if (IS_FLYING) then
     begin
-    REMOVE_BIT(act_flags,ACT_FLYING);
-    
+    REMOVE_BIT(aff_flags, AFF_FLYING);
+
     act(AT_REPORT,'You slowly land on the ground.',false,Self,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n gently lands on the ground.',false,Self,nil,nil,TO_ROOM);
     end;
@@ -2579,6 +2675,45 @@ begin
       if (count = number) then
         begin
         findCharWorld := vict;
+        exit;
+        end;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+function findPlayerWorld(ch : GCharacter; name : string) : GPlayer;
+var
+   node : GListNode;
+   vict : GCharacter;
+   number,count : integer;
+begin
+  Result := nil;
+
+  number := findNumber(name); // eg 2.char
+
+  if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
+    begin
+    Result := GPlayer(ch);
+    exit;
+    end;
+
+  count := 0;
+
+  node := char_list.head;
+
+  while (node <> nil) do
+    begin
+    vict := node.element;
+
+    if (isName(vict.name^,name)) or (isName(vict.short^,name)) and (ch.CAN_SEE(vict)) and (not ch.IS_NPC) then
+      begin
+      inc(count);
+
+      if (count = number) then
+        begin
+        Result := GPlayer(vict);
         exit;
         end;
       end;

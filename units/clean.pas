@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.8 2001/05/10 17:28:14 xenon Exp $
+// $Id: clean.pas,v 1.9 2001/05/11 14:25:02 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -76,7 +76,7 @@ begin
     ch := node.element;
 
     if (not ch.IS_NPC) then
-      ch.save(ch.name^);
+      GPlayer(ch).save(ch.name^);
 
     node := node.next;
     end;
@@ -130,7 +130,7 @@ begin
         conn.ch.conn := nil;
 
         act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
-        SET_BIT(conn.ch.player^.flags,PLR_LINKLESS);
+        SET_BIT(conn.ch.flags,PLR_LINKLESS);
 
         conn.Free;
 

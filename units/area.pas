@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.29 2001/05/10 17:26:10 xenon Exp $
+// $Id: area.pas,v 1.30 2001/05/11 14:25:00 ***REMOVED*** Exp $
 
 unit area;
 
@@ -12,6 +12,7 @@ uses
     clan,
     race,
     fsys,
+    gvm,
     strip,
     util;
 
@@ -139,10 +140,11 @@ type
       level:integer;
       gold,weight,height:integer;
 
+      prog : GCodeBlock;
+
       skills_learned : GDLinkedList;
 
-      programs : GDLinkedList;
-      mpflags, act_flags : cardinal;
+      act_flags : cardinal;
       area : GArea;
       clan : GClan;
       shop : GShop;
@@ -262,7 +264,6 @@ uses
     chars,
     skills,
     fight,
-    progs,
     mudsystem,
     conns;
 
@@ -270,8 +271,8 @@ uses
 // GNPCIndex
 destructor GNPCIndex.Destroy;
 begin
-  programs.clean;
-  programs.Destroy;
+  if (prog <> nil) then
+    prog.Free;
 
   inherited Destroy;
 end;
@@ -475,7 +476,7 @@ var s:string;
     num:integer;
     sk : GSkill;
     npc : GNPCIndex;
-    prog : GProgram;
+//    prog : GProgram;
 begin
   npc := nil;
   s := af.readLine;
@@ -494,13 +495,12 @@ begin
 
       npc := GNPCIndex.Create;
 
+      npc.prog := nil;
       npc.area := Self;
       npc.skills_learned := GDLinkedList.Create;
 
       with npc do
         begin
-        programs := GDLinkedList.Create;
-
         vnum := num;
 
         if (not found_range) then
@@ -550,9 +550,7 @@ begin
           begin
           if (pos('>', s) <> 0) then
             begin
-            prog := GProgram.Create;
-
-            prog.load(af, s, npc);
+            prog := loadCode('progs\' + right(s, ' '));
             end
           else
             begin
@@ -569,8 +567,6 @@ begin
           end;
 
         race := race_list.head.element;
-
-        SET_BIT(act_flags, ACT_NPC);
 
         count := 0;
 
@@ -1003,6 +999,7 @@ begin
   tm := Now() - tm;
 
   write_console('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
+  room_list.hashStats();
 end;
 
 { Xenon 28/Apr/2001 : added saving of #RANGES; fixed bug that caused areas
@@ -1017,7 +1014,7 @@ var
    room : GRoom;
    npcindex : GNPCIndex;
    reset : GReset;
-   prog : GProgram;
+//   prog : GProgram;
    shop : GShop;
    obj : GObjectIndex;
    h : integer;
@@ -1189,7 +1186,7 @@ begin
 
     writeln(f, npcindex.natural_ac, ' ', npcindex.act_flags, ' ', npcindex.gold, ' ', npcindex.height, ' ', npcindex.weight);
 
-    node_ex := npcindex.programs.head;
+{    node_ex := npcindex.programs.head;
     while (node_ex <> nil) do
       begin
       prog := node_ex.element;
@@ -1214,7 +1211,7 @@ begin
       writeln(f,'~');
 
       node_ex := node_ex.next;
-      end;
+      end; }
 
     node_ex := npcindex.skills_learned.head;;
     while (node_ex <> nil) do
@@ -1302,7 +1299,7 @@ end;
 
 procedure GArea.reset;
 var reset : GReset;
-    npc, vict, lastmob : GCharacter;
+    npc, vict, lastmob : GNPC;
     obj, lastobj : GObject;
     npcindex : GNPCIndex;
     objindex : GObjectIndex;
@@ -1349,28 +1346,31 @@ begin
             if (npcindex.count < reset.arg3) then
               begin
 
-              npc := GCharacter.Create;
+              npc := GNPC.Create;
+              npc.context := GContext.Create;
+              npc.context.load(npcindex.prog);
+              npc.context.owner := npc;
 
               with npc do
                 begin
-                ability.str:=npcindex.str;
-                ability.con:=npcindex.con;
-                ability.dex:=npcindex.dex;
-                ability.int:=npcindex.int;
-                ability.wis:=npcindex.wis;
-                point.hp:=npcindex.hp;
-                point.max_hp:=npcindex.hp;
-                point.mv:=npcindex.mv;
-                point.max_mv:=npcindex.mv;
-                point.mana:=npcindex.mana;
-                point.max_mana:=npcindex.mana;
-                point.natural_ac:=npcindex.natural_ac;
-                point.ac_mod:=0;
-                point.hitroll:=npcindex.hitroll;
+                str := npcindex.str;
+                con := npcindex.con;
+                dex := npcindex.dex;
+                int := npcindex.int;
+                wis := npcindex.wis;
+                hp:=npcindex.hp;
+                max_hp:=npcindex.hp;
+                mv:=npcindex.mv;
+                max_mv:=npcindex.mv;
+                mana:=npcindex.mana;
+                max_mana:=npcindex.mana;
+                natural_ac:=npcindex.natural_ac;
+                ac_mod:=0;
+                hitroll:=npcindex.hitroll;
 {                  point.dam_type:=npcindex.dam_type; }
-                point.damnumdie:=npcindex.damnumdie;
-                point.damsizedie:=npcindex.damsizedie;
-                point.apb:=npcindex.apb;
+                damnumdie:=npcindex.damnumdie;
+                damsizedie:=npcindex.damsizedie;
+                apb:=npcindex.apb;
                 skills_learned := npcindex.skills_learned;
                 clan:=npcindex.clan;
                 conn:=nil;
@@ -1408,7 +1408,7 @@ begin
                 npc.toRoom(npc.room);
                 lastmob := npc;
                 inc(mobs_loaded);
-                resetTrigger(npc);
+//                resetTrigger(npc);
                 end;
               end;
             end;
@@ -2461,20 +2461,24 @@ var
 begin
   result := nil;
 
-  try
-    searchVNum := StrToInt(param);
+  searchVNum := StrToIntDef(param, -1);
+
+  if (searchVnum > -1) then
+    begin
     room := findRoom(searchVNum);
     Result := room;
     exit;
-  except
+    end
+  else
+    begin
     victim := findCharWorld(ch, param);
 
     if victim <> nil then
       begin
       Result := victim.room;
       exit;
+      end;
     end;
-  end;
 
  {left out obj's for today}
  (*    if ( ( obj = get_obj_world( ch, arg ) ) != NULL )
@@ -2606,7 +2610,7 @@ begin
     end;
 
   { when ch dies in bg, we don't want to have him lose all his items! - Grimlord }
-  if not (not ch.IS_NPC and (ch.player^.bg_status=BG_PARTICIPATE)) then
+  if not (not ch.IS_NPC and (GPlayer(ch).bg_status=BG_PARTICIPATE)) then
     begin
     node := ch.objects.head;
 

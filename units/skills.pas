@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.12 2001/04/26 21:42:43 xenon Exp $
+// $Id: skills.pas,v 1.13 2001/05/11 14:24:24 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -353,7 +353,7 @@ begin
   if (ch.LEARNED(sn) = 100) then
     exit;
 
-  chance := ch.LEARNED(sn) - (ch.ability.wis div 5);
+  chance := ch.LEARNED(sn) - (ch.wis div 5);
 
   percent := number_percent;
 
@@ -393,22 +393,22 @@ begin
     end;
 
   case apply_type of
-    APPLY_STR: inc(ch.ability.str, modif);
-    APPLY_DEX: inc(ch.ability.dex, modif);
-    APPLY_INT: inc(ch.ability.int, modif);
-    APPLY_WIS: inc(ch.ability.wis, modif);
-    APPLY_CON: inc(ch.ability.con, modif);
-    APPLY_HP: ch.point.hp := UMin(ch.point.hp + modif, ch.point.max_hp);
-    APPLY_MAX_HP: inc(ch.point.max_hp, modif);
-    APPLY_MV: ch.point.mv := UMin(ch.point.mv + modif, ch.point.max_mv);
-    APPLY_MAX_MV: inc(ch.point.max_mv, modif);
-    APPLY_MANA: ch.point.mana := UMin(ch.point.mana + modif, ch.point.max_mana);
-    APPLY_MAX_MANA: inc(ch.point.max_mana, modif);
+    APPLY_STR: ch.str := UMin(ch.str + modif, 100);
+    APPLY_DEX: ch.dex := UMin(ch.dex + modif, 100);
+    APPLY_INT: ch.int := UMin(ch.int + modif, 100);
+    APPLY_WIS: ch.wis := UMin(ch.wis + modif, 100);
+    APPLY_CON: ch.con := UMin(ch.con + modif, 100);
+    APPLY_HP: ch.hp := UMin(ch.hp + modif, ch.max_hp);
+    APPLY_MAX_HP: inc(ch.max_hp, modif);
+    APPLY_MV: ch.mv := UMin(ch.mv + modif, ch.max_mv);
+    APPLY_MAX_MV: inc(ch.max_mv, modif);
+    APPLY_MANA: ch.mana := UMin(ch.mana + modif, ch.max_mana);
+    APPLY_MAX_MANA: inc(ch.max_mana, modif);
     APPLY_AC: begin
-              inc(ch.point.ac, modif);
+              inc(ch.ac, modif);
               ch.calcAC;
               end;
-    APPLY_APB: inc(ch.point.apb, modif);
+    APPLY_APB: inc(ch.apb, modif);
     APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
     APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
     APPLY_STRIPSPELL: removeAffectSkill(ch, GSkill(pointer(modif)));
