@@ -2,13 +2,15 @@
 	Summary:
 		SOAP Data Module
 	
-	## $Id: DataModule.pas,v 1.2 2003/09/26 06:15:59 ***REMOVED*** Exp $
+	## $Id: DataModule.pas,v 1.3 2003/09/26 22:45:48 ***REMOVED*** Exp $
 }
 Unit DataModule;
 
 interface
 
-uses SysUtils, Classes, InvokeRegistry, Midas, SOAPMidas, SOAPDm, GrendelWebServiceIntf, race;
+uses 
+	SysUtils, Classes, InvokeRegistry, Midas, SOAPMidas, SOAPDm, GrendelWebServiceIntf, 
+	race, dtypes, console;
 
 type
   IGrendelDataModule = interface(IAppServerSOAP)
@@ -19,19 +21,37 @@ type
   private
   
   public
-    function getRaces() : GRace; stdcall;
+    function getRaces() : TStringArray; stdcall;
   end;
 
 implementation
+
+{$R *.dfm}
 
 procedure TGrendelDataModuleCreateInstance(out obj: TObject);
 begin
  obj := TGrendelDataModule.Create(nil);
 end;
 
-function TGrendelDataModule.getRaces() : GRace; stdcall;
+function TGrendelDataModule.getRaces() : TStringArray; stdcall;
+var
+	iterator : GIterator;
+	list : TStringArray;
+	i : integer;
 begin
-  Result := nil;
+	SetLength(list, racelist.getSize());
+	iterator := raceList.iterator();
+	i := 0;
+	
+	while (iterator.hasNext()) do
+		begin
+		list[i] := GRace(iterator.next()).name;
+		inc(i);
+		end;
+  
+  iterator.Free();
+  
+  Result := list;
 end;
 
 initialization

@@ -4,9 +4,10 @@ unit GrendelWebServiceIntf;
 
 interface
 
-uses InvokeRegistry, Types, Classes, XSBuiltIns, race;
+uses InvokeRegistry, Types, Classes, XSBuiltIns;
 
 type
+	TStringArray = array of string;
 
   { Invokable interfaces must derive from IInvokable }
   IGrendelWebService = interface(IInvokable)
@@ -14,7 +15,7 @@ type
 
     { Methods of Invokable interface must not use the default }
     { calling convention; stdcall is recommended }
-    function getRaces() : GRace; stdcall;
+    function getRaces() : TStringArray; stdcall;
   end;
 
 implementation
