@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.6 2004/02/01 12:06:34 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.7 2004/02/02 15:35:58 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -2444,7 +2444,7 @@ begin
   if (worn <> '') then
     ch.equipment[worn] := Self
   else
-    node_carry := ch.inventory.insertLast(Self);
+    node_carry := ch.inventory.insertFirst(Self);
   
   carried_by := c;
 
