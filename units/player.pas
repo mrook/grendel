@@ -2,11 +2,12 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.9 2003/10/23 08:15:30 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.10 2003/10/29 12:56:56 ***REMOVED*** Exp $
 }
 unit player;
 
 interface
+
 
 uses
 	md5,
@@ -17,142 +18,176 @@ uses
 	constants,
 	chars;
 
+
+const
+	PLAYER_FIELDS_HASHSIZE = 256;
+
+
 type
-		GPlayer = class;
+	GPlayer = class;
+
+	GPlayerConnection = class(GConnection)
+	protected
+		_state : integer;
+		_ch : GPlayer;
+
+		_pagepoint : cardinal;
+		pagebuf : string;
+		pagecmd : char;
+		fcommand : boolean;
+
+		procedure OnOpenEvent();
+		procedure OnInputEvent();
+		function OnTickEvent() : boolean;
+		procedure OnOutputEvent();
+		procedure OnCloseEvent();
+
+	public
+		constructor Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+
+		procedure writePager(txt : string);
+		procedure setPagerInput(argument : string);
+		procedure outputPager;
+
+		function findDualConnection(const name: string) : GPlayer;
+		procedure nanny(argument : string);
+
+	published
+		property state : integer read _state write _state;
+
+		property pagepoint : cardinal read _pagepoint write _pagepoint;
+
+		property ch: GPlayer read _ch write _ch;
+	end;
+	
+	GPlayerField = class
+	protected
+  	_name : string;
+  	
+  public		
+  	constructor Create(name : string);
+  	
+		function default() : TObject; virtual; abstract;
+		function fromString(s : string) : TObject; virtual; abstract;
+		function toString(x : TObject) : string; virtual; abstract;
 		
-		GPlayerConnection = class(GConnection)
-    protected
-    	_state : integer;
-      _ch : GPlayer;
-      
-      _pagepoint : cardinal;
-      pagebuf : string;
-      pagecmd : char;
-      fcommand : boolean;
-      
-      procedure OnOpenEvent();
-      procedure OnInputEvent();
-      function OnTickEvent() : boolean;
-      procedure OnOutputEvent();
-      procedure OnCloseEvent();
-
-		public
-    	constructor Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+		property name : string read _name;
+	end;
+	
+	GPlayer = class(GCharacter)   	
+	protected
+		_keylock: boolean;
+		_afk : boolean;
+		_fields : GHashTable;
 		
-      procedure writePager(txt : string);
-      procedure setPagerInput(argument : string);
-      procedure outputPager;
-      
-      function findDualConnection(const name: string) : GPlayer;
-      procedure nanny(argument : string);
-      
-    published
-    	property state : integer read _state write _state;
-    	
-    	property pagepoint : cardinal read _pagepoint write _pagepoint;
-    	
-    	property ch: GPlayer read _ch write _ch;
-		end;
-		
-    GPlayer = class(GCharacter)   	
-    protected
-      _keylock: boolean;
-      _afk : boolean;
-    
-    public
-      edit_buffer : string;
-      edit_dest : pointer;
+		function getField(name : string) : TObject;
+		procedure putField(name : string; obj : TObject);
 
-      pagerlen : integer;
-      title : string;                     { Title of PC }
-      age : longint;                     { Age in hours (irl) }
-      cfg_flags, flags : cardinal;    { config flags and misc. flags }
-      deaths : integer;
-      bankgold : longint;           { Gold in bank }
-      xptot, xptogo : longint;       { Experience earned total and needed to level }
-      fightxp : longint;
-      rank : string;
-      clanleader : boolean;         { is clanleader? }
-      password : string;
-      md5_password : MD5Digest;
-      prompt : string;
-      remorts : integer;            { remorts done }
-      condition : array[COND_DRUNK..COND_MAX-1] of integer;
-      area: GArea;
-      area_fname : string;
-      r_lo, r_hi, m_lo, m_hi, o_lo, o_hi : integer;
-      wiz_level : integer;          { level of wizinvis }
-      bg_status, bg_points : integer;
-      bg_room : pointer;
-      war_points, quest_points : integer;
-      snooping : GCharacter;
-      switching : GCharacter;
-      reply : GPlayer;
-      trophy : array[1..15] of GTrophy;
-      trophysize: integer;
-      logon_first : TDateTime;
-      logon_now : TDateTime;
-      played : TDateTime;
-      wimpy : integer;
-      aliases : GDLinkedList;
-      pracs : integer;
-      max_skills, max_spells : integer;
-      bamfin, bamfout : string;
-      taunt : string;
-      channels : GDLinkedList;
-      // profession:PROF_DATA;
+	public
+		edit_buffer : string;
+		edit_dest : pointer;
 
-      ld_timer : integer;
-      
-      conn : GPlayerConnection;
+		pagerlen : integer;
+		title : string;                     { Title of PC }
+		age : longint;                     { Age in hours (irl) }
+		cfg_flags, flags : cardinal;    { config flags and misc. flags }
+		deaths : integer;
+		bankgold : longint;           { Gold in bank }
+		xptot, xptogo : longint;       { Experience earned total and needed to level }
+		fightxp : longint;
+		rank : string;
+		clanleader : boolean;         { is clanleader? }
+		password : string;
+		md5_password : MD5Digest;
+		prompt : string;
+		remorts : integer;            { remorts done }
+		condition : array[COND_DRUNK..COND_MAX-1] of integer;
+		area: GArea;
+		area_fname : string;
+		r_lo, r_hi, m_lo, m_hi, o_lo, o_hi : integer;
+		wiz_level : integer;          { level of wizinvis }
+		bg_status, bg_points : integer;
+		bg_room : pointer;
+		war_points, quest_points : integer;
+		snooping : GCharacter;
+		switching : GCharacter;
+		reply : GPlayer;
+		trophy : array[1..15] of GTrophy;
+		trophysize: integer;
+		logon_first : TDateTime;
+		logon_now : TDateTime;
+		played : TDateTime;
+		wimpy : integer;
+		aliases : GDLinkedList;
+		pracs : integer;
+		max_skills, max_spells : integer;
+		bamfin, bamfout : string;
+		taunt : string;
+		channels : GDLinkedList;
+		// profession:PROF_DATA;
 
-      active_board : integer;
-      boards : array[BOARD1..BOARD_MAX-1] of integer;
-      subject : string;
+		ld_timer : integer;
 
-      constructor Create(conn : GPlayerConnection);
-      destructor Destroy; override;
+		conn : GPlayerConnection;
 
-    published
-      function ansiColor(color : integer) : string; override;
+		active_board : integer;
+		boards : array[BOARD1..BOARD_MAX-1] of integer;
+		subject : string;
 
-      function IS_IMMORT : boolean; override;
-      function IS_WIZINVIS : boolean; override;
-      function IS_HOLYWALK : boolean; override;
-      function IS_HOLYLIGHT : boolean; override;
-      function IS_AFK : boolean; override;
-      function IS_KEYLOCKED : boolean; override;
-      function IS_EDITING : boolean; override;
-      function IS_DRUNK : boolean; override;
+		constructor Create(conn : GPlayerConnection);
+		destructor Destroy(); override;
 
-      function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
-      function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
+		property fields[name : string] : TObject read getField write putField; 
 
-      function load(fn : string) : boolean;
-      function save(fn : string) : boolean;
+	published
+		function ansiColor(color : integer) : string; override;
 
-      function getAge : integer;
-      function getPlayed : integer;
+		function IS_IMMORT : boolean; override;
+		function IS_WIZINVIS : boolean; override;
+		function IS_HOLYWALK : boolean; override;
+		function IS_HOLYLIGHT : boolean; override;
+		function IS_AFK : boolean; override;
+		function IS_KEYLOCKED : boolean; override;
+		function IS_EDITING : boolean; override;
+		function IS_DRUNK : boolean; override;
 
-      procedure die; override;
-      procedure calcRank;
+		function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
+		function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
 
-      procedure quit;
+		function load(fn : string) : boolean;
+		function save(fn : string) : boolean;
 
-      procedure sendPrompt; override;
-      procedure sendBuffer(s : string); override;
-      procedure sendPager(txt : string); override;
-      procedure emptyBuffer; override;
+		function getAge : integer;
+		function getPlayed : integer;
 
-      procedure startEditing(text : string);
-      procedure stopEditing;
-      procedure editBuffer(text : string);
-      procedure sendEdit(text : string);
+		procedure die; override;
+		procedure calcRank;
 
-    	property keylock : boolean read _keylock write _keylock;
-    	property afk : boolean read _afk write _afk;
-    end;
+		procedure quit;
 
+		procedure sendPrompt; override;
+		procedure sendBuffer(s : string); override;
+		procedure sendPager(txt : string); override;
+		procedure emptyBuffer; override;
+
+		procedure startEditing(text : string);
+		procedure stopEditing;
+		procedure editBuffer(text : string);
+		procedure sendEdit(text : string);
+
+		property keylock : boolean read _keylock write _keylock;
+		property afk : boolean read _afk write _afk;	
+	end;
+
+
+var
+	fieldList : GHashTable;
+
+procedure registerField(field : GPlayerField);
+procedure unregisterField(name : string);
+
+procedure initPlayers();
+procedure cleanupPlayers();
 
 implementation
 
@@ -190,6 +225,8 @@ begin
 	state := CON_NAME;
 	
 	ch := GPlayer.Create(Self);
+
+  node := connection_list.insertLast(Self);
 end;
 
 procedure GPlayerConnection.OnOpenEvent();
@@ -1062,6 +1099,8 @@ begin
     room := findRoom(ROOM_VNUM_EVIL_PORTAL);
 
   fighting := nil;
+  
+  _fields := GHashTable.Create(PLAYER_FIELDS_HASHSIZE);
 end;
 
 destructor GPlayer.Destroy();
@@ -1088,8 +1127,34 @@ begin
 
   skills_learned.clean();
   skills_learned.Free();
+  
+  _fields.clear();
+  _fields.Free();
 
   inherited Destroy;
+end;
+
+function GPlayer.getField(name : string) : TObject;
+begin
+  name := prep(name);
+  
+	if (_fields[name] = nil) then
+		_fields[name] := GPlayerField(fieldList[name]).default();
+
+	Result := _fields[name];
+end;
+
+procedure GPlayer.putField(name : string; obj : TObject);
+begin
+  name := prep(name);
+
+	if (_fields[name] <> nil) then
+		begin
+		_fields[name].Free();
+		_fields.remove(name);
+		end;
+	
+	_fields[name] := obj;
 end;
 
 procedure GPlayer.quit();
@@ -1306,11 +1371,17 @@ begin
     if (s = '#PLAYER') then
       begin
       inc(inner);
-      repeat
-        a := af.readLine;
 
+      a := af.readLine();
+      
+      while (a <> '#END') and (not af.eof()) do
+      	begin
         g := uppercase(left(a,':'));
 
+				if (g = 'USER') then
+				else
+				if (g = 'LAST-LOGIN') then
+				else
         if (g = 'TITLE') then
           title := right(a,' ')
         else
@@ -1527,7 +1598,7 @@ begin
         if g='BGPOINTS' then
           bg_points:=strtoint(right(a,' '))
         else
-        if g='PAGELEN' then
+        if g='PAGERLEN' then
           pagerlen:=strtoint(right(a,' '))
         else
         if g='LOGON' then
@@ -1589,8 +1660,17 @@ begin
             if (tc.channelname = right(a, ' ')) then
               tc.ignored := true;
             end;
-          end;
-      until (uppercase(a)='#END') or (af.eof);
+          end
+				else
+					begin
+					if (fieldList[g] <> nil) then
+						_fields[g] := GPlayerField(fieldList[g]).fromString(right(a, ' '))
+					else
+						writeConsole('Dropping unknown field "' + g + '"');
+					end;
+
+        a := af.readLine();
+        end;
 
       if (uppercase(a)='#END') then
         dec(inner);
@@ -1600,7 +1680,7 @@ begin
       begin
       inc(inner);
       repeat
-        a := af.readLine;
+        a := af.readLine();
 
         if (uppercase(a) <> '#END') and (not af.eof) then
           begin
@@ -1835,17 +1915,18 @@ end;
 
 function GPlayer.save(fn : string) : boolean;
 var
-   af : GFileWriter;
-   temp : TDateTime;
-   h : integer;
-   obj : GObject;
-   al : GAlias;
-   g : GLearned;
-   aff : GAffect;
-   fl : cardinal;
-   tc : GUserChannel;
-   iterator : GIterator;
-   w1, w2 : string;
+	af : GFileWriter;
+	temp : TDateTime;
+	h : integer;
+	obj : GObject;
+	al : GAlias;
+	g : GLearned;
+	aff : GAffect;
+	fl : cardinal;
+	tc : GUserChannel;
+	iterator : GIterator;
+	w1, w2 : string;
+	field : GPlayerField;
 begin
   if (IS_NPC) then
     begin
@@ -1860,236 +1941,251 @@ begin
     exit;
   end;
 
-  // reset the character to a basic state (without affects) before writing
-  iterator := affects.iterator();
+	// reset the character to a basic state (without affects) before writing
+	iterator := affects.iterator();
 
-  while (iterator.hasNext()) do
-    begin
-    aff := GAffect(iterator.next());
+	while (iterator.hasNext()) do
+		begin
+		aff := GAffect(iterator.next());
 
-    aff.modify(Self, false);
-    end;
+		aff.modify(Self, false);
+		end;
 
-  af.writeLine('#PLAYER');
-  af.writeLine('User: ' + name);
-  af.writeLine('MD5-Password: ' + MD5Print(md5_password));
-  af.writeLine('Sex: ' + IntToStr(sex));
-  af.writeLine('Race: ' + race.name);
-  af.writeLine('Alignment: ' + IntToStr(alignment));
-  af.writeLine('Level: ' + IntToStr(level));
-  af.writeLine('Weight: ' + IntToStr(weight));
-  af.writeLine('Height: ' + IntToStr(height));
-  af.writeLine('aff_flags: ' + IntToStr(aff_flags));
-  af.writeLine('Mentalstate: ' + IntToStr(mental_state));
-  af.writeLine('Last-login: ' + DateTimeToStr(Now));
+	try
+		af.writeLine('#PLAYER');
+		af.writeLine('User: ' + name);
+		af.writeLine('MD5-Password: ' + MD5Print(md5_password));
+		af.writeLine('Sex: ' + IntToStr(sex));
+		af.writeLine('Race: ' + race.name);
+		af.writeLine('Alignment: ' + IntToStr(alignment));
+		af.writeLine('Level: ' + IntToStr(level));
+		af.writeLine('Weight: ' + IntToStr(weight));
+		af.writeLine('Height: ' + IntToStr(height));
+		af.writeLine('aff_flags: ' + IntToStr(aff_flags));
+		af.writeLine('Mentalstate: ' + IntToStr(mental_state));
+		af.writeLine('Last-login: ' + DateTimeToStr(Now));
 
-  af.writeLine('Title: ' + title);
-  af.writeLine('Age: ' + IntToStr(age));
-  af.writeLine('Gold: ' + IntToStr(gold) + ' ' + IntToStr(bankgold));
-  af.writeLine('XP: ' + IntToStr(xptot) + ' ' + IntToStr(xptogo));
-  af.writeLine('Kills: ' + IntToStr(kills));
-  af.writeLine('Deaths: ' + IntToStr(deaths));
-  af.writeLine('Practices: ' + IntToStr( pracs));
-  af.writeLine('Bamfin: ' + bamfin);
-  af.writeLine('Bamfout: ' + bamfout);
-  af.writeLine('Taunt: ' + taunt);
-  af.writeLine('Prompt: ' + prompt);
-  af.writeLine('Active_board: ' + IntToStr( active_board));
-  af.writeLine('Read-notes: ' + IntToStr(boards[BOARD1]) +  ' ' + IntToStr(boards[BOARD2]) + ' ' + IntToStr(boards[BOARD3]) + ' ' + IntToStr(boards[BOARD_NEWS]) + ' ' + IntToStr(boards[BOARD_IMM]));
+		af.writeLine('Title: ' + title);
+		af.writeLine('Age: ' + IntToStr(age));
+		af.writeLine('Gold: ' + IntToStr(gold) + ' ' + IntToStr(bankgold));
+		af.writeLine('XP: ' + IntToStr(xptot) + ' ' + IntToStr(xptogo));
+		af.writeLine('Kills: ' + IntToStr(kills));
+		af.writeLine('Deaths: ' + IntToStr(deaths));
+		af.writeLine('Practices: ' + IntToStr( pracs));
+		af.writeLine('Bamfin: ' + bamfin);
+		af.writeLine('Bamfout: ' + bamfout);
+		af.writeLine('Taunt: ' + taunt);
+		af.writeLine('Prompt: ' + prompt);
+		af.writeLine('Active_board: ' + IntToStr( active_board));
+		af.writeLine('Read-notes: ' + IntToStr(boards[BOARD1]) +  ' ' + IntToStr(boards[BOARD2]) + ' ' + IntToStr(boards[BOARD3]) + ' ' + IntToStr(boards[BOARD_NEWS]) + ' ' + IntToStr(boards[BOARD_IMM]));
 
-  fl := flags;
-  REMOVE_BIT(fl, PLR_LINKLESS);
-  REMOVE_BIT(fl, PLR_LOADED);
+		fl := flags;
+		REMOVE_BIT(fl, PLR_LINKLESS);
+		REMOVE_BIT(fl, PLR_LOADED);
 
-  af.writeLine('Flags: ' + IntToStr(fl));
-  af.writeLine('Config: ' + IntToStr(cfg_flags));
-  af.writeLine('Remorts: ' + IntToStr(remorts));
-  af.writeLine('Wimpy: ' + IntToStr(wimpy));
-  af.writeLine('Logon: ' + IntToStr(trunc(logon_first)) + ' ' + IntToStr(trunc(frac(logon_first)*MSecsPerDay)));
+		af.writeLine('Flags: ' + IntToStr(fl));
+		af.writeLine('Config: ' + IntToStr(cfg_flags));
+		af.writeLine('Remorts: ' + IntToStr(remorts));
+		af.writeLine('Wimpy: ' + IntToStr(wimpy));
+		af.writeLine('Logon: ' + IntToStr(trunc(logon_first)) + ' ' + IntToStr(trunc(frac(logon_first)*MSecsPerDay)));
 
-  temp:=played + (Now - logon_now);
-  af.writeLine('Played: ' + IntToStr(trunc(temp)) + ' ' + IntToStr(trunc(frac(temp)*MSecsPerDay)));
+		temp:=played + (Now - logon_now);
+		af.writeLine('Played: ' + IntToStr(trunc(temp)) + ' ' + IntToStr(trunc(frac(temp)*MSecsPerDay)));
 
-  af.writeLine('Condition: ' + IntToStr(condition[COND_DRUNK]) + ' ' + IntToStr(condition[COND_FULL]) +
-          ' ' + IntToStr(condition[COND_THIRST]) + ' ' + IntToStr(condition[COND_CAFFEINE]) + ' ' + IntToStr(condition[COND_HIGH]));
+		af.writeLine('Condition: ' + IntToStr(condition[COND_DRUNK]) + ' ' + IntToStr(condition[COND_FULL]) +
+						' ' + IntToStr(condition[COND_THIRST]) + ' ' + IntToStr(condition[COND_CAFFEINE]) + ' ' + IntToStr(condition[COND_HIGH]));
 
-  if clan<>nil then
-    af.writeLine('Clan: ' + clan.name);
+		if clan<>nil then
+			af.writeLine('Clan: ' + clan.name);
 
-  if area_fname<>'' then
-    af.writeLine('Area: ' + area_fname);
+		if area_fname<>'' then
+			af.writeLine('Area: ' + area_fname);
 
-  af.writeLine('Ranges: ' + IntToStr(r_lo) + ' ' + IntToStr(r_hi) + ' ' + IntToStr(m_lo) + ' ' + IntToStr(m_hi) + ' ' + IntToStr(o_lo) + ' ' + IntToStr(o_hi));
+		af.writeLine('Ranges: ' + IntToStr(r_lo) + ' ' + IntToStr(r_hi) + ' ' + IntToStr(m_lo) + ' ' + IntToStr(m_hi) + ' ' + IntToStr(o_lo) + ' ' + IntToStr(o_hi));
 
-  af.writeLine('Wizlevel: ' + IntToStr(wiz_level));
-  af.writeLine('BGpoints: ' + IntToStr(bg_points));
-  af.writeLine('Pagerlen: ' + IntToStr(pagerlen));
+		af.writeLine('Wizlevel: ' + IntToStr(wiz_level));
+		af.writeLine('BGpoints: ' + IntToStr(bg_points));
+		af.writeLine('Pagerlen: ' + IntToStr(pagerlen));
 
-  af.writeLine('Stats: ' + IntToStr(str) + ' ' + IntToStr(con) + ' ' + IntToStr(dex) + ' ' + IntToStr(int) + ' ' + IntToStr(wis));
+		af.writeLine('Stats: ' + IntToStr(str) + ' ' + IntToStr(con) + ' ' + IntToStr(dex) + ' ' + IntToStr(int) + ' ' + IntToStr(wis));
 
-  af.writeLine('Max_skills: ' + IntToStr(max_skills));
-  af.writeLine('Max_spells: ' + IntToStr(max_spells));
+		af.writeLine('Max_skills: ' + IntToStr(max_skills));
+		af.writeLine('Max_spells: ' + IntToStr(max_spells));
 
-  af.writeLine('APB: ' + IntToStr(apb));
-  af.writeLine('Mana: ' + IntToStr(mana) + ' ' + IntToStr(max_mana));
-  af.writeLine('HP: ' + IntToStr(hp) + ' ' + IntToStr(max_hp));
-  af.writeLine('Mv: ' + IntToStr(mv) + ' ' + IntToStr(max_mv));
-  af.writeLine('AC: ' + IntToStr(ac));
-  af.writeLine('HAC: ' + IntToStr(hac));
-  af.writeLine('BAC: ' + IntToStr(bac));
-  af.writeLine('AAC: ' + IntToStr(aac));
-  af.writeLine('LAC: ' + IntToStr(lac));
-  af.writeLine('AC_mod: ' + IntToStr(ac_mod));
-  af.writeLine('RoomVNum: ' + IntToStr(room.vnum));
-  
-  iterator := channels.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    tc := GUserChannel(iterator.next());
-    
-    if (tc.ignored) then
-      af.writeLine('Ignore: ' + tc.channelname);
-    end;
-  
-  af.writeLine('#END');
-  af.writeLine('');
+		af.writeLine('APB: ' + IntToStr(apb));
+		af.writeLine('Mana: ' + IntToStr(mana) + ' ' + IntToStr(max_mana));
+		af.writeLine('HP: ' + IntToStr(hp) + ' ' + IntToStr(max_hp));
+		af.writeLine('Mv: ' + IntToStr(mv) + ' ' + IntToStr(max_mv));
+		af.writeLine('AC: ' + IntToStr(ac));
+		af.writeLine('HAC: ' + IntToStr(hac));
+		af.writeLine('BAC: ' + IntToStr(bac));
+		af.writeLine('AAC: ' + IntToStr(aac));
+		af.writeLine('LAC: ' + IntToStr(lac));
+		af.writeLine('AC_mod: ' + IntToStr(ac_mod));
+		af.writeLine('RoomVNum: ' + IntToStr(room.vnum));
 
-  af.writeLine('#SKILLS');
-  
-  iterator := skills_learned.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    g := GLearned(iterator.next());
+		iterator := channels.iterator();
 
-    af.writeLine( 'Skill: ''' + GSkill(g.skill).name^ + ''' ' + IntToStr(g.perc));
-    end;
+		while (iterator.hasNext()) do
+			begin
+			tc := GUserChannel(iterator.next());
 
-  af.writeLine('#END');
-  af.writeLine('');
+			if (tc.ignored) then
+				af.writeLine('Ignore: ' + tc.channelname);
+			end;
 
-  af.writeLine('#AFFECTS');
+		iterator.Free();
 
-  iterator := affects.iterator();
+		iterator := fieldList.iterator();
 
-  while (iterator.hasNext()) do
-    begin
-    aff := GAffect(iterator.next());
+		while (iterator.hasNext()) do
+			begin
+			field := GPlayerField(iterator.next());
 
-    with aff do
-      begin
-      af.writeString('''' + name^ + ''' ''' + wear_msg + ''' ');
-      af.writeInteger(duration);
+			af.writeLine(field.name + ': ' + field.toString(fields[field.name]));
+			end;
 
-      for h := 0 to length(modifiers) - 1 do
-        begin
-        af.writeString(' { ');
-        
-        af.writeString(printApply(modifiers[h].apply_type) + ' ');
+		iterator.Free();
 
-        case modifiers[h].apply_type of
-          APPLY_STRIPNAME: af.writeString(PString(modifiers[h].modifier)^);
-          else
-            af.writeInteger(modifiers[h].modifier);
-        end;
-        
-        af.writeString(' } ');
-        end;
+		af.writeLine('#END');
+		af.writeLine('');
 
-      af.writeLine('');
-      end;
-    end;
-    
-  af.writeLine('#END');
-  af.writeLine('');
+		af.writeLine('#SKILLS');
 
-  af.writeLine( '#ALIASES');
-  
-  iterator := aliases.iterator();
+		iterator := skills_learned.iterator();
 
-  while (iterator.hasNext()) do
-    begin
-    al := GAlias(iterator.next());
+		while (iterator.hasNext()) do
+			begin
+			g := GLearned(iterator.next());
 
-    af.writeLine(al.alias + ':' + al.expand);
-    end;
+			af.writeLine( 'Skill: ''' + GSkill(g.skill).name^ + ''' ' + IntToStr(g.perc));
+			end;
 
-  af.writeLine( '#END');
-  af.writeLine('');
+		af.writeLine('#END');
+		af.writeLine('');
 
-  af.writeLine('#OBJECTS');
-  
-  iterator := inventory.iterator();
+		af.writeLine('#AFFECTS');
 
-  while (iterator.hasNext()) do
-    begin
-    obj := GObject(iterator.next());
+		iterator := affects.iterator();
 
-    af.writeLine('none');
+		while (iterator.hasNext()) do
+			begin
+			aff := GAffect(iterator.next());
 
-    af.writeLine(IntToStr(obj.vnum));
+			with aff do
+				begin
+				af.writeString('''' + name^ + ''' ''' + wear_msg + ''' ');
+				af.writeInteger(duration);
 
-    af.writeLine(obj.name);
-    af.writeLine(obj.short);
-    af.writeLine(obj.long);
-    af.writeLine(IntToStr(obj.item_type) + ' ' + obj.wear_location1 + ' ' + obj.wear_location2);
-    af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
-    af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
-    end;
-    
-  iterator.Free();
+				for h := 0 to length(modifiers) - 1 do
+					begin
+					af.writeString(' { ');
 
-  iterator := equipment.iterator();
+					af.writeString(printApply(modifiers[h].apply_type) + ' ');
 
-  while (iterator.hasNext()) do
-    begin
-    obj := GObject(iterator.next());
-    
-    af.writeLine(obj.worn);
+					case modifiers[h].apply_type of
+						APPLY_STRIPNAME: af.writeString(PString(modifiers[h].modifier)^);
+						else
+							af.writeInteger(modifiers[h].modifier);
+					end;
 
-    af.writeLine(IntToStr(obj.vnum));
+					af.writeString(' } ');
+					end;
 
-    af.writeLine(obj.name);
-    af.writeLine(obj.short);
-    af.writeLine(obj.long);
-    
-    if (obj.wear_location1 = '') then
-      w1 := 'none'
-    else
-      w1 := obj.wear_location1;
-    
-    if (obj.wear_location2 = '') then
-      w2 := 'none'
-    else
-      w2 := obj.wear_location2;
+				af.writeLine('');
+				end;
+			end;
 
-    af.writeLine(IntToStr(obj.item_type) + ' ' + w1 + ' ' + w2);
-    af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
-    af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
-    end;
-    
-  iterator.Free();
+		af.writeLine('#END');
+		af.writeLine('');
 
-  af.writeLine('#END');
-  af.writeLine('');
+		af.writeLine( '#ALIASES');
 
-  af.writeLine('#TROPHY');
-  for h := 1 to trophysize do
-    af.writeLine('Trophy: ' + trophy[h].name + ' ' + IntToStr(trophy[h].level) + ' ' + IntToStr(trophy[h].times));
-  af.writeLine('#END');
+		iterator := aliases.iterator();
 
-  af.Free;
+		while (iterator.hasNext()) do
+			begin
+			al := GAlias(iterator.next());
 
-  // re-apply affects to character
-  iterator := affects.iterator();
+			af.writeLine(al.alias + ':' + al.expand);
+			end;
 
-  while (iterator.hasNext()) do
-    begin
-    aff := GAffect(iterator.next());
+		af.writeLine( '#END');
+		af.writeLine('');
 
-    aff.modify(Self, true);
-    end;
+		af.writeLine('#OBJECTS');
+
+		iterator := inventory.iterator();
+
+		while (iterator.hasNext()) do
+			begin
+			obj := GObject(iterator.next());
+
+			af.writeLine('none');
+
+			af.writeLine(IntToStr(obj.vnum));
+
+			af.writeLine(obj.name);
+			af.writeLine(obj.short);
+			af.writeLine(obj.long);
+			af.writeLine(IntToStr(obj.item_type) + ' ' + obj.wear_location1 + ' ' + obj.wear_location2);
+			af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
+			af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
+			end;
+
+		iterator.Free();
+
+		iterator := equipment.iterator();
+
+		while (iterator.hasNext()) do
+			begin
+			obj := GObject(iterator.next());
+
+			af.writeLine(obj.worn);
+
+			af.writeLine(IntToStr(obj.vnum));
+
+			af.writeLine(obj.name);
+			af.writeLine(obj.short);
+			af.writeLine(obj.long);
+
+			if (obj.wear_location1 = '') then
+				w1 := 'none'
+			else
+				w1 := obj.wear_location1;
+
+			if (obj.wear_location2 = '') then
+				w2 := 'none'
+			else
+				w2 := obj.wear_location2;
+
+			af.writeLine(IntToStr(obj.item_type) + ' ' + w1 + ' ' + w2);
+			af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
+			af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
+			end;
+
+		iterator.Free();
+
+		af.writeLine('#END');
+		af.writeLine('');
+
+		af.writeLine('#TROPHY');
+		for h := 1 to trophysize do
+			af.writeLine('Trophy: ' + trophy[h].name + ' ' + IntToStr(trophy[h].level) + ' ' + IntToStr(trophy[h].times));
+		af.writeLine('#END');
+	finally
+		af.Free;
+	end;
+
+	// re-apply affects to character
+	iterator := affects.iterator();
+
+	while (iterator.hasNext()) do
+		begin
+		aff := GAffect(iterator.next());
+
+		aff.modify(Self, true);
+		end;
 
   save := true;
 end;
@@ -2525,5 +2621,37 @@ begin
   rank := r;
 end;
 
+
+constructor GPlayerField.Create(name : string);
+begin
+	inherited Create();
+	
+	_name := prep(name);
+end;
+
+procedure registerField(field : GPlayerField);
+begin
+	if (fieldList[field.name] <> nil) then
+		fieldList.remove(field.name);
+		
+	fieldList[field.name] := field;
+end;
+
+procedure unregisterField(name : string);
+begin
+	fieldList.remove(prep(name));
+end;
+
+
+procedure initPlayers();
+begin
+	fieldList := GHashTable.Create(PLAYER_FIELDS_HASHSIZE);
+end;
+
+procedure cleanupPlayers();
+begin
+	fieldList.clear();
+	fieldList.Free();
+end;
 
 end.
