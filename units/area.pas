@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.35 2001/06/17 21:20:42 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.36 2001/07/12 16:37:00 ***REMOVED*** Exp $
 
 unit area;
 
@@ -422,7 +422,7 @@ begin
 
       while (true) do
         begin
-        s := af.readWord;
+        s := af.readToken;
 
         case s[1] of
           'S' : break;
@@ -554,7 +554,7 @@ begin
 
         if (not af.feol) then
           begin
-          s := af.readQuoted;
+          s := af.readToken();
 
           clan := findClan(s);
           end;
@@ -606,7 +606,7 @@ end;
 
 procedure GArea.loadObjects;
 var s:string;
-    num:integer;
+    modif, num:integer;
     o_index:GObjectIndex;
     aff : GAffect;
 begin
@@ -670,22 +670,44 @@ begin
           timer := 0;
       end;
 
-      weight := af.readInteger;
-      flags := af.readCardinal;
-      cost := af.readInteger;
+      weight := af.readInteger();
+      flags := af.readCardinal();
+      cost := af.readInteger();
 
       obj_count:=0;
 
-      s := af.readWord;
+      s := af.readToken();
 
       if (s = 'A') then
         begin
-        aff := GAffect.Create;
+        aff := GAffect.Create();
 
-        aff.skill := nil;
-        aff.apply_type := findApply(af.readWord);
-        aff.modifier := af.readInteger;
-        aff.duration := af.readInteger;
+        aff.name := hash_string(af.readToken());
+        aff.wear_msg := '';
+
+        aff.duration := af.readInteger();
+        num := 1;
+
+        while (not af.eol) and (af.readToken() = '{') do
+          begin
+          setLength(aff.modifiers, num);
+
+          aff.modifiers[num - 1].apply_type := findApply(af.readToken);
+
+          s := af.readToken();
+
+          modif := cardinal(findSkill(s));
+
+          if (modif = 0) then
+            modif := strtointdef(s, 0);
+
+          aff.modifiers[num - 1].modifier := modif;
+
+          s := af.readToken();
+
+          inc(num);
+          end;
+
         aff.node := affects.insertLast(aff);
 
         s := af.readLine;
@@ -1242,7 +1264,7 @@ begin
       begin
       g := node_ex.element;
 
-      writeln(f, 'Skill: ''', GSkill(g.skill).name, ''' ', g.perc);
+      writeln(f, 'Skill: ''', GSkill(g.skill).name^, ''' ', g.perc);
 
       node_ex := node_ex.next;
       end;

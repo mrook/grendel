@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.32 2001/06/09 20:56:09 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.33 2001/07/12 16:37:02 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -377,11 +377,9 @@ begin
     begin
       aff := node.element;
 
-      if (aff.skill <> nil) then
-      begin
-      buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.skill.name, aff.duration]);
-      end;
-      
+      if (aff.name <> nil) then
+        buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name^, aff.duration]);
+
       node := node.next;
     end;
     buf1 := buf1 + buf + #13#10;

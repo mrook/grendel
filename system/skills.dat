@@ -193,10 +193,9 @@ minlevel: 50
 mana: 50
 target: 3
 function: spell_generic
-affects: apply_int 2 6
+affects: "Aura of Enlightment" "You feel less bright." 1 { apply_int 2 }
 hitchar: You feel smart.
 hitroom: $N looks very smart.
-wearoff: You feel less bright.
 #end
 
 #skill
@@ -207,8 +206,7 @@ minlevel: 28
 mana: 32
 target: 3
 function: spell_generic
-affects: apply_affect 512 12
-wearoff: You can no longer breath under water.
+affects: "Aqua Breath" "You can no longer breath under water." 12 { apply_affect 512 }
 hitvict: You now have the ability to breath under water.
 hitroom: $n's face glows a watery blue.
 #end
@@ -221,10 +219,9 @@ minlevel: 12
 mana: 16
 target: 4
 function: spell_generic
-affects: apply_ac -2 12
+affects: "Barrier" "The barrier dissolves." 12 { apply_ac -2 }
 hitvict: You are surrounded by a strange $3barrier$6.
 hitroom: A strange $3barrier$6 surrounds $N.
-wearoff: The barrier dissolves.
 #end
 
 #skill
@@ -235,11 +232,10 @@ minlevel: 16
 mana: 18
 target: 1
 function: spell_generic
-affects: apply_affect 1 12
+affects: "Blindness" "You can see again!" 12 { apply_affect 1 }
 hitchar: You have succesfully blinded $N!
 hitvict: You are blinded!
 hitroom: $N tears at $S eyes, blinded!
-wearoff: You can see again!
 #end
 
 #skill
@@ -250,7 +246,7 @@ minlevel: 22
 mana: 20
 target: 4
 function: spell_generic
-affects: apply_stripspell Blindness 0
+affects: "" 0 { apply_stripname Blindness }
 #end
 
 #skill
@@ -260,7 +256,6 @@ rounds: 10
 minlevel: 16
 mana: 23
 target: 1
-wearoff: You feel better.
 function: spell_poison
 #end
 
@@ -272,7 +267,7 @@ minlevel: 22
 mana: 20
 target: 4
 function: spell_generic
-affects: apply_stripspell Poison 0
+affects: "" 0 { apply_stripname Poison }
 #end
 
 #skill
@@ -283,10 +278,9 @@ minlevel: 30
 mana: 28
 target: 3
 function: spell_generic
-wearoff: You can no longer spot invisible things.
 hitchar: Your vision extends beyond the normal.
 hitroom: $N's eyes glow an eerie color.
-affects: apply_affect 4 16
+affects: "Detect Invisible" "You can no longer spot invisible things." 16 { apply_affect 4 }
 #end
 
 #skill
@@ -297,10 +291,9 @@ minlevel: 40
 mana: 45
 target: 3
 function: spell_generic
-wearoff: You no longer feel enchanted.
 hitchar: You feel enchanted by a strange power.
 hitroom: $N looks as if $E is enchanted.
-affects: apply_affect 8192 12
+affects: "Enchantment" "You no longer feel enchanted." 12 { apply_affect 8192 }
 #end
 
 #skill
@@ -313,7 +306,7 @@ target: 4
 function: spell_generic
 hitvict: You look a lot better.
 hitroom: $N looks a lot better.
-affects: apply_hp 100 0
+affects: "" 0 { apply_hp 100 }
 #end
 
 #skill
@@ -327,7 +320,7 @@ function: spell_generic
 hitroom: $N looks a bit better.
 hitvict: You look a bit better.
 hitroom: $N looks a bit better.
-affects: apply_hp 12 0
+affects: "" 0 { apply_hp 12 }
 #end
 
 #skill
@@ -350,8 +343,7 @@ target: 3
 function: spell_generic
 hitchar: Your eyes glow red.
 hitroom: $N's eyes glow a dark red.
-wearoff: Your eyes look normal again.
-affects: apply_affect 32 12
+affects: "Infravision" "Your eyes look normal again." 12 { apply_affect 32 }
 #end
 
 
@@ -365,8 +357,7 @@ target: 3
 function: spell_generic
 hitchar: You slowly fade away into invisibility.
 hitroom: $N waves $S hands and fades away.
-wearoff: Your invisibility slowly ebbs away.
-affects: apply_affect 2 12
+affects: "Invisibility" "Your invisibility slowly ebbs away." 12 { apply_affect 2 }
 #end
 
 #skill
@@ -377,10 +368,9 @@ minlevel: 20
 mana: 20
 target: 3
 function: spell_generic
-affects: apply_affect 128 10
+affects: "Levitation" "You gently float down to the ground." 10 { apply_affect 128 }
 hitchar: You are lifted off the ground by the wind.
 hitroom: A gust of wind lifts $N off the ground.
-wearoff: You gently float down to the ground.
 #end
 
 #skill
@@ -391,10 +381,9 @@ minlevel: 5
 mana: 10
 target: 4
 function: spell_generic
-affects: apply_ac -1 12
+affects: "Protection" "You no longer feel protected." 12 { apply_ac -1 }
 hitvict: You feel protected.
 hitroom: $N looks protected.
-wearoff: You no longer feel protected.
 #end
 
 #skill

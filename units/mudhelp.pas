@@ -1,4 +1,4 @@
-// $Id: mudhelp.pas,v 1.6 2001/04/16 17:26:58 xenon Exp $
+// $Id: mudhelp.pas,v 1.7 2001/07/12 16:37:02 ***REMOVED*** Exp $
 
 unit mudhelp;
 
@@ -97,7 +97,7 @@ begin
     gsk := node.element;
     if (gsk.skill_type = sktype) then
     begin
-      ask := ASkill.Create(gsk.min_lvl, gsk.name);
+      ask := ASkill.Create(gsk.min_lvl, gsk.name^);
       insertLevelSorted(ll, ask);
     end;
     

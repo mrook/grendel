@@ -1,10 +1,10 @@
-// $Id: constants.pas,v 1.33 2001/06/06 19:01:14 xenon Exp $
+// $Id: constants.pas,v 1.34 2001/07/12 16:37:01 ***REMOVED*** Exp $
 
 unit constants;
 
 interface
 
-const version_number = 'v0.3.6pre15';
+const version_number = 'v0.4.0rc2';
       version_info = 'The Grendel Project - A Win32 MUD Server';
       version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
 
@@ -656,7 +656,7 @@ const
 type GApplyTypes = (APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
   APPLY_HP, APPLY_MAX_HP, APPLY_MV, APPLY_MAX_MV, APPLY_MANA, APPLY_MAX_MANA,
   APPLY_AC, APPLY_APB, APPLY_AFFECT, APPLY_REMOVE,
-  APPLY_STRIPSPELL, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE,
+  APPLY_STRIPNAME, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE,
 
 (*  APPLY_HITROLL, APPLY_DAMROLL, APPLY_SAVING_POISON, APPLY_SAVING_ROD,
   APPLY_SAVING_PARA, APPLY_SAVING_BREATH, APPLY_SAVING_SPELL,

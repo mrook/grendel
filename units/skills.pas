@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.14 2001/06/14 18:19:42 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.15 2001/07/12 16:37:02 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -17,11 +17,17 @@ type
 
     SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
 
-    GAffect = class
-      skill : GSkill;
+    GModifier = record
       apply_type : GApplyTypes;
       modifier : longint;
+    end;
+
+    GAffect = class
+//      skill : GSkill;
+      wear_msg : string;
+      name : PString;
       duration : longint;
+      modifiers : array of GModifier;
 
       node : GListNode;
 
@@ -37,7 +43,7 @@ type
       affects : GDLinkedList;
       prereqs : GDLinkedList;
 
-      name : string;
+      name : PString;
       skill_type:integer;
       min_mana:integer;
       min_lvl:integer;
@@ -46,7 +52,7 @@ type
 
       dicenum,dicesize,diceadd:integer;
 
-      dam_msg,wear_msg:string;
+      dam_msg:string;
       start_char,start_vict,start_room:string;
       hit_char,hit_vict,hit_room:string;
       miss_char,miss_vict,miss_room:string;
@@ -98,10 +104,10 @@ function skill_success(ch : GCharacter; sn : GSkill) : boolean;
 
 function findApply(s : string) : GApplyTypes;
 function printApply(apply : GApplyTypes) : string;
-function findAffect(ch : GCharacter; sn : GSkill) : GAffect;
+function findAffect(ch : GCharacter; name : string) : GAffect;
 procedure removeAffect(ch : GCharacter; aff : GAffect);
-function removeAffectSkill(ch:GCharacter; sn : GSkill):boolean;
-function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
+function removeAffectName(ch:GCharacter; name : string):boolean;
+function removeAffectFlag(ch:GCharacter; flag : integer):boolean;
 procedure update_affects;
 
 
@@ -109,6 +115,7 @@ implementation
 
 uses
     strip,
+    fsys,
     magic,
     fight,
     update,
@@ -128,7 +135,7 @@ begin
     begin
     sk := node.element;
 
-    if (s = uppercase(sk.name)) or (pos(s, uppercase(sk.name)) = 1) then
+    if (s = uppercase(sk.name^)) or (pos(s, uppercase(sk.name^)) = 1) then
       begin
       Result := sk;
       break;
@@ -162,57 +169,31 @@ begin
   assign_gsn := gsn;
 end;
 
-procedure process_affect(skill : GSkill; format : string);
-var
-   aff : GAffect;
-begin
-  aff := GAffect.Create;
-  aff.skill := skill;
-
-  with aff do
-    begin
-    apply_type := findApply(left(format, ' '));
-
-    format := right(format, ' ');
-
-    modifier := cardinal(findSkill(left(format, ' ')));
-
-    if (modifier = 0) then
-      modifier := strtointdef(left(format, ' '), 0);
-
-    format := right(format, ' ');
-    duration := strtointdef(left(format, ' '), 0);
-    end;
-
-  aff.node := skill.affects.insertLast(aff);
-end;
-
 procedure load_skills;
-var f:textfile;
-    s,g,a:string;
-    num : integer;
-    sk, skill : GSkill;
+var
+  af : GFileReader;
+  s,g,a:string;
+  num : integer;
+  sk, skill : GSkill;
+  aff : GAffect;
+  modif, len : integer;
 begin
-  assignfile(f, 'system\skills.dat');
-  {$I-}
-  reset(f);
-  {$I+}
-
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileReader.Create('system\skills.dat');
+  except
     bugreport('load_skills', 'skills.pas', 'could not open system\skills.dat',
               'The system file skills.dat could not be opened.');
     exit;
-    end;
+  end;
 
   num := 0;
 
   repeat
     repeat
-      readln(f,s);
-    until (uppercase(s) = '#SKILL') or (eof(f));
+      s := af.readLine();
+    until (uppercase(s) = '#SKILL') or (af.eof());
 
-    if (eof(f)) then
+    if (af.eof()) then
       break;
 
     skill := GSkill.Create;
@@ -220,13 +201,11 @@ begin
 
     with skill do
       repeat
-      readln(f, s);
-
-      g := uppercase(left(s,':'));
+      g := uppercase(left(af.readToken(), ':'));
 
       if (g = 'TYPE') then
         begin
-        s := uppercase(right(s,' '));
+        s := uppercase(af.readToken());
 
         if (s = 'SPELL') then
           skill_type := SKILL_SPELL
@@ -239,59 +218,56 @@ begin
         end
       else
       if (g = 'NAME') then
-        name := right(s,' ')
+        name := hash_string(af.readLine())
       else
       if g='ROUNDS' then
-        beats:=strtoint(right(s,' '))
+        beats := af.readInteger()
       else
       if g='MINLEVEL' then
-        min_lvl:=strtoint(right(s,' '))
+        min_lvl := af.readInteger()
       else
       if g='MANA' then
-        min_mana:=strtoint(right(s,' '))
+        min_mana := af.readInteger()
       else
       if g='TARGET' then
-        target:=strtoint(right(s,' '))
+        target := af.readInteger()
       else
       if g='FUNCTION' then
-        func := findFunc(right(s,' '))
+        func := findFunc(af.readToken())
       else
       if g='STARTCHAR' then
-        start_char := right(s,' ')
+        start_char := af.readLine()
       else
       if g='STARTVICT' then
-        start_vict := right(s,' ')
+        start_vict := af.readLine()
       else
       if g='STARTROOM' then
-        start_room := right(s,' ')
+        start_room := af.readLine()
       else
       if g='HITCHAR' then
-        hit_char := right(s,' ')
+        hit_char := af.readLine()
       else
       if g='HITVICT' then
-        hit_vict := right(s,' ')
+        hit_vict := af.readLine()
       else
       if g='HITROOM' then
-        hit_room := right(s,' ')
+        hit_room := af.readLine()
       else
       if g='MISSCHAR' then
-        miss_char := right(s,' ')
+        miss_char := af.readLine()
       else
       if g='MISSVICT' then
-        miss_vict := right(s,' ')
+        miss_vict := af.readLine()
       else
       if g='MISSROOM' then
-        miss_room := right(s,' ')
+        miss_room := af.readLine()
       else
       if g='DAMMSG' then
-        dam_msg := right(s,' ')
-      else
-      if g='WEAROFF' then
-        wear_msg := right(s,' ')
+        dam_msg := af.readLine()
       else
       if g='DICE' then
         begin
-        a:=uppercase(right(s,' '));
+        a:=uppercase(af.readLine());
         dicenum:=strtoint(left(a,'D'));
         a:=right(a,'D');
         dicesize:=strtoint(left(a,'+'));
@@ -300,11 +276,41 @@ begin
         end
       else
       if g='AFFECTS' then
-        process_affect(skill, right(s,' '))
+        begin
+        aff := GAffect.Create();
+
+        aff.name := hash_string(af.readToken());
+        aff.wear_msg := af.readToken();
+
+        aff.duration := af.readInteger();
+        num := 1;
+
+        while (not af.eol) and (af.readToken() = '{') do
+          begin
+          setLength(aff.modifiers, num);
+
+          aff.modifiers[num - 1].apply_type := findApply(af.readToken);
+
+          s := af.readToken();
+
+          modif := cardinal(findSkill(s));
+
+          if (modif = 0) then
+            modif := strtointdef(s, 0);
+
+          aff.modifiers[num - 1].modifier := modif;
+
+          s := af.readToken();
+
+          inc(num);
+          end;
+
+        aff.node := affects.insertLast(aff);
+        end
       else
       if g='PREREQ' then
         begin
-        a := right(s, ' ');
+        a := af.readToken();
         sk := findSkill(a);
 
         if (sk <> nil) then
@@ -313,14 +319,14 @@ begin
           bugreport('load_skills', 'skills.pas', 'Could not find prereq skill ' + a,
                     'The specified skill could not be found.');
         end;
-      until uppercase(s)='#END';
+      until g='#END';
 
     skill_table.insertLast(skill);
 
     inc(num);
-  until eof(f);
+  until (af.eof());
 
-  closefile(f);
+  af.Free;
 
   gsn_second_attack := assign_gsn('second attack');
   gsn_third_attack := assign_gsn('third attack');
@@ -359,7 +365,7 @@ begin
 
   if (percent <= chance div 3) then
     begin
-    act(AT_WHITE, '[You have become better at ' + sn.name + '!]',false,ch,nil,nil,TO_CHAR);
+    act(AT_WHITE, '[You have become better at ' + sn.name^ + '!]',false,ch,nil,nil,TO_CHAR);
     ch.SET_LEARNED(UMin(ch.LEARNED(sn) + 1, 100), sn);
     end;
 end;
@@ -371,51 +377,55 @@ end;
 
 procedure GAffect.modify(ch : GCharacter; add : boolean);
 var
-   modif : integer;
+  modif : integer;
+  a : integer;
 begin
-  modif := modifier;
-
-  if (not add) then
+  for a := 0 to length(modifiers) - 1 do
     begin
-    case apply_type of
-      APPLY_AFFECT: begin
-                    REMOVE_BIT(ch.aff_flags, modif);
-                    exit;
-                    end;
-      APPLY_REMOVE: begin
-                    SET_BIT(ch.aff_flags, modif);
-                    exit;
-                    end;
-      APPLY_STRIPSPELL: exit;
-    end;
+    modif := modifiers[a].modifier;
 
-    modif := -modif;
-    end;
+    if (not add) then
+      begin
+      case (modifiers[a].apply_type) of
+        APPLY_AFFECT: begin
+                      REMOVE_BIT(ch.aff_flags, modif);
+                      exit;
+                      end;
+        APPLY_REMOVE: begin
+                      SET_BIT(ch.aff_flags, modif);
+                      exit;
+                      end;
+        APPLY_STRIPNAME: exit;
+      end;
 
-  case apply_type of
-    APPLY_STR: ch.str := UMin(ch.str + modif, 100);
-    APPLY_DEX: ch.dex := UMin(ch.dex + modif, 100);
-    APPLY_INT: ch.int := UMin(ch.int + modif, 100);
-    APPLY_WIS: ch.wis := UMin(ch.wis + modif, 100);
-    APPLY_CON: ch.con := UMin(ch.con + modif, 100);
-    APPLY_HP: ch.hp := UMin(ch.hp + modif, ch.max_hp);
-    APPLY_MAX_HP: ch.max_hp := UMin(ch.max_hp + modif, 15000);
-    APPLY_MV: ch.mv := UMin(ch.mv + modif, ch.max_mv);
-    APPLY_MAX_MV: ch.max_mv := UMin(ch.max_mv + modif, 15000);
-    APPLY_MANA: ch.mana := UMin(ch.mana + modif, ch.max_mana);
-    APPLY_MAX_MANA: ch.max_mana := UMin(ch.max_mana + modif, 15000);
-    APPLY_AC: begin
-              inc(ch.ac, modif);
-              ch.calcAC;
-              end;
-    APPLY_APB: ch.apb := ch.apb + modif;
-    APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
-    APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
-    APPLY_STRIPSPELL: removeAffectSkill(ch, GSkill(pointer(modif)));
-    APPLY_FULL: gain_condition(ch, COND_FULL, modif);
-    APPLY_THIRST: gain_condition(ch, COND_THIRST, modif);
-    APPLY_DRUNK: gain_condition(ch, COND_DRUNK, modif);
-    APPLY_CAFFEINE: gain_condition(ch, COND_CAFFEINE, modif);
+      modif := -modif;
+      end;
+
+    case (modifiers[a].apply_type) of
+      APPLY_STR: ch.str := UMin(ch.str + modif, 100);
+      APPLY_DEX: ch.dex := UMin(ch.dex + modif, 100);
+      APPLY_INT: ch.int := UMin(ch.int + modif, 100);
+      APPLY_WIS: ch.wis := UMin(ch.wis + modif, 100);
+      APPLY_CON: ch.con := UMin(ch.con + modif, 100);
+      APPLY_HP: ch.hp := UMin(ch.hp + modif, ch.max_hp);
+      APPLY_MAX_HP: ch.max_hp := UMin(ch.max_hp + modif, 15000);
+      APPLY_MV: ch.mv := UMin(ch.mv + modif, ch.max_mv);
+      APPLY_MAX_MV: ch.max_mv := UMin(ch.max_mv + modif, 15000);
+      APPLY_MANA: ch.mana := UMin(ch.mana + modif, ch.max_mana);
+      APPLY_MAX_MANA: ch.max_mana := UMin(ch.max_mana + modif, 15000);
+      APPLY_AC: begin
+                inc(ch.ac, modif);
+                ch.calcAC;
+                end;
+      APPLY_APB: ch.apb := ch.apb + modif;
+      APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
+      APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
+      APPLY_STRIPNAME: removeAffectName(ch, PString(modif)^);
+      APPLY_FULL: gain_condition(ch, COND_FULL, modif);
+      APPLY_THIRST: gain_condition(ch, COND_THIRST, modif);
+      APPLY_DRUNK: gain_condition(ch, COND_DRUNK, modif);
+      APPLY_CAFFEINE: gain_condition(ch, COND_CAFFEINE, modif);
+    end;
   end;
 end;
 
@@ -426,12 +436,13 @@ begin
   if (duration > 0) then
     begin
     aff := GAffect.Create;
-    aff.skill := Self.skill;
-    aff.apply_type := Self.apply_type;
+    aff.name := Self.name;
+    aff.wear_msg := Self.wear_msg;
     aff.duration := Self.duration;
-    aff.modifier := Self.modifier;
 
-    if (findAffect(ch, Self.skill) = nil) then // not yet affected
+    aff.modifiers := Self.modifiers;
+
+    if (findAffect(ch, Self.name^) = nil) then // not yet affected
       aff.node := ch.affects.insertLast(aff);
 
     aff.modify(ch, true);
@@ -489,8 +500,8 @@ begin
   if (s = 'APPLY_APB') then
     Result := APPLY_APB
   else
-  if (s = 'APPLY_STRIPSPELL') then
-    Result := APPLY_STRIPSPELL
+  if (s = 'APPLY_STRIPNAME') then
+    Result := APPLY_STRIPNAME
   else
   if (s = 'APPLY_FULL') then
     Result := APPLY_FULL
@@ -520,7 +531,7 @@ begin
     APPLY_DEX: Result := 'apply_dex';
     APPLY_AC : Result := 'apply_ac';
     APPLY_APB : Result := 'apply_apb';
-    APPLY_STRIPSPELL : Result := 'apply_stripspell';
+    APPLY_STRIPNAME : Result := 'apply_stripname';
     APPLY_AFFECT : Result := 'apply_affect';
     APPLY_REMOVE : Result := 'apply_remove';
     APPLY_FULL : Result := 'apply_full';
@@ -537,12 +548,12 @@ begin
   end;
 end;
 
-function findAffect(ch : GCharacter; sn : GSkill) : GAffect;
+function findAffect(ch : GCharacter; name : string) : GAffect;
 var
    node : GListNode;
    aff : GAffect;
 begin
-  findAffect := nil;
+  Result := nil;
 
   node := ch.affects.head;
 
@@ -550,9 +561,9 @@ begin
     begin
     aff := node.element;
 
-    if (aff.skill = sn) then
+    if (aff.name^ = name) then
       begin
-      findAffect := aff;
+      Result := aff;
       exit;
       end;
 
@@ -569,11 +580,11 @@ begin
   aff.Free;
 end;
 
-function removeAffectSkill(ch:GCharacter; sn : GSkill):boolean;
+function removeAffectName(ch : GCharacter; name : string) : boolean;
 var
    aff : GAffect;
 begin
-  aff := findAffect(ch, sn);
+  aff := findAffect(ch, name);
 
   if (aff = nil) then
     begin
@@ -589,7 +600,8 @@ end;
 function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
 var
    node : GListNode;
-   aff : GAffect;
+   aff, taff : GAffect;
+   a : integer;
 begin
   removeAffectFlag := false;
   aff := nil;
@@ -597,10 +609,15 @@ begin
 
   while (node <> nil) do
     begin
-    if (GAffect(node.element).apply_type = APPLY_AFFECT) and (GAffect(node.element).modifier = flag) then
+    taff := node.element;
+
+    for a := 0 to length(taff.modifiers) - 1 do
       begin
-      aff := node.element;
-      break;
+      if (taff.modifiers[a].apply_type = APPLY_AFFECT) and (taff.modifiers[a].modifier = flag) then
+        begin
+        aff := node.element;
+        break;
+        end;
       end;
 
     node := node.next;
@@ -662,7 +679,7 @@ begin
 
       if (aff.duration = 0) then
         begin
-        act(AT_REPORT, aff.skill.wear_msg, false,ch,nil,nil,TO_CHAR);
+        act(AT_REPORT, aff.wear_msg, false,ch,nil,nil,TO_CHAR);
         removeAffect(ch, aff);
         end;
 

@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.13 2001/05/11 14:25:07 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.14 2001/07/12 16:37:03 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -406,7 +406,7 @@ begin
 
 //      if (ch.LEARNED(g.skill) = 0) then
       if ((ch.level >= GSkill(g.skill).min_lvl) and (ch.LEARNED(g.skill) = 0)) then
-        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name, false, ch, nil, nil, TO_CHAR);
+        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name^, false, ch, nil, nil, TO_CHAR);
 
       node := node.next;
       end;
@@ -443,14 +443,14 @@ begin
             begin
             if (ch.LEARNED(node.element) < 50) then
               begin
-              ch.sendBuffer('You need to have sufficient knowledge of ' + GSkill(node.element).name + ' first.'#13#10);
+              ch.sendBuffer('You need to have sufficient knowledge of ' + GSkill(node.element).name^ + ' first.'#13#10);
               exit;
               end;
 
             node := node.next;
             end;
 
-          act(AT_REPORT,'You learn ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You learn ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
 
           ch.SET_LEARNED(20, sn);
           end;
@@ -479,7 +479,7 @@ begin
   else
     begin
     ch.SET_LEARNED(0, sn);
-    act(AT_REPORT, 'You have unlearned ' + sn.name + '.', false, ch, nil, nil, TO_CHAR);
+    act(AT_REPORT, 'You have unlearned ' + sn.name^ + '.', false, ch, nil, nil, TO_CHAR);
     end;
 end;
 
@@ -560,10 +560,10 @@ begin
           begin
           ch.SET_LEARNED(50, sn);
 
-          act(AT_REPORT,'You now know enough about ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You now know enough about ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
           end
         else
-          act(AT_REPORT,'You practice ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You practice ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
         end
       else
         act(AT_REPORT,'You have practiced this skill enough.',false,ch,nil,nil,TO_CHAR);

@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.10 2001/06/14 18:19:42 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.11 2001/07/12 16:37:01 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -37,6 +37,7 @@ procedure spell_acid_arrow(ch, victim : GCharacter; sn : GSkill);
 var af : GAffect;
 begin
   af := nil;
+
   if (saving_throw(ch.level,victim.save_poison,victim)) then
     begin
     act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
@@ -45,10 +46,13 @@ begin
   else
     begin
     af := GAffect.Create();
-    af.skill := sn;
+    af.wear_msg := 'The poison slowly wears off.';
     af.duration := (ch.level div 8);
-    af.apply_type := APPLY_AFFECT;
-    af.modifier := AFF_POISON;
+
+    setLength(af.modifiers, 1);
+
+    af.modifiers[0].apply_type := APPLY_AFFECT;
+    af.modifiers[0].modifier := AFF_POISON;
 
     af.applyTo(victim);
 
@@ -85,10 +89,13 @@ begin
   else
     begin
     af := GAffect.Create();
-    af.skill := sn;
+    af.wear_msg := 'The poison slowly wears off.';
     af.duration := (ch.level div 8);
-    af.apply_type := APPLY_AFFECT;
-    af.modifier := AFF_POISON;
+
+    setLength(af.modifiers, 1);
+
+    af.modifiers[0].apply_type := APPLY_AFFECT;
+    af.modifiers[0].modifier := AFF_POISON;
 
     af.applyTo(victim);
 
@@ -264,14 +271,13 @@ var
    node : GListNode;
    aff : GAffect;
 begin
-  removeAffectSkill(ch, sn);
-  
   node := sn.affects.head;
 
   while (node <> nil) do
     begin
     aff := node.element;
 
+    removeAffectName(ch, aff.name^);
     aff.applyTo(ch);
 
     node := node.next;
@@ -584,7 +590,7 @@ begin
        else
          ch.position := POS_STANDING;
 
-       say_spell(ch, sn.name);
+       say_spell(ch, sn.name^);
 
        improve_skill(ch, sn);
 

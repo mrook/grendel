@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.42 2001/06/14 18:19:41 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.43 2001/07/12 16:37:01 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1091,7 +1091,7 @@ var d, x : longint;
     g , a, t : string;
     obj : GObject;
     aff : GAffect;
-    inner : integer;
+    len, modif, inner : integer;
     s: string;
     sk : GSkill;
     al : GAlias;
@@ -1429,33 +1429,47 @@ begin
     if (s = '#AFFECTS') then
       begin
       inc(inner);
+
       repeat
         a := af.readLine;
 
         if (uppercase(a) <> '#END') and (not af.eof) then
           begin
-          a:=right(right(a,' '),'''');
-          g:=left(a,'''');
-          a:=right(right(a,''''),' ');
-
           aff := GAffect.Create;
 
           with aff do
             begin
-            skill := findSkill(g);
-
-            g := left(a, ' ');
-            apply_type := findApply(g);
+            name := hash_string(left(a, ' '));
+            wear_msg := 'boe';
 
             a := right(a, ' ');
+
             duration := strtointdef(left(a, ' '), 0);
+            len := 1;
 
-            a := right(a, ' ');
-            modifier := strtointdef(left(a, ' '), 0);
+            while (pos('{', a) > 0) do
+              begin
+              a := trim(right(a, '{'));
+
+              setLength(modifiers, len);
+
+              modifiers[len - 1].apply_type := findApply(left(a, ' '));
+
+              a := right(a, ' ');
+
+              modif := cardinal(findSkill(left(a, ' ')));
+
+              if (modif = 0) then
+                modif := strtointdef(left(a, ' '), 0);
+
+              modifiers[len - 1].modifier := modif;
+
+              a := trim(right(a, '}'));
+              inc(len);
+              end;
             end;
 
-          if (aff.skill <> nil) then
-            aff.applyTo(Self);
+          aff.applyTo(Self);
           end;
       until (uppercase(a)='#END') or (af.eof);
 
@@ -1740,7 +1754,7 @@ begin
     begin
     g := node.element;
 
-    writeln(f, 'Skill: ''', GSkill(g.skill).name, ''' ', g.perc);
+    writeln(f, 'Skill: ''', GSkill(g.skill).name^, ''' ', g.perc);
 
     node := node.next;
     end;
@@ -1755,9 +1769,9 @@ begin
     begin
     aff := node.element;
 
-    with aff do
+{    with aff do
       writeln(f,'Affect: ''', skill.name, ''' ',
-               printApply(apply_type), ' ', duration, ' ', modifier);
+               printApply(apply_type), ' ', duration, ' ', modifier); }
 
     node := node.next;
     end;

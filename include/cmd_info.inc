@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.40 2001/06/09 13:09:48 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.41 2001/07/12 16:37:03 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1290,10 +1290,10 @@ begin
     begin
     aff := node.element;
 
-    if (aff.skill <> nil) then
+    if (aff.name <> nil) and (aff.name^ <> '') then
       with aff do
         begin
-        buf := skill.name + ', which will wear off';
+        buf := name^ + ', which will wear off';
 
         if duration=1 then
           buf := buf + ' any moment'
