@@ -76,6 +76,7 @@ uses
 	progs,
 	events,
 	area,
+	debug,
 	race;
 
 
@@ -118,17 +119,25 @@ begin
 	if (isSupported(SOCKTYPE_IPV4)) then
 		begin
 		socket := createSocket(SOCKTYPE_IPV4);
-		socket.openPort(system_info.port);
-
-		listenSockets.add(socket);
+		
+		try
+			socket.openPort(system_info.port);
+			listenSockets.add(socket);
+		except
+			socket.Free();
+		end;
 		end;
 
 	if (isSupported(SOCKTYPE_IPV6)) then
 		begin
 		socket := createSocket(SOCKTYPE_IPV6);
-		socket.openPort(system_info.port6);
-
-		listenSockets.add(socket);
+		
+		try
+			socket.openPort(system_info.port6);
+			listenSockets.add(socket);
+		except
+			socket.Free();
+		end;
 		end;
 end;
 
@@ -327,33 +336,40 @@ begin
 	
   	while (running) do
 		begin
-		iterator := listenSockets.iterator();
+		try
+			iterator := listenSockets.iterator();
 
-		while (iterator.hasNext()) do
-			begin
-			socket := GSocket(iterator.next());
+			while (iterator.hasNext()) do
+				begin
+				socket := GSocket(iterator.next());
+	
+				if (socket.canRead()) then
+					acceptConnection(socket);
+				end;
 
-			if (socket.canRead()) then
-				acceptConnection(socket);
-			end;
-
-		iterator.Free();
+			iterator.Free();
 		
-		{$IFDEF WIN32}
-		Application.ProcessMessages();
-		{$ENDIF}
+			{$IFDEF WIN32}
+			Application.ProcessMessages();
+			{$ENDIF}
 
-		pollConsole();
+			pollConsole();
 
-		Sleep(SERVER_PULSE_SLEEP);
+			Sleep(SERVER_PULSE_SLEEP);
 		
-		if (shutdownDelay > 0) then
-			dec(shutdownDelay);
+			if (shutdownDelay > 0) then
+				dec(shutdownDelay);
 
-		if (shutdownDelay = 0) then
-			running := false;
+			if (shutdownDelay = 0) then
+				running := false;
+		except
+			on E : EQuit do break;
+			on E : EControlC do break;
+			on E : Exception do reportException(E);
 		end;
-		
+		end;
+	
+	running := false;
 	serverBooted := false;
 	
 	Result := shutdownType;

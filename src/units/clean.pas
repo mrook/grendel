@@ -2,7 +2,7 @@
 	Summary:
 		Cleaning (system janitor) thread
 	
-	## $Id: clean.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
+	## $Id: clean.pas,v 1.6 2004/03/18 15:13:55 ***REMOVED*** Exp $
 }
 
 unit clean;
@@ -41,6 +41,7 @@ uses
 	constants,
 	console,
 	dtypes,
+	debug,
 	area,
 	util,
 	timers,
@@ -166,15 +167,9 @@ begin
 
 //      cleanExtractedChars();
     except
-{      on E : EExternal do
-        begin
-        bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
-        outputError(E);
-        end;
-      on E : Exception do
-        bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed: ' + E.Message)
-      else }
-      bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
+    	on E : EQuit do break;
+    	on E : EControlC do break;
+	on E : Exception do reportException(E);
     end;    
   until (Terminated); 
 end;
