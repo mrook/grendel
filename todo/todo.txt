@@ -25,6 +25,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! rework affects system
 ! spells: Cure Poison
 ! skill/spellslots
+! dynamic prompts, not the hardcoded bla, but redefinable by the user
 
 
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
@@ -48,8 +49,6 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - spells: Mistform (walk thru doors, ethereal bla)
 - "real life" sleep - players need sleep to keep from falling down after 2 days,
   some rooms (with beds) have better sleep ratios etc.
-- dynamic prompts, not the hardcoded bla, but a few choosable from a list
-  or redefinable by the user
 - expand tracking system
 
 
