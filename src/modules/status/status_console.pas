@@ -1,3 +1,9 @@
+{
+	Summary:
+		Module that hooks into systray.pas and displays console form on desktop
+	
+	## $Id: status_console.pas,v 1.10 2004/04/04 22:17:21 ***REMOVED*** Exp $
+}
 unit status_console;
 
 interface
