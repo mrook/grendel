@@ -77,11 +77,11 @@ begin
 
         if (s[length(s)] <> '_') then
           begin
-          buf := buf + pad_string(lowercase(s), 15);
+          buf := buf + pad_string(lowercase(s), 19);
 
           inc(counter);
 
-          if (counter = 5) then
+          if (counter = 4) then
             begin
             buf := buf + #13#10;
             counter := 0;
