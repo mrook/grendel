@@ -1,37 +1,57 @@
-.AUTODEPEND
+# Grendel Makefile
+#
+# Use GNU make!
 
+# .autodepend
+
+
+ifeq ($(OSTYPE),linux-gnu)
+	LINUX=1
+else
+	WIN32=1
+endif
+
+
+ifdef WIN32
 DCC=dcc32
-DCC_FLAGS=-Q -D+ -V- -W+ -O+
 
 GRENDEL=grendel.exe
-GRENDEL_SOURCES=grendel.dpr
-
 COPYOVER=copyover.exe
-COPYOVER_SOURCES=copyover.dpr
-
 CONVERT=convert.exe
-CONVERT_SOURCES=convert.dpr
-
 CORE=core.bpl
+
+MAKE=$(CURDIR)/make
+endif
+
+
+ifdef LINUX
+DCC=dcc
+
+GRENDEL=grendel
+COPYOVER=copyover
+CONVERT=convert
+CORE=bplcore.so
+endif
+
+
+DCC_FLAGS=-Q -D+ -V- -W+ -O+
+
+GRENDEL_SOURCES=grendel.dpr
+COPYOVER_SOURCES=copyover.dpr
+CONVERT_SOURCES=convert.dpr
 CORE_SOURCES=core.dpk units/*.pas gmc/*.pas contrib/*.pas
 
+
 all:	$(GRENDEL) $(COPYOVER)
-	cd gmc 
-  	make -DDCC_DEFS=$(DCC_DEFS)
-	cd ..
-	cd modules
-	make -DDCC_DEFS=$(DCC_DEFS)
-	
+	cd gmc && $(MAKE)
+	cd modules && $(MAKE)
       
 clean:
-	del $(GRENDEL) $(COPYOVER) $(CONVERT) $(CORE)
-	cd gmc
-	make clean
-  	cd ..
-	cd modules
-	make clean
+	rm $(GRENDEL) $(COPYOVER) $(CORE)
+	cd gmc && $(MAKE) clean
+	cd modules && $(MAKE) clean
 
-$(GRENDEL):	$(GRENDEL_SOURCES) $(CORE) jcl\*.pas
+$(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
 	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ujcl
 	
 $(COPYOVER):	$(COPYOVER_SOURCES)
@@ -42,4 +62,3 @@ $(COPYOVER):	$(COPYOVER_SOURCES)
 
 $(CORE): $(CORE_SOURCES)
 	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -GD
-
