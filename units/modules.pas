@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id)
+  @lastmod($Id: modules.pas,v 1.10 2002/08/03 19:17:56 ***REMOVED*** Exp $)
 }
   
 unit modules;

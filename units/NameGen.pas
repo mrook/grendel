@@ -1,6 +1,6 @@
 {
   @abstract(Phonetic namegenerator)
-  @lastmod($Id)
+  @lastmod($Id: NameGen.pas,v 1.7 2002/08/03 19:17:56 ***REMOVED*** Exp $)
 }
 
 unit NameGen;

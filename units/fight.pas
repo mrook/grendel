@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id)
+  @lastmod($Id: fight.pas,v 1.26 2002/08/03 19:17:48 ***REMOVED*** Exp $)
 }
 
 unit fight;

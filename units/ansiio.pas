@@ -1,6 +1,6 @@
 { 
   @abstract(ANSI output routines by Gayle Davis)
-  @lastmod($Id)
+  @lastmod($Id: ansiio.pas,v 1.4 2002/08/03 19:17:46 ***REMOVED*** Exp $)
 }
 
 UNIT ansiio;

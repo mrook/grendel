@@ -1,6 +1,6 @@
 {
   @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id)
+  @lastmod($Id: bulletinboard.pas,v 1.9 2002/08/03 19:17:47 ***REMOVED*** Exp $)
 }
 
 unit bulletinboard;

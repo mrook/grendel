@@ -1,6 +1,6 @@
 {
   @abstract(Internal debug routines)
-  @lastmod($Id)
+  @lastmod($Id: debug.pas,v 1.17 2002/08/03 19:17:47 ***REMOVED*** Exp $)
 }
 
 unit debug;

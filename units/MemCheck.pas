@@ -1,6 +1,6 @@
 {
   @abstract(MemCheck library 2.58 by Jean Marc Eber & Vincent Mahon, Société Générale, INFI/SGOP/R&D)
-  @lastmod($Id)
+  @lastmod($Id: MemCheck.pas,v 1.4 2002/08/03 19:17:54 ***REMOVED*** Exp $)
 }
 
 unit MemCheck;

@@ -1,6 +1,6 @@
 {
   @abstract(MD5 Message-Digest implementation for Delphi by Matthias Fichtner)
-  @lastmod($Id)
+  @lastmod($Id: md5.pas,v 1.6 2002/08/03 19:17:49 ***REMOVED*** Exp $)
 }
 
 unit md5;

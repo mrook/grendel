@@ -1,6 +1,6 @@
 {
   @abstract(Interface with GMC virtual machine)
-  @lastmod($Id)
+  @lastmod($Id: progs.pas,v 1.20 2002/08/03 19:17:56 ***REMOVED*** Exp $)
 }
 
 unit progs;

@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id)
+  @lastmod($Id: console.pas,v 1.6 2002/08/03 19:17:47 ***REMOVED*** Exp $)
 }
 
 unit console;

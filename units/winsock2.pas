@@ -1,6 +1,6 @@
 {
   @abstract(Winsock2 interface library by Alex Konshin)
-  @lastmod($Id)
+  @lastmod($Id: winsock2.pas,v 1.4 2002/08/03 19:18:03 ***REMOVED*** Exp $)
 
 	Winsock2.h -- definitions to be used with the WinSock 2 DLL and WinSock 2 applications.
  	This header file corresponds to version 2.2.x of the WinSock API specification.

@@ -1,6 +1,6 @@
 {
   @abstract(System tray icon routines)
-  @lastmod($Id)
+  @lastmod($Id: systray.pas,v 1.5 2002/08/03 19:18:03 ***REMOVED*** Exp $)
 }
 
 unit systray;

@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id)
+  @lastmod($Id: socket.pas,v 1.7 2002/08/03 19:17:58 ***REMOVED*** Exp $)
 }
 
 unit socket;

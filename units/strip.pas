@@ -1,6 +1,6 @@
 {
   @abstract(Substring manipulation routines)
-  @lastmod($Id)
+  @lastmod($Id: strip.pas,v 1.7 2002/08/03 19:18:03 ***REMOVED*** Exp $)
 }
 
 unit strip;

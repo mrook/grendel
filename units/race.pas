@@ -1,6 +1,6 @@
 {
   @abstract(Race routines)
-  @lastmod($Id)
+  @lastmod($Id: race.pas,v 1.12 2002/08/03 19:17:56 ***REMOVED*** Exp $)
 }
 
 unit race;

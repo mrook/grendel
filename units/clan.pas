@@ -1,6 +1,6 @@
 {
   @abstract(Clan routines)
-  @lastmod($Id)
+  @lastmod($Id: clan.pas,v 1.10 2002/08/03 19:17:47 ***REMOVED*** Exp $)
 }
 
 unit clan;
