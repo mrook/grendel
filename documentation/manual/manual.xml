@@ -15,7 +15,7 @@
 				<email>nemesis at grendelproject dot nl</email>
 			</author>
 		</authorgroup>
-		<releaseinfo>$Id: manual.xml,v 1.5 2004/04/21 21:07:05 ***REMOVED*** Exp $</releaseinfo>
+		<releaseinfo>$Id$</releaseinfo>
 	</articleinfo>
 	<section id="intro">
 		<title>Introduction</title>
@@ -1405,34 +1405,49 @@ $B$7white</screen>
 				<listitem><para>valid integer and boolean expressions</para></listitem>
 			</itemizedlist>
 			</para>
+			<para>
+			<example>
+				<title>GMC Example</title>
+				<programlisting>void onEmoteTarget(external ch, external target, string name)
+{
+	if ((name == "BOW") &amp;&amp; (ch.name == "Syra"))
+	{
+		do("say Good day, " + target.name + "!");
+	}
+}
+
+void onAct(external ch, external target, string arg)
+{
+}
+
+export onEmoteTarget
+export onAct</programlisting>
+			</example>
+			</para>
 		</section>
 		
-		<section id="gmc_compiler">
-			<title>Compiler</title>
+		<section id="gmc_compiler_assembler">
+			<title>Compiler and assembler</title>
 			<para>
-			The GMC compiler works in four distinct passes.
+			The GMC compiler works in four distinct passes:
+			<itemizedlist>
+				<listitem><para>
+				In the first pass, the source files are scanned and parsed,
+				and basic syntax checking is performed.
+				</para></listitem>
+				<listitem><para>The second pass performs type checking and coercion.</para></listitem>
+				<listitem><para>
+				In the third pass an optimizer performs some basic
+				optimizations: dead-code elimination, algebraic
+				simplication (constant elimination) and some flow-of-
+				control optimizations.</para></listitem>
+				<listitem><para>
+				The fourth and final pass is the code generator,
+				where assembly code for the stack machine is written
+				to a file.
+				</para></listitem>
+			</itemizedlist>
 			</para>
-			<para>
-			In the first pass, the source files are scanned and parsed,
-			and basic syntax checking is performed.
-			</para>
-			<para>
-			The second pass performs type checking and coercion.
-			</para>
-			<para>
-			In the third pass an optimizer performs some basic
-			optimizations: dead-code elimination, algebraic
-			simplication (constant elimination) and some flow-of-
-			control optimizations.
-			</para>
-			<para>
-			The fourth and final pass is the code generator,
-			where assembly code for the stack machine is written
-			to a file.
-			</para>
-		</section>
-		<section id="gmc_assembler">
-			<title>Assembler</title>
 			<para>
 			The assembler simply converts the "human readable"
 			assembly code to a binary format (this includes translating
@@ -1442,6 +1457,22 @@ $B$7white</screen>
 			Additionally, the assembler performs some simple optimizations
 			(in a section commonly known as the 'peephole optimizer'),
 			to reduce the number of instructions.
+			</para>
+		</section>
+		<section id="gmc_compiling">
+			<title>Compiling your own code</title>
+			<para>
+			<example>
+				<title>Compiling <literal>give.c</literal></title>
+				<screen>
+<prompt>C:\Development\Grendel\progs></prompt><userinput>..\gmcc give.c</userinput>
+GMCC - GMC 'Elise' compiler v0.3
+			
+Output file written, datasize is 0 element(s).
+GASM - GMC 'Elise' v0.3
+			
+Saved 100 byte(s) of code, 0 element(s) data.</screen>
+			</example>
 			</para>
 		</section>
 		<section id="gmc_vm">
@@ -1463,9 +1494,6 @@ $B$7white</screen>
 			Lastly there is a data segment present. Its size is defined through
 			the assembler directive '$DATA'.
 			</para>
-		</section>
-		<section id="gmc_out">
-			<title>'Getting out' of the VM</title>
 			<para>
 			The VM has support for a number of mechanisms to help a program 'get out' of the 
 			environment and have some interaction with the calling application.
@@ -1473,35 +1501,43 @@ $B$7white</screen>
 			<para>
 			These mechanisms are:
 			<itemizedlist>
-				<listitem><para>System traps</para></listitem>
-				<listitem><para>Signals and sleep</para></listitem>
-				<listitem><para>External variables</para></listitem>
-				<listitem><para>External methods</para></listitem>
+				<listitem>
+					<para>System traps</para>
+					<para>
+					The system trap (in the form of <literal>do("some expression")</literal>) can be set to a
+					userspecified function by the calling application. The trap can do with
+					the string expression as it sees fit.
+					</para>
+				</listitem>
+				<listitem>
+					<para>Signals and sleep</para>
+					<para>
+					Signals are used to "suspend" the execution of the program until
+					some condition has been met (e.g. a signal has been raised) in another
+					part of the server (wether that be native or scripted code).
+					The sleep function suspends the program until a certain tickcount has
+					been reached.
+					</para>
+				</listitem>
+				<listitem>
+					<para>External variables</para>
+					<para>
+					External variables are a construct to associate external data with names
+					or expressions in the GMC language.
+					</para>
+				</listitem>
+				<listitem>
+					<para>External methods</para>
+					<para>
+					External methods are methods within a class, that are registered
+					before a script is executed. In a script they are represented
+					by a function without a body ('float cos(float x);' for example).
+					These 'callbacks' are somewhat dangerous, as there is no mechanism
+					to check the validity of the parameters specified in the declaration, nor 
+					the values provided at the time of calling.
+					</para>
+				</listitem>
 			</itemizedlist>
-			</para>
-			<para>
-			The system trap (in the form of <literal>do("some expression")</literal>) can be set to a
-			userspecified function by the calling application. The trap can do with
-			the string expression as it sees fit.
-			</para>
-			<para>
-			Signals are used to "suspend" the execution of the program until
-			some condition has been met (e.g. a signal has been raised) in another
-			part of the server (wether that be native or scripted code).
-			The sleep function suspends the program until a certain tickcount has
-			been reached.
-			</para>
-			<para>
-			External variables are a construct to associate external data with names
-			or expressions in the GMC language.
-			</para>
-			<para>
-			External methods are methods within a class, that are registered
-			before a script is executed. In a script they are represented
-			by a function without a body ('float cos(float x);' for example).
-			These 'callbacks' are somewhat dangerous, as there is no mechanism
-			to check the validity of the parameters specified in the declaration, nor 
-			the values provided at the time of calling.
 			</para>
 		</section>
 		<section id="gmc_types">
