@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.26 2001/04/23 11:18:22 xenon Exp $
+// $Id: cmd_imm.inc,v 1.27 2001/04/26 21:12:15 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -78,17 +78,6 @@ begin
   act(AT_ECHO,param,false,ch,nil,nil,TO_ALL);
 end;
 
-procedure do_thunder(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Thunder what?'#13#10);
-    exit;
-    end;
-
-  talk_channel(ch,param,CHANNEL_THUNDER,'thunder',AT_THUNDER);
-end;
-
 procedure do_wizinvis(ch:GCharacter;param:string);
 var level:integer;
 begin
@@ -160,6 +149,13 @@ begin
     end;
   param:=one_argument(param,vict_nm);
   vict:=findcharworld(ch,vict_nm);
+
+  if (vict.IS_NPC()) then
+  begin
+    ch.sendBuffer('This command does not work on NPCs.'#13#10);
+    exit;
+  end;
+  
   try
     lvl:=strtoint(param);
   except
@@ -1813,4 +1809,15 @@ begin
     act(AT_REPORT, Format('  $B$1[$7%2d$1]$A$7   %s', [i, generateName(nt.template_name)]), false, ch, nil, nil, TO_CHAR);
   end
 end;
+
+{procedure do_thunder(ch:GCharacter;param:string);
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Thunder what?'#13#10);
+    exit;
+    end;
+
+  talk_channel(ch,param,CHANNEL_THUNDER,'thunder',AT_THUNDER);
+end;}
 
