@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.26 2001/04/28 16:06:25 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.27 2001/04/29 16:53:43 xenon Exp $
 
 unit area;
 
@@ -228,6 +228,7 @@ var
 
 procedure load_areas;
 
+function createRoom(vnum : integer; area : GArea) : GRoom;
 function findArea(fname : string) : GArea;
 
 function findRoom(vnum : integer) : GRoom;
@@ -864,7 +865,7 @@ begin
     else
     if (s = '#SHOPS') then
       loadShops;
-  until (s = '$');
+  until (s = '$') or (af.eof());
 
   af.Free;
 end;
@@ -992,6 +993,8 @@ begin
   write_console('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
 end;
 
+{ Xenon 28/Apr/2001 : added saving of #RANGES; fixed bug that caused areas
+                      not to save (and their length set to 0) }
 procedure GArea.save(fn : string);
 var
    f : textfile;
@@ -1018,6 +1021,10 @@ begin
     exit;
     end;
 
+  writeln(f, '#RANGES');
+  writeln(f, Format('%d %d %d %d %d %d', [r_lo, r_hi, m_lo, m_hi, o_lo, o_hi]));
+  writeln(f);
+  
   writeln(f, '#AREA');
   writeln(f, Self.name);
   writeln(f, Self.author);
@@ -1033,7 +1040,7 @@ begin
 
     while (node <> nil) do
       begin
-      room := node.element;
+      room := GRoom(GHashValue(node.element).value);
 
       if (room.area <> Self) then
         begin
@@ -1767,6 +1774,20 @@ begin
     end;
 end;
 
+{ Xenon 28/Apr/2001: moved createRoom() from cmd_build.inc to area.pas }
+function createRoom(vnum : integer; area : GArea) : GRoom;
+var
+   room : GRoom;
+begin
+  room := GRoom.Create(vnum, area);
+  room.name := hash_string('Floating in a void');
+  room.description := 'Merely wisps of gas and steam, this room has not yet been clearly defined.'#13#10;
+
+  room_list.put(vnum, room);
+
+  Result := room;
+end;
+
 { 24/02/2001 - Nemesis }
 function findArea(fname : string) : GArea;
 var node : GListNode;
@@ -2332,11 +2353,11 @@ end;
 		- should probably be placed elsewhere }
 function findLocation(ch : pointer; param : string) : GRoom;
 var
-	room : GRoom;
+  room : GRoom;
   searchVNum : integer;
   victim : GCharacter;
 begin
-	result := nil;
+  result := nil;
 
   try
     searchVNum := StrToInt(param);
@@ -2358,7 +2379,7 @@ begin
 	return obj->in_room;
 *)
 
-	Result := nil;
+  Result := nil;
 end;
 
 function findRoom(vnum : integer) : GRoom;
