@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.23 2004/03/13 17:41:44 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.24 2004/03/13 19:14:43 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -947,8 +947,7 @@ var
 	iterator, in_iterator : GIterator;
   node_exit : GListNode;
   to_room, room : GRoom;
-  npc : GNPC;
-  npci : GNPCIndex;
+  npc : GNPCIndex;
   obj : GObject;
   shop : GShop;
   reset : GReset;
@@ -979,7 +978,7 @@ begin
     
     while (in_iterator.hasNext()) do
     	begin
-    	npc := GNPC(in_iterator.next());
+    	npc := GNPCIndex(in_iterator.next());
     	
 			npc_list.insertLast(npc);
 			end;
@@ -1055,12 +1054,12 @@ begin
 			begin
 			shop := GShop(in_iterator.next());
 			
-      npci := findNPCIndex(shop.keeper);
+      npc := findNPCIndex(shop.keeper);
 
-      if (npci = nil) then
+      if (npc = nil) then
         bugreport('processAreas()', 'area.pas', 'shopkeeper #'+inttostr(shop.keeper)+' null')
       else
-        npci.shop := shop;
+        npc.shop := shop;
 			end;
 			
 		in_iterator.Free();
@@ -1129,7 +1128,10 @@ begin
   iterator := area_list.iterator();
 
   while (iterator.hasNext()) do
-    GArea(iterator.next()).reset();
+  	begin
+    area := GArea(iterator.next());
+		area.reset();
+    end;
 
 	iterator.Free();
 end;
@@ -1487,8 +1489,7 @@ var
 	room : GRoom;
 	pexit : GExit;
 	conn : GPlayerConnection;
-	node_reset : GListNode;
-	iterator : GIterator;
+	iterator, in_iterator : GIterator;
 	buf : string;
 begin
   lastobj := nil;
@@ -1509,10 +1510,11 @@ begin
     
   iterator.Free();
 
-  node_reset := resets.head;
-  while (node_reset <> nil) do
+  iterator := resets.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    reset := GReset(node_reset.element);
+    reset := GReset(iterator.next());
 
     case reset.reset_type of
       'M':begin
@@ -1553,11 +1555,11 @@ begin
 
           if (reset.arg3<>0) then
             begin
-            iterator := char_list.iterator();
+            in_iterator := char_list.iterator();
 
-            while (iterator.hasNext()) do
+            while (in_iterator.hasNext()) do
               begin
-              vict := GCharacter(iterator.next());
+              vict := GCharacter(in_iterator.next());
 
               if (vict.IS_NPC) and (GNPC(vict).npc_index.vnum = reset.arg3) then
                 begin
@@ -1566,12 +1568,11 @@ begin
                 end;
               end;
               
-            iterator.Free();
+            in_iterator.Free();
 
             if (npc = nil) then
               begin
               bugreport('GArea.reset (E) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null');
-              node_reset := node_reset.next;
               continue;
               end;
             end
@@ -1579,10 +1580,7 @@ begin
             npc := lastmob;
 
           if lastmob=nil then
-            begin
-            node_reset := node_reset.next;
             continue;
-            end;
 
           if (npc = nil) then
             bugreport('GArea.reset (E) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null')
@@ -1609,9 +1607,9 @@ begin
 
           if (reset.arg3 <> 0) then
             begin
-            iterator := char_list.iterator();
+            in_iterator := char_list.iterator();
 
-            while (iterator.hasNext()) do
+            while (in_iterator.hasNext()) do
               begin
               vict := GCharacter(iterator.next());
 
@@ -1622,12 +1620,11 @@ begin
                 end;
               end;
               
-            iterator.Free();
+            in_iterator.Free();
 
             if (npc = nil) then
               begin
               bugreport('GArea.reset (G) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null');
-              node_reset := node_reset.next;
               continue;
               end;
             end
@@ -1635,10 +1632,7 @@ begin
             npc := lastmob;
 
           if lastmob=nil then
-            begin
-            node_reset := node_reset.next;
             continue;
-            end;
 
 					tempobj := GObject(objectIndices[reset.arg1]);
 					
@@ -1670,10 +1664,7 @@ begin
           tempobj := GObject(objectIndices[reset.arg1]);
 
           if (lastobj = nil) then
-            begin
-            node_reset := node_reset.next;
             continue;
-            end;
 
           if (tempobj = nil) then
             bugreport('GArea.reset (I) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
@@ -1690,7 +1681,6 @@ begin
           if (room = nil) then
             begin
             bugreport('GArea.reset (D) area: ' + name, 'area.pas', 'room #' + IntToStr(reset.arg1) + ' null');
-	    node_reset := node_reset.next;
             continue;
             end;
 
@@ -1699,7 +1689,6 @@ begin
           if (pexit = nil) then
             begin
             bugreport('GArea.reset (D) area: ' + name, 'area.pas', 'direction ' + IntToStr(reset.arg2) + ' has no exit in room ' + IntToStr(reset.arg1));
-            node_reset := node_reset.next;
             continue;
             end;
 
@@ -1773,7 +1762,6 @@ begin
           end;
     end;
 
-    node_reset := node_reset.next;
     end;
 
   _age := 0;
