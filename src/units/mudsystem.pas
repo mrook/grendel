@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.3 2004/01/26 01:08:08 hemko Exp $)
 }
 
 unit mudsystem;
@@ -205,91 +205,88 @@ begin
   system_info.max_conns := 200;
   system_info.terminated := false;
 
-  try
+  if (fileExists(SystemDir + 'sysdata.dat')) then
+    begin
     af := GFileReader.Create(SystemDir + 'sysdata.dat');
-  except
-    exit;
-  end;
 
-  repeat
-    s := af.readLine;
+    repeat
+      s := af.readLine;
 
-    g := uppercase(left(s,':'));
+      g := uppercase(left(s,':'));
 
-    if g='PORT' then
-      system_info.port:=strtoint(right(s,' '))
-    else
-    if (g = 'PORT6') then
-      system_info.port6 := strtoint(right(s, ' '))
-    else
-    if g='NAME' then
-      system_info.mud_name := right(s,' ')
-    else
-    if g='EMAIL' then
-      system_info.admin_email := right(s,' ')
-    else
-    if g='HOSTLOOKUP' then
-      system_info.lookup_hosts:=strtoint(right(s,' '))<>0
-    else
-    if g='DENYNEWCONNS' then
-      system_info.deny_newconns:=strtoint(right(s,' '))<>0
-    else
-    if g='DENYNEWPLAYERS' then
-      system_info.deny_newplayers:=strtoint(right(s,' '))<>0
-    else
-    if g='LEVELFORCEPC' then
-      system_info.level_forcepc:=strtoint(right(s,' '))
-    else
-    if g='LEVELLOG' then
-      system_info.level_log:=strtoint(right(s,' '))
-    else
-    if g='BINDIP' then
-      system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
-    else
-    if (g = 'MAXCONNS') then
-      system_info.max_conns := strtoint(right(s, ' '))
-    else
-    if (g = 'ARENASTART') then
-      system_info.arena_start := strtoint(right(s, ' '))
-    else
-    if (g = 'ARENAEND') then
-      system_info.arena_end := strtoint(right(s, ' '))
-    else
-    if (g = 'SHOWCLANABBREV') then
-      system_info.show_clan_abbrev := strtoint(right(s, ' ')) <> 0;
-  until (s = '$') or (af.eof);
+      if g='PORT' then
+        system_info.port:=strtoint(right(s,' '))
+      else
+      if (g = 'PORT6') then
+        system_info.port6 := strtoint(right(s, ' '))
+      else
+      if g='NAME' then
+        system_info.mud_name := right(s,' ')
+      else
+      if g='EMAIL' then
+        system_info.admin_email := right(s,' ')
+      else
+      if g='HOSTLOOKUP' then
+        system_info.lookup_hosts:=strtoint(right(s,' '))<>0
+      else
+      if g='DENYNEWCONNS' then
+        system_info.deny_newconns:=strtoint(right(s,' '))<>0
+      else
+      if g='DENYNEWPLAYERS' then
+        system_info.deny_newplayers:=strtoint(right(s,' '))<>0
+      else
+      if g='LEVELFORCEPC' then
+        system_info.level_forcepc:=strtoint(right(s,' '))
+      else
+      if g='LEVELLOG' then
+        system_info.level_log:=strtoint(right(s,' '))
+      else
+      if g='BINDIP' then
+        system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
+      else
+      if (g = 'MAXCONNS') then
+        system_info.max_conns := strtoint(right(s, ' '))
+      else
+      if (g = 'ARENASTART') then
+        system_info.arena_start := strtoint(right(s, ' '))
+      else
+      if (g = 'ARENAEND') then
+        system_info.arena_end := strtoint(right(s, ' '))
+      else
+      if (g = 'SHOWCLANABBREV') then
+        system_info.show_clan_abbrev := strtoint(right(s, ' ')) <> 0;
+    until (s = '$') or (af.eof);
 
-  af.Free;
+    af.Free();
+    end;
 
-  try
+  if (fileExists(SystemDir + 'bans.dat')) then
+    begin
     af := GFileReader.Create(SystemDir + 'bans.dat');
-  except
-    exit;
-  end;
 
-  repeat
-    s := af.readLine;
+    repeat
+      s := af.readLine;
 
-    if (s <> '$') then
-      banned_masks.add(s);
-  until (s = '$') or (af.eof);
+      if (s <> '$') then
+        banned_masks.add(s);
+    until (s = '$') or (af.eof);
 
-  af.Free;
+    af.Free();
+    end;
 
-  try
+  if (fileExists(SystemDir + 'names.dat')) then
+    begin
     af := GFileReader.Create(SystemDir + 'names.dat');
-  except
-    exit;
-  end;
 
-  repeat
-    s := af.readLine;
+    repeat
+      s := af.readLine;
 
-    if (s <> '$') then
-      banned_names.add(lowercase(s));
-  until (s = '$') or (af.eof);
+      if (s <> '$') then
+        banned_names.add(lowercase(s));
+    until (s = '$') or (af.eof);
 
-  af.Free;
+    af.Free();
+    end;
 end;
 
 procedure save_system;
@@ -300,55 +297,52 @@ var
 begin
   t.s_addr := system_info.bind_ip;
 
-  try
+  if (fileExists(SystemDir + 'sysdata.dat')) then
+    begin
     af := GFileWriter.Create(SystemDir + 'sysdata.dat');
-  except
-    exit;
-  end;
 
-  af.writeLine('Name: ' + system_info.mud_name);
-  af.writeLine('EMail: ' + system_info.admin_email);
-  af.writeLine('Port: ' + IntToStr(system_info.port));
-  af.writeLine('Port6: ' + IntToStr(system_info.port6));
-  af.writeLine('DenyNewConns: ' + IntToStr(integer(system_info.deny_newconns)));
-  af.writeLine('DenyNewPlayers: ' + IntToStr(integer(system_info.deny_newplayers)));
-  af.writeLine('HostLookup: ' + IntToStr(integer(system_info.lookup_hosts)));
-  af.writeLine('LevelForcePC: ' + IntToStr(system_info.level_forcepc));
-  af.writeLine('LevelLog: ' + IntToStr(system_info.level_log));
-  af.writeLine('BindIP: ' + inet_ntoa(t));
-  af.writeLine('MaxConns: ' + IntToStr(system_info.max_conns));
-  af.writeLine('ArenaStart: ' + IntToStr(system_info.arena_start));
-  af.writeLine('ArenaEnd: ' + IntToStr(system_info.arena_end));
-  af.writeLine('ShowClanAbbrev: ' + IntToStr(integer(system_info.show_clan_abbrev))); 
-  af.writeLine('$');
+    af.writeLine('Name: ' + system_info.mud_name);
+    af.writeLine('EMail: ' + system_info.admin_email);
+    af.writeLine('Port: ' + IntToStr(system_info.port));
+    af.writeLine('Port6: ' + IntToStr(system_info.port6));
+    af.writeLine('DenyNewConns: ' + IntToStr(integer(system_info.deny_newconns)));
+    af.writeLine('DenyNewPlayers: ' + IntToStr(integer(system_info.deny_newplayers)));
+    af.writeLine('HostLookup: ' + IntToStr(integer(system_info.lookup_hosts)));
+    af.writeLine('LevelForcePC: ' + IntToStr(system_info.level_forcepc));
+    af.writeLine('LevelLog: ' + IntToStr(system_info.level_log));
+    af.writeLine('BindIP: ' + inet_ntoa(t));
+    af.writeLine('MaxConns: ' + IntToStr(system_info.max_conns));
+    af.writeLine('ArenaStart: ' + IntToStr(system_info.arena_start));
+    af.writeLine('ArenaEnd: ' + IntToStr(system_info.arena_end));
+    af.writeLine('ShowClanAbbrev: ' + IntToStr(integer(system_info.show_clan_abbrev))); 
+    af.writeLine('$');
 
-  af.Free();
+    af.Free();
+    end;
 
-  try
+  if (fileExists(SystemDir + 'bans.dat')) then
+    begin
     af := GFileWriter.Create(SystemDir + 'bans.dat');
-  except
-    exit;
-  end;
 
-  for a := 0 to banned_masks.count-1 do
-    af.writeLine(banned_masks[a]);
+    for a := 0 to banned_masks.count-1 do
+      af.writeLine(banned_masks[a]);
 
-  af.writeLine('$');
+    af.writeLine('$');
 
-  af.Free();
+    af.Free();
+    end;
 
-  try
+  if (fileExists(SystemDir + 'names.dat')) then
+    begin
     af := GFileWriter.Create(SystemDir + 'names.dat');
-  except
-    exit;
-  end;
 
-  for a := 0 to banned_names.count-1 do
-    af.writeLine(banned_names[a]);
+    for a := 0 to banned_names.count-1 do
+      af.writeLine(banned_names[a]);
 
-  af.writeLine('$');
+    af.writeLine('$');
 
-  af.Free();
+    af.Free();
+    end;
 end;
 
 function isMaskBanned(host : string) : boolean;
