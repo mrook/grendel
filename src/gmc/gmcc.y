@@ -7,19 +7,19 @@
 %{
 
 uses 
-  SysUtils,
-  Classes,
+	SysUtils,
+	Classes,
 {$IFDEF WIN32}
-  Windows,
+	Windows,
 {$ENDIF}  
-  YaccLib, 
-  LexLib,
-  strip;
+	YaccLib, 
+	LexLib,
+	strip;
 
 
 const
-  CONV_TO_INT = 1;
-  CONV_TO_FLOAT = 2;
+	CONV_TO_INT = 1;
+	CONV_TO_FLOAT = 2;
 	CONV_TO_STRING = 3;
 	
 	SPECIAL_TRAP = 1;
@@ -34,149 +34,154 @@ const
 	VARTYPE_STATIC = 5;
 
 
-type 	Root = class
-        lineNum : integer;
-				typ : integer;
-     	end;
-	
-			Expr = class(Root)
-     	end;
-	
-
-			Expr_ConstInt = class(Expr)
-				value : Integer;
-			end;
-
-			Expr_ConstFloat = class(Expr)
-				value : Single;
-			end;
-
-      Expr_String = class(Expr)
-        value : string;
-      end;
-
-			Expr_Neg = class(Expr)
-        ex : Expr;
-      end;
-
-			Expr_Op = class(Expr)
-				op : char;
-        le, re : Expr;
-			end;
-
-			Expr_Seq = class(Expr)
-				ex, seq : Expr;
-			end;
-
-			Expr_If = class(Expr)
-        ce : Expr;
-        le, re : Expr;
-
-				lThen, lElse, lAfter : Integer;
-      end;
-
-			Expr_Id = class(Expr)
-        id : string;
-      end;
+type 	
+	Root = class
+		lineNum : integer;
+		fname : string;
+		typ : integer;
 		
-      Expr_Assign = class(Expr)
-        id, ex : Expr;
-      end;
-
-			Expr_Asm = class(Expr)
-        line : string; 
-      end;
-
-			Expr_Func = class(Expr)
-				id : string;
-				displ : integer;
-				body : Expr;
-				lStart : integer;
-      end;
-      
-      Expr_Return = class(Expr)
-				id : string;
-        ret : Expr;
-      end;
-
-			Expr_Call = class(Expr)
-			  id : string;
-				params : Expr;
-			end;
-
-			Expr_External = class(Expr)
-				id : string;
-				assoc : string;
-      end;
-
-			Expr_Conv = class(expr)
-				ex : Expr;
-
-				cnv : integer;
-				originaltyp : integer;	
-			end;
-			
-			Expr_Cast = class(expr)
-			  ex : Expr;
-			  desttype : integer;
-			end;
-			
-			Expr_Special = class(Expr)
-				spec : integer;
-				ex : Expr;
-			end;
-			
-			Expr_Loop = class(Expr)
-			  lStart : integer;
-			  init : Expr;
-			  ce : Expr;
-			  step : Expr;
-			  body : Expr;
-			end;
-
-			Expr_Rel = class(Expr)
-        op : string;
-        le, re : Expr;
-			end;
-
-			Expr_And = class(Expr)
-        le, re : Expr;
-			end;
-
-			Expr_Or = class(Expr)
-        le, re : Expr;
-			end;
-
-			Expr_Not = class(Expr)
-        ex : Expr;
-			end;
-
+		constructor Create();
+   	end;
 	
-			Env_Entry = class
-        id : string;
-        typ : integer;
-				lbl : integer;
-		 		displ : integer;
-		 		varTyp : integer;
-      end;
+
+	Expr = class(Root)
+   	end;
+	
+
+	Expr_ConstInt = class(Expr)
+		value : Integer;
+	end;
+
+	Expr_ConstFloat = class(Expr)
+		value : Single;
+	end;
+
+	Expr_String = class(Expr)
+		value : string;
+	end;
+
+	Expr_Neg = class(Expr)
+		ex : Expr;
+	end;
+
+	Expr_Op = class(Expr)
+		op : char;
+		le, re : Expr;
+	end;
+
+	Expr_Seq = class(Expr)
+		ex, seq : Expr;
+	end;
+
+	Expr_If = class(Expr)
+		ce : Expr;
+		le, re : Expr;
+
+		lThen, lElse, lAfter : Integer;
+	end;
+
+	Expr_Id = class(Expr)
+		id : string;
+	end;
+
+	Expr_Assign = class(Expr)
+		id, ex : Expr;
+	end;
+
+	Expr_Asm = class(Expr)
+		line : string; 
+	end;
+
+	Expr_Func = class(Expr)
+		id : string;
+		displ : integer;
+		body : Expr;
+		lStart : integer;
+	end;
+
+	Expr_Return = class(Expr)
+		id : string;
+		ret : Expr;
+	end;
+
+	Expr_Call = class(Expr)
+		id : string;
+		params : Expr;
+	end;
+
+	Expr_External = class(Expr)
+		id : string;
+		assoc : string;
+	end;
+
+	Expr_Conv = class(expr)
+		ex : Expr;
+
+		cnv : integer;
+		originaltyp : integer;	
+	end;
+
+	Expr_Cast = class(expr)
+		ex : Expr;
+		desttype : integer;
+	end;
+
+	Expr_Special = class(Expr)
+		spec : integer;
+		ex : Expr;
+	end;
+
+	Expr_Loop = class(Expr)
+		lStart : integer;
+		init : Expr;
+		ce : Expr;
+		step : Expr;
+		body : Expr;
+	end;
+
+	Expr_Rel = class(Expr)
+		op : string;
+		le, re : Expr;
+	end;
+
+	Expr_And = class(Expr)
+		le, re : Expr;
+	end;
+
+	Expr_Or = class(Expr)
+		le, re : Expr;
+	end;
+
+	Expr_Not = class(Expr)
+		ex : Expr;
+	end;
+
+	Env_Entry = class(Root)
+		id : string;
+		lbl : integer;
+		displ : integer;
+		varTyp : integer;
+		used : boolean;
+	end;
+
 
 var
-    labelNum : integer;
-    globalCount : integer;
-    tmp, varName, varGlob : string;
-		curFunction : string;
-    varType : integer;
-    includeList : TStringList;
-    environment : TList;
-    f : textfile;
+	labelNum : integer;
+	globalCount : integer;
+	tmp, varName, varGlob : string;
+	curFunction : string;
+	varType : integer;
+	includeList : TStringList;
+	environment : TList;
+	f : textfile;
 
 
 procedure startCompiler(root : Expr); forward;
 procedure updateLabel(id : string; lbl : integer); forward;
-procedure addEnvironment(lineNum : integer; id : string; typ, lbl, varTyp : integer); forward;
-function lookupEnv(id : string) : Env_Entry; forward;
-procedure compilerError(lineNum : integer; msg : string); forward;
-procedure compilerWarning(lineNum : integer; msg : string); forward;
+procedure addEnvironment(id : string; typ, lbl, varTyp : integer); forward;
+function lookupEnv(id : string; lookupCounts : boolean = false) : Env_Entry; forward;
+procedure compilerError(lineNum : integer; const fname, msg : string); forward;
+procedure compilerWarning(lineNum : integer; const fname, msg : string); forward;
 
 
 %}
@@ -223,185 +228,185 @@ procedure compilerWarning(lineNum : integer; msg : string); forward;
 %token _AND _OR _NOT
 %token _RELGT _RELLT _RELGTE _RELLTE _RELEQ
 %token _RETURN _BREAK _CONTINUE
-%token _DO _SLEEP _WAIT _SIGNAL _WHILE _FOR _REQUIRE
+%token _DO _SLEEP _WAIT _SIGNAL _WHILE _FOR _REQUIRE _EXPORT
 %token _VOID _INT _FLOAT _STRING _EXTERNAL
 
 %%
 
 input	: /* empty */
-  | input '\n' { yyaccept; }
+	| input '\n' { yyaccept; }
 	| input basic_list	 { startCompiler($2); }
 	| error '\n'       { yyerrok; }
 	;
 
 basic_list	: { $$ := nil; }
-						| basic								{ $$ := $1; }
-						| basic_list basic		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
-						;
+			| basic								{ $$ := $1; }
+			| basic_list basic		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
+			;
 
 statement_list	: { $$ := nil; }
-	    					| statement					        	{ $$ := $1; }
-			    			| statement_list statement		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
-					    	;
+				| statement					        	{ $$ := $1; }
+    			| statement_list statement		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
+		    	;
 
 stop_statement  : { $$ := nil; }
-								| _BREAK ';'	{ $$ := nil; }
-								| _CONTINUE ';'	{ $$ := nil; }
-								| _RETURN ';'	{ $$ := Expr_Return.Create; Expr_Return($$).ret := nil; Expr_Return($$).lineNum := yylineno; Expr_Return($$).id := curFunction; }
-								|	_RETURN expr ';'		{ $$ := Expr_Return.Create; Expr_Return($$).ret := $2; Expr_Return($$).lineNum := yylineno; Expr_Return($$).id := curFunction; }
-								| _RETURN '(' expr ')' ';'	{ $$ := Expr_Return.Create; Expr_Return($$).ret := $3; Expr_Return($$).lineNum := yylineno; Expr_Return($$).id := curFunction; }
+				| _BREAK ';'	{ $$ := nil; }
+				| _CONTINUE ';'	{ $$ := nil; }
+				| _RETURN ';'	{ $$ := Expr_Return.Create; Expr_Return($$).ret := nil; Expr_Return($$).id := curFunction; }
+				|	_RETURN expr ';'		{ $$ := Expr_Return.Create; Expr_Return($$).ret := $2; Expr_Return($$).id := curFunction; }
+				| _RETURN '(' expr ')' ';'	{ $$ := Expr_Return.Create; Expr_Return($$).ret := $3; Expr_Return($$).id := curFunction; }
                 ;
 									
-basic : { $$ := nil; }
-      | declaration_list { $$ := $1; }
-      | _REQUIRE '"' LINE '"'														{ $$ := nil;
-																											 		if (not FileExists(varName)) then
-																													  compilerError(yylineno, 'could not open include file ' + varName)
-																													else
-																													  begin
-																													  if (includeList.IndexOf(varName) > -1) then
-																													  	compilerWarning(yylineno, 'ignoring previously included file ' + varName)
-																													  else
-																													  	begin
-																													  	includeList.Add(varName);
-																													  	yyopen(varName);
-																													  	end;
-																														end;	}
-      ;
+basic 	: { $$ := nil; }
+      	| declaration_list { $$ := $1; }
+      	| _EXPORT IDENTIFIER { $$ := nil; lookupEnv(varName, true); }
+		| _REQUIRE '"' LINE '"'			{ 	$$ := nil;
+											if (not FileExists(varName)) then
+												compilerError(yylineno, yyfname, 'could not open include file ' + varName)
+											else
+												begin
+												if (includeList.IndexOf(varName) > -1) then
+													compilerWarning(yylineno, yyfname, 'ignoring previously included file ' + varName)
+												else
+													begin
+													includeList.Add(varName);
+													yyopen(varName);
+													end;
+												end;	}
+		;
 
 statement	: { $$ := nil; }
-					| compound_statement															{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
-					| expr ';'																				{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
-  				| _IF '(' expr ')' statement _ELSE statement 	{ $$ := Expr_If.Create; Expr_If($$).ce := $3;	$$.lineNum := yylineno;
+			| compound_statement															{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
+			| expr ';'																				{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
+			| _IF '(' expr ')' statement _ELSE statement 	{ $$ := Expr_If.Create; Expr_If($$).ce := $3;	
 																														Expr_If($$).le := $5; Expr_If($$).re := $7; 
 																														Expr_If($$).lThen := labelNum; inc(labelNum); 
 																														Expr_If($$).lElse := labelNum; inc(labelNum); 
 																														Expr_If($$).lAfter := labelNum; inc(labelNum); }
-					| _IF '(' expr ')' statement									{ $$ := Expr_If.Create; Expr_If($$).ce := $3; $$.lineNum := yylineno;	
+			| _IF '(' expr ')' statement									{ $$ := Expr_If.Create; Expr_If($$).ce := $3; 
 																														Expr_If($$).le := $5; Expr_If($$).re := nil; 
 																														Expr_If($$).lThen := labelNum; inc(labelNum); 
 																														Expr_If($$).lAfter := labelNum; inc(labelNum); }
-  				| _FOR '('expr ';' expr ';' expr ')' statement { $$ := Expr_Loop.Create; Expr_Loop($$).init := $3;
-  				                                                    $$.lineNum := yylineno; Expr_Loop($$).ce := $5;
+  			| _FOR '('expr ';' expr ';' expr ')' statement { $$ := Expr_Loop.Create; Expr_Loop($$).init := $3;
+  				                                                    Expr_Loop($$).ce := $5;
   				                                                    Expr_Loop($$).lStart := labelNum; inc(labelNum);
   				                                                    Expr_Loop($$).step := $7; Expr_Loop($$).body := $9; }
-					| _DO expr ';'																		{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_TRAP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
-					| _SLEEP expr ';'																	{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_SLEEP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
-					| _WAIT expr ';'																	{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_WAIT; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
-					| _SIGNAL expr ';'																{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_SIGNAL; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
-          | _ASM '{' asm_list '}'														{ $$ := $3; }
-          | stop_statement																	{ $$ := $1; }
-          | ';'                                             { $$ := nil; }
+			| _DO expr ';'																		{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_TRAP; Expr_Special($$).ex := $2; }
+			| _SLEEP expr ';'																	{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_SLEEP; Expr_Special($$).ex := $2; }
+			| _WAIT expr ';'																	{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_WAIT; Expr_Special($$).ex := $2; }
+			| _SIGNAL expr ';'																{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_SIGNAL; Expr_Special($$).ex := $2; }
+			| _ASM '{' asm_list '}'														{ $$ := $3; }
+			| stop_statement																	{ $$ := $1; }
+			| ';'                                             { $$ := nil; }
 					;
 
 parameter_specifiers 	: { $$ := nil; }
-											| parameter_specifier	{ $$ := $1; }
-											| parameter_specifiers ',' parameter_specifier { $$ := nil; }
-										 	;
+						| parameter_specifier	{ $$ := $1; }
+						| parameter_specifiers ',' parameter_specifier { $$ := nil; }
+						;
  
-parameter_specifier  	:	type_specifier IDENTIFIER { $$ := nil; addEnvironment(yylineno, curFunction + ':' + varName, varType, -1, VARTYPE_PARAM); }
-										 	;
+parameter_specifier  	:	type_specifier IDENTIFIER { $$ := nil; addEnvironment(curFunction + ':' + varName, varType, -1, VARTYPE_PARAM); }
+						;
 
 parameter_list 	: { $$ := nil; }
-								| expr												{ $$ := $1; }
-								| parameter_list ',' expr		  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $1; Expr_Seq($$).ex := $3; }
-								;
+				| expr												{ $$ := $1; }
+				| parameter_list ',' expr		  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $1; Expr_Seq($$).ex := $3; }
+				;
 
 asm_list : asm_statement    					{ $$ := $1; }
          | asm_list asm_statement			{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
-				 ;
+		 ;
 
-asm_statement : '\"' LINE '\"'        { $$ := Expr_Asm.Create; Expr_Asm($$).line := varName; }
-							;
+asm_statement 	: '\"' LINE '\"'        { $$ := Expr_Asm.Create; Expr_Asm($$).line := varName; }
+				;
 
 compound_statement	: '{' '}'									{  $$ := Expr_Seq.Create; Expr_Seq($$).seq := nil; Expr_Seq($$).ex := nil; }
-										| '{' declaration_list statement_list '}' {  $$ := $3;  }
-										;
+					| '{' declaration_list statement_list '}' {  $$ := $3;  }
+					;
 
-declaration_list		: { $$ := nil; }
-										| declaration { $$ := $1; }
-										| declaration_list declaration  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
-										;
+declaration_list	: { $$ := nil; }
+					| declaration { $$ := $1; }
+					| declaration_list declaration  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
+					;
 
 function_definition : type_specifier IDENTIFIER { curFunction := varName;	 $$ := Expr_Func.Create; Expr_Func($$).id := curFunction;
 																				Expr_Func($$).lStart := labelNum; inc(labelNum);
-																				addEnvironment(yylineno, varName, varType, Expr_Func($$).lStart, VARTYPE_FUNCTION); }
-										;
+																				addEnvironment(varName, varType, Expr_Func($$).lStart, VARTYPE_FUNCTION); }
+					;
 
-function_body : ';'		{ $$ := nil; }
-							| compound_statement		{ $$ := $1; }
-							;
+function_body 	: ';'		{ $$ := nil; }
+				| compound_statement		{ $$ := $1; }
+				;
 
 declaration	: type_specifier init_declarator_list ';' { $$ := nil; }
             | function_definition '(' parameter_specifiers ')' function_body { $$ := $1; Expr_Func($$).body := $5; 
                                                                                if ($5 = nil) then updateLabel(curFunction, -1);  curFunction := ''; }
-						;
+			;
 
 init_declarator_list	: declarator
-											| init_declarator_list ',' declarator
-											;
+						| init_declarator_list ',' declarator
+						;
 
 declarator			: IDENTIFIER		{ varName := curFunction + ':' + varName; 
                                   $$ := varName; 
                                   if (curFunction = '') then
-                                    addEnvironment(yylineno, varName, varType, -1, VARTYPE_GLOBAL)
+                                    addEnvironment(varName, varType, -1, VARTYPE_GLOBAL)
                                   else
-                                    addEnvironment(yylineno, varName, varType, -1, VARTYPE_LOCAL); }
+                                    addEnvironment(varName, varType, -1, VARTYPE_LOCAL); }
 
 type_specifier	: _VOID					{ varType := _VOID; $$ := _VOID; }
-								| _INT					{ varType := _INT; $$ := _INT; }
-								| _FLOAT				{ varType := _FLOAT; $$ := _FLOAT; }
-								| _STRING				{ varType := _STRING; $$ := _STRING; }
-								| _EXTERNAL 		{ varType := _EXTERNAL; $$ := _EXTERNAL; }
-								;
+				| _INT					{ varType := _INT; $$ := _INT; }
+				| _FLOAT				{ varType := _FLOAT; $$ := _FLOAT; }
+				| _STRING				{ varType := _STRING; $$ := _STRING; }
+				| _EXTERNAL 		{ varType := _EXTERNAL; $$ := _EXTERNAL; }
+				;
 
 expr 	:  { $$ := nil; }
-			|  expr '+' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '+'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  expr '-' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '-'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  expr '*' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '*'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  expr '/' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '/'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  expr '%' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '%'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  expr '&' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '&'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  expr '|' expr	 	{ $$ := Expr_Op.Create; $$.lineNum := yylineno; Expr_Op($$).op := '|'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
-			|  '(' expr ')'		 	{ $$ := $2; }
-			|  '-' expr        	{ $$ := Expr_Neg.Create; $$.lineNum := yylineno; Expr_Neg($$).ex := $2; }
-         %prec UMINUS
-			|  INT             	{ $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := $1; }
-			|  FLOAT           	{ $$ := Expr_ConstFloat.Create; $$.lineNum := yylineno; Expr_ConstFloat($$).value := $1; }
-      |  '\"' '\"'		    { $$ := Expr_String.Create; $$.lineNum := yylineno; Expr_String($$).value := ''; }
-      |  '\"' LINE '\"'		{ $$ := Expr_String.Create; $$.lineNum := yylineno; Expr_String($$).value := varName; }
-      | '(' type_specifier ')' expr { $$ := Expr_Cast.Create; $$.lineNum := yylineno; Expr_Cast($$).ex := $4; Expr_Cast($$).desttype := $2; }
-		  |  varname '=' expr { if ($1 <> nil) then
-															begin
-															$$ := Expr_Assign.Create; 
-															Expr_Assign($$).id := $1; 
-															Expr_Assign($$).ex := $3; 
-															$$.lineNum := yylineno;
-															end
-														else
- 															$$ := nil; }
-		  |  varname		      { $$ := $1; }
-			|  funcname '(' parameter_list ')'					{	if (lookupEnv($1) = nil) then 
-																					  					begin
-																											compilerError(yylineno, 'undefined function "' + $1 + '"');
-																											$$ := nil;
-																											yyabort;
-																											end;
-																										$$ := Expr_Call.Create; Expr_Call($$).id := $1; Expr_Call($$).params := $3; $$.lineNum := yyLineno; }
-      | expr _RELGT expr   { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '>';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
-      | expr _RELLT expr   { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '<';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
-      | expr _RELGTE expr  { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '>=';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
-      | expr _RELLTE expr  { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '=<';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
-      | expr _RELEQ expr   { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '==';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
-      | expr _AND expr	   { $$ := Expr_And.Create; $$.lineNum := yylineno; Expr_And($$).le := $1; Expr_And($$).re := $3; $$.lineNum := yylineno;}
-      | expr _OR expr	 	   { $$ := Expr_Or.Create; $$.lineNum := yylineno; Expr_Or($$).le := $1; Expr_Or($$).re := $3; $$.lineNum := yylineno;}
-      | _NOT expr          { $$ := Expr_Not.Create; $$.lineNum := yylineno; Expr_Not($$).ex := $2; };
-      | _TRUE			      	 { $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := 1; $$.lineNum := yylineno;}
-			| _FALSE				     { $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := 0; $$.lineNum := yylineno;}
-      ;
+		|  expr '+' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '+'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  expr '-' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '-'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  expr '*' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '*'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  expr '/' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '/'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  expr '%' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '%'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  expr '&' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '&'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  expr '|' expr	 	{ $$ := Expr_Op.Create; Expr_Op($$).op := '|'; Expr_Op($$).le := $1; Expr_Op($$).re := $3; }
+		|  '(' expr ')'		 	{ $$ := $2; }
+		|  '-' expr        	{ $$ := Expr_Neg.Create; Expr_Neg($$).ex := $2; }
+		%prec UMINUS
+		|  INT             	{ $$ := Expr_ConstInt.Create; Expr_ConstInt($$).value := $1; }
+		|  FLOAT           	{ $$ := Expr_ConstFloat.Create; Expr_ConstFloat($$).value := $1; }
+		|  '\"' '\"'		    { $$ := Expr_String.Create; Expr_String($$).value := ''; }
+		|  '\"' LINE '\"'		{ $$ := Expr_String.Create; Expr_String($$).value := varName; }
+		| '(' type_specifier ')' expr { $$ := Expr_Cast.Create; Expr_Cast($$).ex := $4; Expr_Cast($$).desttype := $2; }
+		|  varname '=' expr { if ($1 <> nil) then
+								begin
+								$$ := Expr_Assign.Create; 
+								Expr_Assign($$).id := $1; 
+								Expr_Assign($$).ex := $3; 
+								end
+							else
+								$$ := nil; }
+		|  varname		      { $$ := $1; }
+		|  funcname '(' parameter_list ')'					{	if (lookupEnv($1) = nil) then 
+																	begin
+																		compilerError(yylineno, yyfname, 'undefined function "' + $1 + '"');
+																		$$ := nil;
+																		yyabort;
+																		end;
+																	$$ := Expr_Call.Create; Expr_Call($$).id := $1; Expr_Call($$).params := $3; }
+		| expr _RELGT expr   { $$ := Expr_Rel.Create; Expr_Rel($$).le := $1; Expr_Rel($$).op := '>';  Expr_Rel($$).re := $3; }
+		| expr _RELLT expr   { $$ := Expr_Rel.Create; Expr_Rel($$).le := $1; Expr_Rel($$).op := '<';  Expr_Rel($$).re := $3; }
+		| expr _RELGTE expr  { $$ := Expr_Rel.Create; Expr_Rel($$).le := $1; Expr_Rel($$).op := '>=';  Expr_Rel($$).re := $3; }
+		| expr _RELLTE expr  { $$ := Expr_Rel.Create; Expr_Rel($$).le := $1; Expr_Rel($$).op := '=<';  Expr_Rel($$).re := $3; }
+		| expr _RELEQ expr   { $$ := Expr_Rel.Create; Expr_Rel($$).le := $1; Expr_Rel($$).op := '==';  Expr_Rel($$).re := $3; }
+		| expr _AND expr	   { $$ := Expr_And.Create; Expr_And($$).le := $1; Expr_And($$).re := $3; $$.lineNum := yylineno;}
+		| expr _OR expr	 	   { $$ := Expr_Or.Create; Expr_Or($$).le := $1; Expr_Or($$).re := $3; $$.lineNum := yylineno;}
+		| _NOT expr          { $$ := Expr_Not.Create; Expr_Not($$).ex := $2; };
+		| _TRUE			      	 { $$ := Expr_ConstInt.Create; Expr_ConstInt($$).value := 1; }
+		| _FALSE				     { $$ := Expr_ConstInt.Create; Expr_ConstInt($$).value := 0; }
+		;
 
 funcname 	: IDENTIFIER		{ $$ := varName; }
-					;
+			;
 
 varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
@@ -413,13 +418,12 @@ varname  : idlist    	{ varGlob := ':' + $1;
                           if (lookupEnv(varName) <> nil) then
                             begin
   													$$ := Expr_External.Create;
-  													$$.lineNum := yylineno; 
   													Expr_External($$).id := varName;
   													Expr_External($$).assoc := right(tmp, '.');
   													end
   												else
   												  begin
-  													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');
+  													compilerError(yylineno, yyfname, 'undeclared identifier "' + right(varGlob, ':') + '"');
   													$$ := nil;
 	  												yyabort;
 	  												end;
@@ -428,28 +432,26 @@ varname  : idlist    	{ varGlob := ':' + $1;
 												if (lookupEnv(varName) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
-													$$.lineNum := yylineno; 
 													Expr_Id($$).id := varName;
 													end
 												else
 												if (lookupEnv(varGlob) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
-													$$.lineNum := yylineno; 
 													Expr_Id($$).id := varGlob;
 													end
 												else
 													begin
-													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');
+													compilerError(yylineno, yyfname, 'undeclared identifier "' + right(varGlob, ':') + '"');
 													$$ := nil;
 													yyabort;
 													end; }
          ;
 
 idlist	:
-				| IDENTIFIER	{ $$ := varName; }
-				| idlist '.' IDENTIFIER { $$ := $1 + '.' + varName; }
-				;
+		| IDENTIFIER	{ $$ := varName; }
+		| idlist '.' IDENTIFIER { $$ := $1 + '.' + varName; }
+		;
 
 %%
 
@@ -467,21 +469,31 @@ procedure showExpr(expr : Expr); forward;
 function typeToString(typ : integer) : string; forward;
 
 
+
+constructor Root.Create();
+begin
+	inherited Create();
+	
+	lineNum := yylineno;
+	fname := yyfname;
+end;
+
+
 procedure emit(line : string);
 begin
   writeln(output, line);
 end;
 
-procedure compilerError(lineNum : integer; msg : string);
+procedure compilerError(lineNum : integer; const fname, msg : string);
 begin
-  writeln('error (line ', lineNum, ', file ', yyfname, '): ', msg);
+  writeln('error (line ', lineNum, ', file ', fname, '): ', msg);
  
   yyerrors := true;
 end;
 
-procedure compilerWarning(lineNum : integer; msg : string);
+procedure compilerWarning(lineNum : integer; const fname, msg : string);
 begin
-  writeln('warning (line ', lineNum, ', file ', yyfname, '): ', msg);
+  writeln('warning (line ', lineNum, ', file ', fname, '): ', msg);
 end;
 
 procedure updateLabel(id : string; lbl : integer);
@@ -501,13 +513,13 @@ begin
     end;
 end;
 
-procedure addEnvironment(lineNum : integer; id : string; typ, lbl, varTyp : integer);
+procedure addEnvironment(id : string; typ, lbl, varTyp : integer);
 var
 	  e : Env_Entry;
 begin
   if (lookupEnv(id) <> nil) then
     begin
-    compilerError(lineNum, 'identifier redeclared');
+    compilerError(yylineno, yyfname, 'identifier redeclared');
     exit;
     end;
        
@@ -516,6 +528,9 @@ begin
   e.typ := typ;
 	e.lbl := lbl;
 	e.varTyp := varTyp;
+	e.used := false;
+	e.lineNum := yylineno;
+	e.fname := yyfname;
 	
 	if (varTyp = VARTYPE_GLOBAL) then
 	  begin
@@ -528,7 +543,7 @@ begin
   environment.add(e);
 end;
 
-function lookupEnv(id : string) : Env_Entry;
+function lookupEnv(id : string; lookupCounts : boolean = false) : Env_Entry;
 var
 		a : integer;
     e : Env_Entry;
@@ -541,6 +556,9 @@ begin
    
     if (e.id = id) then
       begin
+      if (lookupCounts) then
+        e.used := true;
+      
       Result := e;
       break; 
       end;
@@ -558,6 +576,21 @@ begin
    
     else Result := 'unknown (' + IntToStr(typ) + ')';
   end;
+end;
+
+function cleanIdentifier(e : Env_Entry) : string;
+var
+	typ : string;
+begin
+	case e.varTyp of
+		VARTYPE_LOCAL: typ := 'local variable';
+		VARTYPE_GLOBAL: typ := 'global variable';
+		VARTYPE_PARAM: typ := 'parameter';
+		VARTYPE_FUNCTION: typ := 'function';
+		VARTYPE_STATIC: typ := 'static variabel';
+	end;
+	
+	Result := typ + ' "' + right(e.id, ':') + '"';
 end;
 
 function coerce(expr : Expr; src, dest: integer) : Expr;
@@ -587,7 +620,7 @@ begin
     end
   else
     begin
-    compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(src) + ''' to ''' + typeToString(dest) + '''');
+    compilerError(expr.lineNum, expr.fname, 'no appropriate conversion from ''' + typeToString(src) + ''' to ''' + typeToString(dest) + '''');
 		Result := expr;
     end;
 end;
@@ -626,12 +659,12 @@ begin
   else
   if (expr is Expr_Return) then
     begin
-		t1 := lookupEnv(Expr_Func(expr).id).typ;
+		t1 := lookupEnv(Expr_Func(expr).id, true).typ;
 		
 		if (t1 = _VOID) then
 		  begin
 		  if (Expr_Return(expr).ret <> nil) then
-		    compilerError(expr.lineNum, 'can not assign return value to void function');
+		    compilerError(expr.lineNum, expr.fname, 'can not assign return value to void function');
 		    
 		  end
 		else
@@ -648,7 +681,7 @@ begin
     begin
 		Expr_Call(expr).params := typeExpr(Expr_Call(expr).params);
 
-		t1 := lookupEnv(Expr_Call(expr).id).typ;
+		t1 := lookupEnv(Expr_Call(expr).id, true).typ;
 		 
     if (t1 <> -1) then
 	    expr.typ := t1
@@ -670,7 +703,7 @@ begin
   else
   if (expr is Expr_Id) then
     begin
-		t1 := lookupEnv(Expr_Id(expr).id).typ;
+		t1 := lookupEnv(Expr_Id(expr).id, true).typ;
    
     if (t1 <> -1) then
       expr.typ := t1
@@ -744,7 +777,7 @@ begin
 		t2 := Expr_Rel(expr).re.typ;
 
     if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
-      compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(t1) + ''' to ''' + typeToString(t2) + '''');
+      compilerError(expr.lineNum, expr.fname, 'no appropriate conversion from ''' + typeToString(t1) + ''' to ''' + typeToString(t2) + '''');
 
     expr.typ := _INT;
     end
@@ -756,7 +789,7 @@ begin
 		t1 := Expr_Not(expr).ex.typ;
 
     if (t1 <> _INT) then
-      compilerError(expr.lineNum, 'impossible to negate non-integer value');
+      compilerError(expr.lineNum, expr.fname, 'impossible to negate non-integer value');
 
     expr.typ := _INT;
     end
@@ -770,7 +803,7 @@ begin
 		t2 := Expr_And(expr).re.typ;
 
     if (t1 <> _INT) or (t2 <> _INT) then
-      compilerError(expr.lineNum, 'impossible to and non-integer value');
+      compilerError(expr.lineNum, expr.fname, 'impossible to and non-integer value');
 
     expr.typ := _INT;
     end
@@ -784,7 +817,7 @@ begin
 		t2 := Expr_Or(expr).re.typ;
 
     if (t1 <> _INT) or (t2 <> _INT) then
-      compilerError(expr.lineNum, 'impossible to or non-integer value');
+      compilerError(expr.lineNum, expr.fname, 'impossible to or non-integer value');
 
     expr.typ := _INT;
     end;
@@ -1180,7 +1213,7 @@ begin
   else
   if (expr is Expr_Call) then
     begin
-		t := lookupEnv(Expr_Call(expr).id).lbl;
+		t := lookupEnv(Expr_Call(expr).id, true).lbl;
 
     if (t > 0) then
       begin
@@ -1203,7 +1236,7 @@ begin
   else
   if (expr is Expr_Id) then
     begin
-    e := lookupEnv(Expr_Id(expr).id);
+    e := lookupEnv(Expr_Id(expr).id, true);
     
     if (e.varTyp = VARTYPE_GLOBAL) then
       emit('PUSHR R' + IntToStr(e.displ))
@@ -1213,7 +1246,7 @@ begin
   else
   if (expr is Expr_External) then
     begin
-    e := lookupEnv(Expr_External(expr).id);
+    e := lookupEnv(Expr_External(expr).id, true);
     
     if (e.varTyp = VARTYPE_GLOBAL) then
       emit('PUSHR R' + IntToStr(e.displ))
@@ -1228,7 +1261,7 @@ begin
     begin
     showExpr(Expr_Assign(expr).ex);
 
-    e := lookupEnv(Expr_Id(Expr_Assign(expr).id).id);
+    e := lookupEnv(Expr_Id(Expr_Assign(expr).id).id, true);
 
 {		if (e.typ = _EXTERNAL) then
       emit('GET'); }
@@ -1321,6 +1354,29 @@ begin
     end;
 end;
 
+procedure optimizeEnvironment();
+var
+	e : Env_Entry;
+	x : integer;
+begin
+	for x := 0 to environment.Count - 1 do
+		begin
+		e := Env_Entry(environment[x]);
+
+		if (e.varTyp in [VARTYPE_LOCAL,VARTYPE_GLOBAL,VARTYPE_STATIC]) and (not e.used) then
+			begin
+			compilerWarning(e.lineNum, e.fname, 'Hint: ' + cleanIdentifier(e) + ' possibly unused');
+			end;
+			
+		if (e.varTyp in [VARTYPE_FUNCTION]) and (e.lbl > -1) and (not e.used) then
+			begin
+			compilerWarning(e.lineNum, e.fname, 'Hint: ' + cleanIdentifier(e) + ' possibly unused');
+			end;
+		end;
+	
+	environment.Pack();
+end;
+
 procedure startCompiler(root : Expr);
 var
   a : integer;
@@ -1328,9 +1384,11 @@ var
 begin
   root := typeExpr(root);
 
+  optimizeEnvironment();
+
   if (not yyerrors) then
     root := optimizeExpr(root);
-
+    
   if (not yyerrors) then
     begin
     emit('$DATA ' + IntToStr(globalCount));
@@ -1353,12 +1411,12 @@ end;
 
 var
 	ifname : string; 
-  ofname : string;
-  {$IFDEF WIN32}
-  SI : TStartupInfo;
-  PI : TProcessInformation;
-  ex : DWORD;
-  {$ENDIF}
+	ofname : string;
+	{$IFDEF WIN32}
+	SI : TStartupInfo;
+	PI : TProcessInformation;
+	ex : DWORD;
+	{$ENDIF}
 
 begin
   DecimalSeparator := '.';
@@ -1405,7 +1463,7 @@ begin
   if yyparse=0 then { done; };
 
   closefile(output);
-
+  
   if (not yyerrors) then
     begin
     {$IFDEF WIN32}
