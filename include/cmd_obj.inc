@@ -121,6 +121,7 @@ begin
 
     while (node <> nil) do
       begin
+      node_next := node.next;
       obj_in := node.element;
 
       if (pos(arg,obj_in.name) <> 0) then
@@ -144,7 +145,7 @@ begin
         exit;
         end;
 
-      node := node.next;
+      node := node_next;
       end;
 
     if (counter = 0) then
@@ -301,7 +302,7 @@ begin
 
       obj_in.extract;
 
-      node := node.next;
+      node := node_next;
       end;
 
     obj.extract;
