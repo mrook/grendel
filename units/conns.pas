@@ -1,31 +1,34 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.50 2003/10/17 20:34:25 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.51 2003/10/18 11:09:34 ***REMOVED*** Exp $)
 }
 
 unit conns;
 
 interface
 
+
 uses
+	ZLib,
 {$IFDEF WIN32}
-    Winsock2,
-    Windows,
-    Forms,
+	Winsock2,
+	Windows,
+	Forms,
 {$ENDIF}
 {$IFDEF LINUX}
-    Libc,
+	Libc,
 {$ENDIF}
-    Classes,
-    SysUtils,
-    constants,
-    chars,
-    dtypes,
-    util,
-    area,
-    socket,
-    console,
-    mudsystem;
+	Classes,
+	SysUtils,
+	constants,
+	chars,
+	dtypes,
+	util,
+	area,
+	socket,
+	console,
+	mudsystem;
+	
 
 const
 		IAC_COMPRESS = 85;		// MCCP v1
@@ -37,6 +40,7 @@ const
 		IAC_DO = 253;
 		IAC_DONT = 254;
 		IAC_IAC = 255;
+
 
 type
 		GConnection = class;
@@ -70,6 +74,7 @@ type
       sendbuffer : string;
 
       empty_busy : boolean;
+      compress : boolean; { are we using MCCP v2? }
 
       _lastupdate : TDateTime;
       
@@ -85,8 +90,10 @@ type
       procedure sendIAC(option : byte; params : array of byte);
       procedure processIAC();
 
+			procedure send(s : PChar; len : integer); overload;
+
 		public
-      procedure send(s : string);
+      procedure send(s : string); overload;
       procedure read();
       procedure readBuffer();
 
@@ -147,6 +154,8 @@ begin
 
   _socket := socket;
   _idle := 0;
+  
+  compress := false;
 
   node := connection_list.insertLast(Self);
   
@@ -166,22 +175,13 @@ procedure GConnection.Execute();
 begin
   FreeOnTerminate := true;
   
+  read();
+  
   if (Assigned(FOnOpen)) then
   	FOnOpen();
 
   writeConsole('(' + IntToStr(socket.getDescriptor) + ') New connection (' + socket.host_string + ')');
-
-  if (isMaskBanned(socket.host_string)) then
-    begin
-    writeConsole('(' + IntToStr(socket.getDescriptor) + ') Closed banned IP (' + socket.host_string + ')');
-
-    send(system_info.mud_name + #13#10#13#10);
-    send('Your site has been banned from this server.'#13#10);
-    send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
-
-    exit;
-    end;
-    
+   
   while (not Terminated) do
   	begin
   	_lastupdate := Now();
@@ -206,15 +206,30 @@ begin
 		FOnClose();
 end;
 
-procedure GConnection.send(s : string);
+procedure GConnection.send(s : PChar; len : integer);
+var
+	compress_size : integer;
+	compress_buf : pointer;
 begin
-  try
-  	while (not socket.canWrite()) do;
-  	
-    socket.send(s);
+	try
+		while (not socket.canWrite()) do;
+		
+		if (compress) then
+			begin
+			//CompressBuf(s, len, compress_buf, compress_size);
+			socket.send(compress_buf^, compress_size);
+			//socket.send(s^, len);
+  		end
+  	else
+			socket.send(s^, len);
   except
     Terminate();
   end;
+end;
+
+procedure GConnection.send(s : string);
+begin
+	send(@s[1], length(s));
 end;
 
 procedure GConnection.read;
@@ -296,7 +311,7 @@ begin
   	
 	while (not socket.canWrite()) do;
   	
-  socket.send(buf, 2 + length(params));
+  send(buf, 2 + length(params));
 end;
 
 procedure GConnection.processIAC();
@@ -327,6 +342,9 @@ begin
     								case byte(input_buf[i]) of
     									IAC_COMPRESS2:	begin
     																	writeConsole('(' + IntToStr(socket.getDescriptor) + ') Client has MCCPv2');
+    																	sendIAC(IAC_SB, [IAC_COMPRESS2]);
+    																	sendIAC(IAC_SE, []);
+    																	compress := true;
     																	end;
     								end;
     								
@@ -849,6 +867,15 @@ begin
   
   ac.setNonBlocking();
 
+  if (isMaskBanned(ac.host_string)) then
+    begin
+    writeConsole('(' + IntToStr(ac.getDescriptor) + ') Closed banned IP (' + ac.host_string + ')');
+
+    ac.send(system_info.mud_name + #13#10#13#10);
+    ac.send('Your site has been banned from this server.'#13#10);
+    ac.send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
+    end
+  else
   if (boot_info.timer >= 0) then
     begin
     ac.send(system_info.mud_name+#13#10#13#10);

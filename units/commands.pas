@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: commands.pas,v 1.3 2003/10/17 20:34:24 ***REMOVED*** Exp $)
+  @lastmod($Id: commands.pas,v 1.4 2003/10/18 11:09:33 ***REMOVED*** Exp $)
 }
 
 unit commands;
@@ -271,9 +271,8 @@ begin
 		exit;
 		end;
 
-	{ TODO:
 	if (ch.snooped_by <> nil) then
-		GConnection(snooped_by.conn).send(line + #13#10); }
+		GPlayer(ch.snooped_by).conn.send(line + #13#10);
 
 	clean_cmdline(line);
 

@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.73 2003/10/17 20:34:24 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.74 2003/10/18 11:09:33 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -271,13 +271,15 @@ procedure cleanupChars();
 implementation
 
 uses
-    conns,
-    timers,
-    skills,
-    console,
-    mudsystem,
-    commands,
-    Channels;
+	player,
+	conns,
+	timers,
+	skills,
+	console,
+	mudsystem,
+	commands,
+	Channels;
+
 
 constructor THistoryElement.Create(txt : string);
 begin
@@ -438,7 +440,7 @@ function GCharacter.getTrust : integer;
 var
    ch : GCharacter;
 begin
-  if (snooped_by <> nil) { TODO: and (GPlayer(snooped_by).switching = Self) } then
+  if (snooped_by <> nil) and (GPlayer(snooped_by).switching = Self) then
     ch := snooped_by
   else
     ch := Self;
@@ -863,13 +865,13 @@ end;
 procedure GCharacter.die;
 begin
   { snooping/switching immortals should stop doing so when we die }
-{ TODO:  if (snooped_by <> nil) then
+	if (snooped_by <> nil) then
     begin
     GPlayer(snooped_by).snooping := nil;
     GPlayer(snooped_by).switching := nil;
     snooped_by.sendBuffer('Ok.'#13#10);
     snooped_by := nil;
-    end; }
+    end;
 
   addCorpse(Self);
 end;
@@ -885,8 +887,8 @@ end;
 
 procedure GNPC.sendBuffer(s : string);
 begin
-{ TODO: if (snooped_by <> nil) then
-    GConnection(snooped_by.conn).send(s); }
+	if (snooped_by <> nil) then
+    GPlayer(snooped_by).conn.send(s); 
 end;
 
 procedure GCharacter.setWait(ticks : integer);

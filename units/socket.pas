@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.12 2003/09/26 12:45:58 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.13 2003/10/18 11:09:35 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -306,25 +306,9 @@ begin
 end;
 
 function GSocket.send(s : string) : integer;
-var
-   res : integer;
 begin
-  res := 0;
-  
-  if (length(s) > 0) then
-{$IFDEF WIN32}
-    res := Winsock2.send(fd, s[1], length(s), 0);
-{$ENDIF}
-{$IFDEF LINUX}
-    res := Libc.send(fd, s[1], length(s), 0);
-{$ENDIF}
-
-  if (res = SOCKET_ERROR) then
-    raise Exception.Create('Connection reset by peer');
-    
-  Result := res;
+	Result := send(s[1], length(s));
 end;
-
 
 function GSocket.send(var s; len : integer) : integer;
 var

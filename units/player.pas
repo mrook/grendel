@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.6 2003/10/17 20:34:25 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.7 2003/10/18 11:09:35 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -354,7 +354,7 @@ begin
                   
                   if (length(argument) = 0) then
                     begin
-                    socket.send('Please enter your name: ');
+                    send('Please enter your name: ');
                     exit;
                     end;
 
@@ -362,13 +362,13 @@ begin
                     begin
                     if (system_info.deny_newplayers) then
                     begin
-                      socket.send(#13#10'Currently we do not accept new players. Please come back some other time.'#13#10#13#10);
-                      socket.send('Name: '); 
+                      send(#13#10'Currently we do not accept new players. Please come back some other time.'#13#10#13#10);
+                      send('Name: '); 
                       exit;
                     end
                     else
                     begin
-                      socket.send(#13#10'By what name do you wish to be known? ');
+                      send(#13#10'By what name do you wish to be known? ');
                       state := CON_NEW_NAME;
                       exit;
                     end;
@@ -376,8 +376,8 @@ begin
                     
                   if (isNameBanned(argument)) then
                     begin;
-                    socket.send('Illegal name.'#13#10);
-                    socket.send('Please enter your name: ');
+                    send('Illegal name.'#13#10);
+                    send('Please enter your name: ');
                     exit;
                     end;
 
@@ -387,7 +387,7 @@ begin
                     begin
                     if (not MD5Match(MD5String(pwd), GPlayer(vict).md5_password)) then
                       begin
-                      socket.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
+                      send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
                       Terminate();
                       end
                     else
@@ -408,25 +408,25 @@ begin
 
                   if (not ch.load(argument)) then
                     begin
-                    socket.send(#13#10'Are you sure about that name?'#13#10'Name: ');
+                    send(#13#10'Are you sure about that name?'#13#10'Name: ');
                     exit;
                     end;
 
                   state:=CON_PASSWORD;
-                  socket.send('Password: ');
+                  send('Password: ');
                   end;
     CON_PASSWORD: begin
                   if (length(argument) = 0) then
                     begin
-                    socket.send('Password: ');
+                    send('Password: ');
                     exit;
                     end;
 
                   if (not MD5Match(MD5String(argument), ch.md5_password)) then
                     begin
                     writeConsole('(' + inttostr(socket.getDescriptor) + ') Failed password');
-                    socket.send('Wrong password.'#13#10);
-                    socket.send('Password: ');
+                    send('Wrong password.'#13#10);
+                    send('Password: ');
                     exit;
                     end;
 
@@ -445,7 +445,7 @@ begin
 
                     ch.ld_timer := 0;
 
-                    socket.send('You have reconnected.'#13#10);
+                    send('You have reconnected.'#13#10);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.flags, PLR_LINKLESS);
                     writeConsole('(' + inttostr(socket.getDescriptor) + ') ' + ch.name + ' has reconnected');
@@ -456,15 +456,15 @@ begin
                     end;
 
                   if (ch.IS_IMMORT) then
-                    socket.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
+                    send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
                   else
-                    socket.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
+                    send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
 
-                  socket.send('Press Enter.'#13#10);
+                  send('Press Enter.'#13#10);
                   state := CON_MOTD;
                   end;
         CON_MOTD: begin
-                  socket.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name + ', to this MUD. May your stay be pleasant.'#13#10);
+                  send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name + ', to this MUD. May your stay be pleasant.'#13#10);
 
                   with system_info do
                     begin
@@ -492,14 +492,14 @@ begin
     CON_NEW_NAME: begin
                   if (length(argument) = 0) then
                     begin
-                    socket.send('By what name do you wish to be known? ');
+                    send('By what name do you wish to be known? ');
                     exit;
                     end;
 
                   if (FileExists('players\' + argument + '.usr')) or (findDualConnection(argument) <> nil) then
                     begin
-                    socket.send('That name is already used.'#13#10);
-                    socket.send('By what name do you wish to be known? ');
+                    send('That name is already used.'#13#10);
+                    send('By what name do you wish to be known? ');
                     exit;
                     end;
 
@@ -514,50 +514,50 @@ begin
 
                   if (length(argument) < 3) or (length(argument) > 15) then
                     begin
-                    socket.send('Your name must be between 3 and 15 characters long.'#13#10);
-                    socket.send('By what name do you wish to be known? ');
+                    send('Your name must be between 3 and 15 characters long.'#13#10);
+                    send('By what name do you wish to be known? ');
                     exit;
                     end;
 
                   ch.setName(cap(argument));
                   state := CON_NEW_PASSWORD;
-                  socket.send(#13#10'Allright, '+ch.name+', choose a password: ');
+                  send(#13#10'Allright, '+ch.name+', choose a password: ');
                   end;
 CON_NEW_PASSWORD: begin
                   if (length(argument)=0) then
                     begin
-                    socket.send('Choose a password: ');
+                    send('Choose a password: ');
                     exit;
                     end;
 
                   ch.md5_password := MD5String(argument);
                   state := CON_CHECK_PASSWORD;
-                  socket.send(#13#10'Please retype your password: ');
+                  send(#13#10'Please retype your password: ');
                   end;
 CON_CHECK_PASSWORD: begin
                     if (length(argument) = 0) then
                       begin
-                      socket.send('Please retype your password: ');
+                      send('Please retype your password: ');
                       exit;
                       end;
 
                     if (not MD5Match(MD5String(argument), ch.md5_password)) then
                       begin
-                      socket.send(#13#10'Password did not match!'#13#10'Choose a password: ');
+                      send(#13#10'Password did not match!'#13#10'Choose a password: ');
                       state := CON_NEW_PASSWORD;
                       exit;
                       end
                     else
                       begin
                       state := CON_NEW_SEX;
-                      socket.send(#13#10'What sex do you wish to be (M/F/N): ');
+                      send(#13#10'What sex do you wish to be (M/F/N): ');
                       exit;
                       end;
                     end;
      CON_NEW_SEX: begin
                   if (length(argument) = 0) then
                     begin
-                    socket.send('Choose a sex (M/F/N): ');
+                    send('Choose a sex (M/F/N): ');
                     exit;
                     end;
 
@@ -567,14 +567,14 @@ CON_CHECK_PASSWORD: begin
                     'N':ch.sex:=2;
                   else
                     begin
-                    socket.send('That is not a valid sex.'#13#10);
-                    socket.send('Choose a sex (M/F/N): ');
+                    send('That is not a valid sex.'#13#10);
+                    send('Choose a sex (M/F/N): ');
                     exit;
                     end;
                   end;
 
                   state:=CON_NEW_RACE;
-                  socket.send(#13#10'Available races: '#13#10#13#10);
+                  send(#13#10'Available races: '#13#10#13#10);
 
                   h:=1;
                   iterator := raceList.iterator();
@@ -590,19 +590,19 @@ CON_CHECK_PASSWORD: begin
 
                     buf := buf + #13#10;
 
-                    socket.send(buf);
+                    send(buf);
 
                     inc(h);
                     end;
                     
                   iterator.Free();
 
-                  socket.send(#13#10'Choose a race: ');
+                  send(#13#10'Choose a race: ');
                   end;
     CON_NEW_RACE: begin
                   if (length(argument)=0) then
                     begin
-                    socket.send(#13#10'Choose a race: ');
+                    send(#13#10'Choose a race: ');
                     exit;
                     end;
 
@@ -633,7 +633,7 @@ CON_CHECK_PASSWORD: begin
 
                   if (race = nil) then
                     begin
-                    socket.send('Not a valid race.'#13#10);
+                    send('Not a valid race.'#13#10);
 
                     h:=1;
 										iterator := raceList.iterator();
@@ -649,21 +649,21 @@ CON_CHECK_PASSWORD: begin
 
                       buf := buf + #13#10;
 
-                      socket.send(buf);
+                      send(buf);
 
                       inc(h);
                       end;
 
 										iterator.Free();
 										
-                    socket.send(#13#10'Choose a race: ');
+                    send(#13#10'Choose a race: ');
                     exit;
                     end;
 
                   ch.race:=race;
-                  socket.send(race.description);
-                  socket.send('250 stat points will be randomly distributed over your five attributes.'#13#10);
-                  socket.send('It is impossible to get a lower or a higher total of stat points.'#13#10);
+                  send(race.description);
+                  send('250 stat points will be randomly distributed over your five attributes.'#13#10);
+                  send('It is impossible to get a lower or a higher total of stat points.'#13#10);
 
                   with ch do
                     begin
@@ -735,22 +735,22 @@ CON_CHECK_PASSWORD: begin
                     top:=str+con+dex+int+wis;
                     end;
 
-                  socket.send(#13#10'Your character statistics are: '#13#10#13#10);
+                  send(#13#10'Your character statistics are: '#13#10#13#10);
 
                   buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
                          'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
                          'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
                          'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
                          'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
-                  socket.send(buf);
+                  send(buf);
 
-                  socket.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                  send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                   state:=CON_NEW_STATS;
                   end;
    CON_NEW_STATS: begin
                   if (length(argument) =0) then
                     begin
-                    socket.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                    send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                     exit;
                     end;
 
@@ -762,16 +762,16 @@ CON_CHECK_PASSWORD: begin
                         ch.md5_password := digest;
                         ch.save(ch.name);
 
-                        socket.send(#13#10'Thank you. You have completed your entry.'#13#10);
+                        send(#13#10'Thank you. You have completed your entry.'#13#10);
 
-                        socket.send(ch.ansiColor(2) + #13#10);
+                        send(ch.ansiColor(2) + #13#10);
 
                         if (ch.IS_IMMORT) then
-                          socket.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
+                          send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
                         else
-                          socket.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
+                          send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
 
-                        socket.send('Press Enter.'#13#10);
+                        send('Press Enter.'#13#10);
                         state:=CON_MOTD;
                         end;
                     'R':begin
@@ -845,24 +845,24 @@ CON_CHECK_PASSWORD: begin
                           top:=str+con+dex+int+wis;
                           end;
 
-                        socket.send(#13#10'Your character statistics are: '#13#10#13#10);
+                        send(#13#10'Your character statistics are: '#13#10#13#10);
 
                         buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
                                'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
                                'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
                                'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
                                'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
-                        socket.send(buf);
+                        send(buf);
 
-                        socket.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                        send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                         end;
                     'S':begin
-                        socket.send(#13#10'Very well, restarting.'#13#10);
-                        socket.send('By what name do you wish to be known?');
+                        send(#13#10'Very well, restarting.'#13#10);
+                        send('By what name do you wish to be known?');
                         state:=CON_NEW_NAME;
                         end;
                   else
-                    socket.send('Do you wish to (C)ontinue, (R)eroll or (S)art over? ');
+                    send('Do you wish to (C)ontinue, (R)eroll or (S)art over? ');
                     exit;
                  end;
                  end;
