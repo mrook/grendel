@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.22 2004/05/06 20:43:34 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.23 2004/05/11 14:52:16 ***REMOVED*** Exp $
 #
 
 
@@ -35,7 +35,6 @@ ifdef WIN32
 	$(CP) 'src\grendelservice.exe'
 	$(CP) 'src\core.bpl'
 	$(CP) 'src\*.jdbg'
-	$(CP) 'src\copyover.exe'
 	$(CP) 'src\gmc\gmcc.exe'
 	$(CP) 'src\gmc\gasm.exe'
 	$(CP) 'src\modules\*.bpl' modules
@@ -57,7 +56,6 @@ clean:
 ifdef WIN32	
 	$(RM) *.bpl
 	$(RM) grendel.exe
-	$(RM) copyover.exe
 	$(RM) helper.exe
 	$(RM) gmcc.exe
 	$(RM) gasm.exe

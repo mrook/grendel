@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.12 2004/05/06 20:43:34 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.13 2004/05/11 14:52:16 ***REMOVED*** Exp $
 #
 
 
@@ -26,7 +26,7 @@ CORE=core.bpl
 HELPER=helper.exe
 SERVICE=grendelservice.exe
 
-ALL=$(GRENDEL) $(CONVERT) $(COPYOVER) $(CORE) $(HELPER) $(SERVICE)
+ALL=$(GRENDEL) $(CONVERT) $(CORE) $(HELPER) $(SERVICE)
 
 MAKE=$(CURDIR)/../make
 
