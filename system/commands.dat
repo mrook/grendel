@@ -82,6 +82,12 @@ function: do_apropos
 #end
 
 #command
+name: areas
+function: do_areas
+position: 4
+#end
+
+#command
 name: armor
 alias: arm
 position: 4
@@ -671,9 +677,9 @@ position: 0
 #end
 
 #command
-name: areas
-function: do_areas
-level: 993
+name: aranges
+function: do_aranges
+level: 999
 position: 0
 #end
 
@@ -1095,6 +1101,13 @@ position: 0
 name: uptime
 function: do_uptime
 level: 1000
+position: 0
+#end
+
+#command
+name: vnums
+function: do_vnums
+level: 990
 position: 0
 #end
 
