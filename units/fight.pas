@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.26 2002/08/03 19:17:48 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.27 2003/06/24 21:41:33 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -95,16 +95,15 @@ begin
 
     if (vict.fighting = ch) then
       begin
-      vict.fighting:=nil;
-      vict.position:=POS_STANDING;
+      vict.fighting := nil;
+      vict.state := STATE_IDLE;
       end;
 
     node := node.next;
     end;
 
   ch.fighting := nil;
-  ch.position := POS_STANDING;
-  // ch.fought_by.clear;
+  ch.state := STATE_IDLE;
 end;
 
 procedure death_cry(ch, killer : GCharacter);
@@ -279,7 +278,7 @@ begin
     exit;
     end;
 
-  if (ch.position = POS_BASHED) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
     damage := RESULT_CHARBASHED;
     exit; { can't fight when bashed! }
@@ -288,37 +287,39 @@ begin
   if (ch.room <> oppnt.room) and (dt <> TYPE_SILENT) then
     begin
     ch.fighting := nil;
-    ch.position := POS_STANDING;
+    ch.state := STATE_IDLE;
     oppnt.fighting := nil;
-    oppnt.position := POS_STANDING;
+    oppnt.state := STATE_IDLE;
     damage := RESULT_VICTDIED;
     exit;
     end;
 
-  if (ch.position <> POS_FIGHTING) and (ch.position <> POS_CASTING)
-   and (oppnt <> ch) then
+  if (dam > 25) and (hasTimer(ch, 'cast') <> nil) then
     begin
-    ch.position := POS_FIGHTING;
+    act(AT_FIGHT_HIT, '$B$4OUCH$7!$A$7 You just lost your concentration!',false,oppnt,nil,ch,TO_CHAR);
+
+    unregisterTimer(oppnt, TIMER_ACTION);
+
+    oppnt.state := STATE_FIGHTING;
+    end; 
+
+  if (ch.state <> STATE_FIGHTING) and (oppnt <> ch) then
+    begin
+    unregisterTimer(oppnt, TIMER_ACTION);
+    
+    ch.state := STATE_FIGHTING;
+    ch.position := POS_STANDING;
     ch.fighting := oppnt;
     end;
 
-  if (oppnt.position <> POS_FIGHTING) and (oppnt.position <> POS_BASHED) and (oppnt.position <> POS_CASTING)
-   and (oppnt <> ch) then
+  if (oppnt.state <> STATE_FIGHTING) and (oppnt <> ch) then
     begin
-    oppnt.position := POS_FIGHTING;
+    oppnt.state := STATE_FIGHTING;
+    oppnt.position := POS_STANDING;
     oppnt.fighting := ch;
     end;
 
-{  if (dam > 5) and (oppnt.position = POS_CASTING) then
-    begin
-    act(AT_FIGHT_HIT, '$B$4OUCH$7!$A$7 You lost your concentration!',false,oppnt,nil,ch,TO_CHAR);
-
-    unregisterTimer(oppnt, TIMER_CAST);
-
-    oppnt.position := POS_FIGHTING;
-    end; }
-
-  if (dam>10) and (dt<>TYPE_UNDEFINED) then
+(*  if (dam>10) and (dt<>TYPE_UNDEFINED) then
     begin
     dameq := random(MAX_WEAR)+1;
     damobj := oppnt.getEQ(dameq);
@@ -330,7 +331,7 @@ begin
       end
     else
       inc(dam,5);
-    end;
+    end; *)
 
   { check for damage type }
   dm := findDamage(dam);
@@ -470,11 +471,11 @@ begin
 
   if (oppnt.hp<0) then
     begin
-    unregisterTimer(oppnt, TIMER_CAST);
+    unregisterTimer(oppnt, TIMER_ACTION);
     unregisterTimer(oppnt, TIMER_COMBAT);
 
-    oppnt.position:=POS_STANDING;
-    ch.position:=POS_STANDING;
+    oppnt.state := STATE_IDLE;
+    ch.state := STATE_IDLE;
     stopfighting(oppnt);
     oppnt.fighting:=nil;
     ch.fighting:=nil;
@@ -519,10 +520,10 @@ begin
       if (not ch.IS_NPC) then
         begin
         if (IS_SET(GPlayer(ch).cfg_flags,CFG_AUTOLOOT)) then
-          interpret(ch, 'get all ''corpse of ' + oppnt.name^ + '''');
+          interpret(ch, 'get all ''corpse of ' + oppnt.name + '''');
 
         if (IS_SET(GPlayer(ch).cfg_flags,CFG_AUTOSAC)) then
-          interpret(ch, 'sac ''corpse of ' + oppnt.name^ + '''');
+          interpret(ch, 'sac ''corpse of ' + oppnt.name + '''');
         end;
       end
     else
@@ -549,18 +550,18 @@ begin
           inc(GPlayer(oppnt).xptogo,  oppnt.calcxp2lvl div 4);
 
         if (IS_SET(GPlayer(ch).cfg_flags, CFG_AUTOSCALP)) then
-          interpret(ch, 'scalp corpse of '+oppnt.name^);
+          interpret(ch, 'scalp corpse of '+oppnt.name);
         end;
 
       if (oppnt.clan <> nil) then
-        to_channel(oppnt, '*CLAN NOTIFY*: '+oppnt.name^+' has been'+
-        ' killed by '+ch.name^+'!',CHANNEL_CLAN,AT_WHITE);
+        to_channel(oppnt, '*CLAN NOTIFY*: '+oppnt.name+' has been'+
+        ' killed by '+ch.name+'!',CHANNEL_CLAN,AT_WHITE);
 
       if (not ch.IS_NPC) then
         begin
         if (ch.clan<>nil) then
-          to_channel(ch, '*CLAN NOTIFY*: '+ch.name^+' has just'+
-          ' killed '+oppnt.name^+'!',CHANNEL_CLAN,AT_WHITE);
+          to_channel(ch, '*CLAN NOTIFY*: '+ch.name+' has just'+
+          ' killed '+oppnt.name+'!',CHANNEL_CLAN,AT_WHITE);
 
         if not (ch.IS_SAME_ALIGN(oppnt)) then
           begin
@@ -602,6 +603,22 @@ begin
     one_hit := RESULT_VICTDIED;
     exit;
     end;
+    
+  if (ch.state <> STATE_FIGHTING) and (victim <> ch) then
+    begin
+    unregisterTimer(victim, TIMER_ACTION);
+    
+    ch.state := STATE_FIGHTING;
+    ch.position := POS_STANDING;
+    ch.fighting := victim;
+    end;
+
+  if (victim.state <> STATE_FIGHTING) and (victim <> ch) then
+    begin
+    victim.state := STATE_FIGHTING;
+    victim.position := POS_STANDING;
+    victim.fighting := ch;
+    end;    
 
   { get the weapon }
   wield := ch.getDualWield;
@@ -611,7 +628,7 @@ begin
     if (not dual_flip) then
       begin
       dual_flip := true;
-      wield := ch.getEQ(WEAR_RHAND);
+      wield := ch.getEQ('rwield');
       end
     else
       dual_flip := false;
@@ -628,26 +645,6 @@ begin
 
     if (ds = 0) then
       ds := FG_PUNCH;
-    end;
-
-  if (victim.CHAR_DIED) then
-    begin
-    one_hit := RESULT_VICTDIED;
-    exit;
-    end;
-
-  if (ch.position <> POS_FIGHTING) and (ch.position <> POS_CASTING)
-   and (victim <> ch) then
-    begin
-    ch.position := POS_FIGHTING;
-    ch.fighting := victim;
-    end;
-
-  if (victim.position<>POS_FIGHTING) and (victim.position<>POS_BASHED) and (victim.position<>POS_CASTING)
-   and (victim<>ch) then
-    begin
-    victim.position:=POS_FIGHTING;
-    victim.fighting:=ch;
     end;
 
   vict_ac := victim.ac;
@@ -771,7 +768,7 @@ begin
     begin
     t := node.element;
 
-    if (t.position = POS_FIGHTING) and (t.fighting = vict) then
+    if (t.state = STATE_FIGHTING) and (t.fighting = vict) then
       begin
       inc(num);
 
@@ -794,7 +791,7 @@ begin
   if (ch.fighting <> vict) then
     begin
     ch.fighting := nil;
-    ch.position := POS_STANDING;
+    ch.state := STATE_IDLE;
 
     bugreport('multi_hit', 'fight.pas', 'desync error: ch.fighting & vict not same');
     writeConsole('System is unstable - prepare for a rough ride');
@@ -808,22 +805,16 @@ begin
   if (vict.CHAR_DIED) then
     begin
     ch.fighting := nil;
-    ch.position := POS_STANDING;
+    ch.state := STATE_IDLE;
     exit;
     end;
 
-  if (ch.position = POS_BASHED) then 
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then 
     exit;
     
-  if (ch.position = POS_FIGHTING) or ((ch.position = POS_CASTING) and Assigned(ch.fighting)) then
+  if (ch.state = STATE_FIGHTING) or (Assigned(ch.fighting)) then
     begin
-    if (vict.position < POS_FIGHTING) then
-      begin
-      vict.position := POS_FIGHTING;
-      vict.fighting := ch;
-      end;
-
-    if not in_melee(ch,vict) then
+    if (not in_melee(ch,vict)) then
       begin
       act(AT_REPORT,'$10- You are not in melee range! -',false,ch,nil,nil,TO_CHAR);
       exit;
@@ -913,20 +904,28 @@ begin
     if (ch.cast_timer > 0) then
       dec(ch.cast_timer);
 
-    if (ch.bash_timer = 1) and (ch.position = POS_BASHED) then
+    if (ch.bash_timer = 1) then
       begin
-      if (ch.fighting <> nil) then
-        ch.position := POS_FIGHTING
-      else
-        ch.position := POS_STANDING;
+      if (IS_SET(ch.aff_flags, AFF_BASHED)) then
+        begin
+        REMOVE_BIT(ch.aff_flags, AFF_BASHED);
 
-      act(AT_REPORT,'You recover from the bash and stand quickly.',false,ch,nil,nil,TO_CHAR);
-      act(AT_REPORT,'$n recovers and stands quickly.',false,ch,nil,nil,TO_ROOM);
+        act(AT_REPORT,'You recover from the bash and stand quickly.',false,ch,nil,nil,TO_CHAR);
+        act(AT_REPORT,'$n recovers from the bash and stands quickly.',false,ch,nil,nil,TO_ROOM);
+        end
+      else
+      if (IS_SET(ch.aff_flags, AFF_STUNNED)) then
+        begin
+        REMOVE_BIT(ch.aff_flags, AFF_STUNNED);
+
+        act(AT_REPORT,'You shake your head and stand quickly.',false,ch,nil,nil,TO_CHAR);
+        act(AT_REPORT,'$n recovers from the stun and stands quickly.',false,ch,nil,nil,TO_ROOM);
+        end;
       end;
 
     vch := ch.fighting;
 
-    if (ch.position = POS_FIGHTING) or ((ch.position = POS_CASTING) and Assigned(ch.fighting)) then
+    if (ch.state = STATE_FIGHTING) or (Assigned(ch.fighting)) then
       begin
       multi_hit(ch,vch);
 
@@ -941,7 +940,7 @@ begin
         gch := GCharacter(iter_room.next());
 
         if (gch <> ch) and (gch.leader=ch.leader) and (gch.room = ch.room) then
-         if (gch.fighting = nil) and (gch.position = POS_STANDING) then
+         if (gch.fighting = nil) and (gch.state = STATE_IDLE) then
           if (gch.IS_NPC) or (IS_SET(GPlayer(gch).cfg_flags, CFG_ASSIST)) then
             begin
             if (vch.CHAR_DIED) then
@@ -951,7 +950,8 @@ begin
             act(AT_REPORT,'$n assists $N!',false,gch,nil,ch,TO_ROOM);
 
             gch.fighting := vch;
-            gch.position := POS_FIGHTING;
+            gch.position := POS_STANDING;
+            gch.state := STATE_FIGHTING;
             end;
         end;
         
@@ -970,14 +970,14 @@ begin
             break;
 
           if (gch <> ch) and (gch.IS_NPC) and (gch.IS_AWAKE) then
-           if (gch.position = POS_STANDING) and (GNPC(gch).npc_index.vnum = GNPC(ch).npc_index.vnum) then
+           if (gch.state = STATE_IDLE) and (GNPC(gch).npc_index.vnum = GNPC(ch).npc_index.vnum) then
             if (number_percent <= 25) then
              begin
              if (vch.CHAR_DIED) then
                break;
 
              gch.fighting := vch;
-             gch.position := POS_FIGHTING;
+             gch.state := STATE_FIGHTING;
 
              // in_melee(gch,vch);
 
@@ -996,14 +996,14 @@ begin
       begin
       // aggress mode
       if (ch.hunting <> nil) and (ch.hunting.room = ch.room) then
-        interpret(ch, 'kill '+ch.hunting.name^);
+        interpret(ch, 'kill '+ch.hunting.name);
 
       if (IS_SET(GNPC(ch).act_flags, ACT_AGGRESSIVE)) then
         begin
         vch := ch.room.findRandomChar;
 
         if (vch <> nil) and (not vch.IS_NPC) then
-          interpret(ch, 'kill ' + vch.name^);
+          interpret(ch, 'kill ' + vch.name);
         end;
       end;
     end;

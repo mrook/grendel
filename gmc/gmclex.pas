@@ -52,8 +52,6 @@ const
 
 
 
-
-
 const INITIAL = 2;
 const LINEMODE = 4;
 const COMMENT = 6;
@@ -70,39 +68,39 @@ begin
   (* actions: *)
   case yyruleno of
   1:
-                 											begin
-																val(yytext, yylval.yyInteger, result);
+                 														begin
+																					  val(yytext, yylval.yyInteger, result);
 
-																if (result = 0) then
-	 														    	return(INT)
-																else
-																	return(ILLEGAL);
-															end;
+																						if (result = 0) then
+				  															      return(INT)
+																						else
+																							return(ILLEGAL);
+																						end;
 
   2:
                             								begin
-														  		val(yytext, yylval.yySingle, result);
+																					  val(yytext, yylval.yySingle, result);
 
-																if (result = 0) then
-																	return(FLOAT)
-																else
-																	return(ILLEGAL);
-															end;
+																						if (result = 0) then
+				  															      return(FLOAT)
+																						else
+																							return(ILLEGAL);
+																						end;
 
   3:
-                                              				begin														
-	          													for result := 1 to KWSize do 
-	            													begin
-														            if (uppercase(yytext) = uppercase(KWtable[result].kw)) then 
-	              														begin	
-														                return(KWtable[result].state);
-																		exit;
-																		end;
-	            													end;
-	            	
-																varName := yytext;	
-																return(IDENTIFIER);
-  	        												end;
+                                              		begin
+	          for result := 1 to KWSize do 
+	            begin
+	            if (uppercase(yytext) = uppercase(KWtable[result].kw)) then 
+	              begin	
+	              return(KWtable[result].state);
+								exit;
+								end;
+	            end;
+	            
+						varName := yytext;
+						return(IDENTIFIER);
+  	        end;
 
   4:
                           		;
@@ -121,27 +119,27 @@ begin
                               ;
 
   8:
-             		 	 	  								begin
-																start(LINEMODE);
-											        			returnc(yytext[1]);
+             		 	 	  				begin
+															start(LINEMODE);
+											        returnc(yytext[1]);
 															end;
 
   9:
-                  											begin
-																varName := yytext;
-																return(LINE);
+                  						begin
+															varName := yytext;
+															return(LINE);
 															end;
 															
   10:
-              												begin
-																start(INITIAL);
-											        			returnc(yytext[1]);
+              								begin
+															start(INITIAL);
+											        returnc(yytext[1]);
 															end;
 
   11:
-                   											begin
-        														returnc(yytext[1]);
-													        end;
+                   				begin
+        returnc(yytext[1]);
+        end;
 
   end;
 end(*yyaction*);
@@ -371,9 +369,9 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '|' ]; s: 12),
 { 4: }
   ( cc: [ #1..#9,#11..#31,'#'..'%','@','^','{','}',
-            #127..#191 ]; s: 19),
+            #127..#255 ]; s: 19),
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 20),
+            '~' ]; s: 20),
   ( cc: [ '"' ]; s: 26),
   ( cc: [ '&' ]; s: 21),
   ( cc: [ '=' ]; s: 24),
@@ -382,9 +380,9 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '|' ]; s: 22),
 { 5: }
   ( cc: [ #1..#9,#11..#31,'#'..'%','@','^','{','}',
-            #127..#191 ]; s: 19),
+            #127..#255 ]; s: 19),
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 20),
+            '~' ]; s: 20),
   ( cc: [ '"' ]; s: 26),
   ( cc: [ '&' ]; s: 21),
   ( cc: [ '=' ]; s: 24),
@@ -419,7 +417,7 @@ yyt : array [1..yyntrans] of YYTrec = (
 { 19: }
 { 20: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -429,7 +427,7 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '&' ]; s: 34),
 { 22: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -437,7 +435,7 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '|' ]; s: 36),
 { 23: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -445,7 +443,7 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '|' ]; s: 36),
 { 24: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -468,7 +466,7 @@ yyt : array [1..yyntrans] of YYTrec = (
 { 33: }
 { 34: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -478,7 +476,7 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '&' ]; s: 34),
 { 36: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -486,7 +484,7 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '|' ]; s: 36),
 { 37: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),
@@ -494,7 +492,7 @@ yyt : array [1..yyntrans] of YYTrec = (
   ( cc: [ '|' ]; s: 36),
 { 38: }
   ( cc: [ ' ','!',''''..'<','?','A'..'[',']','_'..'z',
-            '~',#192..#255 ]; s: 34),
+            '~' ]; s: 34),
   ( cc: [ '&' ]; s: 35),
   ( cc: [ '=' ]; s: 38),
   ( cc: [ '>' ]; s: 37),

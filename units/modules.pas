@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.11 2002/10/14 15:32:20 xenon Exp $)
+  @lastmod($Id: modules.pas,v 1.12 2003/06/24 21:41:34 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -39,7 +39,6 @@ implementation
 
 uses
   strip,
-  debug,
   chars,
   util,
   mudthread,
@@ -158,7 +157,7 @@ begin
 
   writeConsole('Loaded module ' + name + ' (' + module.desc + ')');
   
-  readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
+//  readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
 end;
 
 procedure removeModule(name : string);

@@ -1,6 +1,6 @@
 {
   @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.49 2002/10/14 15:32:18 xenon Exp $)
+  @lastmod($Id: constants.pas,v 1.50 2003/06/24 21:41:33 ***REMOVED*** Exp $)
 }
 
 unit constants;
@@ -9,9 +9,9 @@ interface
 
 const 
 {$IFDEF LINUX}
-  version_number = 'v0.4.4-linux';
+  version_number = 'v1.0.0-unstable-linux';
 {$ELSE}
-  version_number = 'v0.4.4';
+  version_number = 'v1.0.0-unstable';
 {$ENDIF}
   version_info = 'The Grendel Project - A Windows MUD Server';
   version_copyright = 'Copyright (c) 2000-2002 by Michiel Rook';
@@ -63,11 +63,10 @@ const BV00=1 shl 0;
 
 { system maxima }
 const MAX_RECEIVE = 2048;
-      MAX_WEAR = 25;
       MAX_TRADE = 5;
 
 { Wear constants }
-const WEAR_NULL = 0;
+{const WEAR_NULL = 0;
       WEAR_RFINGER=1;
       WEAR_LFINGER=2;
       WEAR_NECK1=3;
@@ -84,8 +83,8 @@ const WEAR_NULL = 0;
       WEAR_RWRIST=14;
       WEAR_LWRIST=15;
       WEAR_FLOAT=16;
-      WEAR_RHAND=17;                { primary hand }
-      WEAR_LHAND=18;                { secondary hand, and dual wielding hand }
+      WEAR_RHAND=17;          
+      WEAR_LHAND=18;          
       WEAR_RSHOULDER=19;
       WEAR_LSHOULDER=20;
       WEAR_FACE=21;
@@ -93,7 +92,7 @@ const WEAR_NULL = 0;
       WEAR_LEAR=23;
       WEAR_RANKLE=24;
       WEAR_LANKLE=25;
-      WEAR_EYES=26;
+      WEAR_EYES=26; }
 
 const ARMOR_HAC=1;
       ARMOR_BAC=2;
@@ -152,23 +151,18 @@ const COND_DRUNK=1;                  { alcohol }
 
       MAX_COND = 125;
 
-      POS_DEAD=0;
-      POS_MORTAL=1;
-      POS_INCAP=2;
-      POS_STUNNED=3;
-      POS_SLEEPING=4;
-      POS_MEDITATE=5;
-      POS_RESTING=6;
-      POS_SITTING=7;
-      POS_FIGHTING=8;
-      POS_STANDING=9;
-      POS_CASTING=10;
-      POS_SEARCHING=11;
-      POS_BACKSTAB=12;
-      POS_CIRCLE=13;
-      POS_BASHED=14;
+      POS_LYING = 1;
+      POS_SITTING = 2;
+      POS_STANDING = 3;
+      POS_FLYING = 4;
 
-{ spell affects }
+      STATE_IDLE = 1;
+      STATE_FIGHTING = 2;
+      STATE_RESTING = 3;
+      STATE_MEDITATING = 4;
+      STATE_SLEEPING = 5;
+
+{ various affects }
 const AFF_BLIND = BV00;
       AFF_INVISIBLE = BV01;
       AFF_DETECT_INVIS = BV02;
@@ -183,33 +177,33 @@ const AFF_BLIND = BV00;
       AFF_HIDE = BV11;
       AFF_SNEAK = BV12;
       AFF_ENCHANT = BV13;             { magical attacks }
-      AFF_FLYING = BV14;
+      AFF_BASHED = BV14;
+      AFF_STUNNED = BV15;
 
 { PC status flags}
-const PLR_NPC=BV00;
+const PLR_NPC = BV00;
 //      PLR_FLYCAP=BV01;          { can fly }
-      PLR_WIZINVIS=BV02;        { is wizinvis? }
-      PLR_LINKLESS=BV04;        { linkless dude? }
-      PLR_LOADED=BV05;          { loaded up by immo }
-      PLR_DENY=BV06;            { denied? }
-      PLR_FROZEN=BV07;          { frozen }
-      PLR_SILENCED=BV08;        { silenced }
+      PLR_WIZINVIS = BV02;        { is wizinvis? }
+      PLR_LINKLESS = BV04;        { linkless dude? }
+      PLR_LOADED = BV05;          { loaded up by immo }
+      PLR_DENY = BV06;            { denied? }
+      PLR_FROZEN = BV07;          { frozen }
+      PLR_SILENCED = BV08;        { silenced }
       PLR_HOLYWALK = BV09;      { walk thru anything }
       PLR_HOLYLIGHT = BV10;     { see anything }
       PLR_CLOAK = BV11;	{ immortals don't get logged }
 
 { Config flags }
-const CFG_ASSIST=BV01;
-      CFG_AUTOLOOT=BV02;
-      CFG_AUTOSAC=BV03;
-      CFG_AUTOSCALP=BV04;
-      CFG_BLANK=BV05;           { blank line }
-      CFG_BRIEF=BV06;           { brief descriptions }
-      CFG_ANSI=BV07;            { receive ansi }
-      CFG_PAGER=BV08;           { see pager }
+const CFG_ASSIST = BV01;
+      CFG_AUTOLOOT = BV02;
+      CFG_AUTOSAC = BV03;
+      CFG_AUTOSCALP = BV04;
+      CFG_BLANK = BV05;           { blank line }
+      CFG_BRIEF = BV06;           { brief descriptions }
+      CFG_ANSI = BV07;            { receive ansi }
+      CFG_PAGER = BV08;           { see pager }
       CFG_AUTOPEEK = BV09;      { peek automatically on look }
       CFG_AUTOCREATE = BV10;    { immflag: autocreate rooms when walking? }
-      CFG_SHOWTRACKS = BV11;    { immflag: show tracks in room on look }
 
 { NPC/PC flags }
 const ACT_AGGRESSIVE=BV02;      { aggressive NPC? }
@@ -247,15 +241,6 @@ const ITEM_WEAPON=1;
       ITEM_BLOOD=13;
       ITEM_PORTAL=14;
       ITEM_KEY=15;
-
-{ Wear constants }
-const eq_string:array[1..MAX_WEAR] of string=
-      ('on left finger','on right finger','around neck','around neck',
-       'on body','on head','on legs','on feet','on hands','on arms',
-       'as shield','about body','around waist','around left wrist',
-       'around right wrist','near head','in primary hand','in secondary hand',
-       'on left shoulder','on right shoulder','on face',
-       'in left ear','in right ear','on left ankle','on right ankle');
 
 // do NOT just change the order of these exit constants; used in a couple for-loops
 { directions }
@@ -590,18 +575,9 @@ const RESULT_NONE=0;
       RESULT_BUG=4;
 
 { timer types }
-const TIMER_GAME = 0;                { game timer, used internally }
-      TIMER_COMBAT=1;                { combat timer }
-      TIMER_SEARCH=2;                { search }
-      TIMER_BACKSTAB=3;              { backstab }
-      TIMER_CIRCLE=4;                { circle }
-      TIMER_CAST=5;                  { casting timer }
-      TIMER_TRACK=6;                 { tracking }
-
-      TIMER_MAX = TIMER_TRACK;
-
-      timer_names : array[TIMER_GAME..TIMER_MAX] of string =
-      ('game', 'combat', 'search', 'backstab', 'circle', 'cast', 'track');
+const TIMER_GAME = 0;                  { game timer, used internally }
+      TIMER_COMBAT = 1;                { combat timer }
+      TIMER_ACTION = 2;                { action = search/backstab/circle/cast/track }
 
 { combat types }
 const COMBAT_MOBILE=0;               { mobile/same align }

@@ -1,3 +1,5 @@
+// $Id
+
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var obj : GObject;
     node : GListNode;
@@ -23,22 +25,20 @@ begin
 
   with obj do
     begin
-    name := hash_string('a trail of blood');
-    short := hash_string('a trail of $B$4blood$A$7');
-    long := hash_string('a trail of $B$4blood$A$3 goes ' + headings[pexit.direction]);
+    name := 'a trail of blood';
+    short := 'a trail of $B$4blood$A$7';
+    long := 'a trail of $B$4blood$A$3 goes ' + headings[pexit.direction];
 
     item_type:=ITEM_BLOOD;
     SET_BIT(flags,OBJ_NOPICKUP);
     SET_BIT(flags,OBJ_NOSAC);
 
     value[2]:=pexit.direction;
-    wear1:=0; wear2:=0;
     weight:=0;
-    obj_index:=nil;
     timer := 60;
     end;
 
-  obj.node_world := object_list.insertLast(obj);
+  obj.node_world := objectList.insertLast(obj);
 
   obj.toRoom(ch.room);
 end;
@@ -55,7 +55,7 @@ begin
     begin
     track := node.element;
 
-    if (track.who = ch.name^) and (track.direction = pexit.direction) then
+    if (track.who = ch.name) and (track.direction = pexit.direction) then
       begin
       track.life := 150;
       exit;
@@ -66,7 +66,7 @@ begin
 
   track := GTrack.Create;
 
-  track.who := ch.name^;
+  track.who := ch.name;
   track.direction := pexit.direction;
   track.life := 150;
 
@@ -137,25 +137,19 @@ begin
       end;
     end;
 
-  if (ch.position = POS_FIGHTING) then
+  if (ch.state = STATE_FIGHTING) then
     begin
     ch.sendBuffer('You are fighting and cannot move.'#13#10);
     exit;
     end;
 
-  if (ch.position = POS_BASHED) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
-    ch.sendBuffer('You are bashed and cannot move.'#13#10);
+    ch.sendBuffer('You are immobilized and cannot move.'#13#10);
     exit;
     end;
 
-  if (ch.position <= POS_STUNNED) then
-    begin
-    ch.sendBuffer('You are hurt too badly.'#13#10);
-    exit;
-    end;
-
-  if (ch.position <> POS_STANDING) then
+  if (not (ch.position in [POS_STANDING,POS_FLYING])) then
     begin
     ch.sendBuffer('You must stand up first.'#13#10);
     exit;
@@ -173,25 +167,25 @@ begin
     exit;
     end;
 
-  if (not ch.IS_IMMORT) and (IS_SET(pexit.to_room.flags,ROOM_PRIVATE)) then
+  if (not ch.IS_IMMORT) and (pexit.to_room.flags.isBitSet(ROOM_PRIVATE)) then
     begin
     ch.sendBuffer('That room is private.'#13#10);
     exit;
     end;
 
-  if (ch.IS_EVIL) and (IS_SET(pexit.to_room.flags,ROOM_GOOD)) then
+  if (ch.IS_EVIL) and (pexit.to_room.flags.isBitSet(ROOM_GOOD)) then
     begin
     ch.sendBuffer('An irritating holy force prevents you from entering.'#13#10);
     exit;
     end;
 
-  if (ch.IS_GOOD) and (IS_SET(pexit.to_room.flags,ROOM_EVIL)) then
+  if (ch.IS_GOOD) and (pexit.to_room.flags.isBitSet(ROOM_EVIL)) then
     begin
     ch.sendBuffer('A distinct evil force prevents you from entering.'#13#10);
     exit;
     end;
 
-  if (IS_SET(pexit.to_room.flags,ROOM_SOLITARY)) and (pexit.to_room.chars.getSize > 0) and (not ch.IS_HOLYWALK) then
+  if (pexit.to_room.flags.isBitSet(ROOM_SOLITARY)) and (pexit.to_room.chars.getSize > 0) and (not ch.IS_HOLYWALK) then
     begin
     ch.sendBuffer('Only one person can enter that room at a time.'#13#10);
     exit;
@@ -223,7 +217,7 @@ begin
     exit;
     end;
 
-  if ((ch.level < room_to.min_level) or (ch.level > room_to.max_level)) and
+  if ((ch.level < room_to.minlevel) or (ch.level > room_to.maxlevel)) and
    (not ch.IS_IMMORT) and (not ch.IS_NPC) then
     begin
     ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
@@ -313,7 +307,7 @@ begin
     txt_room := 'stumbles';
     end
   else
-  if (IS_SET(ch.room.flags, ROOM_NOFLOOR)) then
+  if (ch.room.flags.isBitSet(ROOM_NOFLOOR)) then
     begin
     txt_ch := 'fall';
     txt_room := 'falls';
@@ -365,10 +359,7 @@ begin
   interpret(ch, 'look _AUTO');
 
   if (ch.tracking <> '') then
-    begin
-    unregisterTimer(ch, TIMER_TRACK);
     interpret(ch, 'track');
-    end;
 
   node := room_pos.chars.head;
 
@@ -412,7 +403,7 @@ begin
     node := node.next;
     end;
     
-  if (IS_SET(ch.room.flags, ROOM_NOFLOOR)) and (not ch.IS_FLYING) then
+  if (ch.room.flags.isBitSet(ROOM_NOFLOOR)) and (not ch.IS_FLYING) then
     begin
     pexit := ch.room.findExit(DIR_DOWN);
     
@@ -478,179 +469,134 @@ end;
 
 procedure do_sleep(ch:GCharacter;param:string);
 begin
-  with ch do
-   case position of
-     POS_FIGHTING:act(AT_REPORT,'You are fighting!',false,ch,nil,nil,TO_CHAR);
-       POS_BASHED:act(AT_REPORT,'You are bashed to the ground!',false,ch,nil,nil,TO_CHAR);
-     POS_DEAD,POS_MORTAL,POS_INCAP,POS_STUNNED:act(AT_REPORT,'You are hurt to badly.',false,ch,nil,nil,TO_CHAR);
-     POS_SLEEPING:act(AT_REPORT,'You are already sleeping!',false,ch,nil,nil,TO_CHAR);
-     POS_MEDITATE:begin
-                  act(AT_REPORT,'You stop meditating and fall sleep.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops meditating and falls asleep.',true,ch,nil,nil,TO_ROOM);
-                  position:=POS_SLEEPING;
-                  end;
-     POS_RESTING,POS_SITTING:begin
-                  act(AT_REPORT,'You fall asleep.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n falls asleep.',true,ch,nil,nil,TO_ROOM);
-                  position:=POS_SLEEPING;
-                  end;
-     POS_STANDING:begin
-									ch.stopFlying;
-                  act(AT_REPORT,'You lie down and fall sleep.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n lies down and falls asleep.',true,ch,nil,nil,TO_ROOM);
-                  position:=POS_SLEEPING;
-                  end;
-   end;
+  if (IS_SET(ch.aff_flags, AFF_BASHED)) or (IS_SET(ch.aff_flags, AFF_STUNNED)) then
+    act(AT_REPORT, 'You are immobilized and cannot move.',false,ch,nil,nil,TO_CHAR);
+    
+  if (ch.state in [STATE_IDLE,STATE_RESTING,STATE_MEDITATING]) then
+    begin
+    ch.stopFlying();
+    
+    act(AT_REPORT,'You lie down and fall sleep.',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'$n lies down and falls asleep.',true,ch,nil,nil,TO_ROOM);
+    
+    ch.position := POS_LYING;
+    ch.state := STATE_SLEEPING;
+    end;
 end;
 
 procedure do_stand(ch:GCharacter;param:string);
 begin
-  with ch do
-   case position of
-     POS_FIGHTING,POS_STANDING:act(AT_REPORT,'You are already standing.',false,ch,nil,nil,TO_CHAR);
-       POS_BASHED:act(AT_REPORT,'You are bashed to the ground!',false,ch,nil,nil,TO_CHAR);
-     POS_DEAD,POS_MORTAL,POS_INCAP,POS_STUNNED:act(AT_REPORT,'You are hurt to badly.',false,ch,nil,nil,TO_CHAR);
-     POS_SLEEPING:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You awake and stand up.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n awakes and stands up.',true,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_MEDITATE:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You stop meditating and stand up.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops meditating and stands up.',true,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_RESTING,POS_SITTING:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You stand up.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stands up.',true,ch,nil,nil,TO_ROOM);
-                  end;
+  if (ch.position in [POS_STANDING,POS_FLYING]) then
+    begin
+    act(AT_REPORT,'You are already standing.',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end;
+  
+  if (IS_SET(ch.aff_flags, AFF_BASHED)) or (IS_SET(ch.aff_flags, AFF_STUNNED)) then
+    begin
+    act(AT_REPORT, 'You are immobilized and cannot move.',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end;
+    
+  case ch.state of
+       STATE_SLEEPING : begin
+					  						ch.state := STATE_IDLE;
+										  	ch.position := POS_STANDING;
+					  						act(AT_REPORT,'You wake and stand up.',false,ch,nil,nil,TO_CHAR);
+										  	act(AT_REPORT,'$n wakes and stands up.',true,ch,nil,nil,TO_ROOM);
+                        end;
+     STATE_MEDITATING : begin
+												ch.state := STATE_IDLE;
+												ch.position := POS_STANDING;
+
+												act(AT_REPORT,'You stop meditating and stand up.',false,ch,nil,nil,TO_CHAR);
+												act(AT_REPORT,'$n stops meditating and stands up.',true,ch,nil,nil,TO_ROOM);
+                        end;
+        STATE_RESTING : begin
+												ch.state := STATE_IDLE;
+												ch.position := POS_STANDING;
+
+												act(AT_REPORT,'You stand up.',false,ch,nil,nil,TO_CHAR);
+												act(AT_REPORT,'$n stands up.',true,ch,nil,nil,TO_ROOM);
+                        end;
    end;
 end;
 
 procedure do_meditate(ch:GCharacter;param:string);
 begin
-  with ch do
-   case position of
-     POS_FIGHTING:act(AT_REPORT,'You are fighting!',false,ch,nil,nil,TO_CHAR);
-       POS_BASHED:act(AT_REPORT,'You are bashed to the ground!',false,ch,nil,nil,TO_CHAR);
-     POS_DEAD,POS_MORTAL,POS_INCAP,POS_STUNNED:act(AT_REPORT,'You are hurt to badly.',false,ch,nil,nil,TO_CHAR);
-     POS_SLEEPING:act(AT_REPORT,'You are asleep.',false,ch,nil,nil,TO_CHAR);
-     POS_MEDITATE:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You stop meditating and stand up.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops meditating and stands up.',true,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_RESTING,POS_SITTING:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You start meditating.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n starts meditating.',true,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_STANDING:begin
-                  position:=POS_MEDITATE;
-									ch.stopFlying;
-                  act(AT_REPORT,'You sit down cross-legged and begin meditating.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n sits down cross-legged and begins meditating.',true,ch,nil,nil,TO_ROOM);
-                  end;
+  if (IS_SET(ch.aff_flags, AFF_BASHED)) or (IS_SET(ch.aff_flags, AFF_STUNNED)) then
+    begin
+    act(AT_REPORT, 'You are immobilized and cannot move.',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end;
+
+  case ch.state of
+       STATE_SLEEPING : act(AT_REPORT, 'You are asleep.',false,ch,nil,nil,TO_CHAR);
+     STATE_MEDITATING : act(AT_REPORT, 'You are already meditating.', false, ch, nil, nil, TO_CHAR);
+        STATE_RESTING : begin 
+                        ch.state := STATE_MEDITATING;
+						  					act(AT_REPORT,'You start meditating.',false,ch,nil,nil,TO_CHAR);
+											  act(AT_REPORT,'$n starts meditating.',true,ch,nil,nil,TO_ROOM);
+  					  					end;
+		   		 STATE_IDLE : begin
+		   									ch.state := STATE_MEDITATING;
+			                  act(AT_REPORT,'You sit down cross-legged and begin meditating.',false,ch,nil,nil,TO_CHAR);
+			                  act(AT_REPORT,'$n sits down cross-legged and begins meditating.',true,ch,nil,nil,TO_ROOM);
+		   				  				end;
    end;
 end;
 
 procedure do_rest(ch:GCharacter;param:string);
 begin
-  with ch do
-   case position of
-     POS_FIGHTING:act(AT_REPORT,'You are fighting!',false,ch,nil,nil,TO_CHAR);
-       POS_BASHED:act(AT_REPORT,'You are bashed to the ground!',false,ch,nil,nil,TO_CHAR);
-     POS_DEAD,POS_MORTAL,POS_INCAP,POS_STUNNED:act(AT_REPORT,'You are hurt to badly.',false,ch,nil,nil,TO_CHAR);
-     POS_SLEEPING:begin
-                  position:=POS_RESTING;
-                  act(AT_REPORT,'You wake up and rest.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n wakes up and rests.',false,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_MEDITATE:begin
-                  position:=POS_RESTING;
-                  act(AT_REPORT,'You stop meditating and go to rest.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops meditating and rests.',true,ch,nil,nil,TO_ROOM);
-                  end;
-      POS_RESTING:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You stop resting and stand up.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops resting and stands up.',false,ch,nil,nil,TO_ROOM);
-                  end;
-      POS_SITTING:begin
-                  position:=POS_RESTING;
-                  act(AT_REPORT,'You rest.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n rests.',true,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_STANDING:begin
-                  position:=POS_RESTING;
-									ch.stopFlying;
-                  act(AT_REPORT,'You sit down comfortably and rest.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n sits down comfortably and rests.',true,ch,nil,nil,TO_ROOM);
-                  end;
-   end;
-end;
+  if (IS_SET(ch.aff_flags, AFF_BASHED)) or (IS_SET(ch.aff_flags, AFF_STUNNED)) then
+    begin
+    act(AT_REPORT, 'You are immobilized and cannot move.',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end;
 
-procedure do_sit(ch:GCharacter;param:string);
-begin
-  with ch do
-   case position of
-     POS_FIGHTING:act(AT_REPORT,'You are fighting!',false,ch,nil,nil,TO_CHAR);
-       POS_BASHED:act(AT_REPORT,'You are bashed to the ground!',false,ch,nil,nil,TO_CHAR);
-     POS_DEAD,POS_MORTAL,POS_INCAP,POS_STUNNED:act(AT_REPORT,'You are hurt to badly.',false,ch,nil,nil,TO_CHAR);
-     POS_SLEEPING:begin
-                  position:=POS_SITTING;
-                  act(AT_REPORT,'You wake up and sit down.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n wakes up and sits down.',false,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_MEDITATE:begin
-                  position:=POS_SITTING;
-                  act(AT_REPORT,'You stop meditating.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops meditating.',true,ch,nil,nil,TO_ROOM);
-                  end;
-      POS_RESTING:begin
-                  position:=POS_SITTING;
-                  act(AT_REPORT,'You stop resting.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stops resting.',false,ch,nil,nil,TO_ROOM);
-                  end;
-      POS_SITTING:begin
-                  position:=POS_STANDING;
-                  act(AT_REPORT,'You stand up.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n stands up.',false,ch,nil,nil,TO_ROOM);
-                  end;
-     POS_STANDING:begin
-                  position:=POS_SITTING;
-									ch.stopFlying;
-                  act(AT_REPORT,'You sit down.',false,ch,nil,nil,TO_CHAR);
-                  act(AT_REPORT,'$n sits down.',true,ch,nil,nil,TO_ROOM);
-                  end;
+  case ch.state of
+       STATE_SLEEPING : act(AT_REPORT, 'You are asleep.',false,ch,nil,nil,TO_CHAR);
+        STATE_RESTING : act(AT_REPORT, 'You are already resting.', false, ch, nil, nil, TO_CHAR);
+		 STATE_MEDITATING : begin
+												ch.state := STATE_RESTING;
+												act(AT_REPORT,'You stop meditating and go to rest.',false,ch,nil,nil,TO_CHAR);
+												act(AT_REPORT,'$n stops meditating and rests.',true,ch,nil,nil,TO_ROOM);
+			                  end;
+			     STATE_IDLE : begin
+												ch.position := POS_SITTING;
+												ch.state := STATE_RESTING;
+												
+												act(AT_REPORT,'You sit down comfortably and rest.',false,ch,nil,nil,TO_CHAR);
+												act(AT_REPORT,'$n sits down comfortably and rests.',true,ch,nil,nil,TO_ROOM);
+			                  end;
    end;
 end;
 
 procedure do_wake(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
-    ch.sendBuffer('Wake whom?'#13#10);
+    ch.sendBuffer('Wake who?'#13#10);
     exit;
     end;
 
   vict := ch.room.findChar(ch, param);
 
-  if (vict=nil) then
+  if (vict = nil) then
     ch.sendBuffer('They aren''t here.'#13#10)
   else
-  if (vict=ch) then
-    do_stand(ch,'')
+  if (vict = ch) then
+    do_stand(ch, '')
   else
-  if (vict.position<>POS_SLEEPING) then
+  if (vict.state <> STATE_SLEEPING) then
     act(AT_REPORT,'$N is not sleeping.',false,ch,nil,vict,TO_CHAR)
   else
     begin
     act(AT_REPORT,'You wake $N.',false,ch,nil,vict,TO_CHAR);
     act(AT_REPORT,'$n wakes $N.',false,ch,nil,vict,TO_ROOM);
-    vict.position:=POS_STANDING;
+    vict.position := POS_STANDING;
+    vict.state := STATE_IDLE;
     end;
 end;
 

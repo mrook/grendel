@@ -47,22 +47,19 @@ const
 
 ALPHA				[A-Za-z]
 DIGIT				[0-9]
-DIGITS				{DIGIT}+
+DIGITS			{DIGIT}+
 
-ALPHANUM    		{ALPHA}|{DIGIT}
+ALPHANUM    {ALPHA}|{DIGIT}
 
 SEP					" "
 SEPS				{SEPS}*
 
-BOOLOP				"!"|"&&"|"||"|"<"|">"|"=<"|">="|"=="
-RESERV				"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"|":"|";"|"`"|"="|"/"|"?"|"-"|"+"|"'"
+BOOLOP			"!"|"&&"|"||"|"<"|">"|"=<"|">="|"=="
+RESERV			"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"|":"|";"|"`"|"="|"/"|"?"|"-"|"+"|"'"
 EXTRA				"_"
-ESCAPE  		    "\\\""
+ESCAPE      "\\\""
 
-UTF8				[\300-\377]
-
-
-ALL					{ALPHANUM}|{UTF8}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}|{ESCAPE}
+ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}|{ESCAPE}
 
 %start INITIAL LINEMODE COMMENT
 
@@ -70,37 +67,37 @@ ALL					{ALPHANUM}|{UTF8}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}|{ESCAPE}
 
   var result : integer;
 
-<INITIAL>{DIGITS}											begin
-																val(yytext, yylval.yyInteger, result);
+<INITIAL>{DIGITS}														begin
+																					  val(yytext, yylval.yyInteger, result);
 
-																if (result = 0) then
-	 														    	return(INT)
-																else
-																	return(ILLEGAL);
-															end;
+																						if (result = 0) then
+				  															      return(INT)
+																						else
+																							return(ILLEGAL);
+																						end;
 
 <INITIAL>{DIGITS}"."{DIGITS}								begin
-														  		val(yytext, yylval.yySingle, result);
+																					  val(yytext, yylval.yySingle, result);
 
-																if (result = 0) then
-																	return(FLOAT)
-																else
-																	return(ILLEGAL);
-															end;
+																						if (result = 0) then
+				  															      return(FLOAT)
+																						else
+																							return(ILLEGAL);
+																						end;
 
-<INITIAL>{ALPHA}({ALPHANUM}|{EXTRA})*|{BOOLOP}				begin														
-	          													for result := 1 to KWSize do 
-	            													begin
-														            if (uppercase(yytext) = uppercase(KWtable[result].kw)) then 
-	              														begin	
-														                return(KWtable[result].state);
-																		exit;
-																		end;
-	            													end;
-	            	
-																varName := yytext;	
-																return(IDENTIFIER);
-  	        												end;
+<INITIAL>{ALPHA}({ALPHANUM}|{EXTRA})*|{BOOLOP}		begin
+	          for result := 1 to KWSize do 
+	            begin
+	            if (uppercase(yytext) = uppercase(KWtable[result].kw)) then 
+	              begin	
+	              return(KWtable[result].state);
+								exit;
+								end;
+	            end;
+	            
+						varName := yytext;
+						return(IDENTIFIER);
+  	        end;
 
 <INITIAL>" "|\t|\r|\n     		;
 
@@ -114,22 +111,22 @@ ALL					{ALPHANUM}|{UTF8}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}|{ESCAPE}
                               
 <COMMENT>.                    ;
 
-<INITIAL>"\""		 	 	  								begin
-																start(LINEMODE);
-											        			returnc(yytext[1]);
+<INITIAL>"\""		 	 	  				begin
+															start(LINEMODE);
+											        returnc(yytext[1]);
 															end;
 
-<LINEMODE>({ALL})*											begin
-																varName := yytext;
-																return(LINE);
+<LINEMODE>({ALL})*						begin
+															varName := yytext;
+															return(LINE);
 															end;
 															
-<LINEMODE>"\""												begin
-																start(INITIAL);
-											        			returnc(yytext[1]);
+<LINEMODE>"\""								begin
+															start(INITIAL);
+											        returnc(yytext[1]);
 															end;
 
-<INITIAL,LINEMODE>.											begin
-        														returnc(yytext[1]);
-													        end;
+<INITIAL,LINEMODE>.				begin
+        returnc(yytext[1]);
+        end;
 

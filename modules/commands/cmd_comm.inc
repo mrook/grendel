@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.3 2001/10/18 16:26:18 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.4 2003/06/24 21:41:27 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -130,14 +130,14 @@ begin
     end;
     
   act(AT_SUGGEST,'You suggest, '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  writeConsole(ch.name^+' suggested '''+param+'''');
+  writeConsole(ch.name+' suggested '''+param+'''');
 
   assignfile(f, 'system\suggest.dat');
   append(f);
-  writeln(f, DateTimeToStr(Now),'> ', 'Suggestion by ',ch.name^,': ',param);
+  writeln(f, DateTimeToStr(Now),'> ', 'Suggestion by ',ch.name,': ',param);
   closefile(f);
 
-  he := THistoryElement.Create(ch.name^+' suggested '''+param+'''');
+  he := THistoryElement.Create(ch.name+' suggested '''+param+'''');
   
   suggestHistory.insertLast(he);
 
@@ -171,9 +171,9 @@ begin
     end;
     
   act(AT_PRAY, 'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  writeConsole(ch.name^ + ' prays ''' + param + '''');
+  writeConsole(ch.name + ' prays ''' + param + '''');
   
-  he := THistoryElement.Create(ch.name^ + ' prays ''' + param + '''');
+  he := THistoryElement.Create(ch.name + ' prays ''' + param + '''');
   
   prayHistory.insertLast(he);
 
@@ -184,7 +184,7 @@ end;
 procedure do_clanadd(ch:GCharacter;param:string);
 var vict : GPlayer;
     obj : GObject;
-    index : GObjectIndex;
+    index : GObject;
 begin
   if (ch.IS_NPC) then
     exit;
@@ -214,13 +214,13 @@ begin
       vict.clan := ch.clan;
       GPlayer(vict).clanleader := false;
 
-      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name^+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
+      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
 
-			index := findObjectIndex(ch.clan.clanobj);
+			index := GObject(objectIndices[ch.clan.clanobj]);
 
 			if (index <> nil) then
         begin
-        obj := instanceObject(index);
+        obj := index.clone();
         obj.toChar(vict);
         act(AT_REPORT,'You have received $p.',false,vict,obj,nil,TO_CHAR);
 				end;
@@ -253,7 +253,7 @@ begin
       ch.sendBuffer('That character is not a member of this clan!'#13#10)
     else
       begin
-      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name^+' is no longer a member of the clan!',CHANNEL_CLAN,AT_WHITE);
+      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name+' is no longer a member of the clan!',CHANNEL_CLAN,AT_WHITE);
       vict.clan:=nil;
       vict.clanleader:=false;
       end;
@@ -263,18 +263,16 @@ end;
 procedure do_clan(ch:GCharacter;param:string);
 var
   str : string;
-  gobj : GObjectIndex;
+  obj : GObject;
 begin
   if (ch.clan=nil) then
     ch.sendBuffer('But you aren''t in a clan!'#13#10)
   else
     with ch.clan do
       begin
-      gobj := findObjectIndex(clanobj);
-      if (gobj = nil) then
-        str := 'none'
-      else
-        str := gobj.short^;
+      obj := GObject(objectIndices[clanobj]);
+      
+      str := obj.short;
 
       act(AT_REPORT,#13#10'$B$3'+name,false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,#13#10'$B$1[$7Leader$1]$A$7:        $B$2'+leader,false,ch,nil,nil,TO_CHAR);
@@ -295,8 +293,8 @@ begin
   if not (param[length(param)] in ['.','!','?']) then
     param := param + '.';
 
-  act(AT_REPORT,ch.name^+' '+param,false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,ch.name^+' '+param,false,ch,nil,nil,TO_ROOM);
+  act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_ROOM);
 end;
 
 procedure do_auction(ch:GCharacter;param:string);
@@ -321,7 +319,7 @@ begin
       begin
       GObject(auc.item).toChar(ch);
 
-      buf := '$B$2<Auction> $1[$7' + ch.name^ + '$1] Auction of $7' + GObject(auc.item).name^ + '$1 has been halted.';
+      buf := '$B$2<Auction> $1[$7' + ch.name + '$1] Auction of $7' + GObject(auc.item).name + '$1 has been halted.';
       to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
       auc.item:=nil;
       auc.seller:=nil;
@@ -377,7 +375,7 @@ begin
   auc.seller:=ch;
   auc.going:=0;
 
-  buf := '$B$2<Auction> $1[$7' + ch.name^ + '$1] $7' + cap(GObject(auc.item).name^) + '$1, minimum bid ' + inttostr(auc.start) + ' coins.';
+  buf := '$B$2<Auction> $1[$7' + ch.name + '$1] $7' + cap(GObject(auc.item).name) + '$1, minimum bid ' + inttostr(auc.start) + ' coins.';
 
   to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
 end;
@@ -406,7 +404,7 @@ begin
 
   if (length(param)=0) then
     begin
-    buf := 'Currently up for auction: ' + cap(GObject(auc.item).name^) + ' by ' + GCharacter(auc.seller).name^ + '.'#13#10;
+    buf := 'Currently up for auction: ' + cap(GObject(auc.item).name) + ' by ' + GCharacter(auc.seller).name + '.'#13#10;
     ch.sendBuffer(buf);
 
     buf := 'Startprice: ' + inttostr(auc.start);
@@ -414,7 +412,7 @@ begin
     if (auc.bid=0) then
       buf := buf + '   No bids made yet.'#13#10
     else
-      buf := buf + '  Current bid: ' + inttostr(auc.bid) + ' (' + GCharacter(auc.buyer).name^ + ')'#13#10;
+      buf := buf + '  Current bid: ' + inttostr(auc.bid) + ' (' + GCharacter(auc.buyer).name + ')'#13#10;
 
     ch.sendBuffer(buf);
     exit;
@@ -462,7 +460,7 @@ begin
   auc.bid:=bid;
   auc.going:=0;
 
-  buf := '$B$2<Auction> $1[$7' + GCharacter(auc.seller).name^ + '$1] $7' + GCharacter(auc.buyer).name^ + '$1 bids ' + inttostr(auc.bid) + ' coins.';
+  buf := '$B$2<Auction> $1[$7' + GCharacter(auc.seller).name + '$1] $7' + GCharacter(auc.buyer).name + '$1 bids ' + inttostr(auc.bid) + ' coins.';
 
   to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
 end;
@@ -495,96 +493,4 @@ begin
     exit;
     end;
 end;
-
-{
-// These are all obsolete now due to restructured channelsystem (Channels.pas).
-// Remove soon.
-
-procedure do_babbel(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Babbel what?'#13#10);
-    exit;
-    end;
-  talk_channel(ch,param,CHANNEL_BABBEL,'babbel',AT_BABBEL);
-end;
-
-procedure do_clantalk(ch:GCharacter;param:string);
-begin
-  if (ch.clan=nil)then
-    begin
-    ch.sendBuffer('But you aren''t in a clan!'#13#10);
-    exit;
-    end;
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Clantalk what?'#13#10);
-    exit;
-    end;
-
-  to_channel(ch, '$N [Clantalk]: '+param,CHANNEL_CLAN,2);
-end;
-
-procedure do_auctalk(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Auctalk what?'#13#10);
-    exit;
-    end;
-
- talk_channel(ch,param,CHANNEL_AUCTION,'auction',AT_AUCTION);
-end;
-
-procedure do_chat(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Chat what?'#13#10);
-    exit;
-    end;
-
-  if (ch.IS_DRUNK) then
-    param := makedrunk(param);
-
-  talk_channel(ch,param,CHANNEL_CHAT,'chat',AT_CHAT);
-end;
-
-procedure do_raid(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Raid what?'#13#10);
-    exit;
-    end;
-
-  act(AT_RAID,'You [!] '+param,false,ch,nil,nil,TO_CHAR);
-
-  to_channel(ch,string('$N [!] '+param),CHANNEL_RAID,AT_RAID);
-end;
-
-procedure do_immtalk(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Immtalk what?'#13#10);
-    exit;
-    end;
-
-  act(AT_IMMTALK,'You <IMMTALK> '+param,false,ch,nil,nil,TO_CHAR);
-  to_channel(ch, ch.name^+' <IMMTALK> '+param,CHANNEL_IMMTALK,AT_IMMTALK);
-end;
-
-procedure do_yell(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Yell what?'#13#10);
-    exit;
-    end;
-
-  talk_channel(ch,param,CHANNEL_YELL,'yell',AT_YELL);
-end;
-}
 

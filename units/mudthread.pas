@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: mudthread.pas,v 1.79 2002/08/18 19:35:19 ***REMOVED*** Exp $)
+  @lastmod($Id: mudthread.pas,v 1.80 2003/06/24 21:41:34 ***REMOVED*** Exp $)
 }
 
 unit mudthread;
@@ -65,7 +65,7 @@ type
       func_name : string;
       ptr : COMMAND_FUNC;
       level : integer;             { minimum level }
-      position : integer;          { minimum position }
+      allowed_states : set of STATE_IDLE .. STATE_SLEEPING;      { allowed states }
       addArg0 : boolean;           { send arg[0] (the command itself) to func? }
     end;
 
@@ -88,7 +88,6 @@ uses
     md5,
     update,
     timers,
-    debug,
     fight,
     NameGen,
     Channels;
@@ -151,7 +150,7 @@ begin
 
     alias := nil;
     cmd := GCommand.Create;
-    cmd.position := POS_MEDITATE;
+    cmd.allowed_states := [STATE_MEDITATING, STATE_IDLE, STATE_RESTING, STATE_FIGHTING];
 
     with cmd do
       repeat
@@ -172,7 +171,9 @@ begin
         level:=strtoint(right(s,' '))
       else
       if g='POSITION' then
-        position:=strtoint(right(s,' '))
+        begin
+        //position:=strtoint(right(s,' '));
+        end
       else
       if g='FUNCTION' then
         begin
@@ -196,7 +197,7 @@ begin
         alias.level := cmd.level;
         alias.ptr := cmd.ptr;
         alias.func_name := cmd.func_name;
-        alias.position := cmd.position;
+        alias.allowed_states := cmd.allowed_states;
         alias.addarg0 := cmd.addarg0;
 
         commands.put(alias.name, alias);
@@ -237,6 +238,7 @@ var
     cmdline, param, ale : string;
     hash, time : cardinal;
     al : GAlias;
+    timer : GTimer;
 begin
   if (not ch.IS_NPC) and (GPlayer(ch).switching <> nil) then
     begin
@@ -280,11 +282,11 @@ begin
       act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
       end;
 
-    if (ch.position = POS_CASTING) then
+    timer := hasTimer(ch, TIMER_ACTION);
+    if (timer <> nil) then
       begin
-      act(AT_REPORT, 'You stop casting.', false, ch, nil, nil, TO_CHAR);
-      unregisterTimer(ch, TIMER_CAST);
-      ch.position := POS_STANDING;
+      act(AT_REPORT, 'You stop your ' + timer.name + '.', false, ch, nil, nil, TO_CHAR);
+      unregisterTimer(ch, TIMER_ACTION);
       end;
 
     if (length(line) = 0) then
@@ -360,22 +362,20 @@ begin
 
       if (a >= cmd.level) then
         begin
-        if (cmd.position > position) then
-          case position of
-            POS_SLEEPING: ch.sendBuffer('You are off to dreamland.'#13#10);
-            POS_MEDITATE: ch.sendBuffer('You must break out of your trance first.'#13#10);
-             POS_RESTING: ch.sendBuffer('You feel too relaxed to do this.'#13#10);
-             POS_SITTING: ch.sendBuffer('You must get on your feet first.'#13#10);
-            POS_FIGHTING: ch.sendBuffer('You are fighting!'#13#10);
+        if (not (state in cmd.allowed_states)) then
+          case state of
+              STATE_SLEEPING: ch.sendBuffer('You are off to dreamland.'#13#10);
+            STATE_MEDITATING: ch.sendBuffer('You must break out of your trance first.'#13#10);
+               STATE_RESTING: ch.sendBuffer('You feel too relaxed to do this.'#13#10);
+              STATE_FIGHTING: ch.sendBuffer('You are fighting!'#13#10);
           end
         else
           begin
           try
             if (system_info.log_all) or (ch.logging) then
-              writeLog(ch.name^ + ': ' + line);
-
+              writeLog(ch.name + ': ' + line);
             if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
-              writeConsole('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+              writeConsole('[LOG] ' + ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
 //            time := GetTickCount;
 
@@ -393,19 +393,19 @@ begin
 {            time := GetTickCount - time;
 
             if (time > 1500) and (not ch.CHAR_DIED) then
-              bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.'); }
+              bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name + ' lagged', 'The command took over 1.5 sec to complete.'); }
           except
-            on E : EExternal do
+{            on E : EExternal do
               begin
-              bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - External exception');
+              bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - External exception');
               outputError(E);
               end;
               
             on E : Exception do
-              bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - ' + E.Message);
+              bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - ' + E.Message);
               
             else
-              bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - Unknown exception');
+              bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - Unknown exception'); }
           end;
           end;
         end
@@ -463,8 +463,7 @@ begin
 
     // is there another conn with exactly the same name?
     if  (dual <> conn)  and Assigned(dual)
-    and Assigned(dual.ch) and Assigned(dual.ch.name)
-    and (lowercase(dual.ch.name^) = lowercase(name)) then
+    and Assigned(dual.ch) and (lowercase(dual.ch.name) = lowercase(name)) then
     begin
       Result := dual.ch;
       exit;
@@ -477,7 +476,7 @@ end;
 procedure nanny(conn : GConnection; argument : string);
 var ch, vict : GPlayer;
     tmp : GCharacter;
-    node : GListNode;
+    iterator : GIterator;
     race : GRace;
     digest : MD5Digest;
     h,top,x,temp:integer;
@@ -520,7 +519,7 @@ begin
 
                   vict := findDualConnection(conn, argument); // returns nil if player is 
 
-                  if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) and (cap(vict.name^) = cap(argument)) then
+                  if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) and (cap(vict.name) = cap(argument)) then
                     begin
                     if (not MD5Match(MD5String(pwd), GPlayer(vict).md5_password)) then
                       begin
@@ -568,10 +567,10 @@ begin
                     exit;
                     end;
 
-                  vict := findDualConnection(conn, ch.name^); // returns nil if player is not dual connected
+                  vict := findDualConnection(conn, ch.name); // returns nil if player is not dual connected
 
                   if not Assigned(vict) then
-                    vict := findPlayerWorldEx(nil, ch.name^);
+                    vict := findPlayerWorldEx(nil, ch.name);
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin
@@ -586,7 +585,7 @@ begin
                     conn.sock.send('You have reconnected.'#13#10);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.flags, PLR_LINKLESS);
-                    writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') ' + ch.name^ + ' has reconnected');
+                    writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') ' + ch.name + ' has reconnected');
 
                     ch.sendPrompt;
                     conn.state := CON_PLAYING;
@@ -602,7 +601,7 @@ begin
                   conn.state := CON_MOTD;
                   end;
         CON_MOTD: begin
-                  conn.sock.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name^ + ', to this MUD. May your stay be pleasant.'#13#10);
+                  conn.sock.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name + ', to this MUD. May your stay be pleasant.'#13#10);
 
                   with system_info do
                     begin
@@ -614,7 +613,7 @@ begin
                   ch.toRoom(ch.room);
 
                   act(AT_WHITE, '$n enters through a magic portal.', true, ch, nil, nil, TO_ROOM);
-                  writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+ ch.name^ +' has logged in');
+                  writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+ ch.name +' has logged in');
 
                   ch.node_world := char_list.insertLast(ch);
                   ch.logon_now := Now;
@@ -657,9 +656,9 @@ begin
                     exit;
                     end;
 
-                  ch.name := hash_string(cap(argument));
+                  ch.setName(cap(argument));
                   conn.state := CON_NEW_PASSWORD;
-                  conn.sock.send(#13#10'Allright, '+ch.name^+', choose a password: ');
+                  conn.sock.send(#13#10'Allright, '+ch.name+', choose a password: ');
                   end;
 CON_NEW_PASSWORD: begin
                   if (length(argument)=0) then
@@ -715,10 +714,11 @@ CON_CHECK_PASSWORD: begin
                   conn.sock.send(#13#10'Available races: '#13#10#13#10);
 
                   h:=1;
-                  node := race_list.head;
-                  while (node <> nil) do
+                  iterator := raceList.iterator();
+
+                  while (iterator.hasNext()) do
                     begin
-                    race := node.element;
+                    race := GRace(iterator.next());
 
                     buf := '  ['+inttostr(h)+']  '+pad_string(race.name,15);
 
@@ -730,8 +730,9 @@ CON_CHECK_PASSWORD: begin
                     conn.sock.send(buf);
 
                     inc(h);
-                    node := node.next;
                     end;
+                    
+                  iterator.Free();
 
                   conn.sock.send(#13#10'Choose a race: ');
                   end;
@@ -749,30 +750,34 @@ CON_CHECK_PASSWORD: begin
                   end;
 
                   race := nil;
-                  node := race_list.head;
+                  iterator := raceList.iterator();
                   h := 1;
 
-                  while (node <> nil) do
+                  while (iterator.hasNext()) do
                     begin
                     if (h = x) then
                       begin
-                      race := node.element;
+                      race := GRace(iterator.next());
                       break;
-                      end;
+                      end
+                    else
+                      iterator.next();
 
                     inc(h);
-                    node := node.next;
                     end;
+                    
+                  iterator.Free();
 
                   if (race = nil) then
                     begin
                     conn.sock.send('Not a valid race.'#13#10);
 
                     h:=1;
-                    node := race_list.head;
-                    while (node <> nil) do
-                      begin
-                      race := node.element;
+										iterator := raceList.iterator();
+
+										while (iterator.hasNext()) do
+											begin
+											race := GRace(iterator.next());
 
                       buf := '  ['+inttostr(h)+']  '+pad_string(race.name,15);
 
@@ -784,9 +789,10 @@ CON_CHECK_PASSWORD: begin
                       conn.sock.send(buf);
 
                       inc(h);
-                      node := node.next;
                       end;
 
+										iterator.Free();
+										
                     conn.sock.send(#13#10'Choose a race: ');
                     exit;
                     end;
@@ -889,9 +895,9 @@ CON_CHECK_PASSWORD: begin
                     'C':begin
                         digest := ch.md5_password;
 
-                        ch.load(ch.name^);
+                        ch.load(ch.name);
                         ch.md5_password := digest;
-                        ch.save(ch.name^);
+                        ch.save(ch.name);
 
                         conn.sock.send(#13#10'Thank you. You have completed your entry.'#13#10);
 
@@ -1051,7 +1057,7 @@ begin
     begin
     conn.state := CON_MOTD;
 
-    conn.ch.name := hash_string(copyover_name);
+    conn.ch.setName(copyover_name);
     conn.ch.load(copyover_name);
     conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
     conn.send('Copyover complete!'#13#10);
@@ -1123,24 +1129,24 @@ begin
           end;
         end;
     except
-      on E : EExternal do
+{      on E : EExternal do
         begin
-        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name^ + ' - External exception');
+        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name + ' - External exception');
         outputError(E);
         end;
         
       on E : Exception do
-        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name^ + ' - ' + E.Message);
+        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name + ' - ' + E.Message);
         
       else
-        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name^ + ' - Unknown exception');
+        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name + ' - Unknown exception'); }
     end;
   until Terminated;
 
   try
     if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
       begin
-      writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+conn.ch.name^+' has lost the link');
+      writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+conn.ch.name+' has lost the link');
 
       if (conn.ch.level >= LEVEL_IMMORTAL) then
         interpret(conn.ch, 'return');
@@ -1161,7 +1167,7 @@ begin
 
     conn.Free();
   except
-    on E : EExternal do
+{    on E : EExternal do
       begin
       bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread');
       outputError(E);
@@ -1171,7 +1177,7 @@ begin
       bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread: ' + E.Message);
       
     else
-      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Unknown error while shutting down thread');
+      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Unknown error while shutting down thread'); }
   end;
 end;
 

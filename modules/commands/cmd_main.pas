@@ -48,7 +48,7 @@ begin
   if (ch.IS_NPC) then
     exit;
 
-  if (ch.position = POS_FIGHTING) then
+  if (ch.state = STATE_FIGHTING) then
     begin
     ch.sendBuffer('You are fighting! You can''t quit!'#13#10);
     exit;
@@ -88,7 +88,7 @@ begin
   if (ch.IS_NPC) then
     exit;
 
-  GPlayer(ch).save(ch.name^);
+  GPlayer(ch).save(ch.name);
   ch.sendBuffer('Ok.'#13#10);
 end;
 
@@ -309,11 +309,11 @@ begin
 
   GConnection(ch.conn).send('You feel yourself dissolving, atom by atom...'#13#10);
 
-  writeConsole(ch.name^ + ' has deleted');
+  writeConsole(ch.name + ' has deleted');
   GPlayer(ch).quit;
 
-  assignfile(f, 'players\' + ch.name^ + '_' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.usr');
-  rename(f, 'backup\' + ch.name^ + '.usr');
+  assignfile(f, 'players\' + ch.name + '_' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.usr');
+  rename(f, 'backup\' + ch.name + '.usr');
 end;
 
 procedure do_wimpy(ch : GCharacter; param : string);
@@ -696,7 +696,6 @@ initialization
   registerCommand('do_wake', do_wake);
   registerCommand('do_meditate', do_meditate);
   registerCommand('do_rest', do_rest);
-  registerCommand('do_sit', do_sit);
   registerCommand('do_stand', do_stand);
   registerCommand('do_flee', do_flee);
   registerCommand('do_flurry', do_flurry);
@@ -737,7 +736,6 @@ initialization
   registerCommand('do_eat', do_eat);
   registerCommand('do_scalp', do_scalp);
   registerCommand('do_give', do_give);
-  registerCommand('do_throw', do_throw);
   registerCommand('do_alias', do_alias);
   registerCommand('do_clanadd', do_clanadd);
   registerCommand('do_clanremove', do_clanremove);
@@ -891,7 +889,6 @@ finalization
   unregisterCommand('do_wake');
   unregisterCommand('do_meditate');
   unregisterCommand('do_rest');
-  unregisterCommand('do_sit');
   unregisterCommand('do_stand');
   unregisterCommand('do_flee');
   unregisterCommand('do_flurry');
@@ -932,7 +929,6 @@ finalization
   unregisterCommand('do_eat');
   unregisterCommand('do_scalp');
   unregisterCommand('do_give');
-  unregisterCommand('do_throw');
   unregisterCommand('do_alias');
   unregisterCommand('do_clanadd');
   unregisterCommand('do_clanremove');

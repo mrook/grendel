@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.18 2002/08/03 19:14:04 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.19 2003/06/24 21:41:35 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -27,7 +27,7 @@ type
       timer_func : TIMER_FUNC;
       counter, timeout : integer;
       looping : boolean;
-
+	
       constructor Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
     end;
 
@@ -40,7 +40,7 @@ type
 
       sn : GSkill;
 
-      constructor Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
+      constructor Create(name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
     end;
 
     GTimerThread = class (TThread)
@@ -53,13 +53,14 @@ type
 var
    timer_list : GDLinkedList;
 
-procedure registerTimer(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean); overload;
-procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill); overload;
+procedure registerTimer(name : string; func : TIMER_FUNC; timeout : integer; looping : boolean); overload;
+procedure registerTimer(name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill); overload;
 
 procedure unregisterTimer(name_ : string); overload;
 procedure unregisterTimer(ch : GCharacter; timer_type : integer); overload;
 
-function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
+function hasTimer(ch : GCharacter; timer_type : integer) : GTimer; overload;
+function hasTimer(ch : GCharacter; const timer_name : string) : GTimer; overload;
 
 procedure initTimers();
 procedure cleanupTimers();
@@ -75,7 +76,6 @@ uses
     util,
     mudthread,
     update,
-    debug,
     area,
     conns,
     Channels;
@@ -86,23 +86,23 @@ constructor GTimer.Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer
 begin
   inherited Create;
 
-  name := name_;
-  timer_func := func_;
-  timeout := timeout_;
-  counter := timeout_;
-  looping := looping_;
+  Self.name := name_;
+  Self.timer_func := func_;
+  Self.timeout := timeout_;
+  Self.counter := timeout_;
+  Self.looping := looping_;
 end;
 
 // GSpecTimer
-constructor GSpecTimer.Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
+constructor GSpecTimer.Create(name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
 begin
-  inherited Create(timer_names[timer_type_], nil, timeout_, false);
+  inherited Create(name_, nil, timeout_, false);
 
-  spec_func := func_;
-  timer_type := timer_type_;
-  ch := ch_;
-  victim := victim_;
-  sn := sn_;
+  Self.spec_func := func_;
+  Self.timer_type := timer_type_;
+  Self.ch := ch_;
+  Self.victim := victim_;
+  Self.sn := sn_;
 end;
 
 
@@ -157,15 +157,15 @@ begin
         end;
 
       except
-        on E : EExternal do
+{        on E : EExternal do
           begin
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
           outputError(E);
           end;
         on E : Exception do
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed: ' + E.Message)
-        else
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
+        else }
+        bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
 
 {        if (timer is GSpecTimer) then
           begin
@@ -183,20 +183,20 @@ begin
     end;
 end;
 
-procedure registerTimer(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
+procedure registerTimer(name : string; func : TIMER_FUNC; timeout : integer; looping : boolean);
 var
    timer : GTimer;
 begin
-  timer := GTimer.Create(name_, func_, timeout_, looping_);
+  timer := GTimer.Create(name, func, timeout, looping);
 
   timer_list.insertLast(timer);
 end;
 
-procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill); overload;
+procedure registerTimer(name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill);
 var
    timer : GSpecTimer;
 begin
-  timer := GSpecTimer.Create(timer_type_, func_, timeout_, ch_, victim_, sn_);
+  timer := GSpecTimer.Create(name, timer_type, func, timeout, ch, victim, sn);
 
   timer_list.insertLast(timer);
 end;
@@ -280,7 +280,34 @@ begin
     end;
 end;
 
+function hasTimer(ch : GCharacter; const timer_name : string) : GTimer;
+var
+   timer : GTimer;
+   spec : GSpecTimer;
+   node : GListNode;
+begin
+  Result := nil;
 
+  node := timer_list.head;
+
+  while (node <> nil) do
+    begin
+    timer := node.element;
+
+    if (timer is GSpecTimer) then
+      begin
+      spec := GSpecTimer(timer);
+
+      if (spec.ch = ch) and (spec.name = timer_name) then
+        begin
+        Result := timer;
+        break;
+        end;
+      end;
+
+    node := node.next;
+    end;
+end;
 
 // main timers
 procedure update_auction;

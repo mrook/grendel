@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.20 2002/12/31 13:54:55 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.21 2003/06/24 21:41:34 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -131,7 +131,7 @@ end;
 
 procedure spell_recall(ch,victim:GCharacter;sn:GSkill);
 begin
-  if (IS_SET(ch.room.flags, ROOM_NORECALL)) then
+  if (ch.room.flags.isBitSet(ROOM_NORECALL)) then
     begin
     act(AT_SPELL, 'Your recall spell failed.', false, ch, nil, nil, TO_CHAR);
     exit;
@@ -150,8 +150,6 @@ end;
 
 procedure spell_summon(ch,victim:GCharacter;sn:GSkill);
 begin
-  // Jago 18May2001 : check ch <> vict
-  // note: could make the spell not castable on self, but this is more fun ;)
   if (ch = victim) then
     begin
     act(AT_SPELL,'You attempt to summon yourself into the room.',false,ch,nil,victim,TO_CHAR);
@@ -160,12 +158,12 @@ begin
     exit;
     end;
 
-  if (IS_SET(ch.room.flags, ROOM_NOSUMMON)) then
+  if (ch.room.flags.isBitSet(ROOM_NOSUMMON)) then
     begin
     act(AT_SPELL, 'Your summon spell failed.', false, ch, nil, nil, TO_CHAR);
     end
   else
-  if (victim.position <> POS_FIGHTING) then
+  if (victim.state = STATE_IDLE) then
     begin
     act(AT_SPELL,'You summon $N into the room.',false,ch,nil,victim,TO_CHAR);
     act(AT_SPELL,'$n is summoned out of here!',false,victim,nil,nil,TO_ROOM);
@@ -174,8 +172,9 @@ begin
     victim.toRoom(ch.room);
 
     act(AT_SPELL,'$n has summoned $N!',false,ch,nil,victim,TO_ROOM);
+    
     if (victim.position <> POS_STANDING) then
-      interpret(victim,'stand');
+      interpret(victim, 'stand');
     end
   else
     act(AT_REPORT,'$N is not in a normal position to be summoned.',false,ch,nil,victim,TO_CHAR);
@@ -194,11 +193,6 @@ procedure spell_identify(ch,victim:GCharacter;sn:GSkill);
 var obj : GObject;
     s:string;
     liq:integer;
-const wearpos:array[WEAR_RFINGER..WEAR_EYES] of string=
-      ('FINGER','FINGER','NECK','NECK','BODY','HEAD','LEGS',
-       'FEET','HANDS','ARMS','SHIELD','ABOUT','WAIST',
-       'WRIST','WRIST','FLOATING','HAND','HAND','SHOULDER',
-       'SHOULDER','FACE','EAR','EAR','ANKLE','ANKLE','EYES');
 const ac_types:array[ARMOR_HAC..ARMOR_LAC] of string=
       ('HAC','BAC','AAC','LAC');
 begin
@@ -224,19 +218,20 @@ begin
     else
        s:='unknown object';
     end;
+    
     act(AT_REPORT,'$p$7 is some sort of $B$4'+s+'$A$7.'#13#10,false,ch,obj,nil,TO_CHAR);
-    s:='';
-    if wear1<>0 then
-      s:=wearpos[wear1];
-    if wear2<>0 then
-      begin
-      if s<>'' then
-        s:=s+' '+wearpos[wear2]
-      else
-        s:=wearpos[wear2];
-      end;
-    if (wear1=0) and (wear2=0) then
-      s:='NONE';
+    
+    if (wear_location1 = '') and (wear_location2 = '') then
+      s := 'NONE'
+    else
+    if (wear_location1 = '') and (wear_location2 <> '') then
+      s := wear_location2
+    else
+    if (wear_location1 <> '') and (wear_location2 = '') then
+      s := wear_location1
+    else
+      s := uppercase(wear_location1 + ', ' + wear_location2);
+      
     act(AT_REPORT,'Wearing positions $B$7'+s+'$A$7, weight $B$2'+inttostr(weight)+'$A$7 ounce(s).',false,ch,obj,nil,TO_CHAR);
     s:='';
     if IS_SET(flags,OBJ_GLOW) then
@@ -323,11 +318,11 @@ begin
                         node := victim.node_world;
                         vict := victim;
                         
-{                        if (not ch.IS_SAME_ALIGN(vict)) then
+                        if (not ch.IS_SAME_ALIGN(vict)) then
                           begin
                           ch.sendBuffer('They are not here.'#13#10);
                           exit;
-                          end; }
+                          end;
                         end;
         TARGET_OFF_AREA:begin
                         { check fighting }
@@ -601,25 +596,24 @@ begin
 
   func := sn.func;
 
-  if ((sn.target in [TARGET_DEF_WORLD,TARGET_OBJECT]) or
-   (victim.room=ch.room)) and (not victim.CHAR_DIED) then
+  if ((sn.target in [TARGET_DEF_WORLD, TARGET_OBJECT]) or (victim.room=ch.room)) and (not victim.CHAR_DIED) then
      begin
-     if skill_success(ch,sn) or (ch.IS_IMMORT) or (ch.IS_NPC) then      { immo's don't fail :) }
+     if (skill_success(ch, sn)) or (ch.IS_IMMORT) or (ch.IS_NPC) then      { immo's don't fail :) }
        begin
        if (sn.target <= TARGET_OFF_AREA) then
         if (not victim.CHAR_DIED) then
          begin
-         ch.position := POS_FIGHTING;
+         ch.state := STATE_FIGHTING;
+         ch.position := POS_STANDING;
          ch.fighting := victim;
 
-         if (victim.position < POS_FIGHTING) then
+         if (victim.state <> STATE_FIGHTING) then
            begin
            victim.fighting := ch;
-           victim.position := POS_FIGHTING;
+           victim.state := STATE_FIGHTING;
+           victim.position := POS_STANDING;
            end;
-         end
-       else
-         ch.position := POS_STANDING;
+         end;
 
        say_spell(ch, sn.name^);
 
@@ -635,9 +629,9 @@ begin
          end;
 
        if (ch.fighting <> nil) then
-         ch.position := POS_FIGHTING
+         ch.state := STATE_FIGHTING
        else
-         ch.position := POS_STANDING;
+         ch.state := STATE_IDLE;
        end
      else
        begin
@@ -645,34 +639,34 @@ begin
 
        if (sn.target < TARGET_OFF_AREA) then
          begin
-         ch.position := POS_FIGHTING;
+         ch.state := STATE_FIGHTING;
+         ch.position := POS_STANDING;
          ch.fighting := victim;
 
-         if (victim.position < POS_FIGHTING) then
+         if (victim.state <> STATE_FIGHTING) then
            begin
            victim.fighting := ch;
-           victim.position := POS_FIGHTING;
+           victim.state := STATE_FIGHTING;
+           victim.position := POS_STANDING;
            end;
-         end
-       else
-         ch.position := POS_STANDING;
+         end;
 
        act(AT_REPORT, 'You have lost your concentration.',false,ch,nil,nil,TO_CHAR);
 
        if (ch.fighting <> nil) then
-         ch.position := POS_FIGHTING
+         ch.state := STATE_FIGHTING
        else
-         ch.position := POS_STANDING;
+         ch.state := STATE_IDLE;
        end;
      end
    else
      begin
      act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
      
-     ch.position := POS_STANDING;
+     ch.state := STATE_IDLE;
      end;
 
-  ch.emptyBuffer;
+  ch.emptyBuffer();
 end;
 
 end.

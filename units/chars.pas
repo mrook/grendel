@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.67 2002/10/14 15:32:17 xenon Exp $)
+  @lastmod($Id: chars.pas,v 1.68 2003/06/24 21:41:32 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -72,7 +72,8 @@ type
     {$M+}
     GCharacter = class
       node_world, node_room : GListNode;
-      objects : GDLinkedList;
+      inventory : GDLinkedList;
+      equipment : GHashTable;
 
       reply, master, leader : GCharacter;
       fighting, hunting : GCharacter;
@@ -94,6 +95,8 @@ type
       _save_poison, _save_cold, _save_para,  { saving throws }
       _save_breath, _save_spell : integer;
 
+      _name, _short, _long : PString;
+
     public
       ac_mod : integer;             { AC modifier (spells?) }
       natural_ac : integer;         { Natural AC (race based for PC's) }
@@ -106,6 +109,7 @@ type
       logging : boolean;
 
       position : integer;
+      state : integer;
       mental_state : integer;
       room : GRoom;
       substate : integer;
@@ -115,7 +119,6 @@ type
       skills_learned : GDLinkedList;
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
-      name, short, long : PString;
       race : GRace;
       carried_weight : integer;             { weight of items carried }
       weight, height : integer;       { weight/height of (N)PC }
@@ -169,7 +172,7 @@ type
       procedure fromRoom;
       procedure toRoom(to_room : GRoom);
 
-      function getEQ(location : integer) : GObject;
+      function getEQ(location : string) : GObject;
       function getWield(item_type : integer) : GObject;
       function getDualWield : GObject;
       procedure affectObject(obj : GObject; remove: boolean);
@@ -192,10 +195,15 @@ type
       constructor Create;
       destructor Destroy; override;
 
-    // properties
+      procedure setName(const name : string);
+      procedure setShortName(const name : string);
+      procedure setLongName(const name : string);
       function getName() : string;
+      function getShortName() : string;
+      function getLongName() : string;
       function getRaceName() : string;
 
+    // properties   
       property level : integer read _level write _level;
       property str : integer read _str write _str;
       property con : integer read _con write _con;
@@ -223,7 +231,9 @@ type
       property save_breath : integer read _save_breath write _save_breath;
       property save_spell : integer read _save_spell write _save_spell;
 
-      property pname : string read getName;
+      property name : string read getName write setName;
+      property short : string read getShortName write setShortName;
+      property long : string read getLongName write setLongName;
       property rname : string read getRaceName;
     end;
 
@@ -351,6 +361,7 @@ implementation
 
 uses
     conns,
+    timers,
     skills,
     console,
     mudsystem,
@@ -396,12 +407,13 @@ begin
   inherited Destroy();
 end;
 
-constructor GCharacter.Create;
+constructor GCharacter.Create();
 begin
-  inherited Create;
+  inherited Create();
 
-  objects := GDLinkedList.Create;
-  affects := GDLinkedList.Create;
+  inventory := GDLinkedList.Create();
+  equipment := GHashTable.Create(32);
+  affects := GDLinkedList.Create();
 
   reply := nil;
   master := nil;
@@ -410,28 +422,26 @@ begin
   tracking := '';
 end;
 
-destructor GCharacter.Destroy;
+destructor GCharacter.Destroy();
 var
    obj : GObject;
    node : GListNode;
    tc : TChannel;
 begin
-  affects.clean;
-  affects.Free;
+  affects.clean();
+  affects.Free();
 
-  if (objects.tail <> nil) then
-    repeat
-      obj := objects.tail.element;
-      obj.extract;
-    until (objects.tail = nil);
-
-  objects.Free;
+  inventory.clean();
+  inventory.Free();
+  
+  equipment.clear();
+  equipment.Free();
 
   hunting := nil;
 
-  unhash_string(name);
-  unhash_string(short);
-  unhash_string(long);
+  unhash_string(_name);
+  unhash_string(_short);
+  unhash_string(_long);
 
   inherited Destroy;
 end;
@@ -466,10 +476,41 @@ begin
     end;
 end;
 
+procedure GCharacter.setName(const name : string);
+begin
+  _name := hash_string(name);
+end;
+
+procedure GCharacter.setShortName(const name : string);
+begin
+  _short := hash_string(name);
+end;
+
+procedure GCharacter.setLongName(const name : string);
+begin
+  _long := hash_string(name);
+end;
+
 function GCharacter.getName() : string;
 begin
-  if (name <> nil) then
-    Result := name^
+  if (_name <> nil) then
+    Result := _name^
+  else
+    Result := '';
+end;
+
+function GCharacter.getShortName() : string;
+begin
+  if (_short <> nil) then
+    Result := _short^
+  else
+    Result := '';
+end;
+
+function GCharacter.getLongName() : string;
+begin
+  if (_long <> nil) then
+    Result := _long^
   else
     Result := '';
 end;
@@ -613,6 +654,7 @@ begin
   hitroll := 50;
 
   position := POS_STANDING;
+  state := STATE_IDLE;
   bash_timer := -2;
   cast_timer := 0;
   bashing := -2;
@@ -674,10 +716,10 @@ begin
     end;
 
   if (c = nil) then
-    writeConsole('(Linkless) '+ name^+ ' has logged out')
+    writeConsole('(Linkless) '+ name+ ' has logged out')
   else
   if (c <> nil) then
-    writeConsole('(' + inttostr(c.sock.getDescriptor) + ') ' + name^ + ' has logged out');
+    writeConsole('(' + inttostr(c.sock.getDescriptor) + ') ' + name + ' has logged out');
 
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
@@ -688,7 +730,7 @@ begin
     try
       c.thread.terminate;
     except
-      writeConsole('could not delete thread of ' + name^);
+      writeConsole('could not delete thread of ' + name);
     end;
 
     conn := nil;
@@ -714,7 +756,7 @@ begin
 
   if (leader <> Self) then
     begin
-    to_channel(leader, '$B$7[Group]: ' + name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
+    to_channel(leader, '$B$7[Group]: ' + name + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
     leader := nil;
     end
   else
@@ -736,7 +778,7 @@ begin
       end;
     end;
 
-  save(name^);
+  save(name);
 
   extract(true);
 end;
@@ -794,7 +836,7 @@ end;
 
 function GCharacter.IS_AWAKE : boolean;
 begin
-  IS_AWAKE := (position <> POS_SLEEPING);
+  IS_AWAKE := (state <> STATE_SLEEPING);
 end;
 
 function GCharacter.IS_INVIS : boolean;
@@ -843,7 +885,7 @@ end;
 
 function GCharacter.IS_FLYING : boolean;
 begin
-  Result := IS_SET(aff_flags, AFF_FLYING);
+  Result := (position = POS_FLYING);
 end;
 
 function GCharacter.IS_BANKER : boolean;
@@ -869,7 +911,7 @@ end;
 function GCharacter.IS_OUTSIDE : boolean;
 begin
   IS_OUTSIDE := (room.sector <> SECT_INSIDE) and
-               (not IS_SET(room.flags, ROOM_INDOORS));
+               (not room.flags.isBitSet(ROOM_INDOORS));
 end;
 
 function GCharacter.IS_AFFECT(affect : integer) : boolean;
@@ -887,24 +929,25 @@ end;
 
 function GCharacter.IS_WEARING(item_type : integer) : boolean;
 var
-   node : GListNode;
-   obj : GObject;
+  iterator : GIterator;
+  obj : GObject;
 begin
-  node := objects.head;
   Result := false;
+  
+  iterator := equipment.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (obj.wear_location <> WEAR_NULL) and (obj.item_type = item_type) then
+    if (obj.item_type = item_type) then
       begin
       Result := true;
       break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 function GCharacter.IS_HOLYWALK : boolean;
@@ -1122,9 +1165,9 @@ begin
   s := fn;
   s[1] := upcase(s[1]);
 
-  name := hash_string(s);
-  short := hash_string(s + ' is here');
-  long := hash_string(s + ' is standing here');
+  _name := hash_string(s);
+  _short := hash_string(s + ' is here');
+  _long := hash_string(s + ' is standing here');
 
   try
     af := GFileReader.Create('players\' + fn + '.usr');
@@ -1160,7 +1203,7 @@ begin
           if (race = nil) then
             begin
             bugreport('GCharacter.load', 'chars.pas', 'Unknown race ' + right(a, ' ') + ', reverting to default instead');
-            race := race_list.head.element;
+            race := raceList.head.element;
             end;
           end
         else
@@ -1276,7 +1319,7 @@ begin
           begin
           clan := findClan(right(a,' '));
 
-          if (clan <> nil) and(clan.leader = name^) then
+          if (clan <> nil) and(clan.leader = name) then
             clanleader := true;
           end
         else
@@ -1542,36 +1585,21 @@ begin
 
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
-
           obj := GObject.Create;
 
           with obj do
             begin
-            d := af.readInteger;
-
-            if (d <> -1 ) then
-              begin
-              obj_index := findObjectIndex(d);
-
-              if (obj_index = nil) then
-                bugreport('load_user', 'charlist.pas', 'illegal vnum ' + inttostr(d))
-              else
-                inc(obj_index.obj_count);
-              end;
-
-            a := af.readLine;
-            name := hash_string(a);
-            a := af.readLine;
-            short := hash_string(a);
-            a := af.readLine;
-            long := hash_string(a);
+            vnum := af.readInteger();
+            name := af.readLine();
+            short := af.readLine();
+            long := af.readLine();
 
             a := af.readLine;
             item_type:=StrToInt(left(a,' '));
             a:=right(a,' ');
-            wear1:=StrToInt(left(a,' '));
+            wear_location1 := left(a,' ');
             a:=right(a,' ');
-            wear2:=StrToInt(left(a,' '));
+            wear_location2 := left(a,' ');
 
             a := af.readLine;
             value[1]:=StrToInt(left(a,' '));
@@ -1596,14 +1624,14 @@ begin
             room:=nil;
             end;
 
-          obj.node_world := object_list.insertLast(obj);
-
-          obj.toChar(Self);
-
-          obj.wear_location := strtoint(g);
-
-          if (obj.wear_location < WEAR_NULL) then
-            obj.wear_location := WEAR_NULL;
+					obj.node_world := objectList.insertLast(obj);
+					
+				  obj.worn := g;
+				  
+				  if (obj.worn = 'none') then
+				    obj.worn := '';
+	            
+          obj.toChar(Self);         
           end;
       until (uppercase(g) = '#END') or (af.eof);
 
@@ -1638,9 +1666,9 @@ begin
 
   if (inner <> 0) then
     begin
-    bugreport('GCharacter.load', 'chars.pas', 'corrupted playerfile ' + name^);
+    bugreport('GCharacter.load', 'chars.pas', 'corrupted playerfile ' + name);
 
-    race := GRace(race_list.head.element);
+    race := GRace(raceList.head.element);
     end;
 
   if (race <> nil) then
@@ -1670,6 +1698,10 @@ begin
 
   calcAC;
   calcRank;
+  
+  // backwards compatibility fixes
+  REMOVE_BIT(aff_flags, AFF_BASHED);
+  REMOVE_BIT(aff_flags, AFF_STUNNED);
 
   load := true;
 end;
@@ -1686,6 +1718,7 @@ var
    fl : cardinal;
    tc : TChannel;
    iterator : GIterator;
+   w1, w2 : string;
 begin
   if (IS_NPC) then
     begin
@@ -1711,7 +1744,7 @@ begin
     end;
 
   af.writeLine('#PLAYER');
-  af.writeLine('User: ' + name^);
+  af.writeLine('User: ' + name);
   af.writeLine('MD5-Password: ' + MD5Print(md5_password));
   af.writeLine('Sex: ' + IntToStr(sex));
   af.writeLine('Race: ' + race.name);
@@ -1860,26 +1893,56 @@ begin
 
   af.writeLine('#OBJECTS');
   
-  iterator := objects.iterator();
+  iterator := inventory.iterator();
 
   while (iterator.hasNext()) do
     begin
     obj := GObject(iterator.next());
 
-    af.writeLine(IntToStr(obj.wear_location));
+    af.writeLine('none');
 
-    if (obj.obj_index <> nil) then
-      af.writeLine(IntToStr(obj.obj_index.vnum))
-    else
-      af.writeLine(IntToStr(-1));
+    af.writeLine(IntToStr(obj.vnum));
 
-    af.writeLine(obj.name^);
-    af.writeLine(obj.short^);
-    af.writeLine(obj.long^);
-    af.writeLine(IntToStr(obj.item_type) + ' ' + IntToStr(obj.wear1) + ' ' + IntToStr(obj.wear2));
+    af.writeLine(obj.name);
+    af.writeLine(obj.short);
+    af.writeLine(obj.long);
+    af.writeLine(IntToStr(obj.item_type) + ' ' + obj.wear_location1 + ' ' + obj.wear_location2);
     af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
     af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
     end;
+    
+  iterator.Free();
+
+  iterator := equipment.iterator();
+
+  while (iterator.hasNext()) do
+    begin
+    obj := GObject(iterator.next());
+    
+    af.writeLine(obj.worn);
+
+    af.writeLine(IntToStr(obj.vnum));
+
+    af.writeLine(obj.name);
+    af.writeLine(obj.short);
+    af.writeLine(obj.long);
+    
+    if (obj.wear_location1 = '') then
+      w1 := 'none'
+    else
+      w1 := obj.wear_location1;
+    
+    if (obj.wear_location2 = '') then
+      w2 := 'none'
+    else
+      w2 := obj.wear_location2;
+
+    af.writeLine(IntToStr(obj.item_type) + ' ' + w1 + ' ' + w2);
+    af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
+    af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
+    end;
+    
+  iterator.Free();
 
   af.writeLine('#END');
   af.writeLine('');
@@ -2027,12 +2090,12 @@ begin
         if (active_board = BOARD_IMM) then
           begin
           act(AT_REPORT,'There is a new note on the ' + board_names[active_board] + ' board.', false, Self, nil, nil, TO_IMM);
-          act(AT_REPORT,'Written by ' + name^ + '.',false,Self,nil,nil,TO_IMM);
+          act(AT_REPORT,'Written by ' + name + '.',false,Self,nil,nil,TO_IMM);
           end
         else
           begin
           act(AT_REPORT,'There is a new note on the ' + board_names[active_board] + ' board.', false, Self, nil, nil, TO_ALL);
-          act(AT_REPORT,'Written by ' + name^ + '.', false, Self, nil, nil, TO_ALL);
+          act(AT_REPORT,'Written by ' + name + '.', false, Self, nil, nil, TO_ALL);
           end;
 
         exit;
@@ -2220,7 +2283,7 @@ begin
       exit;
     end;
 
-  if (position = POS_CASTING) then
+  if (hasTimer(Self, TIMER_ACTION) <> nil) then
     buf := buf + '+';
 
   if (IS_IMMORT) then
@@ -2246,7 +2309,7 @@ begin
         'l':  s := s + inttostr(level);
         'x':  s := s + inttostr(xptogo);
         'f':  begin
-              if (fighting <> nil) and (position >= POS_FIGHTING) then
+              if (fighting <> nil) and (state = STATE_FIGHTING) then
                 begin
                 s := s + ' [Oppnt: ';
 
@@ -2257,10 +2320,10 @@ begin
                 end;
               end;
         't':  begin
-              if (fighting <> nil) and (position >= POS_FIGHTING) then
+              if (fighting <> nil) and (position = STATE_FIGHTING) then
                if (fighting.fighting <> nil) and (fighting.fighting <> Self) then
                  begin
-                 s := s + ' [' + fighting.fighting.name^ + ': ';
+                 s := s + ' [' + fighting.fighting.name + ': ';
 
                  with fighting.fighting do
                    s := s + hp_perc[UMax(round((hp / max_hp) * 5), 0)];
@@ -2305,7 +2368,7 @@ begin
   room.chars.remove(node_room);
 
   if (IS_WEARING(ITEM_LIGHT)) and (room.light > 0) then
-    inc(room.light);
+    room.light := room.light - 1;
 
   { Only PCs register as players, so increase the number! - Grimlord }
   if (not IS_NPC) then
@@ -2350,7 +2413,7 @@ begin
   room := to_room;
 
   if (IS_WEARING(ITEM_LIGHT)) then
-    inc(room.light);
+    room.light := room.light + 1;
 
   node_room := room.chars.insertLast(Self);
 
@@ -2360,7 +2423,7 @@ begin
     inc(to_room.area.nplayer);
 
   { check for teleports }
-  if (IS_SET(to_room.flags, ROOM_TELEPORT)) and (to_room.teledelay>0) then
+  if (to_room.flags.isBitSet(ROOM_TELEPORT)) and (to_room.teledelay>0) then
     begin
     node := teleport_list.head;
 
@@ -2452,26 +2515,27 @@ begin
   wait := UMax(wait, ticks);
 end;
 
-function GCharacter.getEQ(location : integer) : GObject;
+function GCharacter.getEQ(location : string) : GObject;
 var
-   node : GListNode;
-   obj : GObject;
+	iterator : GIterator;
+  obj : GObject;
 begin
   Result := nil;
 
-  node := objects.head;
-  while (node <> nil) do
+	iterator := equipment.iterator();
+	
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (obj.wear_location = location) then
+    if (obj.worn = location) then
       begin
       Result := obj;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 function GCharacter.getWield(item_type : integer) : GObject;
@@ -2480,14 +2544,14 @@ var
 begin
   getWield := nil;
 
-  obj := getEQ(WEAR_RHAND);
+  obj := getEQ('rwield');
   if (obj <> nil) and (obj.item_type = item_type) then
     begin
     getWield := obj;
     exit;
     end;
 
-  obj := getEQ(WEAR_LHAND);
+  obj := getEQ('lwield');
   if (obj <> nil) and (obj.item_type = item_type) then
     begin
     getWield:=obj;
@@ -2503,45 +2567,113 @@ begin
   if (LEARNED(gsn_dual_wield) = 0) then
     exit;
 
-  if (getEQ(WEAR_RHAND) <> nil) and (getEQ(WEAR_LHAND) <> nil) then
-    getDualWield := getEQ(WEAR_LHAND);
+  if (getEQ('rwield') <> nil) and (getEQ('lwield') <> nil) then
+    getDualWield := getEQ('lwield');
 end;
 
 procedure GCharacter.affectObject(obj : GObject; remove : boolean);
 var
-   node : GListNode;
+   iterator : GIterator;
    aff : GAffect;
 begin
   with obj do
     case obj.item_type of
       ITEM_ARMOR: calcAC;
       ITEM_LIGHT: if (remove) then
-                    dec(Self.room.light)
+                    Self.room.light := room.light - 1
                   else
-                    inc(Self.room.light);
+                    Self.room.light := room.light + 1;
       ITEM_GEM: if (remove) then
                   max_mana := max_mana - obj.value[3]
                 else
                   max_mana := max_mana + obj.value[3]
     end;
 
-  if (obj.obj_index <> nil) then
-    begin
-    node := obj.obj_index.affects.head;
+  iterator := obj.affects.iterator();
+  
+	while (iterator.hasNext()) do
+		begin
+		aff := GAffect(iterator.next());
 
-    while (node <> nil) do
-      begin
-      aff := node.element;
-
-      aff.modify(Self, not remove);
-
-      node := node.next;
-      end;
-    end;
+		aff.modify(Self, not remove);
+		end;
 end;
 
 function GCharacter.equip(obj : GObject) : boolean;
-const wr_string:array[WEAR_RFINGER..WEAR_EYES, 1..2] of string =
+var
+  bodypart : GBodyPart;
+begin
+  Result := true;
+
+  if IS_SET(obj.flags,OBJ_ANTI_GOOD) and IS_GOOD then
+    begin
+    act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
+    act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
+
+    obj.fromChar;
+    obj.toRoom(room);
+    exit;
+    end;
+
+  if IS_SET(obj.flags,OBJ_ANTI_EVIL) and IS_EVIL then
+    begin
+    act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
+    act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
+
+    obj.fromChar;
+    obj.toRoom(room);
+    exit;
+    end;
+
+  if (obj.wear_location1 <> '') and (getEQ(obj.wear_location1) = nil) then      { Wear on spot #1}
+    begin
+    bodypart := GBodyPart(race.bodyparts[obj.wear_location1]);
+    
+    if (bodypart = nil) then
+      begin
+      act(AT_REPORT, 'You do not have the right anatomy to wear $p.', false, Self, obj, nil, TO_CHAR);
+      Result := false;
+      exit;
+      end;
+      
+    act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
+    act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+
+    obj.fromChar();
+    obj.worn := obj.wear_location1;
+    obj.toChar(Self);
+
+    affectObject(obj, false);
+    end
+  else
+  if (obj.wear_location2 <> '') and (getEQ(obj.wear_location2) = nil) then      { Wear on spot #2}
+    begin
+    bodypart := GBodyPart(race.bodyparts[obj.wear_location2]);
+    
+    if (bodypart = nil) then
+      begin
+      act(AT_REPORT, 'You do not have the right anatomy to wear $p.', false, Self, obj, nil, TO_CHAR);
+      Result := false;
+      exit;
+      end;
+      
+    act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
+    act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+
+    obj.fromChar();
+    obj.worn := obj.wear_location2;
+    obj.toChar(Self);
+
+    affectObject(obj, false);
+    end
+  else                                              { No spots left }
+    begin
+    sendBuffer('You are already wearing something there!'#13#10);
+    Result := false;
+    end; 
+end;
+
+(* const wr_string:array[WEAR_RFINGER..WEAR_EYES, 1..2] of string =
       (('on your finger', 'on $s finger'),
        ('on your finger', 'on $s finger'),
        ('around your neck', 'around $s neck'),
@@ -2610,8 +2742,8 @@ begin
     begin
     act(AT_REPORT,'You are already wearing something there!',false,Self,nil,nil,TO_CHAR);
     equip := false;
-    end;
-end;
+    end; 
+end; *)
 
 function GCharacter.calcxp2lvl : cardinal;
 begin
@@ -2620,9 +2752,9 @@ end;
 
 procedure GCharacter.calcAC;
 var
-   dex_mod:integer;
-   node : GListNode;
-   obj : GObject;
+  dex_mod:integer;
+  iterator : GIterator;
+  obj : GObject;
 begin
   dex_mod := (dex-50) div 12;
   hac := natural_ac - dex_mod + ac_mod;
@@ -2630,21 +2762,22 @@ begin
   aac := natural_ac - dex_mod + ac_mod;
   lac := natural_ac - dex_mod + ac_mod;
 
-  node := objects.head;
-  while (node <> nil) do
+  iterator := equipment.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (obj.wear_location > WEAR_NULL) and (obj.item_type = ITEM_ARMOR) then
+    if (obj.item_type = ITEM_ARMOR) then
       case obj.value[2] of
         ARMOR_HAC : dec(hac, obj.value[3]);
         ARMOR_BAC : dec(bac, obj.value[3]);
         ARMOR_AAC : dec(aac, obj.value[3]);
         ARMOR_LAC : dec(lac, obj.value[3]);
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 
   ac := (hac + bac + aac + lac) div 4;
 end;
@@ -2706,7 +2839,7 @@ begin
   else
   if (CAN_FLY) then
     begin
-    SET_BIT(aff_flags, AFF_FLYING);
+    position := POS_FLYING;
 
     act(AT_REPORT,'You begin to fly again!',false,Self,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n gently floats up in the air.',false,Self,nil,nil,TO_ROOM);
@@ -2722,7 +2855,7 @@ procedure GCharacter.stopFlying;
 begin
   if (IS_FLYING) then
     begin
-    REMOVE_BIT(aff_flags, AFF_FLYING);
+    position := POS_STANDING;
 
     act(AT_REPORT,'You slowly land on the ground.',false,Self,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n gently lands on the ground.',false,Self,nil,nil,TO_ROOM);
@@ -2730,45 +2863,49 @@ begin
 end;
 
 function GCharacter.findInventory(s : string) : GObject;
-var obj : GObject;
-    node : GListNode;
+var 
+  obj : GObject;
+  iterator : Giterator;
 begin
-  findInventory := nil;
-  node := objects.head;
+  Result := nil;
+  
+  iterator := inventory.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
-    if (obj.wear_location = WEAR_NULL) and (isObjectName(obj.name^, s) or isObjectName(obj.short^, s)) then
+    obj := GObject(iterator.next());
+    
+    if (isObjectName(obj.name, s) or isObjectName(obj.short, s)) then
       begin
-      findInventory := obj;
-      exit;
+      Result := obj;
+      break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
-{ Xenon 20/Feb/2001: like findInventory searches thru inv, findEquipment searches thru stuff being worn }
 function GCharacter.findEquipment(s : string) : GObject;
-var obj : GObject;
-    node : GListNode;
+var 
+  obj : GObject;
+  iterator : GIterator;
 begin
-  findEquipment := nil;
-  node := objects.head;
+  Result := nil;
 
-  while (node <> nil) do
+  iterator := equipment.iterator();
+
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (obj.wear_location <> WEAR_NULL) and (isObjectName(obj.name^, s) or isObjectName(obj.short^, s)) then
+    if (isObjectName(obj.name, s) or isObjectName(obj.short, s)) then
       begin
-      findEquipment := obj;
-      exit;
+      Result := obj;
+      break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 { Added 2.<char> - Nemesis }
@@ -2796,7 +2933,7 @@ begin
     begin
     vict := node.element;
 
-    if (isName(vict.name^,name)) or (isName(vict.short^,name)) and (ch.CAN_SEE(vict)) then
+    if (isName(vict.name,name)) or (isName(vict.short,name)) and (ch.CAN_SEE(vict)) then
       begin
       inc(count);
 
@@ -2835,7 +2972,7 @@ begin
     begin
     vict := GCharacter(iterator.next());
 
-    if ((isName(vict.name^,name)) or (isName(vict.short^,name))) and (not vict.IS_NPC) then
+    if ((isName(vict.name,name)) or (isName(vict.short,name))) and (not vict.IS_NPC) then
       begin    
       if (ch <> nil) and (not ch.CAN_SEE(vict)) then
         continue;
@@ -2877,7 +3014,7 @@ begin
     begin
     vict := GCharacter(iterator.next());
 
-    if (lowercase(vict.name^) = lowercase(name)) and (not vict.IS_NPC) then
+    if (lowercase(vict.name) = lowercase(name)) and (not vict.IS_NPC) then
       begin    
       if (ch <> nil) and (not ch.CAN_SEE(vict)) then
         continue;
@@ -2920,7 +3057,7 @@ begin
   char_list.clean();
   char_list.Free();
 
-  extracted_chars.clean();
+//  extracted_chars.clean();
   extracted_chars.Free();
 end;
 

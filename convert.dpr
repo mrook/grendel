@@ -157,10 +157,10 @@ begin
     s := af.readLine;
 
     if (pos('#AREA',s) > 0) then
-      are.name := trim(left(right(s, ' '), '~'))
+      are.a_name := trim(left(right(s, ' '), '~'))
     else
     if (pos('#AUTHOR',s) > 0) then
-      are.author := trim(left(right(s, ' '), '~'))
+      are.a_author := trim(left(right(s, ' '), '~'))
     else
     if (s = '#ROOMS') then
       repeat

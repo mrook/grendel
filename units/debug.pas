@@ -1,6 +1,6 @@
 {
   @abstract(Internal debug routines)
-  @lastmod($Id: debug.pas,v 1.17 2002/08/03 19:17:47 ***REMOVED*** Exp $)
+  @lastmod($Id: debug.pas,v 1.18 2003/06/24 21:41:33 ***REMOVED*** Exp $)
 }
 
 unit debug;
@@ -198,7 +198,7 @@ begin
     s := af.readLine();
   until (trim(s) <> '');
 
-  while (pos('Line numbers for',s) = 0) do
+  while (pos('Line numbers for',s) = 0) and (pos(':', s) <> 0) do
     begin
     g := trim(s);
 
@@ -222,7 +222,7 @@ begin
 
   while (true) do
     begin
-    if (af.eof()) then
+    if (af.eof()) or (pos('Bound resource files', s) > 0) or (pos('Program entry point', s) > 0) then
       break;
 
     temp := left(right(s, '('), ')');
@@ -257,9 +257,9 @@ begin
         end;
 
       s := af.readLine();
-    until (pos('Line numbers for', s) > 0) or (pos('Bound resource files', s) > 0) or (pos('Program entryp point', s) > 0);
+    until (pos('Line numbers for', s) > 0) or (pos('Bound resource files', s) > 0) or (pos('Program entry point', s) > 0);
     
-    if (pos('Bound resource files', s) > 0) or (pos('Program entryp point', s) > 0) then
+    if (pos('Bound resource files', s) > 0) or (pos('Program entry point', s) > 0) then
       break;
     end;
 

@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.20 2002/11/14 16:26:40 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.21 2003/06/24 21:41:33 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -39,7 +39,6 @@ uses
     area,
     util,
     timers,
-    debug,
 {$IFDEF WIN32}
     Winsock2,
 {$ENDIF}
@@ -74,7 +73,7 @@ begin
     ch := node.element;
 
     if (not ch.IS_NPC) then
-      GPlayer(ch).save(ch.name^);
+      GPlayer(ch).save(ch.name);
 
     node := node.next;
     end;
@@ -111,12 +110,9 @@ begin
 
         if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
           begin
-          if (Assigned(conn.ch.name)) then
-            bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name^ + ' probably died')
-          else
-            bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of unnamed player probably died');
-
-          conn.ch.emptyBuffer;
+          bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name + ' probably died');
+          
+          conn.ch.emptyBuffer();
 
           conn.send('Your previous command possibly triggered an illegal action on this server.'#13#10);
           conn.send('The administration has been notified, and you have been disconnected'#13#10);
@@ -160,20 +156,19 @@ begin
         timer_thread := GTimerThread.Create;
         end;
 
-      cleanExtractedChars();
-      cleanExtractedObjects();
+//      cleanExtractedChars();
 
       sleep(10000);
     except
-      on E : EExternal do
+{      on E : EExternal do
         begin
         bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
         outputError(E);
         end;
       on E : Exception do
         bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed: ' + E.Message)
-      else
-        bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
+      else }
+      bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
     end;    
   until (Terminated); 
 end;

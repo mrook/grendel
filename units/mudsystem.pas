@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.39 2002/08/03 19:14:00 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.40 2003/06/24 21:41:34 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -19,6 +19,7 @@ uses
     strip,
     clean,
     dtypes,
+    FastStringFuncs,
     util;
 
 const BOOTTYPE_SHUTDOWN = 1;
@@ -728,7 +729,7 @@ begin
     begin
     area := node.element;
 
-    if (not IS_SET(area.flags, AREA_PROTO)) then
+    if (not area.flags.isBitSet(AREA_PROTO)) then
       with area do
         begin
         af.writeLine(fname);
@@ -765,34 +766,34 @@ begin
     1,2:begin
         if (bid > 0) then
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] $7' + cap(GObject(item).name^);
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] $7' + cap(GObject(item).name);
 
           if (going = 1) then
             buf := buf + ' $1is going ONCE to '
           else
             buf := buf + ' $1is going TWICE to ';
 
-          buf := buf + GCharacter(buyer).name^ + ' for ' + inttostr(bid) + ' coins.';
+          buf := buf + GCharacter(buyer).name + ' for ' + inttostr(bid) + ' coins.';
           to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
           end
         else
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] Anyone?$7 ' + cap(GObject(item).name^) + '$1 for ' + inttostr(start) + ' coins?';
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] Anyone?$7 ' + cap(GObject(item).name) + '$1 for ' + inttostr(start) + ' coins?';
           to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
           end;
         end;
       3:begin
         if (bid > 0) then
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] $7' + cap(GObject(item).name^);
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] $7' + cap(GObject(item).name);
 
-          buf := buf + ' $1has been SOLD to ' + GCharacter(buyer).name^ + ' for ' + inttostr(bid) + ' coins.';
+          buf := buf + ' $1has been SOLD to ' + GCharacter(buyer).name + ' for ' + inttostr(bid) + ' coins.';
 
           to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
 
           GObject(item).toChar(buyer);
 
-          act(AT_REPORT,'You have won the auction! '+cap(GObject(item).name^)+' at '+
+          act(AT_REPORT,'You have won the auction! '+cap(GObject(item).name)+' at '+
               inttostr(bid)+' coins.',false,buyer,nil,nil,TO_CHAR);
 
           dec(GPlayer(buyer).bankgold, bid);
@@ -800,7 +801,7 @@ begin
           end
         else
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] Due to lack of bidders, auction has been halted.';
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] Due to lack of bidders, auction has been halted.';
 
           to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
 

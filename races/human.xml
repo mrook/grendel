@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+
+<race>
+  <name>Human</name>
+  <alignment>0</alignment>
+  <convert>true</convert>
+  <skills>15</skills>
+  <spells>25</spells>
+  <statmax>
+    <str>25</str>
+    <int>25</int>
+    <wis>25</wis>
+    <dex>25</dex>
+    <con>25</con>
+  </statmax>
+  <bonus>
+    <str>0</str>
+    <int>0</int>
+    <wis>0</wis>
+    <dex>0</dex>
+    <con>0</con>
+  </bonus>
+  <saves>
+    <poison>14</poison>
+    <cold>15</cold>
+    <para>16</para>
+    <breath>17</breath>
+    <spell>17</spell>
+  </saves>
+  <description>
+	Humans are best known for their versatility, they can literally do
+	anything. At the start of the war, different groups humans claimed
+	allegiance to both sides.
+
+
+	Humans gain no bonuses, nor penalties.
+
+	Natural abilities: None  
+  </description>
+  <body>
+<!-- essential bodypart -->
+    <bodypart>
+      <name>float</name>
+      <description>near head</description>
+      <char_message>$p begins floating near your head.</char_message>
+      <room_message>$p begins floating near $n's head.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>head</name>
+      <description>head</description>
+      <char_message>You don $p on your head.</char_message>
+      <room_message>$n dons $p on $s head.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>lear</name>
+      <description>left ear</description>
+      <char_message>You pin $p in your left ear.</char_message>
+      <room_message>$n pins $p in $s left ear.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>rear</name>
+      <description>right ear</description>
+      <char_message>You pin $p in your right ear.</char_message>
+      <room_message>$n pins $p in $s right ear.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>face</name>
+      <description>face</description>
+      <char_message>You strap $p on your face.</char_message>
+      <room_message>$n straps $p on $s face.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>body</name>
+      <description>body</description>
+    </bodypart>
+    <bodypart>
+      <name>neck</name>
+      <char_message>You clasp $p around your neck.</char_message>
+      <room_message>$n clasps $p around $s neck.</room_message>
+      <description>neck</description>
+    </bodypart>
+    <bodypart>
+      <name>lshoulder</name>
+      <description>left shoulder</description>
+      <char_message>You sling $p over your left shoulder.</char_message>
+      <room_message>$n sling $p over $s left shoulder.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>rshoulder</name>
+      <description>right shoulder</description>
+      <char_message>You sling $p over your right shoulder.</char_message>
+      <room_message>$n sling $p over $s right shoulder.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>larm</name>
+      <description>left arm</description>
+      <char_message>You strap $p on your left arm.</char_message>
+      <room_message>$n straps $p on $s left arm.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>rarm</name>
+      <description>right arm</description>
+      <char_message>You strap $p on your right arm.</char_message>
+      <room_message>$n straps $p on $s right arm.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>lwrist</name>
+      <description>left wrist</description>
+      <char_message>You wear $p around your left wrist.</char_message>
+      <room_message>$n wears $p around $s left wrist.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>rwrist</name>
+      <description>right wrist</description>
+      <char_message>You wear $p around your right wrist.</char_message>
+      <room_message>$n wears $p around $s right wrist.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>lfinger</name>
+      <description>left finger</description>
+      <char_message>You slide $p around your left finger.</char_message>
+      <room_message>$n slides $p around $s left finger.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>rfinger</name>
+      <description>right finger</description>
+      <char_message>You slide $p around your right finger.</char_message>
+      <room_message>$n slides $p around $s right finger.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>lleg<name>
+      <char_message>You strap $p on your left leg.</char_message>
+      <room_message>$n straps $p on $s left leg.</char_message>
+      <description>left leg</description>
+    </bodypart>
+    <bodypart>
+      <name>rleg<name>
+      <char_message>You strap $p on your right leg.</char_message>
+      <room_message>$n straps $p on $s right leg.</char_message>
+      <description>right leg</description>
+    </bodypart>
+    <bodypart>
+      <name>lankle</name>
+      <description>left ankle</description>
+      <char_message>You wear $p around your left ankle.</char_message>
+      <room_message>$n wears $p around $s left ankle.</room_message>
+    </bodypart>
+    <bodypart>
+      <name>rankle</name>
+      <description>right ankle</description>
+      <char_message>You wear $p around your right ankle.</char_message>
+      <room_message>$n wears $p around $s right ankle.</room_message>
+    </bodypart>
+<!-- NB: there MUST be lwield/rwield bodyparts or the race will bug -->    
+    <bodypart>
+      <name>lwield</name>
+      <char_message>You hold $p in your left hand.</char_message>
+      <room_message>$n holds $p in $s left hand.</char_message>
+      <description>left hand</description>
+    </bodypart>
+    <bodypart>
+      <name>rwield</name>
+      <char_message>You hold $p in your right hand.</char_message>
+      <room_message>$n holds $p in $s right hand.</char_message>
+      <description>right hand</description>
+    </bodypart>
+  </body>
+</race>  

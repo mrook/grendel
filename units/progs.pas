@@ -1,6 +1,6 @@
 {
   @abstract(Interface with GMC virtual machine)
-  @lastmod($Id: progs.pas,v 1.20 2002/08/03 19:17:56 ***REMOVED*** Exp $)
+  @lastmod($Id: progs.pas,v 1.21 2003/06/24 21:41:34 ***REMOVED*** Exp $)
 }
 
 unit progs;
@@ -36,9 +36,7 @@ procedure init_progs;
 implementation
 
 uses
-{$IFDEF LINUX}
     Variants,
-{$ENDIF}
     Math,
     Strip,
     SysUtils,
@@ -49,7 +47,8 @@ uses
     util,
     mudthread,
     mudsystem,
-    gvm;
+    gvm,
+    FastStringFuncs;
 
 // GMathLib
 function GMathLib.cos(x : single) : single; stdcall;
@@ -85,7 +84,7 @@ end;
 
 function GStringLib.match(src, pattern : string) : boolean; stdcall;
 begin
-  Result := Util.StringMatches(src, pattern);
+  Result := StringMatches(src, pattern);
 end;
 
 function GStringLib.IntToStr(x : integer) : string; stdcall;
@@ -106,7 +105,7 @@ end;
 procedure grendelVMError(owner : TObject; msg : string);
 begin
   if (owner <> nil) then
-    writeConsole('VM error in context of ' + GNPC(owner).name^ + ': ' + msg)
+    writeConsole('VM error in context of ' + GNPC(owner).name + ': ' + msg)
   else
     writeConsole('VM error: ' + msg);
 end;

@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.6 2002/10/14 15:32:11 xenon Exp $
+// $Id: cmd_build.inc,v 1.7 2003/06/24 21:41:27 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -32,7 +32,7 @@ begin
 
   buf1 := '';
   buf := Format('Name:   %s.' + #13#10 + 'Area:   %s.' + #13#10 + 'Vnum:   %d'#13#10#13#10,
-                 [location.name^, location.area.name, location.vnum]);
+                 [location.name, location.area.name, location.vnum]);
 
   buf1 := buf1 + buf;
 
@@ -59,7 +59,7 @@ begin
     if (length(buf) <> 0) then
       buf := buf + ', ';
 
-    buf := buf + rch.name^;
+    buf := buf + rch.name;
 
     rch_node := rch_node.next;
   end;
@@ -77,7 +77,7 @@ begin
     if (length(buf) <> 0) then
       buf := buf + ', ';
 
-    buf := buf + obj_data.name^;
+    buf := buf + obj_data.name;
     
     obj_node := obj_node.next;
   end;
@@ -92,16 +92,18 @@ begin
   buf1 := buf1 + buf;
 
   buf := '';
-  if (location.flags = 0) then
+  
+  if (location.flags.value = 0) then
     buf := 'none'
   else
-  for a:=0 to High(room_flags) do
-    if IS_SET(location.flags, 1 shl a) then
-    begin
-      if (length(buf) <> 0) then
-        buf := buf + ' ';
-      buf := buf + room_flags[a];
-    end;
+    for a:=0 to High(room_flags) do
+      if (location.flags.isBitSet(1 shl a)) then
+        begin
+        if (length(buf) <> 0) then
+          buf := buf + ' ';
+   
+        buf := buf + room_flags[a];
+        end;
 
   buf1 := buf1 + Format('Room flags: [%s].' + #13#10,
                 [buf]);
@@ -114,7 +116,7 @@ begin
     Format('Televnum: %d. Teledelay: %d.'#13#10, [location.televnum, location.teledelay]);
 
   buf1 := buf1 +
-    Format('Min_level: %d. Max_level: %d.'#13#10#13#10, [location.min_level, location.max_level]);
+    Format('Min_level: %d. Max_level: %d.'#13#10#13#10, [location.minlevel, location.maxlevel]);
   
   buf1 := buf1 +
     Format('Description: ' + #13#10 + '%s'#13#10, [location.description]);
@@ -240,7 +242,7 @@ begin
   end;
 
   buf1 := '';
-  buf := 'Name: ' + victim.name^ + '.' + #13#10;
+  buf := 'Name: ' + victim.name + '.' + #13#10;
   buf1 := buf1 + buf;
 
   if victim.IS_NPC then
@@ -323,14 +325,9 @@ begin
   	buf1 := buf1 + 'Page Lines: ' + IntToStr(GPlayer(victim).pagerlen) + '.' + #13#10;
 
   if victim.fighting <> nil then
-    buf1 := buf1 + 'Fighting: ' + victim.fighting.name^ + '. '
+    buf1 := buf1 + 'Fighting: ' + victim.fighting.name + '.' + #13#10
   else
-    buf1 := buf1 + 'Fighting: (none). ';
-
-  if victim.hunting <> nil then
-    buf1 := buf1 + 'Hunting: ' + victim.hunting.name^ + '.' + #13#10
-  else
-    buf1 := buf1 + 'Hunting: (none).' + #13#10;
+    buf1 := buf1 + 'Fighting: (none).' + #13#10;
 
   if not victim.IS_NPC then
   begin
@@ -355,12 +352,12 @@ begin
   end;
 
   if victim.master <> nil then
-  	master := victim.master.name^
+  	master := victim.master.name
   else
   	master := '(none)';
 
   if victim.leader <> nil then
-  	leader := victim.leader.name^
+  	leader := victim.leader.name
   else
   	leader := '(none)';
 
@@ -370,7 +367,7 @@ begin
   buf1 := buf1 + buf;
 
   buf := Format('Short description: %s.' + #13#10 + 'Long description: %s' + #13#10,
-                [victim.short^, victim.long^]);
+                [victim.short, victim.long]);
 
   buf1 := buf1 + buf;
 
@@ -383,7 +380,7 @@ begin
       aff := node.element;
 
       if (aff.name <> nil) then
-        buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name^, aff.duration]);
+        buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name, aff.duration]);
 
       node := node.next;
     end;
@@ -406,7 +403,7 @@ begin
         else
           buf := '  Skill: ';
 
-        buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name^, g.perc]);
+        buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name, g.perc]);
         
         node := node.next;
       end;
@@ -449,15 +446,15 @@ begin
     exit;
     end;
 
-  buf1 := 'Name: ' + obj.name^ + '.' + #13#10;
+  buf1 := 'Name: ' + obj.name + '.' + #13#10;
 
   buf := Format('Vnum: %d.  Type: %s.' + #13#10 +
                 'Short description: %s.' + #13#10 +
                 'Long description: %s$A$7' + #13#10,
-                [obj.obj_index.vnum,
-                obj.name^,
-                obj.short^,
-                obj.long^]);
+                [obj.vnum,
+                obj.name,
+                obj.short,
+                obj.long]);
 
   buf1 := buf1 + buf;
 
@@ -482,7 +479,7 @@ begin
   if obj.in_obj = nil then
   	in_obj := '(none)'
   else
-   in_obj := obj.in_obj.name^;
+   in_obj := obj.in_obj.name;
 
   {if obj.carried_by = nil then
   	carried_by := ''
@@ -526,8 +523,7 @@ end;
 procedure do_oload(ch : GCharacter; param : string);
 var
   arg1, arg2 : string;
-  obj_index : GObjectIndex;
-  obj : GObject;
+  newobj, obj : GObject;
   level : integer;
 begin
   param := one_argument( param, arg1 );
@@ -555,16 +551,16 @@ begin
   end;
 
   // get the obj index
-  obj_index := findObjectIndex(strtoint(arg1));
+  newobj := GObject(objectIndices[StrToInt(arg1)]);
 
-  if obj_index = nil then
-  begin
-     ch.sendBuffer('No object has that vnum.' + #13#10);
-     exit;
-  end;
+  if (newobj = nil) then
+    begin
+    ch.sendBuffer('No object has that vnum.' + #13#10);
+    exit;
+    end;
 
   // create the obj
-  obj := instanceObject(obj_index);
+  obj := newobj.clone();
 
   // give obj to ch
   obj.toChar(ch);
@@ -619,8 +615,8 @@ end;
 { Revised 25/Feb/2001 - Nemesis }
 procedure do_ofind(ch : GCharacter; param : string);
 var buf : string;
-    obj : GObjectIndex;
-    node : GListNode;
+    obj : GObject;
+    iterator : GIterator;
     found, fAll : boolean;
 begin
   found := false;
@@ -633,19 +629,17 @@ begin
   fAll := (uppercase(param) = 'ALL');
   buf := #13#10 + '[Vnum] [Name]' + #13#10;
 
-  node := obj_list.head;
+  iterator := objectIndices.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (fAll) or (isName(obj.name^, param)) then
+    if (fAll) or (isName(obj.name, param)) then
       begin
       found := true;
-      buf := buf + pad_integer_front(obj.vnum,5) + '   ' + obj.name^ + #13#10;
+      buf := buf + pad_integer_front(obj.vnum,5) + '   ' + obj.name + #13#10;
       end;
-
-    node := node.next;
     end;
 
   if (not found) then
@@ -1023,8 +1017,7 @@ end;
 
 procedure do_ocreate(ch : GCharacter; param : string);
 var
-   oindex : GObjectIndex;
-   obj : GObject;
+   oindex, obj : GObject;
    sub : string;
    vnum : integer;
 begin
@@ -1062,22 +1055,23 @@ begin
     exit;
     end;
 
-  if (findObjectIndex(vnum) <> nil) then
+  if (objectIndices[vnum] <> nil) then
     begin
     ch.sendBuffer('That vnum has been used.'#13#10);
     exit;
     end;
 
-  oindex := GObjectIndex.Create;
+  oindex := GObject.Create();
   oindex.area := GPlayer(ch).area;
   oindex.vnum := vnum;
-  oindex.name := hash_string(param);
-  oindex.short := hash_string(param);
-  oindex.long := hash_string(param);
+  oindex.name := param;
+  oindex.short := param;
+  oindex.long := param;
   oindex.flags := OBJ_PROTO;
-  obj_list.insertLast(oindex);
+  
+  objectIndices[vnum] := oindex;
 
-  obj := instanceObject(oindex);
+  obj := oindex.clone();
   obj.toChar(ch);
 
   act(AT_REPORT,'You utter a few words and you create $p!',false,ch,obj,nil,TO_CHAR);
@@ -1113,7 +1107,7 @@ const wear_types:array[1..26] of string=('rfinger','lfinger','neck1',
 procedure do_oedit(ch : GCharacter; param : string);
 var sub : string;
     a : integer;
-    obj : GObject;
+    obj, idx : GObject;
 begin
   if (length(param) = 0) then
     begin
@@ -1133,16 +1127,17 @@ begin
     ch.sendBuffer('Could not find that object.'#13#10);
     exit;
     end;
+    
+  idx := GObject(objectIndices[obj.vnum]);
 
-  if (IS_SET(obj.flags, OBJ_PROTO)) and (obj.obj_index = nil) then
+  if (IS_SET(obj.flags, OBJ_PROTO)) and (idx = nil) then
     begin
     ch.sendBuffer('Illegal proto.'#13#10);
     exit;
     end;
 
   { make sure builders don't overwrite other areas }
-  if (obj.obj_index <>nil) and
-   ((obj.obj_index.vnum < GPlayer(ch).o_lo) or (obj.obj_index.vnum > GPlayer(ch).o_hi)) then
+  if (obj.vnum < GPlayer(ch).o_lo) or (obj.vnum > GPlayer(ch).o_hi) then
     begin
     ch.sendBuffer('This vnum is not in your range.'#13#10);
     exit;
@@ -1152,38 +1147,26 @@ begin
 
   if (sub = 'name') then
     begin
-    unhash_string(obj.name);
-    obj.name := hash_string(param);
+    obj.name := param;
 
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      begin
-      unhash_string(obj.obj_index.name);
-      obj.obj_index.name := hash_string(param);
-      end;
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.name := param;
     end
   else
   if (sub = 'short') then
     begin
-    unhash_string(obj.short);
-    obj.short := hash_string(param);
+    obj.short := param;
 
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      begin
-      unhash_string(obj.obj_index.short);
-      obj.obj_index.short := hash_string(param);
-      end;
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.short := param;
     end
   else
   if (sub = 'long') then
     begin
-    unhash_string(obj.long);
-    obj.long := hash_string(param);
+    obj.long := param;
 
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      begin
-      unhash_string(obj.obj_index.long);
-      obj.obj_index.long := hash_string(param);
-      end;
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.long := param;
     end
   else
   if (sub = 'flags') then
@@ -1197,8 +1180,8 @@ begin
         SET_BIT(obj.flags,1 shl a);
       end;
 
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      obj.obj_index.flags := obj.flags - OBJ_PROTO;
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.flags := obj.flags - OBJ_PROTO;
     end
   else
   if (sub = 'type') then
@@ -1210,34 +1193,24 @@ begin
       break;
       end;
 
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      obj.obj_index.item_type:=obj.item_type;
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.item_type := obj.item_type;
     end
   else
   if (sub = 'wear1') then
     begin
-    for a:=0 to High(wear_types) do
-     if (pos(wear_types[a], param) > 0) then
-      begin
-      obj.wear1:=a;
-      break;
-      end;
-
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      obj.obj_index.wear1:=obj.wear1;
+    obj.wear_location1 := param;
+    
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.wear_location1 := obj.wear_location1;
     end
   else
   if (sub = 'wear2') then
     begin
-    for a:=0 to High(wear_types) do
-     if (pos(wear_types[a], param) > 0) then
-      begin
-      obj.wear2:=a;
-      break;
-      end;
-
-    if IS_SET(obj.flags,OBJ_PROTO) then
-      obj.obj_index.wear2:=obj.wear2;
+    obj.wear_location2 := param;
+    
+    if (IS_SET(obj.flags,OBJ_PROTO)) then
+      idx.wear_location2 := obj.wear_location2;
     end
   else
     begin
@@ -1249,10 +1222,11 @@ begin
 end;
 
 procedure do_olist(ch : GCharacter; param : string);
-var num:integer;
-    area : GArea;
-    obj : GObjectIndex;
-    node : GListNode;
+var 
+	num:integer;
+	area : GArea;
+	obj : GObject;
+	iterator : GIterator;
 begin
   if (GPlayer(ch).area_fname = '') then
     begin
@@ -1270,19 +1244,17 @@ begin
   num:=0;
   act(AT_REPORT, '$B$1[$B$7Nr$B$1] [$B$7VNum$B$1]  [$B$7Name$B$1]$A$7',false,ch,nil,nil,TO_CHAR);
 
-  node := obj_list.head;
+	iterator := objectIndices.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     if (obj.area = area) then
       begin
       act(AT_REPORT, pad_integer_front(num, 4) + ' ' + pad_integer(obj.vnum,8) + ' $p',false, ch, obj, nil, TO_CHAR);
       inc(num);
       end;
-
-    node := node.next;
     end;
 end;
 
@@ -1327,11 +1299,11 @@ begin
   if (sub = 'name') then
     if (length(param) = 0) then
     begin
-      ch.sendBuffer('Roomname is currently ''' + ch.room.name^ + '''.'#13#10);
+      ch.sendBuffer('Roomname is currently ''' + ch.room.name + '''.'#13#10);
       exit;
     end
     else
-      ch.room.name := hash_string(param)
+      ch.room.name := param
   else
   if (sub = 'desc') then
     begin
@@ -1346,10 +1318,10 @@ begin
     for a:=0 to High(room_flags) do
      if (pos(room_flags[a], param) > 0) then
       begin
-      if IS_SET(ch.room.flags, 1 shl a) then
-        REMOVE_BIT(ch.room.flags, 1 shl a)
+      if (ch.room.flags.isBitSet(1 shl a)) then
+        ch.room.flags.removeBit(1 shl a)
       else
-        SET_BIT(ch.room.flags, 1 shl a);
+        ch.room.flags.setBit(1 shl a);
       end;
     end
   else
@@ -1370,10 +1342,10 @@ begin
     ch.room.teledelay := strtointdef(param, 0)
   else
   if (sub = 'minlevel') then
-    ch.room.min_level := strtointdef(param, 0)
+    ch.room.minlevel := strtointdef(param, 0)
   else
   if (sub = 'maxlevel') then
-    ch.room.max_level:=strtoint(param)
+    ch.room.maxlevel:=strtoint(param)
   else
   if (sub = 'exflags') then
     begin
@@ -1576,7 +1548,7 @@ begin
 
   new_room := createRoom(new_vnum, ch.room.area);
 
-  new_room.name := hash_string(ch.room.name);
+  new_room.name := ch.room.name;
   new_room.sector := ch.room.sector;
 
   to_exit := GExit.Create;
@@ -1723,13 +1695,13 @@ begin
 
   area := GPlayer(ch).area;
   new_room := createRoom(new_vnum, area);
-  new_room.name := hash_string(ch.room.name);
+  new_room.name := ch.room.name;
   new_room.description := ch.room.description;
-  new_room.flags := ch.room.flags;
+  new_room.flags.value := ch.room.flags.value;
   new_room.televnum := ch.room.televnum;
   new_room.teledelay := ch.room.teledelay;
-  new_room.min_level := ch.room.min_level;
-  new_room.max_level := ch.room.max_level;
+  new_room.minlevel := ch.room.minlevel;
+  new_room.maxlevel := ch.room.maxlevel;
   new_room.sector := ch.room.sector;
 
   to_exit := GExit.Create;
@@ -1803,7 +1775,7 @@ begin
         continue;
       end;
 
-      ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name^]));
+      ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name]));
       
       node := node.next;
     end
@@ -1841,7 +1813,7 @@ begin
       act(AT_REPORT,'Area ' + param + ' assigned to $N.',false,ch,nil,vict,TO_CHAR);
 
       if (vict <> ch) then
-        act(AT_REPORT,ch.name^ + ' has assigned ' + param + ' to you.',false,vict,nil,ch,TO_CHAR);
+        act(AT_REPORT,ch.name + ' has assigned ' + param + ' to you.',false,vict,nil,ch,TO_CHAR);
 
       GPlayer(vict).area := area;
       GPlayer(vict).area_fname := param;
@@ -1860,7 +1832,7 @@ begin
           act(AT_REPORT,'Unassigned area ' + GPlayer(vict).area_fname + ' from $N.',false,ch,nil,vict,TO_CHAR);
 
           if (vict <> ch) then
-            act(AT_REPORT,ch.name^ + ' has unassigned area ' + GPlayer(vict).area_fname + ' from you.',false,vict,nil,ch,TO_CHAR);
+            act(AT_REPORT,ch.name + ' has unassigned area ' + GPlayer(vict).area_fname + ' from you.',false,vict,nil,ch,TO_CHAR);
 
           GPlayer(vict).area := nil;
           GPlayer(vict).area_fname := '';
@@ -1951,12 +1923,11 @@ begin
 
   area.fname := fn;
   area.author := 'No author';
-  area.reset_msg := 'No reset message';
+  area.resetmsg := 'No reset message';
   area.name := 'New area';
 
-  area.max_age := 10;
-  area.age := 0;
-  area.flags := 0;
+  area.maxage := 10;
+  area.flags.value := 0;
 
   with area.weather do
     begin
@@ -1967,8 +1938,6 @@ begin
     temp_avg := 20;
     temp_mult := 5;
     end;
-
-//  area_list.insertLast(area); { Xenon 28/Apr/2001: this is already done in GArea.Create() }
 
   Result := area;
 end;
@@ -1992,8 +1961,8 @@ begin
     end;
 
   area := createArea(param);
-  area.author := ch.name^;
-  area.flags := AREA_NOPC or AREA_PROTO;           { not for mortals, proto }
+  area.author := ch.name;
+  area.flags.value := AREA_NOPC or AREA_PROTO;           { not for mortals, proto }
   act(AT_REPORT,'Area '+param+' created.',false,ch,nil,nil,TO_CHAR);
 end;
 
@@ -2035,20 +2004,20 @@ begin
     area.name := param
   else
   if (sub = 'resetmsg') then
-    area.reset_msg := param
+    area.resetmsg := param
   else
   if (sub = 'age') then
-    area.max_age := strtointdef(param, 0)
+    area.maxage := strtointdef(param, 0)
   else
   if (sub = 'flags') then
     begin
     for a:=0 to High(area_flags) do
      if (pos(area_flags[a], param) > 0) then
       begin
-      if IS_SET(area.flags,1 shl a) then
-        REMOVE_BIT(area.flags, 1 shl a)
+      if (area.flags.isBitSet(1 shl a)) then
+        area.flags.removeBit(1 shl a)
       else
-        SET_BIT(area.flags,1 shl a);
+        area.flags.setBit(1 shl a);
       end;
     end
   else
@@ -2082,8 +2051,8 @@ begin
   act(AT_REPORT, '['+area.fname+']'#13#10,false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT, 'Name:             '+area.name,false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT, 'Author:           '+area.author,false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT, 'Reset message:    '+area.reset_msg,false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT, 'Maximum age:      '+inttostr(area.max_age),false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT, 'Reset message:    '+area.resetmsg,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT, 'Maximum age:      '+inttostr(area.maxage),false,ch,nil,nil,TO_CHAR);
 
   buf := 'Ranges:         ';
 
@@ -2100,11 +2069,11 @@ begin
 
   buf := 'Flags:           ';
 
-  if (area.flags = 0) then
+  if (area.flags.value = 0) then
     buf := buf + ' none'
   else
   for a:=0 to High(area_flags) do
-   if IS_SET(area.flags,1 shl a) then
+   if (area.flags.isBitSet(1 shl a)) then
     buf := buf + ' ' + area_flags[a];
 
   act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
@@ -2147,7 +2116,7 @@ begin
 
       if (room.area = area) then
         begin
-        if (room.name = nil) or (length(room.name^) = 0) then
+        if (length(room.name) = 0) then
           begin
           no_errors := false;
           ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);

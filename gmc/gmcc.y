@@ -398,8 +398,6 @@ varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
                         varGlob := left(varGlob, '.');
 												varName := left(tmp, '.');
-												
-												// writeln('searching ', varName, ' ', varGlob);
 																																		
 												if (varName <> tmp) then
                           begin
@@ -410,14 +408,6 @@ varname  : idlist    	{ varGlob := ':' + $1;
   													Expr_External($$).id := varName;
   													Expr_External($$).assoc := right(tmp, '.');
   													end
-  											  else
-													if (lookupEnv(varGlob) <> nil) then 
-														begin
-  													$$ := Expr_External.Create;
-  													$$.lineNum := yylineno; 
-  													Expr_External($$).id := varGlob;
-  													Expr_External($$).assoc := right(tmp, '.');
-													end
   												else
   												  begin
   													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');

@@ -1,3 +1,5 @@
+// $Id: cmd_shops.inc,v 1.4 2003/06/24 21:41:29 ***REMOVED*** Exp $
+
 procedure do_balance(ch:GCharacter;param:string);
 var
    node : GListNode;
@@ -204,13 +206,13 @@ begin
     exit;
     end;
 
-  if (keeper.objects.getSize = 0) then
+  if (keeper.inventory.getSize = 0) then
     begin
-    interpret(keeper, 'say I am not selling anything today, '+ch.name^+'.');
+    interpret(keeper, 'say I am not selling anything today, '+ch.name+'.');
     exit;
     end;
 
-  node := keeper.objects.head;
+  node := keeper.inventory.head;
   i:=0;
 
   while (node <> nil) do
@@ -259,9 +261,9 @@ begin
     exit;
     end;
 
-  if (keeper.objects.getSize = 0) then
+  if (keeper.inventory.getSize = 0) then
     begin
-    interpret(keeper, 'say I am not selling anything today, '+ch.name^+'.');
+    interpret(keeper, 'say I am not selling anything today, '+ch.name+'.');
     exit;
     end;
 
@@ -276,8 +278,8 @@ begin
     if (cost > ch.gold) then
       ch.sendBuffer('You cannot afford that.'#13#10)
     else
-      begin
-      newobj := instanceObject(obj.obj_index);
+      begin     
+      newobj := obj.clone();
 
       act(AT_REPORT,'You buy $p for '+inttostr(cost)+' coins.',false,ch,newobj,nil,TO_CHAR);
 
@@ -310,7 +312,7 @@ begin
     node := node.next;
     end;
 
-  if (keeper=nil) then
+  if (keeper = nil) or (GNPC(keeper).npc_index.shop = nil) then
     begin
     ch.sendBuffer('You cannot do that here.'#13#10);
     exit;

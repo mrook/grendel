@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.3 2002/10/14 15:32:15 xenon Exp $
+// $Id: cmd_skill.inc,v 1.4 2003/06/24 21:41:29 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -10,15 +10,9 @@ begin
     exit;
     end;
 
-  if (length(param) = 0) and (ch.position <> POS_FIGHTING) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
-    act(AT_REPORT,'Bash whom?',false,ch,nil,nil,TO_CHAR);
-    exit;
-    end;
-
-  if (ch.position = POS_BASHED) then
-    begin
-    ch.sendBuffer('You are bashed and cannot move!'#13#10);
+    ch.sendBuffer('You are immobile cannot move!'#13#10);
     exit;
     end;
 
@@ -34,18 +28,23 @@ begin
     exit;
     end;
 
+  if (length(param) = 0) and (ch.state <> STATE_FIGHTING) then
+    begin
+    act(AT_REPORT,'Bash whom?',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end;
+
   vict := ch.room.findChar(ch, param);
 
-  if (vict = nil) then
-   if (ch.position = POS_FIGHTING) and (ch.fighting <> nil) then
+  if (vict = nil) and (ch.state = STATE_FIGHTING) then
     vict := ch.fighting;
 
   if (vict = nil) then
     ch.sendBuffer('They aren''t here.'#13#10)
   else
-  if not in_melee(ch,vict) then
+  if (not in_melee(ch,vict)) then
     begin
-    act(AT_REPORT,'You aren''t on the front lines of that battle!',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'You aren''t on the front lines of the battle!',false,ch,nil,nil,TO_CHAR);
     exit;
     end
   else
@@ -62,14 +61,14 @@ begin
     begin
     if fighting=nil then
       begin
-      if IS_SET(ch.room.flags,ROOM_SAFE) then
+      if (ch.room.flags.isBitSet(ROOM_SAFE)) then
         begin
         ch.sendBuffer('A strange force prevents you from attacking.'#13#10);
         exit;
         end
       else
         begin
-        fighting:=vict;
+        fighting := vict;
 
         if (not ch.IS_NPC) then
           GPlayer(ch).fightxp:=0;
@@ -86,14 +85,13 @@ begin
     else
     if (number_percent <= chance) then
       begin
-      // improve_skill(ch,gsn_bash);
+      improve_skill(ch, gsn_bash);       
+      SET_BIT(vict.aff_flags, AFF_BASHED);
 
-      vict.position:=POS_BASHED;
-      position:=POS_FIGHTING;
+      state := STATE_FIGHTING;
       vict.bash_timer:=6;
-      bashing:=6;
-      if vict.fighting=nil then
-        vict.fighting:=ch;
+      bashing := 6;
+             
       act(AT_GREEN,'Your powerful bash sends $N sprawling to the ground!',false,ch,nil,vict,TO_CHAR);
       act(AT_GREEN,'$n sends $N sprawling to the ground with a powerful bash!',false,ch,nil,vict,TO_ROOM);
       end
@@ -103,10 +101,8 @@ begin
 
       act(AT_REPORT,'You miss the bash and almost fall over!',false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,'$n misses a bash at $N and almost falls over!',false,ch,nil,vict,TO_ROOM);
-      position:=POS_FIGHTING;
-      vict.position:=POS_FIGHTING;
-      if vict.fighting=nil then
-        vict.fighting:=ch;
+
+      state := STATE_FIGHTING;
       end;
     end;
 end;
@@ -121,15 +117,9 @@ begin
     exit;
     end;
 
-  if (length(param)=0) and (ch.position<>POS_FIGHTING) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
-    act(AT_REPORT,'Kick whom?',false,ch,nil,nil,TO_CHAR);
-    exit;
-    end;
-
-  if (ch.position = POS_BASHED) then
-    begin
-    ch.sendBuffer('You are bashed and cannot move!'#13#10);
+    ch.sendBuffer('You are immobile cannot move!'#13#10);
     exit;
     end;
 
@@ -145,16 +135,21 @@ begin
     exit;
     end;
 
-  vict := ch.room.findChar(ch, param);
+  if (length(param) = 0) and (ch.state <> STATE_FIGHTING) then
+    begin
+    act(AT_REPORT,'Kick whom?',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end;
 
-  if (vict = nil) then
-   if (ch.position=POS_FIGHTING) and (ch.fighting<>nil) then
-    vict:=ch.fighting;
+  vict := ch.room.findChar(ch, param);
+  
+  if (vict = nil) and (ch.state = STATE_FIGHTING) then
+    vict := ch.fighting;
 
   if (vict = nil) then
     act(AT_REPORT,'They aren''t here.',false,ch,nil,nil,TO_CHAR)
   else
-  if not in_melee(ch,vict) then
+  if (not in_melee(ch,vict)) then
     begin
     act(AT_REPORT,'You cannot reach $N!',false,ch,nil,vict,TO_CHAR);
     exit;
@@ -176,7 +171,7 @@ begin
 
     if fighting=nil then
       begin
-      if IS_SET(ch.room.flags,ROOM_SAFE) then
+      if (ch.room.flags.isBitSet(ROOM_SAFE)) then
         begin
         ch.sendBuffer('A strange force prevents you from attacking.'#13#10);
         exit;
@@ -194,20 +189,9 @@ begin
 
     chance := ch.LEARNED(gsn_kick);
 
-    if (vict.IS_NPC) and (IS_SET(GNPC(vict).act_flags, ACT_SPIRIT)) then
+    if (number_percent() <= chance) then
       begin
-      ch.sendBuffer('You swing your leg and kick high, but it goes right through your victim!'#13#10);
-
-      if vict.fighting=nil then
-        vict.fighting:=ch;
-
-      position:=POS_FIGHTING;
-      vict.position:=POS_FIGHTING;
-      end
-    else
-    if number_percent<=chance then
-      begin
-      //improve_skill(ch,gsn_kick);
+      improve_skill(ch,gsn_kick);
 
       dam:=urange(1,rolldice(4,18),level div 6)*3;
       inc(dam,ch.apb);
@@ -223,9 +207,9 @@ end;
 procedure do_fly(ch:GCharacter;param:string);
 begin
   if (ch.IS_FLYING) then
-    ch.stopFlying
+    ch.stopFlying()
   else
-    ch.startFlying;
+    ch.startFlying();
 end;
 
 procedure do_sneak(ch:GCharacter;param:string);
@@ -528,7 +512,7 @@ begin
       g := node.element;
 
       if (ch.level >= GSkill(g.skill).min_lvl) then
-        act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name^, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
+        act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
 
       node := node.next;
       end;
@@ -577,9 +561,7 @@ procedure search_timer(ch, victim : GCharacter; sn : GSkill);
 var pexit : GExit;
     node : GListNode;
 begin
-  ch.position := POS_STANDING;
-
-  if skill_success(ch,sn) then
+  if (skill_success(ch,sn)) then
     begin
     { check for hidden exits first }
     node := ch.room.exits.head;
@@ -614,9 +596,7 @@ begin
 
   act(AT_REPORT,'$n looks around, searching for something...',false,ch,nil,nil,TO_ROOM);
 
-  ch.position := POS_SEARCHING;
-
-  registerTimer(TIMER_SEARCH, search_timer, 6, ch, nil, gsn_searching);
+  registerTimer('search', TIMER_ACTION, search_timer, 6, ch, nil, gsn_searching);
 end;
 
 procedure backstab_timer(ch,victim:GCharacter;sn:GSkill);
@@ -627,7 +607,6 @@ begin
   if (victim.CHAR_DIED) or (victim.room <> ch.room) or (not ch.CAN_SEE(victim)) then
     begin
     ch.sendBuffer('They are not here.'#13#10);
-    ch.position:=POS_STANDING;
     exit;
     end;
 
@@ -693,6 +672,7 @@ begin
       act(AT_REPORT,'$n targets your spine and thrusts $s blade through!',false,ch,nil,victim,TO_VICT);
       act(AT_REPORT,'$n finds a mark in $N''s spine and thrusts $s blade through!',false,ch,nil,victim,TO_NOTVICT);
       end;
+      
     damage(ch,victim,dam,cardinal(sn));
     victim.fighting:=ch;
     end
@@ -721,21 +701,15 @@ begin
     exit;
     end;
 
-  if (ch.position=POS_FIGHTING) then
-    begin
-    ch.sendBuffer('You cannot backstab while fighting!'#13#10);
-    exit;
-    end;
-
   victim := ch.room.findChar(ch, param);
 
-  if (victim=nil) then
+  if (victim = nil) then
     begin
     ch.sendBuffer('They are not here.'#13#10);
     exit;
     end
   else
-  if (victim=ch) then
+  if (victim = ch) then
     begin
     ch.sendBuffer('How would you sneak upon yourself?'#13#10);
     exit;
@@ -750,8 +724,7 @@ begin
     end;
 
   ch.sendBuffer('You move stealthily, attempting to get behind your target...'#13#10);
-  registerTimer(TIMER_BACKSTAB, backstab_timer, 8, ch, victim, gsn_backstab);
-  ch.position:=POS_BACKSTAB;
+  registerTimer('backstab', TIMER_ACTION, backstab_timer, 8, ch, victim, gsn_backstab);
 end;
 
 procedure circle_timer(ch,victim:GCharacter; sn : GSkill);
@@ -759,11 +732,8 @@ begin
   if (victim.CHAR_DIED) or (victim.room<>ch.room) then
     begin
     ch.sendBuffer('They are not here.'#13#10);
-    ch.position:=POS_STANDING;
     exit;
     end;
-
-  ch.position := POS_FIGHTING;
 
   if (number_percent <= ch.LEARNED(sn)) then
     begin
@@ -784,7 +754,7 @@ begin
     exit;
     end;
 
-  if (ch.position <> POS_FIGHTING) then
+  if (ch.state <> STATE_FIGHTING) then
     begin
     ch.sendBuffer('You are not fighting!'#13#10);
     exit;
@@ -805,8 +775,7 @@ begin
     end;
 
   act(AT_REPORT,'You attempt to circle behind your target...',false,ch,nil,nil,TO_CHAR);
-  registerTimer(TIMER_CIRCLE, circle_timer, 10, ch, ch.fighting, gsn_circle);
-  ch.position:=POS_CIRCLE;
+  registerTimer('circle', TIMER_ACTION, circle_timer, 10, ch, ch.fighting, gsn_circle);
 end;
 
 procedure do_rescue(ch:GCharacter;param:string);
@@ -824,7 +793,7 @@ begin
     exit;
     end;
 
-  if (ch.position=POS_FIGHTING) and (ch.fighting.fighting=ch) then
+  if (ch.state = STATE_FIGHTING) and (ch.fighting.fighting = ch) then
     begin
     ch.sendBuffer('You are on the frontline and can not rescue!'#13#10);
     exit;
@@ -844,15 +813,13 @@ begin
     act(AT_REPORT,'$N rescues you!',false,victim,nil,ch,TO_VICT);
     act(AT_REPORT,'$N rescues $n!',false,victim,nil,ch,TO_NOTVICT);
 
-    if (ch.position <> POS_FIGHTING) then
+    if (ch.state <> STATE_FIGHTING) then
       begin
       ch.fighting := victim.fighting;
-      ch.position := POS_FIGHTING;
+      ch.state := STATE_FIGHTING;
       end;
 
     ch.fighting.fighting := ch;
-    victim.fighting := nil;
-    victim.position := POS_STANDING;
     end
   else
     begin
@@ -935,9 +902,9 @@ begin
   act(AT_REPORT,'You begin to look for tracks...',false,ch,nil,nil,TO_CHAR);
 
   if (vict <> nil) then
-    ch.tracking := vict.name^;
+    ch.tracking := vict.name;
 
-  registerTimer(TIMER_TRACK, track_timer, 4, ch, vict, gsn_track);
+  registerTimer('track', TIMER_ACTION, track_timer, 4, ch, vict, gsn_track);
 end;
 
 // Lock Pick - Nemesis

@@ -1,6 +1,6 @@
 {
   @abstract(Area loader & manager)
-  @lastmod($Id: area.pas,v 1.57 2002/08/03 19:13:49 ***REMOVED*** Exp $)
+  @lastmod($Id: area.pas,v 1.58 2003/06/24 21:41:30 ***REMOVED*** Exp $)
 }
 
 unit area;
@@ -30,20 +30,22 @@ type
     end;
 
     GArea = class
-    protected
+    private
       af : GFileReader;
-      
-    public
-      fname, name, author : string;
-      m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
-      resets : GDLinkedList;
-      flags : cardinal;
-      nplayer : integer;
-      age, max_age : integer;         { age/max in gamehours }
-      reset_msg : string;              { msg when reset }
-      weather : GWeather;             { current local weather }
+    
+      _age : integer;	
+      _name, _author : string;
+      _maxage : integer;
+      _resetmsg : string;
 
       found_range : boolean;
+    public     
+      m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
+      fname : string;
+      nplayer : integer;
+      weather : GWeather;             { current local weather }
+      flags : GBit;
+      resets : GDLinkedList;
 
       procedure areaBug(func : string; problem : string);
 
@@ -61,72 +63,74 @@ type
 
       constructor Create;
       destructor Destroy; override;
+    published
+      property name : string read _name write _name;
+      property author : string read _author write _author;
+      property resetmsg : string read _resetmsg write _resetmsg;
+
+      property maxage : integer read _maxage write _maxage;
     end;
 
     GObjectValues = array[1..4] of integer;
 
-    GObjectIndex = class
-    public
-      name, short, long : PString;
-      area : GArea;
-      flags : cardinal;
-      affects : GDLinkedList;
-      item_type,wear1,wear2:integer;
-      value : GObjectValues;
-      weight:integer;
-      cost:integer;
-      timer:integer;
-      obj_count:integer;
-      vnum:integer;
-    end;
-
     GObject = class
+    private
+      _name, _short, _long : PString;
+      _vnum : integer;
     public
       node_world, node_room, node_in, node_carry : GListNode;
 
+      area : GArea;
+      affects : GDLinkedList;
       contents : GDLinkedList;
       carried_by : pointer;
       in_obj : GObject;
       room : GRoom;
       value : GObjectValues;
-      obj_index : GObjectIndex;
-
-      name, short, long : PString;
-
-      wear_location : integer;
+      
+      worn : string;
+      wear_location1, wear_location2 : string;
 
       flags : cardinal;
-      item_type,wear1,wear2:integer;
+      item_type : integer;
       weight:integer;
       cost:integer;
       count:integer;
       timer:integer;
+      
+      child_count : integer; { how many of me were cloned }
 
-      procedure extract;
-
+  	published
       procedure toRoom(to_room : GRoom);
-      procedure fromRoom;
+      procedure fromRoom();
 
       procedure toChar(c : pointer);
-      procedure fromChar;
+      procedure fromChar();
 
       procedure toObject(obj : GObject);
-      procedure fromObject;
+      procedure fromObject();
 
       function getWeight() : integer;
-      function getVnum() : integer;
-      function getName() : string;
 
-      function clone : GObject;
+      function clone() : GObject;
       function group(obj : GObject) : boolean;
       procedure split(num : integer);
-      procedure seperate;
+      procedure seperate();
 
-      constructor Create;
-      destructor Destroy; override;
-    published
-      property vnum : integer read getVnum;
-      property pname : string read getName;
+      constructor Create();
+      destructor Destroy(); override;
+
+      procedure setName(const name : string);
+      procedure setShortName(const name : string);
+      procedure setLongName(const name : string);
+      function getName() : string;
+      function getShortName() : string;
+      function getLongName() : string;
+
+      property vnum : integer read _vnum write _vnum;
+      property name : string read getName write setName;
+      property short : string read getShortName write setShortName;
+      property long : string read getLongName write setLongName;
     end;
 
     GExit = class
@@ -205,25 +209,25 @@ type
     end;
 
     GRoom = class
+    private
+      _vnum : integer;
+      _name : PString;
+      _description : string;
+      _sector : integer;
+      _televnum, _teledelay : integer;
+      _maxlevel, _minlevel : integer;
+      _light : integer;
+
     public
-      vnum : integer;
+      area : GArea;
       areacoords : GCoords;
       worldcoords : GCoords; // not used yet
-      name : PString;
-      description : string;
-      area : GArea;
-      flags : cardinal;
-      sector : integer;
-      televnum, teledelay : integer;
-      max_level, min_level : integer;
-
-      light : integer;
-
       extra : GDLinkedList;
       exits : GDLinkedList;
       chars : GDLinkedList;
       objects : GDLinkedList;
       tracks : GDLinkedList;
+      flags : GBit;
 
       function IS_DARK : boolean;
 
@@ -240,7 +244,20 @@ type
 
       constructor Create(vn : integer; ar : GArea);
       destructor Destroy; override;
+
+      procedure setName(const name : string);
+      function getName() : string;
+
     published
+      property name : string read getName write setName;
+      property description : string read _description write _description;
+      property vnum : integer read _vnum write _vnum;
+      property sector : integer read _sector write _sector;
+      property televnum : integer read _televnum write _televnum;
+      property teledelay : integer read _teledelay write _teledelay;
+      property minlevel : integer read _minlevel write _minlevel;
+      property maxlevel : integer read _maxlevel write _maxlevel;
+      property light : integer read _light write _light;
     end;
 
     GShop = class
@@ -254,16 +271,17 @@ type
 
 
 var
+   objectList : GDLinkedList;  
+   objectIndices : GHashTable;
+   
    area_list : GDLinkedList;
    room_list : GHashTable;
-   object_list : GDLinkedList;
    shop_list : GDLinkedList;
    teleport_list : GDLinkedList;
-   extracted_object_list : GDLinkedList;
 
-   npc_list, obj_list : GDLinkedList;
+   npc_list : GDLinkedList;
 
-procedure load_areas;
+procedure loadAreas();
 
 function createRoom(vnum : integer; area : GArea) : GRoom;
 function findArea(fname : string) : GArea;
@@ -271,15 +289,14 @@ function findArea(fname : string) : GArea;
 function findRoom(vnum : integer) : GRoom;
 function findLocation(ch : pointer; param : string) : GRoom;
 function findNPCIndex(vnum : integer) : GNPCIndex;
-function findObjectIndex(vnum : integer) : GObjectIndex;
+
+{ function findObjectIndex(vnum : integer) : GObjectIndex; }
+{ function instanceObject(o_index : GObjectIndex) : GObject; }
 
 function instanceNPC(npcindex : GNPCIndex) : pointer;
-function instanceObject(o_index : GObjectIndex) : GObject;
 procedure addCorpse(c : pointer);
 function findHeading(s : string) : integer;
 function findDirectionShort(startroom, goalroom : GRoom) : string;
-
-procedure cleanExtractedObjects();
 
 function findObjectWorld(s : string) : GObject;
 
@@ -320,13 +337,13 @@ begin
   o_lo := high(integer);
   o_hi := -1;
 
-  author := 'No author';
-  reset_msg := 'No reset';
-  name := 'New area';
+  _author := 'No author';
+  _resetmsg := 'No reset';
+  _name := 'New area';
 
-  max_age := 10;
-  age := 0;
-  flags := 0;
+  _maxage := 10;
+  _age := 0;
+  flags := GBit.Create(0);
 
   with weather do
     begin
@@ -396,13 +413,13 @@ begin
 
       if (not found_range) then
         begin
-        if (vnum < area.r_lo) then
-          area.r_lo := vnum;
+        if (vnum < r_lo) then
+          r_lo := vnum;
         if (vnum > area.r_hi) then
-          area.r_hi := vnum;
+          r_hi := vnum;
         end;
 
-      name := hash_string(s);
+      _name := hash_string(s);
       buf := '';
 
       repeat
@@ -412,21 +429,21 @@ begin
           buf := buf + s + #13#10;
       until (s = '~');
 
-      description := buf;
+      _description := buf;
 
-      flags := af.readCardinal;
-      min_level := af.readInteger;
-      max_level := af.readInteger;
-      sector := af.readCardinal;
+      flags.value := af.readCardinal;
+      _minlevel := af.readInteger;
+      _maxlevel := af.readInteger;
+      _sector := af.readCardinal;
 
-      if (IS_SET(flags, ROOM_TELEPORT)) then
+      if (_maxlevel = 0) then
+        _maxlevel := LEVEL_MAX;
+
+      if (flags.isBitSet(ROOM_TELEPORT)) then
         begin
-        televnum := af.readCardinal;
-        teledelay := af.readInteger;
+        _televnum := af.readCardinal;
+        _teledelay := af.readInteger;
         end;
-
-      if (max_level = 0) then
-        max_level := LEVEL_MAX;
 
       while (true) do
         begin
@@ -598,7 +615,7 @@ begin
           s := af.readLine;
           end;
 
-        race := race_list.head.element;
+        race := raceList.head.element;
 
         count := 0;
 
@@ -612,10 +629,11 @@ begin
 end;
 
 procedure GArea.loadObjects;
-var s:string;
-    modif, num:integer;
-    o_index:GObjectIndex;
-    aff : GAffect;
+var 
+  s:string;
+  modif, num:integer;
+  obj : GObject;
+  aff : GAffect;
 begin
   num:=0;
   s := af.readLine;
@@ -631,22 +649,21 @@ begin
       exit;
     end;
 
-    if (findObjectIndex(num) <> nil) then
+    if (objectIndices[num] <> nil) then
       begin
       areaBug('load_objects','vnum conflict ('+inttostr(num)+')');
       exit;
       end;
 
-    o_index := GObjectIndex.Create;
-    o_index.affects := GDLinkedList.Create;
-    o_index.area := Self;
+    obj := GObject.Create();
+    obj.area := Self;
 
-    with o_index do
+    with obj do
       begin
-      name := hash_string(af.readLine);
-      short := hash_string(af.readLine);
-      long := hash_string(af.readLine);
-
+      name := af.readLine();
+      short := af.readLine();
+      long := af.readLine();
+      
       vnum:=num;
 
       if (not found_range) then
@@ -659,8 +676,14 @@ begin
 
       item_type := af.readInteger;
 
-      wear1 := af.readInteger;
-      wear2 := af.readInteger;
+      wear_location1 := af.readToken;
+      wear_location2 := af.readToken;
+      
+      if (wear_location1 = 'none') then
+        wear_location1 := '';
+
+      if (wear_location2 = 'none') then
+        wear_location2 := '';
 
       value[1] := af.readInteger;
       value[2] := af.readInteger;
@@ -680,8 +703,6 @@ begin
       weight := af.readInteger();
       flags := af.readCardinal();
       cost := af.readInteger();
-
-      obj_count:=0;
 
       s := af.readToken();
 
@@ -721,7 +742,7 @@ begin
         end;
       end;
 
-    obj_list.insertLast(o_index);
+    objectIndices[obj.vnum] := obj;
   until (uppercase(s) = '#END');
 end;
 
@@ -762,7 +783,7 @@ begin
         else
         if (reset_type = 'O') then
           begin
-          if (findObjectIndex(arg1) = nil) then
+          if (objectIndices[arg1] = nil) then
             begin
             areaBug('GArea.loadResets', 'obj reset ' + inttostr(arg1) + ' null');
             g.Free;
@@ -773,7 +794,7 @@ begin
         else
         if (reset_type = 'E') then
           begin
-          if (findObjectIndex(arg1) = nil) then
+          if (objectIndices[arg1] = nil) then
             begin
             areaBug('GArea.loadResets', 'equip reset ' + inttostr(arg1) + ' null');
             g.Free;
@@ -784,7 +805,7 @@ begin
         else
         if (reset_type = 'I') then
           begin
-          if (findObjectIndex(arg1) = nil) then
+          if (objectIndices[arg1] = nil) then
             begin
             areaBug('GArea.loadResets', 'insert reset ' + inttostr(arg1) + ' null');
             g.Free;
@@ -795,7 +816,7 @@ begin
         else
         if (reset_type = 'G') then
           begin
-          if (findObjectIndex(arg1) = nil) then
+          if (objectIndices[arg1] = nil) then
             begin
             areaBug('GArea.loadResets', 'give reset ' + inttostr(arg1) + ' null');
             g.Free;
@@ -883,11 +904,10 @@ begin
 
     if (s = '#AREA') then
       begin
-      name := af.readLine;
-      author := af.readLine;
-      reset_msg := af.readLine;
-
-      max_age := af.readInteger;
+      _name := af.readLine;
+      _author := af.readLine;
+      _resetmsg := af.readLine;
+      _maxage := af.readInteger;
 
       with weather do
         begin
@@ -895,8 +915,8 @@ begin
         temp_avg := af.readInteger;
         end;
 
-      flags := af.readCardinal;
-      age := 0;
+      flags.value := af.readCardinal;
+      _age := 0;
       end
     else
     if (s = '#RANGES') then
@@ -912,25 +932,25 @@ begin
       end
     else
     if (s = '#ROOMS') then
-      loadRooms
+      loadRooms()
     else
     if (s = '#MOBILES') then
-      loadNPCs
+      loadNPCs()
     else
     if (s = '#OBJECTS') then
-      loadObjects
+      loadObjects()
     else
     if (s = '#RESETS') then
-      loadResets
+      loadResets()
     else
     if (s = '#SHOPS') then
-      loadShops;
+      loadShops();
   until (s = '$') or (af.eof());
 
   af.Free;
 end;
 
-procedure load_areas;
+procedure loadAreas();
 var
   af : GFileReader;
   to_room, room : GRoom;
@@ -997,7 +1017,7 @@ begin
 
         if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
           begin
-          bugreport('load_areas', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
+          bugreport('loadAreas()', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
                     ' for exit in room #' + IntToStr(room.vnum));
 
           room.exits.remove(node_exit);
@@ -1007,7 +1027,7 @@ begin
         else
         if (to_room = room) then
           begin
-          bugreport('load_areas', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
+          bugreport('loadAreas()', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
 
           room.exits.remove(node_exit);
 
@@ -1016,7 +1036,7 @@ begin
         else
         if (to_room = nil) then
           begin
-          bugreport('load_areas', 'area.pas', 'exit ' + headings[pexit.direction] +
+          bugreport('loadAreas()', 'area.pas', 'exit ' + headings[pexit.direction] +
                     ' from room #' + IntToStr(room.vnum) + ' to unexisting room # '+ IntToStr(pexit.vnum));
 
           room.exits.remove(node_exit);
@@ -1072,7 +1092,7 @@ var
    iterator : GIterator;
 //   prog : GProgram;
    shop : GShop;
-   obj : GObjectIndex;
+   obj : GObject;
    h : integer;
 begin
   assign(f, 'areas\' + fn);
@@ -1093,9 +1113,9 @@ begin
   writeln(f, '#AREA');
   writeln(f, Self.name);
   writeln(f, Self.author);
-  writeln(f, Self.reset_msg);
-  writeln(f, Self.max_age);
-  writeln(f, Self.weather.temp_mult, ' ', Self.weather.temp_avg, ' ', Self.flags);
+  writeln(f, Self.resetmsg);
+  writeln(f, Self.maxage);
+  writeln(f, Self.weather.temp_mult, ' ', Self.weather.temp_avg, ' ', Self.flags.value);
   writeln(f);
   writeln(f, '#ROOMS');
   
@@ -1109,13 +1129,13 @@ begin
       continue;
 
     writeln(f, '#', room.vnum);
-    writeln(f, room.name^);
+    writeln(f, room.name);
     write(f, room.description);
     writeln(f, '~');
 
-    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
+    write(f, room.flags.value, ' ', room.minlevel, ' ', room.maxlevel, ' ', room.sector);
 
-    if (IS_SET(room.flags, ROOM_TELEPORT)) then
+    if (room.flags.isBitSet(ROOM_TELEPORT)) then
       writeln(f, ' ', room.televnum, ' ', room.teledelay)
     else
       writeln(f);
@@ -1151,60 +1171,6 @@ begin
     end;
     
   iterator.Free();
-
-(*  for h := r_lo to (r_hi - 1) do
-  begin
-    room := GRoom(room_list.get(h));
-    if (room = nil) then
-      continue;
-
-    if (room.area <> Self) then
-      begin
-      node := node.next;
-      continue;
-      end;
-
-    writeln(f, '#', room.vnum);
-    writeln(f, room.name^);
-    write(f, room.description);
-    writeln(f, '~');
-
-    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
-
-    if (IS_SET(room.flags, ROOM_TELEPORT)) then
-      writeln(f, ' ', room.televnum, ' ', room.teledelay)
-    else
-      writeln(f);
-
-    node_ex := room.exits.head;
-    while (node_ex <> nil) do
-      begin
-      ex := node_ex.element;
-
-      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
-
-      if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
-        writeln(f, ' ', ex.keywords^)
-      else
-        writeln(f);
-
-      node_ex := node_ex.next;
-      end;
-
-    node_ex := room.extra.head;
-    while (node_ex <> nil) do
-      begin
-      extra := node_ex.element;
-
-      writeln(f, 'E ', extra.keywords);
-      write(f, extra.description);
-      writeln(f, '~');
-
-      node_ex := node_ex.next;
-      end;
-
-    writeln(f, 'S');
-  end; *)
 
   writeln(f, '#END');
   writeln(f);
@@ -1281,26 +1247,21 @@ begin
   writeln(f);
   writeln(f, '#OBJECTS');
 
-  node := obj_list.head;
-  while (node <> nil) do
+  iterator := objectIndices.iterator();
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     if (obj.area <> Self) then
-      begin
-      node := node.next;
       continue;
-      end;
 
     writeln(f, '#',obj.vnum);
-    writeln(f, obj.name^);
-    writeln(f, obj.short^);
-    writeln(f, obj.long^);
-    writeln(f, obj.item_type,' ',obj.wear1,' ',obj.wear2);
+    writeln(f, obj.name);
+    writeln(f, obj.short);
+    writeln(f, obj.long);
+    writeln(f, obj.item_type,' ',obj.wear_location1,' ',obj.wear_location2);
     writeln(f, obj.value[1],' ',obj.value[2],' ',obj.value[3],' ',obj.value[4]);
     writeln(f, obj.weight,' ',obj.flags,' ',obj.cost);
-
-    node := node.next;
     end;
 
   writeln(f, '#END');
@@ -1396,20 +1357,21 @@ begin
     clan:=npcindex.clan;
     conn:=nil;
     npc.room := nil;
-    position:=POS_STANDING;
+    position := POS_STANDING;
+    state := STATE_IDLE;
     npc.npc_index := npcindex;
 
-    name := hash_string(npcindex.name);
-    short := hash_string(npcindex.short);
-    long := hash_string(npcindex.long);
+	  name := npcindex.name^;
+    short := npcindex.short^;
+    long := npcindex.long^;
 
-    sex:=npcindex.sex;
-    race:=npcindex.race;
-    alignment:=npcindex.alignment;
-    level:=npcindex.level;
-    weight:=npcindex.weight;
-    height:=npcindex.height;
-    act_flags:=npcindex.act_flags;
+    sex := npcindex.sex;
+    race := npcindex.race;
+    alignment := npcindex.alignment;
+    level := npcindex.level;
+    weight := npcindex.weight;
+    height := npcindex.height;
+    act_flags := npcindex.act_flags;
     end;
 
   inc(npcindex.count);
@@ -1423,9 +1385,8 @@ end;
 procedure GArea.reset;
 var reset : GReset;
     npc, vict, lastmob : GNPC;
-    obj, lastobj : GObject;
+    obj, lastobj, tempobj : GObject;
     npcindex : GNPCIndex;
-    objindex : GObjectIndex;
     room : GRoom;
     pexit : GExit;
     conn : GConnection;
@@ -1443,7 +1404,7 @@ begin
 
     if (conn.state=CON_PLAYING) and (conn.ch.room.area = Self) then
       begin
-      buf := conn.ch.ansiColor(AT_REPORT) + reset_msg + #13#10;
+      buf := conn.ch.ansiColor(AT_REPORT) + resetmsg + #13#10;
       conn.ch.sendBuffer(buf);
       end;
 
@@ -1499,7 +1460,6 @@ begin
             end;
           end;
       'E':begin
-          objindex:=findObjectIndex(reset.arg1);
           npc:=nil;
 
           if (reset.arg3<>0) then
@@ -1535,24 +1495,27 @@ begin
             continue;
             end;
 
-          if (objindex = nil) then
-            bugreport('GArea.reset (E) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
-          else
           if (npc = nil) then
             bugreport('GArea.reset (E) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null')
           else
           if (number_percent <= reset.arg2) then
             begin
-            obj := instanceObject(findObjectIndex(reset.arg1));
+            tempobj := GObject(objectIndices[reset.arg1]);
+            
+            if (tempobj <> nil) then
+              begin
+              obj := tempobj.clone();
 
-            obj.toChar(npc);
-            npc.equip(obj);
+	            obj.toChar(npc);
+	            npc.equip(obj);
 
-            lastobj := obj;
+	            lastobj := obj;
+	            end
+	          else
+              bugreport('GArea.reset (E) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null');
             end;
           end;
       'G':begin
-          objindex := findObjectIndex(reset.arg1);
           npc := nil;
 
           if (reset.arg3 <> 0) then
@@ -1588,45 +1551,47 @@ begin
             continue;
             end;
 
-          if (objindex = nil) then
-            bugreport('GArea.reset (G) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
-          else
-            begin
-            obj := instanceObject(findObjectIndex(reset.arg1));
+					tempobj := GObject(objectIndices[reset.arg1]);
+					
+					if (tempobj <> nil) then
+					  begin
+            obj := tempobj.clone();
             obj.toChar(npc);
 
             lastobj := obj;
-            end;
+					  end
+					else
+            bugreport('GArea.reset (G) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null');
           end;
       'O':begin
-          objindex:=findObjectIndex(reset.arg1);
-
-          if objindex=nil then
+          tempobj := GObject(objectIndices[reset.arg1]);
+          
+          if (tempobj = nil) then
             bugreport('GArea.reset (O) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
           else
-          if (objindex.area.nplayer=0) and (reset.arg3>objindex.obj_count) then
+          if (tempobj.area.nplayer = 0) and (reset.arg3 > tempobj.child_count) then
             begin
-            obj := instanceObject(objindex);
+            obj := tempobj.clone();
             obj.toRoom(findRoom(reset.arg2));
 
             lastobj := obj;
             end;
           end;
       'I':begin
-          objindex := findObjectIndex(reset.arg1);
+          tempobj := GObject(objectIndices[reset.arg1]);
 
-          if lastobj=nil then
+          if (lastobj = nil) then
             begin
             node_reset := node_reset.next;
             continue;
             end;
 
-          if objindex=nil then
+          if (tempobj = nil) then
             bugreport('GArea.reset (I) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
           else
-          if (objindex.area.nplayer=0) and (reset.arg3>objindex.obj_count) then
+          if (tempobj.area.nplayer = 0) and (reset.arg3 > tempobj.child_count) then
             begin
-            obj := instanceObject(objindex);
+            obj := tempobj.clone();
             obj.toObject(lastobj);
             end;
           end;
@@ -1718,7 +1683,7 @@ begin
     node_reset := node_reset.next;
     end;
 
-  age:=0;
+  _age := 0;
 end;
 
 procedure GArea.update;
@@ -1727,13 +1692,13 @@ var buf : string;
     conn : GConnection;
     node : GListNode;
 begin
-  inc(age);
+  inc(_age);
 
-  if (age >= max_age) then
+  if (_age >= _maxage) then
     begin
     writeConsole('Resetting ' + fname + '...');
 
-    reset;
+    reset();
     end;
 
   { weather routine, adapted from Smaug code - Grimlord }
@@ -1921,7 +1886,7 @@ var
    room : GRoom;
 begin
   room := GRoom.Create(vnum, area);
-  room.name := hash_string('Floating in a void');
+  room.name := 'Floating in a void';
   room.description := 'Merely wisps of gas and steam, this room has not yet been clearly defined.'#13#10;
 
   room_list.put(vnum, room);
@@ -1992,25 +1957,25 @@ constructor GRoom.Create(vn : integer; ar : GArea);
 begin
   inherited Create;
 
-  vnum := vn;
+  _vnum := vn;
+  _sector := 1;
+  _light := 0;
+  
   area := ar;
   areacoords := nil;
   worldcoords := nil;
 
-  extra := GDLinkedList.Create;
-  exits := GDLinkedList.Create;
-  chars := GDLinkedList.Create;
-  objects := GDLinkedList.Create;
-  tracks := GDLinkedList.Create;
-
-  sector := 1;
-  light := 0;
-  flags := 0;
+  flags := GBit.Create(0);
+  extra := GDLinkedList.Create();
+  exits := GDLinkedList.Create();
+  chars := GDLinkedList.Create();
+  objects := GDLinkedList.Create();
+  tracks := GDLinkedList.Create();
 end;
 
 destructor GRoom.Destroy;
 begin
-  unhash_string(name);
+  unhash_string(_name);
 
   extra.clean;
   exits.clean;
@@ -2027,6 +1992,22 @@ begin
   inherited Destroy;
 end;
 
+procedure GRoom.setName(const name : string);
+begin 
+  if (_name <> nil) then
+    unhash_string(_name);
+    
+  _name := hash_string(name);
+end;
+
+function GRoom.getName() : string;
+begin
+  if (_name <> nil) then
+    Result := _name^
+  else
+    Result := '';
+end;
+
 function GRoom.IS_DARK : boolean;
 begin
   if (light > 0) then
@@ -2041,7 +2022,7 @@ begin
     exit;
     end;
 
-  if (IS_SET(flags, ROOM_DARK)) then
+  if (flags.isBitSet(ROOM_DARK)) then
     begin
     Result := true;
     exit;
@@ -2084,7 +2065,7 @@ begin
 
     if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
       ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
-      isName(vict.name^, name) or isName(vict.short^, name) or
+      isName(vict.name, name) or isName(vict.short, name) or
       ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
       (isName(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
       begin
@@ -2209,7 +2190,7 @@ begin
     begin
     obj := node.element;
 
-    if isObjectName(obj.name^, name) or isObjectName(obj.short^, name) or isObjectName(obj.long^, name) then
+    if isObjectName(obj.name, name) or isObjectName(obj.short, name) or isObjectName(obj.long, name) then
       begin
       inc(cnt, obj.count);
 
@@ -2326,40 +2307,35 @@ end;
 
 
 // GObject
-constructor GObject.Create;
+constructor GObject.Create();
 begin
   inherited Create;
+  
+  _name := nil;
+  _short := nil;
+  _long := nil;
 
-  wear_location := WEAR_NULL;
-  contents := GDLinkedList.Create;
-  obj_index := nil;
+  worn := '';
+  wear_location1 := '';
+  wear_location2 := '';
+  contents := GDLinkedList.Create();
+  affects := GDLinkedList.Create();
+  child_count := 0;
   count := 1;
 end;
 
 destructor GObject.Destroy;
-begin
-  unhash_string(name);
-  unhash_string(short);
-  unhash_string(long);
-
-  contents.clean;
-  contents.Free;
-  
-  inherited Destroy;
-end;
-
-procedure GObject.extract;
 var 
   obj_in : GObject;
 begin
-  object_list.remove(node_world);
+  objectList.remove(node_world);
   node_world := nil;
 
   while (contents.tail <> nil) do
     begin
     obj_in := contents.tail.element;
 
-    obj_in.extract;
+    obj_in.Free();
     end;
 
   if (room <> nil) then
@@ -2371,10 +2347,23 @@ begin
   if (in_obj <> nil) then
     fromObject;
 
-  if (obj_index <> nil) then
-    dec(obj_index.obj_count);
+  obj_in := GObject(objectIndices[vnum]);
+  
+  if (obj_in <> nil) then
+    dec(obj_in.child_count);
 
-  extracted_object_list.insertLast(Self);
+  if (_name <> nil) then
+    unhash_string(_name);
+    
+  if (_short <> nil) then
+    unhash_string(_short);
+
+  if (_long <> nil) then
+    unhash_string(_long);
+
+  contents.Free();
+  
+  inherited Destroy;
 end;
 
 procedure GObject.toRoom(to_room : GRoom);
@@ -2424,9 +2413,10 @@ var grouped : boolean;
     otmp : GObject;
     oweight : integer;
 begin
-  oweight := getWeight;
+  oweight := getWeight();
   ch := GCharacter(c);
-  grouped := false;
+  
+{  grouped := false;
 
   node := ch.objects.head;
 
@@ -2441,24 +2431,28 @@ begin
       end;
 
     node := node.next;
-    end;
+    end; }
 
-  if (not grouped) then
-    begin
-    node_carry := ch.objects.insertLast(Self);
-    carried_by := c;
-    end;
+  if (worn <> '') then
+    ch.equipment[worn] := Self
+  else
+    node_carry := ch.inventory.insertLast(Self);
+  
+  carried_by := c;
 
   inc(ch.carried_weight, oweight);
 end;
 
 procedure GObject.fromChar;
 begin
-  GCharacter(carried_by).objects.remove(node_carry);
+  if (worn <> '') then
+    GCharacter(carried_by).equipment.remove(worn)
+  else
+    GCharacter(carried_by).inventory.remove(node_carry);
+    
   dec(GCharacter(carried_by).carried_weight, getWeight);
 
-  wear_location := WEAR_NULL;
-
+  worn := '';
   node_carry := nil;
   carried_by := nil;
 end;
@@ -2511,15 +2505,50 @@ begin
   getWeight := we;
 end;
 
-function GObject.getVnum() : integer;
+procedure GObject.setName(const name : string);
 begin
-  Result := obj_index.vnum;
+  if (_name <> nil) then
+    unhash_string(_name);
+
+  _name := hash_string(name);
+end;
+
+procedure GObject.setShortName(const name : string);
+begin
+  if (_short <> nil) then
+    unhash_string(_short);
+
+  _short := hash_string(name);
+end;
+
+procedure GObject.setLongName(const name : string);
+begin
+  if (_long <> nil) then
+    unhash_string(_long);
+
+  _long := hash_string(name);
 end;
 
 function GObject.getName() : string;
 begin
-  if (name <> nil) then
-    Result := name^
+  if (_name <> nil) then
+    Result := _name^
+  else
+    Result := '';
+end;
+
+function GObject.getShortName() : string;
+begin
+  if (_short <> nil) then
+    Result := _short^
+  else
+    Result := '';
+end;
+
+function GObject.getLongName() : string;
+begin
+  if (_long <> nil) then
+    Result := _long^
   else
     Result := '';
 end;
@@ -2604,7 +2633,7 @@ begin
     end;
 end;
 
-function findObjectIndex(vnum : integer) : GObjectIndex;
+{ function findObjectIndex(vnum : integer) : GObjectIndex;
 var
    node : GListNode;
    obj : GObjectIndex;
@@ -2641,9 +2670,9 @@ begin
 
   with obj do
     begin
-    name := hash_string(o_index.name);
-    short := hash_string(o_index.short);
-    long := hash_string(o_index.long);
+    name := o_index.name^;
+    short := o_index.short^;
+    long := o_index.long^;
 
     item_type:=o_index.item_type;
     wear1:=o_index.wear1;
@@ -2661,27 +2690,29 @@ begin
 
   obj.node_world := object_list.insertLast(obj);
   instanceObject:=obj;
-end;
+end; }
 
 { Revised 29/Jan/2001 - Nemesis }
 procedure addCorpse(c : pointer);
 var 
   obj,obj_in : GObject;
-  node : GListNode;
+  iterator : GIterator;
   ch : GCharacter;
 begin
   ch := c;
 
-  obj := instanceObject(findObjectIndex(OBJ_VNUM_CORPSE));
-
-  if (obj = nil) then
+  obj_in := GObject(objectIndices[OBJ_VNUM_CORPSE]);
+  
+  if (obj_in = nil) then
     exit;
+    
+  obj := obj_in.clone();
 
   with obj do
     begin
-    name := hash_string('a corpse');
-    short := hash_string('$4the corpse of ' + ch.name^ + '$7');
-    long := hash_string('$4The corpse of ' + ch.name^ + ' is lying here$7');
+    name := 'a corpse';
+    short := '$4the corpse of ' + ch.name + '$7';
+    long := '$4The corpse of ' + ch.name + ' is lying here$7';
 
     if (not ch.IS_NPC) then
       SET_BIT(flags, OBJ_NOSAC);
@@ -2700,40 +2731,38 @@ begin
   { when ch dies in bg, we don't want to have him lose all his items! - Grimlord }
   if not (not ch.IS_NPC and (GPlayer(ch).bg_status=BG_PARTICIPATE)) then
     begin
-    node := ch.objects.head;
-
     // Inventory put into corpse as well, but not for shopkeepers of course :)
-
     if (not ch.IS_SHOPKEEPER) then
       begin
-      while (node <> nil) do
+      iterator := ch.inventory.iterator();
+      
+      while (iterator.hasNext()) do
         begin
-        obj_in := node.element;
+        obj_in := GObject(iterator.next());
 
-        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.wear_location > WEAR_NULL) and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
+        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
           obj_in.fromChar;
           obj_in.toObject(obj);
           end;
-
-        node := node.next;
-
         end;
-      end
-    else
-      begin
-      while (node <> nil) do
-        begin
-        obj_in := node.element;
-        node := node.next;
+        
+      iterator.Free();
 
-        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and IS_SET(obj_in.flags, OBJ_NOREMOVE) and (obj_in.wear_location > WEAR_NULL) then
+      iterator := ch.equipment.iterator();
+      
+      while (iterator.hasNext()) do
+        begin
+        obj_in := GObject(iterator.next());
+
+        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
           obj_in.fromChar;
           obj_in.toObject(obj);
           end;
-
         end;
+        
+      iterator.Free();
       end;
     end;
     
@@ -2745,28 +2774,28 @@ begin
       begin
       if (ch.gold = 1) then
         begin
-        name := hash_string('one gold coin');
-        short := hash_string('one gold coin');
-        long := hash_string('one gold coin');
+        name := 'one gold coin';
+        short := 'one gold coin';
+        long := 'one gold coin';
         end
       else
         begin
-        name := hash_string(IntToStr(ch.gold) + ' gold coins');
-        short := hash_string(IntToStr(ch.gold) + ' gold coins');
-        long := hash_string(IntToStr(ch.gold) + ' gold coins');
+        name := IntToStr(ch.gold) + ' gold coins';
+        short := IntToStr(ch.gold) + ' gold coins';
+        long := IntToStr(ch.gold) + ' gold coins';
         end;
 
       item_type := ITEM_MONEY;
 
       value[1] := ch.gold;
       
-      wear1 := 0; wear2 := 0;
+      worn := '';
+      wear_location1 := ''; wear_location2 := '';
       weight := 0;
-      obj_index := nil;
       timer := 0;
       end;
 
-    obj_in.node_world := object_list.insertLast(obj_in);
+    obj_in.node_world := objectList.insertLast(obj_in);
 
     obj_in.toObject(obj);
     
@@ -2804,19 +2833,19 @@ begin
   end;
 end;
 
-function GObject.clone : GObject;
+function GObject.clone() : GObject;
 var
-   obj : GObject;
+  obj : GObject;
+  obj_in : GObject;
 begin
-  obj := GObject.Create;
+  obj := GObject.Create();
 
-  obj.obj_index := obj_index;
-  obj.name := hash_string(name);
-  obj.short := hash_string(short);
-  obj.long := hash_string(long);
+  obj.name := name;
+  obj.short := short;
+  obj.long := long;
   obj.item_type := item_type;
-  obj.wear1 := wear1;
-  obj.wear2 := wear2;
+  obj.wear_location1 := wear_location1;
+  obj.wear_location2 := wear_location2;
   obj.flags := flags;
   obj.value[1] := value[1];
   obj.value[2] := value[2];
@@ -2825,11 +2854,14 @@ begin
   obj.weight := weight;
   obj.cost := cost;
   obj.count := 1;
+  obj.vnum := vnum;
+  
+  obj_in := GObject(objectIndices[vnum]);
 
-  if (obj_index <> nil) then
-    inc(obj_index.obj_count);
+  if (obj_in <> nil) then
+    inc(obj_in.child_count);
 
-  obj.node_world := object_list.insertLast(obj);
+  obj.node_world := objectList.insertLast(obj);
 
   Result := obj;
 end;
@@ -2838,11 +2870,10 @@ function GObject.group(obj : GObject) : boolean;
 begin
   Result := false;
 
-  if (obj = nil) or (obj = Self) then
+{  if (obj = nil) or (obj = Self) then
     exit;
 
-  if (Self.obj_index = obj.obj_index) and
-   (Self.name = obj.name) and
+  if (Self.name = obj.name) and
    (Self.short = obj.short) and
    (Self.long = obj.long) and
    (Self.item_type = obj.item_type) and
@@ -2863,21 +2894,21 @@ begin
     if (obj_index <> nil) then
       inc(obj_index.obj_count, obj.count);
 
-    obj.extract;
+    obj.extract();
 
     Result := true;
     exit;
-    end;
+    end; }
 end;
 
 procedure GObject.split(num : integer);
 var
    rest : GObject;
 begin
-  if (count <= num) or (num = 0) then
+{  if (count <= num) or (num = 0) then
     exit;
 
-  rest := clone;
+  rest := clone();
 
   if (obj_index <> nil) then
     dec(obj_index.obj_count);
@@ -2907,7 +2938,7 @@ begin
     rest.in_obj := in_obj;
     rest.room := nil;
     rest.carried_by := nil;
-    end;
+    end; }
 end;
 
 procedure GObject.seperate;
@@ -2915,33 +2946,26 @@ begin
   split(1);
 end;
 
-procedure cleanExtractedObjects();
-begin
-  extracted_object_list.clean();
-end;
-
 {Jago 10/Jan/2001 - utility function }
 { Revised 28/Jan/2001 - Nemesis }
 function findObjectWorld(s : string) : GObject;
-var obj : GObject;
-    obj_node : GListNode;
-    number, count : integer;
+var 
+  obj : GObject;
+  iterator : GIterator;
+  number, count : integer;
 begin
-
   number := findNumber(s); // eg 2.sword
 
   count := 0;
 
-  obj_node := object_list.head;
+  iterator := objectList.iterator();
 
-  while (obj_node <> nil) do
+  while (iterator.hasNext()) do
     begin
+    obj := GObject(iterator.next());
 
-    obj := GObject(obj_node.element);
-
-    if isName(obj.name^,s) then
+    if (isName(obj.name,s)) then
       begin
-
       inc(count);
 
       if (count = number) then
@@ -2950,8 +2974,6 @@ begin
         exit;
         end;
       end;
-
-    obj_node := obj_node.next;
     end;
 
   Result := nil;
@@ -2961,13 +2983,13 @@ procedure initAreas();
 begin
   area_list := GDLinkedList.Create;
   room_list := GHashTable.Create(32768);
-  object_list := GDLinkedList.Create;
   shop_list := GDLinkedList.Create;
   teleport_list := GDLinkedList.Create;
-  extracted_object_list := GDLinkedList.Create;
 
   npc_list := GDLinkedList.Create;
-  obj_list := GDLinkedList.Create;
+  
+  objectList := GDLinkedList.Create();
+  objectIndices := GHashTable.Create(32768);
 end;
 
 procedure cleanupAreas();
@@ -2977,21 +2999,21 @@ begin
   
   room_list.clear();
   room_list.Free();
-
-  object_list.clean();
-  object_list.Free();
-  
+ 
   shop_list.clean();
   shop_list.Free();
   
   teleport_list.clean();
   teleport_list.Free();
   
-  extracted_object_list.clean();
-  extracted_object_list.Free();
-
   npc_list.clean();
   npc_list.Free();
+
+  //objectList.clean();
+  objectList.Free();
+  
+  objectIndices.clear();
+  objectIndices.Free();
 end;
 
 end.

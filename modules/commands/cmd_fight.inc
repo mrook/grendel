@@ -13,52 +13,41 @@ begin
     ch.sendBuffer('They aren''t here.'#13#10)
   else
   if (vict=ch) then
-    ch.sendBuffer('You try to attack yourself, but somehow it just doesn''t work!'#13#10)
+    ch.sendBuffer('Attack yourself? Get a clue!'#13#10)
   else
-  if IS_SET(ch.room.flags,ROOM_SAFE) then
+  if (ch.room.flags.isBitSet(ROOM_SAFE)) then
     ch.sendBuffer('A strange force prevents you from attacking.'#13#10)
   else
-  if (vict.position<>POS_FIGHTING) then
+  if (vict.state <> STATE_FIGHTING) then
     begin
     if (not ch.IS_NPC) then
       GPlayer(ch).fightxp:=0;
 
-    ch.position:=POS_FIGHTING;
-    ch.fighting:=vict;
-    // ch.fought_by.add(vict);
+    ch.state := STATE_FIGHTING;
+    ch.fighting := vict;
 
-    vict.position:=POS_FIGHTING;
-    vict.fighting:=ch;
-    // vict.fought_by.add(ch);
-
-    act(AT_FIGHT_YOU,'You attack $N!',false,ch,nil,vict,TO_CHAR);
-//          act(AT_FIGHT_HIT,'You are being attacked by $N!',false,t,nil,ch,TO_CHAR);
-//          act(AT_FIGHT,'$N attackes $n!',false,t,nil,ch,TO_NOTVICT);
+    act(AT_FIGHT_YOU, 'You attack $N!',false,ch,nil,vict,TO_CHAR);
     end
   else
-  if (vict.position=POS_FIGHTING) and (ch.position<>POS_FIGHTING) then
+  if (vict.state = STATE_FIGHTING) and (ch.state <> STATE_FIGHTING) then
     begin
     if (not ch.IS_NPC) then
       GPlayer(ch).fightxp:=0;
 
-    ch.position:=POS_FIGHTING;
-    ch.fighting:=vict;
-    // vict.fought_by.add(ch);
+    ch.state := STATE_FIGHTING;
+    ch.fighting := vict;
 
     act(AT_FIGHT_YOU,'You assist $N!',false,ch,nil,vict.fighting,TO_CHAR);
     act(AT_FIGHT_HIT,'$N CHARGES into battle!',false,vict,nil,ch,TO_CHAR);
     act(AT_FIGHT,'$N CHARGES into the battle against $n!',false,vict,nil,ch,TO_NOTVICT);
     end
   else
-  if (vict<>ch.fighting) then
+  if (vict <> ch.fighting) then
     begin
-    //ch.fighting.fought_by.delete(ch.fighting.fought_by.indexof(ch));
-
     if (not ch.IS_NPC) then
       GPlayer(ch).fightxp:=0;
 
-    ch.fighting:=vict;
-    //vict.fought_by.add(ch);
+    ch.fighting := vict;
 
     act(AT_FIGHT_YOU,'You turn and target $N!',false,ch,nil,vict,TO_CHAR);
     act(AT_FIGHT_HIT,'$N turns and targets YOU!',false,vict,nil,ch,TO_CHAR);
@@ -75,9 +64,9 @@ var a : integer;
     vict : GCharacter;
     node : GListNode;
 begin
-  if (ch.position = POS_BASHED) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
-    act(AT_REPORT,'You are bashed and cannot flee.',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'You are immobile and cannot flee!',false,ch,nil,nil,TO_CHAR);
     exit;
     end;
 
@@ -87,7 +76,7 @@ begin
     exit;
     end;
 
-  if (ch.position <> POS_FIGHTING) then
+  if (ch.state <> STATE_FIGHTING) then
     begin
     ch.sendBuffer('You can''t flee when you''re not fighting!'#13#10);
     exit;
@@ -95,7 +84,7 @@ begin
 
   a := random(6)+1;
 
-  ch.position := POS_STANDING;
+  ch.state := STATE_IDLE;
   room := ch.room;
 
   if (do_move(ch, a)) then
@@ -119,7 +108,7 @@ begin
     if (timer <> nil) then
       timer.counter := combat_timer[COMBAT_MOBILE]
     else
-      registerTimer(TIMER_COMBAT, nil, combat_timer[COMBAT_MOBILE], ch, nil, nil);
+      registerTimer('combat', TIMER_COMBAT, nil, combat_timer[COMBAT_MOBILE], ch, nil, nil);
 
     if (ch.fighting.IS_NPC) then
       begin
@@ -130,13 +119,13 @@ begin
     if (ch.fighting.fighting = ch) then
       ch.fighting.fighting := nil;
       
-    ch.fighting.position := POS_STANDING;
+    ch.fighting.state := STATE_IDLE;
     stopfighting(ch);
     ch.fighting := nil;
     end
   else
     begin
-    ch.position := POS_FIGHTING;
+    ch.state := STATE_FIGHTING;
     ch.sendBuffer('You cannot get away!'#13#10);
     end;
 end;
@@ -144,24 +133,24 @@ end;
 procedure do_flurry(ch:GCharacter;param:string);
 var a,num:integer;
 begin
-  if (ch.position = POS_BASHED) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
-    ch.sendBuffer('You are bashed! You cannot flurry!'#13#10);
+    ch.sendBuffer('You are immobilized and cannot move!'#13#10);
     exit;
-    end
-  else
-  if (ch.position<>POS_FIGHTING) or (ch.fighting.CHAR_DIED) then
+    end;
+
+  if (ch.state <> STATE_FIGHTING) or (ch.fighting.CHAR_DIED) then
     begin
     ch.sendBuffer('You can only flurry when you are fighting.'#13#10);
     exit;
-    end
-  else
+    end;
+    
   if (ch.bashing > -2) then
     begin
     ch.sendBuffer('You cannot flurry this soon after a bash.'#13#10);
     exit;
-    end
-  else
+    end;
+
   if (ch.mv < 15 + (ch.level div 10)+1) then
     begin
     ch.sendBuffer('You don''t have enough energy to flurry.'#13#10);
@@ -198,16 +187,17 @@ end;
 procedure do_assist(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
-  case ch.position of
-    POS_BASHED:begin
-               ch.sendBuffer('You are bashed to the ground!'#13#10);
-               exit;
-               end;
-  POS_FIGHTING:begin
-               ch.sendBuffer('You are already fighting!'#13#10);
-               exit;
-               end;
-  end;
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
+    begin
+    ch.sendBuffer('You are immobilized and cannot move!'#13#10);
+    exit;
+    end;
+
+  if (ch.state = STATE_FIGHTING) then
+    begin
+    ch.sendBuffer('You are already fighting!'#13#10);
+    exit;
+    end;
 
   if (length(param) = 0) then
     ch.sendBuffer('Assist who?'#13#10)
@@ -228,21 +218,21 @@ begin
       act(AT_REPORT,'You assist $N!',false,ch,nil,vict,TO_CHAR);
       act(AT_REPORT,'$n assists $N!',false,ch,nil,vict,TO_ROOM);
       ch.fighting := vict.fighting;
-      ch.position := POS_FIGHTING;
+      ch.state := STATE_FIGHTING;
       end;
     end;
 end;
 
 procedure do_disengage(ch:GCharacter;param:string);
 begin
-  if (ch.position<>POS_FIGHTING) then
+  if (ch.state <> STATE_FIGHTING) then
     begin
     ch.sendBuffer('You are not fighting!'#13#10);
     exit;
     end;
 
   { cannot disengage when tanking }
-  if (ch.fighting.fighting=ch) then
+  if (ch.fighting.fighting = ch) then
     begin
     ch.sendBuffer('You are in the frontline and can not disengage!'#13#10);
     exit;
@@ -250,6 +240,6 @@ begin
     
   act(AT_REPORT,'You withdraw from the fight.',false,ch,nil,nil,TO_CHAR);
 
-  ch.fighting:=nil;
-  ch.position:=POS_STANDING;
+  ch.fighting := nil;
+  ch.state := STATE_IDLE;
 end;

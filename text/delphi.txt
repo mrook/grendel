@@ -1,0 +1,6 @@
+-- Hints for compiling Grendel in the Delphi IDE
+
+
+1) Tools -> Environment -> Library, clear 'BPL output directory' and 'DCP output directory'
+
+.. tbc

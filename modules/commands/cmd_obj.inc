@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.6 2002/01/22 13:54:16 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.7 2003/06/24 21:41:29 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -16,7 +16,7 @@ begin
     exit;
     end;
 
-  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
+  if (ch.room.flags.isBitSet(ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
@@ -52,7 +52,7 @@ begin
       if (obj.item_type=ITEM_MONEY) then
         begin
         ch.gold := ch.gold + obj.value[1];
-        obj.extract();
+        obj.Free();
         end
       else
         begin
@@ -94,7 +94,7 @@ begin
       if (obj_in.item_type=ITEM_MONEY) then
         begin
         ch.gold := ch.gold + obj_in.value[1];
-        obj_in.extract();
+        obj_in.Free();
         end
       else
         begin
@@ -132,7 +132,7 @@ begin
       node_next := node.next;
       obj_in := node.element;
 
-      if isName(obj_in.name^, arg) then
+      if (isName(obj_in.name, arg)) then
         begin
         inc(counter);
 
@@ -143,7 +143,7 @@ begin
         if (obj_in.item_type = ITEM_MONEY) then
           begin
           ch.gold := ch.gold + obj_in.value[1];
-          obj_in.extract();
+          obj_in.Free();
           end
         else
           begin
@@ -186,7 +186,7 @@ begin
     if (obj.item_type=ITEM_MONEY) then
       begin
       ch.gold := ch.gold + obj.value[1];
-      obj.extract();
+      obj.Free();
       end
     else
       begin
@@ -200,23 +200,24 @@ begin
 end;
 
 procedure do_drop(ch:GCharacter;param:string);
-var obj:GObject;
-    node, node_next : GListNode;
-    d : integer;
+var 
+  obj : GObject;
+  iterator : GIterator;
+  d : integer;
 begin
   if (length(param) = 0) then
     begin
     ch.sendBuffer( 'Drop what?'#13#10);
     end;
 
-  if (ch.objects.getSize = 0) then
+  if (ch.inventory.getSize() = 0) then
     begin
     ch.sendBuffer( 'You move your arms around wildly, but nothing happens.'#13#10);
     exit;
     end;
 
   // prevent trading in battlegrounds
-  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
+  if (ch.room.flags.isBitSet(ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
@@ -224,44 +225,38 @@ begin
 
   if (param = 'all') then
     begin
-    if (IS_SET(ch.room.flags, ROOM_NODROPALL)) then
+    if (ch.room.flags.isBitSet(ROOM_NODROPALL)) then
       begin
       ch.sendBuffer( 'That is not allowed here.'#13#10);
       exit;
       end;
     
-    node := ch.objects.head;
+    iterator := ch.inventory.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      node_next := node.next;
-      obj := node.element;
+      obj := GObject(iterator.next());
 
-      if (obj.wear_location = WEAR_NULL) then
-        begin
-        if IS_SET(obj.flags,OBJ_NODROP) then
-          ch.sendBuffer('You cannot drop that.'#13#10)
-        else
-          begin
-          for d := 1 to obj.count do
-            begin
-            act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
-            act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
-            end;
+			if IS_SET(obj.flags,OBJ_NODROP) then
+				ch.sendBuffer('You cannot drop that.'#13#10)
+			else
+				begin
+				for d := 1 to obj.count do
+					begin
+					act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
+					act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
+					end;
 
-          obj.fromChar;
-          obj.toRoom(ch.room);
-          end;
+				obj.fromChar;
+				obj.toRoom(ch.room);
         end;
-
-      node := node_next;
       end;
     end
   else
     begin
     obj := ch.findInventory(param);
 
-    if (obj = nil) or (obj.wear_location > WEAR_NULL) then
+    if (obj = nil) then
       ch.sendBuffer('You move your arms around wildly, but nothing happens.'#13#10)
     else
     if IS_SET(obj.flags,OBJ_NODROP) then
@@ -317,19 +312,20 @@ begin
       node_next := node.next;
       obj_in := node.element;
 
-      obj_in.extract;
+      obj_in.Free();
 
       node := node_next;
       end;
 
-    obj.extract;
+    obj.Free();
     end;
 end;
 
 procedure do_wear(ch:GCharacter;param:string);
-var obj : GObject;
-    node, node_next : GListNode;
-    cnt : integer;
+var 
+  obj : GObject;
+  iterator : GIterator;
+  cnt : integer;
 begin
   if (length(param)=0) then
     begin
@@ -339,30 +335,25 @@ begin
 
   if (param = 'all') then
     begin
-    if (ch.objects.getSize = 0) then
+    if (ch.inventory.getSize() = 0) then
       begin
       ch.sendBuffer('You are not carrying anything!'#13#10);
       exit;
       end;
 
-    node := ch.objects.head;
+    iterator := ch.inventory.iterator();
     cnt := 0;
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      node_next := node.next;
-      obj := node.element;
+      obj := GObject(iterator.next());
 
-      if (obj.wear_location = WEAR_NULL) then
-        begin
+	    if (obj.wear_location1 <> '') or (obj.wear_location2 <> '') then
         if (ch.equip(obj)) then
           begin
           obj.seperate;
           inc(cnt);
           end;
-        end;
-
-      node := node_next;
       end;
 
     if (cnt = 0) then
@@ -374,13 +365,13 @@ begin
 
     if (obj = nil) then
       begin
-      ch.sendBuffer('You are not carrying this object.'#13#10);
+      ch.sendBuffer('You are not carrying that item.'#13#10);
       exit;
       end;
 
-    if (obj.wear1=0) and (obj.wear2=0) then
+    if (obj.wear_location1 = '') and (obj.wear_location2 = '') then
       begin
-      ch.sendBuffer('You cannot wear this object.'#13#10);
+      act(AT_REPORT, '$p cannot be worn.', false, ch, obj, nil, TO_CHAR);
       exit;
       end;
 
@@ -390,9 +381,10 @@ begin
 end;
 
 procedure do_remove(ch:GCharacter;param:string);
-var node, node_next, node_back : GListNode;
-    obj : GObject;
-    found : boolean;
+var 
+  iterator : GIterator;
+  obj : GObject;
+  found : boolean;
 begin
   if (length(param)=0) then
     begin
@@ -402,27 +394,25 @@ begin
 
   if (param = 'all') then
     begin
-    node := ch.objects.head;
-    while (node <> nil) do
+    iterator := ch.equipment.iterator();
+    
+    while (iterator.hasNext()) do
       begin
-      obj := node.element;
+      obj := GObject(iterator.next());
 
-      if (obj.wear_location > WEAR_NULL) then
-        begin
-        if IS_SET(obj.flags,OBJ_NOREMOVE) then
-          act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
-        else
-          begin
-          act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
-          act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
+			if IS_SET(obj.flags,OBJ_NOREMOVE) then
+				act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
+			else
+				begin
+				act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
+				act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
 
-          obj.wear_location := WEAR_NULL;
+				obj.fromChar();
+				obj.worn := '';			
+				obj.toChar(ch);
 
-          ch.affectObject(obj, true);
-          end;
-        end;
-
-      node := node.next;
+				ch.affectObject(obj, true);
+				end;
       end;
     end
   else
@@ -439,13 +429,15 @@ begin
       act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
       act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
 
-      obj.wear_location := WEAR_NULL;
+			obj.fromChar();
+			obj.worn := '';			
+			obj.toChar(ch);
 
       ch.affectObject(obj, true);
       end;
     end;
 
-  // fix the grouping
+{  // fix the grouping
   node := ch.objects.head;
   while (node <> nil) do
     begin
@@ -467,35 +459,40 @@ begin
       end;
 
     node := node_next;
-    end;
+    end; }
 end;
 
 procedure do_swap(ch:GCharacter;param:string);
 var
    x, y : GObject;
 begin
-  x := ch.getEQ(WEAR_LHAND);
-  y := ch.getEQ(WEAR_RHAND);
+  x := ch.getEQ('lwield');
+  y := ch.getEQ('rwield');
 
   if (x = nil) and (y = nil) then
     act(AT_REPORT,'Left hand, right hand, all hands!',false,ch,nil,nil,TO_CHAR)
   else
     begin
+    ch.equipment.remove('rwield');
+    ch.equipment.remove('lwield');
+
     if (y <> nil) then
       begin
-      y.wear_location := WEAR_LHAND;
+      ch.equipment['lwield'] := y;
+      y.worn := 'lwield';
       act(AT_REPORT,'You now hold $p in your left hand.',false,ch,y,nil,TO_CHAR);
       end;
 
     if (x <> nil) then
       begin
-      x.wear_location := WEAR_RHAND;
+      ch.equipment['rwield'] := x;
+      x.worn := 'rwield';
       act(AT_REPORT,'You now hold $p in your right hand.',false,ch,x,nil,TO_CHAR);
       end;
     end;
 end;
 
-procedure do_throw(ch:GCharacter;param:string);
+(* procedure do_throw(ch:GCharacter;param:string);
 var obj:GObject;
     vict:GCharacter;
     dest:GRoom;
@@ -625,7 +622,7 @@ begin
         end;
       end;
     end;
-end;
+end; *)
 
 { Added drink without argument - Nemesis }
 procedure do_drink(ch:GCharacter;param:string);
@@ -706,10 +703,12 @@ begin
     begin
     if item_type=ITEM_DRINK then
       dec(value[2]);
+      
     liq := value[3];
+    
     if (liq < LIQ_WATER) or (liq>=LIQ_MAX) then
       begin
-      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name^);
+      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name);
       exit;
       end;
 
@@ -765,8 +764,8 @@ begin
         ch.sendBuffer('You are full.'#13#10);
       end;
 
-    obj.fromChar;
-    obj.extract;
+    obj.fromChar();
+    obj.Free();
     end;
 end;
 
@@ -801,31 +800,31 @@ begin
     exit;
     end;
 
-  h:=pos('of',corpse.short^);
+  h:=pos('of',corpse.short);
   if (h=0) then
     begin
     ch.sendBuffer('You cannot scalp that corpse.'#13#10);
     exit;
     end;
 
-  s_name := copy(corpse.short^,h,length(corpse.short^)-cardinal(h)+1);
+  s_name := copy(corpse.short, h,length(corpse.short) - cardinal(h) + 1);
   s_name := left(s_name,'$');
 
   scalp := GObject.Create;
 
   with scalp do
     begin
-    name := hash_string('the head ' + s_name);
-    short := hash_string('the head ' + s_name);
-    long := hash_string('the head of a once famous warrior lays here');
+    name := 'the head ' + s_name;
+    short := 'the head ' + s_name;
+    long := 'the head of a once famous warrior lays here';
     item_type := ITEM_TRASH;
-    node_world := object_list.insertLast(scalp);
+    node_world := objectList.insertLast(scalp);
     end;
 
   with corpse do
     begin
-    short := hash_string('$4the mutilated corpse ' + s_name + '$7');
-    long := hash_string('$4the mutilated corpse ' + s_name + ' is lying here$7');
+    short := '$4the mutilated corpse ' + s_name + '$7';
+    long := '$4the mutilated corpse ' + s_name + ' is lying here$7';
     item_type := ITEM_TRASH;
     end;
 
@@ -862,7 +861,7 @@ begin
     end;
 
   // prevent trading in battlegrounds
-  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
+  if (ch.room.flags.isBitSet(ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
@@ -912,23 +911,20 @@ begin
       exit;
       end;
 
-    node := ch.objects.tail;
+    node := ch.inventory.tail;
     
     while (node <> nil) do
       begin
       obj := node.element;
 
-      if (obj.wear_location = WEAR_NULL) then
-        begin
-        act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
-        act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
+			act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
+			act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
 
-        inc(counter);
+			inc(counter);
 
-        obj.seperate;
-        obj.fromChar;
-        obj.toChar(vict);
-        end;
+			obj.seperate;
+			obj.fromChar;
+			obj.toChar(vict);
 
       node := node.next;
       end;
@@ -945,7 +941,7 @@ begin
   obj := ch.findInventory(arg);
   vict := ch.room.findChar(ch,arg2);
 
-  if (obj = nil) or (obj.wear_location > WEAR_NULL) then
+  if (obj = nil) then
     begin
     ch.sendBuffer('You are not carrying that.'#13#10);
     exit;
@@ -1014,7 +1010,7 @@ begin
       exit;
       end;
 
-    node := ch.objects.head;
+    node := ch.inventory.head;
 
     while (node <> nil) do
       begin
@@ -1023,7 +1019,6 @@ begin
       if IS_SET(obj.flags,OBJ_NODROP) then
         ch.sendBuffer('You can''t put that anywhere.'#13#10)
       else
-      if (obj.wear_location = WEAR_NULL) then
         begin
         act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
         act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
@@ -1057,12 +1052,6 @@ begin
       exit;
       end;
     
-    if (obj.wear_location <> WEAR_NULL) then
-      begin
-      ch.sendBuffer('You don''t have that.'#13#10);
-      exit;
-      end;
-
     if (obj_in = nil) then
       begin
       ch.sendBuffer('That is not here.'#13#10);
@@ -1203,13 +1192,13 @@ begin
   if IS_SET(pexit.flags, EX_LOCKED) then
     begin
 
-    if (ch.objects.getSize = 0) then
+    if (ch.inventory.getSize() = 0) then
       begin
       ch.sendBuffer('You don''t have a key.'#13#10);
       exit;
       end;
 
-    node := ch.objects.head;
+    node := ch.inventory.head;
 
     while (node <> nil) do
       begin
@@ -1230,7 +1219,7 @@ begin
         exit;
         end;
 
-      if (node = ch.objects.tail) then
+      if (node = ch.inventory.tail) then
         begin
         ch.sendBuffer('You lack the key.'#13#10);
         exit;
@@ -1291,17 +1280,15 @@ begin
     end
   else
     begin
-
     if (pexit.key > 0) then
       begin
-
-      if (ch.objects.getSize = 0) then
+      if (ch.inventory.getSize() = 0) then
         begin
         ch.sendBuffer('You don''t have a key.'#13#10);
         exit;
         end;
 
-      node := ch.objects.head;
+      node := ch.inventory.head;
 
       while (node <> nil) do
         begin
@@ -1322,7 +1309,7 @@ begin
           exit;
           end;
 
-        if (node = ch.objects.tail) then
+        if (node = ch.inventory.tail) then
           begin
           ch.sendBuffer('You lack the key.'#13#10);
           exit;

@@ -541,8 +541,6 @@ begin
          tmp := curFunction + varGlob;
          varGlob := left(varGlob, '.');
          												varName := left(tmp, '.');
-         												
-         												// writeln('searching ', varName, ' ', varGlob);
          																																		
          												if (varName <> tmp) then
          begin
@@ -551,14 +549,6 @@ begin
          													yyval.yyExpr := Expr_External.Create;
          													yyval.yyExpr.lineNum := yylineno; 
          													Expr_External(yyval.yyExpr).id := varName;
-         													Expr_External(yyval.yyExpr).assoc := right(tmp, '.');
-         													end
-         											  else
-         													if (lookupEnv(varGlob) <> nil) then 
-         														begin
-         													yyval.yyExpr := Expr_External.Create;
-         													yyval.yyExpr.lineNum := yylineno; 
-         													Expr_External(yyval.yyExpr).id := varGlob;
          													Expr_External(yyval.yyExpr).assoc := right(tmp, '.');
          													end
          												else

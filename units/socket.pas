@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.7 2002/08/03 19:17:58 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.8 2003/06/24 21:41:35 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -349,11 +349,7 @@ var
 begin
   len := 128;
   
-{$IFDEF VER130}
   ac_fd := accept(fd, PSockAddr(@client_addr)^, len);
-{$ELSE}
-  ac_fd := accept(fd, PSockAddr(@client_addr), @len);
-{$ENDIF}
 
   sk := createSocket(af, ac_fd);
   sk.addr := client_addr;

@@ -1,6 +1,6 @@
 {
   @abstract(Collection of common datastructures)
-  @lastmod($Id: dtypes.pas,v 1.26 2002/08/21 19:50:28 ***REMOVED*** Exp $)
+  @lastmod($Id: dtypes.pas,v 1.27 2003/06/24 21:41:33 ***REMOVED*** Exp $)
 }
 
 unit dtypes;
@@ -8,21 +8,44 @@ unit dtypes;
 interface
 
 uses
+    Variants,
     SysUtils,
     SyncObjs;
 
 type
     GString = class
-      value : string;
+    private
+      _value : string;
 
-      constructor Create(s : string);
+    published
+      constructor Create(const value : string);
+      
+      property value : string read _value write _value;
     end;
 
     GInteger = class
-      value : integer;
+    private
+      _value : integer;
 
-      constructor Create(s : integer);
+    published
+      constructor Create(const value : integer);
+
+      property value : integer read _value write _value;
     end;
+    
+    GBit = class
+    private
+      _value : cardinal;
+      
+    published
+      constructor Create(const value : cardinal);
+
+      function isBitSet(const bit : cardinal) : boolean;
+      procedure setBit(const bit : cardinal);
+      procedure removeBit(const bit : cardinal);
+
+      property value : cardinal read _value write _value;
+		end;
 
     GIterator = class
       function hasNext() : boolean; virtual; abstract;
@@ -79,7 +102,7 @@ type
       procedure clear();
 
       function isEmpty() : boolean;
-      function size() : integer;
+      function getSize() : integer;
 
       function iterator() : GIterator;
 
@@ -152,20 +175,47 @@ type
 
 
 // GString
-constructor GString.Create(s : string);
+constructor GString.Create(const value : string);
 begin
-  inherited Create;
+  inherited Create();
 
-  value := s;
+  _value := value;
 end;
+
 
 // GInteger
-constructor GInteger.Create(s : integer);
+constructor GInteger.Create(const value : integer);
 begin
-  inherited Create;
+  inherited Create();
 
-  value := s;
+  _value := value;
 end;
+
+
+// GBit
+constructor GBit.Create(const value : cardinal);
+begin
+  inherited Create();
+
+  _value := value;
+end;
+
+function GBit.isBitSet(const bit : cardinal) : boolean;
+begin
+  Result := ((_value and bit) = bit);
+end;
+
+procedure GBit.setBit(const bit : cardinal);
+begin
+  _value := _value or bit;
+end;
+
+procedure GBit.removeBit(const bit : cardinal);
+begin
+  if (isBitSet(bit)) then
+    dec(_value, bit);
+end;
+
 
 // GListNode
 constructor GListNode.Create(e : pointer; p, n : GListNode);
@@ -376,9 +426,9 @@ begin
   end;
 end;
 
-function GDLinkedList.getSize : integer;
+function GDLinkedList.getSize() : integer;
 begin
-  getSize := size;
+  Result := size;
 end;
 
 procedure GDLinkedList.clean;
@@ -616,7 +666,7 @@ begin
     bucketList[hash].remove(fnode);
 end;
 
-function GHashTable.size() : integer;
+function GHashTable.getSize() : integer;
 var
    i : integer;
    total : integer;
@@ -625,7 +675,7 @@ begin
 
   for i := 0 to hashsize - 1 do
     begin
-    total := total + bucketList[i].getSize;
+    total := total + bucketList[i].getSize();
     end;
 
   Result := total;
@@ -633,7 +683,7 @@ end;
 
 function GHashTable.isEmpty() : boolean;
 begin
-  Result := size() = 0;
+  Result := getSize() = 0;
 end;
 
 procedure GHashTable.hashStats;

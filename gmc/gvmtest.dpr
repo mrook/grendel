@@ -1,15 +1,16 @@
+program gvmtest;
 uses gvm, Classes, TypInfo;
 
 {$M+}
 type GMath = class
      published
-			 function cos(x : single) : single; stdcall;
+			 procedure blaat(a : string); stdcall;
      end;
 {$M-}
 
-function GMath.cos(x : single) : single; stdcall;
+procedure GMath.blaat(a : string); stdcall;
 begin
-  Result := System.Cos(x);
+  writeln('a: ', a);
 end;
 
 var
@@ -17,14 +18,15 @@ var
   sig : GSignature;
   c : GContext;
   cb : GCodeBlock;
+  p : integer;
 
 begin
-  sig.resultType := varSingle;
+  sig.resultType := varNull;
   setLength(sig.paramTypes, 1);
-  sig.paramTypes[1] := varSingle;
+  sig.paramTypes[0] := varString;
 
   gm := GMath.Create;
-  registerExternalMethod('cos', gm, gm.MethodAddress('cos'), sig);
+  registerExternalMethod('blaat', gm, gm.MethodAddress('blaat'), sig);
 
   c := GContext.Create;
 
@@ -32,6 +34,14 @@ begin
 
   c.Load(cb);
 
-  c.setEntryPoint('main');
-  c.Execute;
+  p := c.findSymbol('main');
+
+  if (p <> -1) then
+    begin
+    writeln('Executing at ', p, '...');
+    c.setEntryPoint(p);
+    c.Execute;
+    end
+  else
+    writeln('Could not find entrypoint.');
 end.

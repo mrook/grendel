@@ -347,12 +347,6 @@ position: 9
 #end
 
 #command
-name: lock
-function: do_lock
-position: 5
-#end
-
-#command
 name: lockpick
 function: do_lockpick
 position: 5
@@ -504,12 +498,6 @@ function: do_showprompt
 #end
 
 #command
-name: sit
-function: do_sit
-position: 4
-#end
-
-#command
 name: skills
 function: do_skills
 position: 4
@@ -579,11 +567,6 @@ position: 9
 #command
 name: trophy
 function: do_trophy
-#end
-
-#command
-name: throw
-function: do_throw
 #end
 
 #command

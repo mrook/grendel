@@ -1,6 +1,6 @@
 {
   @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.16 2002/08/06 21:53:28 ***REMOVED*** Exp $)
+  @lastmod($Id: Channels.pas,v 1.17 2003/06/24 21:41:32 ***REMOVED*** Exp $)
 }
 
 unit Channels;
@@ -16,6 +16,9 @@ uses
 
 const
   channelDataFile = SystemDir + 'channels.xml';
+
+{ <!-- Flags: 1: log this channel; 2: channel has history; 4: room; 8: area;
+  16: align; 32: global/interalign; 64: clan; 128: group --> }
 
   CHANNEL_FLAG_LOG = BV00;
   CHANNEL_FLAG_HISTORY = BV01;
@@ -38,10 +41,9 @@ type
       channelcolor : integer;
       verbyou : string;
       verbother : string;
-{ <!-- Flags: 1: log this channel; 2: channel has history; 4: room; 8: area;
-  16: align; 32: global/interalign; 64: clan; 128: group --> }
-      channel_flags : cardinal;
+      channelFlags : GBit;
       cost : integer;
+      
       constructor Create(chname : string);
       function LOG() : boolean;
       function HISTORY() : boolean;
@@ -110,48 +112,48 @@ begin
   channelcolor := 15;
   verbyou := '%s';
   verbother := '%s';
-  channel_flags := 0;
+  channelFlags := GBit.Create(0);
   cost := 0;
 end;
 
 function GChannel.LOG() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_LOG);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_LOG);
 end;
 
 function GChannel.HISTORY() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_HISTORY);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_HISTORY);
 end;
 
 function GChannel.ROOM() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_ROOM);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_ROOM);
 end;
 
 function GChannel.AREA() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_AREA);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_AREA);
 end;
 
 function GChannel.ALIGN() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_ALIGN);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_ALIGN);
 end;
 
 function GChannel.GLOBAL() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_GLOBAL);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_GLOBAL);
 end;
 
 function GChannel.CLAN() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_CLAN);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_CLAN);
 end;
 
 function GChannel.GROUP() : boolean;
 begin
-  Result := IS_SET(channel_flags, CHANNEL_FLAG_GROUP);
+  Result := channelFlags.isBitSet(CHANNEL_FLAG_GROUP);
 end;
 
 function prep(str : string) : string;
@@ -218,7 +220,7 @@ begin
   Result := false;
     
   iterator := ch.channels.iterator();
-  
+
   while (iterator.hasNext()) do
     begin
     tc := TChannel(iterator.next());
@@ -289,16 +291,6 @@ begin
     begin
     vict := GCharacter(iterator.next());
 
-{    if (channel <> CHANNEL_AUCTION) and (channel <> CHANNEL_CLAN) and (vict=ch) then continue;
-    if (channel = CHANNEL_CHAT) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_BABBEL) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_RAID) and ((vict.level < 100) or (not ch.IS_SAME_ALIGN(vict))) then continue;
-    if (channel = CHANNEL_AUCTION) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_IMMTALK) and (not vict.IS_IMMORT) then continue;
-    if (channel = CHANNEL_CLAN) and (vict.clan<>ch.clan) then continue;
-    if (channel = CHANNEL_YELL) and (vict.room.area <> ch.room.area) then continue;
-    if (channel = CHANNEL_LOG) and (not vict.IS_NPC) and (vict.level<system_info.level_log) then continue;}
-
     with channel do
     begin
       if (ch <> nil) then
@@ -346,7 +338,7 @@ begin
     chan := node.element;
     if (chname = chan.channelname) or
        (pos(chname, chan.command) = 1) or
-       ((chan.alias <> '') and (copy(chname, 1, length(chan.alias)) = chan.alias)) then
+       ((chan.alias <> '') and (chname = chan.alias)) then
     begin
       Result := chan;
       exit;
@@ -423,7 +415,7 @@ begin
   begin
     if (chan.LOG()) then
     begin
-      writeConsole(Format('Logged channel [%s]: %s ' + chan.verbother, [chan.channelname, ch.name^, param]));
+      writeConsole(Format('Logged channel [%s]: %s ' + chan.verbother, [chan.channelname, ch.name, param]));
     end;
     
     if (not ch.IS_IMMORT()) then
@@ -620,7 +612,7 @@ begin
               FieldFlags:
                 begin
                   try
-                    chanparam.channel_flags := parseCardinal(parser.CurContent);
+                    chanparam.channelFlags.value := parseCardinal(parser.CurContent);
                   except
                     on E: EConvertError do
                     begin
@@ -679,7 +671,7 @@ begin
     if (chan.command <> '') then
     begin
       cmd := GCommand.Create();
-      cmd.position := POS_SLEEPING;
+      cmd.allowed_states := [STATE_IDLE,STATE_FIGHTING,STATE_RESTING,STATE_MEDITATING];
       cmd.name := chan.command;
       cmd.func_name := 'channelCommunicate';
       cmd.level := chan.minleveluse;
@@ -691,7 +683,7 @@ begin
       if (chan.alias <> '') then
       begin
         alias := GCommand.Create();
-        alias.position := cmd.position;
+        alias.allowed_states := cmd.allowed_states;
         alias.name := chan.alias;
         alias.func_name := cmd.func_name;
         alias.level := chan.minleveluse;
@@ -727,7 +719,7 @@ begin
       writeConsole('  channelcolor:  ' + IntToStr(channelcolor));
       writeConsole('  verbyou:       ' + verbyou);
       writeConsole('  verbother:     ' + verbother);
-      writeConsole('  flags:         ' + IntToStr(integer(channel_flags)));
+      writeConsole('  flags:         ' + IntToStr(integer(channelFlags)));
     end;
 
     node := node.next;

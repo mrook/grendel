@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.65 2002/11/14 16:27:56 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.66 2003/06/24 21:41:13 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -51,8 +51,6 @@ program grendel;
 {$APPTYPE CONSOLE}
 {$ENDIF}
 
-{$W+}
-
 uses
   SysUtils,
 {$IFDEF WIN32}
@@ -61,9 +59,9 @@ uses
   {$IFNDEF CONSOLEBUILD}
   systray,
   {$ENDIF}
-  {$IFDEF __DEBUG}
-  memdebug,
-  {$ENDIF}
+  Classes,
+  JclHookExcept,
+  JclDebug,
 {$ENDIF}
 {$IFDEF LINUX}
   Libc,
@@ -83,7 +81,6 @@ uses
   dtypes,
   socket,
   console,
-  debug,
   skills,
   clean,
   chars,
@@ -139,80 +136,79 @@ procedure cleanupServer();
 var
    node : GListNode;
 begin
-  try
-    mud_booted := false;
+	mud_booted := false;
 
-    timer_thread.Terminate;
-    clean_thread.Terminate;
-    
-    Sleep(250);
+	timer_thread.Terminate;
+	clean_thread.Terminate;
 
-    saveMudState();
+	Sleep(250);
 
-    {$IFDEF __DEBUG}
-    writeConsole('Dumping memory debug...');
-    dumpMemory();
-    {$ENDIF}
+	saveMudState();
 
-    unloadModules();
+	unloadModules();
 
-    writeConsole('Releasing allocated memory...');
+	writeConsole('Releasing allocated memory...');
 
-    node := char_list.tail;
-    while (node <> nil) do
-      begin
-      GCharacter(node.element).extract(true);
-      node := char_list.tail;
-      end;
+	node := char_list.tail;
+	while (node <> nil) do
+		begin
+		GCharacter(node.element).extract(true);
+		node := char_list.tail;
+		end;
+		
+	writeConsole('Cleaning chars...');
+	cleanupChars();
+	
+	writeConsole('Cleaning clans...');
+	cleanupClans();
 
-    node := object_list.tail;
-    while (node <> nil) do
-      begin
-      GObject(node.element).extract;
-      node := object_list.tail;
-      end;
+	writeConsole('Cleaning channels...');
+	cleanupChannels();
 
-    cleanupChars();
-    cleanupClans();
-    cleanupChannels();
-    cleanupCommands();
-    cleanupConns();
-    cleanupHelp();
-    cleanupSkills();
-    cleanupAreas();
-    cleanupTimers();
-    cleanupRaces();
-    cleanupSystem();
-    cleanupNotes();
+	writeConsole('Cleaning commands...');
+	cleanupCommands();
 
-    {$IFDEF WIN32}      
-      {$IFNDEF CONSOLEBUILD}
-      unregisterSysTray();
-      cleanupSysTray();
-      {$ENDIF}
-    {$ENDIF}
+	writeConsole('Cleaning connections...');
+	cleanupConns();
 
-    str_hash.Free;
+	writeConsole('Cleaning help...');
+	cleanupHelp();
 
-    listenv4.Free();
-    listenv4 := nil;
-    listenv6.Free();
-    listenv6 := nil;
+	writeConsole('Cleaning skills...');
+	cleanupSkills();
 
-    cleanupConsole();
-    cleanupDebug();
+	writeConsole('Cleaning areas...');
+	cleanupAreas();
 
-    writeDirect('Cleanup complete.');
-  except
-    on E : EExternal do
-      begin
-      bugreport('cleanup', 'grendel.dpr', 'Cleanup procedure failed, terminating now.');
-      outputError(E);
-      end;
-  
-    on E : Exception do
-      bugreport('cleanup', 'grendel.dpr', 'Exception in cleanup procedure: ' + E.Message);
-  end;
+	writeConsole('Cleaning timers...');
+	cleanupTimers();
+
+	writeConsole('Cleaning races...');
+	cleanupRaces();
+
+	writeConsole('Cleaning system...');
+	cleanupSystem();
+
+	writeConsole('Cleaning notes...');
+	cleanupNotes();
+
+	{$IFDEF WIN32}      
+		{$IFNDEF CONSOLEBUILD}
+		unregisterSysTray();
+		cleanupSysTray();
+		{$ENDIF}
+	{$ENDIF}
+
+	str_hash.Free;
+
+	listenv4.Free();
+	listenv4 := nil;
+	listenv6.Free();
+	listenv6 := nil;
+
+	cleanupConsole();
+
+	writeDirect('Cleanup complete.');
 
   if (TTextRec(logfile).mode = fmOutput) then
     CloseFile(LogFile);
@@ -332,7 +328,7 @@ begin
       reboot_mud;
       end;
 
-    strpcopy(name, conn.ch.name^);
+    strpcopy(name, conn.ch.name);
     len := strlen(name);
 
     if (not WriteFile(pipe, len, 4, w, nil)) then
@@ -347,7 +343,7 @@ begin
       reboot_mud;
       end;
 
-    conn.ch.save(conn.ch.name^);
+    conn.ch.save(conn.ch.name);
     conn.thread.terminate;
 
     node := node_next;
@@ -367,20 +363,12 @@ end;
 
 procedure shutdown_mud;
 begin
-  try
-    writeConsole('Server shutting down...');
-    
-    if MUD_Booted then
-      flushConnections;
-      
-    Sleep(1000);
-  except
-    on E : EExternal do
-    begin
-      bugreport('shutdown_mud', 'grendel.dpr', 'Error while shutting down');
-      outputError(E);
-    end;
-  end;
+	writeConsole('Server shutting down...');
+
+	if MUD_Booted then
+		flushConnections;
+
+	Sleep(1000);
 
   cleanupServer();
 end;
@@ -467,120 +455,104 @@ begin
   writeDirect(version_info + ', ' + version_number + '.');
   writeDirect(version_copyright + '.');
 
-  try
-    writeDirect('Initializing memory pool...');
-    init_progs();
-    initClans();
-    initCommands();
-    initConns();
-    initHelp();
-    initConsole();
-    initChannels();
-    initDebug();
-    initChars();
-    initSkills();
-    initAreas();
-    initTimers();
-    initRaces();
-    initNotes();
-    initSystem();
+	writeDirect('Initializing memory pool...');
+	init_progs();
+	initClans();
+	initCommands();
+	initConns();
+	initHelp();
+	initConsole();
+	initChannels();
+	initChars();
+	initSkills();
+	initAreas();
+	initTimers();
+	initRaces();
+	initNotes();
+	initSystem();
 
-    {$IFDEF WIN32}
-      {$IFNDEF CONSOLEBUILD}
-      initSysTray();
-      {$ENDIF}
-    {$ENDIF}
+	{$IFDEF WIN32}
+		{$IFNDEF CONSOLEBUILD}
+		initSysTray();
+		{$ENDIF}
+	{$ENDIF}
 
-    writeConsole('Reading debug info...');
-    readMapFile('grendel.exe', 'grendel.map');
-    readMapfile('core.bpl', 'core.map');
+	{ writeConsole('Reading debug info...');
+	readMapFile('grendel.exe', 'grendel.map');
+	readMapfile('core.bpl', 'core.map'); }
 
-    writeConsole('Booting server...');
-    load_system;
+	writeConsole('Booting server...');
+	load_system;
 
-    s := FormatDateTime('ddddd', Now);
-    writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
+	s := FormatDateTime('ddddd', Now);
+	writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
-    writeConsole('Loading skills...');
-    load_skills;
-    writeConsole('Loading races...');
-    load_races;
-    writeConsole('Loading clans...');
-    load_clans;
-    writeConsole('Loading channels...');
-    load_channels();
-    writeConsole('Loading areas...');
-    load_areas;
-    writeConsole('Loading help...');
-    load_help('help.dat');
-    writeConsole('Loading namegenerator data...');
-    loadNameTables(NameTablesDataFile);
-    writeConsole('Loading noteboards...');
-    load_notes('boards.dat');
-    writeConsole('Loading modules...');
-    loadModules();
-    writeConsole('Loading texts...');
-    load_commands;
-    load_socials;
-    load_damage;
-    writeConsole('Loading mud state...');
-    BootTime := Now;
+	writeConsole('Loading skills...');
+	load_skills;
+	writeConsole('Loading races...');
+	loadRaces();
+	writeConsole('Loading clans...');
+	load_clans;
+	writeConsole('Loading channels...');
+	load_channels();
+	writeConsole('Loading areas...');
+	loadAreas();
+	writeConsole('Loading help...');
+	load_help('help.dat');
+	writeConsole('Loading namegenerator data...');
+	loadNameTables(NameTablesDataFile);
+	writeConsole('Loading noteboards...');
+	load_notes('boards.dat');
+	writeConsole('Loading modules...');
+	loadModules();
+	writeConsole('Loading texts...');
+	load_commands;
+	load_socials;
+	load_damage;
+	writeConsole('Loading mud state...');
+	BootTime := Now;
 
-    boot_type := 0;
-    bg_info.count := -1;
-    boot_info.timer := -1;
-    mud_booted:=true;
+	boot_type := 0;
+	bg_info.count := -1;
+	boot_info.timer := -1;
+	mud_booted:=true;
 
-    update_time;
+	update_time;
 
-    time_info.day := 1;
-    time_info.month := 1;
-    time_info.year := 1;
-    
-    loadMudState();
+	time_info.day := 1;
+	time_info.month := 1;
+	time_info.year := 1;
 
-    randomize;
+	loadMudState();
 
-    startup_tcpip;
+	randomize;
 
-    ExitProc := @reboot_exitproc;
+	startup_tcpip;
 
-    registerTimer('teleports', update_teleports, 1, true);
-    registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
-    registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
-    registerTimer('objects', update_objects, CPULSE_TICK, true);
-    registerTimer('characters', update_chars, CPULSE_TICK, true);
-    registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
+	ExitProc := @reboot_exitproc;
 
-    timer_thread := GTimerThread.Create;
-    clean_thread := GCleanThread.Create;
+	registerTimer('teleports', update_teleports, 1, true);
+	registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
+	registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
+	registerTimer('objects', update_objects, CPULSE_TICK, true);
+	registerTimer('characters', update_chars, CPULSE_TICK, true);
+	registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
 
-    calculateonline;
+	timer_thread := GTimerThread.Create;
+	clean_thread := GCleanThread.Create;
 
-    {$IFDEF WIN32}
-      {$IFNDEF CONSOLEBUILD}
-      registerSysTray();
-      {$ENDIF}  
-    {$ENDIF}
+	calculateonline;
 
-    {$IFDEF __DEBUG}
-    writeConsole('Enabling memory debugger...');
-    enableMemoryDebug();
-    {$ENDIF}
-  except
-    on E: Exception do
-      begin
-      writeConsole('Fatal error while booting: ' + E.Message);
-      halt;
-      end;
-    
-    on E : EExternal do
-      begin
-      writeConsole('Fatal exception while booting');
-      outputError(E);
-      halt;
-      end;
-  end;
+	{$IFDEF WIN32}
+		{$IFNDEF CONSOLEBUILD}
+		registerSysTray();
+		{$ENDIF}  
+	{$ENDIF}
+
+	{$IFDEF __DEBUG}
+	writeConsole('Enabling memory debugger...');
+	enableMemoryDebug();
+	{$ENDIF}
 end;
 
 procedure from_copyover;
@@ -669,42 +641,75 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-// fail-safe device, will catch unhandled exceptions and reboot server
-procedure handleException(ExceptObject: TObject; ExceptAddr: Pointer); far;
+procedure AnyExceptionNotify(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
+var
+  a : integer;
+  strings : TStringList;
 begin
-  Windows.MessageBox(0, 'help', 'kapot', MB_OK);
+  strings := TStringList.Create();
+	
+  JclLastExceptStackListToStrings(strings, False, False, False);
   
-  if (ExceptObject is EExternal) then
-    begin
-    writeLog('Uncaught external exception encountered:');
-    outputError(EExternal(ExceptObject));
-    end
-  else
-  if (ExceptObject is Exception) then
-    writeLog('Uncaught exception: ' + Exception(ExceptObject).Message)
-  else
-    writeLog('Uncaught exception encountered!');
+  writeConsole('Possible bug detected, stacktrace follows:');
 
-  Flush(LogFile);
-  CloseFile(LogFile);
-   
-  halt(1);
+  for a := 0 to strings.count - 1 do
+    writeConsole(strings[a]);
+    
+  strings.Free();
 end;
 
+function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; stdcall;
+begin
+  Result := 1;
+end;
+
+procedure do_crash(ch : GCharacter; param : string);
+var testList : GDLinkedList;
+begin  
+  try
+    testList.insertLast(ch); 
+  except
+  end;
+
+  ch.sendBuffer('Ok.'#13#10);
+end;
 
 var
   tm : TDateTime;
+  cmd : GCommand;
+  x : TList;
 
 begin
   old_exitproc := ExitProc;
 
   tm := Now();
 
-  // initialize the 'fail-safe device' after boot
-  ExceptProc := @handleException;
-  //DebugHook := 1;
+{$IFDEF WIN32}
+  // initialize the debug 'fail-safe device'
 
-  bootServer();
+  ExceptProc := nil;
+
+  //JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
+  SetUnhandledExceptionFilter(@ExceptionFilter);
+
+  JclStartExceptionTracking;
+	JclInitializeLibrariesHookExcept;
+  JclAddExceptNotifier(AnyExceptionNotify);
+{$ENDIF}
+
+  bootServer();  
+  
+  registerCommand('crash', do_crash);
+
+  cmd := GCommand.Create();
+  cmd.allowed_states := [STATE_IDLE];
+  cmd.name := 'CRASH';
+  cmd.func_name := 'CRASH';
+  cmd.level := LEVEL_IMMORTAL;
+  cmd.ptr := @do_crash;
+  cmd.addArg0 := true;
+
+  commands.put(cmd.name, cmd);
 
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
@@ -723,17 +728,5 @@ begin
   {$ENDIF}
 {$ENDIF}
 
-  try
-    gameLoop();
-  except
-    on E: EControlC do begin
-                    grace_exit := true;
-                    halt;
-                    end;
-    on E: Exception do if (TTextRec(logfile).mode <> fmClosed) then
-													writeConsole('Exception in main game loop: ' + E.Message)
-    else 
-    	if (TTextRec(logfile).mode <> fmClosed) then
-				writeConsole('Exception in main game loop: ' + E.Message);
-  end;
+  gameLoop();
 end.

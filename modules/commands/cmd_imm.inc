@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.20 2002/10/14 18:28:20 xenon Exp $
+// $Id: cmd_imm.inc,v 1.21 2003/06/24 21:41:28 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -253,22 +253,7 @@ begin
     else
       act(AT_REPORT,'You feel yourself growing... to a higher level of understanding.',false,vict,nil,nil,TO_CHAR);
 
-    obj_node := vict.objects.head;
-
-    while obj_node <> nil do
-    begin
-    	 vict.objects.remove(obj_node);
-      obj_node := vict.objects.head;
-    end;
-
-    {if (vict.carried_first<>nil) then
-      repeat
-        obj:=vict.carried_last;
-        extract_obj(obj);
-      until (vict.carried_last=nil);}
-
     vict.level:=lev;
-    act(AT_REPORT,#13#10'As you wake up... you find that all your possesions are... gone.',false,vict,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have attained the rank of '+IMM_Types[vict.level]+'.',false,vict,nil,nil,TO_CHAR);
     ch.sendBuffer('Ok.'#13#10);
     //recalcac(ch);
@@ -310,10 +295,10 @@ begin
       GPlayer(vict).quit;
 
       ch.sendBuffer('Ok.'#13#10);
-      writeConsole(vict.name^ + ' has been destroyed.');
+      writeConsole(vict.name + ' has been destroyed.');
 
-      assignfile(f, 'players\' + vict.name^ + '.usr');
-      rename(f, 'backup\' + vict.name^ + '.usr');
+      assignfile(f, 'players\' + vict.name + '.usr');
+      rename(f, 'backup\' + vict.name + '.usr');
       exit;
       end;
     end;
@@ -571,16 +556,14 @@ begin
    end;
  end;
 
- if (IS_SET(location.flags, ROOM_PRIVATE)) then
+ if (location.flags.isBitSet(ROOM_PRIVATE)) then
    begin
    ch.sendBuffer('That room is private right now.' + #13#10);
    exit;
    end;
 
- if ch.fighting <> nil then
-   begin
+ if (ch.fighting <> nil) then
    stopFighting(ch);
-   end;
 
  {goto while hunting not tested! - result may be unpredictable!!}
  {if ch.hunting <> nil then
@@ -629,8 +612,8 @@ begin
     if (conn.ch <> nil) and (not conn.ch.IS_NPC) and (IS_SET(GPlayer(conn.ch).flags, PLR_CLOAK)) then
       continue;
 
-    if (conn.ch <> nil) and (conn.ch.name <> nil) then
-      s := conn.ch.name^
+    if (conn.ch <> nil) then
+      s := conn.ch.name
     else
       s := '-';
 
@@ -701,6 +684,12 @@ begin
 
   vict := findCharWorld(ch, param);
   
+  if (vict.IS_IMMORT()) and (vict.level >= ch.level) then
+    begin
+    ch.sendBuffer('Cannot snoop a same or higher level immortal.'#13#10);
+    exit;
+    end
+  else
   if (vict = nil) then
     begin
     ch.sendBuffer('That character does not exist.'#13#10);
@@ -764,7 +753,7 @@ begin
 
   vict.toRoom(vict.room);
   act(AT_REPORT,'$N loaded.',false,ch,nil,vict,TO_CHAR);
-  interpret(ch, 'goto '+vict.name^);
+  interpret(ch, 'goto '+vict.name);
 end;
 
 function yes_no(v:boolean):string;
@@ -985,8 +974,8 @@ begin
   iterator.Free();
   ch.sendBuffer('Rooms: ' + IntToStr(total) + #13#10);
   ch.sendBuffer('NPC indices: ' + IntToStr(GNPCIndex.InstanceSize() * npc_list.getSize()) + #13#10);
-  ch.sendBuffer('Object indices: ' + IntToStr(GObjectIndex.InstanceSize() * obj_list.getSize()) + #13#10);
-  ch.sendBuffer('Object instances: ' + IntToStr(GObject.InstanceSize() * object_list.getSize()) + #13#10);
+  ch.sendBuffer('Object indices: ' + IntToStr(GObject.InstanceSize() * objectIndices.getSize()) + #13#10);
+  ch.sendBuffer('Object instances: ' + IntToStr(GObject.InstanceSize() * objectList.getSize()) + #13#10);
 
   total := 0;
   iterator := char_list.iterator();
@@ -1022,7 +1011,7 @@ begin
     end;
     
   ch.sendBuffer('String buffer: ' + IntToStr(total) + #13#10);
-  ch.sendBuffer('Programs: ' + IntToStr(GCodeBlock.InstanceSize() * codeCache.size()) + #13#10);
+  ch.sendBuffer('Programs: ' + IntToStr(GCodeBlock.InstanceSize() * codeCache.getSize()) + #13#10);
 end;
 
 procedure do_switch(ch:GCharacter;param:string);
@@ -1205,13 +1194,13 @@ begin
 
   if (IS_SET(victim.flags,PLR_FROZEN)) then
     begin
-    act(AT_REPORT,Format('You have defrosted $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,Format('You have defrosted $B$5%s$A$7.', [victim.name]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been un-frozen by $N.',false,victim,nil,ch,TO_CHAR);
     REMOVE_BIT(victim.flags,PLR_FROZEN);
     end
   else
     begin
-    act(AT_REPORT,Format('You have frozen $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,Format('You have frozen $B$5%s$A$7.', [victim.name]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been frozen by $N.',false,victim,nil,ch,TO_CHAR);
     SET_BIT(victim.flags,PLR_FROZEN);
     end;
@@ -1249,13 +1238,13 @@ begin
 //  ch.sendBuffer('Ok.'#13#10);
   if (IS_SET(victim.flags,PLR_SILENCED)) then
     begin
-    act(AT_REPORT,Format('You have unsilenced $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,Format('You have unsilenced $B$5%s$A$7.', [victim.name]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been un-silenced by $N.',false,victim,nil,ch,TO_CHAR);
     REMOVE_BIT(victim.flags,PLR_SILENCED);
     end
   else
     begin
-    act(AT_REPORT,Format('You have silenced $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,Format('You have silenced $B$5%s$A$7.', [victim.name]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been silenced by $N.',false,victim,nil,ch,TO_CHAR);
     SET_BIT(victim.flags,PLR_SILENCED);
     end;
@@ -1291,19 +1280,19 @@ end;
 { Xenon 28/Apr/2001 : renamed do_areas() to do_vnums() }
 procedure do_vnums(ch:GCharacter; param:string);
 var
-	//area:AREA_DATA;
-	area: GArea;
- area_node : GListNode;
+  area: GArea;
+  iterator : GIterator;
 begin
   act(AT_DCYAN, 'Area name                          Filename                  Author              VNum Range'#13#10, false, ch, nil, nil, TO_CHAR);
 
-  area_node := area_list.head;
-  while area_node <> nil do
-  begin
-   area := GArea(area_node.element);
-		act(AT_REPORT, pad_string(area.name, 29) + pad_string(area.fname, 15) + ' ' + pad_string(area.author, 17) + ' ' + pad_integer(area.r_lo, 5) + ' - ' + pad_integer(area.r_hi, 5), false, ch, nil, nil, TO_CHAR);
-		area_node := area_node.next;
-  end;
+  iterator := area_list.iterator();
+
+  while (iterator.hasNext()) do
+    begin
+    area := GArea(iterator.next());
+
+    act(AT_REPORT, pad_string(area.name, 29) + pad_string(area.fname, 15) + ' ' + pad_string(area.author, 17) + ' ' + pad_integer(area.r_lo, 5) + ' - ' + pad_integer(area.r_hi, 5), false, ch, nil, nil, TO_CHAR);
+    end;
 end;
 
 {Jago 6/Jan/2001 - repaired for v 0.3}
@@ -1550,14 +1539,14 @@ begin
 
       conn := GConnection(conn_node.element);
 
-      obj := findObjectWorld('the corpse of ' + conn.ch.name^);
+      obj := findObjectWorld('the corpse of ' + conn.ch.name);
 
       if (obj <> nil) then
         begin
         inc(count);
 
         buf := buf + ' (' + ansiColor(7,0) + pad_integer_front(obj.timer,2) +
-               ansiColor(2,0) + ') ' + obj.name^ + ' in room: ' + ansiColor(6,0) +
+               ansiColor(2,0) + ') ' + obj.name + ' in room: ' + ansiColor(6,0) +
                inttostr(obj.room.vnum) + ansiColor(2,0) + '.' + #13#10;
         end;
 
@@ -1702,7 +1691,7 @@ begin
     exit;
     end;
 
-  obj.wear_location := WEAR_NULL;       // put it in inv no matter what
+  obj.worn := '';       // put it in inv no matter what
 
   obj.seperate;
   obj.fromChar;
@@ -1760,20 +1749,17 @@ begin
 
   with vict do
   begin
-    unhash_string(name);
-    unhash_string(short);
-    unhash_string(long);
-    name := hash_string(cap(new_name));
-    short := hash_string(new_name + ' is here');
-    long := hash_string(new_name + ' is standing here');
-    vict.save(vict.name^);
+    name := cap(new_name);
+    short := cap(new_name) + ' is here';
+    long := cap(new_name) + ' is standing here';
+    vict.save(vict.name);
   end;
 
   deleteFile('players\' + curr_name + '.usr');
 
-  writeConsole(ch.name^ + ' has renamed ' + curr_name + ' to ' + new_name);
+  writeConsole(ch.name + ' has renamed ' + curr_name + ' to ' + new_name);
 
-  buf := Format('$B$5%s$A$7 has renamed you to $B$5%s$A$7.', [ch.name^, new_name]);
+  buf := Format('$B$5%s$A$7 has renamed you to $B$5%s$A$7.', [ch.name, new_name]);
   act(AT_REPORT,buf,false,vict,nil,nil,TO_CHAR);
   buf := Format('$B$5%s$A$7 has been renamed to $B$5%s$A$7.', [curr_name, new_name]);
   act(AT_REPORT,buf,false,vict,nil,nil,TO_NOTVICT);
@@ -2465,7 +2451,7 @@ begin
       begin
       obj := GObject(iterator.Next());
 
-      obj.extract;
+      obj.Free();
       end;
 
     iterator.Free();
@@ -2487,17 +2473,28 @@ begin
 
   if (uppercase(objstr) = 'ALL') then
     begin
-    iterator := vict.objects.iterator();
+    iterator := vict.inventory.iterator();
 
     while (iterator.hasNext()) do
       begin
       obj := GObject(iterator.Next());
 
-      if (obj.wear_location > WEAR_NULL) then
-        vict.affectObject(obj, true);
+      obj.fromChar();
+      obj.Free();
+      end;
+      
+    iterator.Free();
 
-      obj.fromChar;
-      obj.extract;
+    iterator := vict.equipment.iterator();
+
+    while (iterator.hasNext()) do
+      begin
+      obj := GObject(iterator.Next());
+
+      vict.affectObject(obj, true);
+
+      obj.fromChar();
+      obj.Free();
       end;
       
     iterator.Free();
@@ -2521,12 +2518,12 @@ begin
     exit;
     end;
 
-  if (obj.wear_location > WEAR_NULL) then
+  if (obj.worn <> '') then
     vict.affectObject(obj, true);
-
-  obj.fromChar;
-  obj.extract;
 
   act(AT_REPORT,'$p has been purged by $N.',false, vict, obj, ch, TO_CHAR);
   act(AT_REPORT,'You have purged $p of $N.',false, ch, obj, vict, TO_CHAR);
+
+  obj.fromChar();
+  obj.Free();
 end;

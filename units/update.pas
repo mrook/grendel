@@ -1,6 +1,6 @@
 {
   @abstract(Character update & regeneration routines)
-  @lastmod($Id: update.pas,v 1.19 2002/10/14 15:32:20 xenon Exp $)
+  @lastmod($Id: update.pas,v 1.20 2003/06/24 21:41:35 ***REMOVED*** Exp $)
 }
 
 unit update;
@@ -57,32 +57,32 @@ begin
     if (not ch.IS_NPC) then
     with ch do
       begin
-      case position of
-        POS_SLEEPING:begin
-                     hp_gain:=9;
-                     mv_gain:=7;
-                     mana_gain:=3;
-                     end;
-         POS_RESTING:begin
-                     hp_gain:=7;
-                     mv_gain:=9;
-                     mana_gain:=4;
-                     end;
-        POS_MEDITATE:begin
-                     hp_gain:=6;
-                     mv_gain:=6;
-                     mana_gain:=10;
-                     end;
-        POS_STANDING:begin
-                     hp_gain:=2;
-                     mv_gain:=2;
-                     mana_gain:=1;
-                     end;
-      POS_FIGHTING:begin
-                   hp_gain:=0;
-                   mv_gain:=1;
-                   mana_gain:=0;
-                   end;
+      case state of
+            STATE_SLEEPING: begin
+                            hp_gain:=9;
+                            mv_gain:=7;
+                            mana_gain:=3;
+                            end;
+             STATE_RESTING: begin
+                            hp_gain:=7;
+                            mv_gain:=9;
+                            mana_gain:=4;
+                            end;
+          STATE_MEDITATING: begin
+                            hp_gain:=6;
+                            mv_gain:=6;
+                            mana_gain:=10;
+                            end;
+                STATE_IDLE: begin
+                            hp_gain:=2;
+                            mv_gain:=2;
+                            mana_gain:=1;
+                            end;
+        	STATE_FIGHTING: begin
+                            hp_gain:=0;
+                            mv_gain:=1;
+                            mana_gain:=0;
+                            end;
       end;
 
       if IS_SET(ch.aff_flags,AFF_POISON) then
@@ -92,8 +92,8 @@ begin
         mana_gain:=mana_gain div 2;
         end;
 
-      if IS_SET(ch.room.flags,ROOM_MANAROOM) then
-        mana_gain:=mana_gain*2;
+      if (ch.room.flags.isBitSet(ROOM_MANAROOM)) then
+        mana_gain := mana_gain*2;
 
       hp := UMin(hp + hp_gain, max_hp);
       mv := UMin(mv + mv_gain, max_mv);
@@ -301,102 +301,67 @@ var p:integer;
     e:GExit;
     r:GRoom;
     node : GListNode;
-    rooms : integer;
-    track, newest_tracks : GTrack;
-    iterator : GIterator;
-    i : integer;
 begin
   node := char_list.head;
 
   while (node <> nil) do
-  begin
+    begin
     ch := node.element;
 
     { switched mobs don't wander }
     if (ch.IS_NPC) and (ch.conn = nil) then
-    begin
-      if not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL) then
       begin
-        if ch.position=POS_STANDING then
+      if (not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL)) and (ch.state = STATE_IDLE) then
         begin
-          if (IS_SET(GNPC(ch).act_flags, ACT_HUNTING)) then
+        p:=random(6)+1;
+
+        e := ch.room.findExit(p);
+
+        if (e <> nil) then
           begin
-            if (IS_SET(GNPC(ch).act_flags, ACT_FASTHUNT)) then
-              rooms := RATE_TRACKROOMS_FASTHUNTING
-            else
-              rooms := RATE_TRACKROOMS_HUNTING;
+          r := findRoom(e.vnum);
 
-            for i := 1 to rooms do
-            begin
-              newest_tracks := nil;
-              iterator := ch.room.tracks.iterator();
-
-              while (iterator.hasNext()) do
-              begin
-                track := GTrack(iterator.next());
-                if ((track.who = ch.hunting.name^) and ((newest_tracks = nil) or (track.life > newest_tracks.life))) then
-                  newest_tracks := track;
-              end;
-
-              iterator.Free();
-
-              interpret(ch, headings[track.direction]);
-            end;
-          end
-          else
-          begin
-            p:=random(6)+1;
-
-            e := ch.room.findExit(p);
-
-            if (e <> nil) then
-            begin
-              r := findRoom(e.vnum);
-
-              if (r <> nil) and not (IS_SET(GNPC(ch).act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
-                interpret(ch, headings[p]);
-            end;
-          end;
-
-          p := GNPC(ch).context.findSymbol('onTick');
-
-          if (p <> -1) then
-          begin
-            GNPC(ch).context.push(integer(ch));
-            GNPC(ch).context.setEntryPoint(p);
-            GNPC(ch).context.Execute;
+          if (r <> nil) and not (IS_SET(GNPC(ch).act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
+            interpret(ch, headings[p]);
           end;
         end;
+
+      p := GNPC(ch).context.findSymbol('onTick');
+
+      if (p <> -1) then
+        begin
+        GNPC(ch).context.push(integer(ch));
+        GNPC(ch).context.setEntryPoint(p);
+        GNPC(ch).context.Execute;
+        end;
       end
-    end
     else
     if (not ch.IS_NPC) then
       begin
-      if (GPlayer(ch).condition[COND_DRUNK]>8) then
+      if (GPlayer(ch).condition[COND_DRUNK] > 8) then
         worsen_mental_state(ch,GPlayer(ch).condition[COND_DRUNK] div 8);
 
-      if (GPlayer(ch).condition[COND_FULL]>1) then
+      if (GPlayer(ch).condition[COND_FULL] > 1) then
         case ch.position of
-          POS_SLEEPING:better_mental_state(ch,4);
-           POS_RESTING:better_mental_state(ch,3);
-           POS_SITTING:better_mental_state(ch,2);
-          POS_STANDING:better_mental_state(ch,1);
-          POS_FIGHTING:if random(4)=0 then
-                         better_mental_state(ch,1);
+              STATE_SLEEPING: better_mental_state(ch, 4);
+               STATE_RESTING: better_mental_state(ch, 3);
+                  STATE_IDLE: better_mental_state(ch, 2);
+          	  STATE_FIGHTING: if (random(4) = 0) then
+                                better_mental_state(ch, 1);
         end;
 
-      if (GPlayer(ch).condition[COND_THIRST]>1) then
+      if (GPlayer(ch).condition[COND_THIRST] > 1) then
         case ch.position of
-          POS_SLEEPING:better_mental_state(ch,5);
-           POS_RESTING:better_mental_state(ch,3);
-           POS_SITTING:better_mental_state(ch,2);
-          POS_STANDING:better_mental_state(ch,1);
-          POS_FIGHTING:if random(4)=0 then
-                         better_mental_state(ch,1);
+              STATE_SLEEPING: better_mental_state(ch, 5);
+               STATE_RESTING: better_mental_state(ch, 3);
+                  STATE_IDLE: better_mental_state(ch, 2);
+              STATE_FIGHTING: if (random(4) = 0) then
+                                better_mental_state(ch, 1);
         end;
-      gain_condition(ch,COND_DRUNK,-1);
-      gain_condition(ch,COND_HIGH,-1);
-      gain_condition(ch,COND_FULL,-1);
+        
+      gain_condition(ch,COND_DRUNK, -1);
+      gain_condition(ch,COND_HIGH, -1);
+      gain_condition(ch,COND_FULL, -1);
 
       case ch.room.sector of
             SECT_DESERT:gain_condition(ch,COND_THIRST,-2);
@@ -448,7 +413,7 @@ end;
 
 procedure teleportChar(ch : GCharacter;room:GRoom);
 begin
-  if IS_SET(room.flags,ROOM_PRIVATE) then
+  if (room.flags.isBitSet(ROOM_PRIVATE)) then
     exit;
 
   act(AT_REPORT,'$n disappears suddenly!',false,ch,nil,nil,TO_ROOM);
@@ -560,7 +525,7 @@ begin
   if (bg_info.prize<>nil) then
     to_channel(nil,pchar('[$B$7Battleground starting in '+inttostr(bg_info.count)+' seconds$A$7]'#13#10+
                'Allowed levels: '+inttostr(bg_info.lo_range)+
-               '-'+inttostr(bg_info.hi_range)+'  Prize: '+ GObject(bg_info.prize).short^),CHANNEL_ALL,AT_REPORT)
+               '-'+inttostr(bg_info.hi_range)+'  Prize: '+ GObject(bg_info.prize).short),CHANNEL_ALL,AT_REPORT)
   else
     to_channel(nil,pchar('[$B$7Battleground starting in '+inttostr(bg_info.count)+' seconds$A$7]'#13#10+
                'Allowed levels: '+inttostr(bg_info.lo_range)+
@@ -637,7 +602,7 @@ begin
     else
     if s=1 then
       begin
-      to_channel(nil,'[$B$3'+last.name^+'$B$7 has won the battleground!$A$7]',CHANNEL_ALL,AT_REPORT);
+      to_channel(nil,'[$B$3'+last.name+'$B$7 has won the battleground!$A$7]',CHANNEL_ALL,AT_REPORT);
       act(AT_REPORT,'Congratulations! You have won the battleground!',false,last,nil,nil,TO_CHAR);
 
       inc(GPlayer(last).bg_points,3);
@@ -664,44 +629,28 @@ begin
 end;
 
 procedure update_objects;
-var obj : Gobject;
-    rch : GCharacter;
-    msg : string;
-    at_temp : integer;
-    node, node_prev : GListNode;
+var 
+  obj : GObject;
+  rch : GCharacter;
+  msg : string;
+  at_temp : integer;
+  iterator : GIterator;
 begin
-  node := object_list.tail;
+  iterator := objectList.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    node_prev := node.prev;
-
-    if (node_prev <> nil) and (node_prev.next <> node) then
-      begin
-      bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil');
-      exit;
-      end;
-
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     if (IS_SET(obj.flags, OBJ_NODECAY)) then
-      begin
-      node := node_prev;
       continue;
-      end;
 
     if (obj.timer <= 0) then
-      begin
-      node := node_prev;
       continue;
-      end;
 
     dec(obj.timer);
     if (obj.timer > 0) then
-      begin
-      node := node_prev;
       continue;
-      end;
 
     case obj.item_type of
       ITEM_CORPSE : begin
@@ -740,9 +689,7 @@ begin
         end;
       end;
 
-    obj.extract;
-
-    node := node_prev;
+    obj.Free();
   end;
 end;
 

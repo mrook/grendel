@@ -1,6 +1,6 @@
 {
   @abstract(Race routines)
-  @lastmod($Id: race.pas,v 1.12 2002/08/03 19:17:56 ***REMOVED*** Exp $)
+  @lastmod($Id: race.pas,v 1.13 2003/06/24 21:41:35 ***REMOVED*** Exp $)
 }
 
 unit race;
@@ -16,24 +16,41 @@ uses
     dtypes,
     fsys;
 
-type
+type   
+    GBodyPart = class
+    private
+      _name : string;
+      _description : string;
+      _char_message, _room_message : string;
+    public
+      constructor Create();
+    published
+      property name : string read _name write _name;
+      property description : string read _description write _description;
+      property char_message : string read _char_message write _char_message;
+      property room_message : string read _room_message write _room_message;
+    end;
+    
     GRace = class
       node : GListNode;
       name, description : string;
       def_alignment : integer;
       convert : boolean;
+      saves : GHashTable;
       str_bonus, con_bonus, dex_bonus, int_bonus, wis_bonus : integer;
+      str_max, con_max, dex_max, int_max, wis_max : integer;
       save_poison, save_cold, save_para, save_breath, save_spell : integer;
       max_skills, max_spells : integer;
       abilities : GDLinkedList;
+      bodyparts : GHashTable;
 
       constructor Create();
     end;
 
 var
-   race_list : GDLinkedList;
+   raceList : GDLinkedList;
 
-procedure load_races;
+procedure loadRaces();
 
 function findRace(name : string) : GRace;
 
@@ -43,8 +60,19 @@ procedure cleanupRaces();
 implementation
 
 uses
+  LibXmlParser,
   console,
   skills;
+  
+constructor GBodyPart.Create();
+begin
+  inherited Create;
+  
+  name := 'bodypart';
+  description := 'bodypart';
+  char_message := 'You wear $p on your bodypart,';
+  room_message := '$n wears $p on $s bodypart,';
+end;
 
 constructor GRace.Create();
 begin
@@ -67,10 +95,151 @@ begin
   max_skills := 10;
   max_spells := 10;
   abilities := GDLinkedList.Create();
+  bodyparts := GHashTable.Create(32);
 end;
 
-{ Xenon 21/Feb/2001: revamped racefile format; made load_races() less error prone }
-procedure load_races;
+function prep(str : string) : string;
+begin
+  Result := trim(uppercase(str));
+end;
+
+procedure loadBodyParts(parser : TXmlParser; race : GRace);
+var
+  bodypart : GBodyPart;
+begin
+	bodypart := GBodyPart.Create();
+	
+  while (parser.Scan()) do
+		case parser.CurPartType of // Here the parser tells you what it has found
+		  ptContent:
+		    begin
+		    if (prep(parser.CurName) = 'NAME') then
+		      bodypart.name := parser.CurContent
+		    else
+		    if (prep(parser.CurName) = 'DESCRIPTION') then
+		      bodypart.description := parser.CurContent
+		    else
+		    if (prep(parser.CurName) = 'CHAR_MESSAGE') then
+		      bodypart.char_message := parser.CurContent
+		    else
+		    if (prep(parser.CurName) = 'ROOM_MESSAGE') then
+		      bodypart.room_message := parser.CurContent;
+		    end;
+			ptEndTag:
+			  begin
+				if (prep(parser.CurName) = 'BODYPART') then
+				  begin
+					race.bodyparts[bodypart.name] := bodypart;
+					exit;
+					end;
+				end;
+    end;
+end;
+
+procedure loadStatMax(parser : TXmlParser; race : GRace);
+begin
+  while (parser.Scan()) do
+		case parser.CurPartType of // Here the parser tells you what it has found
+		  ptContent:
+		    begin
+		    if (prep(parser.CurName) = 'INT') then
+		    	race.int_max := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'WIS') then
+		    	race.wis_max := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'DEX') then
+		    	race.dex_max := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'STR') then
+		    	race.str_max := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'CON') then
+		    	race.con_max := StrToInt(parser.CurContent);
+		    end;
+			ptEndTag:
+			  begin
+				if (prep(parser.CurName) = 'STATMAX') then
+					exit;
+				end;
+    end;
+end;
+
+procedure loadSaves(parser : TXmlParser; race : GRace);
+begin
+  while (parser.Scan()) do
+		case parser.CurPartType of // Here the parser tells you what it has found
+		  ptContent:
+		    begin
+//		    if (prep(parser.CurName) = 'POISON') then
+//		      race.save_poison :=
+		    end;
+			ptEndTag:
+			  begin
+				if (prep(parser.CurName) = 'SAVES') then
+					exit;
+				end;
+    end;
+end;
+
+{ xml version of loadRacesOld() }
+procedure loadRaces();
+var
+  t : TSearchRec;
+  parser : TXmlParser;
+  race : GRace;
+  bodypart : GBodyPart;
+begin
+  parser := TXmlParser.Create();
+  parser.Normalize := true;
+
+  if (FindFirst('races' + PathDelimiter + '*.xml', faAnyFile, t) = 0) then
+    repeat
+		  parser.LoadFromFile('races' + PathDelimiter + t.name);
+  
+  		if (parser.Source <> 'races' + PathDelimiter + t.name) then
+    		writeConsole('Could not load ' + t.name)
+    	else
+    	  begin
+			  parser.StartScan();
+
+			  while (parser.Scan()) do
+    			case parser.CurPartType of // Here the parser tells you what it has found
+      			ptStartTag:
+        			begin
+			        if (prep(parser.CurName) = 'RACE') then
+			          race := GRace.Create()
+			        else
+			        if (prep(parser.CurName) = 'BODYPART') then
+			          loadBodyParts(parser, race)
+			        else
+			        if (prep(parser.CurName) = 'STATMAX') then
+			          loadStatMax(parser, race);
+			        end;
+			      ptContent:
+			        begin
+			        if (prep(parser.CurName) = 'NAME') then
+			          race.name := cap(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'DESCRIPTION') then
+			          race.description := parser.CurContent;
+			        end;
+      			ptEndTag   : // Process End-Tag here (Parser.CurName)
+							begin
+							if (prep(parser.CurName) = 'RACE') then
+								race.node := raceList.insertLast(race);
+							end;
+    			end;
+    	  end;
+    until (FindNext(t) <> 0);
+
+  FindClose(t);
+
+	parser.Free();
+end;
+
+{ Xenon 21/Feb/2001: revamped racefile format; made loadRaces() less error prone }
+procedure loadRacesOld();
 var t : TSearchRec;
     race : GRace;
     rf : GFileReader;
@@ -87,11 +256,11 @@ begin
       begin
         try
           try
-            rf := GFileReader.Create('races\' + t.name);
+            rf := GFileReader.Create('races' + PathDelimiter + t.name);
           except
             on E: Exception do
             begin
-              bugreport('load_races()', 'race.pas', 'error opening race file ' + t.name);
+              bugreport('loadRaces()', 'race.pas', 'error opening race file ' + t.name);
               exit;
             end;
           end;
@@ -115,7 +284,7 @@ begin
               begin
                 if not(arg[1] in ['0', '1']) then
                 begin
-                  bugreport('load_races()', 'race.pas', 'boolean conversion error');
+                  bugreport('loadRaces()', 'race.pas', 'boolean conversion error');
                   exit;
                 end;
                 convert := (strtoint(arg) = 1);
@@ -172,7 +341,7 @@ begin
                 sk := findSkill(arg);
                 
                 if (sk = nil) then
-                  bugreport('load_races()', 'race.pas', 'Could not find racial ability ' + arg)
+                  bugreport('loadRaces()', 'race.pas', 'Could not find racial ability ' + arg)
                 else
                   abilities.insertLast(sk);
                 end;
@@ -181,12 +350,12 @@ begin
           except
             on EConvertError do
             begin
-              bugreport('load_races()', 'race.pas', 'conversion error');
+              bugreport('loadRaces()', 'race.pas', 'conversion error');
               exit;
             end;
             on E: Exception do
             begin
-              bugreport('load_races()', 'race.pas', 'unknown exception');
+              bugreport('loadRaaces()', 'race.pas', 'unknown exception');
               exit;
             end;
           end;
@@ -197,55 +366,55 @@ begin
         end;
       end;  
 
-      race.node := race_list.insertLast(race);
+      race.node := raceList.insertLast(race);
     until (FindNext(t) <> 0);
 
   FindClose(t);
 
   // fall-through rule: if no races are loaded, we must create a dummy one
 
-  if (race_list.getSize() = 0) then
+  if (raceList.getSize() = 0) then
     begin
-    bugreport('load_races()', 'race.pas', 'No races loaded, adding default one');
+    bugreport('loadRaces()', 'race.pas', 'No races loaded, adding default one');
     
     race := GRace.Create;
     race.name := 'Creature';
-    race.node := race_list.insertLast(race);
+    race.node := raceList.insertLast(race);
     end;
 end;
 
 function findRace(name : string) : GRace;
 var
-   node : GListNode;
+   iterator : GIterator;
    race : GRace;
 begin
-  findRace := nil;
+  Result := nil;
 
-  node := race_list.head;
+  iterator := raceList.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    race := GRace(node.element);
+    race := GRace(iterator.next);
 
     if (comparestr(name, race.name) = 0) then
       begin
-      findRace := race;
-      exit;
+      Result := race;
+      break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 procedure initRaces();
 begin
-  race_list := GDLinkedList.Create;
+  raceList := GDLinkedList.Create;
 end;
 
 procedure cleanupRaces();
 begin
-  race_list.clean();
-  race_list.Free();
+  raceList.clean();
+  raceList.Free();
 end;
 
 end.

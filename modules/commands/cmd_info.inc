@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.11 2002/10/14 15:32:13 xenon Exp $
+// $Id: cmd_info.inc,v 1.12 2003/06/24 21:41:28 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -39,8 +39,6 @@ begin
       ' and it''s around '+inttostr(ch.room.area.weather.temp)+' C.',false,ch,nil,nil,TO_CHAR);
 end;
 
-{ Xenon 22/Feb/2001: - peek is a command on it's own now (with it's own config-flag)
-                     - you also see [x] now when someone has more than 1 instance of the same object }
 procedure do_peek(ch : GCharacter; param : string);
 var
    cnt : integer;
@@ -73,20 +71,17 @@ begin
     act(AT_REPORT, 'You peek at the inventory and see:'#13#10, false, ch, nil, nil, TO_CHAR);
 
     cnt := 0;
-    node := vict.objects.head;
+    node := vict.inventory.head;
 
     while (node <> nil) do
     begin
       obj := node.element;
 
-      if (obj.wear_location = WEAR_NULL) then
-      begin
-        if (obj.count > 1) then
-          act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
-        else
-          act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-        inc(cnt);
-      end;
+			if (obj.count > 1) then
+				act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+			else
+				act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+			inc(cnt);
 
       node := node.next;
     end;
@@ -98,20 +93,20 @@ end;
 
 { Xenon 22/Feb/2001: seperated peek from look (it's a command on its own now) }
 procedure do_look(ch : GCharacter; param:string);
-var vict:GCharacter;
-    node : GListNode;
-    obj,obj_in: GObject;
-    s_extra : GExtraDescription;
-    pexit:GExit;
-    w1,w2:byte;
-    inside:string[20];
-    buf1 : string;
-    cnt:integer;
-    brief:boolean;
-    act_str:string;
-    where_str : string;
-    track : GTrack;
-    iterator : GIterator;
+var 
+  vict:GCharacter;
+  obj,obj_in: GObject;
+  s_extra : GExtraDescription;
+  pexit:GExit;
+  w1,w2:byte;
+  inside:string[20];
+  buf1 : string;
+  cnt:integer;
+  brief:boolean;
+  act_str:string;
+  where_str : string;
+  bodypart : GBodyPart;
+  iterator : GIterator;
 begin
   if (IS_SET(ch.aff_flags,AFF_BLIND)) then
     begin
@@ -155,37 +150,36 @@ begin
     if (vict <> nil) then
       begin
       if (not vict.IS_NPC) then
-        act(AT_REPORT,vict.name^+'$7 is known as $B$6' + GPlayer(vict).rank+'$A$7 amongst'+
-        ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR);
+        act(AT_REPORT,vict.name+'$7 is known as $B$6' + GPlayer(vict).rank+'$A$7 amongst'+
+        ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR)
+      else 
+        if vict.short <> '' then
+         act(AT_REPORT, vict.short + #13#10, false, ch, nil, vict, TO_CHAR);
 
       w1 := UMax(round((vict.hp / vict.max_hp)*5),0);
       w2 := UMax(round((vict.mv / vict.max_mv)*5),0);
 
-      act(AT_REPORT,vict.name^+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
+      act(AT_REPORT,vict.name+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
 
-      ch.sendBuffer(#13#10 + vict.name^ + ' is using: '#13#10#13#10);
+      ch.sendBuffer(#13#10 + vict.name + ' is using: '#13#10#13#10);
 
       cnt := 0;
-      node := vict.objects.head;
+      iterator := vict.equipment.iterator();
 
-      while (node <> nil) do
+      while (iterator.hasNext()) do
         begin
-        obj := node.element;
+        obj := GObject(iterator.next());
 
-        if (obj.wear_location <> WEAR_NULL) then
-          begin
-          case obj.wear_location of
-              16 : buf1 := '(floating ';
-           17,18 : buf1 := '(held ';
-            else   buf1 := '(worn ';
-          end;
+				bodypart := GBodyPart(vict.race.bodyparts[obj.worn]);
 
-          act(AT_REPORT, pad_string(buf1 + eq_string[obj.wear_location] + ')', 30) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-          inc(cnt);
-          end;
-
-        node := node.next;
-        end;
+				if (bodypart <> nil) then
+					begin
+					act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+					inc(cnt);
+					end;
+				end;
+      
+      iterator.Free();
 
       if (cnt = 0) then
         ch.sendBuffer('  nothing.'#13#10);
@@ -193,7 +187,7 @@ begin
       if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).cfg_flags, CFG_AUTOPEEK)) then
       begin
         ch.sendBuffer(#13#10);
-        interpret(ch, 'peek ' + vict.name^);
+        interpret(ch, 'peek ' + vict.name);
       end;
       end
     else
@@ -205,21 +199,21 @@ begin
         begin
         if (obj.contents.getSize > 0) then
           begin
-          node := obj.contents.head;
-
           act(AT_REPORT,'$p contains:'#13#10,false,ch,obj,nil,TO_CHAR);
 
-          while (node <> nil) do
+					iterator := obj.contents.iterator();
+					
+          while (iterator.hasNext()) do
             begin
-            obj_in := node.element;
+            obj_in := GObject(iterator.next());
 
             if (obj_in.count > 1) then
               act(AT_REPORT,'   $p [$4'+inttostr(obj_in.count)+'$7x]',false,ch,obj_in,nil,TO_CHAR)
             else
               act(AT_REPORT,'   $p',false,ch,obj_in,nil,TO_CHAR);
-
-            node := node.next;
             end;
+            
+          iterator.Free();
           end
         else
           act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR);
@@ -241,24 +235,20 @@ begin
     else
       inside := 'Indoors';
 
-    act(AT_DGREEN,name^ + ' [$B$5'+inside+'$A$2]$7',false,ch,nil,nil,TO_CHAR);
+    act(AT_DGREEN,name + ' [$B$5'+inside+'$A$2]$7',false,ch,nil,nil,TO_CHAR);
 
     if (not brief) then
       ch.sendBuffer(description);
 
     buf1 := '';
-    node := exits.head;
+    iterator := exits.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      pexit := node.element;
+      pexit := GExit(iterator.next());
 
       if (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) then
-        begin
-        node := node.next;
-
         continue;
-        end;
 
       if (length(buf1) > 0) then
         buf1 := buf1 + ', ';
@@ -276,57 +266,71 @@ begin
         buf1 := buf1 + '{' + headings[pexit.direction] + '}'
       else
         buf1 := buf1 + headings[pexit.direction];
-
-      node := node.next;
       end;
+      
+    iterator.Free();
 
     if (length(buf1) = 0) then
       buf1 := 'none';
 
     act(AT_YELLOW, '[Exits: ' + buf1 + ']',false,ch,nil,nil,TO_CHAR);
 
-    node := objects.head;
+    iterator := objects.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      obj := node.element;
+      obj := GObject(iterator.next());
 
       if not IS_SET(obj.flags,OBJ_HIDDEN) then
         begin
-        act_str := obj.long^ + '.';
-
+        act_str := obj.long + '.';
+        
         if (obj.count>1) then
           act_str:=act_str+' [$4'+inttostr(obj.count)+'$7x]';
 
         act(AT_OBJ,act_str,false,ch,nil,nil,TO_CHAR);
         end;
-
-      node := node.next;
       end;
+      
+    iterator.Free();
 
-    node := chars.head;
-    while (node <> nil) do
+    iterator := chars.iterator();
+    
+    while (iterator.hasNext()) do
       begin
-      vict := node.element;
+      vict := GCharacter(iterator.next());
 
       if (vict <> ch) and (ch.CAN_SEE(vict)) then
         begin
-        case (vict.position) of
-          POS_SLEEPING: act_str := '$N is asleep here.';
-          POS_MEDITATE: act_str := '$N is meditating here.';
-           POS_RESTING: act_str := '$N is resting here.';
-           POS_SITTING: act_str := '$N is sitting here.';
-          POS_STANDING,
-          POS_BACKSTAB: if (vict.IS_NPC) then
-                          act_str := vict.long^ + '.'
-                        else
-                          act_str := '$N is here.';
-           POS_CASTING: act_str := '$N is here, casting a spell.';
-          POS_FIGHTING: act_str := '$N is here, fighting ' + playername(vict.fighting, ch) + '!';
-            POS_BASHED: act_str := '$N is bashed to the ground.';
-         POS_SEARCHING: act_str := '$N is here, searching for something.';
-        end;
-
+        if (IS_SET(vict.aff_flags, AFF_BASHED)) then
+          act_str := '$N is bashed to the ground.'
+        else
+        if (hasTimer(vict, 'cast') <> nil) then
+          act_str := '$N is here, casting a spell.'
+        else
+        if (hasTimer(vict, 'searching') <> nil) then
+          act_str := '$N is here, searching the room.'
+        else
+        if (vict.state = STATE_FIGHTING) then
+          act_str := '$N is here, fighting ' + playername(vict.fighting, ch) + '!'
+        else
+        if (vict.state = STATE_SLEEPING) then
+          act_str := '$N is sleeping here.'
+        else
+        if (vict.state = STATE_MEDITATING) then
+          act_str := '$N is meditating here.'
+        else
+        if (vict.state = STATE_RESTING) then
+          act_str := '$N is resting here.'
+        else
+        if (vict.state = STATE_IDLE) then
+          begin
+          if (vict.IS_NPC) then
+            act_str := vict.long + '.'
+          else
+            act_str := '$N is here.';
+          end;
+          
         if (vict.IS_FLYING) then
           act_str := act_str + ' (Flying)';
 
@@ -347,23 +351,9 @@ begin
         else
           act(AT_PC,act_str,true,ch,nil,vict,TO_CHAR);
         end;
-
-      node := node.next;
       end;
-
-    if (ch.IS_IMMORT and IS_SET(GPlayer(ch).cfg_flags, CFG_SHOWTRACKS)) then
-    begin
-      iterator := ch.room.tracks.iterator();
-
-      while (iterator.hasNext()) do
-      begin
-        track := GTrack(iterator.next());
-        act(AT_REPORT, Format('$B$7(Tracks of %s heading %s (life: %d).)$A$7', [track.who, headings[track.direction], track.life]), false, ch, nil, nil, TO_CHAR);
-      end;
-
-      iterator.Free();
-    end;
-
+      
+		iterator.Free();    
     end;
 
   ch.sendBuffer(ch.ansiColor(7));
@@ -394,7 +384,7 @@ begin
         if IS_SET(pexit.flags, EX_CLOSED) then
           rmname := 'Closed'
         else
-          rmname := room.name^;
+          rmname := room.name;
 
         buf := buf + ch.ansiColor(14) + pad_string(cap(headings[h]), 5) + ' - ' + rmname + #13#10;
         end;
@@ -407,11 +397,11 @@ begin
   ch.sendBuffer(buf);
 end;
 
-{ Revised 13/Feb/2001 - Nemesis }
 procedure do_inventory(ch:GCharacter;param:string);
-var obj : GObject;
-    node : GListNode;
-    counter : integer;
+var
+  obj : GObject;
+  iterator : GIterator;
+  counter : integer;
 begin
   counter := 0;
 
@@ -420,24 +410,21 @@ begin
   if (ch.gold > 0) then
     act(AT_REPORT, '  $3' + inttostr(ch.gold) + '$7 coin(s).', false, ch, nil, nil, TO_CHAR);
 
-  node := ch.objects.head;
+  iterator := ch.inventory.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (obj.wear_location = WEAR_NULL) then
-      begin
-      if (obj.count > 1) then
-        act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
-      else
-        act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+		if (obj.count > 1) then
+			act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+		else
+			act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
 
-      inc(counter);
-      end;
-
-    node := node.next;
+		inc(counter);
     end;
+    
+  iterator.Free();
 
   if (counter = 0) and (ch.gold = 0) then
     begin
@@ -448,32 +435,28 @@ end;
 
 procedure do_equipment(ch:GCharacter;param:string);
 var
-   buf : string;
-   node : GListNode;
-   obj : GObject;
-   cnt : integer;
+  buf : string;
+  iterator : GIterator;
+  bodypart : GBodyPart;
+  obj : GObject;
+  cnt : integer;
 begin
   cnt := 0;
   ch.sendBuffer('You are using:'#13#10#13#10);
 
-  node := ch.objects.head;
-  while (node <> nil) do
+  iterator := ch.equipment.iterator();
+
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
-    if (obj.wear_location > WEAR_NULL) then
-      begin
-      case obj.wear_location of
-          16 : buf := '(floating ';
-       17,18 : buf := '(held ';
-        else   buf := '(worn ';
-      end;
+		bodypart := GBodyPart(ch.race.bodyparts[obj.worn]);
 
-      act(AT_REPORT, pad_string(buf + eq_string[obj.wear_location] + ')', 30) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-      inc(cnt);
-      end;
-
-    node := node.next;
+		if (bodypart <> nil) then
+			begin
+			act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+			inc(cnt);
+			end;
     end;
 
   if (cnt = 0) then
@@ -491,14 +474,14 @@ begin
 
   if (not ch.IS_NPC) and (not ch.IS_IMMORT) then
     begin
-    act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art known as $B$6' + GPlayer(ch).rank+'$A$7 amongst'+
+    act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art known as $B$6' + GPlayer(ch).rank+'$A$7 amongst'+
         ' thy $B$4'+ch.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).xptot)+'$A$7 experience points'+
         ' and need $B$3'+inttostr(GPlayer(ch).xptogo)+'$A$7 to level.',false,ch,nil,nil,TO_CHAR);
     end
   else
   if (ch.IS_IMMORT) then
-    act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
     act(AT_REPORT,'   Thou art $B$3'+inttostr(GPlayer(ch).getAge)+'$A$7 years of age ('+inttostr(GPlayer(ch).getPlayed div 60)+' hours).'#13#10,false,ch,nil,nil,TO_CHAR);
@@ -543,7 +526,7 @@ begin
       ch.sendBuffer('   Thou art starving to death.'#13#10);
     end;
 
-  if ch.position<>POS_SLEEPING then
+  if (ch.state <> STATE_SLEEPING) then
    case ch.mental_state div 10 of
      -10:ch.sendBuffer('   You are barely conscious.'#13#10);
       -9:ch.sendBuffer('   You can barely keep your eyes open.'#13#10);
@@ -688,7 +671,7 @@ begin
     begin
       if not(specarg) or
         isName(conn.ch.race.name, arg) or
-        isName(conn.ch.name^, arg) or
+        isName(conn.ch.name, arg) or
         ((arg = 'CLAN') and (ch.clan <> nil) and (ch.clan = conn.ch.clan)) then
       begin
         inc(num);
@@ -732,7 +715,7 @@ begin
           if (conn.afk) then
             buf_imm := buf_imm + '$B$7<AFK> $A$7';
 
-          buf_imm := buf_imm + conn.ch.name^ + ' ' + GPlayer(conn.ch).title;
+          buf_imm := buf_imm + conn.ch.name + ' ' + GPlayer(conn.ch).title;
 
           buf_imm := buf_imm + #13#10;
 
@@ -760,7 +743,7 @@ begin
           if (conn.afk) then
             buf1 := buf1 + '$B$7<AFK> $A$7';
 
-          buf1 := buf1 + conn.ch.name^ + ' ' + GPlayer(conn.ch).title;
+          buf1 := buf1 + conn.ch.name + ' ' + GPlayer(conn.ch).title;
 
           buf1 := buf1 + #13#10;
 
@@ -770,7 +753,7 @@ begin
           if (conn.ch.IS_EVIL) then
             buf_evil := buf_evil + buf1
           else
-            bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name^);
+            bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name);
         end;
       end;
     end;
@@ -852,7 +835,7 @@ begin
       if ch.IS_EVIL then
         buf_result := buf_result + buf_evil
       else
-          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name^);
+          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name);
     end;
   end;
         
@@ -882,7 +865,7 @@ var buf1 : string;
 begin
   if (length(param)=0) then
     begin
-    act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name^+'$A$7]',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name+'$A$7]',false,ch,nil,nil,TO_CHAR);
     ch.sendBuffer(#13#10'[Power of Char]  [Name]      [Health]  [Stamina]   [Xp2Lvl]'#13#10);
 
     node := char_list.head;
@@ -913,7 +896,7 @@ begin
         else
           buf1 := '[$8----Deity----';
 
-        buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name^,12);
+        buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name,12);
 
         buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMax(round((vict.hp / vict.max_hp) * 5), 0)], 10);
 
@@ -940,8 +923,7 @@ begin
         begin
         vict.leader := ch;
         act(AT_REPORT,'$N joins $n''s group.',false,ch,nil,vict,TO_ROOM);
-//        to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
-        to_channel(ch, '$B$7[Group]: '+vict.name^+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
+        to_channel(ch, '$B$7[Group]: '+vict.name+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
         end;
 
       node := node.next;
@@ -981,15 +963,13 @@ begin
     else
     if (vict.leader = ch) then
       begin
-//      to_group(ch, '$B$7[Group]: ' + vict.name^ + ' has left the group.');
-      to_channel(ch, '$B$7[Group]: ' + vict.name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
+      to_channel(ch, '$B$7[Group]: ' + vict.name + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
       vict.leader := vict;
       end
     else
       begin
       vict.leader := ch;
-//      to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
-      to_channel(ch, '$B$7[Group]: '+vict.name^+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
+      to_channel(ch, '$B$7[Group]: '+vict.name+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
       end;
     end;
 end;
@@ -1008,7 +988,7 @@ begin
       ch.sendBuffer('You stop anyone you were following.'#13#10)
     else
       begin
-      ch.sendBuffer('You stop following ' + ch.master.name^ + '.'#13#10);
+      ch.sendBuffer('You stop following ' + ch.master.name + '.'#13#10);
 
       if not(ch.IS_WIZINVIS() and ch.IS_IMMORT()) then
         act(AT_REPORT,'$n no longer follows you.',false,ch,nil,ch.master,TO_VICT);
@@ -1016,15 +996,14 @@ begin
 
       if (ch.leader <> ch) then
         begin
-//        to_group(ch.leader, '$B$7[Group]: ' + ch.name^+ ' has left the group.');
-        to_channel(ch.leader, '$B$7[Group]: ' + ch.name^+ ' has left the group.', CHANNEL_GROUP, AT_WHITE);
+        to_channel(ch.leader, '$B$7[Group]: ' + ch.name+ ' has left the group.', CHANNEL_GROUP, AT_WHITE);
         ch.leader := ch;
         end;
       end;
     end
   else
     begin
-    ch.sendBuffer('You now follow ' + vict.name^ + '.'#13#10);
+    ch.sendBuffer('You now follow ' + vict.name + '.'#13#10);
 
     if not(ch.IS_WIZINVIS() and ch.IS_IMMORT()) then
       act(AT_REPORT,'$n now follows you.',false,ch,nil,vict,TO_VICT);
@@ -1033,8 +1012,7 @@ begin
 
     if (ch.leader <> ch) then
       begin
-//      to_group(ch.leader, '$B$7[Group]: ' + ch.name^ + ' has left the group.');
-      to_channel(ch.leader, '$B$7[Group]: ' + ch.name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
+      to_channel(ch.leader, '$B$7[Group]: ' + ch.name + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
       ch.leader := ch;
       end;
     end;
@@ -1104,7 +1082,7 @@ begin
 
     if (vict <> ch) and (not vict.IS_NPC) and (vict.room.area = ch.room.area) and (ch.IS_SAME_ALIGN(vict)) then
       begin
-      buf := pad_string(vict.name^,20) + '   ' + vict.room.name^ + #13#10;
+      buf := pad_string(vict.name,20) + '   ' + vict.room.name + #13#10;
       ch.sendBuffer(buf);
       inc(d);
       end;
@@ -1121,8 +1099,8 @@ var
    buf : string;
 begin
   buf := '$B$4Some world statistics:$A$7'#13#10#13#10 +
-         'Open areas:        [$B$1' + pad_integer_front(area_list.getSize, 5) + '$A$7]'#13#10 +
-         'Rooms explorable:  [$B$1' + pad_integer_front(room_list.size(), 5) + '$A$7]'#13#10 +
+         'Open areas:        [$B$1' + pad_integer_front(area_list.getSize(), 5) + '$A$7]'#13#10 +
+         'Rooms explorable:  [$B$1' + pad_integer_front(room_list.getSize(), 5) + '$A$7]'#13#10 +
          'World user max:    [$B$1' + pad_integer_front(system_info.user_high, 5) + '$A$7]'#13#10;
 
   act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
@@ -1516,12 +1494,6 @@ begin
         hi_type('autocreate','You automatically create new rooms upon walking.')
       else
         lo_type('autocreate','You don''t automatically create new rooms upon walking.');
-
-      if IS_SET(cfg_flags,CFG_SHOWTRACKS) then
-        hi_type('showtracks','You see tracks in a room on looking.')
-      else
-        lo_type('showtracks','You don''t see tracks in a room on looking.');
-
       end;
     end
   else
@@ -1568,9 +1540,6 @@ begin
     else
     if s='AUTOCREATE' then
       d:=CFG_AUTOCREATE
-    else
-    if s='SHOWTRACKS' then
-      d:=CFG_SHOWTRACKS
     else
       begin
       ch.sendBuffer('Unknown option.'#13#10);
@@ -1916,7 +1885,7 @@ begin
   else
     begin
     GPlayer(ch).md5_password := MD5String(arg2);
-    GPlayer(ch).save(ch.name^);
+    GPlayer(ch).save(ch.name);
     ch.sendBuffer('Ok, password changed.'#13#10);
     end;
 end;
@@ -1945,7 +1914,7 @@ begin
     if (not vict.IS_SAME_ALIGN(ch)) then
       ch.sendBuffer('That player is not found on your side.'#13#10)
     else
-      act(AT_REPORT,vict.name^ + ' is currently online.',false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,vict.name + ' is currently online.',false,ch,nil,nil,TO_CHAR);
 
     exit;
     end
@@ -1995,52 +1964,50 @@ end;
 procedure do_raceinfo(ch : GCharacter; param : string);
 procedure get_longest_racename(var len : integer);
 var
-  node : GListNode;
+  iterator : GIterator;
   race : GRace;
 begin
   len := 0;
   race := nil;
-  node := race_list.head;
+  iterator := raceList.iterator();
 
-  while (node <> nil) do
-  begin
-    race := node.element;
+  while (iterator.hasNext()) do
+    begin
+    race := GRace(iterator.next());
 
     if (length(race.name) > len) then
       len := length(race.name);
-      
-    node := node.next;
-  end;
+    end;
 end;
 
 function get_nearest_racematch(name : string) : GRace;
 var
-  node : GListNode;
+  iterator : GIterator;
   race : GRace;
 begin
   race := nil;
-  node := race_list.head;
 
   name := uppercase(name);
   
-  while (node <> nil) do
-  begin
-    race := node.element;
+  iterator := raceList.iterator();
+
+  while (iterator.hasNext()) do
+    begin
+    race := GRace(iterator.next());
 
     if (isName(race.name, name)) then
-    begin
+      begin
       get_nearest_racematch := race;
       exit;
+      end;
     end;
 
-    node := node.next;
-  end;
   get_nearest_racematch := nil;
 end;
 
 var
   arg : string;
-  node : GListNode;
+  iterator : GIterator;
   race : GRace;
   buf, str, header, buf_good, buf_evil, legenda : string;
   conv_str : string;
@@ -2049,7 +2016,7 @@ begin
   one_argument(param, arg);
 
   if (length(arg) = 0) then
-  begin
+    begin
     header := '$B$1Racename        A   B   C   D   E  |  S1  S2  S3  S4  S5  |  M1 M2  |  Convertable?$A$7'#13#10#13#10;
     buf_good := '$B$7----[Races of the Creatures of $B$6Light$B$7]----$A$7'#13#10#13#10 + header;
     buf_evil := '$B$7----[Races of the Creatures of $A$8Darkness$B$7]----$A$7'#13#10#13#10 + header;
@@ -2061,12 +2028,11 @@ begin
 
     get_longest_racename(maxlen);
     
-    race := nil;
-    node := race_list.head;
+    iterator := raceList.iterator();
 
-    while (node <> nil) do
-    begin
-      race := node.element;
+    while (iterator.hasNext()) do
+      begin
+      race := GRace(iterator.next());
 
       with race do
       begin
@@ -2085,8 +2051,6 @@ begin
         end;
         
       end;
-      
-      node := node.next;
     end;
 
     buf := buf_good + #13#10 + buf_evil + legenda + #13#10;

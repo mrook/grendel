@@ -5,9 +5,9 @@ var sn : GSkill;
     obj : GObject;
     spell_lvl : integer;
 begin
-  if (ch.position = POS_BASHED) then
+  if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
-    ch.sendBuffer('You are bashed to the ground!'#13#10);
+    ch.sendBuffer('You are immobilized and cannot move!'#13#10);
     exit;
     end;
 
@@ -17,7 +17,7 @@ begin
     exit;
     end;
 
-  if (IS_SET(ch.room.flags, ROOM_NOCAST)) then
+  if (ch.room.flags.isBitSet(ROOM_NOCAST)) then
     begin
     ch.sendBuffer('A powerful force prevents you from using magic here.'#13#10);
     exit;
@@ -48,11 +48,10 @@ begin
         TARGET_OFF_ATTACK:begin
                           victim := ch.room.findChar(ch, sub);
 
-                          if victim=nil then
-                           if (ch.position=POS_FIGHTING) and (ch.fighting<>nil) then
-                            victim:=ch.fighting;
+                          if (victim = nil) and (ch.state = STATE_FIGHTING) then
+                            victim := ch.fighting;
 
-                          if victim=nil then
+                          if (victim = nil) then
                             begin
                             act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
                             exit;
@@ -67,11 +66,10 @@ begin
                             exit;
                             end;
 
-                          if victim=nil then
-                           if (ch.position=POS_FIGHTING) and (ch.fighting<>nil) then
-                            victim:=ch.fighting;
+                          if (victim = nil) and (ch.state = STATE_FIGHTING) then
+                            victim := ch.fighting;
 
-                          if victim=nil then
+                          if (victim = nil) then
                             begin
                             act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
                             exit;
@@ -84,7 +82,7 @@ begin
                             exit;
                             end;
 
-                          if ch.position=POS_FIGHTING then
+                          if (ch.state = STATE_FIGHTING) then
                             begin
                             act(AT_REPORT,'You cannot concentrate enough.',false,ch,nil,nil,TO_CHAR);
                             exit;
@@ -98,7 +96,7 @@ begin
                           else
                             victim := ch.room.findChar(ch, sub);
 
-                          if victim=nil then
+                          if (victim = nil) then
                             begin
                             act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
                             exit;
@@ -110,7 +108,7 @@ begin
          TARGET_DEF_WORLD:begin
                           victim := findCharWorld(ch, sub);
 
-                          if victim=nil then
+                          if (victim = nil) then
                             begin
                             act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
                             exit;
@@ -119,7 +117,13 @@ begin
             TARGET_OBJECT:begin
                           victim := GCharacter(ch.findInventory(sub));
 
-                          if victim=nil then
+                          if (ch.state = STATE_FIGHTING) then
+                            begin
+                            act(AT_REPORT,'You cannot concentrate enough.',false,ch,nil,nil,TO_CHAR);
+                            exit;
+                            end;
+
+                          if (victim = nil) then
                             begin
                             act(AT_REPORT,'You are not carrying that.',false,ch,nil,nil,TO_CHAR);
                             exit;
@@ -155,12 +159,10 @@ begin
         magic_timer(ch, victim, sn)
       else
         begin
-        ch.position := POS_CASTING;
-
         act(AT_REPORT,'You begin to utter some strange incantations...',false,ch,nil,nil,TO_CHAR);
         act(AT_REPORT,'$n begins to utter some strange incantations...',false,ch,nil,nil,TO_ROOM);
 
-        registerTimer(TIMER_CAST, magic_timer, sn.beats, ch, victim, sn);
+        registerTimer('cast', TIMER_ACTION, magic_timer, sn.beats, ch, victim, sn);
         end;
       end
     else

@@ -6,9 +6,7 @@ uses
 {$IFDEF WIN32}
   Windows,
 {$ENDIF}
-{$IFDEF LINUX}
   Variants,
-{$ENDIF}
   fsys,
   dtypes;
 

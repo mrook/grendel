@@ -28,7 +28,7 @@ package speller;
 
 requires
 {$IFDEF WIN32}
-  vcl50;
+  vcl;
 {$ENDIF}
 {$IFDEF LINUX}
   baseclx;

@@ -1,6 +1,6 @@
 {
   @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id: bulletinboard.pas,v 1.9 2002/08/03 19:17:47 ***REMOVED*** Exp $)
+  @lastmod($Id: bulletinboard.pas,v 1.10 2003/06/24 21:41:32 ***REMOVED*** Exp $)
 }
 
 unit bulletinboard;
@@ -204,7 +204,7 @@ begin
   note.board := ch.active_board;
   note.number := noteNumber(ch.active_board);
   note.date := DateTimeToStr(Now);
-  note.author := ch.name^;
+  note.author := ch.name;
   note.subject := ch.subject;
   note.text := text;
 

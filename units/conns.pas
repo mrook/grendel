@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.36 2002/08/03 19:13:55 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.37 2003/06/24 21:41:33 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -69,7 +69,7 @@ var
 
 
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
-function act_color(to_ch : GCharacter; acts, sep : string) : string;
+function act_color(to_ch : GCharacter; acts : string; sep : char) : string;
 
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);
@@ -84,6 +84,8 @@ procedure cleanupConns();
 implementation
 
 uses
+  FastStrings,
+  FastStringFuncs,
   mudthread;
 
 
@@ -334,7 +336,7 @@ begin
   if (not to_ch.IS_NPC) and (not from_ch.IS_NPC) then
     begin
     if (from_ch.IS_IMMORT) then
-      playername := from_ch.name^
+      playername := from_ch.name
     else
     if (not to_ch.IS_SAME_ALIGN(from_ch)) then
       begin
@@ -344,65 +346,176 @@ begin
         playername := '+* A ' + from_ch.race.name + ' *+';
       end
     else
-      playername := from_ch.name^;
+      playername := from_ch.name;
     end
   else
-    playername := from_ch.name^;
+    playername := from_ch.name;
 
   if (from_ch = to_ch) then
     playername := 'you';
 end;
 
-function act_color(to_ch : GCharacter; acts, sep : string) : string;
+function act_color(to_ch : GCharacter; acts : string; sep : char) : string;
 var
-   t : integer;
-   boldflag:boolean;
-   s, i : string;
+  last, current : integer;
+  boldflag : boolean;
+  res : string;
 begin
-  t := 1;
-  s := '';
-  boldflag := false;
-
-  while (t <= length(acts)) do
+  last := 1;
+  current := FastCharPos(acts, sep, last);
+  res := '';
+  
+  while (current <> 0) do
     begin
-    if (acts[t] = sep) then
-      begin
-      inc(t);
-      i := '';
+    if (current - last > 0) then
+      res := res + CopyStr(acts, last, current - last);
 
-      case acts[t] of
+    last := current + 2;
+       
+    case acts[current + 1] of
         'B': boldflag := true;
         'A': boldflag := false;
    '0'..'9': begin
              if (boldflag) then
-               i := to_ch.ansiColor(strtoint(acts[t]) + 8)
+               res := res + to_ch.ansiColor(strtoint(acts[current + 1]) + 8)
              else
-               i := to_ch.ansiColor(strtoint(acts[t]));
+               res := res + to_ch.ansiColor(strtoint(acts[current + 1])); 
              end;
-      end;
-
-      s := s + i;
-      end
-    else
-      s := s + acts[t];
-
-    inc(t);
     end;
-
-  Result := s;
+    
+    current := FastCharPos(acts, sep, last);
+    end;
+    
+  Result := res + CopyStr(acts, last, length(acts) - last + 1)
 end;
 
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
-var s, i : string;
-    t : integer;
-    vch : GCharacter;
-    obj1, obj2 : TObject;
-    ex : GExit;
+var
+  last, current : integer;
+  res, temp : string;
+  vch : GCharacter;
+  obj1, obj2 : TObject;
+  ex : GExit;
+begin
+  last := 1;
+  current := FastCharPos(acts, '$', last);
+  res := '';
+  vch := arg2;
+  obj1 := arg1; obj2 := arg2;
+
+  while (current <> 0) do
+    begin
+    if (current - last > 0) then
+      res := res + CopyStr(acts, last, current - last);
+
+    last := current + 2;
+       
+		case acts[current + 1] of
+			'n': res := res + playername(ch, to_ch);
+			'N': begin
+					 if (vch = nil) then
+						 writeConsole('[BUG]: act() -> vch null')
+					 else
+						 res := res + playername(vch, to_ch);
+					 end;
+			'm': res := res + sex_nm[ch.sex];
+			'M': begin
+					 if (vch = nil) then
+						 writeConsole('[BUG]: act() -> vch null')
+					 else
+						 res := res + sex_nm[vch.sex];
+					 end;
+			's': res := res + sex_bm[ch.sex];
+			'S': begin
+					 if (vch = nil) then
+						 writeConsole('[BUG]: act() -> vch null')
+					 else
+						 res := res + sex_bm[vch.sex];
+					 end;
+			'e': res := res + sex_pm[ch.sex];
+			'E': begin
+					 if (vch = nil) then
+						 writeConsole('[BUG]: act() -> vch null')
+					 else
+						 res := res + sex_pm[vch.sex];
+					 end;
+		 'o': begin
+					 if (obj1 = nil) then
+						 writeConsole('[BUG]: act() -> obj1 null')
+					 else
+						 res := res + GObject(obj1).name;
+					 end;
+			'O': begin
+					 if (obj2 = nil) then
+						 writeConsole('[BUG]: act() -> obj2 null')
+					 else
+						 res := res + GObject(obj2).name;
+					 end;
+			'p': begin
+					 if (obj1 = nil) then
+						 writeConsole('[BUG]: act() -> obj1 null')
+					 else
+						 res := res + GObject(obj1).short;
+					 end;
+			'P': begin
+					 if (obj2 = nil) then
+						 writeConsole('[BUG]: act() -> obj2 null')
+					 else
+						 res := res + GObject(obj2).short;
+					 end;
+			't': begin
+					 if (arg1 = nil) then
+						 writeConsole('[BUG]: act() -> pchar(arg1) null')
+					 else
+						 res := res + (PString(arg1))^;
+					 end;
+			'T': begin
+					 if (arg2 = nil) then
+						 writeConsole('[BUG]: act() -> pchar(arg2) null')
+					 else
+						 res := res + (PString(arg2))^;
+					 end;
+			'd': begin
+						 if (arg2 = nil) then
+							 writeConsole('[BUG]: act() -> arg2 is nil')
+						 else
+						 begin
+							 ex := GExit(arg2);
+
+							 if ((ex.keywords <> nil) and (length(ex.keywords^) = 0)) then
+								 res := res + 'door'
+							 else
+							   begin
+								 one_argument(ex.keywords^, temp);
+								 res := res + temp;
+								 end;
+						 end;
+					 end;
+			else
+			  res := res + '$' + acts[current + 1];
+		end;
+    
+    current := FastCharPos(acts, '$', last);
+    end;
+    
+  res := cap(res + CopyStr(acts, last, length(acts) - last + 1));
+
+  Result := act_color(to_ch, res, '$');
+ end;
+
+{var 
+  i : ShortString;
+  x : string;
+  s : array[0..1023] of char;
+  t, c : integer;
+  vch : GCharacter;
+  obj1, obj2 : TObject;
+  ex : GExit;
 begin
   vch := arg2;
   obj1 := arg1; obj2 := arg2;
-  s := '';
   t := 1;
+  c := 0;
 
   while (t <= length(acts)) do
     begin
@@ -410,6 +523,7 @@ begin
       begin
       inc(t);
       i:='';
+      
       case acts[t] of
         'n': i := playername(ch, to_ch);
         'N': begin
@@ -443,45 +557,25 @@ begin
              if (obj1 = nil) then
                writeConsole('[BUG]: act() -> obj1 null')
              else
-               begin
-               if (obj1 is GObjectIndex) then
-                 i := GObjectIndex(obj1).name^
-               else
-                 i := GObject(obj1).name^;
-               end;
+               i := GObject(obj1).name;
              end;
         'O': begin
              if (obj2 = nil) then
                writeConsole('[BUG]: act() -> obj2 null')
              else
-               begin
-               if (obj1 is GObjectIndex) then
-                 i := GObjectIndex(obj2).name^
-               else
-                 i := GObject(obj2).name^;
-               end;
+               i := GObject(obj2).name;
              end;
         'p': begin
              if (obj1 = nil) then
                writeConsole('[BUG]: act() -> obj1 null')
              else
-               begin
-               if (obj1 is GObjectIndex) then
-                 i := GObjectIndex(obj1).short^
-               else
-                 i := GObject(obj1).short^;
-               end;
+               i := GObject(obj1).short;
              end;
         'P': begin
              if (obj2 = nil) then
                writeConsole('[BUG]: act() -> obj2 null')
              else
-               begin
-               if (obj2 is GObjectIndex) then
-                 i := GObjectIndex(obj2).short^
-               else
-                 i := GObject(obj2).short^;
-               end;
+               i := GObject(obj2).short;
              end;
         't': begin
              if (arg1 = nil) then
@@ -505,7 +599,7 @@ begin
                  if ((ex.keywords <> nil) and (length(ex.keywords^) = 0)) then
                    i := 'door'
                  else
-                   one_argument(ex.keywords^, i);
+                   one_argument(ex.keywords^, x);
                end;
              end;
    '0'..'9','A','B':begin
@@ -514,18 +608,24 @@ begin
       else
         writeConsole('[BUG]: act() -> bad format code');
       end;
-      s := s + i;
+
+      Move(i[1], s[c], length(i));
+      c := c + length(i);
       end
-    else
-      s := s + acts[t];
+    else 
+      begin
+      s[c] := acts[t];
+      inc(c);
+      end;
 
     inc(t);
     end;
 
-  acts := cap(s);
+  s[c] := #0;
+  s[0] := UpCase(s[0]);
 
-  act_string := act_color(to_ch, acts, '$');
-end;
+  act_string := act_color(to_ch, s, '$');
+end; }
 
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);

@@ -1,5 +1,5 @@
 DCC=dcc32
-DCC_FLAGS=-Q -D+ -V- -W+ -O+ -GD
+DCC_FLAGS=-Q -D+ -V- -W- -O+ -GD
 
 MODULES=core_commands.bpl speller.bpl status.bpl
 
