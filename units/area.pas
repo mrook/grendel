@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.55 2001/10/05 21:48:58 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.56 2001/10/19 15:02:40 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1201,10 +1201,10 @@ begin
       end;
 
     writeln(f, 'S');
-  end;
+  end; *)
 
   writeln(f, '#END');
-  writeln(f); *)
+  writeln(f);
   
   writeln(f, '#MOBILES');
 
