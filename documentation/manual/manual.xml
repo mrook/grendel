@@ -7,15 +7,15 @@
 			<author>
 				<firstname>Michiel</firstname>
 				<surname>Rook</surname>
-				<email>michiel@grendelproject.nl</email>
+				<email>michiel at grendelproject dot nl</email>
 			</author>
 			<author>
 				<firstname>Hemko</firstname>
 				<surname>de Visser</surname>
-				<email>nemesis@grendelproject.nl</email>
+				<email>nemesis at grendelproject dot nl</email>
 			</author>
 		</authorgroup>
-		<releaseinfo>$Id: manual.xml,v 1.4 2004/04/21 20:55:11 ***REMOVED*** Exp $</releaseinfo>
+		<releaseinfo>$Id: manual.xml,v 1.5 2004/04/21 21:07:05 ***REMOVED*** Exp $</releaseinfo>
 	</articleinfo>
 	<section id="intro">
 		<title>Introduction</title>
