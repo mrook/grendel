@@ -41,7 +41,7 @@
       <!-- Xenon 'chats,' -->
     <VerbOther>chats, '%s'</VerbOther>
       <!-- Flags: 1: log this channel; 2: channel has history; 4: room; 8: area; 16: align; 32: global/interalign; 64: clan; 128: group -->
-    <Flags>1|2|16</Flags>
+    <Flags>2|16</Flags>
       <!-- Cost: the cost in moves to use this channel once. -->
     <Cost>-1</Cost>
   </ChannelData>
@@ -122,6 +122,6 @@
     <Channelcolor>10</Channelcolor>
     <VerbYou>tell the group, '%s'</VerbYou>
     <VerbOther>tells the group, '%s'</VerbOther>
-    <Flags>1|2|128</Flags>
+    <Flags>2|128</Flags>
   </ChannelData>
 </Channels>
