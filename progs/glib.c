@@ -1,7 +1,7 @@
 void terminate()
 {
-  asm 
-	{ 
+  asm
+	{
 		"HALT"
 	}
 }
@@ -18,3 +18,5 @@ bool match(string src, string pattern);
 string IntToStr(int x);
 int StrToInt(string s);
 string uppercase(string s);
+
+bool is_npc(external target);
