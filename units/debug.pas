@@ -297,7 +297,6 @@ var
 begin
 {$IFDEF WIN32}
   addr := E.ExceptionRecord.ExceptionAddress;
-  writeConsole('Win32 exception detected.');
   writeConsole('Exception message: "' + E.Message + '".');
   
   try

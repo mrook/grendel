@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.65 2001/08/14 13:44:44 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.66 2001/08/15 19:01:57 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -373,10 +373,16 @@ begin
               bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.'); }
           except
             on E : EExternal do
-              outputError(E);            
+              begin
+              bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - External exception');
+              outputError(E);
+              end;
               
             on E : Exception do
               bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - ' + E.Message);
+              
+            else
+              bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - Unknown exception');
           end;
           end;
         end
@@ -985,67 +991,81 @@ begin
     end;
 
   repeat
-    if (conn.fcommand) then
-      begin
-      if (conn.pagepoint <> 0) then
-        conn.outputPager
-      else
-        conn.ch.emptyBuffer;
-      end;
-
-    conn.fcommand:=false;
-    sleep(100);
-
-    last_update := Now();
-
-    if (not Terminated) then
-      conn.read;
-
-    if (not Terminated) and (conn.ch.wait > 0) then
-      continue;
-
-    if (not Terminated) then
-      conn.readBuffer;
-
-    if (length(conn.comm_buf) > 0) then
-      begin
-      cmdline := trim(conn.comm_buf);
-
-      i := pos(#13, cmdline);
-      if (i <> 0) then
-        delete(cmdline, i, 1);
-
-      i := pos(#10, cmdline);
-      if (i <> 0) then
-        delete(cmdline, i, 1);
-
-      conn.comm_buf := '';
-      conn.fcommand := true;
-
-      if (conn.pagepoint <> 0) then
-        conn.setPagerInput(cmdline)
-      else
-        case conn.state of
-          CON_PLAYING: begin
-                       if (not conn.ch.IS_NPC) and (IS_SET(conn.ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
-                         begin
-                         conn.ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
-                         conn.ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
-                         continue;
-                         end;
-
-                       conn.ch.in_command:=true;
-                       interpret(conn.ch, cmdline);
-
-                       if (not conn.ch.CHAR_DIED) then
-                         conn.ch.in_command := false;
-                       end;
-          CON_EDIT_HANDLE: conn.ch.editBuffer(cmdline);
-          CON_EDITING: conn.ch.editBuffer(cmdline);
-          else
-            nanny(conn, cmdline);
+    try
+      if (conn.fcommand) then
+        begin
+        if (conn.pagepoint <> 0) then
+          conn.outputPager
+        else
+          conn.ch.emptyBuffer;
         end;
-      end;
+
+      conn.fcommand:=false;
+      sleep(100);
+
+      last_update := Now();
+
+      if (not Terminated) then
+        conn.read;
+
+      if (not Terminated) and (conn.ch.wait > 0) then
+        continue;
+
+      if (not Terminated) then
+        conn.readBuffer;
+
+      if (length(conn.comm_buf) > 0) then
+        begin
+        cmdline := trim(conn.comm_buf);
+
+        i := pos(#13, cmdline);
+        if (i <> 0) then
+          delete(cmdline, i, 1);
+
+        i := pos(#10, cmdline);
+        if (i <> 0) then
+          delete(cmdline, i, 1);
+
+        conn.comm_buf := '';
+        conn.fcommand := true;
+
+        if (conn.pagepoint <> 0) then
+          conn.setPagerInput(cmdline)
+        else
+          case conn.state of
+            CON_PLAYING: begin
+                         if (not conn.ch.IS_NPC) and (IS_SET(conn.ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
+                           begin
+                           conn.ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
+                           conn.ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
+                           continue;
+                           end;
+
+                         conn.ch.in_command:=true;
+                         interpret(conn.ch, cmdline);
+
+                         if (not conn.ch.CHAR_DIED) then
+                           conn.ch.in_command := false;
+                         end;
+            CON_EDIT_HANDLE: conn.ch.editBuffer(cmdline);
+            CON_EDITING: conn.ch.editBuffer(cmdline);
+            else
+              nanny(conn, cmdline);
+          end;
+        end;
+    except
+      on E : EExternal do
+        begin
+        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name^ + ' - External exception');
+        outputError(E);
+        end;
+        
+      on E : Exception do
+        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name^ + ' - ' + E.Message);
+        
+      else
+        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name^ + ' - Unknown exception');
+    end;
   until Terminated;
 
   try
@@ -1073,10 +1093,16 @@ begin
     conn.Free();
   except
     on E : EExternal do
-    begin
+      begin
       bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread');
       outputError(E);
-    end;
+      end;
+    
+    on E : Exception do
+      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread: ' + E.Message);
+      
+    else
+      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Unknown error while shutting down thread');
   end;
 end;
 
