@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.13 2003/10/29 13:33:15 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.14 2003/10/31 11:29:42 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -145,8 +145,8 @@ begin
 			exit;
 			end;
 
-		ch.sendBuffer('Trying to locate "' + arg + '". If you do not got any results within the next minute,'#13#10);
-		ch.sendBuffer('you can safely assume this player is not online.'#13#10);
+		ch.sendBuffer('Trying to locate "' + arg + '". If you do not got any results within'#13#10);
+		ch.sendBuffer('the next minute, you can safely assume this player is not online.'#13#10);
 
 		i3.sendLocateRequest(ch.name, arg);
 		end
@@ -250,6 +250,37 @@ begin
 		
 		i3.sendBeep(ch.name, t, mud);
 		ch.sendBuffer(Format('You beep %s@%s.', [cap(t), mud.name]) + #13#10);
+		end
+	else
+	if (prep(cmd) = 'WHO') then
+		begin
+		if (length(arg) = 0) then
+			begin
+			ch.sendBuffer('Usage: I3 who <mud>'#13#10);
+			exit;
+			end;
+
+		mud := findMud(arg);
+		
+		if (mud = nil) then
+			begin
+			ch.sendBuffer('No such mud known. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		if (mud.status >= 0) then
+			begin
+			ch.sendBuffer('Mud is down.'#13#10);
+			exit;
+			end;
+			
+		if (not mud.who) then
+			begin
+			ch.sendBuffer('Mud does not support the ''beep'' command.'#13#10);
+			exit
+			end;
+		
+		i3.sendWho(ch.name, mud);
 		end
 	else
 		ch.sendBuffer('Unimplemented.'#13#10);

@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.15 2003/10/29 15:47:19 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.16 2003/10/31 11:29:42 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -46,6 +46,8 @@ type
 		procedure handleLocateRequest(packet : GPacket_I3);
 		procedure handleTell(packet : GPacket_I3);
 		procedure handleBeep(packet : GPacket_I3);
+		procedure handleWhoReq(packet : GPacket_I3);
+		procedure handleWhoReply(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -68,6 +70,7 @@ type
 		procedure sendLocateRequest(originator, user : string);
 		procedure sendTell(from_user, to_user : string; mud : GMud_I3; msg : string);
 		procedure sendBeep(from_user, to_user : string; mud : GMud_I3);
+		procedure sendWho(from_user : string; mud : GMud_I3);
 		
 		procedure shutdown();
 		
@@ -609,6 +612,39 @@ begin
 		end;
 end;
 
+procedure GInterMud.handleWhoReq(packet : GPacket_I3);
+begin
+end;
+
+procedure GInterMud.handleWhoReply(packet : GPacket_I3);
+var
+	pl : GPlayer;
+	list, child : TList;
+	i : integer;
+begin
+	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+	
+	if (pl <> nil) then
+		begin
+	  list := TList(packet.fields[6]);
+	  i := 0;
+	  
+	  while (i < list.count) do
+	  	begin
+	  	child := TList(list[i]);
+	  	
+	  	pl.sendBuffer(GString(child[0]).value + #13#10);
+	  	
+	  	inc(i);
+	  	end;
+		end
+	else
+		begin
+		debug('Could not find player "' + packet.target_username + '" referenced in who-reply packet.', 1);
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+		end;	
+end;
+
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
@@ -637,6 +673,12 @@ begin
   else
   if (packet.packet_type = 'beep') then
   	handleBeep(packet)
+  else
+  if (packet.packet_type = 'who-req') then
+  	handleWhoReq(packet)
+  else
+  if (packet.packet_type = 'who-reply') then
+  	handleWhoReply(packet)
   else
   if (packet.packet_type = 'error') then
   	handleError(packet)
@@ -891,6 +933,14 @@ begin
 	writeBuffer(from_user);
 	writeBuffer('",})'#13);
 	sendPacket();
+end;
+
+// void I3_send_who( CHAR_DATA *ch, char *mud ) 
+procedure GInterMud.sendWho(from_user : string; mud : GMud_I3);
+begin
+	writeHeader('who-req', this_mud.name, from_user, mud.name, '');
+	writeBuffer('})'#13);
+	sendPacket();	
 end;
 
 procedure GInterMud.debug(msg : string; level : integer = 1);
