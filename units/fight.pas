@@ -807,13 +807,15 @@ begin
     exit;
     end;
 
-  if (ch.position=POS_BASHED) or (ch.position=POS_CASTING) then exit;
-  if ch.position=POS_FIGHTING then
+  if (ch.position = POS_BASHED) then 
+    exit;
+    
+  if (ch.position = POS_FIGHTING) or ((ch.position = POS_CASTING) and Assigned(ch.fighting) then
     begin
-    if (vict.position<POS_FIGHTING) then
+    if (vict.position < POS_FIGHTING) then
       begin
-      vict.position:=POS_FIGHTING;
-      vict.fighting:=ch;
+      vict.position := POS_FIGHTING;
+      vict.fighting := ch;
       end;
 
     if not in_melee(ch,vict) then
@@ -919,7 +921,7 @@ begin
 
     vch := ch.fighting;
 
-    if (ch.position = POS_FIGHTING) then
+    if (ch.position = POS_FIGHTING) or ((ch.position = POS_CASTING) and Assigned(ch.fighting)) then
       begin
       multi_hit(ch,vch);
 
