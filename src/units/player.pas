@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.15 2004/03/06 20:18:40 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.16 2004/03/10 21:49:42 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -10,6 +10,7 @@ interface
 
 
 uses
+	Classes,
 	md5,
 	area,
 	dtypes,
@@ -20,7 +21,8 @@ uses
 
 
 const
-	PLAYER_FIELDS_HASHSIZE = 256;
+	PLAYER_FIELDS_HASHSIZE = 256;		{ estimated size of hash table for dynamic fields }
+	PLAYER_MAX_QUEUESIZE = 16;			{ max size of command queue (per client) }
 
 {$M+}
 type
@@ -30,7 +32,7 @@ type
 	protected
 		_state : integer;
 		_ch : GPlayer;
-
+		
 		_pagepoint : integer;
 		pagebuf : string;
 		pagecmd : char;
@@ -38,11 +40,18 @@ type
 		copyover : boolean;
 		copyover_name : string;
 
+		commandQueue : TStringList;
+
 		procedure OnOpenEvent();
 		procedure OnInputEvent();
-		function OnTickEvent() : boolean;
+		procedure OnTickEvent();
 		procedure OnOutputEvent();
 		procedure OnCloseEvent();
+		
+		procedure clearCommandQueue();
+		procedure addCommandQueue(line : string);
+		procedure emptyCommandQueue();
+		function checkAliases(line : string) : boolean;
 
 	public
 		constructor Create(socket : GSocket; from_copyover : boolean = false; const copyover_name : string = '');
@@ -274,6 +283,8 @@ begin
   
   copyover := from_copyover;
   Self.copyover_name := copyover_name;
+  
+  commandQueue := TStringList.Create();
 
 	Resume();
 end;
@@ -335,7 +346,7 @@ begin
 		end;
 end;
 
-function GPlayerConnection.OnTickEvent() : boolean;
+procedure GPlayerConnection.OnTickEvent();
 begin
 	if (fcommand) then
 		begin
@@ -346,11 +357,8 @@ begin
 			
 		fcommand := false;
 		end;
-		
-	if (ch.wait > 0) then
-		Result := false
-	else
-		Result := true;
+	
+	emptyCommandQueue();
 end;
 
 procedure GPlayerConnection.OnInputEvent();
@@ -367,33 +375,110 @@ begin
 	i := pos(#10, cmdline);
 	if (i <> 0) then
 		delete(cmdline, i, 1);
-
+		
 	comm_buf := '';
+
 	fcommand := true;
 
 	if (pagepoint <> 0) then
 		setPagerInput(cmdline)
 	else
 		case state of
-			CON_PLAYING: begin
-									 if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
-										 begin
-										 ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
-										 ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
-										 exit;
-										 end;
+			CON_PLAYING: 	begin
+										if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
+											begin
+											ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
+											ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
+											exit;
+											end;
+										
+										if (not checkAliases(cmdline)) then
+												addCommandQueue(cmdline);												
 
-									 ch.in_command:=true;
-									 
-									 interpret(ch, cmdline);
-
-									 if (not ch.CHAR_DIED) then
-										 ch.in_command := false;
-									 end;
+										emptyCommandQueue();
+										end;
 			CON_EDIT_HANDLE: ch.editBuffer(cmdline);
 			CON_EDITING: ch.editBuffer(cmdline);
 			else
 				nanny(cmdline);
+		end;
+end;
+
+function GPlayerConnection.checkAliases(line : string) : boolean;
+var
+	iterator : GIterator;
+	al : GAlias;
+	cmdline, ale, param : string;
+begin
+	Result := false;
+	
+  param := one_argument(line, cmdline);
+  cmdline := uppercase(cmdline);
+
+	iterator := ch.aliases.iterator();
+
+	while (iterator.hasNext()) do
+		begin
+		al := GAlias(iterator.next());
+		
+		if (uppercase(al.alias) = cmdline) then
+			begin
+			ale := stringreplace(al.expand, '%', param, [rfReplaceAll]);
+
+			while (pos(':', ale) > 0) do
+				begin
+				line := left(ale, ':');
+				ale := right(ale, ':');
+
+				addCommandQueue(line);
+				end;
+
+			addCommandQueue(ale);
+			
+			Result := true;
+
+			break;
+			end;
+		end;
+
+	iterator.Free();
+end;
+
+{ Flush all lines from the command queue }
+procedure GPlayerConnection.clearCommandQueue();
+begin
+	commandQueue.Clear();
+end;
+
+{ Add a line to the command queue}
+procedure GPlayerConnection.addCommandQueue(line : string);
+begin
+	if (commandQueue.Count < PLAYER_MAX_QUEUESIZE) then
+		begin
+		commandQueue.Add(line);
+		end
+	else
+		begin
+		ch.sendBuffer('Stop spamming all those commands!'#13#10);
+		end;
+end;
+
+{ Execute all lines in the command queue }
+procedure GPlayerConnection.emptyCommandQueue();
+begin
+	while (commandQueue.Count > 0) do
+		begin
+		if (ch.wait > 0) then
+			break;
+		
+		ch.in_command := true;
+
+		interpret(ch, commandQueue[0]);
+		
+		commandQueue.delete(0);
+
+		if (not ch.CHAR_DIED) then
+			ch.in_command := false;
 		end;
 end;
 

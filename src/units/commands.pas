@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.12 2004/03/08 21:09:57 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.13 2004/03/10 21:49:42 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -272,9 +272,8 @@ var
   a : longint;
   gc : GCommand;
   cmd : GCommand;
-  cmdline, param, ale : string;
+  cmdline, param : string;
   hash : cardinal;
-  al : GAlias;
   iterator : GIterator;
   timer : GTimer;
 begin
@@ -343,36 +342,6 @@ begin
 
   param := one_argument(line, cmdline);
   cmdline := uppercase(cmdline);
-
-  // check for aliases first
-  if (not ch.IS_NPC) then
-    begin
-    iterator := GPlayer(ch).aliases.iterator();
-
-    while (iterator.hasNext()) do
-      begin
-      al := GAlias(iterator.next());
-
-      if (uppercase(al.alias) = cmdline) then
-        begin
-        ale := stringreplace(al.expand, '%', param, [rfReplaceAll]);
-
-        while (pos(':', ale) > 0) do
-          begin
-          line := left(ale, ':');
-          ale := right(ale, ':');
-
-          interpret(ch, line);
-          end;
-        
-        interpret(ch, ale);
-        
-        exit;
-        end;
-      end;
-      
-    iterator.Free();
-    end;
 
   cmd := nil;
 
