@@ -36,6 +36,9 @@ contains
 	JclDebug,
 	JclSysInfo,
 	JclStrings,
+	JclSysUtils,
+	JclMath,
+	JclResources,
 {$ENDIF}
 	dtypes,
 	server,
