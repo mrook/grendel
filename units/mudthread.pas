@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.73 2001/11/15 20:42:49 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.74 2001/11/24 15:16:08 xenon Exp $
 
 unit mudthread;
 
@@ -478,9 +478,18 @@ begin
 
                   if (uppercase(argument) = 'CREATE') then
                     begin
-                    conn.sock.send(#13#10'By what name do you wish to be known? ');
-                    conn.state := CON_NEW_NAME;
-                    exit;
+                    if (system_info.deny_newplayers) then
+                    begin
+                      conn.sock.send(#13#10'Currently we do not accept new players. Please come back some other time.'#13#10#13#10);
+                      conn.sock.send('Name: '); 
+                      exit;
+                    end
+                    else
+                    begin
+                      conn.sock.send(#13#10'By what name do you wish to be known? ');
+                      conn.state := CON_NEW_NAME;
+                      exit;
+                    end;
                     end;
                     
                   if (isNameBanned(argument)) then

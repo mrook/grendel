@@ -8,6 +8,7 @@ HostLookup: 1
 LevelForcePC: 999
 LevelLog: 998
 BindIP: 0.0.0.0
+MaxConns: 200
 ArenaStart: 30
 ArenaEnd: 46
 ShowClanAbbrev: 1

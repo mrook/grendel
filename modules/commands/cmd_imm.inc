@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.13 2001/09/17 21:52:46 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.14 2001/11/24 15:16:07 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -797,6 +797,12 @@ begin
     end;
 
   param := one_argument(param,sub);
+
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Please specify a new value for this option.'#13#10);
+    exit;
+  end;
 
   if (sub = 'name') then
     system_info.mud_name := param
