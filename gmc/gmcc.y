@@ -388,7 +388,7 @@ expr 	:  { $$ := nil; }
 		  |  varname		      { $$ := $1; }
 			|  funcname '(' parameter_list ')'					{	if (lookupEnv($1) = nil) then 
 																					  					begin
-																											compilerError(yylineno, 'undefined function ' + $1);
+																											compilerError(yylineno, 'undefined function "' + $1 + '"');
 																											$$ := nil;
 																											yyabort;
 																											end;
@@ -415,13 +415,22 @@ funcname 	: IDENTIFIER		{ $$ := varName; }
 varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
 												varName := left(tmp, '.');
-																							
+																																		
 												if (varName <> tmp) then
                           begin
-													$$ := Expr_External.Create;
-													$$.lineNum := yylineno; 
-													Expr_External($$).id := varName;
-													Expr_External($$).assoc := right(tmp, '.');
+                          if (lookupEnv(varName) <> nil) then
+                            begin
+  													$$ := Expr_External.Create;
+  													$$.lineNum := yylineno; 
+  													Expr_External($$).id := varName;
+  													Expr_External($$).assoc := right(tmp, '.');
+  													end
+  												else
+  												  begin
+  													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');
+  													$$ := nil;
+	  												yyabort;
+	  												end;
 													end
 												else
 												if (lookupEnv(varName) <> nil) then 

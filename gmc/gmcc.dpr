@@ -513,7 +513,7 @@ begin
   79 : begin
          	if (lookupEnv(yyv[yysp-3].yyShortString) = nil) then 
          																					  					begin
-         																											compilerError(yylineno, 'undefined function ' + yyv[yysp-3].yyShortString);
+         																											compilerError(yylineno, 'undefined function "' + yyv[yysp-3].yyShortString + '"');
          																											yyval.yyExpr := nil;
          																											yyabort;
          																											end;
@@ -559,13 +559,22 @@ begin
          varGlob := ':' + yyv[yysp-0].yyShortString;
          tmp := curFunction + varGlob;
          												varName := left(tmp, '.');
-         																							
+         																																		
          												if (varName <> tmp) then
+         begin
+         if (lookupEnv(varName) <> nil) then
          begin
          													yyval.yyExpr := Expr_External.Create;
          													yyval.yyExpr.lineNum := yylineno; 
          													Expr_External(yyval.yyExpr).id := varName;
          													Expr_External(yyval.yyExpr).assoc := right(tmp, '.');
+         													end
+         												else
+         												  begin
+         													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');
+         													yyval.yyExpr := nil;
+         	  												yyabort;
+         	  												end;
          													end
          												else
          												if (lookupEnv(varName) <> nil) then 
