@@ -341,7 +341,10 @@ begin
     exit;
     end;
 
-  obj.fromChar;
+  if (obj.count > 1) then 
+    obj.seperate();
+    
+  obj.fromChar();
   obj.toChar(keeper);
   inc(ch.gold, cost);
   act(AT_REPORT,'You sold $p for ' + inttostr(cost) + ' coins.', false, ch, obj, nil, TO_CHAR);
