@@ -1677,4 +1677,82 @@ begin
   act(AT_REPORT,'Nr. of players:   '+inttostr(area.nplayer),false,ch,nil,nil,TO_CHAR);
 end;
 
+procedure do_savearea(ch : GCharacter; param : string);
+var
+   area : GArea;
+begin
+  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname = '') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if ((ch.getTrust() < LEVEL_GOD) or (length(param) = 0)) and (ch.player^.area = nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  if (length(param) = 0) then
+    area:=ch.player^.area
+  else
+    begin
+    if (ch.getTrust() < LEVEL_GOD) then
+      begin
+      ch.sendBuffer('You can only save your own area.'#13#10);
+      exit;
+      end;
+
+    area := findArea(param);
+
+    if (area = nil) then
+      begin
+      ch.sendBuffer('Area not found.'#13#10);
+      exit;
+      end;
+    end;
+
+  ch.sendBuffer('Saving ' + area.fname + '...');
+
+  area.save(area.fname);
+
+  ch.sendBuffer('Done.'#13#10);
+end;
+
+procedure do_loadarea(ch : GCharacter; param : string);
+var
+   area : GArea;
+   fn : string;
+begin
+  if (ch.player^.area_fname = '') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if (length(param) = 0) then
+    fn := ch.player^.area_fname
+  else
+    begin
+    if (ch.getTrust() < LEVEL_GOD) then
+      begin
+      ch.sendBuffer('You can only load your own area.'#13#10);
+      exit;
+      end;
+
+    fn := param;
+    end;
+
+  area := findArea(fn);
+  if (area <> nil) then
+    begin
+    ch.sendBuffer('That area is already loaded.'#13#10);
+    exit;
+    end;
+
+  area := GArea.Create;
+  area.load(fn);
+  ch.player^.area := area;
+  act(AT_REPORT,'Area ' + fn + ' loaded.',false,ch,nil,nil,TO_CHAR);
+end;
 
