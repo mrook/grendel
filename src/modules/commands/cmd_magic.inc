@@ -1,3 +1,5 @@
+// $Id: cmd_magic.inc,v 1.2 2004/03/04 19:39:50 ***REMOVED*** Exp $
+
 procedure do_cast(ch:GCharacter;param:string);
 var sn : GSkill;
     victim:GCharacter;

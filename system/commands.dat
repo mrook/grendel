@@ -4,6 +4,8 @@
 ; a command can have an alias too, simply alias: <name>, aliases
 ; which are substrings of the command name (so 'l' with name 'look')
 ; will be discarded.
+;
+; $Id: commands.dat,v 1.35 2004/03/04 19:39:50 ***REMOVED*** Exp $
 
 #command
 name: down

@@ -1,3 +1,10 @@
+{
+	Summary:
+		Main interface for commands module
+		
+	## $Id: cmd_main.pas,v 1.5 2004/03/04 19:39:50 ***REMOVED*** Exp $
+}
+
 unit cmd_main;
 
 interface

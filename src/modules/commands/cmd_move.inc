@@ -1,4 +1,4 @@
-// $Id
+// $Id: cmd_move.inc,v 1.4 2004/03/04 19:39:50 ***REMOVED*** Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
