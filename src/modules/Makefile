@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.5 2004/02/19 14:38:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.6 2004/03/11 23:30:46 ***REMOVED*** Exp $
 #
 
 
@@ -54,7 +54,7 @@ endif
 
 DCC_FLAGS=-Q -D+ -V- -W- -O+ -GD
 
-MODULES=$(COMMANDS) $(SPELLER) $(STATUS)
+MODULES=$(COMMANDS) $(SPELLER) $(STATUS) $(IMC3) $(WEBSERVICE)
 
 
 all:	$(MODULES)
