@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.71 2001/10/04 17:14:02 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.72 2001/10/05 15:47:38 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -606,7 +606,7 @@ begin
                     exit;
                     end;
 
-                  if (FileExists('players\' + argument + '.usr')) then
+                  if (FileExists('players\' + argument + '.usr')) or (findDualConnection(conn, argument) <> nil) then
                     begin
                     conn.sock.send('That name is already used.'#13#10);
                     conn.sock.send('By what name do you wish to be known? ');
