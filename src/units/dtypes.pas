@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.5 2004/02/18 23:07:14 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -132,7 +132,7 @@ type
 		{
 			Definition of hash function
 		}
-    GHASH_FUNC = function(size, prime : integer; key : string) : integer;
+    GHASH_FUNC = function(size, prime : integer; const key : string) : integer;
 
 		{
 			Container for hash elements
@@ -207,15 +207,15 @@ var
   str_hash : GHashTable;
 
 
-function hash_string(src : string) : PString; overload;
+function hash_string(const src : string) : PString; overload;
 function hash_string(src : PString) : PString; overload;
 
 procedure unhash_string(var src : PString);
 
-function md5Hash(size, prime : integer; key : string) : integer;
-function defaultHash(size, prime : integer; key : string) : integer;
-function firstHash(size, prime : integer; key : string) : integer;
-function sortedHash(size, prime : integer; key : string) : integer;
+function md5Hash(size, prime : integer; const key : string) : integer;
+function defaultHash(size, prime : integer; const key : string) : integer;
+function firstHash(size, prime : integer; const key : string) : integer;
+function sortedHash(size, prime : integer; const key : string) : integer;
 
 implementation
 
@@ -667,7 +667,7 @@ end;
 	Summary:
 		MD5 hashing function
 }
-function md5Hash(size, prime : integer; key : string) : integer;
+function md5Hash(size, prime : integer; const key : string) : integer;
 var
   md : MD5Digest;
   val : integer;
@@ -687,7 +687,7 @@ end;
 	Summary:
 		Default (string) hashing function
 }
-function defaultHash(size, prime : integer; key : string) : integer;
+function defaultHash(size, prime : integer; const key : string) : integer;
 var
    i : integer;
    val : integer;
@@ -705,7 +705,7 @@ end;
 	Summary:
 		Alternative string hashing function, only uses first character in string
 }
-function firstHash(size, prime : integer; key : string) : integer;
+function firstHash(size, prime : integer; const key : string) : integer;
 begin
   if (length(key) >= 1) then
     Result := (byte(key[1]) * prime) mod size
@@ -717,7 +717,7 @@ end;
 	Summary:
 		Alternative string hashing function, sorts linearly on first character in string
 }
-function sortedHash(size, prime : integer; key : string) : integer;
+function sortedHash(size, prime : integer; const key : string) : integer;
 begin
   if (length(key) >= 1) then
     Result := (byte(key[1]) * size) div 256
@@ -1096,7 +1096,7 @@ end;
 	Summary:
 		Add string to global string hash table
 }
-function hash_string(src : string) : PString;
+function hash_string(const src : string) : PString;
 var
   hv : GHashValue;
   g : GString;

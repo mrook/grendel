@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.6 2004/02/23 21:29:30 hemko Exp $
+  ##  $Id: commands.pas,v 1.7 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -72,8 +72,8 @@ var
 
 procedure interpret(ch : GCharacter; line : string);
 
-procedure registerCommand(name : string; func : COMMAND_FUNC);
-procedure unregisterCommand(name : string);
+procedure registerCommand(const name : string; func : COMMAND_FUNC);
+procedure unregisterCommand(const name : string);
 
 procedure initCommands();
 procedure loadCommands();
@@ -100,7 +100,7 @@ begin
   ch.sendBuffer('Please contact the administration if this persists for more than an hour.'#13#10);
 end;
 
-function findCommand(s : string) : COMMAND_FUNC;
+function findCommand(const s : string) : COMMAND_FUNC;
 var
    f : GCommandFunc;
 begin
@@ -431,166 +431,8 @@ begin
     end;
 end;
 
-(* procedure GGameThread.Execute;
-var 
-  cmdline : string;
-  temp_buf : string;
-  ch : GPlayer;
-  i : integer;
-
-label nameinput,stopthread;
-begin
-
-  ch := GPlayer.Create;
-  conn.ch := ch;
-  ch.conn := conn;
-
-  if (not copyover) then
-    begin
-    conn.state := CON_NAME;
-
-    conn.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
-
-    temp_buf := AnsiColor(6,0) + #13#10;
-
-    temp_buf := temp_buf + version_info + ', ' + version_number + '.'#13#10;
-    temp_buf := temp_buf + version_copyright + '.';
-    temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
-
-    conn.send(temp_buf);
-
-    conn.send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
-    end
-  else
-    begin
-    conn.state := CON_MOTD;
-
-    conn.ch.setName(copyover_name);
-    conn.ch.load(copyover_name);
-    conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
-    conn.send('Copyover complete!'#13#10);
-
-    nanny(conn, '');
-    end;
-
-  repeat
-    try
-      if (conn.fcommand) then
-        begin
-        if (conn.pagepoint <> 0) then
-          conn.outputPager
-        else
-          conn.ch.emptyBuffer;
-        end;
-
-      conn.fcommand:=false;
-      sleep(100);
-
-      last_update := Now();
-
-      if (not Terminated) then
-        conn.read;
-
-      if (not Terminated) and (conn.ch.wait > 0) then
-        continue;
-
-      if (not Terminated) then
-        conn.readBuffer;
-
-      if (length(conn.comm_buf) > 0) then
-        begin
-        cmdline := trim(conn.comm_buf);
-
-        i := pos(#13, cmdline);
-        if (i <> 0) then
-          delete(cmdline, i, 1);
-
-        i := pos(#10, cmdline);
-        if (i <> 0) then
-          delete(cmdline, i, 1);
-
-        conn.comm_buf := '';
-        conn.fcommand := true;
-
-        if (conn.pagepoint <> 0) then
-          conn.setPagerInput(cmdline)
-        else
-          case conn.state of
-            CON_PLAYING: begin
-                         if (not conn.ch.IS_NPC) and (IS_SET(conn.ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
-                           begin
-                           conn.ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
-                           conn.ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
-                           continue;
-                           end;
-
-                         conn.ch.in_command:=true;
-                         interpret(conn.ch, cmdline);
-
-                         if (not conn.ch.CHAR_DIED) then
-                           conn.ch.in_command := false;
-                         end;
-            CON_EDIT_HANDLE: conn.ch.editBuffer(cmdline);
-            CON_EDITING: conn.ch.editBuffer(cmdline);
-            else
-              nanny(conn, cmdline);
-          end;
-        end;
-    except
-{      on E : EExternal do
-        begin
-        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name + ' - External exception');
-        outputError(E);
-        end;
-        
-      on E : Exception do
-        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name + ' - ' + E.Message);
-        
-      else
-        bugreport('GGameThread.Execute()', 'mudthread.pas', conn.ch.name + ' - Unknown exception'); }
-    end;
-  until Terminated;
-
-  try
-    if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
-      begin
-      writeConsole('(' + inttostr(conn.socket.getDescriptor) + ') '+conn.ch.name+' has lost the link');
-
-      if (conn.ch.level >= LEVEL_IMMORTAL) then
-        interpret(conn.ch, 'return');
-
-      conn.ch.conn := nil;
-
-      act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
-      SET_BIT(conn.ch.flags,PLR_LINKLESS);
-      end
-    else
-    if (conn.state = CON_LOGGED_OUT) then
-      dec(system_info.user_cur)
-    else
-      begin
-      writeConsole('('+inttostr(conn.socket.getDescriptor)+') Connection reset by peer');
-      conn.ch.Free;
-      end;
-
-    conn.Free();
-  except
-{    on E : EExternal do
-      begin
-      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread');
-      outputError(E);
-      end;
-    
-    on E : Exception do
-      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread: ' + E.Message);
-      
-    else
-      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Unknown error while shutting down thread'); }
-  end;
-end; *)
-
 // command stuff
-procedure registerCommand(name : string; func : COMMAND_FUNC);
+procedure registerCommand(const name : string; func : COMMAND_FUNC);
 var
    g : GCommandFunc;
    c : GCommand;
@@ -627,7 +469,7 @@ begin
   iterator.Free();
 end;
 
-procedure unregisterCommand(name : string);
+procedure unregisterCommand(const name : string);
 var
   g : GCommandFunc;
   c : GCommand;

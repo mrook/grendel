@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.10 2004/02/23 21:29:30 hemko Exp $
+  $Id: grendel.dpr,v 1.11 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -393,7 +393,7 @@ begin
   cleanupServer();
 end;
 
-procedure sendtoall(s : string);
+procedure sendtoall(const s : string);
 var
 	iterator : GIterator;
 	conn : GPlayerConnection;

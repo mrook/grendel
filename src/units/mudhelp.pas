@@ -1,6 +1,8 @@
 {
-  @abstract(Online help interface)
-  @lastmod($Id: mudhelp.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $)
+	Summary:
+		Online help interface
+
+	## $Id: mudhelp.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit mudhelp;
@@ -21,7 +23,7 @@ type
 var
    helpFiles : GDLinkedList;
 
-procedure loadHelp(fname:string);
+procedure loadHelp(const fname : string);
 function findHelp(text : string) : GHelp;
 
 procedure initHelp();
@@ -43,10 +45,10 @@ type
   ASkill = class
              min_lvl : integer;
              name : string;
-             constructor Create(lvl : integer; str : string);
+             constructor Create(lvl : integer; const str : string);
            end;
 
-constructor ASkill.Create(lvl : integer; str : string);
+constructor ASkill.Create(lvl : integer; const str : string);
 begin
   min_lvl := lvl;
   name := str;
@@ -122,7 +124,7 @@ begin
 end;
     
 { Xenon 16/Apr/2001: added keywords %SKILL_LIST% and %SPELL_LIST% and their functionality }
-procedure loadHelp(fname:string);
+procedure loadHelp(const fname : string);
 var
 	f : textfile;
   s, g, key : string;

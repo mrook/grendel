@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.7 2004/02/19 14:40:22 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.8 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -90,18 +90,18 @@ type
     protected
     	procedure Execute(); override;
 
-      procedure sendIAC(option : byte; params : array of byte);
+      procedure sendIAC(option : byte; const params : array of byte);
       procedure processIAC();
 
 			procedure send(s : PChar; len : integer); overload;
 
 		public
-      procedure send(s : string); overload;
+      procedure send(const s : string); overload;
       procedure read();
       procedure readBuffer();
 
 			procedure emptyBuffer();
-      procedure writeBuffer(txt : string; in_command : boolean = false);
+      procedure writeBuffer(const txt : string; in_command : boolean = false);
 
       constructor Create(socket : GSocket);
       destructor Destroy; override;
@@ -266,7 +266,7 @@ begin
   end;
 end;
 
-procedure GConnection.send(s : string);
+procedure GConnection.send(const s : string);
 begin
 	send(@s[1], length(s));
 end;
@@ -329,7 +329,7 @@ begin
   until false;
 end;
 
-procedure GConnection.sendIAC(option : byte; params : array of byte);
+procedure GConnection.sendIAC(option : byte; const params : array of byte);
 var
 	buf : array[0..255] of char;
 	i : integer;
@@ -466,7 +466,7 @@ begin
   empty_busy := false;
 end;
 
-procedure GConnection.writeBuffer(txt : string; in_command : boolean = false);
+procedure GConnection.writeBuffer(const txt : string; in_command : boolean = false);
 begin
   if ((length(sendbuffer) + length(txt)) > 2048) then
     begin

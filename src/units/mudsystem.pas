@@ -1,6 +1,8 @@
 {
-  @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.5 2004/02/15 18:51:05 hemko Exp $)
+	Summary:
+		Configuration and other mud specific functions
+	
+	## $Id: mudsystem.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -129,19 +131,19 @@ var
   boot_type : integer = BOOTTYPE_SHUTDOWN;
 
 
-procedure bugreport(func, pasfile, bug : string);
+procedure bugreport(const func, pasfile, bug : string);
 procedure calculateonline();
 
 procedure loadSystem();
 procedure saveSystem();
-function isMaskBanned(host : string) : boolean;
+function isMaskBanned(const host : string) : boolean;
 function isNameBanned(name : string) : boolean;
 
 procedure loadDamage();
 
 procedure loadSocials();
-function findSocial(cmd : string) : GSocial;
-function checkSocial(c : pointer; cmd, param : string) : boolean;
+function findSocial(const cmd : string) : GSocial;
+function checkSocial(c : pointer; const cmd, param : string) : boolean;
 
 procedure loadMudState();
 procedure saveMudState();
@@ -163,7 +165,7 @@ uses
 	RegExpr;
 
 
-procedure bugreport(func, pasfile, bug : string);
+procedure bugreport(const func, pasfile, bug : string);
 begin
   writeConsole('[BUG] ' + func + ' -> ' + bug);
 end;
@@ -348,7 +350,7 @@ begin
 end;
 
 // Check if mask is banned
-function isMaskBanned(host : string) : boolean;
+function isMaskBanned(const host : string) : boolean;
 var
    a : integer;
 begin
@@ -462,14 +464,14 @@ begin
   af.Free();
 end;
 
-function findSocial(cmd : string) : GSocial;
+function findSocial(const cmd : string) : GSocial;
 begin
   Result := GSocial(socials.get(cmd));
 end;
 
 { Xenon 19/Feb/2001 :   - added socials on objects
                         - added checks on social-strings (if empty, ignore) to fix odd behaviour i noticed }
-function checkSocial(c : pointer; cmd, param : string) : boolean;
+function checkSocial(c : pointer; const cmd, param : string) : boolean;
 var social : GSocial;
     chance : integer;
     ch, vict : GCharacter;

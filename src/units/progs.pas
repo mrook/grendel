@@ -1,6 +1,8 @@
 {
-  @abstract(Interface with GMC virtual machine)
-  @lastmod($Id: progs.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $)
+  Summary:
+  	Interface with GMC virtual machine
+  	
+	## $Id: progs.pas,v 1.3 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit progs;
@@ -18,12 +20,12 @@ type
     end;
 
     GStringLib = class
-      function left(src, delim : string) : string; stdcall;
-      function right(src, delim : string) : string; stdcall;
-      function match(src, pattern : string) : boolean; stdcall;
+      function left(const src, delim : string) : string; stdcall;
+      function right(const src, delim : string) : string; stdcall;
+      function match(const src, pattern : string) : boolean; stdcall;
       function IntToStr(x : integer) : string; stdcall;
-      function StrToInt(x : string) : integer; stdcall;
-      function uppercase(s : string) : string; stdcall;
+      function StrToInt(const x : string) : integer; stdcall;
+      function uppercase(const s : string) : string; stdcall;
     end;
 {$M-}
 
@@ -73,17 +75,17 @@ begin
 end;
 
 // GStringLib
-function GStringLib.left(src, delim : string) : string; stdcall;
+function GStringLib.left(const src, delim : string) : string; stdcall;
 begin
   Result := Strip.left(src, delim[1]);
 end;
 
-function GStringLib.right(src, delim : string) : string; stdcall;
+function GStringLib.right(const src, delim : string) : string; stdcall;
 begin
   Result := Strip.right(src, delim[1]);
 end;
 
-function GStringLib.match(src, pattern : string) : boolean; stdcall;
+function GStringLib.match(const src, pattern : string) : boolean; stdcall;
 begin
   Result := StringMatches(src, pattern);
 end;
@@ -93,17 +95,17 @@ begin
   Result := Sysutils.IntToStr(x);
 end;
 
-function GStringLib.StrToInt(x : string) : integer; stdcall;
+function GStringLib.StrToInt(const x : string) : integer; stdcall;
 begin
   Result := Sysutils.StrToInt(x);
 end;
 
-function GStringLib.uppercase(s : string) : string; stdcall;
+function GStringLib.uppercase(const s : string) : string; stdcall;
 begin
   Result := Sysutils.Uppercase(s);
 end;
 
-procedure grendelVMError(owner : TObject; msg : string);
+procedure grendelVMError(owner : TObject; const msg : string);
 begin
   if (owner <> nil) then
     writeConsole('VM error in context of ' + GNPC(owner).name + ': ' + msg)
@@ -111,7 +113,7 @@ begin
     writeConsole('VM error: ' + msg);
 end;
 
-function grendelExternalTrap(obj : variant; member : string) : variant;
+function grendelExternalTrap(obj : variant; const member : string) : variant;
 var
   s : TObject;
   prop : PPropInfo;
@@ -139,7 +141,7 @@ begin
     end;
 end;
 
-procedure grendelSystemTrap(owner : TObject; msg : string);
+procedure grendelSystemTrap(owner : TObject; const msg : string);
 begin
   interpret(GNPC(owner), msg);
 end;

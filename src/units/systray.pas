@@ -1,6 +1,8 @@
 {
-  @abstract(System tray icon routines)
-  @lastmod($Id: systray.pas,v 1.1 2003/12/12 13:20:09 ***REMOVED*** Exp $)
+	Summary:
+		System tray icon routines
+		
+	## $Id: systray.pas,v 1.2 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit systray;
@@ -14,8 +16,8 @@ procedure registerSysTray();
 procedure unregisterSysTray();
 
 procedure addMenuSeparator();
-procedure registerMenuItem(name : string; callback : GMenuCallBack);
-procedure unregisterMenuItem(name : string);
+procedure registerMenuItem(const name : string; callback : GMenuCallBack);
+procedure unregisterMenuItem(const name : string);
 
 procedure initSysTray();
 procedure cleanupSysTray();
@@ -216,7 +218,7 @@ begin
   InsertMenu(menu, 0, MF_BYPOSITION or MF_SEPARATOR, 0, nil);
 end;
 
-procedure registerMenuItem(name : string; callback : GMenuCallBack);
+procedure registerMenuItem(const name : string; callback : GMenuCallBack);
 var
   item : GMenuItem;
 begin
@@ -231,7 +233,7 @@ begin
   menuitems.insertLast(item);
 end;
 
-procedure unregisterMenuItem(name : string);
+procedure unregisterMenuItem(const name : string);
 var
   node : GListNode;
   item : GMenuItem;

@@ -1,6 +1,8 @@
 {
-  @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id: bulletinboard.pas,v 1.2 2003/12/12 23:01:15 ***REMOVED*** Exp $)
+  Summary:
+  	Abstract(Bulletinboard (noteboard) interface
+  	
+	## $Id: bulletinboard.pas,v 1.3 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 unit bulletinboard;
@@ -21,11 +23,11 @@ type
 var
    notes : GDLinkedList;
 
-procedure load_notes(fname : string);
+procedure load_notes(const fname : string);
 procedure save_notes();
 function findNote(board, number : integer) : GNote;
 function noteNumber(board : integer) : integer;
-procedure postNote(c : pointer; text : string);
+procedure postNote(c : pointer; const text : string);
 
 procedure initNotes();
 procedure cleanupNotes();
@@ -40,7 +42,7 @@ uses
     player,
     mudsystem;
 
-procedure load_notes(fname : string);
+procedure load_notes(const fname : string);
 var
   af : GFileReader;
   note : GNote;
@@ -198,7 +200,7 @@ begin
   Result := number + 1;
 end;
 
-procedure postNote(c : pointer; text : string);
+procedure postNote(c : pointer; const text : string);
 var note : GNote;
     ch : GPlayer;
 begin

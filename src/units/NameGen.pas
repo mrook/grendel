@@ -1,49 +1,67 @@
 {
-  @abstract(Phonetic namegenerator)
-  @lastmod($Id: NameGen.pas,v 1.1 2003/12/12 13:19:59 ***REMOVED*** Exp $)
+	Summary:
+		Phonetic namegenerator
+
+	## $Id: NameGen.pas,v 1.2 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 unit NameGen;
 
+
 interface
 
+
 uses
-  constants,
-  dtypes;
+	constants,
+	dtypes;
+
 
 const
   NameTablesDataFile = SystemDir + 'NameData.xml';
 
+
 type
-  TPhonemePart =
-       class
-         part_value : string;
-         constructor Create(name : string); // name: part_value
-       end;
-  TPhoneme =
-       class
-         phoneme_name : string;
-         phoneme_parts : GDLinkedList;
-         constructor Create(name : string); // name: phoneme_name
-         destructor Destroy(); override;
-         function getNthPhonemePart(nth : integer) : TPhonemePart; // returns nth phoneme_part from linked list
-       end;
-  TNameTemplatePart =
-       class
-         part_type : string;
-         part_value : string;
-       end;
-  TNameTemplate =
-       class
-         template_name : string;
-         template_parts : GDLinkedList;
-         constructor Create(name : string);
-         destructor Destroy(); override;
-       end;
+  TPhonemePart = class
+  private
+		part_value : string;
+		
+	public
+		constructor Create(const name : string); // name: part_value
+	end;
+	
+  TPhoneme = class
+  private
+		phoneme_name : string;
+		phoneme_parts : GDLinkedList;
+
+	public
+		constructor Create(const name : string); // name: phoneme_name
+		destructor Destroy(); override;
+		function getNthPhonemePart(nth : integer) : TPhonemePart; // returns nth phoneme_part from linked list
+  end;
+
+  TNameTemplatePart = class
+  private
+  	part_type : string;
+  	part_value : string;
+  end;
+
+  TNameTemplate = class
+  private
+  	template_name : string;
+  	template_parts : GDLinkedList;
+  	
+  public
+		constructor Create(const name : string);
+		destructor Destroy(); override;
+		
+		property name : string read template_name;
+	end;
+
 
 procedure loadNameTables(dfile : string);
 procedure reloadNameTables();
-function generateName(nametemplate : string) : string;
+function generateName(const nametemplate : string) : string;
 
 var
   PhonemeList : GDLinkedList = nil;
@@ -59,7 +77,7 @@ uses
   util,
   LibXmlParser;
   
-constructor TPhoneme.Create(name : string);
+constructor TPhoneme.Create(const name : string);
 begin
   inherited Create;
 
@@ -69,7 +87,6 @@ end;
 
 destructor TPhoneme.Destroy();
 begin
-//  phoneme_parts.Destroy();
   phoneme_parts.Clean();
   phoneme_parts.Free();
   
@@ -97,14 +114,14 @@ begin
   end;
 end;
 
-constructor TPhonemePart.Create(name : string);
+constructor TPhonemePart.Create(const name : string);
 begin
   inherited Create();
 
   part_value := name;
 end;
 
-constructor TNameTemplate.Create(name : string);
+constructor TNameTemplate.Create(const name : string);
 begin
   inherited Create();
 
@@ -114,7 +131,6 @@ end;
 
 destructor TNameTemplate.Destroy();
 begin
-//  template_parts.Destroy();
   template_parts.Clean();
   template_parts.Free();
   
@@ -237,7 +253,7 @@ begin
   writeConsole('Loaded ' + inttostr(PhonemeList.size()) + ' phoneme classes and ' + inttostr(NameTemplateList.size()) + ' name templates from ' + dfile + '.');
 end;
 
-function findPhoneme(str : string) : TPhoneme;
+function findPhoneme(const str : string) : TPhoneme;
 var
   node : GListNode;
 begin
@@ -254,7 +270,7 @@ begin
   end;
 end;
 
-function findNameTemplate(str : string) : TNameTemplate;
+function findNameTemplate(const str : string) : TNameTemplate;
 var
   node : GListNode;
 begin
@@ -271,7 +287,7 @@ begin
   end;
 end;
 
-function generateName(nametemplate : string) : string;
+function generateName(const nametemplate : string) : string;
 var
   iterator : GIterator;
   ph : TPhoneme;

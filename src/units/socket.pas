@@ -2,7 +2,7 @@
   Summary:
   	Wrappers for IPv4 and IPv6 socket operations
   	
-  ## $Id: socket.pas,v 1.5 2004/02/21 17:44:05 ***REMOVED*** Exp $
+  ## $Id: socket.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit socket;
@@ -54,7 +54,7 @@ type
     
 		function acceptConnection(lookup_hosts : boolean) : GSocket;
     
-		function connect(remoteName : string; port : integer) : boolean;
+		function connect(const remoteName : string; port : integer) : boolean;
     
 		constructor Create(_af : integer; _fd : TSocket = -1);
 		destructor Destroy; override;
@@ -424,7 +424,7 @@ begin
   Result := sk;
 end;
 
-function GSocket.connect(remoteName : string; port : integer) : boolean;
+function GSocket.connect(const remoteName : string; port : integer) : boolean;
 var
 	addrLength : integer;
 	addrPointer : PChar;

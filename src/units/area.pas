@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.12 2004/02/19 19:51:09 hemko Exp $
+  ## $Id: area.pas,v 1.13 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -50,7 +50,7 @@ type
       nplayer : integer;
       weather : GWeather;             { current local weather }
 
-      procedure areaBug(func : string; problem : string);
+      procedure areaBug(const func, problem : string);
 
       procedure loadRooms();
       procedure loadNPCs();
@@ -61,8 +61,8 @@ type
       procedure update();
       procedure reset();
 
-      procedure load(fn : string);
-      procedure save(fn : string);
+      procedure load(const fn : string);
+      procedure save(const fn : string);
 
       constructor Create();
       destructor Destroy(); override;
@@ -250,7 +250,7 @@ type
       function findRandomEvil : pointer;
       function findObject(name : string) : pointer;
 
-      function findDescription(keyword : string) : GExtraDescription;
+      function findDescription(const keyword : string) : GExtraDescription;
       function isConnectedTo(dir : integer) : GRoom;
       function findExit(dir : integer) : GExit;
       function findExitKeyword(s : string) : GExit;
@@ -297,14 +297,11 @@ var
 procedure loadAreas();
 
 function createRoom(vnum : integer; area : GArea) : GRoom;
-function findArea(fname : string) : GArea;
+function findArea(const fname : string) : GArea;
 
 function findRoom(vnum : integer) : GRoom;
-function findLocation(ch : pointer; param : string) : GRoom;
+function findLocation(ch : pointer; const param : string) : GRoom;
 function findNPCIndex(vnum : integer) : GNPCIndex;
-
-{ function findObjectIndex(vnum : integer) : GObjectIndex; }
-{ function instanceObject(o_index : GObjectIndex) : GObject; }
 
 function instanceNPC(npcindex : GNPCIndex) : pointer;
 procedure addCorpse(c : pointer);
@@ -381,7 +378,7 @@ begin
   inherited Destroy;
 end;
 
-procedure GArea.areaBug(func : string; problem : string);
+procedure GArea.areaBug(const func, problem : string);
 begin
   bugreport(func, 'area.pas', fname + ': ' + problem + ', line ' + inttostr(af.line));
 end;
@@ -929,7 +926,7 @@ begin
 end;
 
 // Load the areafile
-procedure GArea.load(fn : string);
+procedure GArea.load(const fn : string);
 var
   s : string;
 begin
@@ -1111,7 +1108,7 @@ end;
 
 { Xenon 28/Apr/2001 : added saving of #RANGES; fixed bug that caused areas
                       not to save (and their length set to 0) }
-procedure GArea.save(fn : string);
+procedure GArea.save(const fn : string);
 var
    f : textfile;
    g : GLearned;
@@ -1920,7 +1917,7 @@ begin
 end;
 
 // Find area by filename
-function findArea(fname : string) : GArea;
+function findArea(const fname : string) : GArea;
 var
 	iterator : GIterator;
   area : GArea;
@@ -2244,7 +2241,7 @@ begin
 	iterator.Free();
 end;
 
-function GRoom.findDescription(keyword : string) : GExtraDescription;
+function GRoom.findDescription(const keyword : string) : GExtraDescription;
 var
 	iterator : GIterator;
 	s_extra : GExtraDescription;
@@ -2637,7 +2634,7 @@ end;
 // misc
 {Jago 5/Jan/01 : func required for do_goto and do_transfer
 		- should probably be placed elsewhere }
-function findLocation(ch : pointer; param : string) : GRoom;
+function findLocation(ch : pointer; const param : string) : GRoom;
 var
   room : GRoom;
   searchVNum : integer;

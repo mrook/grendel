@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.5 2004/02/17 11:41:19 ***REMOVED*** Exp $
+  ##	$Id: skills.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit skills;
@@ -124,17 +124,17 @@ var
 procedure load_skills();
 
 function findSkill(s : string) : GSkill;
-function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
+function findSkillPlayer(ch : GCharacter; const s : string) : GSkill;
 
 procedure improve_skill(ch : GCharacter; sn : GSkill);
 function skill_success(ch : GCharacter; sn : GSkill) : boolean;
 
 function findApply(s : string) : GApplyTypes;
 function printApply(apply : GApplyTypes) : string;
-function findAffect(ch : GCharacter; name : string) : GAffect;
+function findAffect(ch : GCharacter; const name : string) : GAffect;
 procedure removeAffect(ch : GCharacter; aff : GAffect);
-function removeAffectName(ch:GCharacter; name : string):boolean;
-function removeAffectFlag(ch:GCharacter; flag : integer):boolean;
+function removeAffectName(ch : GCharacter; const name : string):boolean;
+function removeAffectFlag(ch : GCharacter; flag : integer):boolean;
 procedure update_affects();
 
 procedure initSkills();
@@ -179,7 +179,7 @@ begin
   iterator.Free();
 end;
 
-function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
+function findSkillPlayer(ch : GCharacter; const s : string) : GSkill;
 var
    sk : GSkill;
 begin
@@ -190,7 +190,7 @@ begin
     Result := sk;
 end;
 
-function assign_gsn(name : string) : GSkill;
+function assign_gsn(const name : string) : GSkill;
 var
    gsn : GSkill;
 begin
@@ -605,7 +605,7 @@ begin
 end;
 
 // Find affect by name on char
-function findAffect(ch : GCharacter; name : string) : GAffect;
+function findAffect(ch : GCharacter; const name : string) : GAffect;
 var
 	iterator : GIterator;
 	aff : GAffect;
@@ -639,7 +639,7 @@ begin
 end;
 
 // Remove affect by name from char
-function removeAffectName(ch : GCharacter; name : string) : boolean;
+function removeAffectName(ch : GCharacter; const name : string) : boolean;
 var
    aff : GAffect;
 begin

@@ -20,7 +20,7 @@ uses
 type
   GConsoleWindowWriter = class(GConsoleWriter)
   public
-    procedure write(timestamp : TDateTime; text : string); override;
+    procedure write(timestamp : TDateTime; const text : string); override;
   end;
   
   GConsoleModule = class(TInterfacedObject, IModuleInterface)
@@ -45,7 +45,7 @@ begin
 	Result := GConsoleModule.Create();
 end;
 
-procedure GConsoleWindowWriter.write(timestamp : TDateTime; text : string);
+procedure GConsoleWindowWriter.write(timestamp : TDateTime; const text : string);
 begin
 	if (consoleMemo <> nil) then
 		begin
@@ -90,11 +90,12 @@ end;
 
 procedure GConsoleModule.unregisterModule();
 begin
+  unregisterConsoleDriver(consoleDriver);
+
   FreeAndNil(consoleMemo);
 	FreeAndNil(consoleFont);
 	FreeAndNil(consoleForm);
 
-  unregisterConsoleDriver(consoleDriver);
   unregisterMenuItem('Show console');
   
   consoleDriver.Free();

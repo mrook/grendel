@@ -1,6 +1,8 @@
 {
-  @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.3 2004/02/11 22:15:25 ***REMOVED*** Exp $)
+  Summary:
+  	Timer class
+    
+  ## $Id: timers.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -32,7 +34,7 @@ type
 		looping : boolean;
 
 	published
-		constructor Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
+		constructor Create(const name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
 		
 		property name : string read _name;
 		property counter : integer read _counter write _counter;
@@ -46,7 +48,7 @@ type
 		sn : GSkill;
 
 	published
-		constructor Create(name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
+		constructor Create(const name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
 	end;
 
 	GTimerThread = class (TThread)
@@ -67,10 +69,10 @@ var
 	timer_list : GDLinkedList;
 
 
-procedure registerTimer(name : string; func : TIMER_FUNC; timeout : integer; looping : boolean); overload;
-procedure registerTimer(name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill); overload;
+procedure registerTimer(const name : string; func : TIMER_FUNC; timeout : integer; looping : boolean); overload;
+procedure registerTimer(const name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill); overload;
 
-procedure unregisterTimer(name_ : string); overload;
+procedure unregisterTimer(const name_ : string); overload;
 procedure unregisterTimer(ch : GCharacter; timer_type : integer); overload;
 
 function hasTimer(ch : GCharacter; timer_type : integer) : GTimer; overload;
@@ -100,7 +102,7 @@ uses
 
 
 // GTimer
-constructor GTimer.Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
+constructor GTimer.Create(const name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
 begin
   inherited Create;
 
@@ -112,7 +114,7 @@ begin
 end;
 
 // GSpecTimer
-constructor GSpecTimer.Create(name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
+constructor GSpecTimer.Create(const name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
 begin
   inherited Create(name_, nil, timeout_, false);
 
@@ -125,7 +127,7 @@ end;
 
 
 // GTimerThread
-constructor GTimerThread.Create;
+constructor GTimerThread.Create();
 begin
   inherited Create(false);
 
@@ -133,7 +135,7 @@ begin
 end;
 
 { TODO remove nodes }
-procedure GTimerThread.Execute;
+procedure GTimerThread.Execute();
 var
    node, node_next : GListNode;
    timer : GTimer;
@@ -205,7 +207,7 @@ begin
     end;
 end;
 
-procedure registerTimer(name : string; func : TIMER_FUNC; timeout : integer; looping : boolean);
+procedure registerTimer(const name : string; func : TIMER_FUNC; timeout : integer; looping : boolean);
 var
    timer : GTimer;
 begin
@@ -214,7 +216,7 @@ begin
   timer_list.insertLast(timer);
 end;
 
-procedure registerTimer(name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill);
+procedure registerTimer(const name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill);
 var
    timer : GSpecTimer;
 begin
@@ -224,7 +226,7 @@ begin
 end;
 
 { TODO remove nodes }
-procedure unregisterTimer(name_ : string);
+procedure unregisterTimer(const name_ : string);
 var
    timer : GTimer;
    node : GListNode;

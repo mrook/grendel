@@ -1,6 +1,8 @@
 {
-  @abstract(Buffered filereader & writer)
-  @lastmod($Id: fsys.pas,v 1.3 2004/02/11 22:15:25 ***REMOVED*** Exp $)
+  Summary:
+  	Buffered filereader & writer
+  
+  ## $Id: fsys.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit fsys;
@@ -56,8 +58,8 @@ type
 	published
 		procedure writeChar(c : char);
 		procedure writeInteger(i : integer);
-		procedure writeString(s : string);
-		procedure writeLine(s : string);
+		procedure writeString(const s : string);
+		procedure writeLine(const s : string);
 
 		procedure flush();
 
@@ -68,13 +70,13 @@ type
 	end;
 
 
-function translateFileName(fn : string) : string;
+function translateFileName(const fn : string) : string;
 
 
 implementation
 
 
-function translateFileName(fn : string) : string;
+function translateFileName(const fn : string) : string;
 begin
 {$IFDEF LINUX}
   Result := StringReplace(fn, '\', '/', [rfReplaceAll]);
@@ -103,7 +105,7 @@ begin
   feol := false;
 end;
 
-destructor GFileReader.Destroy;
+destructor GFileReader.Destroy();
 begin
   fp.Free;
 
@@ -392,11 +394,11 @@ begin
   fname := fn;
 end;
 
-destructor GFileWriter.Destroy;
+destructor GFileWriter.Destroy();
 begin
   flush();
   
-  fp.Free;
+  fp.Free();
 
   inherited Destroy;
 end;
@@ -419,7 +421,7 @@ begin
   writeString(IntToStr(i));
 end;
 
-procedure GFileWriter.writeString(s : string);
+procedure GFileWriter.writeString(const s : string);
 var
   a : integer;
 begin
@@ -427,7 +429,7 @@ begin
     writeChar(s[a]);
 end;
 
-procedure GFileWriter.writeLine(s : string);
+procedure GFileWriter.writeLine(const s : string);
 var
   a : integer;
 begin

@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.2 2003/12/12 23:01:15 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.3 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -45,7 +45,7 @@ type
 		channelFlags : GBitVector;
 		cost : integer;
 
-		constructor Create(name : string);
+		constructor Create(const name : string);
 		function LOG() : boolean;
 		function HISTORY() : boolean;
 		function ROOM() : boolean;
@@ -80,9 +80,9 @@ var
 
 procedure load_channels();
 procedure channelCommunicate(ch : GCharacter; param : string);
-function lookupChannel(chname : string) : GChannel;
-procedure to_channel(ch : GCharacter; arg : string; chanstr : string; color : integer); overload;
-procedure to_channel(ch : GCharacter; arg : string; channel : GChannel; color : integer; localecho : boolean); overload;
+function lookupChannel(const chname : string) : GChannel;
+procedure to_channel(ch : GCharacter; const arg : string; const chanstr : string; color : integer); overload;
+procedure to_channel(ch : GCharacter; const arg : string; channel : GChannel; color : integer; localecho : boolean); overload;
 procedure do_channel(ch : GCharacter; param : string);
 
 procedure initChannels();
@@ -101,7 +101,7 @@ uses
 var
   errprefix : string;
 
-constructor GChannel.Create(name : string);
+constructor GChannel.Create(const name : string);
 begin
   channelname := name;
   command := '';
@@ -156,7 +156,7 @@ begin
   Result := channelFlags.isBitSet(CHANNEL_FLAG_GROUP);
 end;
 
-function StrToBoolean(str : string) : boolean;
+function StrToBoolean(const str : string) : boolean;
 begin
   if (prep(str) = 'TRUE') then
     Result := true
@@ -206,7 +206,7 @@ begin
   until (i = 0);
 end;
 
-function chan_ignored(ch : GPlayer; chanstr : string) : boolean;
+function chan_ignored(ch : GPlayer; const chanstr : string) : boolean;
 var
   iterator : GIterator;
   tc : GUserChannel;
@@ -227,7 +227,7 @@ begin
     end; 
 end;
 
-procedure channelAddHistory(vict, actor : GPlayer; channel : GChannel; str : string);
+procedure channelAddHistory(vict, actor : GPlayer; channel : GChannel; const str : string);
 var
   node : GListNode;
   he : GHistoryElement;
@@ -251,7 +251,7 @@ begin
   end;
 end;
 
-procedure to_channel(ch : GCharacter; arg : string; chanstr : string; color : integer); overload;
+procedure to_channel(ch : GCharacter; const arg : string; const chanstr : string; color : integer); overload;
 var
   channel : GChannel;
 begin
@@ -259,7 +259,7 @@ begin
   to_channel(ch, arg, channel, color, true);
 end;
 
-procedure to_channel(ch : GCharacter; arg : string; channel : GChannel; color : integer; localecho : boolean); overload;
+procedure to_channel(ch : GCharacter; const arg : string; channel : GChannel; color : integer; localecho : boolean); overload;
 var
   iterator : GIterator;
   vict : GCharacter;
@@ -320,7 +320,7 @@ begin
   iterator.Free();
 end;
 
-function lookupChannel(chname : string) : GChannel;
+function lookupChannel(const chname : string) : GChannel;
 var
   iterator : GIterator;
   chan : GChannel;
@@ -328,16 +328,16 @@ begin
   Result := nil;
   iterator := channellist.iterator();
   while (iterator.hasNext()) do
-  begin
+  	begin
     chan := GChannel(iterator.next());
     if (chname = chan.channelname) or
        (pos(chname, chan.command) = 1) or
        ((chan.alias <> '') and (chname = chan.alias)) then
-    begin
+    	begin
       Result := chan;
       exit;
-    end;
-  end;
+    	end;
+  	end;
   iterator.Free();
 end;
 
@@ -428,7 +428,7 @@ begin
   	end;
 end;
 
-procedure processChannels(parser : TXmlParser; errprefix : string; Field : ChannelFieldEnum; ptr : pointer);
+procedure processChannels(parser : TXmlParser; const errprefix : string; Field : ChannelFieldEnum; ptr : pointer);
 var
   attr : TNvpList;
   i : integer;
@@ -892,10 +892,10 @@ end;
 type 
   GConsoleChannel = class(GConsoleWriter)
   public
-    procedure write(timestamp : TDateTime; text : string); override;
+    procedure write(timestamp : TDateTime; const text : string); override;
   end;
 
-procedure GConsoleChannel.write(timestamp : TDateTime; text : string);
+procedure GConsoleChannel.write(timestamp : TDateTime; const text : string);
 begin
   if (channels_loaded) then
     to_channel(nil, FormatDateTime('[hh:nn] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);

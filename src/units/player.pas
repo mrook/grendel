@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.13 2004/02/22 20:41:45 hemko Exp $
+	## $Id: player.pas,v 1.14 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -45,11 +45,11 @@ type
 		procedure OnCloseEvent();
 
 	public
-		constructor Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+		constructor Create(socket : GSocket; from_copyover : boolean = false; const copyover_name : string = '');
 
-		procedure writePager(txt : string);
+		procedure writePager(const txt : string);
 		procedure setPagerInput(argument : string);
-		procedure outputPager;
+		procedure outputPager();
 
 		function findDualConnection(const name: string) : GPlayer;
 		procedure nanny(argument : string);
@@ -139,8 +139,8 @@ type
 		function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
 		function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
 
-		function load(fn : string) : boolean;
-		function save(fn : string) : boolean;
+		function load(const fn : string) : boolean;
+		function save(const fn : string) : boolean;
 
 		function getAge() : integer;
 		function getPlayed() : integer;
@@ -151,14 +151,14 @@ type
 		procedure quit;
 
 		procedure sendPrompt; override;
-		procedure sendBuffer(s : string); override;
-		procedure sendPager(txt : string); override;
+		procedure sendBuffer(const s : string); override;
+		procedure sendPager(const txt : string); override;
 		procedure emptyBuffer; override;
 
-		procedure startEditing(text : string);
+		procedure startEditing(const text : string);
 		procedure stopEditing();
 		procedure editBuffer(text : string);
-		procedure sendEdit(text : string);
+		procedure sendEdit(const text : string);
 
 		property fields[name : string] : TObject read getField write putField; 
 		property keylock : boolean read _keylock write _keylock;
@@ -173,10 +173,10 @@ type
   	_name : string;
   	
   public		
-  	constructor Create(name : string);
+  	constructor Create(const name : string);
   	
 		function default() : TObject; virtual; abstract;
-		function fromString(s : string) : TObject; virtual; abstract;
+		function fromString(const s : string) : TObject; virtual; abstract;
 		function toString(x : TObject) : string; virtual; abstract;
 		
 		property name : string read _name;
@@ -185,21 +185,21 @@ type
 	GPlayerFieldFlag = class(GPlayerField)
 	public
   	function default() : TObject; override;
-  	function fromString(s : string) : TObject; override;
+  	function fromString(const s : string) : TObject; override;
   	function toString(x : TObject) : string; override;	
 	end;
 
 	GPlayerFieldInteger = class(GPlayerField)
 	public
   	function default() : TObject; override;
-  	function fromString(s : string) : TObject; override;
+  	function fromString(const s : string) : TObject; override;
   	function toString(x : TObject) : string; override;	
 	end;
 	
 	GPlayerFieldString = class(GPlayerField)
 	public
   	function default() : TObject; override;
-  	function fromString(s : string) : TObject; override;
+  	function fromString(const s : string) : TObject; override;
   	function toString(x : TObject) : string; override;	
 	end;
 {$M-}
@@ -210,21 +210,21 @@ var
 
 
 procedure registerField(field : GPlayerField);
-procedure unregisterField(name : string);
+procedure unregisterField(const name : string);
 
 function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
 function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
 
-function existsPlayer(name : string) : boolean;
+function existsPlayer(const name : string) : boolean;
 procedure acceptConnection(list_socket : GSocket);
 
 procedure initPlayers();
 procedure cleanupPlayers();
 
-function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
-function act_color(to_ch : GCharacter; acts : string; sep : char) : string;
+function act_string(const acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
+function act_color(to_ch : GCharacter; const acts : string; sep : char) : string;
 
-procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
+procedure act(atype : integer; const acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);
 
 function playername(from_ch, to_ch : GCharacter) : string;
@@ -256,7 +256,7 @@ uses
 	
 
 // GPlayerConnection
-constructor GPlayerConnection.Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
+constructor GPlayerConnection.Create(socket : GSocket; from_copyover : boolean = false; const copyover_name : string = '');
 begin
 	inherited Create(socket);
 	
@@ -960,7 +960,7 @@ CON_CHECK_PASSWORD: begin
   end;
 end;
 
-procedure GPlayerConnection.writePager(txt : string);
+procedure GPlayerConnection.writePager(const txt : string);
 begin
   if (pagepoint = 0) then
     begin
@@ -1405,7 +1405,7 @@ begin
 end;
 
 // Load player file
-function GPlayer.load(fn : string) : boolean;
+function GPlayer.load(const fn : string) : boolean;
 var
 	num, d, x : longint;
   af : GFileReader;
@@ -2027,7 +2027,7 @@ begin
 end;
 
 // Save player
-function GPlayer.save(fn : string) : boolean;
+function GPlayer.save(const fn : string) : boolean;
 var
 	af : GFileWriter;
 	temp : TDateTime;
@@ -2373,7 +2373,7 @@ begin
   save := true;
 end;
 
-procedure GPlayer.sendBuffer(s : string);
+procedure GPlayer.sendBuffer(const s : string);
 begin
   if (snooped_by <> nil) then
    	begin
@@ -2392,7 +2392,7 @@ begin
 	GConnection(conn).writeBuffer(s, in_command);
 end;
 
-procedure GPlayer.sendPager(txt : string);
+procedure GPlayer.sendPager(const txt : string);
 begin
   if (conn = nil) then
     exit;
@@ -2412,7 +2412,7 @@ begin
 end;
 
 // Start editing mode
-procedure GPlayer.startEditing(text : string);
+procedure GPlayer.startEditing(const text : string);
 begin
   if (conn = nil) then
     exit;
@@ -2446,7 +2446,7 @@ begin
   act(AT_REPORT,'$n has returned to $s keyboard.',false,Self,nil,nil,to_room);
 end;
 
-procedure GPlayer.sendEdit(text : string);
+procedure GPlayer.sendEdit(const text : string);
 begin
   case substate of
     SUB_NOTE:
@@ -2811,7 +2811,7 @@ end;
 
 
 // GPlayerField
-constructor GPlayerField.Create(name : string);
+constructor GPlayerField.Create(const name : string);
 begin
 	inherited Create();
 	
@@ -2824,7 +2824,7 @@ begin
 	Result := GBitVector.Create(0);
 end;
 
-function GPlayerFieldFlag.fromString(s : string) : TObject;
+function GPlayerFieldFlag.fromString(const s : string) : TObject;
 begin
 	Result := GBitVector.Create(StrToIntDef(s, 0));
 end;
@@ -2840,7 +2840,7 @@ begin
 	Result := GInteger.Create(0);
 end;
 
-function GPlayerFieldInteger.fromString(s : string) : TObject;
+function GPlayerFieldInteger.fromString(const s : string) : TObject;
 begin
 	Result := GInteger.Create(StrToIntDef(s, 0));
 end;
@@ -2856,7 +2856,7 @@ begin
 	Result := GString.Create('');
 end;
 
-function GPlayerFieldString.fromString(s : string) : TObject;
+function GPlayerFieldString.fromString(const s : string) : TObject;
 begin
 	Result := GString.Create(s);
 end;
@@ -2874,7 +2874,7 @@ begin
 	fieldList[field.name] := field;
 end;
 
-procedure unregisterField(name : string);
+procedure unregisterField(const name : string);
 begin
 	fieldList.remove(prep(name));
 end;
@@ -2964,7 +2964,7 @@ begin
   iterator.Free();
 end;
 
-function existsPlayer(name : string) : boolean;
+function existsPlayer(const name : string) : boolean;
 begin
 	Result := FileExists('players\' + name + '.usr');
 end;
@@ -3057,7 +3057,7 @@ begin
     playername := 'you';
 end;
 
-function act_color(to_ch : GCharacter; acts : string; sep : char) : string;
+function act_color(to_ch : GCharacter; const acts : string; sep : char) : string;
 var
   last, current : integer;
   boldflag : boolean;
@@ -3092,7 +3092,7 @@ begin
   Result := res + CopyStr(acts, last, length(acts) - last + 1)
 end;
 
-function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
+function act_string(const acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
 var
   last, current : integer;
   res, temp : string;
@@ -3204,133 +3204,9 @@ begin
   res := cap(res + CopyStr(acts, last, length(acts) - last + 1));
 
   Result := act_color(to_ch, res, '$');
- end;
+end;
 
-{var 
-  i : ShortString;
-  x : string;
-  s : array[0..1023] of char;
-  t, c : integer;
-  vch : GCharacter;
-  obj1, obj2 : TObject;
-  ex : GExit;
-begin
-  vch := arg2;
-  obj1 := arg1; obj2 := arg2;
-  t := 1;
-  c := 0;
-
-  while (t <= length(acts)) do
-    begin
-    if (acts[t] = '$') then
-      begin
-      inc(t);
-      i:='';
-      
-      case acts[t] of
-        'n': i := playername(ch, to_ch);
-        'N': begin
-             if (vch = nil) then
-               writeConsole('[BUG]: act() -> vch null')
-             else
-               i := playername(vch, to_ch);
-             end;
-        'm': i := sex_nm[ch.sex];
-        'M': begin
-             if (vch = nil) then
-               writeConsole('[BUG]: act() -> vch null')
-             else
-               i := sex_nm[vch.sex];
-             end;
-        's': i := sex_bm[ch.sex];
-        'S': begin
-             if (vch = nil) then
-               writeConsole('[BUG]: act() -> vch null')
-             else
-               i := sex_bm[vch.sex];
-             end;
-        'e': i := sex_pm[ch.sex];
-        'E': begin
-             if (vch = nil) then
-               writeConsole('[BUG]: act() -> vch null')
-             else
-               i := sex_pm[vch.sex];
-             end;
-       'o': begin
-             if (obj1 = nil) then
-               writeConsole('[BUG]: act() -> obj1 null')
-             else
-               i := GObject(obj1).name;
-             end;
-        'O': begin
-             if (obj2 = nil) then
-               writeConsole('[BUG]: act() -> obj2 null')
-             else
-               i := GObject(obj2).name;
-             end;
-        'p': begin
-             if (obj1 = nil) then
-               writeConsole('[BUG]: act() -> obj1 null')
-             else
-               i := GObject(obj1).short;
-             end;
-        'P': begin
-             if (obj2 = nil) then
-               writeConsole('[BUG]: act() -> obj2 null')
-             else
-               i := GObject(obj2).short;
-             end;
-        't': begin
-             if (arg1 = nil) then
-               writeConsole('[BUG]: act() -> pchar(arg1) null')
-             else
-               i := (PString(arg1))^;
-             end;
-        'T': begin
-             if (arg2 = nil) then
-               writeConsole('[BUG]: act() -> pchar(arg2) null')
-             else
-               i := (PString(arg2))^;
-             end;
-        'd': begin
-               if (arg2 = nil) then
-                 writeConsole('[BUG]: act() -> arg2 is nil')
-               else
-               begin
-                 ex := GExit(arg2);
-
-                 if ((ex.keywords <> nil) and (length(ex.keywords^) = 0)) then
-                   i := 'door'
-                 else
-                   one_argument(ex.keywords^, x);
-               end;
-             end;
-   '0'..'9','A','B':begin
-                    i:='$'+acts[t];
-                    end;
-      else
-        writeConsole('[BUG]: act() -> bad format code');
-      end;
-
-      Move(i[1], s[c], length(i));
-      c := c + length(i);
-      end
-    else 
-      begin
-      s[c] := acts[t];
-      inc(c);
-      end;
-
-    inc(t);
-    end;
-
-  s[c] := #0;
-  s[0] := UpCase(s[0]);
-
-  act_string := act_color(to_ch, s, '$');
-end; }
-
-procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
+procedure act(atype : integer; const acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);
 { Documentation of act routine:
 

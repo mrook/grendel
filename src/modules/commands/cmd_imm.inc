@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.7 2004/02/15 18:51:04 hemko Exp $
+// $Id: cmd_imm.inc,v 1.8 2004/02/27 22:24:20 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -1933,7 +1933,7 @@ begin
         break;
         
       nt := TNameTemplate(node.element);
-      act(AT_REPORT, Format('   $B$1[$7%2d$1]$A$7   %s', [i, nt.template_name]), false, ch, nil, nil, TO_CHAR);
+      act(AT_REPORT, Format('   $B$1[$7%2d$1]$A$7   %s', [i, nt.name]), false, ch, nil, nil, TO_CHAR);
 
       node := node.next;
     	end;
@@ -1994,11 +1994,11 @@ begin
     node := node.next;
   	end;
   
-  act(AT_REPORT, Format('$B$1[$7Nametemplate ''%s''$1]$A$7', [nt.template_name]) + #13#10, false, ch, nil, nil, TO_CHAR);
+  act(AT_REPORT, Format('$B$1[$7Nametemplate ''%s''$1]$A$7', [nt.name]) + #13#10, false, ch, nil, nil, TO_CHAR);
   
   for i := 1 to count do
   	begin
-    act(AT_REPORT, Format('  $B$1[$7%2d$1]$A$7   %s', [i, generateName(nt.template_name)]), false, ch, nil, nil, TO_CHAR);
+    act(AT_REPORT, Format('  $B$1[$7%2d$1]$A$7   %s', [i, generateName(nt.name)]), false, ch, nil, nil, TO_CHAR);
   	end
 end;
 

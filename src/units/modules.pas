@@ -1,6 +1,8 @@
 {
-  @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.2 2004/02/11 22:15:25 ***REMOVED*** Exp $)
+	Summary:
+		Loadable module system
+
+	## $Id: modules.pas,v 1.3 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
   
 unit modules;
@@ -37,7 +39,7 @@ type
     _intf : IModuleInterface;
     
   published
-  	constructor Create(handle_ : HMODULE; filename_ : string; description_ : string; intf_ : IModuleInterface);
+  	constructor Create(handle_ : HMODULE; const filename_, description_ : string; intf_ : IModuleInterface);
   	
   	procedure clearInterface();
   	
@@ -51,8 +53,8 @@ type
 procedure loadModules();
 procedure unloadModules();
 
-procedure addModule(name : string);
-procedure removeModule(name : string);
+procedure addModule(const name : string);
+procedure removeModule(const name : string);
 
 
 var
@@ -72,7 +74,7 @@ uses
 
 
 
-constructor GModuleInfo.Create(handle_ : HMODULE; filename_ : string; description_ : string; intf_ : IModuleInterface);
+constructor GModuleInfo.Create(handle_ : HMODULE; const filename_, description_ : string; intf_ : IModuleInterface);
 begin
 	inherited Create();
 	
@@ -186,7 +188,7 @@ begin
   iterator.Free();
 end;
 
-procedure addModule(name : string);
+procedure addModule(const name : string);
 var
   hndl : HMODULE;
   module : GModuleInfo;
@@ -214,11 +216,9 @@ begin
 
 	  writeConsole('Loaded module ' + name + ' (' + module.description + ')');
 	  end;
-  
-//  readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
 end;
 
-procedure removeModule(name : string);
+procedure removeModule(const name : string);
 var
   module : GModuleInfo;
 begin

@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.3 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -17,17 +17,17 @@ uses
 type
   GConsoleWriter = class
   public
-    procedure write(timestamp : TDateTime; text : string); virtual; abstract;
+    procedure write(timestamp : TDateTime; const text : string); virtual; abstract;
   end;
   
   GConsoleDefault = class(GConsoleWriter)
   public
-    procedure write(timestamp : TDateTime; text : string); override;
+    procedure write(timestamp : TDateTime; const text : string); override;
   end;
 
   GConsoleLogWriter = class(GConsoleWriter)
   public
-    procedure write(timestamp : TDateTime; text : string); override;
+    procedure write(timestamp : TDateTime; const text : string); override;
   end;
   
   GConsoleHistoryElement = class
@@ -54,7 +54,7 @@ var
   
 procedure registerConsoleDriver(writer : GConsoleWriter);
 procedure unregisterConsoleDriver(writer : GConsoleWriter);
-procedure writeConsole(text : string);
+procedure writeConsole(const text : string);
 procedure fetchConsoleHistory(max : integer; callback : GConsoleWriter);
 procedure pollConsole();
 
@@ -91,7 +91,7 @@ begin
     end;
 end;
 
-procedure writeConsole(text : string);
+procedure writeConsole(const text : string);
 var
   he : GConsoleHistoryElement;
   timestamp : TDateTime;
@@ -171,14 +171,14 @@ end;
 
 
 // GConsoleDefault
-procedure GConsoleDefault.write(timestamp : TDateTime; text : string);
+procedure GConsoleDefault.write(timestamp : TDateTime; const text : string);
 begin
 {$IFDEF CONSOLEBUILD}
   writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
 {$ENDIF}
 end;
 
-procedure GConsoleLogWriter.write(timestamp : TDateTime; text : string);
+procedure GConsoleLogWriter.write(timestamp : TDateTime; const text : string);
 begin
   if (TTextRec(logfile).mode = fmOutput) then
     begin

@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $
+	## $Id: race.pas,v 1.5 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -90,7 +90,7 @@ procedure loadRaces();
 procedure initRaces();
 procedure cleanupRaces();
 
-function findRace(name : string) : GRace;
+function findRace(const name : string) : GRace;
 
 
 implementation
@@ -291,7 +291,7 @@ begin
 end;
 
 // Find race by name
-function findRace(name : string) : GRace;
+function findRace(const name : string) : GRace;
 var
    iterator : GIterator;
    race : GRace;

@@ -1,6 +1,8 @@
 {
-  @abstract(Internal debug routines)
-  @lastmod($Id: debug.pas,v 1.3 2004/02/19 14:39:51 ***REMOVED*** Exp $)
+	Summary:
+		Internal debug routines
+		
+	## $Id: debug.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit debug;

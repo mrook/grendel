@@ -2,7 +2,7 @@
   Summary:
     System events
   
-  ##  $Id: events.pas,v 1.1 2003/12/12 13:20:03 ***REMOVED*** Exp $
+  ##  $Id: events.pas,v 1.2 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit events;
@@ -15,20 +15,20 @@ uses
 
 
 type
-	GEventHandlerFunc = function(eventname : string; eventobject : TObject) : boolean;
+	GEventHandlerFunc = function(const eventname : string; eventobject : TObject) : boolean;
 
 
 var
 	eventList : GHashTable;
 
 
-procedure registerEvent(name : string);
-procedure unregisterEvent(name : string);
+procedure registerEvent(const name : string);
+procedure unregisterEvent(const name : string);
 	
-procedure registerEventHandler(name : string; handler_func : GEventHandlerFunc);
-procedure unregisterEventHandler(name : string; handler_func : GEventHandlerFunc);
+procedure registerEventHandler(const name : string; handler_func : GEventHandlerFunc);
+procedure unregisterEventHandler(const name : string; handler_func : GEventHandlerFunc);
 
-procedure raiseEvent(name : string; eventobject : TObject);
+procedure raiseEvent(const name : string; eventobject : TObject);
 
 procedure initEvents();
 procedure cleanupEvents();
@@ -48,7 +48,7 @@ type
 	end;
 	
 
-procedure registerEvent(name : string);
+procedure registerEvent(const name : string);
 var
 	list : GDLinkedList;
 begin
@@ -57,7 +57,7 @@ begin
 	eventList[name] := list;
 end;
 
-procedure unregisterEvent(name : string);
+procedure unregisterEvent(const name : string);
 var
 	list : GDLinkedList;
 begin
@@ -71,7 +71,7 @@ begin
 		end;
 end;
 
-procedure registerEventHandler(name : string; handler_func : GEventHandlerFunc);
+procedure registerEventHandler(const name : string; handler_func : GEventHandlerFunc);
 var
 	handler : GEventHandler;
 	list : GDLinkedList;
@@ -88,7 +88,7 @@ begin
 		end;
 end;
 
-procedure unregisterEventHandler(name : string; handler_func : GEventHandlerFunc);
+procedure unregisterEventHandler(const name : string; handler_func : GEventHandlerFunc);
 var
 	handler : GEventHandler;
 	list : GDLinkedList;
@@ -124,7 +124,7 @@ begin
 		end;
 end;
 
-procedure raiseEvent(name : string; eventobject : TObject);
+procedure raiseEvent(const name : string; eventobject : TObject);
 var
 	list : GDLinkedList;
 	iterator : GIterator;

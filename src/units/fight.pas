@@ -1,6 +1,8 @@
 {
-  @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $)
+	Summary:
+		Damage & experience routines
+	
+	## $Id: fight.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit fight;

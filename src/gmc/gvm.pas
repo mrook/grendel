@@ -1,24 +1,36 @@
+{
+	Summary:
+		Grendel Virtual (Stack) Machine
+	
+	## $Id: gvm.pas,v 1.2 2004/02/27 22:24:20 ***REMOVED*** Exp $
+}
+
 unit gvm;
+
+
 interface
 
+
 uses 
-  SysUtils, 
 {$IFDEF WIN32}
-  Windows,
+	Windows,
 {$ENDIF}
-  Variants,
-  fsys,
-  dtypes;
+	SysUtils, 
+	Variants,
+	fsys,
+	dtypes;
+
 
 const
   stackSize = 512;
 
+
 type
-  GVMError = procedure(owner : TObject; errorMsg : string);
-	GSystemTrap = procedure(owner : TObject; msg : string);
-	GExternalTrap = function(obj : variant; member : string) : variant;
-	GSignalTrap = procedure(owner : TObject; signal : string);
-	GWaitTrap = function(owner : TObject; signal : string) : boolean;
+  GVMError = procedure(owner : TObject; const errorMsg : string);
+	GSystemTrap = procedure(owner : TObject; const msg : string);
+	GExternalTrap = function(obj : variant; const member : string) : variant;
+	GSignalTrap = procedure(owner : TObject; const signal : string);
+	GWaitTrap = function(owner : TObject; const signal : string) : boolean;
 
   GSignature = record
     resultType : integer;
@@ -52,13 +64,13 @@ type
 	  owner : TObject;
     block : GCodeBlock;
 
-		function findSymbol(id : string) : integer;
+		function findSymbol(const id : string) : integer;
     procedure setEntryPoint(addr : integer);
 
 		procedure push(v : variant);
 		function pop : variant;
 
-		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
+		procedure callMethod(classAddr, methodAddr : pointer; const signature : GSignature);
 
     procedure load(cb : GCodeBlock);
 		procedure execute;
@@ -67,18 +79,20 @@ type
 		destructor Destroy(); override;
 	end;
 
-var
-  cmdline : string;
-  input : file;
-  vmError : GVMError;
-  systemTrap : GSystemTrap;
-  externalTrap : GExternalTrap;
-  signalTrap : GSignalTrap;
-  waitTrap : GWaitTrap;
-  externalMethods : GHashTable;
-  codeCache : GHashTable;
 
-function loadCode(fname : string) : GCodeBlock;
+var
+	cmdline : string;
+	input : file;
+	vmError : GVMError;
+	systemTrap : GSystemTrap;
+	externalTrap : GExternalTrap;
+	signalTrap : GSignalTrap;
+	waitTrap : GWaitTrap;
+	externalMethods : GHashTable;
+	codeCache : GHashTable;
+
+
+function loadCode(const fname : string) : GCodeBlock;
 
 procedure setVMError(method : GVMError);
 procedure setSystemTrap(method : GSystemTrap);
@@ -86,37 +100,41 @@ procedure setExternalTrap(method : GExternalTrap);
 procedure setSignalTrap(method : GSignalTrap);
 procedure setWaitTrap(method : GWaitTrap);
 
-procedure registerExternalMethod(name : string; classAddr, methodAddr : pointer; signature : GSignature);
+procedure registerExternalMethod(const name : string; classAddr, methodAddr : pointer; const signature : GSignature);
+
 
 implementation
 
-uses gasmdef;
 
-procedure dummyError(owner : TObject; msg : string);
+uses 
+	gasmdef;
+
+
+procedure dummyError(owner : TObject; const msg : string);
 begin
   writeln('fatal vm error: ', msg);
 end;
 
-procedure dummySystemTrap(owner : TObject; msg : string);
+procedure dummySystemTrap(owner : TObject; const msg : string);
 begin
   writeln('Trap: ', msg);
 end;
 
-function dummyExternalTrap(obj : variant; member : string) : variant;
+function dummyExternalTrap(obj : variant; const member : string) : variant;
 begin
   Result := Null;
 end;
 
-procedure dummySignalTrap(owner : TObject; signal : string);
+procedure dummySignalTrap(owner : TObject; const signal : string);
 begin
 end;
 
-function dummyWaitTrap(owner : TObject; signal : string) : boolean;
+function dummyWaitTrap(owner : TObject; const signal : string) : boolean;
 begin
   Result := True;
 end;
 
-function loadCode(fname : string) : GCodeBlock;
+function loadCode(const fname : string) : GCodeBlock;
 var
   cb : GCodeBlock;
   input : file;
@@ -182,7 +200,7 @@ begin
 	inherited Destroy();
 end;
 
-function GContext.findSymbol(id : string) : integer;
+function GContext.findSymbol(const id : string) : integer;
 var
   sym : GSymbol;
 begin
@@ -244,7 +262,7 @@ begin
     setLength(data, 0);
 end;
 
-procedure GContext.callMethod(classAddr, methodAddr : pointer; signature : GSignature);
+procedure GContext.callMethod(classAddr, methodAddr : pointer; const signature : GSignature);
 var
 	i : integer;
   v, vd : variant;
@@ -431,7 +449,7 @@ begin
                 push(v1 / v2);
                 inc(pc);
                 end;
-      _Not    : begin
+      _NOT    : begin
                 push(not pop());
                 inc(pc);
                 end;
@@ -644,7 +662,7 @@ begin
     waitTrap := method;
 end;
 
-procedure registerExternalMethod(name : string; classAddr, methodAddr : pointer; signature : GSignature);
+procedure registerExternalMethod(const name : string; classAddr, methodAddr : pointer; const signature : GSignature);
 var
 	meth : GExternalMethod;
 begin

@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.6 2004/02/19 19:51:09 hemko Exp $
+  ## $Id: chars.pas,v 1.7 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -53,7 +53,7 @@ type
     public
         time : TDateTime;
         contents : PString;
-        constructor Create(txt : string);
+        constructor Create(const txt : string);
         destructor Destroy(); override;
       end;
 
@@ -63,7 +63,7 @@ type
 			history : GDLinkedList;
 			ignored : boolean;
 			
-			constructor Create(name : string);
+			constructor Create(const name : string);
 			destructor Destroy(); override;
 		end;
 
@@ -136,8 +136,8 @@ type
       clan : GClan;                 { joined a clan? }
 
       procedure sendPrompt; virtual;
-      procedure sendBuffer(s : string); virtual;
-      procedure sendPager(txt : string); virtual;
+      procedure sendBuffer(const s : string); virtual;
+      procedure sendPager(const txt : string); virtual;
       procedure emptyBuffer; virtual;
 
       function ansiColor(color : integer) : string; virtual;
@@ -178,13 +178,13 @@ type
       procedure fromRoom();
       procedure toRoom(to_room : GRoom);
 
-      function getEQ(location : string) : GObject;
+      function getEQ(const location : string) : GObject;
       function getWield(item_type : integer) : GObject;
-      function getDualWield : GObject;
+      function getDualWield() : GObject;
       procedure affectObject(obj : GObject; remove: boolean);
       function equip(obj : GObject) : boolean;
 
-      procedure die; virtual;
+      procedure die(); virtual;
 
       procedure setWait(ticks : integer);
 
@@ -196,10 +196,10 @@ type
       procedure stopFlying();
 
       function findInventory(s : string) : GObject;
-      function findEquipment(s : string) : GObject;
+      function findEquipment(const s : string) : GObject;
 
-      constructor Create;
-      destructor Destroy; override;
+      constructor Create();
+      destructor Destroy(); override;
 
       procedure setName(const name : string);
       procedure setShortName(const name : string);
@@ -258,7 +258,7 @@ type
       function IS_BANKER : boolean; override;
       function IS_SHOPKEEPER : boolean; override;
 
-      procedure sendBuffer(s : string); override;
+      procedure sendBuffer(const s : string); override;
       procedure die; override;
     end;
 {$M-}
@@ -291,7 +291,7 @@ uses
 	Channels;
 
 
-constructor GHistoryElement.Create(txt : string);
+constructor GHistoryElement.Create(const txt : string);
 begin
   inherited Create();
   
@@ -305,7 +305,7 @@ begin
   inherited Destroy();
 end;
 
-constructor GUserChannel.Create(name : string);
+constructor GUserChannel.Create(const name : string);
 begin
   inherited Create();
   
@@ -487,19 +487,19 @@ begin
   iterator.Free();
 end;
 
-procedure GCharacter.sendPrompt;
+procedure GCharacter.sendPrompt();
 begin
 end;
 
-procedure GCharacter.sendBuffer(s : string);
+procedure GCharacter.sendBuffer(const s : string);
 begin
 end;
 
-procedure GCharacter.sendPager(txt : string);
+procedure GCharacter.sendPager(const txt : string);
 begin
 end;
 
-procedure GCharacter.emptyBuffer;
+procedure GCharacter.emptyBuffer();
 begin
 end;
 
@@ -898,7 +898,7 @@ begin
   dec(mobs_loaded);
 end;
 
-procedure GNPC.sendBuffer(s : string);
+procedure GNPC.sendBuffer(const s : string);
 begin
 	if (snooped_by <> nil) then
     GPlayer(snooped_by).conn.send(s); 
@@ -910,7 +910,7 @@ begin
 end;
 
 // Get object wearing at bodypart <location>
-function GCharacter.getEQ(location : string) : GObject;
+function GCharacter.getEQ(const location : string) : GObject;
 var
 	iterator : GIterator;
   obj : GObject;
@@ -1257,7 +1257,7 @@ begin
 end;
 
 // Find object in equipment by name
-function GCharacter.findEquipment(s : string) : GObject;
+function GCharacter.findEquipment(const s : string) : GObject;
 var 
   obj : GObject;
   iterator : GIterator;

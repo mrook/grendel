@@ -1,6 +1,8 @@
 {
-  @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.5 2004/02/17 11:41:19 ***REMOVED*** Exp $)
+	Summary:
+		Various spell related functions
+		
+	## $Id: magic.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit magic;
@@ -13,7 +15,7 @@ uses
 	chars;
 
 
-function findFunc(s:string) : SPEC_FUNC;
+function findFunc(const s : string) : SPEC_FUNC;
 procedure magic_timer(ch, victim : GCharacter; sn : GSkill);
 
 
@@ -510,7 +512,7 @@ begin
 end;
 
 // Find spell function
-function findFunc(s : string) : SPEC_FUNC;
+function findFunc(const s : string) : SPEC_FUNC;
 begin
   findFunc := spell_dummy;
 
@@ -554,7 +556,7 @@ begin
 end;
 
 // Verbose spell
-procedure say_spell(ch : GCharacter; name : string);
+procedure say_spell(ch : GCharacter; const name : string);
 const syl_table:array[1..49,1..2] of string=(
         (' ',' '),
         ('ar','abra'),

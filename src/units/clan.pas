@@ -2,7 +2,7 @@
   Summary:
   	Clan routines
   
-  ##	$Id: clan.pas,v 1.1 2003/12/12 13:20:01 ***REMOVED*** Exp $
+  ##	$Id: clan.pas,v 1.2 2004/02/27 22:24:20 ***REMOVED*** Exp $
 }
 
 unit clan;
@@ -26,7 +26,7 @@ type
 	public
 		constructor Create();
 
-		procedure load(fname : string);
+		procedure load(const fname : string);
 		
 		property name : string read _name write _name;
 		property abbrev : string read _abbrev write _abbrev;
@@ -41,7 +41,7 @@ var
 
 procedure load_clans();
 
-function findClan(s : string) : GClan;
+function findClan(const s : string) : GClan;
 
 procedure initClans();
 procedure cleanupClans();
@@ -66,7 +66,7 @@ begin
   _abbrev := '';
 end;
 
-procedure GClan.load(fname : string);
+procedure GClan.load(const fname : string);
 var 
   cf : textfile;
   d, r : string;
@@ -173,7 +173,7 @@ begin
   close(f);
 end;
 
-function findClan(s : string) : GClan;
+function findClan(const s : string) : GClan;
 var
 	iterator : GIterator;
 	clan : GClan;

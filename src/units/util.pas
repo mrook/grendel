@@ -1,6 +1,8 @@
 {
-  @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $)
+	Summary:
+		Various utility functions
+		
+	## $Id: util.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
 }
 
 unit util;
@@ -22,11 +24,11 @@ procedure REMOVE_BIT(var value : cardinal; bit : cardinal);
 
 function pad_integer(s, num : integer) : string;
 function pad_integer_front(s, num : integer) : string;
-function pad_string(s : string; num : integer) : string;
-function pad_string_front(s : string; num : integer) : string;
+function pad_string(const s : string; num : integer) : string;
+function pad_string_front(const s : string; num : integer) : string;
 function trail_number(s : integer) : string;
 function findNumber(var s : string) : integer;
-function add_chars(num : integer; s : string; c : char) : string;
+function add_chars(num : integer; const s : string; c : char) : string;
 function cap(s : string) : string;
 
 function one_argument(argument : string; var arg_first : string) : string;
@@ -37,9 +39,9 @@ function rolldice(num, size : integer):integer;
 
 function mudAnsi(color : integer) : string;
 
-function isName(name, substr : string) : boolean;
-function isObjectName(name, substr : string) : boolean;
-function isNumber(param : string) : boolean;
+function isName(const name, substr : string) : boolean;
+function isObjectName(const name, substr : string) : boolean;
+function isNumber(const param : string) : boolean;
 
 function DiffSeconds (const D1, D2 : TDateTime) : Integer;
 function DiffMinutes (const D1, D2 : TDateTime) : Integer;
@@ -48,9 +50,9 @@ function DiffDays (const D1, D2 : TDateTime) : Integer;
 
 function makedrunk(param : string) : string;
 
-function prep(str : string) : string;
-function removeQuotes(str : string) : string;
-function escape(str : string) : string;
+function prep(const str : string) : string;
+function removeQuotes(const str : string) : string;
+function escape(const str : string) : string;
 
 implementation
 
@@ -121,12 +123,12 @@ begin
   pad_integer_front := StringOfChar(' ', num - length(g)) + g;
 end;
 
-function pad_string(s : string; num : integer) : string;
+function pad_string(const s : string; num : integer) : string;
 begin
   pad_string := s + StringOfChar(' ', num - length(s));
 end;
 
-function pad_string_front(s : string; num : integer) : string;
+function pad_string_front(const s : string; num : integer) : string;
 begin
   pad_string_front := StringOfChar(' ', num - length(s)) + s;
 end;
@@ -167,7 +169,7 @@ begin
     end;
 end;
 
-function add_chars(num:integer; s : string; c : char) : string;
+function add_chars(num:integer; const s : string; c : char) : string;
 begin
   if (length(s)>num) then
     begin
@@ -280,20 +282,20 @@ end;
 {Jago 10/Jan/2001 - utility function (- move it to util.pas)}
 {Xenon 16/Apr/2001: changed code so something like 'eno' doesn''t match xenon }
 {Xenon 16/Apr/2001: reverted last change for now }
-function isName(name, substr : string) : boolean;
+function isName(const name, substr : string) : boolean;
 begin
   Result := (Pos(trim(uppercase(substr)), trim(uppercase(name)) ) > 0);
 //  Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) = 1);
 end;
 
 {Xenon 16/Apr/2001: same as isName() but less strict }
-function isObjectName(name, substr : string) : boolean;
+function isObjectName(const name, substr : string) : boolean;
 begin
   Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) > 0);
 end;
 
 {Jago 17/Jan/2001 - utility function}
-function isNumber(param : string) : boolean;
+function isNumber(const param : string) : boolean;
 begin
   Result := True;
   
@@ -374,13 +376,13 @@ begin
   Result := drunkstring;
 end;
 
-function prep(str : string) : string;
+function prep(const str : string) : string;
 begin
   Result := trim(uppercase(str));
 end;
 
 // Strip quotes from string
-function removeQuotes(str : string) : string;
+function removeQuotes(const str : string) : string;
 var
   s : string;
   x : integer;
@@ -412,7 +414,7 @@ begin
   Result := Trim(s);
 end;
 
-function escape(str : string) : string;
+function escape(const str : string) : string;
 var
   i : integer;
 begin
