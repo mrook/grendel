@@ -11,3 +11,7 @@ float cos(float x);
 float tan(float x);
 
 int random(int x);
+
+string IntToStr(int x);
+int StrToInt(string s);
+string uppercase(string s);

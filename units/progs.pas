@@ -15,6 +15,9 @@ type
     GStringLib = class
       function left(src, delim : string) : string; stdcall;
       function right(src, delim : string) : string; stdcall;
+      function IntToStr(x : integer) : string; stdcall;
+      function StrToInt(x : string) : integer; stdcall;
+      function uppercase(s : string) : string; stdcall;
     end;
 {$M-}
 
@@ -29,6 +32,7 @@ implementation
 uses
     Math,
     Strip,
+    SysUtils,
     TypInfo,
     chars,
     dtypes,
@@ -66,6 +70,21 @@ end;
 function GStringLib.right(src, delim : string) : string; stdcall;
 begin
   Result := Strip.right(src, delim[1]);
+end;
+
+function GStringLib.IntToStr(x : integer) : string; stdcall;
+begin
+  Result := Sysutils.IntToStr(x);
+end;
+
+function GStringLib.StrToInt(x : string) : integer; stdcall;
+begin
+  Result := Sysutils.StrToInt(x);
+end;
+
+function GStringLib.uppercase(s : string) : string; stdcall;
+begin
+  Result := Sysutils.Uppercase(s);
 end;
 
 procedure grendelVMError(owner : TObject; msg : string);
@@ -131,6 +150,12 @@ begin
 
   registerExternalMethod('random', gmlib, gmlib.MethodAddress('random'), sig);
 
+  sig.resultType := varInteger;
+  setLength(sig.paramTypes, 1);
+  sig.paramTypes[0] := varString;
+
+  registerExternalMethod('StrToInt', gslib, gslib.MethodAddress('StrToInt'), sig);
+
   sig.resultType := varString;
   setLength(sig.paramTypes, 2);
   sig.paramTypes[0] := varString;
@@ -138,6 +163,18 @@ begin
 
   registerExternalMethod('left', gslib, gslib.MethodAddress('left'), sig);
   registerExternalMethod('right', gslib, gslib.MethodAddress('right'), sig);
+  
+  sig.resultType := varString;
+  setLength(sig.paramTypes, 1);
+  sig.paramTypes[0] := varInteger;
+  
+  registerExternalMethod('IntToStr', gslib, gslib.MethodAddress('IntToStr'), sig);
+
+  sig.resultType := varString;
+  setLength(sig.paramTypes, 1);
+  sig.paramTypes[0] := varString;
+  
+  registerExternalMethod('uppercase', gslib, gslib.MethodAddress('uppercase'), sig);
 
   setVMError(grendelVMError);
   setSystemTrap(grendelSystemTrap);
