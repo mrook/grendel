@@ -30,8 +30,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 * implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
 		ROOM_NOFLOOR, SECT_UNDERGROUND (no-light), EX_NOBREAK, EX_SWIM etc.
 * better damage/xp system (more balanced)
-* Better online construction (autocreate exit+room when moving), object
-  edit/instance, mobile create/edit/instance, reset edit etc.
+* Better online construction (autocreate exit+room when moving),
+  mobile create/edit, reset edit etc.
   > Maybe even a map or something (show current map status in olc)
 - some form of classes/professions/guilds/religions/whatever
 	-> probably Schools	
