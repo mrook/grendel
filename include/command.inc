@@ -151,18 +151,19 @@ begin
     exit;
     end;
 
-  if (comparestr('character forever yes now',param)<>0) or (comparestr('CHARACTER FOREVER YES NOW',param)<>0) then
+  if (uppercase(param) <> 'CHARACTER FOREVER YES NOW') then
     begin
     ch.sendBuffer('Type DELETE CHARACTER FOREVER YES NOW to delete. WARNING: This is irreversible!'#13#10);
     exit;
     end;
 
   GConnection(ch.conn).send('You feel yourself dissolving, atom by atom...'#13#10);
-  { write_console('('+inttostr(ch.descr.recdc)+') '+ch.name+' has deleted');
-  quit_char(ch);
-  assignfile(f,'players\'+names[h]+'.usr');
-  erase(f);
-  names.delete(h); }
+
+  write_console(ch.name + ' has deleted');
+  ch.quit;
+
+  assignfile(f, 'players\' + ch.name + '.usr');
+  rename(f, 'backup\' + ch.name + '.usr');
 end;
 
 procedure do_wimpy(ch : GCharacter; param : string);
