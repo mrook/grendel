@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.8 2004/05/12 22:43:47 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.9 2004/05/18 09:23:21 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -377,27 +377,42 @@ end;
 
 procedure do_remove(ch:GCharacter;param:string);
 var 
-  iterator : GIterator;
-  obj : GObject;
+	iterator, inner_iterator : GIterator;
+	obj, obj_in : GObject;
 begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Remove what?'#13#10);
-    exit;
-    end;
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Remove what?'#13#10);
+		exit;
+		end;
 
-  if (param = 'all') then
-    begin
-    iterator := ch.equipment.iterator();
-    
-    while (iterator.hasNext()) do
-      begin
-      obj := GObject(iterator.next());
+	if (param = 'all') then
+		begin
+		iterator := ch.equipment.iterator();
 
-			if IS_SET(obj.flags,OBJ_NOREMOVE) then
+		while (iterator.hasNext()) do
+			begin
+			obj := GObject(iterator.next());
+
+			if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
 				act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
 			else
 				begin
+				inner_iterator := obj.contents.iterator();
+
+				while (inner_iterator.hasNext()) do
+					begin
+					obj_in := GObject(inner_iterator.next());
+
+					act(AT_REPORT,'$p falls out of $P.',false,ch,obj_in,obj,TO_CHAR);
+
+					obj_in.fromObject();
+					obj_in.worn := '';
+					obj_in.toChar(ch);
+					end;
+
+				inner_iterator.Free();
+				
 				act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
 				act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
 
@@ -407,53 +422,70 @@ begin
 
 				ch.affectObject(obj, true);
 				end;
-      end;
-    end
-  else
-    begin
-    obj := ch.findEquipment(param);
+			end;
+			
+		iterator.Free();
+		end
+	else
+		begin
+		obj := ch.findEquipment(param);
 
-    if (obj = nil) then
-      ch.sendBuffer('You are not wearing this object.'#13#10)
-    else
-    if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
-      act(AT_REPORT,'You cannot remove $p.',false,ch,obj,nil,TO_CHAR)
-    else
-      begin
-      act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
-      act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
+		if (obj = nil) then
+			ch.sendBuffer('You are not wearing this object.'#13#10)
+		else
+		if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
+			act(AT_REPORT,'You cannot remove $p.',false,ch,obj,nil,TO_CHAR)
+		else
+			begin		
+			inner_iterator := obj.contents.iterator();
+			
+			while (inner_iterator.hasNext()) do
+				begin
+				obj_in := GObject(inner_iterator.next());
+
+				act(AT_REPORT,'$p falls out of $P.',false,ch,obj_in,obj,TO_CHAR);
+				
+				obj_in.fromObject();
+				obj_in.worn := '';
+				obj_in.toChar(ch);
+				end;
+				
+			inner_iterator.Free();
+
+			act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
+			act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
 
 			obj.fromChar();
 			obj.worn := '';			
 			obj.toChar(ch);
 
-      ch.affectObject(obj, true);
-      end;
-    end;
+			ch.affectObject(obj, true);
+			end;
+	end;
 
-{  // fix the grouping
-  node := ch.objects.head;
-  while (node <> nil) do
-    begin
-    node_next := node.next;
-    obj := node.element;
-    found := false;
+	{  // fix the grouping
+	node := ch.objects.head;
+	while (node <> nil) do
+	begin
+	node_next := node.next;
+	obj := node.element;
+	found := false;
 
-    // matches tend to be on the right side, so scan from the back
-    node_back := ch.objects.tail;
-    while (node_back <> nil) and (node_back <> node) do
-      begin
-      if (GObject(node_back.element).group(obj)) then
-        begin
-        found := true;
-        break;
-        end;
+	// matches tend to be on the right side, so scan from the back
+	node_back := ch.objects.tail;
+	while (node_back <> nil) and (node_back <> node) do
+	begin
+	if (GObject(node_back.element).group(obj)) then
+	begin
+	found := true;
+	break;
+	end;
 
-      node_back := node_back.prev;
-      end;
+	node_back := node_back.prev;
+	end;
 
-    node := node_next;
-    end; }
+	node := node_next;
+	end; }
 end;
 
 procedure do_swap(ch:GCharacter;param:string);
@@ -1427,6 +1459,7 @@ begin
 		exit;
 		end;
 		
+	belt := nil;
 	iterator := ch.equipment.iterator();
 	
 	while (iterator.hasNext()) do
@@ -1448,8 +1481,8 @@ begin
 		exit;
 		end;
 		
-	act(AT_REPORT, 'You sheath $p.', false, ch, weapon, nil, TO_CHAR);
-	act(AT_REPORT, '$n sheaths $p.', false, ch, weapon, nil, TO_ROOM);
+	act(AT_REPORT, 'You sheath $p through $P.', false, ch, weapon, belt, TO_CHAR);
+	act(AT_REPORT, '$n sheaths $p through $P.', false, ch, weapon, belt, TO_ROOM);
 	
 	weapon.fromChar();
 	weapon.toObject(belt);
