@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.53 2001/10/04 20:58:52 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.54 2001/10/05 11:48:28 ***REMOVED*** Exp $
 
 unit area;
 
@@ -2079,11 +2079,11 @@ begin
     begin
     vict := node.element;
 
-    if ((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
+    if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
       ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
       isName(vict.name^, name) or isName(vict.short^, name) or
       ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
-      (isName(vict.race.name, name))) and (ch.CAN_SEE(vict)) then
+      (isName(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
       begin
       inc(cnt);
 
