@@ -1,6 +1,6 @@
 {
   @abstract(Interface with GMC virtual machine)
-  @lastmod($Id: progs.pas,v 1.1 2003/12/12 13:20:08 ***REMOVED*** Exp $)
+  @lastmod($Id: progs.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $)
 }
 
 unit progs;
@@ -115,7 +115,6 @@ function grendelExternalTrap(obj : variant; member : string) : variant;
 var
   s : TObject;
   prop : PPropInfo;
-  v : variant;
 begin
   Result := 0;
 

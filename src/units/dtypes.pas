@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.1 2003/12/12 13:20:03 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -123,7 +123,7 @@ type
 		{
 			Definition of hash function
 		}
-    GHASH_FUNC = function(size, prime : cardinal; key : string) : cardinal;
+    GHASH_FUNC = function(size, prime : integer; key : string) : integer;
 
 		{
 			Container for hash elements
@@ -150,8 +150,8 @@ type
 		}
     GHashTable = class
     private
-      hashprime : cardinal;
-      hashsize : cardinal;										{ Size of hash table }
+      hashprime : integer;
+      hashsize : integer;										{ Size of hash table }
       bucketList : array of GDLinkedList;			{ Array of double linked lists }
       hashFunc : GHASH_FUNC;
       
@@ -171,7 +171,7 @@ type
       procedure put(key : variant; value : TObject);
       procedure remove(key : variant);
 
-      function getHash(key : variant) : cardinal;
+      function getHash(key : variant) : integer;
       procedure setHashFunc(func : GHASH_FUNC);
 
       procedure hashStats(); virtual;
@@ -183,7 +183,7 @@ type
       property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
       property buckets[index : integer] : GDLinkedList read getBucket;
 
-    	property bucketcount : cardinal read hashsize;
+    	property bucketcount : integer read hashsize;
     end;   
 
 {
@@ -203,10 +203,10 @@ function hash_string(src : PString) : PString; overload;
 
 procedure unhash_string(var src : PString);
 
-function md5Hash(size, prime : cardinal; key : string) : cardinal;
-function defaultHash(size, prime : cardinal; key : string) : cardinal;
-function firstHash(size, prime : cardinal; key : string) : cardinal;
-function sortedHash(size, prime : cardinal; key : string) : cardinal;
+function md5Hash(size, prime : integer; key : string) : integer;
+function defaultHash(size, prime : integer; key : string) : integer;
+function firstHash(size, prime : integer; key : string) : integer;
+function sortedHash(size, prime : integer; key : string) : integer;
 
 implementation
 
@@ -501,10 +501,8 @@ end;
 		Short for insertLast()
 }
 procedure GDLinkedList.add(element : TObject);
-var
-	node : GListNode;
 begin
-	node := insertLast(element);
+	insertLast(element);
 end;
 
 {
@@ -639,10 +637,10 @@ end;
 	Summary:
 		MD5 hashing function
 }
-function md5Hash(size, prime : cardinal; key : string) : cardinal;
+function md5Hash(size, prime : integer; key : string) : integer;
 var
   md : MD5Digest;
-  val : cardinal;
+  val : integer;
   i : integer;
 begin
   md := MD5String(key);
@@ -659,10 +657,10 @@ end;
 	Summary:
 		Default (string) hashing function
 }
-function defaultHash(size, prime : cardinal; key : string) : cardinal;
+function defaultHash(size, prime : integer; key : string) : integer;
 var
    i : integer;
-   val : cardinal;
+   val : integer;
 begin
   val := 0;
 
@@ -677,7 +675,7 @@ end;
 	Summary:
 		Alternative string hashing function, only uses first character in string
 }
-function firstHash(size, prime : cardinal; key : string) : cardinal;
+function firstHash(size, prime : integer; key : string) : integer;
 begin
   if (length(key) >= 1) then
     Result := (byte(key[1]) * prime) mod size
@@ -689,7 +687,7 @@ end;
 	Summary:
 		Alternative string hashing function, sorts linearly on first character in string
 }
-function sortedHash(size, prime : cardinal; key : string) : cardinal;
+function sortedHash(size, prime : integer; key : string) : integer;
 begin
   if (length(key) >= 1) then
     Result := (byte(key[1]) * size) div 256
@@ -797,15 +795,14 @@ end;
 	Remarks:
 		Uses static hash function for integers
 }
-function GHashTable.getHash(key : variant) : cardinal;
+function GHashTable.getHash(key : variant) : integer;
 {$O-}
 begin
-  Result := 0;
   if (varType(key) = varString) then
     Result := hashFunc(hashsize, hashprime, key)
   else
   if (varType(key) in [varSmallint,varInteger,varShortInt,varByte,varWord,varLongWord]) then
-    Result := (cardinal(key) * hashprime) mod hashsize
+    Result := (integer(key) * hashprime) mod hashsize
   else
   { shouldn't be here }
   	raise Exception.Create('Impossible to determine hashkey for unknown variant type ' + VarTypeAsText(VarType(key)));
@@ -828,7 +825,6 @@ function GHashTable.getBucket(index : integer) : GDLinkedList;
 begin
 	if (index < 0) or (index >= length(bucketList)) then
 		begin
-		Result := nil;
 		raise Exception.Create('Index (' + IntToStr(index) + ') out of bounds');
 		end
 	else	
@@ -841,7 +837,7 @@ end;
 }
 function GHashTable._get(key : variant) : GHashValue;
 var
-  hash : cardinal;
+  hash : integer;
   node : GListNode;
 begin
   Result := nil;
@@ -883,7 +879,7 @@ end;
 }
 procedure GHashTable.put(key : variant; value : TObject);
 var
-   hash : cardinal;
+   hash : integer;
    hv : GHashValue;
 begin
 	if (value = nil) then
@@ -915,7 +911,7 @@ end;
 }
 procedure GHashTable.remove(key : variant);
 var
-  hash : cardinal;
+  hash : integer;
   fnode, node : GListNode;
 begin
   fnode := nil;

@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.1 2003/12/12 13:20:10 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.2 2003/12/12 23:01:20 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -39,6 +39,7 @@ function mudAnsi(color : integer) : string;
 
 function isName(name, substr : string) : boolean;
 function isObjectName(name, substr : string) : boolean;
+function isNumber(param : string) : boolean;
 
 function DiffSeconds (const D1, D2 : TDateTime) : Integer;
 function DiffMinutes (const D1, D2 : TDateTime) : Integer;
@@ -281,6 +282,18 @@ end;
 function isObjectName(name, substr : string) : boolean;
 begin
   Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) > 0);
+end;
+
+{Jago 17/Jan/2001 - utility function}
+function isNumber(param : string) : boolean;
+begin
+  Result := True;
+  
+  try
+    StrToInt(param);
+  except
+    Result := False;
+  end;
 end;
 
 // functions borrowed from the Delphi Fundamentals

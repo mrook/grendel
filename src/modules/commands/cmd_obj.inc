@@ -1,11 +1,10 @@
-// $Id: cmd_obj.inc,v 1.1 2003/12/12 13:19:53 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.2 2003/12/12 23:01:23 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
 	obj, obj_in :GObject;
 	arg,arg2:string;
 	d : integer;
-	counter : integer;
 	node : GListNode;
 	iterator : GIterator;
 begin
@@ -122,8 +121,6 @@ begin
       exit;
       end;
 
-    counter := 0;
-
     iterator := obj.contents.iterator();
     while (iterator.hasNext()) do
       begin
@@ -131,11 +128,9 @@ begin
 
       if (isName(obj_in.name, arg)) then
         begin
-        inc(counter);
-
         act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
         act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
-        obj_in.seperate;
+        obj_in.seperate();
 
         if (obj_in.item_type = ITEM_MONEY) then
           begin
@@ -147,6 +142,7 @@ begin
           obj_in.fromObject;
           obj_in.toChar(ch);
           end;
+
         iterator.Free();
         exit;
         end;
@@ -154,11 +150,8 @@ begin
       
     iterator.Free();
 
-    if (counter = 0) then
-      begin
-      ch.sendBuffer( 'That is not in there.'#13#10);
-      exit;
-      end;
+		ch.sendBuffer( 'That is not in there.'#13#10);
+		exit;
     end;
 
   if (length(arg2)=0) then
@@ -386,7 +379,6 @@ procedure do_remove(ch:GCharacter;param:string);
 var 
   iterator : GIterator;
   obj : GObject;
-  found : boolean;
 begin
   if (length(param)=0) then
     begin
@@ -630,10 +622,9 @@ end; *)
 procedure do_drink(ch:GCharacter;param:string);
 var 
 	obj : GObject;
-	liq, counter : integer;
+	liq : integer;
 	iterator : GIterator;
 begin
-  counter := 0;
   if (length(param) = 0) then
     begin
     iterator := ch.room.objects.iterator();
@@ -650,8 +641,6 @@ begin
           iterator.Free();
           exit;
           end;
-
-        inc(counter);
 
         liq := obj.value[3];
 
@@ -673,11 +662,8 @@ begin
       end;
 		iterator.Free();
 
-    if (counter = 0) then
-      begin
-      ch.sendBuffer('Drink what?'#13#10);
-      exit;
-      end;
+		ch.sendBuffer('Drink what?'#13#10);
+		exit;
     end;
 
   obj := ch.findInventory(param);
@@ -1088,10 +1074,9 @@ end;
 procedure do_fill(ch:GCharacter;param:string);
 var 
 	obj, objsource : GObject;
-	counter, liq : integer;
+	liq : integer;
 	iterator : GIterator;
 begin
-  counter := 0;
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Fill what?'#13#10);
@@ -1126,7 +1111,6 @@ begin
 
     if (objsource.item_type = ITEM_FOUNTAIN) then
       begin
-      inc(counter);
 
       liq := objsource.value[3];
 
@@ -1142,11 +1126,8 @@ begin
     end;
   iterator.Free();
 
-  if (counter = 0) then
-    begin
-    ch.sendBuffer('You cannot fill that here.');
-    exit;
-    end;
+	ch.sendBuffer('You cannot fill that here.');
+	exit;
 end;
 
 { Unlock doors - Nemesis }

@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.1 2003/12/12 13:20:03 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.2 2003/12/12 23:01:17 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -260,12 +260,11 @@ end;
 
 function damage(ch, oppnt : GCharacter; dam : integer; dt : integer) : integer;
 var
-   xp,r,dameq:integer;
-   damobj : GObject;
-   dm : GDamMessage;
-   a : array[1..3] of string;
-   s1, s2 : string;
-   p : integer;
+	xp,r : integer;
+	dm : GDamMessage;
+	a : array[1..3] of string;
+	s1, s2 : string;
+	p : integer;
 begin
   damage := RESULT_NONE;
 

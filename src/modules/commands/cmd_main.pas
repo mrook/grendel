@@ -176,7 +176,7 @@ var
   hk : THelpKeyword;
   done : boolean;
 begin
-  keywordlist := nil; hk := nil;
+  keywordlist := nil;
   done := false;
   counter := 0;
   

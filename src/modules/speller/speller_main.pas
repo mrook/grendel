@@ -28,7 +28,6 @@ var
 	room : GRoom;
 	area : GArea;
 	iterator : GIterator;
-	h : integer;
 begin
   if (GPlayer(ch).area_fname='') then
     begin

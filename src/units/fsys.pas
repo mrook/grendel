@@ -1,6 +1,6 @@
 {
   @abstract(Buffered filereader & writer)
-  @lastmod($Id: fsys.pas,v 1.1 2003/12/12 13:20:04 ***REMOVED*** Exp $)
+  @lastmod($Id: fsys.pas,v 1.2 2003/12/12 23:01:17 ***REMOVED*** Exp $)
 }
 
 unit fsys;
@@ -149,13 +149,12 @@ var
    pos : integer;
    c : char;
 begin
-  c := ' ';
   feol := false;
   pos := 0;
 
   while (not eof()) do
     begin
-    c := readChar;
+    c := readChar();
 
     if (c <> #13) and (c <> #10) then
       begin

@@ -1,6 +1,6 @@
 {
   @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id: bulletinboard.pas,v 1.1 2003/12/12 13:20:00 ***REMOVED*** Exp $)
+  @lastmod($Id: bulletinboard.pas,v 1.2 2003/12/12 23:01:15 ***REMOVED*** Exp $)
 }
 
 unit bulletinboard;
@@ -48,6 +48,9 @@ var
   board, number : integer;
   date, author, subject, text : string;
 begin
+	board := 0;
+	number := 0;
+	
   try
     af := GFileReader.Create('boards\' + fname);
   except
@@ -62,10 +65,10 @@ begin
       g := uppercase(left(s,'='));
 
       if (g = '#BOARD') then
-        board := strtoint(rightr(s,'='))
+        board := StrToIntDef(rightr(s,'='), 0)
       else
       if (g = '#NUMBER') then
-        number := strtoint(rightr(s,'='))
+        number := StrToIntDef(rightr(s,'='), 0)
       else
       if (g = '#DATE') then
         date := rightr(s,'=')

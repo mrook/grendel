@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.1 2003/12/12 13:19:52 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.2 2003/12/12 23:01:22 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -435,7 +435,6 @@ end;
 
 procedure do_equipment(ch:GCharacter;param:string);
 var
-  buf : string;
   iterator : GIterator;
   bodypart : GBodyPart;
   obj : GObject;
@@ -644,7 +643,6 @@ var
   arg : string;
   normarg, specarg : boolean;
 begin
-  conn := nil;
   param := one_argument(param, arg);
   arg := trim(uppercase(arg));
   
@@ -1600,7 +1598,7 @@ var
   iterator : GIterator;
   social : GSocial;
   socialList : TStringList;
-  i, cnt : integer;
+  i : integer;
   buf : string;
 begin
   socialList := TStringList.Create();
@@ -1895,10 +1893,9 @@ end;
 procedure do_last(ch : GCharacter; param : string);
 
 function calcTimeDiff(last : TDateTime) : string;
-var tim : TDateTime;
-    days, hours, minutes, seconds : integer;
+var
+	days, hours, minutes, seconds : integer;
 begin
-  tim := Now;
 
   days := DiffDays(last, Now);
   hours := DiffHours(last, Now);
@@ -1993,7 +1990,6 @@ var
   race : GRace;
 begin
   len := 0;
-  race := nil;
   iterator := raceList.iterator();
 
   while (iterator.hasNext()) do
@@ -2010,8 +2006,6 @@ var
   iterator : GIterator;
   race : GRace;
 begin
-  race := nil;
-
   name := uppercase(name);
   
   iterator := raceList.iterator();
@@ -2191,7 +2185,7 @@ var
   iterator : GIterator;
   cmd : GCommand;
   cmdList : TStringList;
-  i, cnt : integer;
+  i : integer;
   buf : string;
 begin
   cmdList := TStringList.Create();

@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.1 2003/12/12 13:19:49 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.2 2003/12/12 23:01:20 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -506,19 +506,6 @@ begin
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 end;
 
-{Jago 17/Jan/2001 - utility function, move to util.pas}
-function is_number( param : string ) : boolean;
-var
-temp : integer;
-begin
-  Result := True;
-  try
-    temp := StrToInt(param);
-  except
-    Result := False;
-  end;
-end;
-
 {Jago 17/Jan/2001 - OLOAD - load an object}
 procedure do_oload(ch : GCharacter; param : string);
 var
@@ -528,7 +515,7 @@ var
 begin
   param := one_argument( param, arg1 );
   param := one_argument( param, arg2 );
-  if (length(arg1) = 0) or (not is_number(arg1)) then
+  if (length(arg1) = 0) or (not isNumber(arg1)) then
   begin
      ch.sendBuffer('Syntax: oload <vnum> <level>.' + #13#10);
      exit;
@@ -536,7 +523,7 @@ begin
 
   if length(arg2) = 0 then
      level := umax(ch.level, ch.getTrust)
-  else if (not is_number(arg2)) then
+  else if (not isNumber(arg2)) then
   begin
      ch.sendBuffer('Syntax: oload <vnum> <level>.' + #13#10);
      exit;
@@ -549,6 +536,8 @@ begin
        exit;
      end;
   end;
+  
+  // TODO: use level
 
   // get the obj index
   newobj := GObject(objectIndices[StrToInt(arg1)]);
@@ -584,7 +573,7 @@ begin
      exit;
   end;
 
-  if not is_number(arg) then
+  if not isNumber(arg) then
   begin
      ch.sendBuffer('Mload what?.' + #13#10);
      exit;
@@ -1463,7 +1452,7 @@ function findFreeVNum(ch : GCharacter) : integer;
 var
    room : GRoom;
    iterator : GIterator;
-   vnum, h : integer;
+   vnum : integer;
 begin
   vnum := GPlayer(ch).r_lo;
 
@@ -1725,7 +1714,6 @@ end;
 
 procedure do_rlist(ch : GCharacter; param : string);
 var
-  i : integer;
   room : GRoom;
   area : GArea;
   iterator : GIterator;
@@ -2084,7 +2072,6 @@ var
   area : GArea;
   iterator : GIterator;
   no_errors : boolean;
-  h : integer;
 begin
   if (GPlayer(ch).area_fname='') then
     begin
@@ -2466,7 +2453,6 @@ var
 begin
   hor := 0;
   vert := 0;
-  been_there := false;
 
   case dir of
     DIR_NORTH:
@@ -2495,13 +2481,14 @@ begin
         exit;
       end;}
   end;
+  
   with gr do
     if (grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] = ch) or
        (grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] = MAP_DOOR_CLOSED) or
        (grid[(curpos.x * 2 + hor), (curpos.y * 2 + vert - 1)] = MAP_DOOR_OPEN) then
-      been_there := true
+      Result := true
     else
-      been_there := false;
+      Result := false;
 end;
 
 procedure build_map(var gr : TGrid; var room : GRoom);

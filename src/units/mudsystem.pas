@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.1 2003/12/12 13:20:06 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -170,11 +170,9 @@ begin
 end;
 
 procedure calculateonline;
-var tim : TDateTime;
-    days, hours, minutes : integer;
+var 
+	days, hours, minutes : integer;
 begin
-  tim := Now;
-
   days := DiffDays(BootTime, Now);
   hours := DiffHours(BootTime, Now);
   minutes := DiffMinutes(BootTime, Now);

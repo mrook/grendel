@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.1 2003/12/12 13:19:32 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.2 2003/12/12 23:01:23 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -606,6 +606,10 @@ begin
       sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
 
     suc := ReadFile(pipe, len, 4, w, nil);
+    
+    if (not suc) then
+    	break;
+    	
     suc := ReadFile(pipe, g, len, w, nil);
 
     if (suc) and (sock <> -1) then

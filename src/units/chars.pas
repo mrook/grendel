@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.1 2003/12/12 13:20:01 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.2 2003/12/12 23:01:15 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -306,9 +306,6 @@ begin
 end;
 
 destructor GUserChannel.Destroy();
-var
-  node : GListNode;
-  he : GHistoryElement;
 begin	
   history.clean();
   history.Free();
@@ -332,10 +329,6 @@ begin
 end;
 
 destructor GCharacter.Destroy();
-var
-   obj : GObject;
-   node : GListNode;
-   tc : GUserChannel;
 begin
   affects.clean();
   affects.Free();

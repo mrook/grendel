@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.1 2003/12/12 13:20:02 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -93,7 +93,6 @@ end;
 
 procedure writeConsole(text : string);
 var
-  iterator : GIterator;
   he : GConsoleHistoryElement;
   timestamp : TDateTime;
 begin

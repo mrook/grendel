@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.1 2003/12/12 13:19:59 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.2 2003/12/12 23:01:14 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -972,8 +972,7 @@ var
   s : string;
   area : GArea;
   iterator : GIterator;
-  node, node_exit : GListNode;
-  h : integer;
+  node_exit : GListNode;
   tm : TDateTime;
 begin
   tm := Now();
@@ -1086,14 +1085,13 @@ procedure GArea.save(fn : string);
 var
    f : textfile;
    g : GLearned;
-   node, node_ex : GListNode;
+   node_ex : GListNode;
    ex : GExit;
    extra : GExtraDescription;
    room : GRoom;
    npcindex : GNPCIndex;
    reset : GReset;
    iterator : GIterator;
-//   prog : GProgram;
    shop : GShop;
    obj : GObject;
 begin
@@ -2405,11 +2403,12 @@ begin
 end;
 
 procedure GObject.toChar(c : pointer);
-var grouped : boolean;
-    ch : GCharacter;
-    node : GListNode;
-    otmp : GObject;
-    oweight : integer;
+var 
+{	grouped : boolean;
+	node : GListNode;
+	otmp : GObject; }
+	ch : GCharacter;
+	oweight : integer;
 begin
   oweight := getWeight();
   ch := GCharacter(c);
@@ -2910,8 +2909,8 @@ begin
 end;
 
 procedure GObject.split(num : integer);
-var
-   rest : GObject;
+{ var
+   rest : GObject; }
 begin
 {  if (count <= num) or (num = 0) then
     exit;

@@ -133,7 +133,7 @@ procedure optimize();
 var
 	iterator : GIterator;
 	stat : Asm_Statement;
-	line : Asm_Line;
+//	line : Asm_Line;
 begin
   iterator := statements.iterator();
 
@@ -144,7 +144,7 @@ begin
 		if (not (stat is Asm_Line)) then
 			continue;
 
-		line := Asm_Line(stat);
+		// line := Asm_Line(stat);
 		end;
 	
 	iterator.Free();

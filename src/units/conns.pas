@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.1 2003/12/12 13:20:02 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -485,6 +485,7 @@ var
 begin
   last := 1;
   current := FastCharPos(acts, sep, last);
+  boldflag := false;
   res := '';
   
   while (current <> 0) do

@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.1 2003/12/12 13:20:09 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -146,8 +146,6 @@ end;
 
 function createSocket(af : integer; fd : TSocket) : GSocket;
 begin
-  Result := nil;
-  
   if (af = AF_INET) then
     Result := GSocket4.Create(fd)
   else
@@ -345,15 +343,15 @@ end;
 
 procedure GSocket.setNonBlocking();
 var
-  x, ret : integer;
+  x : integer;
 begin
 {$IFDEF WIN32}
 	x := 1;
-	ret := ioctlsocket(fd, FIONBIO, x);
+	ioctlsocket(fd, FIONBIO, x);
 {$ENDIF}
 {$IFDEF LINUX}
  	x := fcntl(fd, F_GETFL);
-	ret := fcntl(fd, F_SETFL, x or O_NONBLOCK);
+	fcntl(fd, F_SETFL, x or O_NONBLOCK);
 {$ENDIF}
 end;
 
@@ -387,8 +385,6 @@ var
 	sockAddr : TSockAddr;
 	hostent : PHostEnt;
 begin
-	Result := false;
-	
 	hostent := gethostbyname(PChar(remoteName));
 	
 	if (hostent = nil) then

@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.1 2003/12/12 13:19:58 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.2 2003/12/12 23:01:15 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -177,7 +177,6 @@ begin
     Result := false
   else
   	begin
-    Result := false;
     raise EBooleanConvertError.CreateFmt('''%s'' invalid value for boolean; expected one of: true/false, yes/no, on/off', [str]);
   	end;
 end;

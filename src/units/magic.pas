@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.1 2003/12/12 13:20:05 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -40,8 +40,6 @@ end;
 procedure spell_acid_arrow(ch, victim : GCharacter; sn : GSkill);
 var af : GAffect;
 begin
-  af := nil;
-
   if (saving_throw(ch.level,victim.save_poison,victim)) then
     begin
     act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
@@ -85,7 +83,6 @@ end;
 procedure spell_poison(ch,victim:GCharacter; sn : GSkill);
 var af:GAffect;
 begin
-  af := nil;
   if saving_throw(ch.level,victim.save_poison,victim) then
     begin
     act(AT_REPORT,'Your spell failed!',false,ch,nil,victim,TO_CHAR);
@@ -561,10 +558,9 @@ const syl_table:array[1..49,1..2] of string=(
         ( '', '' ));
 var buf, s : string;
     p : integer;
-    a, len, syl : integer;
+    len, syl : integer;
 begin
   buf := '';
-  a := 1;
   p := 1;
 
   repeat

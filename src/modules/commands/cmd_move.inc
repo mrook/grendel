@@ -80,7 +80,6 @@ var
   mv_cost : integer;
   drunk : boolean;
   iterator : GIterator;
-  node, node_next : GListNode;
   p : integer;
 begin
   do_move := false;

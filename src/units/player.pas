@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.1 2003/12/12 13:20:06 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -31,7 +31,7 @@ type
 		_state : integer;
 		_ch : GPlayer;
 
-		_pagepoint : cardinal;
+		_pagepoint : integer;
 		pagebuf : string;
 		pagecmd : char;
 		fcommand : boolean;
@@ -55,7 +55,7 @@ type
 	published
 		property state : integer read _state write _state;
 
-		property pagepoint : cardinal read _pagepoint write _pagepoint;
+		property pagepoint : integer read _pagepoint write _pagepoint;
 
 		property ch: GPlayer read _ch write _ch;
 	end;
@@ -800,7 +800,7 @@ CON_CHECK_PASSWORD: begin
                       end;
                       end;
 
-                    top:=str+con+dex+int+wis;
+                    //top:=str+con+dex+int+wis;
                     end;
 
                   send(#13#10'Your character statistics are: '#13#10#13#10);
@@ -910,7 +910,7 @@ CON_CHECK_PASSWORD: begin
                             end;
                             end;
 
-                          top:=str+con+dex+int+wis;
+                          //top:=str+con+dex+int+wis;
                           end;
 
                         send(#13#10'Your character statistics are: '#13#10#13#10);
@@ -959,10 +959,10 @@ begin
 end;
 
 procedure GPlayerConnection.outputPager();
-var last : cardinal;
-    c : GPlayer;
-    pclines,lines:integer;
-    buf:string;
+var 
+	c : GPlayer;
+	last, pclines, lines : integer;
+	buf : string;
 begin
   if (pagepoint = 0) then
     exit;
@@ -1168,14 +1168,16 @@ end;
 function GPlayer.getField(name : string) : TObject;
 begin
 	if (_fields = nil) then
-		Result := GPlayerField(fieldList[name]).default();
-		
-  name := prep(name);
-  
-	if (_fields[name] = nil) then
-		_fields[name] := GPlayerField(fieldList[name]).default();
+		Result := GPlayerField(fieldList[name]).default()
+	else
+		begin
+		name := prep(name);
 
-	Result := _fields[name];
+		if (_fields[name] = nil) then
+			_fields[name] := GPlayerField(fieldList[name]).default();
+
+		Result := _fields[name];
+		end;
 end;
 
 procedure GPlayer.putField(name : string; obj : TObject);
@@ -1380,7 +1382,6 @@ var d, x : longint;
     sk : GSkill;
     al : GAlias;
     node : GListNode;
-    chan : GChannel;
     iterator : GIterator;
     tc : GUserChannel;
 begin
@@ -2301,7 +2302,6 @@ begin
 end;
 
 procedure GPlayer.sendEdit(text : string);
-var note : GNote;
 begin
   case substate of
     SUB_NOTE:

@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.1 2003/12/12 13:20:09 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -444,10 +444,9 @@ end;
 procedure update_tracks();
 var
 	iterator_room : GIterator;
-   node_room, node_track, node_tracknext : GListNode;
-   room : GRoom;
-   track : GTrack;
-   h : integer;
+	node_track, node_tracknext : GListNode;
+	room : GRoom;
+	track : GTrack;
 begin
 	iterator_room := room_list.iterator();
 	
@@ -549,7 +548,6 @@ procedure startBattleground();
 var 
 	iterator : GIterator;
 	ch : GCharacter;
-	conn : GConnection;
 	s,vnum:integer;
 begin
   to_channel(nil,pchar('[$B$7Battleground starting NOW!$A$7]'),CHANNEL_ALL,AT_REPORT);
@@ -590,7 +588,6 @@ var
 	s : integer;
 	ch, last : GCharacter;
 	iterator : GIterator;
-	conn : GConnection;
 begin
   { battleground is running, check to see if we have a winner }
   if (bg_info.count=0) then

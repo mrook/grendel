@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.1 2003/12/12 13:19:51 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.2 2003/12/12 23:01:21 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -190,12 +190,10 @@ end;
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
 { Xenon 22/Apr/2001: added (vict = nil) check }
 procedure do_grace(ch:GCharacter;param:string);
-var vict:GCharacter;
-    obj_node : GListnode;
-
-    lev:integer;
-    //vict_nm:array[0..63] of char;
-    vict_nm : string;
+var 
+	vict:GCharacter;
+	lev:integer;
+	vict_nm : string;
 begin
   if (length(param)=0) then
   begin
@@ -941,7 +939,6 @@ end;
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
 procedure do_uptime(ch:GCharacter;param:string);
 var 
-  f : file;
   i, total : integer;
   hv : GHashValue;
   room : GRoom;
@@ -2253,7 +2250,6 @@ var
   arg1, arg2 : string;
   i : integer;
 begin
-  goalroom := nil;
   dirs := '';
 
   if (length(param) = 0) then

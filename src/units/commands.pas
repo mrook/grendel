@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.1 2003/12/12 13:20:01 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -219,7 +219,7 @@ var
   cmd : GCommand;
   node : GListNode;
   cmdline, param, ale : string;
-  hash, time : cardinal;
+  hash : cardinal;
   al : GAlias;
   iterator : GIterator;
   timer : GTimer;

@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.1 2003/12/12 13:20:08 ***REMOVED*** Exp $
+  ##	$Id: skills.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $
 }
 
 unit skills;
@@ -185,7 +185,7 @@ var
   num,x : integer;
   sk, skill : GSkill;
   aff : GAffect;
-  modif, len : integer;
+  modif : integer;
 begin
   try
     af := GFileReader.Create('system\skills.dat');

@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.1 2003/12/12 13:20:08 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -205,8 +205,9 @@ var
   t : TSearchRec;
   parser : TXmlParser;
   race : GRace;
-  bodypart : GBodyPart;
 begin
+	race := nil;
+	
   parser := TXmlParser.Create();
   parser.Normalize := true;
 
