@@ -255,6 +255,17 @@ affects: apply_stripspell Blindness 0
 
 #skill
 type: spell
+name: Poison
+rounds: 10
+minlevel: 16
+mana: 23
+target: 1
+wearoff: You feel better.
+function: spell_poison
+#end
+
+#skill
+type: spell
 name: Cure Poison
 rounds: 11
 minlevel: 22
@@ -331,6 +342,21 @@ function: spell_identify
 
 #skill
 type: spell
+name: Infravision
+rounds: 10
+minlevel: 30
+mana: 35
+target: 3
+function: spell_generic
+hitchar: Your eyes glow red.
+hitroom: $N's eyes glow a dark red.
+wearoff: Your eyes look normal again.
+affects: apply_affect 32 12
+#end
+
+
+#skill
+type: spell
 name: Invisibility
 rounds: 11
 minlevel: 35
@@ -355,17 +381,6 @@ affects: apply_affect 128 10
 hitchar: You are lifted off the ground by the wind.
 hitroom: A gust of wind lifts $N off the ground.
 wearoff: You gently float down to the ground.
-#end
-
-#skill
-type: spell
-name: Poison
-rounds: 10
-minlevel: 16
-mana: 23
-target: 1
-wearoff: You feel better.
-function: spell_poison
 #end
 
 #skill
