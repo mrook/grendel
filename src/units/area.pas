@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.20 2004/03/11 17:18:47 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.21 2004/03/13 15:22:38 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -640,7 +640,10 @@ begin
           s := af.readLine;
           end;
 
-        race := GRace(raceList.head.element);
+        if (raceList = nil) or (raceList.head = nil) then
+        	race := nil
+        else
+	        race := GRace(raceList.head.element);
 
         count := 0;
 
@@ -934,7 +937,7 @@ var
   s : string;
 begin
   try
-    af := GFileReader.Create('areas\' + fn);
+    af := GFileReader.Create(fn);
   except
     exit;
   end;
@@ -1019,7 +1022,7 @@ begin
     if (s <> '$') then
       begin
       area := GArea.Create;
-      area.load(trim(s));
+      area.load('areas\' + trim(s));
 
       s := pad_string(s, 15);
 
