@@ -566,7 +566,8 @@ begin
 end;
 
 { Jago 6/Jan/20001 : changed the format of WHO somewhat }
-{ Xenon 21/Feb/2001: changed the format of WHO some more, still needs some more features (later) }
+{ Xenon 22/Feb/2001: changed the format of WHO some more, still needs some more features (later) }
+{ Xenon 23/Feb/2001: added 'who good' 'who evil' 'who imm' 'who clan' 'who <race>' 'who <name>' (code could be a bit cleaner still)}
 procedure do_who(ch:GCharacter;param:string);
 var a:word;
     num, num_good, num_evil, numImms :integer;
@@ -575,11 +576,16 @@ var a:word;
     conn : GConnection;
     node : GListNode;
     arg : string;
+    normarg, specarg : boolean;
 begin
-
   param := one_argument(param, arg);
   arg := trim(uppercase(arg));
   
+  { normarg is only true if there's a paramater to who and it is one of GOOD, EVIL or IMM }
+  normarg := (arg = 'GOOD') or (arg = 'EVIL') or (pos('IMM', arg) = 1);
+  { specarg is only true if there's a parameter to who and it isnt one of GOOD, EVIL or IMM }
+  specarg := (length(arg) > 0) and not(normarg);
+
   num := 0;
   num_good := 0;
   num_evil := 0;
@@ -592,116 +598,176 @@ begin
   node := connection_list.head;
 
   while (node <> nil) do
-    begin
+  begin
     conn := node.element;
 
     if (conn.state = CON_PLAYING) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
-//    if (conn.state = CON_PLAYING) and (ch.CAN_SEE(conn.ch)) and (not conn.ch.IS_NPC) then
+    begin
+      if not(specarg) or (pos(arg, uppercase(conn.ch.race.name)) <> 0) or
+        (pos(arg, uppercase(conn.ch.name^)) <> 0) or
+        (pos(arg, uppercase(conn.ch.short^)) <> 0) or
+        ((arg = 'CLAN') and (ch.clan <> nil) and (ch.clan = conn.ch.clan)) then
       begin
-      inc(num);
-      if (conn.ch.IS_GOOD) then
-        inc(num_good)
-      else
-      if (conn.ch.IS_EVIL) then
-        inc(num_evil);
-
-      if (conn.ch.IS_IMMORT) then
-      begin
-
-        inc(numImms);
-
-        if (conn.ch.IS_WIZINVIS) then
-          buf_imm := buf_imm + '$B$7W$A$7'
-        else
-          buf_imm := buf_imm + ' ';
-          
-        if (conn.ch.IS_INVIS) then
-          buf_imm := buf_imm + '$B$7I$A$7'
-        else
-          buf_imm := buf_imm + ' ';
-          
-        if (conn.ch.IS_HIDDEN) then
-          buf_imm := buf_imm + '$B$7H$A$7'
-        else
-          buf_imm := buf_imm + ' ';
-          
-        if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
-          buf_imm := buf_imm + '$B$7C $A$7<$B$6'
-        else
-          buf_imm := buf_imm + '  $A$7<$B$6';
-
-        buf_imm := buf_imm +  pad_string(imm_types[conn.ch.level],12) + '$A$7> ';
-
-        if (conn.afk) then
-          buf_imm := buf_imm + '$B$7<AFK> $A$7';
-
-        buf_imm := buf_imm + conn.ch.name^ + ' ' + conn.ch.player^.title;
-
-        buf_imm := buf_imm + #13#10;
-
-      end
-      else
-        begin
-        delete(buf1, 1, length(buf1));
-        
-        if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
-          buf1 := buf1 + '   $B$7C$A$7 <'
-        else
-          buf1 := buf1 + '    $A$7 <';
-
-        //change colour according to align .. dont *really* need to say "Good" or "Evil"
-        if (conn.ch.alignment >= 0) then
-          buf1 := buf1 + '$B$2'
-        else
-        if (conn.ch.alignment < 0) then
-          buf1 := buf1 + '$B$4';
-
-        buf1 := buf1 + Format('%3d', [conn.ch.level]) + ' ' + pad_string_front(conn.ch.race.name, 12);
-
-        buf1 := buf1 + '$A$7> ';
-
-        if (conn.afk) then
-          buf1 := buf1 + '$B$7<AFK> $A$7';
-
-        buf1 := buf1 + conn.ch.name^ + ' ' + conn.ch.player^.title;
-
-        buf1 := buf1 + #13#10;
-
+        inc(num);
         if (conn.ch.IS_GOOD) then
-          buf_good := buf_good + buf1
+          inc(num_good)
         else
         if (conn.ch.IS_EVIL) then
-          buf_evil := buf_evil + buf1
+          inc(num_evil);
+        
+        if (conn.ch.IS_IMMORT) then
+        begin
+          inc(numImms);
+
+          if (conn.ch.IS_WIZINVIS) then
+            buf_imm := buf_imm + '$B$7W$A$7'
+          else
+            buf_imm := buf_imm + ' ';
+          
+          if (conn.ch.IS_INVIS) then
+            buf_imm := buf_imm + '$B$7I$A$7'
+          else
+            buf_imm := buf_imm + ' ';
+          
+          if (conn.ch.IS_HIDDEN) then
+            buf_imm := buf_imm + '$B$7H$A$7'
+          else
+            buf_imm := buf_imm + ' ';
+          
+          if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
+            buf_imm := buf_imm + '$B$7C $A$7<$B$6'
+          else
+            buf_imm := buf_imm + '  $A$7<$B$6';
+
+          buf_imm := buf_imm +  pad_string(imm_types[conn.ch.level],12) + '$A$7> ';
+
+          if (conn.afk) then
+            buf_imm := buf_imm + '$B$7<AFK> $A$7';
+
+          buf_imm := buf_imm + conn.ch.name^ + ' ' + conn.ch.player^.title;
+
+          buf_imm := buf_imm + #13#10;
+
+        end
         else
-          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name^, 'Could not determine alignment on character ' + conn.ch.name^ + '. Not good nor evil according to IS_GOOD and IS_EVIL. (1)');
+        begin
+          delete(buf1, 1, length(buf1));
+        
+          if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
+            buf1 := buf1 + '   $B$7C$A$7 <'
+          else
+            buf1 := buf1 + '    $A$7 <';
+
+          //change colour according to align .. dont *really* need to say "Good" or "Evil"
+          if (conn.ch.alignment >= 0) then
+            buf1 := buf1 + '$B$2'
+          else
+          if (conn.ch.alignment < 0) then
+            buf1 := buf1 + '$B$4';
+
+          buf1 := buf1 + Format('%3d', [conn.ch.level]) + ' ' + pad_string_front(conn.ch.race.name, 12);
+
+          buf1 := buf1 + '$A$7> ';
+
+          if (conn.afk) then
+            buf1 := buf1 + '$B$7<AFK> $A$7';
+
+          buf1 := buf1 + conn.ch.name^ + ' ' + conn.ch.player^.title;
+
+          buf1 := buf1 + #13#10;
+
+          if (conn.ch.IS_GOOD) then
+            buf_good := buf_good + buf1
+          else
+          if (conn.ch.IS_EVIL) then
+            buf_evil := buf_evil + buf1
+          else
+            bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name^, 'Could not determine alignment on character ' + conn.ch.name^ + '. Not good nor evil according to IS_GOOD and IS_EVIL. (1)');
         end;
       end;
-
-    node := node.next;
     end;
 
-  if (numImms > 0) then
-    buf_result := buf_imm;
-      
-  if ch.IS_IMMORT then
+    node := node.next;
+  end;
+
+  if normarg or (arg = 'CLAN') then
   begin
-    if (num_good > 0) then
-      buf_result := buf_result + #13#10 + buf_good;
-    if (num_evil > 0) then
-      buf_result := buf_result + #13#10 + buf_evil;
+    if (arg = 'GOOD') and (ch.IS_GOOD or ch.IS_IMMORT) then
+    begin
+      buf_result := buf_good;
+      num := num_good;
+    end
+    else
+    if (arg = 'EVIL') and (ch.IS_EVIL or ch.IS_IMMORT) then
+    begin
+      buf_result := buf_evil;
+      num := num_evil;
+    end
+    else
+    if (arg = 'CLAN') then
+    begin
+      if (numImms > 0) then
+        buf_result := buf_imm + #13#10;
+        
+      if (ch.IS_IMMORT) then          // in case imm is in a mortal clan
+      begin
+        if (num_good > 0) then
+          buf_result := buf_result + buf_good;
+        if (num_evil > 0) then
+          buf_result := buf_result + buf_evil;
+      end
+      else
+      if (ch.IS_GOOD) then
+      begin
+        buf_result := buf_result + buf_good
+      end
+      else
+      if (ch.IS_EVIL) then
+      begin
+        buf_result := buf_result + buf_evil
+      end;
+    end
+    else
+    if (pos('IMM', arg) = 1) and (numImms > 0) then
+    begin
+      buf_result := buf_imm;
+      num := numImms;
+    end
+    else
+    begin
+      num := 0;
+    end;
   end
   else
-  if ch.IS_GOOD then
-    buf_result := buf_result + buf_good
-  else
-  if ch.IS_EVIL then
-    buf_result := buf_result + buf_evil
-  else
-      bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name^, 'Could not determine alignment on character ' + conn.ch.name^ + '. Not good nor evil according to IS_GOOD and IS_EVIL. (2)');
-
+  begin
+    if (numImms > 0) then
+      buf_result := buf_imm;
+      
+    if ch.IS_IMMORT then
+    begin
+      if (num_good > 0) then
+        buf_result := buf_result + #13#10 + buf_good;
+      if (num_evil > 0) then
+        buf_result := buf_result + #13#10 + buf_evil;
+    end
+    else
+    begin
+      if (numImms > 0) then
+        buf_result := buf_result + #13#10;
+        
+      if ch.IS_GOOD then
+        buf_result := buf_result + buf_good
+      else
+      if ch.IS_EVIL then
+        buf_result := buf_result + buf_evil
+      else
+          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name^, 'Could not determine alignment on character ' + conn.ch.name^ + '. Not good nor evil according to IS_GOOD and IS_EVIL. (2)');
+    end;
+  end;
+        
   act(AT_REPORT,buf_result,false,ch,nil,nil,TO_CHAR);
 
-  act(AT_REPORT,#13#10'Currently '+inttostr(num)+' player(s) visible to you.',false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT,'Currently '+inttostr(num)+' player(s) visible to you.',false,ch,nil,nil,TO_CHAR);
 end;
 
 procedure do_title(ch:GCharacter;param:string);
