@@ -803,6 +803,13 @@ position: 0
 #end
 
 #command
+name: rdelete
+function: do_rdelete
+level: 993
+position: 0
+#end
+
+#command
 name: redit
 function: do_redit
 level: 993
@@ -812,6 +819,13 @@ position: 0
 #command
 name: rlink
 function: do_rlink
+level: 993
+position: 0
+#end
+
+#command
+name: rlist
+function: do_rlist
 level: 993
 position: 0
 #end
@@ -900,6 +914,13 @@ position: 0
 name: connections
 function: do_connections
 level: 995
+position: 0
+#end
+
+#command
+name: coordgen
+function: do_coordgen
+level: 1000
 position: 0
 #end
 
