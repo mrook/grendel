@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.9 2001/08/11 22:02:03 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.10 2001/08/12 18:09:49 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -905,7 +905,7 @@ type
 procedure GConsoleChannel.write(timestamp : TDateTime; text : string);
 begin
   if (channels_loaded) then
-    to_channel(nil, FormatDateTime('[tt] ', Now) + text + '$7',CHANNEL_LOG,AT_LOG);
+    to_channel(nil, FormatDateTime('[tt] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);
 end;
 
 initialization
@@ -915,6 +915,7 @@ initialization
   registerConsoleDriver(GConsoleChannel.Create());
   
 finalization
+  channels_loaded := false;
   channellist.clean();
   channellist.Free();
   

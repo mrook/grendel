@@ -2,8 +2,15 @@ unit systray;
 
 interface
 
+type
+  GMenuCallBack = procedure(id : integer);
+
 procedure registerSysTray();
 procedure unregisterSysTray();
+
+procedure addMenuSeparator();
+procedure registerMenuItem(name : string; callback : GMenuCallBack);
+procedure unregisterMenuItem(name : string);
 
 implementation
 
@@ -13,6 +20,7 @@ uses
   Messages,
   ShellAPI,
   Forms,
+  dtypes,
   mudsystem,
   constants;
 
@@ -27,9 +35,7 @@ type
   private
     icon : TNotifyIconData;
     handle : HWND;
-    
-    menu : HMENU;
-    
+       
     procedure windowHandler(var msg : TMessage);
     
     procedure WMLButtonUp(var Mess: TMessage); message WM_LBUTTONUP;
@@ -47,8 +53,17 @@ type
     destructor Destroy; override;
   end;
   
+  GMenuItem = class
+  public
+    id : integer;
+    name : string;
+    callback : GMenuCallBack;
+  end;
+  
 var
   sys : GSysTray;
+  menuitems : GDLinkedList;
+  menu : HMENU;
  
   
 procedure GSysTray.windowHandler(var msg : TMessage);
@@ -70,17 +85,8 @@ end;
 constructor GSysTray.Create();
 begin
   inherited Create();
-  
-  menu := CreatePopupMenu();
-  AppendMenu(menu, MF_ENABLED or MF_STRING, 1, PChar('Open console'));
-  AppendMenu(menu, MF_ENABLED or MF_STRING, 2, PChar('About'));
-  AppendMenu(menu, MF_SEPARATOR, 0, nil);
-  AppendMenu(menu, MF_ENABLED or MF_STRING, 20, PChar('Reboot'));
-  AppendMenu(menu, MF_ENABLED or MF_STRING, 21, PChar('Shutdown'));
-
-  handle := AllocateHWnd(windowHandler);
-  
-  SetMenu(handle, menu);
+   
+  handle := AllocateHWnd(windowHandler); 
    
   with icon do
     begin
@@ -141,22 +147,27 @@ begin
 end;
 
 procedure GSysTray.WMCommand(var Mess : TMessage);
+var
+  iterator : GIterator;
+  item : GMenuItem;
+  id : integer;
 begin
-  case LOWORD(Mess.WParam) of 
-    2 : MessageBox(handle, version_info + ',' + version_number + '.'#13#10#13#10 + version_copyright + '.'#13#10#13#10 + 'This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.', 'About ' + version_info, MB_OK or MB_SETFOREGROUND);
-    20 : begin
-         boot_info.timer := 1;
-         boot_info.started_by := nil;
-         boot_info.boot_type := BOOTTYPE_REBOOT;
-         end;
-    21 : begin
-         boot_info.timer := 1;
-         boot_info.started_by := nil;
-         boot_info.boot_type:=BOOTTYPE_SHUTDOWN;
-         end;
-  end;
+  id := LOWORD(Mess.WParam);
+  iterator := menuitems.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    item := GMenuItem(iterator.next());
     
-  Mess.Result := 0;
+    if (item.id = id) then
+      begin
+      item.callback(id);
+      Mess.Result := 0;
+      break;
+      end;
+    end;
+
+  iterator.Free();
 end;
 
 procedure registerSysTray();
@@ -170,4 +181,112 @@ begin
 end;
 
 
+function getFreeMenuID() : integer;
+var
+  iterator : GIterator;
+  item : GMenuItem;
+  id : integer;
+begin
+  iterator := menuitems.iterator();
+  id := -1;
+  
+  while (iterator.hasNext()) do
+    begin
+    item := GMenuItem(iterator.next());
+    
+    if (item.id > id) then
+      id := item.id;
+    end;
+    
+  iterator.Free();
+  
+  Result := id + 1;
+end;
+
+procedure addMenuSeparator();
+begin
+  InsertMenu(menu, 0, MF_BYPOSITION or MF_SEPARATOR, 0, nil);
+end;
+
+procedure registerMenuItem(name : string; callback : GMenuCallBack);
+var
+  item : GMenuItem;
+begin
+  item := GMenuItem.Create();
+  
+  item.id := getFreeMenuID();
+  item.name := name;
+  item.callback := callback;
+  
+  InsertMenu(menu, 0, MF_BYPOSITION or MF_ENABLED or MF_STRING, item.id, PChar(item.name));
+  
+  menuitems.insertLast(item);
+end;
+
+procedure unregisterMenuItem(name : string);
+var
+  node : GListNode;
+  item : GMenuItem;
+begin
+  node := menuitems.head;
+  
+  while (node <> nil) do
+    begin
+    item := GMenuItem(node.element);
+    
+    if (item.name = name) then
+      begin
+      RemoveMenu(menu, item.id, MF_BYCOMMAND);
+      menuitems.remove(node);
+      item.Free();
+      
+      break;
+      end;
+    
+    node := node.next;
+    end;
+end;
+
+
+procedure aboutProc(id : integer);
+begin
+  MessageBox(0, version_info + ',' + version_number + '.'#13#10#13#10 + version_copyright + '.'#13#10#13#10 + 'This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.', 'About ' + version_info, MB_OK or MB_SETFOREGROUND);
+end;
+
+procedure copyoverProc(id : integer);
+begin
+  boot_info.timer := 1;
+  boot_info.started_by := nil;
+  boot_info.boot_type := BOOTTYPE_COPYOVER;
+end;
+
+procedure rebootProc(id : integer);
+begin
+  boot_info.timer := 1;
+  boot_info.started_by := nil;
+  boot_info.boot_type := BOOTTYPE_REBOOT;
+end;
+
+procedure shutdownProc(id : integer);
+begin
+  boot_info.timer := 1;
+  boot_info.started_by := nil;
+  boot_info.boot_type := BOOTTYPE_SHUTDOWN;
+end;
+
+
+initialization
+  menu := CreatePopupMenu();
+  menuitems := GDLinkedList.Create();
+
+  registerMenuItem('Shutdown', shutdownProc);
+  registerMenuItem('Reboot', rebootProc);
+  registerMenuItem('Copyover', copyoverProc);
+  addMenuSeparator();
+  registerMenuItem('About', aboutProc);
+  addMenuSeparator();
+  
+finalization
+  DestroyMenu(menu);
+  
 end.
