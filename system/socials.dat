@@ -614,7 +614,7 @@ othersauto: $n screams, 'Geronimo!,' as they chase themself about the room.
 Name: cheer
 charnoarg: And the peasants rejoiced...
 othersnoarg: $n emits an unrivaled cheer! Woo!
-charfound: You show your wild enthusiasm for your new fri#End, $N.
+charfound: You show your wild enthusiasm for your new friend, $N.
 othersfound: $n cheers maniacally as $N shows them who's boss.
 victfound: $n cheers you on like it's going out of style.
 charauto: Go me!
@@ -646,7 +646,7 @@ othersauto: $n shamefully admits $e's a chicken.
 #SOCIAL
 Name: chill
 charnoarg: You mutter the words "chill out" to no one in particular.
-othersnoarg: $n stares off into space and mutters "chill out" to $s imaginary fri#Ends. They must be on crack or something.
+othersnoarg: $n stares off into space and mutters "chill out" to $s imaginary friends. They must be on crack or something.
 charfound: You wish $N would just chill out!
 othersfound: $n turns to $N and shouts, "Chill out, freako!"
 victfound: $n turns to you and shouts "Chill out, freako!"
@@ -1541,9 +1541,9 @@ othersauto: $n yells, 'HAPPY HAPPY JOY JOY!!' Don't mind $m, $e's a bit looney.
 Name: haus
 charnoarg: $n sighs and dreams of $s hero... Haus.
 othersnoarg: $n sighs and dreams of $s hero... Haus
-charfound: Pret#Ending you're Haus, you flex and attempt to summon a pet Name:d Balzhur.
+charfound: Pretending you're Haus, you flex and attempt to summon a pet Name:d Balzhur.
 othersfound: $n imitates Haus and tries to summon a huge demon to attack you!
-victfound: Your attempt to impress someone while pret#Ending to be Haus will surely not be met with favor from the Gods.
+victfound: Your attempt to impress someone while pretending to be Haus will surely not be met with favor from the Gods.
 charauto: Your meager attempt at being like Haus is pitiful.
 othersauto: $n tries to be like Haus, but fails miserably.
 #END
@@ -1758,7 +1758,7 @@ charfound: You hug $M.
 othersfound: $n hugs $N.
 victfound: $n hugs you.
 charauto: You hug yourself.
-othersauto: $n hugs $mself in a vain attempt to get fri#Endship.
+othersauto: $n hugs $mself in a vain attempt to get friendship.
 #END
 
 #SOCIAL
@@ -2334,7 +2334,7 @@ charnoarg: Nuzzle whom?
 charfound: You nuzzle $S neck softly.
 othersfound: $n softly nuzzles $N's neck.
 victfound: $n softly nuzzles your neck.
-charauto: I'm sorry, fri#End, but that's impossible.
+charauto: I'm sorry, friend, but that's impossible.
 #END
 
 #SOCIAL
@@ -2685,7 +2685,7 @@ Name: repop
 charnoarg: You begin to squeak like a mouse, hoping for a contagion.
 othersnoarg: $n begins to squeak like a mouse. Straaange.
 charfound: Sorry, $N won't be able to conjure squeakies any faster than you.
-othersfound: $n begs $N to conjure some squeakies. Shrink recomm#Endations?
+othersfound: $n begs $N to conjure some squeakies. Shrink recommendations?
 victfound: $n grovels at your boots, drooling rabidly in hopes of squeakies.
 charauto: Not even a mouse...
 othersauto: $n desperately scours the room in pursuit of those elusive squeakies.
@@ -3348,8 +3348,8 @@ victfound: $n thinks you are a supreme stud!
 
 #SOCIAL
 Name: stuff
-charnoarg: You stuff your imaginary fri#End into an extradimensional portal.
-othersnoarg: $n stuffs $s imaginary fri#End into an extradimensional portal.
+charnoarg: You stuff your imaginary friend into an extradimensional portal.
+othersnoarg: $n stuffs $s imaginary friend into an extradimensional portal.
 charfound: You stuff $N into an extradimensional portal...where $E belongs.
 othersfound: $n stuffs $N into an extradimensional portal...where $E belongs.
 victfound: $n stuffs you into an extradimensional portal...where you belong.
@@ -3583,9 +3583,9 @@ othersauto: $n looks for a tissue. Poor baby :(.
 #SOCIAL
 Name: tkiss
 charnoarg: You will enjoy it more if you choose someone to kiss.
-charfound: You give $M a soft, t#Ender kiss.
-othersfound: $n gives $N a soft, t#Ender kiss.
-victfound: $n gives you a soft, t#Ender kiss.
+charfound: You give $M a soft, tender kiss.
+othersfound: $n gives $N a soft, tender kiss.
+victfound: $n gives you a soft, tender kiss.
 charauto: You'd better not, people may start to talk!
 #END
 
