@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.1 2003/12/12 13:19:50 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.2 2004/02/16 23:07:30 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -495,3 +495,24 @@ begin
     end;
 end;
 
+procedure do_compress(ch : GCharacter; param : string);
+begin
+  if (ch.IS_NPC) then
+    begin
+    ch.sendBuffer('NPCs don''t use MCCP.'#13#10);
+    exit;
+    end;
+
+  if (GPlayer(ch).conn.useCompress) then
+  	begin
+  	ch.sendBuffer('Disabling MCCP.'#13#10);
+  	GPlayer(ch).conn.disableCompression();
+  	ch.sendBuffer('Ok.'#13#10);
+  	end
+  else
+  	begin
+  	ch.sendBuffer('Enabling MCCP (will only work on supporting clients).'#13#10);
+  	GPlayer(ch).conn.enableCompression();
+  	ch.sendBuffer('Ok.'#13#10);
+  	end;
+end;

@@ -199,6 +199,11 @@ function: do_commands
 #end
 
 #command
+name: compress
+function: do_compress
+#end
+
+#command
 name: consider
 function: do_consider
 #end

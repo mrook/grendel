@@ -879,6 +879,7 @@ begin
   registerCommand('do_purge', do_purge);
   registerCommand('do_lockpick', do_lockpick);
   registerCommand('do_commands', do_commands);
+  registerCommand('do_compress', do_compress);
 end;
 
 procedure GCommandsModule.unregisterModule();
@@ -1075,6 +1076,7 @@ begin
   unregisterCommand('do_purge');
   unregisterCommand('do_lockpick');
   unregisterCommand('do_commands');
+  unregisterCommand('do_compress');
 end;
 
 
