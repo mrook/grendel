@@ -1846,6 +1846,17 @@ othersauto: $n pulls out some VERY sharp swords and begins to juggle them with a
 #END
 
 #SOCIAL
+name: kek
+charnoarg: KEK~~
+othersnoarg: $n rolls $s eyes and yells 'KEK~~'
+charfound: KEK~~
+othersfound: $n rolls his eyes at $N and yells 'KEK~~'
+victfound: $n rolls $s eyes at you and yells 'KEK~~'
+charauto: HIYER YO KEK~~
+othersauto: $n looks happy and yells 'HIYER YO KEK~~'
+#END
+
+#SOCIAL
 Name: kiss
 charnoarg: Isn't there someone you want to kiss?
 othersnoarg: $n looks for someone to kiss.
