@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.21 2004/03/13 15:22:38 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.22 2004/03/13 16:09:10 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -44,6 +44,10 @@ type
       found_range : boolean;
 
       _resets : GDLinkedList;
+      _rooms : GDLinkedList;
+      _objects : GDLinkedList;
+      _npcs : GDLinkedList;
+      _shops : GDLinkedList;
     public     
       m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
       fname : string;
@@ -74,6 +78,10 @@ type
       property maxage : integer read _maxage write _maxage;
       
       property resets : GDLinkedList read _resets write _resets;
+      property rooms : GDLinkedList read _rooms write _rooms;
+      property objects : GDLinkedList read _objects write _objects;
+      property npcs : GDLinkedList read _npcs write _npcs;
+      property shops : GDLinkedList read _shops write _shops;
       
       property flags : GBitVector read _flags write _flags;
     end;
@@ -289,11 +297,13 @@ var
    
    area_list : GDLinkedList;
    room_list : GHashTable;
-   shop_list : GDLinkedList;
+//   shop_list : GDLinkedList;
    teleport_list : GDLinkedList;
 
    npc_list : GDLinkedList;
 
+
+procedure processAreas();
 procedure loadAreas();
 
 function createRoom(vnum : integer; area : GArea) : GRoom;
@@ -334,12 +344,16 @@ begin
   inherited Destroy;
 end;
 
-// GArea
-constructor GArea.Create;
+{ GArea constructor }
+constructor GArea.Create();
 begin
-  inherited Create;
+  inherited Create();
 
-  resets := GDLinkedList.Create;
+  resets := GDLinkedList.Create();
+  rooms := GDLinkedList.Create();
+  objects := GDLinkedList.Create();
+  npcs := GDLinkedList.Create();
+  shops := GDLinkedList.Create();
 
   m_lo := high(integer);
   m_hi := -1;
@@ -369,13 +383,25 @@ begin
   area_list.insertLast(Self);
 end;
 
-// Destructor
-destructor GArea.Destroy;
+{ GArea destructor }
+destructor GArea.Destroy();
 begin
-  resets.clean;
-  resets.Free;
+  resets.clear();
+  resets.Free();
 
-  inherited Destroy;
+  rooms.clear();
+  rooms.Free();
+  
+  objects.clear();
+  objects.Free();
+  
+  shops.clear();
+  shops.Free();
+  
+  npcs.clear();
+  npcs.Free();
+
+  inherited Destroy();
 end;
 
 procedure GArea.areaBug(const func, problem : string);
@@ -525,11 +551,8 @@ begin
           end;
         end;
       end;
-     
-		if (room_list.get(vnum) <> nil) then
-			areaBug('loadRooms()', 'room #' + IntToStr(vnum) + ' defined at least twice')
-		else
-    	room_list.put(vnum, room);
+    
+    rooms.add(room);
   until (uppercase(s) = '#END');
 end;
 
@@ -647,7 +670,7 @@ begin
 
         count := 0;
 
-        npc_list.insertLast(npc);
+				npcs.add(npc);
         end;
       except
         areaBug('loadNPCs()', 'Exception while loading mobile section, please check your area');
@@ -677,13 +700,6 @@ begin
       areaBug('loadObjects()','illegal numeric format ' + s);
       exit;
     end;
-
-    // Object already exists
-    if (objectIndices[num] <> nil) then
-      begin
-      areaBug('loadObjects()','vnum conflict (' + IntToStr(num) + ')');
-      exit;
-      end;
 
     obj := GObject.Create();
     obj.area := Self;
@@ -778,7 +794,7 @@ begin
         end;
       end;
 
-    objectIndices[obj.vnum] := obj;
+		objects.add(obj);
   until (uppercase(s) = '#END');
 end;
 
@@ -806,73 +822,9 @@ begin
         arg2 := strtoint(left(s,' '));
         s := right(s,' ');
         arg3 := strtoint(left(s,' '));
-
-        if (reset_type = 'M') then
-          begin
-          if (findNPCIndex(arg1) = nil) then
-            begin
-            areaBug('GArea.loadResets()', 'M reset npc #' + inttostr(arg1) + ' null');
-            g.Free;
-            end
-          else
-            resets.insertLast(g);
-          end
-        else
-        if (reset_type = 'O') then
-          begin
-          if (objectIndices[arg1] = nil) then
-            begin
-            areaBug('GArea.loadResets()', 'O reset obj #' + inttostr(arg1) + ' null');
-            g.Free;
-            end
-          else
-            resets.insertLast(g);
-          end
-        else
-        if (reset_type = 'E') then
-          begin
-          if (objectIndices[arg1] = nil) then
-            begin
-            areaBug('GArea.loadResets()', 'E reset obj #' + inttostr(arg1) + ' null');
-            g.Free;
-            end
-          else
-            resets.insertLast(g);
-          end
-        else
-        if (reset_type = 'I') then
-          begin
-          if (objectIndices[arg1] = nil) then
-            begin
-            areaBug('GArea.loadResets()', 'I reset obj #' + inttostr(arg1) + ' null');
-            g.Free;
-            end
-          else
-            resets.insertLast(g);
-          end
-        else
-        if (reset_type = 'G') then
-          begin
-          if (objectIndices[arg1] = nil) then
-            begin
-            areaBug('GArea.loadResets()', 'G reset obj #' + inttostr(arg1) + ' null');
-            g.Free;
-            end
-          else
-            resets.insertLast(g);
-          end
-        else
-        if (reset_type = 'D') then
-          begin
-          if (arg3 < 0) or (arg3 > MAX_DOORTYPE) then
-            begin
-            areaBug('GArea.loadResets()', 'D resettype ' + IntToStr(arg3) + ' not a valid doortype');
-            g.Free;
-            end
-          else
-            resets.insertLast(g);
-          end;
         end;
+			
+			resets.add(g);
       end;
   until (uppercase(s) = '#END');
 end;
@@ -881,7 +833,6 @@ end;
 procedure GArea.loadShops();
 var
    shop : GShop;
-   npc : GNPCIndex;
    s : string;
 begin
   repeat
@@ -892,13 +843,6 @@ begin
       shop := GShop.Create();
       shop.area := Self;
       shop.keeper := strtoint(left(s,' '));
-
-      npc := findNPCIndex(shop.keeper);
-
-      if (npc = nil) then
-        areaBug('GArea.loadShops()', 'shopkeeper '+inttostr(shop.keeper)+' null')
-      else
-        npc.shop := shop;
 
       s := af.readLine;
 
@@ -926,7 +870,7 @@ begin
         s := af.readLine;
       until s='~';
 
-      shop.node := shop_list.insertLast(shop);
+			shops.add(shop);
       end;
   until (uppercase(s) = '#END');
 end;
@@ -997,50 +941,132 @@ begin
   af.Free();
 end;
 
-procedure loadAreas();
+procedure processAreas();
 var
-  af : GFileReader;
-  to_room, room : GRoom;
-  pexit : GExit;
-  s : string;
-  area : GArea;
-  iterator : GIterator;
+	area : GArea;
+	iterator, in_iterator : GIterator;
   node_exit : GListNode;
-  tm : TDateTime;
+  to_room, room : GRoom;
+  npc : GNPC;
+  npci : GNPCIndex;
+  obj : GObject;
+  shop : GShop;
+  reset : GReset;
+  pexit : GExit;
 begin
-  tm := Now();
+  { reset the areas }
+  iterator := area_list.iterator();
 
-  try
-    af := GFileReader.Create('areas\area.list');
-  except
-  	exit;
-  end;
+  while (iterator.hasNext()) do
+  	begin
+    area := GArea(iterator.next());
+    
+    in_iterator := area.rooms.iterator();
+    
+    while (in_iterator.hasNext()) do
+    	begin
+    	room := GRoom(in_iterator.next());
+    	
+			if (room_list.get(room.vnum) <> nil) then
+				bugreport('processAreas()', 'area.pas', 'room #' + IntToStr(room.vnum) + ' defined at least twice')
+			else
+    		room_list.put(room.vnum, room);
+    	end;
+    
+    in_iterator.Free();
 
-  repeat
-    s := af.readLine();
+    in_iterator := area.npcs.iterator();
+    
+    while (in_iterator.hasNext()) do
+    	begin
+    	npc := GNPC(in_iterator.next());
+    	
+			npc_list.insertLast(npc);
+			end;
+		
+		in_iterator.Free();
 
-    if (s <> '$') then
-      begin
-      area := GArea.Create;
-      area.load('areas\' + trim(s));
+    in_iterator := area.objects.iterator();
+    
+    while (in_iterator.hasNext()) do
+    	begin
+    	obj := GObject(in_iterator.next());
 
-      s := pad_string(s, 15);
+    	// Object already exists
+    	if (objectIndices[obj.vnum] <> nil) then
+    	  begin
+    	  bugreport('processAreas()', 'area.pas', 'object #' + IntToStr(obj.vnum) + ' defined at least twice');
+    	  exit;
+    	  end;
+    	
+    	objectIndices[obj.vnum] := obj;
+			end;
+		
+		in_iterator.Free();
+		
+    in_iterator := area.resets.iterator();
+    
+    while (in_iterator.hasNext()) do
+    	begin
+    	reset := GReset(in_iterator.next());
 
-      with area do
-        begin
-        if (r_lo <> high(integer)) and (r_hi<>-1) then
-          s := s + ' R ' + pad_integer(r_lo,5) + '-' + pad_integer(r_hi,5);
-        if (m_lo <> high(integer)) and (m_hi<>-1) then
-          s := s + ' M ' + pad_integer(m_lo,5) + '-' + pad_integer(m_hi,5);
-        if (o_lo <> high(integer)) and (o_hi<>-1) then
-          s := s + ' O ' + pad_integer(o_lo,5) + '-' + pad_integer(o_hi,5);
-        end;
+			if (reset.reset_type = 'M') then
+				begin
+				if (findNPCIndex(reset.arg1) = nil) then
+					bugreport('processAreas()', 'area.pas', 'M reset npc #' + inttostr(reset.arg1) + ' null');
+				end
+			else
+			if (reset.reset_type = 'O') then
+				begin
+				if (objectIndices[reset.arg1] = nil) then
+					bugreport('processAreas()', 'area.pas', 'O reset obj #' + inttostr(reset.arg1) + ' null');
+				end
+			else
+			if (reset.reset_type = 'E') then
+				begin
+				if (objectIndices[reset.arg1] = nil) then
+					bugreport('processAreas()', 'area.pas', 'E reset obj #' + inttostr(reset.arg1) + ' null');
+				end
+			else
+			if (reset.reset_type = 'I') then
+				begin
+				if (objectIndices[reset.arg1] = nil) then
+					bugreport('processAreas()', 'area.pas', 'I reset obj #' + inttostr(reset.arg1) + ' null');
+				end
+			else
+			if (reset.reset_type = 'G') then
+				begin
+				if (objectIndices[reset.arg1] = nil) then
+					bugreport('processAreas()', 'area.pas', 'G reset obj #' + inttostr(reset.arg1) + ' null');
+				end
+			else
+			if (reset.reset_type = 'D') then
+				begin
+				if (reset.arg3 < 0) or (reset.arg3 > MAX_DOORTYPE) then
+					bugreport('processAreas()', 'area.pas', 'D reset doortype ' + inttostr(reset.arg3) + ' invalid');
+				end;
+			end;
+			
+		in_iterator.Free();
+		
+		in_iterator := area.shops.iterator();
+		
+		while (in_iterator.hasNext()) do
+			begin
+			shop := GShop(in_iterator.next());
+			
+      npci := findNPCIndex(shop.keeper);
 
-      writeConsole(s);
-      end;
-  until (s = '$');
+      if (npci = nil) then
+        bugreport('processAreas()', 'area.pas', 'shopkeeper #'+inttostr(shop.keeper)+' null')
+      else
+        npci.shop := shop;
+			end;
+			
+		in_iterator.Free();
+    end;
 
-  af.Free();
+	iterator.Free();
 
   writeConsole('Checking exits...');
 
@@ -1062,7 +1088,7 @@ begin
 
 			if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
 				begin
-				bugreport('loadAreas()', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
+				bugreport('processAreas()', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
 									' for exit in room #' + IntToStr(room.vnum));
 
 				room.exits.remove(node_exit);
@@ -1072,7 +1098,7 @@ begin
 			else
 			if (to_room = room) then
 				begin
-				bugreport('loadAreas()', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
+				bugreport('processAreas()', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
 
 				room.exits.remove(node_exit);
 
@@ -1081,7 +1107,7 @@ begin
 			else
 			if (to_room = nil) then
 				begin
-				bugreport('loadAreas()', 'area.pas', 'exit ' + headings[pexit.direction] +
+				bugreport('processAreas()', 'area.pas', 'exit ' + headings[pexit.direction] +
 									' from room #' + IntToStr(room.vnum) + ' to unexisting room # '+ IntToStr(pexit.vnum));
 
 				room.exits.remove(node_exit);
@@ -1106,9 +1132,52 @@ begin
     GArea(iterator.next()).reset();
 
 	iterator.Free();
-	
-  tm := Now() - tm;
+end;
 
+procedure loadAreas();
+var
+  af : GFileReader;
+  s : string;
+  area : GArea;
+  tm : TDateTime;
+begin
+  tm := Now();
+
+  try
+    af := GFileReader.Create('areas\area.list');
+  except
+  	exit;
+  end;
+
+  repeat
+    s := af.readLine();
+
+    if (s <> '$') then
+      begin
+      area := GArea.Create();
+      area.load('areas\' + trim(s));
+
+      s := pad_string(s, 15);
+
+      with area do
+        begin
+        if (r_lo <> high(integer)) and (r_hi<>-1) then
+          s := s + ' R ' + pad_integer(r_lo,5) + '-' + pad_integer(r_hi,5);
+        if (m_lo <> high(integer)) and (m_hi<>-1) then
+          s := s + ' M ' + pad_integer(m_lo,5) + '-' + pad_integer(m_hi,5);
+        if (o_lo <> high(integer)) and (o_hi<>-1) then
+          s := s + ' O ' + pad_integer(o_lo,5) + '-' + pad_integer(o_hi,5);
+        end;
+
+      writeConsole(s);
+      end;
+  until (s = '$');
+
+  af.Free();
+
+	processAreas();
+
+  tm := Now() - tm;
   writeConsole('Area loading took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
 end;
 
@@ -1314,7 +1383,7 @@ begin
   writeln(f);
   writeln(f, '#SHOPS');
 
-  iterator := shop_list.iterator();
+  iterator := shops.iterator();
   while (iterator.hasNext()) do
     begin
     shop := GShop(iterator.next());
@@ -1975,7 +2044,7 @@ end;
 // GRoom
 constructor GRoom.Create(vn : integer; ar : GArea);
 begin
-  inherited Create;
+  inherited Create();
 
   _vnum := vn;
   _sector := 1;
@@ -1997,19 +2066,19 @@ destructor GRoom.Destroy;
 begin
   unhash_string(_name);
 
-  extra.clean;
-  exits.clean;
-  chars.clean;
-  objects.clean;
-  tracks.clean;
+  extra.clear();
+  exits.clear();
+  chars.clear();
+  objects.clear();
+  tracks.clear();
 
-  extra.Free;
-  exits.Free;
-  chars.Free;
-  objects.Free;
-  tracks.Free;
+  extra.Free();
+  exits.Free();
+  chars.Free();
+  objects.Free();
+  tracks.Free();
 
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 procedure GRoom.setName(const name : string);
@@ -2740,65 +2809,6 @@ begin
 	iterator.Free();
 end;
 
-{ function findObjectIndex(vnum : integer) : GObjectIndex;
-var
-   node : GListNode;
-   obj : GObjectIndex;
-begin
-  findObjectIndex := nil;
-
-  node := obj_list.head;
-
-  while (node <> nil) do
-    begin
-    obj := node.element;
-
-    if (obj.vnum = vnum) then
-      begin
-      findObjectIndex := obj;
-      exit;
-      end;
-
-    node := node.next;
-    end;
-end;
-
-function instanceObject(o_index : GObjectIndex) : GObject;
-var obj : GObject;
-begin
-  if (o_index = nil) then
-    begin
-    bugreport('instanceObject', 'area.pas', 'o_index null');
-    instanceObject := nil;
-    exit;
-    end;
-
-  obj := GObject.Create;
-
-  with obj do
-    begin
-    name := o_index.name^;
-    short := o_index.short^;
-    long := o_index.long^;
-
-    item_type:=o_index.item_type;
-    wear1:=o_index.wear1;
-    wear2:=o_index.wear2;
-    value:=o_index.value;
-    weight:=o_index.weight;
-    flags:=o_index.flags;
-    cost:=o_index.cost;
-    timer:=o_index.timer;
-    obj_index:=o_index;
-    room:=nil;
-    end;
-
-  inc(o_index.obj_count);
-
-  obj.node_world := object_list.insertLast(obj);
-  instanceObject:=obj;
-end; }
-
 // Add a corpse
 procedure addCorpse(c : pointer);
 var 
@@ -3114,34 +3124,37 @@ end;
 procedure initAreas();
 begin
   area_list := GDLinkedList.Create();
+
   room_list := GHashTable.Create(32768);
-  shop_list := GDLinkedList.Create();
+  room_list.ownsObjects := false;
+  
   teleport_list := GDLinkedList.Create();
 
   npc_list := GDLinkedList.Create();
+  npc_list.ownsObjects := false;
   
   objectList := GDLinkedList.Create();
+  objectList.ownsObjects := false;
+  
   objectIndices := GHashTable.Create(32768);
+  objectIndices.ownsObjects := false;
 end;
 
 procedure cleanupAreas();
 begin
-  area_list.clean();
+  area_list.clear();
   area_list.Free();
   
   room_list.clear();
   room_list.Free();
 
-  shop_list.clean();
-  shop_list.Free();
-
-  teleport_list.clean();
+  teleport_list.clear();
   teleport_list.Free();
 
-  npc_list.clean();
+  npc_list.clear();
   npc_list.Free();
 
-  //objectList.clean();
+  objectList.clear();
   objectList.Free();
 
   objectIndices.clear();
