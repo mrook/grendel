@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.59 2001/09/02 21:53:00 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.60 2001/09/28 21:30:11 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -2562,10 +2562,10 @@ var
    obj : GObject;
 begin
   dex_mod := (dex-50) div 12;
-  hac := natural_ac - dex_mod - ac_mod;
-  bac := natural_ac - dex_mod - ac_mod;
-  aac := natural_ac - dex_mod - ac_mod;
-  lac := natural_ac - dex_mod - ac_mod;
+  hac := natural_ac - dex_mod + ac_mod;
+  bac := natural_ac - dex_mod + ac_mod;
+  aac := natural_ac - dex_mod + ac_mod;
+  lac := natural_ac - dex_mod + ac_mod;
 
   node := objects.head;
   while (node <> nil) do
