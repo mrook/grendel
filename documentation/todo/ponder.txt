@@ -1,3 +1,0 @@
-General ponderings for Grendel:
-
-	- object grouping solely on vnum is easy & very fast, but is this what we want?
