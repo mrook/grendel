@@ -7,7 +7,7 @@ uses
 
 type
     GHelp = class
-      keywords : string;
+      keywords, helptype, syntax, related : string;
       text : string;
       level : integer;
     end;
@@ -25,13 +25,14 @@ uses
     SysUtils,
     constants,
     strip,
+    util,
     mudsystem;
 
 procedure load_help(fname:string);
 var f:textfile;
     s, g, key : string;
-    keyword:boolean;
-    keys,text:string;
+    keyword : boolean;
+    keys, text, helptype, related, syntax : string;
     help : GHelp;
     a, b : integer;
 begin
@@ -45,7 +46,19 @@ begin
               'The specified helpfile could not be opened. Please check your settings.');
     exit;
     end;
-  keyword:=false;
+
+  // first, add a default help
+  help := GHelp.Create;
+  help.level := 0;
+  help.keywords := 'DEFAULT_';
+  help.helptype := '';
+  help.syntax := '';
+  help.related := '';
+  help.text := 'This is dummy help.';
+  help_files.insertLast(help);
+
+  keyword := false;
+
   repeat
     readln(f,s);
     if pos('#',s)=1 then
@@ -59,6 +72,21 @@ begin
         text:='';
         end
       else
+      if (g = '#TYPE') then
+        begin
+        helptype := stripr(s,'=');
+        end
+      else
+      if (g = '#SYNTAX') then
+        begin
+        syntax := stripr(s,'=');
+        end
+      else
+      if (g = '#RELATED') then
+        begin
+        related := stripr(s,'=');
+        end
+      else
       if g='#END' then
         begin
         keyword:=false;
@@ -66,6 +94,9 @@ begin
         help.level:=StrToInt(stripr(s,'='));
 
         help.keywords := hash_string(keys);
+        help.helptype := helptype;
+        help.syntax := syntax;
+        help.related := related;
         help.text := text;
 
         help_files.insertLast(help);
@@ -129,8 +160,9 @@ function findHelp(text : string) : GHelp;
 var
    node : GListNode;
    help : GHelp;
+   key, arg : string;
 begin
-  findHelp := nil;
+  Result := help_files.head.element;
 
   text := uppercase(text);
 
@@ -140,10 +172,17 @@ begin
     begin
     help := node.element;
 
-    if (pos(text, help.keywords) <> 0) or (text = help.keywords) then
+    key := help.keywords;
+
+    while (length(key) > 0) do
       begin
-      findHelp := help;
-      exit;
+      key := one_argument(key, arg);
+
+      if (arg = text) then
+        begin
+        Result := help;
+        exit;
+        end;
       end;
 
     node := node.next;
