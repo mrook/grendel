@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.18 2002/08/03 19:13:58 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.19 2002/08/03 21:05:28 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -286,7 +286,7 @@ end;
 procedure spell_affect(ch,caster:GCharacter; sn : GSkill);
 var
    node : GListNode;
-   aff : GAffect;
+   aff, aff_find : GAffect;
 begin
   node := sn.affects.head;
 
@@ -294,9 +294,13 @@ begin
     begin
     aff := node.element;
     
-    removeAffectName(ch, aff.name^);
+    aff_find := findAffect(ch, aff.name^);
     
-    aff.applyTo(ch);
+    // prolong existing affect if it already exists
+    if (aff_find <> nil) then
+      aff_find.duration := aff.duration
+    else
+      aff.applyTo(ch);
 
     node := node.next;
     end;
