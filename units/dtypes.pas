@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.12 2001/04/27 19:39:12 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.13 2001/04/28 15:14:36 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -10,7 +10,6 @@ uses
 
 type
     GString = class
-      refcount : integer;
       value : string;
 
       constructor Create(s : string);
@@ -25,7 +24,6 @@ type
     GListNode = class
       prev, next : GListNode;
       element : pointer;
-      refcount : integer;
 
       constructor Create(e : pointer; p, n : GListNode);
     end;
@@ -53,9 +51,9 @@ type
     GHASH_FUNC = function(size, prime : cardinal; key : string) : integer;
 
     GHashValue = class
-      key : string;
-      refcount : integer;
+      key : variant;
       value : TObject;
+      refcount : integer;
     end;
 
     // loosely based on the Java2 hashing classes
@@ -74,13 +72,13 @@ type
       function isEmpty() : boolean;
       function size() : integer;
 
-      function _get(key : string) : GHashValue;
+      function _get(key : variant) : GHashValue;
 
-      function get(key : string) : TObject;
-      procedure put(key : string; value : TObject);
-      procedure remove(key : string);
+      function get(key : variant) : TObject;
+      procedure put(key : variant; value : TObject);
+      procedure remove(key : variant);
 
-      function getHash(key : string) : integer;
+      function getHash(key : variant) : integer;
       procedure setHashFunc(func : GHASH_FUNC);
       function findPrimes(n : integer) : GPrimes;
 
@@ -141,7 +139,6 @@ begin
   element := e;
   next := n;
   prev := p;
-  refcount := 1;
 end;
 
 
@@ -320,7 +317,6 @@ begin
     Result := 0;
 end;
 
-
 function GHashTable.findPrimes(n : integer) : GPrimes;
 var
    i, j : integer;
@@ -379,9 +375,13 @@ begin
   findPrimes := numbers;
 end;
 
-function GHashTable.getHash(key : string) : integer;
+function GHashTable.getHash(key : variant) : integer;
 begin
-  Result := hashFunc(hashsize, hashprime, key);
+  if (varType(key) = varString) then
+    Result := hashFunc(hashsize, hashprime, key)
+  else
+  if (varType(key) = varInteger) then
+    Result := (key * hashprime) mod hashsize;
 end;
 
 procedure GHashTable.setHashFunc(func : GHASH_FUNC);
@@ -389,13 +389,12 @@ begin
   hashFunc := func;
 end;
 
-function GHashTable._get(key : string) : GHashValue;
+function GHashTable._get(key : variant) : GHashValue;
 var
   hash : integer;
   node : GListNode;
 begin
   Result := nil;
-
   hash := getHash(key);
 
   node := bucketList[hash].head;
@@ -412,7 +411,7 @@ begin
     end;
 end;
 
-function GHashTable.get(key : string) : TObject;
+function GHashTable.get(key : variant) : TObject;
 var
   hv : GHashValue;
 begin
@@ -424,7 +423,7 @@ begin
     Result := hv.value;
 end;
 
-procedure GHashTable.put(key : string; value : TObject);
+procedure GHashTable.put(key : variant; value : TObject);
 var
    hash : integer;
    hv : GHashValue;
@@ -448,7 +447,7 @@ begin
     end;
 end;
 
-procedure GHashTable.remove(key : string);
+procedure GHashTable.remove(key : variant);
 var
   hash : integer;
   fnode, node : GListNode;
