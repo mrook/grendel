@@ -1,72 +1,72 @@
-// $Id: cmd_imm.inc,v 1.14 2004/03/22 19:35:50 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.15 2004/03/23 19:43:42 hemko Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
-	haltparam : string;
-	serverInstance : GServer;
-	delay : integer;
+  haltparam : string;
+  serverInstance : GServer;
+  delay : integer;
 begin
-	if (length(param) = 0) then
-		begin
-		ch.sendBuffer('Usage: SHUTDOWN <stop/halt/reboot/copyover> [time]'#13#10#13#10);
-		ch.sendBuffer('If time is not given, a default of 30 seconds is assumed.'#13#10);
-		ch.sendBuffer('Using "stop" as a parameter halts the shutdown.'#13#10);
-		ch.sendBuffer('Using "now" as time value enables immediate shutdown.'#13#10);
-		exit;
-		end;
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: SHUTDOWN <stop/halt/reboot/copyover> [time]'#13#10#13#10);
+    ch.sendBuffer('If time is not given, a default of 30 seconds is assumed.'#13#10);
+    ch.sendBuffer('Using "stop" as a parameter halts the shutdown.'#13#10);
+    ch.sendBuffer('Using "now" as time value enables immediate shutdown.'#13#10);
+    exit;
+    end;
     
-	serverInstance := GServer.Create();
+  serverInstance := GServer.Create();
 
-  	param := one_argument(param, haltparam);
+    param := one_argument(param, haltparam);
   
-  	if (prep(param) = 'NOW') then
-  		delay := 0
-  	else
-  		try
-			delay := StrToInt(param);
-		except
-	        ch.sendBuffer('Boot timer must be a valid numeric value!'#13#10);
-	        exit;
-		end;
+    if (prep(param) = 'NOW') then
+      delay := 0
+    else
+      try
+      delay := StrToInt(param);
+    except
+          ch.sendBuffer('Boot timer must be a valid numeric value!'#13#10);
+          exit;
+    end;
 
-	if (haltparam = 'stop') then
-		begin
-		act(AT_REPORT, 'Timer stopped.',false,ch,nil,nil,TO_CHAR);
-		end
-	else
-	if (haltparam = 'reboot') then
-		begin
-		if (delay = 0) then
-			to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-			
-		act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
+  if (haltparam = 'stop') then
+    begin
+    act(AT_REPORT, 'Timer stopped.',false,ch,nil,nil,TO_CHAR);
+    end
+  else
+  if (haltparam = 'reboot') then
+    begin
+    if (delay = 0) then
+      to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+      
+    act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
 
-		serverInstance.shutdown(SHUTDOWNTYPE_REBOOT, delay);
-		end
-	else
-	if (haltparam = 'halt') then
-		begin
-		if (delay = 0) then
-			to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-			
-		act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
+    serverInstance.shutdown(SHUTDOWNTYPE_REBOOT, delay);
+    end
+  else
+  if (haltparam = 'halt') then
+    begin
+    if (delay = 0) then
+      to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+      
+    act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
 
-		serverInstance.shutdown(SHUTDOWNTYPE_HALT, delay);
-		end
-	else
-	if (haltparam = 'copyover') then
-		begin
-		if (delay = 0) then
-			to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-			
-		act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
+    serverInstance.shutdown(SHUTDOWNTYPE_HALT, delay);
+    end
+  else
+  if (haltparam = 'copyover') then
+    begin
+    if (delay = 0) then
+      to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+      
+    act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
 
-		serverInstance.shutdown(SHUTDOWNTYPE_COPYOVER, delay);
-		end
-	else
-		ch.sendBuffer('Illegal parameter: use "stop", "halt", "reboot" or "copyover".'#13#10);
-	
-	serverInstance.Free();
+    serverInstance.shutdown(SHUTDOWNTYPE_COPYOVER, delay);
+    end
+  else
+    ch.sendBuffer('Illegal parameter: use "stop", "halt", "reboot" or "copyover".'#13#10);
+  
+  serverInstance.Free();
 end;
 
 // Send message to all players
@@ -85,7 +85,7 @@ end;
 // Wizinvis
 procedure do_wizinvis(ch : GCharacter; param : string);
 var
-	level : integer;
+  level : integer;
 begin
   if (ch.IS_NPC) then
     exit;
@@ -127,7 +127,7 @@ end;
 // Slay pc/npc
 procedure do_slay(ch : GCharacter; param : string);
 var
-	t : GCharacter;
+  t : GCharacter;
   dam : integer;
 begin
   if (length(param) = 0) then
@@ -156,7 +156,7 @@ end;
 // Advance pc to a higher level
 procedure do_advance(ch : GCharacter; param : string);
 var
-	vict : GCharacter;
+  vict : GCharacter;
   lvl, num, a : integer;
   vict_nm : string;
 begin
@@ -206,16 +206,16 @@ end;
 // Grace pc Immortal status
 procedure do_grace(ch : GCharacter; param : string);
 var 
-	vict : GCharacter;
-	lev : integer;
-	vict_nm : string;
+  vict : GCharacter;
+  lev : integer;
+  vict_nm : string;
 begin
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer( 'Usage: GRACE <character> <level>'#13#10#13#10);
     ch.sendBuffer( 'Use this command to immortalize players.'#13#10);
     exit;
-  	end;
+    end;
 
   param := one_argument(param, vict_nm);
   vict := findcharworld(ch, vict_nm);
@@ -361,22 +361,22 @@ end;
 // Force a pc/npc
 procedure do_force(ch : GCharacter; param : string);
 var
-	vict_node : GListnode;
+  vict_node : GListnode;
   vict : GCharacter;
   //sub:array[0..63] of char;
   sub : string;
 begin
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Usage:  FORCE <[name]/ALL/ALLPC> <command>'#13#10);
     exit;
-  	end;
+    end;
 
   param := one_argument(param,sub);
 
   // Force ALL
   if (prep(sub) = 'ALL') then
-  	begin
+    begin
     if  ch.getTrust < system_info.level_forcepc then
       begin
       ch.sendBuffer('You must be a higher level to force players.'#13#10);
@@ -388,22 +388,22 @@ begin
     vict_node := char_list.head;
 
     while vict_node <> nil do
-    	begin
+      begin
       vict := GCharacter(vict_node.element);
       
       if vict <> ch then
-    	  begin
+        begin
         act(AT_WHITE,'$n forces you to "' + param + '"', false, ch, nil, vict, TO_VICT);
         interpret(vict,param);
-    	  end;
-    	  
+        end;
+        
       vict_node := vict_node.next;
-    	end;
-  	end
+      end;
+    end
   else
   // Force ALL pc
   if (prep(sub) = 'ALLPC') then
-  	begin
+    begin
     if ch.getTrust < system_info.level_forcepc then
       begin
       ch.sendBuffer('You must be a higher level to force players.'#13#10);
@@ -415,18 +415,18 @@ begin
     vict_node := char_list.head;
 
     while vict_node <> nil do
-    	begin
+      begin
       vict := GCharacter(vict_node.element);
       
       if (vict <> ch) and (not vict.IS_NPC) then
-      	begin
+        begin
         act(AT_WHITE,'$n forces you to "' + param + '"', false, ch, nil, vict, TO_VICT);
         interpret(vict,param);
-      	end;
-      	
+        end;
+        
       vict_node := vict_node.next;
-    	end;
-  	end
+      end;
+    end
   else
   // force <name>
     begin
@@ -458,18 +458,18 @@ end;
 procedure do_transfer( ch : GCharacter; param : string );
 var
   arg1, arg2 : string;
- 	location : GRoom;
-	victim : GCharacter;
- 	char_node : GListNode;
+  location : GRoom;
+  victim : GCharacter;
+  char_node : GListNode;
 begin
   param := one_argument( param, arg1 ); // who to trans
   param := one_argument( param, arg2 ); // where to trans
 
   if (length(arg1) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Transfer whom (and where)?'#13#10);
     exit;
-  	end;
+    end;
 
   // get the trans location.  could be ch.room or a location given by arg2
   if length(arg2) = 0 then
@@ -478,65 +478,65 @@ begin
     location := findLocation(ch, arg2);
 
   if (location = nil) then
-  	begin
+    begin
     ch.sendBuffer('Transfer them where??');
     exit;
-  	end;
+    end;
 
   // Tranfser ALL
   if (uppercase(arg1) = 'ALL') then
-  	begin
-   	char_node := char_list.head;
+    begin
+    char_node := char_list.head;
 
-   	while char_node <> nil do
-   		begin
-   	  victim := GCharacter(char_node.element);
+    while char_node <> nil do
+      begin
+      victim := GCharacter(char_node.element);
 
       // Players only
-   	  if not (victim.IS_NPC) then
-   		  begin
-       	if (victim.fighting <> nil) then
-       	  stopFighting(victim);
-       	  
-       	act(AT_WHITE,'$n disappears in a mushroom cloud.', false, victim, nil,nil, TO_ROOM);
-       	
-       	victim.fromRoom();
-       	victim.toRoom(location);
-       	
-       	act(AT_WHITE,'$n arrives from a puff of smoke.', false, victim, nil, nil, TO_ROOM);
-       	
-       	if (ch <> victim) then
-       		act(AT_WHITE,'$n has transferred you.', false, ch, nil, victim, TO_VICT);
-       		
+      if not (victim.IS_NPC) then
+        begin
+        if (victim.fighting <> nil) then
+          stopFighting(victim);
+          
+        act(AT_WHITE,'$n disappears in a mushroom cloud.', false, victim, nil,nil, TO_ROOM);
+        
+        victim.fromRoom();
+        victim.toRoom(location);
+        
+        act(AT_WHITE,'$n arrives from a puff of smoke.', false, victim, nil, nil, TO_ROOM);
+        
+        if (ch <> victim) then
+          act(AT_WHITE,'$n has transferred you.', false, ch, nil, victim, TO_VICT);
+          
         interpret(victim, 'look _AUTO');
-     	  end;
+        end;
 
       char_node := char_node.next;
-   		end;
-  	end
+      end;
+    end
   else
   // transfer single victim
-  	begin
-   	victim := findCharWorld(ch, arg1);
+    begin
+    victim := findCharWorld(ch, arg1);
 
-   	if (victim <> nil) then
-   	  begin
-   	  if (victim.fighting <> nil) then
-   			stopFighting(victim);
+    if (victim <> nil) then
+      begin
+      if (victim.fighting <> nil) then
+        stopFighting(victim);
       
-     	act(AT_WHITE,'$n disappears in a mushroom cloud.',false,victim,nil,nil,TO_ROOM);
-     	
-     	victim.fromRoom();
-     	victim.toRoom(location);
-     	
-     	act(AT_WHITE,'$n arrives from a puff of smoke.',false,victim,nil,nil,TO_ROOM);
+      act(AT_WHITE,'$n disappears in a mushroom cloud.',false,victim,nil,nil,TO_ROOM);
+      
+      victim.fromRoom();
+      victim.toRoom(location);
+      
+      act(AT_WHITE,'$n arrives from a puff of smoke.',false,victim,nil,nil,TO_ROOM);
 
-     	if (ch <> victim) then
-     		act(AT_WHITE,'$n has transferred you.',false,ch,nil,victim,TO_VICT);
+      if (ch <> victim) then
+        act(AT_WHITE,'$n has transferred you.',false,ch,nil,victim,TO_VICT);
 
-     	interpret(victim, 'look _AUTO');
-     	end;
-  	end;
+      interpret(victim, 'look _AUTO');
+      end;
+    end;
 end;
 
 {Jago 5/Jan/01 : implemented do_goto as done in MERC }
@@ -548,59 +548,59 @@ var
   vnum : integer;
   new_room : GRoom;
 begin
-	param := one_argument(param, locn_name);
+  param := one_argument(param, locn_name);
 
- 	if (length(locn_name) = 0) then
- 		begin
- 	  ch.sendBuffer('Goto where?' + #13#10);
- 	  exit;
- 		end;
+  if (length(locn_name) = 0) then
+    begin
+    ch.sendBuffer('Goto where?' + #13#10);
+    exit;
+    end;
 
-	// Find location
- 	location := findLocation(ch, locn_name);
+  // Find location
+  location := findLocation(ch, locn_name);
 
- 	if (not ch.IS_NPC) and (location = nil) then // if vnum doesn't exist yet and vnum is in builders range, create the room
- 	  begin
- 	  try
- 	    if (length(GPlayer(ch).area_fname) = 0) then
- 	      raise Exception.Create('no area assigned');
-	
- 	    vnum := StrToInt(locn_name);
+  if (not ch.IS_NPC) and (location = nil) then // if vnum doesn't exist yet and vnum is in builders range, create the room
+    begin
+    try
+      if (length(GPlayer(ch).area_fname) = 0) then
+        raise Exception.Create('no area assigned');
+  
+      vnum := StrToInt(locn_name);
      
- 	    if (vnum >= GPlayer(ch).r_lo) and (vnum < GPlayer(ch).r_hi) then
- 	      if (GPlayer(ch).area = nil) then
- 	        begin
- 	        ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
- 	        exit;
- 	        end
- 	      else
- 	        begin
- 	        ch.sendBuffer(ch.ansiColor(15) + 'Creating room #' + inttostr(vnum) + '.' + ch.ansiColor(7) + #13#10#13#10);
- 	        new_room := createRoom(vnum, GPlayer(ch).area);
- 	        ch.fromRoom();
- 	        ch.toRoom(new_room);
- 	        interpret(ch, 'look');
- 	        exit;
- 		      end
- 	    else
-     		begin
-     	  ch.sendBuffer('That vnum is not within your assigned room ranges.'#13#10);
-     	  exit;
-     		end;
-   	except
-   	  ch.sendBuffer('No such location!' + #13#10);
-   	  exit;
-   	end;
- 		end;
+      if (vnum >= GPlayer(ch).r_lo) and (vnum < GPlayer(ch).r_hi) then
+        if (GPlayer(ch).area = nil) then
+          begin
+          ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+          exit;
+          end
+        else
+          begin
+          ch.sendBuffer(ch.ansiColor(15) + 'Creating room #' + inttostr(vnum) + '.' + ch.ansiColor(7) + #13#10#13#10);
+          new_room := createRoom(vnum, GPlayer(ch).area);
+          ch.fromRoom();
+          ch.toRoom(new_room);
+          interpret(ch, 'look');
+          exit;
+          end
+      else
+        begin
+        ch.sendBuffer('That vnum is not within your assigned room ranges.'#13#10);
+        exit;
+        end;
+    except
+      ch.sendBuffer('No such location!' + #13#10);
+      exit;
+    end;
+    end;
 
- 	if (location.flags.isBitSet(ROOM_PRIVATE)) then
-	  begin
-		ch.sendBuffer('That room is private right now.' + #13#10);
-		exit;
-	  end;
+  if (location.flags.isBitSet(ROOM_PRIVATE)) then
+    begin
+    ch.sendBuffer('That room is private right now.' + #13#10);
+    exit;
+    end;
 
- 	if (ch.fighting <> nil) then
- 	  stopFighting(ch);
+  if (ch.fighting <> nil) then
+    stopFighting(ch);
 
  {goto while hunting not tested! - result may be unpredictable!!}
  {if ch.hunting <> nil then
@@ -609,16 +609,16 @@ begin
   REMOVE_BIT(ch.act_flags, ACT_HUNTING);
  end;}
 
- 	if (not ch.IS_WIZINVIS) and (not ch.IS_NPC) then
- 	  begin
- 	  if (GPlayer(ch).bamfout <> '') then
- 	    act(AT_WHITE, GPlayer(ch).bamfout,false,ch,nil,nil,TO_ROOM)
- 	  else
- 	    act(AT_WHITE,'$n leaves in a swirling mist.',false,ch,nil,nil,TO_ROOM);
- 	  end;
-	
- 	ch.fromRoom();
-	ch.toRoom(location);
+  if (not ch.IS_WIZINVIS) and (not ch.IS_NPC) then
+    begin
+    if (GPlayer(ch).bamfout <> '') then
+      act(AT_WHITE, GPlayer(ch).bamfout,false,ch,nil,nil,TO_ROOM)
+    else
+      act(AT_WHITE,'$n leaves in a swirling mist.',false,ch,nil,nil,TO_ROOM);
+    end;
+  
+  ch.fromRoom();
+  ch.toRoom(location);
 
   if (not ch.IS_WIZINVIS) and (not ch.IS_NPC) then
     begin
@@ -667,7 +667,7 @@ end;
 // Set battleground
 procedure do_bgset(ch : GCharacter; param : string);
 var
-	lo, hi, secs : integer;
+  lo, hi, secs : integer;
   obj : GObject;
   buf : string;
 begin
@@ -713,7 +713,7 @@ end;
 // Snoop all activity from pc/npc
 procedure do_snoop(ch : GCharacter; param : string);
 var
-	vict : GCharacter;
+  vict : GCharacter;
 begin
   if (length(param)=0) then
     begin
@@ -768,7 +768,7 @@ end;
 // Loadup player
 procedure do_loadup(ch : GCharacter; param : string);
 var
-	vict : GPlayer;
+  vict : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -814,7 +814,7 @@ end;
 // System configuration
 procedure do_sconfig(ch : GCharacter; param : string);
 var
-	sub : string;
+  sub : string;
   t : TInAddr;
 begin
   if (length(param)=0) then
@@ -932,7 +932,7 @@ end;
 // Allow banned site
 procedure do_allow(ch : GCharacter; param : string);
 var
-	a : integer;
+  a : integer;
 begin
   if (length(param) = 0) then
     begin
@@ -954,7 +954,7 @@ end;
 // Log player activity
 procedure do_log(ch : GCharacter; param : string);
 var
-	victim : GCharacter;
+  victim : GCharacter;
 begin
   if (length(param) = 0) then
     begin
@@ -1077,7 +1077,7 @@ end;
 // Switch into NPC
 procedure do_switch(ch : GCharacter; param : string);
 var
-	vict : GCharacter;
+  vict : GCharacter;
 begin
   if (length(param) = 0) then
     begin
@@ -1118,7 +1118,7 @@ end;
 // Return from switched npc
 procedure do_return(ch : GCharacter; param : string);
 var
-	vict : GCharacter;
+  vict : GCharacter;
 begin
   if (ch.snooped_by = nil) or (GPlayer(ch.snooped_by).switching <> ch) then
     begin
@@ -1185,7 +1185,7 @@ end;
 // Regenerate hp/mana/moves
 procedure do_restore(ch : GCharacter; param : string);
 var
-	victim : GCharacter;
+  victim : GCharacter;
   vict_node : GListNode;
 begin
   if (length(param)=0) then
@@ -1216,7 +1216,7 @@ begin
   end
   else
   // restore single char
-  	begin
+    begin
     victim := FindCharWorld(ch,param);
 
     if (victim = nil) then
@@ -1231,7 +1231,7 @@ begin
 
     ch.sendBuffer('Ok.'#13#10);
     act(AT_REPORT,'$N has restored you.', false, victim, nil, ch, TO_CHAR);
-  	end;
+    end;
 end;
 
 { Xenon 12/Apr/2001: freeze now only works on players lowerlevel than you and you cannot freeze yourself anymore :P }
@@ -1330,7 +1330,7 @@ end;
 procedure do_peace(ch : GCharacter; param : string);
 var
   rch : GCharacter;
- 	rch_node : GListNode;
+  rch_node : GListNode;
 begin
   act(AT_REPORT, '$n BOOOOMS: ''PEACE!!!''', false, ch, nil, nil, TO_ROOM);
 
@@ -1375,7 +1375,7 @@ end;
 // Destroys an active connection
 procedure do_disconnect(ch : GCharacter; param : string);
 var
-	sock : integer;
+  sock : integer;
   conn : GPlayerConnection;
   conn_f : GPlayerConnection;
   iterator : GIterator;
@@ -1398,23 +1398,23 @@ begin
   conn_f := nil;
   
   while (iterator.hasNext()) do
-  	begin
+    begin
     conn := GPlayerConnection(iterator.Next());
 
     if (conn.socket.getDescriptor = sock) then
-  	  begin
+      begin
       conn_f := conn;
       break;
-  	  end;
-  	end;
+      end;
+    end;
 
   iterator.Free();
 
   if (conn_f = nil) then
-  	begin
+    begin
     ch.sendBuffer( 'That socket number was not found.'#13#10);
     exit;
-  	end;
+    end;
 
   ch.sendBuffer( 'Ok.'#13#10);
 
@@ -1470,7 +1470,7 @@ end;
 // Set skills
 procedure do_sset(ch : GCharacter; param : string);
 var
-	vict : GCharacter;
+  vict : GCharacter;
   victim, skill : string;
   perc : integer;
   sn : GSkill;
@@ -1540,7 +1540,7 @@ end;
 // Nourish: regenerates condition values
 procedure do_nourish(ch : GCharacter; param : string);
 var
-	victim : GPlayer;
+  victim : GPlayer;
   vict_node : GListnode;
 begin
   if (length(param) = 0) then
@@ -1799,10 +1799,10 @@ var
    buf : string;
 begin
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Usage:  PRENAME <current_name> <new_name>'#13#10);
     exit;
-  	end;
+    end;
 
   param := one_argument(param, curr_name);
   param := one_argument(param, new_name);
@@ -1813,36 +1813,36 @@ begin
   vict := GPlayer(findPlayerWorld(ch, curr_name));
 
   if (vict = nil) then
-  	begin
+    begin
     ch.sendBuffer('That character isn''t online.'#13#10);
     exit;
-  	end;
+    end;
   
   if (length(new_name) < 3) or (length(new_name) > 15) then
-  	begin
+    begin
     ch.sendBuffer('New name must be between 3 and 15 characters long.'#13#10);
     exit;
-  	end;
+    end;
 
   if (vict.IS_NPC) then
-  	begin
+    begin
     ch.sendBuffer('This command doesn''t work on mobs.'#13#10);
     exit;
-  	end;
+    end;
 
   if (FileExists('players\' + new_name + '.usr')) then
-  	begin
+    begin
     ch.sendBuffer('That name is already in use.'#13#10);
     exit;
-  	end;
+    end;
 
   with vict do
-  	begin
+    begin
     name := cap(new_name);
     short := cap(new_name) + ' is here';
     long := cap(new_name) + ' is standing here';
     vict.save(vict.name);
-  	end;
+    end;
 
   deleteFile('players\' + curr_name + '.usr');
 
@@ -1858,41 +1858,39 @@ end;
 procedure do_at(ch : GCharacter; param : string);
 var
    target : string;
-   vict : GCharacter;
-   saveroom : GRoom;
+   saveroom, location : GRoom;
 begin
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Usage:  AT <player> <command>'#13#10);
+    ch.sendBuffer('        AT <roomvnum> <command>'#13#10);
     exit;
-  	end;
+    end;
 
   param := one_argument(param, target);
 
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Usage:  AT <player> <command>'#13#10);
+    ch.sendBuffer('        AT <roomvnum> <command>'#13#10);
     exit;
-  	end;
+    end;
 
-  vict := findCharWorld(ch, target);
+  location := findLocation(ch, target);
 
-  if (vict = nil) then
-  	begin
-    ch.sendBuffer('That character isn''t online.'#13#10);
+  if (location = nil) then
+    begin
+    ch.sendBuffer('Location could not be found.'#13#10);
     exit;
-  	end;
-
-  if (vict = ch) then
-  	begin
-    ch.sendBuffer('You don''t need AT to do that!'#13#10); // with thanks to Nemesis for his suggestion :)
-    exit;
-  	end;
+    end;
 
   saveroom := ch.room;
+  
   ch.fromRoom();
-  ch.toRoom(vict.room);
+  ch.toRoom(location);
+  
   interpret(ch, param);
+  
   ch.fromRoom();
   ch.toRoom(saveroom);
 end;
@@ -1912,25 +1910,25 @@ begin
   count := 1;
   
   if (length(param) = 0) then
-  	begin
+    begin
     ch.sendBuffer('Usage:  NAMEGEN list|reload|<template #> [amount to generate]'#13#10);
     exit;
-  	end;
+    end;
 
   if (not namegenerator_enabled or (PhonemeList = nil) or (NameTemplateList = nil)) then
-  	begin
+    begin
     ch.sendBuffer('Namegenerator is not enabled at this moment. (Error loading tables? File missing?)'#13#10);
     exit;
-  	end;
+    end;
 
   param := one_argument(param, arg1);
   
   if (arg1 = 'list') then
-  	begin
+    begin
     node := NameTemplateList.head;
     
     for i := 1 to (NameTemplateList.size()) do
-    	begin
+      begin
       if (node = nil) then
         break;
         
@@ -1938,17 +1936,17 @@ begin
       act(AT_REPORT, Format('   $B$1[$7%2d$1]$A$7   %s', [i, nt.name]), false, ch, nil, nil, TO_CHAR);
 
       node := node.next;
-    	end;
-    	
+      end;
+      
     exit;
-  	end;
+    end;
 
   if (arg1 = 'reload') then
-  	begin
+    begin
     reloadNameTables();
     ch.sendBuffer('Done reloading nametables.'#13#10);
     exit;
-  	end;
+    end;
 
   try
     template_nr := StrToInt(arg1);
@@ -1961,14 +1959,14 @@ begin
   end;
 
   if ((template_nr > NameTemplateList.size()) or (template_nr < 1)) then
-  	begin
+    begin
     ch.sendBuffer('Template number out of range.'#13#10);
     exit;
-  	end;
+    end;
   
   param := one_argument(param, amount_str);
   if (amount_str <> '') then
-  	begin
+    begin
     try
       amount := StrToInt(amount_str);
     except
@@ -1977,31 +1975,31 @@ begin
     end;
     
     if ((amount > 20) or (amount < 1)) then
-    	begin
+      begin
       ch.sendBuffer('Amount to generate out of range (1 < amount < 20).'#13#10);
       exit;
-    	end
+      end
     else
       count := amount;
-  	end;
+    end;
 
   node := NameTemplateList.head;
   
   for i := 1 to template_nr do
-  	begin
+    begin
     if (node = nil) then
       break;
       
     nt := TNameTemplate(node.element);
     node := node.next;
-  	end;
+    end;
   
   act(AT_REPORT, Format('$B$1[$7Nametemplate ''%s''$1]$A$7', [nt.name]) + #13#10, false, ch, nil, nil, TO_CHAR);
   
   for i := 1 to count do
-  	begin
+    begin
     act(AT_REPORT, Format('  $B$1[$7%2d$1]$A$7   %s', [i, generateName(nt.name)]), false, ch, nil, nil, TO_CHAR);
-  	end
+    end
 end;
 
 procedure createCoordinates(ch : GCharacter; startroom : GRoom);
