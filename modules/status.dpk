@@ -27,12 +27,7 @@ package speller;
 {$DESCRIPTION 'Status report & console'}
 
 requires
-{$IFDEF WIN32}
   vcl;
-{$ENDIF}
-{$IFDEF LINUX}
-  baseclx;
-{$ENDIF}
 
 {$IFDEF WIN32}
 contains

@@ -27,18 +27,12 @@ package webservice;
 {$DESCRIPTION 'SOAP WebService'}
 
 requires
-{$IFDEF WIN32}
   indy,
   soaprtl,
   vcl;
-{$ENDIF}
-{$IFDEF LINUX}
-  baseclx;
-{$ENDIF}
 
 contains
   main,
-  WSDLPubGrendel,
   GrendelWebServiceIntf,
   DataModule,
   WebModule,

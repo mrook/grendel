@@ -1,6 +1,6 @@
 package core;
 
-{$R *.RES}
+{$R *.res}
 {$ALIGN ON}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -27,86 +27,46 @@ package core;
 {$IMPLICITBUILD OFF}
 
 requires
-  vcl;
-{$IFDEF LINUX}
-baseclx;
-{$ENDIF}
+	vcl;
 
 contains
-{$IFDEF LINUX}
-  ansiio in 'contrib/ansiio.pas',
-  LibXmlParser in 'contrib/LibXmlParser.pas',
-  RegExpr in 'contrib/RegExpr.pas',
-  md5 in 'contrib/md5.pas',
-  FastStrings in 'contrib/FastStrings.pas',
-  FastStringFuncs in 'contrib/FastStringFuncs.pas',
-  area in 'units/area.pas',
-  bulletinboard in 'units/bulletinboard.pas',
-  Channels in 'units/Channels.pas',
-  chars in 'units/chars.pas',
-  player in 'units/player.pas',
-  clan in 'units/clan.pas',
-  clean in 'units/clean.pas',
-  conns in 'units/conns.pas',
-  constants in 'units/constants.pas',
-  dtypes in 'units/dtypes.pas',
-  fight in 'units/fight.pas',
-  fsys in 'units/fsys.pas',
-  gasmdef in 'gmc/gasmdef.pas',
-  gvm in 'gmc/gvm.pas',
-  magic in 'units/magic.pas',
-  mudhelp in 'units/mudhelp.pas',
-  mudsystem in 'units/mudsystem.pas',
-  commands in 'units/commands.pas',
-  NameGen in 'units/NameGen.pas',
-  progs in 'units/progs.pas',
-  race in 'units/race.pas',
-  skills in 'units/skills.pas',
-  strip in 'units/strip.pas',
-  timers in 'units/timers.pas',
-  update in 'units/update.pas',
-  util in 'units/util.pas',
-  modules in 'units/modules.pas',
-  socket in 'units/socket.pas',
-  console in 'units/console.pas';
-{$ELSE}
-  ansiio in 'contrib\ansiio.pas',
-  LibXmlParser in 'contrib\LibXmlParser.pas',
-  RegExpr in 'contrib\RegExpr.pas',
-  md5 in 'contrib\md5.pas',
-  FastStrings in 'contrib\FastStrings.pas',
-  FastStringFuncs in 'contrib\FastStringFuncs.pas',
-  area in 'units\area.pas',
-  bulletinboard in 'units\bulletinboard.pas',
-  Channels in 'units\Channels.pas',
-  chars in 'units\chars.pas',
-  player in 'units\player.pas',
-  clan in 'units\clan.pas',
-  clean in 'units\clean.pas',
-  conns in 'units\conns.pas',
-  constants in 'units\constants.pas',
-  dtypes in 'units\dtypes.pas',
-  fight in 'units\fight.pas',
-  fsys in 'units\fsys.pas',
-  gasmdef in 'gmc\gasmdef.pas',
-  gvm in 'gmc\gvm.pas',
-  magic in 'units\magic.pas',
-  mudhelp in 'units\mudhelp.pas',
-  mudsystem in 'units\mudsystem.pas',
-  commands in 'units\commands.pas',
-  NameGen in 'units\NameGen.pas',
-  progs in 'units\progs.pas',
-  race in 'units\race.pas',
-  skills in 'units\skills.pas',
-  strip in 'units\strip.pas',
-  timers in 'units\timers.pas',
-  update in 'units\update.pas',
-  util in 'units\util.pas',
-  modules in 'units\modules.pas',
-  Winsock2 in 'units\winsock2.pas',
-  socket in 'units\socket.pas',
-  systray in 'units\systray.pas',
-  console in 'units\console.pas';
+{$IFDEF WIN32}
+	WinSock2,
 {$ENDIF}
+	ansiio,
+	LibXmlParser,
+	RegExpr,
+	md5,
+	FastStrings,
+	FastStringFuncs,
+	area,
+	bulletinboard,
+	Channels,
+	chars,
+	commands,
+	clan,
+	clean,
+	conns,
+	constants,
+	dtypes,
+	fight,
+	fsys,
+	gasmdef,
+	gvm,
+	magic,
+	mudhelp,
+	mudsystem,
+	NameGen,
+	player,
+	progs,
+	race,
+	skills,
+	strip,
+	timers,
+	update,
+	util,
+	modules,
+	socket,
+	console;
 
 end.

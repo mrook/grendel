@@ -27,12 +27,7 @@ package speller;
 {$DESCRIPTION 'Spellchecker'}
 
 requires
-{$IFDEF WIN32}
   vcl;
-{$ENDIF}
-{$IFDEF LINUX}
-  baseclx;
-{$ENDIF}
 
 contains
   speller_main,
