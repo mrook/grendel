@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.11 2001/05/11 14:24:24 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.12 2001/05/12 14:24:29 ***REMOVED*** Exp $
 
 unit update;
 
@@ -326,12 +326,17 @@ begin
           end;
         end;
 
-      if (ch.IS_NPC) and (GNPC(ch).npc_index.prog <> nil) then
+      if (ch.IS_NPC) then
         begin
-        GNPC(ch).context.setEntryPoint('onTick');
-        GNPC(ch).context.Execute;
+        p := GNPC(ch).context.findSymbol('onTick');
+
+        if (p <> -1) then
+          begin
+          GNPC(ch).context.push(integer(ch));
+          GNPC(ch).context.setEntryPoint(p);
+          GNPC(ch).context.Execute;
+          end;
         end;
-//      randTrigger(ch);
       end
     else
     if (not ch.IS_NPC) then

@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.24 2001/05/11 14:24:22 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.25 2001/05/12 14:24:29 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -679,6 +679,7 @@ end;
 var txt : string;
     vch : GCharacter;
     to_ch : GCharacter;
+    t : integer;
 
     node : GListNode;
 
@@ -721,8 +722,7 @@ begin
     begin
     to_ch := GCharacter(node.element);
 
-    if (to_ch.IS_NPC) //and (not IS_SET(GNPC(to_ch.npc_index.mpflags,MPROG_ACT)) and (ch.conn = nil)// and (ch.snooped_by=nil))
-      or ((not to_ch.IS_AWAKE) and (to_ch <> ch)) then goto wind;
+    if ((not to_ch.IS_AWAKE) and (to_ch <> ch)) then goto wind;
 
     if (typ = TO_CHAR) and (to_ch <> ch) then
       goto wind;
@@ -741,8 +741,19 @@ begin
 
     to_ch.sendBuffer(to_ch.ansiColor(atype) + txt + #13#10);
 
-//    if (to_ch.IS_NPC) and (GNPC(to_ch).) then
-//       actTrigger(to_ch, ch, txt);
+    if (to_ch.IS_NPC) and (to_ch <> ch) then
+      begin
+      t := GNPC(to_ch).context.findSymbol('onAct');
+
+      if (t <> -1) then
+        begin
+        GNPC(to_ch).context.push(txt);
+        GNPC(to_ch).context.push(integer(ch));
+        GNPC(to_ch).context.push(integer(to_ch));
+        GNPC(to_ch).context.setEntryPoint(t);
+        GNPC(to_ch).context.Execute;
+        end;
+      end;
 
 wind:
      if (typ = TO_CHAR) or (typ = TO_VICT) or (typ = TO_IMM) then
