@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.10 2004/02/18 20:48:00 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.11 2004/02/18 23:07:37 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -23,6 +23,7 @@ const
 	PLAYER_FIELDS_HASHSIZE = 256;
 
 
+{$M+}
 type
 	GPlayer = class;
 
@@ -67,6 +68,7 @@ type
 		_keylock: boolean;
 		_afk : boolean;
 		_fields : GHashTable;
+		_title : string;                     { Title of PC }
 		
 		function getField(name : string) : TObject;
 		procedure putField(name : string; obj : TObject);
@@ -76,7 +78,6 @@ type
 		edit_dest : pointer;
 
 		pagerlen : integer;
-		title : string;                     { Title of PC }
 		age : longint;                     { Age in hours (irl) }
 		cfg_flags, flags : cardinal;    { config flags and misc. flags }
 		deaths : integer;
@@ -125,9 +126,6 @@ type
 		constructor Create(conn : GPlayerConnection);
 		destructor Destroy(); override;
 
-		property fields[name : string] : TObject read getField write putField; 
-
-	published
 		function ansiColor(color : integer) : string; override;
 
 		function IS_IMMORT : boolean; override;
@@ -163,8 +161,12 @@ type
 		procedure editBuffer(text : string);
 		procedure sendEdit(text : string);
 
+		property fields[name : string] : TObject read getField write putField; 
 		property keylock : boolean read _keylock write _keylock;
 		property afk : boolean read _afk write _afk;	
+
+	published
+		property title : string read _title write _title;
 	end;
 
 	GPlayerField = class
@@ -201,9 +203,12 @@ type
   	function fromString(s : string) : TObject; override;
   	function toString(x : TObject) : string; override;	
 	end;
+{$M-}
+
 
 var
 	fieldList : GHashTable;
+
 
 procedure registerField(field : GPlayerField);
 procedure unregisterField(name : string);
@@ -225,7 +230,9 @@ procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharact
 
 function playername(from_ch, to_ch : GCharacter) : string;
 
+
 implementation
+
 
 uses
 	Math,
@@ -1421,16 +1428,16 @@ begin
   s := fn;
   s[1] := upcase(s[1]);
 
-  _name := hash_string(s);
-  _short := hash_string(s + ' is here');
-  _long := hash_string(s + ' is standing here');
-
   try
     af := GFileReader.Create('players\' + fn + '.usr');
   except
     load := false;
     exit;
   end;
+  
+  _name := hash_string(s);
+  _short := hash_string(s + ' is here');
+  _long := hash_string(s + ' is standing here');
 
   repeat
     repeat
@@ -1854,7 +1861,6 @@ begin
       g := af.readLine;
 
       repeat
-      	writeConsole('g at start: ' + g);
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
           obj := GObject.Create();
@@ -1903,8 +1909,6 @@ begin
   
 						g := af.readToken();
 						
-						writeConsole('reading ' + obj.name + ' => ' + g);
-
 						if (g = 'A') then
 							begin
 							aff := GAffect.Create();
@@ -1935,13 +1939,9 @@ begin
 								inc(num);
 								end;
 							
-							writeConsole('last token: ' + g + IntTostr(integer(af.eol)));
-
 							obj.affects.insertLast(aff);
 
 							g := af.readLine();
-							
-							writeConsole('last line: ' + g);
         			end;
         		end;
 
