@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.61 2003/09/16 18:15:32 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.62 2003/10/15 13:47:55 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -2704,7 +2704,10 @@ begin
   obj_in := GObject(objectIndices[OBJ_VNUM_CORPSE]);
   
   if (obj_in = nil) then
+  	begin
+  	bugreport('area.pas', 'addCorpse', 'index for OBJ_VNUM_CORPSE (' + IntToStr(OBJ_VNUM_CORPSE) + ') not found');
     exit;
+    end;
     
   obj := obj_in.clone();
 
