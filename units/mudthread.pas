@@ -561,7 +561,10 @@ begin
   if (comparestr(s, 'do_last') = 0) then
     g := do_last
   else
-    begin                                                     
+  if (comparestr(s, 'do_unlearn') = 0) then
+    g := do_unlearn
+  else
+    begin
     g := nil;
 
     //bugreport('findCommand', 'mudthread.pas', s + ' unknown',
