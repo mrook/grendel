@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.11 2004/03/04 19:35:00 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.12 2004/03/08 21:09:57 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -272,7 +272,6 @@ var
   a : longint;
   gc : GCommand;
   cmd : GCommand;
-  node : GListNode;
   cmdline, param, ale : string;
   hash : cardinal;
   al : GAlias;
@@ -378,23 +377,43 @@ begin
   cmd := nil;
 
   hash := commandList.getHash(cmdline);
-  node := commandList.buckets[hash].head;
+  
+  // try to find exact match first 
+  iterator := commandList.buckets[hash].iterator();
+  
+  while (iterator.hasNext()) do
+  	begin
+    gc := GCommand(GHashValue(iterator.next()).value);
+    
+    if (cmdline = gc.name) then
+    	begin
+    	cmd := gc;
+    	break;
+    	end;
+  	end;
+  	
+  iterator.Free();
 
-  while (node <> nil) do
-    begin
-    gc := GCommand(GHashValue(node.element).value);
+	// if an exact match does not exist, try to find a substring
+	if (cmd = nil) then
+		begin
+  	iterator := commandList.buckets[hash].iterator();
+  
+  	while (iterator.hasNext()) do
+  		begin
+  	  gc := GCommand(GHashValue(iterator.next()).value);
 
-    if (cmdline = gc.name) or
-       ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
+	    if ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
        ((copy(cmdline, 1, length(gc.name)) = gc.name) and (length(cmdline) = 1))
        then
-      begin
-      cmd := gc;
-      break;
+      	begin
+      	cmd := gc;
+      	break;
+      	end;
       end;
 
-    node := node.next;
-    end;
+		iterator.Free();
+		end;
 
   if (cmd <> nil) then
     begin
