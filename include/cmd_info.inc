@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.32 2001/04/20 18:26:10 xenon Exp $
+// $Id: cmd_info.inc,v 1.33 2001/04/26 21:13:38 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -882,7 +882,8 @@ begin
         begin
         vict.leader := ch;
         act(AT_REPORT,'$N joins $n''s group.',false,ch,nil,vict,TO_ROOM);
-        to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
+//        to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
+        to_channel(ch, '$B$7[Group]: '+vict.name^+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
         end;
 
       node := node.next;
@@ -922,13 +923,15 @@ begin
     else
     if (vict.leader = ch) then
       begin
-      to_group(ch, '$B$7[Group]: ' + vict.name^ + ' has left the group.');
+//      to_group(ch, '$B$7[Group]: ' + vict.name^ + ' has left the group.');
+      to_channel(ch, '$B$7[Group]: ' + vict.name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
       vict.leader := vict;
       end
     else
       begin
       vict.leader := ch;
-      to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
+//      to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
+      to_channel(ch, '$B$7[Group]: '+vict.name^+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
       end;
     end;
 end;
@@ -954,7 +957,8 @@ begin
 
       if (ch.leader <> ch) then
         begin
-        to_group(ch.leader, '$B$7[Group]: ' + ch.name^+ ' has left the group.');
+//        to_group(ch.leader, '$B$7[Group]: ' + ch.name^+ ' has left the group.');
+        to_channel(ch.leader, '$B$7[Group]: ' + ch.name^+ ' has left the group.', CHANNEL_GROUP, AT_WHITE);
         ch.leader := ch;
         end;
       end;
@@ -969,7 +973,8 @@ begin
 
     if (ch.leader <> ch) then
       begin
-      to_group(ch.leader, '$B$7[Group]: ' + ch.name^ + ' has left the group.');
+//      to_group(ch.leader, '$B$7[Group]: ' + ch.name^ + ' has left the group.');
+      to_channel(ch.leader, '$B$7[Group]: ' + ch.name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
       ch.leader := ch;
       end;
     end;
