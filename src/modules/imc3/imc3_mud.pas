@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.2 2004/03/11 23:30:26 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.3 2004/03/11 23:32:59 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -19,7 +19,7 @@ uses
 	
 
 const
-	IMC3_DRIVER_VERSION = '$Revision: 1.2 $';
+	IMC3_DRIVER_VERSION = '0.5';
 
 
 type
@@ -384,7 +384,7 @@ begin
 	// Fill in a few fields using running server
 	player_port := system_info.port;
 	mudlib := version_program + ' ' + version_number;
-	driver := IMC3_DRIVER_VERSION;
+	driver := 'Grendel I3 Driver ' + IMC3_DRIVER_VERSION;
 end;
 
 procedure loadMudList();
