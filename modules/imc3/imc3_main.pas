@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.14 2003/10/31 11:29:42 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.15 2003/10/31 15:19:24 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -281,6 +281,7 @@ begin
 			end;
 		
 		i3.sendWho(ch.name, mud);
+		ch.sendBuffer('Ok.'#13#10);
 		end
 	else
 		ch.sendBuffer('Unimplemented.'#13#10);
