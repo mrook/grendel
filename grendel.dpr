@@ -27,11 +27,7 @@ program grendel;
 {$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000,2001 by Michiel Rook.'}
 {$APPTYPE CONSOLE}
 
-// set suitable options when using debugging and mem checking
-{$IFDEF __DEBUG}
 {$W+}
-{$O-}
-{$ENDIF}
 
 {%File 'include\command.inc'}
 {%File 'include\cmd_comm.inc'}
