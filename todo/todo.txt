@@ -62,6 +62,9 @@ Grendel's TODO list with probable release date/version
 - (0.4.3) more help text
 - (0.4.3) "real life" sleep - players need sleep to keep from falling down after 2 days,
           some rooms (with beds) have better sleep ratios etc.
+          
+- (0.4.4) arbitrary fields in pfiles/areas, stored in a
+          associative array, possibly with trigger/callback
 
 
 l implementation of the mud sound protocol
