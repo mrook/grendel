@@ -7,54 +7,55 @@
 
 #command
 name: down
+alias: d
 function: do_down
 position: 9
 #end
 
 #command
 name: east
+alias: e
 function: do_east
 position: 9
 #end
 
 #command
 name: north
+alias: n
 function: do_north
 position: 9
 #end
 
 #command
 name: south
+alias: s
 function: do_south
 position: 9
 #end
 
 #command
 name: west
+alias: w
 function: do_west
 position: 9
 #end
 
 #command
 name: up
+alias: u
 function: do_up
 position: 9
 #end
 
 #command
 name: look
+alias: l
 function: do_look
 position: 5
 #end
 
 
 ; now the other commands
-
-#command
-name: a
-position: 4
-function: do_auctalk
-#end
 
 #command
 name: affects
@@ -97,12 +98,6 @@ position: 8
 name: auction
 function: do_auction
 position: 7
-#end
-
-#command
-name: babbel
-function: do_babbel
-position: 4
 #end
 
 #command
@@ -160,10 +155,8 @@ position: 5
 #end
 
 #command
-name: chat
-alias: .
-position: 4
-function: do_chat
+name: channel
+function: do_channel
 #end
 
 #command
@@ -190,12 +183,6 @@ position: 4
 #end
 
 #command
-name: clantalk
-function: do_clantalk
-position: 4
-#end
-
-#command
 name: close
 function: do_close
 #end
@@ -208,12 +195,6 @@ function: do_consider
 #command
 name: config
 function: do_config
-position: 4
-#end
-
-#command
-name: ct
-function: do_clantalk
 position: 4
 #end
 
@@ -317,7 +298,8 @@ position: 4
 
 #command
 name: kill
-alias: ki
+;alias: ki
+alias: k
 function: do_kill
 position: 8
 #end
@@ -414,14 +396,6 @@ position: 4
 #command
 name: raceinfo
 function: do_raceinfo
-#end
-
-#command
-name: raid
-alias: \
-function: do_raid
-position: 4
-level: 100
 #end
 
 #command
@@ -652,11 +626,6 @@ position: 4
 name: visible
 alias: vis
 function: do_visible
-#end
-
-#command
-name: yell
-function: do_yell
 #end
 
 ; special commands (guilds/clans/remort)
@@ -992,13 +961,6 @@ position: 0
 #end
 
 #command
-name: immtalk
-function: do_immtalk
-level: 990
-position: 0
-#end
-
-#command
 name: loadup
 function: do_loadup
 level: 998
@@ -1118,13 +1080,6 @@ position: 0
 #command
 name: take
 function: do_take
-level: 995
-position: 0
-#end
-
-#command
-name: thunder
-function: do_thunder
 level: 995
 position: 0
 #end
