@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.28 2001/04/30 16:37:45 xenon Exp $
+// $Id: area.pas,v 1.29 2001/05/10 17:26:10 xenon Exp $
 
 unit area;
 
@@ -250,6 +250,7 @@ function findObjectIndex(vnum : integer) : GObjectIndex;
 function instanceObject(o_index : GObjectIndex) : GObject;
 procedure addCorpse(c : pointer);
 function findHeading(s : string) : integer;
+function findDirectionShort(startroom, goalroom : GRoom) : string;
 
 procedure cleanObjects;
 
@@ -2658,6 +2659,21 @@ begin
     FindHeading:=a;
     break;
     end;
+end;
+
+function findDirectionShort(startroom, goalroom : GRoom) : string;
+var
+  i : integer;
+begin
+  Result := '';
+  for i := DIR_NORTH to DIR_UP do
+  begin
+    if (startroom.isConnectedTo(i) = goalroom) then
+    begin
+      Result := headings_short[i];
+      exit;
+    end;
+  end;
 end;
 
 function GObject.clone : GObject;
