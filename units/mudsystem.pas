@@ -600,13 +600,12 @@ begin
   end;
 end;
 
-begin
-  socials := GHashObject.Create(512);
-  dm_msg := GDLinkedList.Create;
+initialization
+socials := GHashObject.Create(512);
+dm_msg := GDLinkedList.Create;
+auction_good := GAuction.Create;
+auction_evil := GAuction.Create;
+banned_masks := TStringList.Create;
 
-  auction_good := GAuction.Create;
-  auction_evil := GAuction.Create;
-
-  banned_masks := TStringList.Create;
 end.
 
