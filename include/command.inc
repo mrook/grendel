@@ -1,4 +1,4 @@
-// $Id: command.inc,v 1.13 2001/04/20 12:17:03 ***REMOVED*** Exp $
+// $Id: command.inc,v 1.14 2001/04/20 18:50:55 xenon Exp $
 
 {$F+}
 
@@ -113,8 +113,10 @@ var buf, s, keyword : string;
     node : GListNode;
     keywordlist : GDLinkedList;
     hk : THelpKeyword;
+    done : boolean;
 begin
   keywordlist := nil; hk := nil;
+  done := false;
   counter := 0;
   
   if (length(param) = 0) then
@@ -184,11 +186,22 @@ begin
         begin
           hk := THelpKeyword.Create(lowercase(s), help);
           insertAlphabetical(keywordlist, hk);
-        end
+        end;
+        if ((uppercase(param) = s) and (help.level <= ch.level)) then // if it's a 1-on-1 match, stop right away
+        begin
+          keywordlist.Clean();
+          keywordlist.Free();
+          keywordlist := GDLinkedList.Create();
+          keywordlist.insertLast(THelpKeyword.Create(lowercase(s), help));
+          done := true;
+          break;
+        end;
       end;
-          
     end;
-    
+
+    if (done) then
+      break;
+      
     node := node.next;
   end;
   
