@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.57 2001/08/15 18:28:09 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.58 2001/08/26 19:20:34 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -2758,7 +2758,7 @@ end;
 
 function findPlayerWorld(ch : GCharacter; name : string) : GPlayer;
 var
-   node : GListNode;
+   iterator : GIterator;
    vict : GCharacter;
    number,count : integer;
 begin
@@ -2774,14 +2774,17 @@ begin
 
   count := 0;
 
-  node := char_list.head;
+  iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
-    if (isName(vict.name^,name)) or (isName(vict.short^,name)) and (ch.CAN_SEE(vict)) and (not ch.IS_NPC) then
-      begin
+    if ((isName(vict.name^,name)) or (isName(vict.short^,name))) and (not vict.IS_NPC) then
+      begin    
+      if (ch <> nil) and (not ch.CAN_SEE(vict)) then
+        continue;
+
       inc(count);
 
       if (count = number) then
@@ -2790,8 +2793,6 @@ begin
         exit;
         end;
       end;
-
-    node := node.next;
     end;
 end;
 

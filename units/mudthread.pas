@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.66 2001/08/15 19:01:57 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.67 2001/08/26 19:20:35 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -427,6 +427,7 @@ end;
 
 procedure nanny(conn : GConnection; argument : string);
 var ch, vict : GPlayer;
+    tmp : GCharacter;
     node : GListNode;
     race : GRace;
     digest : MD5Digest;
@@ -572,13 +573,13 @@ begin
                     exit;
                     end;
 
-                  (* vict := findCharWorld(nil, argument);
-                  if ((banned_names.indexof(uppercase(argument)) <> -1) or ((vict <> nil) and (uppercase(vict.name) = uppercase(argument)))) then
+                  tmp := findCharWorld(nil, argument);
+                  if (* ((banned_names.indexof(uppercase(argument)) <> -1) or *) (tmp <> nil) and (uppercase(tmp.name^) = uppercase(argument)) then
                     begin
-                    send_to_conn(conn,'That name cannot be used.'#13#10);
-                     send_to_conn(conn,'By what name do you wish to be known? ');
+                    conn.send('That name cannot be used.'#13#10);
+                    conn.send('By what name do you wish to be known? ');
                     exit;
-                    end; *)
+                    end;
 
                   if (length(argument) < 3) or (length(argument) > 15) then
                     begin
