@@ -204,7 +204,7 @@ begin
 
   while (p <= length(argument)) and (count < 256) do
     begin
-    if (argument[p] = cEnd) then
+    if (argument[p] = cEnd) or (argument[p] = #13) or (argument[p] = #10) then
       begin
       inc(p);
       break;
@@ -216,7 +216,7 @@ begin
     inc(count);
     end;
 
-  while (p <= length(argument)) and (argument[p] = ' ') do
+  while (p <= length(argument)) and ((argument[p] = ' ') or (argument[p] = #13) or (argument[p] = #10)) do
     inc(p);
 
   one_argument := copy(argument, p, length(argument) - p + 1);
