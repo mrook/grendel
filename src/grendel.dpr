@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.3 2004/02/02 15:27:22 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.4 2004/02/11 20:04:42 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -175,6 +175,9 @@ begin
 		node := char_list.tail;
 		end;
 
+	writeConsole('Cleaning channels...');
+	cleanupChannels();
+
 	writeConsole('Cleaning players...');
 	cleanupPlayers();
 		
@@ -183,9 +186,6 @@ begin
 	
 	writeConsole('Cleaning clans...');
 	cleanupClans();
-
-	writeConsole('Cleaning channels...');
-	cleanupChannels();
 
 	writeConsole('Cleaning commands...');
 	cleanupCommands();
@@ -661,9 +661,9 @@ begin
   
   ac.setNonBlocking();
 
-  if (isMaskBanned(ac.host_string)) then
+  if (isMaskBanned(ac.hostString)) then
     begin
-    writeConsole('(' + IntToStr(ac.getDescriptor) + ') Closed banned IP (' + ac.host_string + ')');
+    writeConsole('(' + IntToStr(ac.getDescriptor) + ') Closed banned IP (' + ac.hostString + ')');
 
     ac.send(system_info.mud_name + #13#10#13#10);
     ac.send('Your site has been banned from this server.'#13#10);
