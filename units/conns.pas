@@ -732,7 +732,7 @@ begin
     if (channel <> CHANNEL_AUCTION) and (channel <> CHANNEL_CLAN) and (vict=ch) then continue;
     if (channel = CHANNEL_CHAT) and (not ch.IS_SAME_ALIGN(vict)) then continue;
     if (channel = CHANNEL_BABBEL) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_RAID) and (vict.level < 100) and (not ch.IS_SAME_ALIGN(vict)) then continue;
+    if (channel = CHANNEL_RAID) and ((vict.level < 100) or (not ch.IS_SAME_ALIGN(vict))) then continue;
     if (channel = CHANNEL_AUCTION) and (not ch.IS_SAME_ALIGN(vict)) then continue;
     if (channel = CHANNEL_IMMTALK) and (not vict.IS_IMMORT) then continue;
     if (channel = CHANNEL_CLAN) and (vict.clan<>ch.clan) then continue;
