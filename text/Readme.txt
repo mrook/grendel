@@ -7,7 +7,52 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 1. Introduction
 
-Welcome to, at last, a brand new version of Grendel - 0.4.0 final!
+We've reached a milestone in Grendel development. Nearly 9 months after the
+resurrection of the codebase, 0.4.0 final has been released - something you have 
+been waiting for a long, long time.
+
+This release features the return of the GUI, or at least part of it. Some of
+you may recall the (very) early days of Grendel. The first few releases (some of
+which where internal and never had widespread use) sported a GUI with buttons, 
+graphical console, all strings/controls attached.
+
+Soon afterwards, I decided a simple "textmode" console would be better. 
+The controls used in the GUI were not terribly lightweight, and at that time,
+size was still an issue.
+
+However, with the implementation of dynamically loadable modules in this
+release - more on this later on - I decided it would be time to let the good ol'
+days thrive again. The old console being eradicated, the server now lives in a 
+single system tray icon with a popup menu. 
+
+Clicking in this menu can trigger actions like shutting down or rebooting
+the server, or other commands provided by modules.
+
+One of the other new things is, as noted before, dynamic module support.
+This enables third-party developers to implement functions that can be loaded
+on-demand from the server, thus forming some sort of plugin architecture.
+
+Modules included with this distribution are the core commands, a spellchecker
+and a graphical console module. The latter registers itself into the popup
+menu, and gives you access to a console window.
+
+Another new thing is Linux support - Grendel now compiles on a Linux box
+that has Kylix 1.0 installed. This results in a native binary that can
+run without any speed loss, however, not all features are enabled.
+
+And the last exciting feature is something you probably saw in the two
+0.4.0 release candidates, the mobprog compiler, GMC, or Grendel MUD C.
+
+Some example mobprogs, courtesy of Hemko de Visser and Tristan
+Pothoven (also a resident Dreaven immortal), can be found in the
+"progs" directory!
+
+All in all, this release is something very special. I hope that
+you will have fun toying around with it.
+
+Enjoy!
+
+  Michiel
 
 
 2. Features
@@ -28,7 +73,8 @@ this update from the Microsoft site:
   - Linux support: Grendel now runs on Linux, using the new Kylix
     compiler from Borland (the Linux version of Delphi). 
     Note: this is entirely experimental, some features are missing
-    (like copyover), and we will not provide any binaries
+    (like copyover, and the graphical goodies), and we will not provide 
+    any binaries
   - Copyover system: Grendel can respawn itself without dumping all the
     connections, e.g. users stay online during the reboot process,
     more info below
@@ -54,23 +100,37 @@ this update from the Microsoft site:
   - OLC support: design and builds your area without leaving the MUD!
 
 
-3. The team
+3. Documentation
 
-  Michiel Rook                (Grimlord)		manager, website, code
-  Hemko de Visser	      (Nemesis)			code, field testing
-  Roeland van Houte           (Xenon)			code
-  Jeremiah Davis              (Woodstock)  	        documentation
-  Oscar Martin                (Jago)			code
+Documentation has never been the strongest point during the development
+of The Grendel Project, but the tide is slowly turning.
+
+In the directory 'text' you will find a few plain-text documents
+describing various parts of the server. These are Modules.txt (for
+info on how to best code a module), Scripting.txt (info about
+the GMC syntax & structure) and Coding.txt (guidelines on
+coding conventions and tips on which units to use).
 
 
 4. Compiling & running
 
-The executable comes with the zipfile, but if you wish to (re)compile grendel.exe,
-use the compile.bat file, located in the root dir. You can ofcourse also use
-the Delphi IDE.
+Normally, you'd download the binary distribution (grendel-....-bin.zip), but
+if you wish to modify and/or (re)compile the sources, you will need the
+source distribution (grendel-....-src.zip).
 
-After that, simply type 'grendel' and hit ENTER. Grendel defaults to port 4444,
-so get a telnet client and connect.
+When installed, the sources can be compiled by running (in the root dir)
+
+  'make -f makefile.w32' on the Windows platform, or
+  
+  'make -f makefile.lnx' on the Linux platform
+  
+You can ofcourse also use the Delphi IDE, but this is not recommended.
+
+When you have a binary (either by downloading it, or compiling it), you
+can start it by typing 'grendel' <ENTER> in the Grendel root directory.
+
+The default port is 4444, so get hold of a telnet client, and connect
+to the server.
 
 
 5. Copyover
@@ -90,26 +150,30 @@ be any endless loops.
 
 6. The new affects system
 
-Since release 0.3.5 Grendel sports an exciting new affects handling system, for
-spells, skills, objects (heck, and maybe even more if I can find
-the imagination).
+0.3.5 saw the addition of a brand new affects system, which looked promising,
+but had a few defects. Those have now been fixed (finally, hopefully).
 
-An affect consists of an apply type, a modifier, and a duration.
+An affect consists of a name, a wear-off message, a duration and a number 
+of modifier/apply-type combinations.
 
 At the moment, the following apply types are supported:
 
   APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
   APPLY_HP, APPLY_MAX_HP, APPLY_MV, APPLY_MAX_MV, APPLY_MANA, APPLY_MAX_MANA,
   APPLY_AC, APPLY_APB, APPLY_AFFECT, APPLY_REMOVE,
-  APPLY_STRIPSPELL, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE
+  APPLY_STRIPNAME, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE
 
 The modifier is specific to the apply type used, for example, when you use
 APPLY_INT, the modifier reflects the amount of intelligence gained (or lost)
 through this affect, whereas with APPLY_AFFECT, the modifier is one of the
 AFF_ flags found in constants.pas (or the manual).
 
-For spells/skills, the syntax is "affects: <apply type> <modifier> <duration>",
-for objects, the syntax is "A <apply type> <modifier> <duration>".
+For spells/skills, the syntax is:
+
+  "affects: <affect name> <wear-off message> <duration> { <apply type> <modifier> } { ... }", 
+  
+for objects, the syntax is:
+  "A <affect name> <wear-off message> <duration> { <apply type> <modifier> } { ... }".
 
 Check the areas and system\skills.dat for examples on objects and spells,
 respectively.
@@ -117,40 +181,51 @@ respectively.
 
 7. Known problems
 
-It's relatively safe to say that 100% of the old functionality is back,
-on top of the shitloads of new features that already are in there.
-Should you see anything missing, do not hesitate to mail me.
+The server has never been this stable. Roughly 90% of the active code has been
+guarded by exception handling and debugging code, enabling developers to track 
+down bugs and keeping uptime at a maximum.
 
-Again, there were a lot of stability fixes, and the server has become even more
-skilled at fixing its own problems, so uptime should have been increased greatly.
-However, I'm sure there are still some things left that could bring the server
-down to its knees. If you find such a thing, notify me about it, and I'll get
-on it ASAP.
+However, there are probably pieces we've missed, so if you run across one,
+please mail everything you did, so we can reproduce the error and help you out.
 
-You will very likely need Delphi 5 to (re)compile the source. Delphi 4 might
-work, but then again, it just might not. Delphi2/3 are seriously obsolete
-and should be removed from your harddisk anyway.
+You will need either Delphi 5 or Kylix 1 to compile the Grendel sources,
+earlier versions are not supported.
+
+Support for Delphi 6 will be introduced in 0.4.1.
 
 
 8. Contact information
 
-Please all subscribe to our mailinglists, as important information,
-discussions about features, bugs, etc. will take place on these
-lists!
-
-Announcements on new versions etc. will be made available on:
-	grendel-announce@yahoogroups.com
-
-For general questions, please refer to the mailinglist: 
-	grendel-mudserver@yahoogroups.com
-
-If you have trouble subscribing, you can go to our website
-(http://grendel.mudcenter.com/) and sign up there.
+Below you will find a few important email addresses, for
+support, info, list communication or personal contact.
 
 
-For personal contact, or a postcard (very much appreciated) use:
+General e-mail addresses:
 
-	***REMOVED***@takeover.nl, or:
+  info@grendelproject.nl    - Requests for info about the project/site
+  support@grendelproject.nl - Requests for support on serious errors
+  
+Developers:
+
+  Michiel Rook          (michiel@grendelproject.nl)     manager, website, code
+  Hemko de Visser       (nemesis@grendelproject.nl)     code, field testing
+  Roeland van Houte     (xenon@grendelproject.nl)       code
+  Oscar Martin          (jago@grendelproject.nl)        code
+  Jeremiah Davis        (woodstock@grendelproject.nl)   documentation
+
+Mailinglists:
+
+	grendel-announce@yahoogroups.com  - announcements (new releases, etc.)
+
+	grendel-mudserver@yahoogroups.com - coding, suggestions, support
+
+  If you have trouble subscribing, you can go to our website
+  (http://www.grendelproject.nl/) and sign up there.
+
+Postcards:
+  
+  If you use and like Grendel, I'd very much appreciate it if you
+  send a postcard to me:
 
 	Michiel Rook
 	***REMOVED***
