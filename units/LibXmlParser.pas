@@ -125,6 +125,11 @@ TXmlParser does not conform 100 % exactly to the XmlSpec:
 This list may be incomplete, so it may grow if I get to know any other points.
 As work on the parser proceeds, this list may also shrink.
 ===============================================================================================
+Things Todo
+-----------
+- Introduce a new event/callback which is called when there is an unresolvable
+  entity or character reference
+===============================================================================================
 Change History, Version numbers
 -------------------------------
 The Date is given in ISO Year-Month-Day (YYYY-MM-DD) order.
@@ -161,11 +166,15 @@ Date        Author Version Changes
                            Fixed a bug in TXmlParser.Scan which caused it to start over when it
                            was called after the end of scanning, resulting in an endless loop
                            TEntityStack is now a TObjectList instead of TList
+2001-07-03  HeySt  1.0.11  Updated Compiler Version IFDEFs for Kylix
+2001-07-11  HeySt  1.0.12  New TCustomXmlScanner component (taken over from LibXmlComps.pas)
+2001-07-14  HeySt  1.0.13  Bugfix TCustomXmlScanner.FOnTranslateEncoding
 *)
 
-// --- Delphi Version Numbers
-//     As this is no code, this does *not* blow up your object or executable code at all
-{       (*$DEFINE D1_OR_NEWER *)
+
+// --- Delphi/Kylix Version Numbers
+//     As this is no code, this does not blow up your object or executable code at all
+       (*$DEFINE D1_OR_NEWER *)
        (*$IFNDEF VER80 *)
          (*$DEFINE D2_OR_NEWER *)
          (*$IFNDEF VER90 *)
@@ -175,17 +184,22 @@ Date        Author Version Changes
              (*$IFNDEF VER120 *)
                (*$DEFINE D5_OR_NEWER *)
                (*$IFNDEF VER130 *)
-               If the compiler gets stuck here,
-               you are using a compiler version unknown to this code.
-               You will probably have to change this code accordingly.
-               At first, try to comment out these lines and see what will happen.
+                 (*$IFDEF LINUX *)
+                   (*$DEFINE K1_OR_NEWER *)
+                 (*$ENDIF *)
+                 (*$IFNDEF VER140 *)
+                   If the compiler gets stuck here,
+                   you are using a compiler version unknown to this code.
+                   You will probably have to change this code accordingly.
+                   At first, try to comment out these lines and see what will happen.
+                 (*$ENDIF *)
                (*$ENDIF *)
              (*$ENDIF *)
            (*$ENDIF *)
          (*$ENDIF *)
        (*$ELSE *)
          (*$DEFINE WIN16 *)
-       (*$ENDIF *) }
+       (*$ENDIF *)
 
 
 UNIT LibXmlParser;
@@ -200,7 +214,7 @@ USES
   Math;
 
 CONST
-  CVersion = '1.0.10';  // This variable will be updated for every release
+  CVersion = '1.0.13';  // This variable will be updated for every release
                         // (I hope, I won't forget to do it everytime ...)
 
 TYPE
@@ -473,6 +487,102 @@ FUNCTION  Utf8ToAnsi  (Source : STRING; UnknownChar : CHAR = '¿') : ANSISTRING; 
 
 (*
 ===============================================================================================
+TCustomXmlScanner component wrapper for TXmlParser
+===============================================================================================
+*)
+
+TYPE
+  TCustomXmlScanner = CLASS;
+  TXmlPrologEvent   = PROCEDURE (Sender : TObject; XmlVersion, Encoding: STRING; Standalone : BOOLEAN) OF OBJECT;
+  TCommentEvent     = PROCEDURE (Sender : TObject; Comment : STRING)                                   OF OBJECT;
+  TPIEvent          = PROCEDURE (Sender : TObject; Target, Content: STRING; Attributes : TAttrList)    OF OBJECT;
+  TDtdEvent         = PROCEDURE (Sender : TObject; RootElementName : STRING)                           OF OBJECT;
+  TStartTagEvent    = PROCEDURE (Sender : TObject; TagName : STRING; Attributes : TAttrList)           OF OBJECT;
+  TEndTagEvent      = PROCEDURE (Sender : TObject; TagName : STRING)                                   OF OBJECT;
+  TContentEvent     = PROCEDURE (Sender : TObject; Content : STRING)                                   OF OBJECT;
+  TElementEvent     = PROCEDURE (Sender : TObject; ElemDef : TElemDef)                                 OF OBJECT;
+  TEntityEvent      = PROCEDURE (Sender : TObject; EntityDef : TEntityDef)                             OF OBJECT;
+  TNotationEvent    = PROCEDURE (Sender : TObject; NotationDef : TNotationDef)                         OF OBJECT;
+  TErrorEvent       = PROCEDURE (Sender : TObject; ErrorPos : PChar)                                   OF OBJECT;
+  TExternalEvent    = PROCEDURE (Sender : TObject; SystemId, PublicId, NotationId : STRING;
+                                 VAR Result : TXmlParser)                                              OF OBJECT;
+  TEncodingEvent    = FUNCTION  (Sender : TObject; CurrentEncoding, Source : STRING) : STRING          OF OBJECT;
+
+
+  TCustomXmlScanner = CLASS (TComponent)
+    PROTECTED
+      FXmlParser           : TXmlParser;
+      FOnXmlProlog         : TXmlPrologEvent;
+      FOnComment           : TCommentEvent;
+      FOnPI                : TPIEvent;
+      FOnDtdRead           : TDtdEvent;
+      FOnStartTag          : TStartTagEvent;
+      FOnEmptyTag          : TStartTagEvent;
+      FOnEndTag            : TEndTagEvent;
+      FOnContent           : TContentEvent;
+      FOnCData             : TContentEvent;
+      FOnElement           : TElementEvent;
+      FOnAttList           : TElementEvent;
+      FOnEntity            : TEntityEvent;
+      FOnNotation          : TNotationEvent;
+      FOnDtdError          : TErrorEvent;
+      FOnLoadExternal      : TExternalEvent;
+      FOnTranslateEncoding : TEncodingEvent;
+      FStopParser          : BOOLEAN;
+      FUNCTION  GetNormalize : BOOLEAN;
+      PROCEDURE SetNormalize (Value : BOOLEAN);
+
+      PROCEDURE WhenXmlProlog(XmlVersion, Encoding: STRING; Standalone : BOOLEAN); VIRTUAL;
+      PROCEDURE WhenComment  (Comment : STRING);                                   VIRTUAL;
+      PROCEDURE WhenPI       (Target, Content: STRING; Attributes : TAttrList);    VIRTUAL;
+      PROCEDURE WhenDtdRead  (RootElementName : STRING);                           VIRTUAL;
+      PROCEDURE WhenStartTag (TagName : STRING; Attributes : TAttrList);           VIRTUAL;
+      PROCEDURE WhenEmptyTag (TagName : STRING; Attributes : TAttrList);           VIRTUAL;
+      PROCEDURE WhenEndTag   (TagName : STRING);                                   VIRTUAL;
+      PROCEDURE WhenContent  (Content : STRING);                                   VIRTUAL;
+      PROCEDURE WhenCData    (Content : STRING);                                   VIRTUAL;
+      PROCEDURE WhenElement  (ElemDef : TElemDef);                                 VIRTUAL;
+      PROCEDURE WhenAttList  (ElemDef : TElemDef);                                 VIRTUAL;
+      PROCEDURE WhenEntity   (EntityDef : TEntityDef);                             VIRTUAL;
+      PROCEDURE WhenNotation (NotationDef : TNotationDef);                         VIRTUAL;
+      PROCEDURE WhenDtdError (ErrorPos : PChar);                                   VIRTUAL;
+      
+    PUBLIC
+      CONSTRUCTOR Create (AOwner: TComponent); OVERRIDE;
+      DESTRUCTOR Destroy;                      OVERRIDE;
+
+      PROCEDURE LoadFromFile   (Filename : TFilename);   // Load XML Document from file
+      PROCEDURE LoadFromBuffer (Buffer : PChar);         // Load XML Document from buffer
+      PROCEDURE SetBuffer      (Buffer : PChar);         // Refer to Buffer
+      FUNCTION  GetFilename : TFilename;
+
+      PROCEDURE Execute;                                 // Perform scanning
+
+    PROTECTED
+      PROPERTY XmlParser           : TXmlParser        READ FXmlParser;
+      PROPERTY StopParser          : BOOLEAN           READ FStopParser          WRITE FStopParser;
+      PROPERTY Filename            : TFilename         READ GetFilename          WRITE LoadFromFile;
+      PROPERTY Normalize           : BOOLEAN           READ GetNormalize         WRITE SetNormalize;
+      PROPERTY OnXmlProlog         : TXmlPrologEvent   READ FOnXmlProlog         WRITE FOnXmlProlog;
+      PROPERTY OnComment           : TCommentEvent     READ FOnComment           WRITE FOnComment;
+      PROPERTY OnPI                : TPIEvent          READ FOnPI                WRITE FOnPI;
+      PROPERTY OnDtdRead           : TDtdEvent         READ FOnDtdRead           WRITE FOnDtdRead;
+      PROPERTY OnStartTag          : TStartTagEvent    READ FOnStartTag          WRITE FOnStartTag;
+      PROPERTY OnEmptyTag          : TStartTagEvent    READ FOnEmptyTag          WRITE FOnEmptyTag;
+      PROPERTY OnEndTag            : TEndTagEvent      READ FOnEndTag            WRITE FOnEndTag;
+      PROPERTY OnContent           : TContentEvent     READ FOnContent           WRITE FOnContent;
+      PROPERTY OnCData             : TContentEvent     READ FOnCData             WRITE FOnCData;
+      PROPERTY OnElement           : TElementEvent     READ FOnElement           WRITE FOnElement;
+      PROPERTY OnAttList           : TElementEvent     READ FOnAttList           WRITE FOnAttList;
+      PROPERTY OnEntity            : TEntityEvent      READ FOnEntity            WRITE FOnEntity;
+      PROPERTY OnNotation          : TNotationEvent    READ FOnNotation          WRITE FOnNotation;
+      PROPERTY OnDtdError          : TErrorEvent       READ FOnDtdError          WRITE FOnDtdError;
+      PROPERTY OnLoadExternal      : TExternalEvent    READ FOnLoadExternal      WRITE FOnLoadExternal;
+      PROPERTY OnTranslateEncoding : TEncodingEvent    READ FOnTranslateEncoding WRITE FOnTranslateEncoding;
+    END;
+
+(*
+===============================================================================================
 IMPLEMENTATION
 ===============================================================================================
 *)
@@ -578,7 +688,7 @@ END;
 
 
 FUNCTION  Utf8ToAnsi (Source : STRING; UnknownChar : CHAR = '¿') : ANSISTRING;
-          (* Converts the given UTF-8 String to Windows ANSI.
+          (* Converts the given UTF-8 String to Windows ANSI (Win-1252).
              If a character can not be converted, the "UnknownChar" is inserted. *)
 VAR
   SourceLen : INTEGER;  // Length of Source string
@@ -2068,13 +2178,14 @@ END;
 
 
 FUNCTION  TXmlParser.TranslateEncoding  (CONST Source : STRING) : STRING;
-          // The Object Variable "CurEncoding" always holds the name of the current
+          // The member variable "CurEncoding" always holds the name of the current
           // encoding, e.g. 'UTF-8' or 'ISO-8859-1'.
           // This virtual method "TranslateEncoding" is responsible for translating
           // the content passed in the "Source" parameter to the Encoding which
           // is expected by the application.
           // This instance of "TranlateEncoding" assumes that the Application expects
-          // Windows ANSI strings. It is able to transform UTF-8 or ISO-8859-1 encodings.
+          // Windows ANSI (Win1252) strings. It is able to transform UTF-8 or ISO-8859-1
+          // encodings.
           // If you want your application to understand or create other encodings, you
           // override this function.
 BEGIN
@@ -2342,5 +2453,244 @@ BEGIN
 END;
 
 
-END.
+(*
+===============================================================================================
+TScannerXmlParser
+A TXmlParser descendant for the TCustomXmlScanner component
+===============================================================================================
+*)
 
+TYPE
+  TScannerXmlParser = CLASS (TXmlParser)
+                       Scanner : TCustomXmlScanner;
+                       CONSTRUCTOR Create (TheScanner : TCustomXmlScanner);
+                       FUNCTION  LoadExternalEntity (SystemId, PublicId,
+                                                     Notation : STRING) : TXmlParser;  OVERRIDE;
+                       FUNCTION  TranslateEncoding  (CONST Source : STRING) : STRING;  OVERRIDE;
+                       PROCEDURE DtdElementFound (DtdElementRec : TDtdElementRec);     OVERRIDE;
+                      END;
+
+CONSTRUCTOR TScannerXmlParser.Create (TheScanner : TCustomXmlScanner);
+BEGIN
+  INHERITED Create;
+  Scanner := TheScanner;
+END;
+
+
+FUNCTION  TScannerXmlParser.LoadExternalEntity (SystemId, PublicId, Notation : STRING) : TXmlParser;
+BEGIN
+  IF Assigned (Scanner.FOnLoadExternal)
+    THEN Scanner.FOnLoadExternal (Scanner, SystemId, PublicId, Notation, Result)
+    ELSE Result :=  INHERITED LoadExternalEntity (SystemId, PublicId, Notation);
+END;
+
+
+FUNCTION  TScannerXmlParser.TranslateEncoding  (CONST Source : STRING) : STRING;
+BEGIN
+  IF Assigned (Scanner.FOnTranslateEncoding)
+    THEN Result := Scanner.FOnTranslateEncoding (Scanner, CurEncoding, Source)
+    ELSE Result := INHERITED TranslateEncoding (Source);
+END;
+
+
+PROCEDURE TScannerXmlParser.DtdElementFound (DtdElementRec : TDtdElementRec);
+BEGIN
+  WITH DtdElementRec DO
+    CASE ElementType OF
+      deElement  : Scanner.WhenElement  (ElemDef);
+      deAttList  : Scanner.WhenAttList  (ElemDef);
+      deEntity   : Scanner.WhenEntity   (EntityDef);
+      deNotation : Scanner.WhenNotation (NotationDef);
+      dePI       : Scanner.WhenPI       (STRING (Target), STRING (Content), AttrList);
+      deComment  : Scanner.WhenComment  (StrSFPas (Start, Final));
+      deError    : Scanner.WhenDtdError (Pos);
+      END;
+END;
+
+
+(*
+===============================================================================================
+TCustomXmlScanner
+===============================================================================================
+*)
+
+CONSTRUCTOR TCustomXmlScanner.Create (AOwner: TComponent);
+BEGIN
+  INHERITED;
+  FXmlParser := TScannerXmlParser.Create (Self);
+END;
+
+
+DESTRUCTOR TCustomXmlScanner.Destroy;
+BEGIN
+  FXmlParser.Free;
+  INHERITED;
+END;
+
+
+PROCEDURE TCustomXmlScanner.LoadFromFile (Filename : TFilename);
+          // Load XML Document from file
+BEGIN
+  FXmlParser.LoadFromFile (Filename);
+END;
+
+
+PROCEDURE TCustomXmlScanner.LoadFromBuffer (Buffer : PChar);
+          // Load XML Document from buffer
+BEGIN
+  FXmlParser.LoadFromBuffer (Buffer);
+END;
+
+
+PROCEDURE TCustomXmlScanner.SetBuffer (Buffer : PChar);
+          // Refer to Buffer
+BEGIN
+  FXmlParser.SetBuffer (Buffer);
+END;
+
+
+FUNCTION  TCustomXmlScanner.GetFilename : TFilename;
+BEGIN
+  Result := FXmlParser.Source;
+END;
+
+
+FUNCTION  TCustomXmlScanner.GetNormalize : BOOLEAN;
+BEGIN
+  Result := FXmlParser.Normalize;
+END;
+
+
+PROCEDURE TCustomXmlScanner.SetNormalize (Value : BOOLEAN);
+BEGIN
+  FXmlParser.Normalize := Value;
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenXmlProlog(XmlVersion, Encoding: STRING; Standalone : BOOLEAN);
+          // Is called when the parser has parsed the <? xml ?> declaration of the prolog
+BEGIN
+  IF Assigned (FOnXmlProlog) THEN FOnXmlProlog (Self, XmlVersion, Encoding, Standalone);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenComment  (Comment : STRING);
+          // Is called when the parser has parsed a <!-- comment -->
+BEGIN
+  IF Assigned (FOnComment) THEN FOnComment (Self, Comment);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenPI (Target, Content: STRING; Attributes : TAttrList);
+          // Is called when the parser has parsed a <?processing instruction ?>
+BEGIN
+  IF Assigned (FOnPI) THEN FOnPI (Self, Target, Content, Attributes);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenDtdRead (RootElementName : STRING);
+          // Is called when the parser has completely parsed the DTD
+BEGIN
+  IF Assigned (FOnDtdRead) THEN FOnDtdRead (Self, RootElementName);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenStartTag (TagName : STRING; Attributes : TAttrList);
+          // Is called when the parser has parsed a start tag like <p>
+BEGIN
+  IF Assigned (FOnStartTag) THEN FOnStartTag (Self, TagName, Attributes);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenEmptyTag (TagName : STRING; Attributes : TAttrList);
+          // Is called when the parser has parsed an Empty Element Tag like <br/>
+BEGIN
+  IF Assigned (FOnEmptyTag) THEN FOnEmptyTag (Self, TagName, Attributes);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenEndTag (TagName : STRING);
+          // Is called when the parser has parsed an End Tag like </p>
+BEGIN
+  IF Assigned (FOnEndTag) THEN FOnEndTag (Self, TagName);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenContent (Content : STRING);
+          // Is called when the parser has parsed an element's text content
+BEGIN
+  IF Assigned (FOnContent) THEN FOnContent (Self, Content);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenCData (Content : STRING);
+          // Is called when the parser has parsed a CDATA section
+BEGIN
+  IF Assigned (FOnCData) THEN FOnCData (Self, Content);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenElement (ElemDef : TElemDef);
+          // Is called when the parser has parsed an <!ELEMENT> definition
+          // inside the DTD
+BEGIN
+  IF Assigned (FOnElement) THEN FOnElement (Self, ElemDef);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenAttList (ElemDef : TElemDef);
+          // Is called when the parser has parsed an <!ATTLIST> definition
+          // inside the DTD
+BEGIN
+  IF Assigned (FOnAttList) THEN FOnAttList (Self, ElemDef);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenEntity   (EntityDef : TEntityDef);
+          // Is called when the parser has parsed an <!ENTITY> definition
+          // inside the DTD
+BEGIN
+  IF Assigned (FOnEntity) THEN FOnEntity (Self, EntityDef);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenNotation (NotationDef : TNotationDef);
+          // Is called when the parser has parsed a <!NOTATION> definition
+          // inside the DTD
+BEGIN
+  IF Assigned (FOnNotation) THEN FOnNotation (Self, NotationDef);
+END;
+
+
+PROCEDURE TCustomXmlScanner.WhenDtdError (ErrorPos : PChar);
+          // Is called when the parser has found an Error in the DTD
+BEGIN
+  IF Assigned (FOnDtdError) THEN FOnDtdError (Self, ErrorPos);
+END;
+
+
+PROCEDURE TCustomXmlScanner.Execute;
+          // Perform scanning
+          // Scanning is done synchronously, i.e. you can expect events to be triggered
+          // in the order of the XML data stream. Execute will finish when the whole XML
+          // document has been scanned or when the StopParser property has been set to TRUE.
+BEGIN
+  FStopParser := FALSE;
+  FXmlParser.StartScan;
+  WHILE FXmlParser.Scan AND (NOT FStopParser) DO
+    CASE FXmlParser.CurPartType OF
+      ptNone      : ;
+      ptXmlProlog : WhenXmlProlog (FXmlParser.XmlVersion, FXmlParser.Encoding, FXmlParser.Standalone);
+      ptComment   : WhenComment   (StrSFPas (FXmlParser.CurStart, FXmlParser.CurFinal));
+      ptPI        : WhenPI        (FXmlParser.CurName, FXmlParser.CurContent, FXmlParser.CurAttr);
+      ptDtdc      : WhenDtdRead   (FXmlParser.RootName);
+      ptStartTag  : WhenStartTag  (FXmlParser.CurName, FXmlParser.CurAttr);
+      ptEmptyTag  : WhenEmptyTag  (FXmlParser.CurName, FXmlParser.CurAttr);
+      ptEndTag    : WhenEndTag    (FXmlParser.CurName);
+      ptContent   : WhenContent   (FXmlParser.CurContent);
+      ptCData     : WhenCData     (FXmlParser.CurContent);
+      END;
+END;
+
+
+END.
