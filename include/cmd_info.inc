@@ -105,7 +105,10 @@ begin
             begin
             obj_in := node.element;
 
-            act(AT_REPORT,'   $p',false,ch,obj_in,nil,TO_CHAR);
+            if (obj_in.count > 1) then
+              act(AT_REPORT,'   $p [$4'+inttostr(obj_in.count)+'$7x]',false,ch,obj_in,nil,TO_CHAR)
+            else
+              act(AT_REPORT,'   $p',false,ch,obj_in,nil,TO_CHAR);
 
             node := node.next;
             end;
@@ -1410,15 +1413,14 @@ begin
     exit;
     end;
 
-  if (param[1] in ['0'..'9']) then
-    begin
+  try
     value := strtoint(param);
-    end
-  else
+  except
     begin
     ch.sendBuffer('Value must be a number.'#13#10);
     exit;
     end;
+  end;
 
   if (value < 15) then
     begin

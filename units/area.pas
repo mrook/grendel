@@ -1534,7 +1534,7 @@ var
    num, cnt : integer;
 begin
   node := objects.head;
-  num := findnumber(name);
+  num := findNumber(name);
   findObject := nil;
   cnt := 0;
 
@@ -1544,9 +1544,9 @@ begin
 
     if (pos(name, obj.name) > 0) or (pos(name, obj.short) > 0) or (pos(name, obj.long) > 0) then
       begin
-      inc(cnt);
+      inc(cnt, obj.count);
 
-      if (cnt = num) then
+      if (cnt >= num) then
         begin
         findObject := obj;
         exit;
@@ -2040,7 +2040,8 @@ begin
    (Self.value[1] = obj.value[1]) and
    (Self.value[2] = obj.value[2]) and
    (Self.value[3] = obj.value[3]) and
-   (Self.value[4] = obj.value[4]) then
+   (Self.value[4] = obj.value[4]) and
+   (Self.contents.getSize() = 0) and (obj.contents.getSize() = 0) then
     begin
     inc(count, obj.count);
 
