@@ -1,4 +1,4 @@
-// $Id: cmd_move.inc,v 1.6 2004/03/06 20:18:40 ***REMOVED*** Exp $
+// $Id: cmd_move.inc,v 1.7 2004/03/07 15:36:50 ***REMOVED*** Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
@@ -232,7 +232,7 @@ begin
 
     if (vict.IS_NPC) then
       begin
-      if (GNPC(vict).context.runSymbol('onBlock', [integer(vict), integer(ch)])) then	
+      if (GNPC(vict).context.runSymbol('onBlock', [integer(vict), integer(ch), headings[pexit.direction]])) then	
       	begin       
         if (GNPC(vict).context.getResult()) and (not ch.IS_HOLYWALK) then
           begin

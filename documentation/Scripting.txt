@@ -172,8 +172,8 @@ void onReset(external ch)
 void onGive(external ch, external target, external obj)
  - is called when 'target' gives 'obj' to 'ch'
  
-bool onBlock(external ch, external target)
- - is called when 'target' tries to leave a room with 'ch' blocking
+bool onBlock(external ch, external target, string dir)
+ - is called when 'target' tries to leave a room (in direction 'dir') with 'ch' blocking
  
 void onEmoteTarget(external victim, external actor, string arg)
  - is called when (e.g.) mob is target of an emote (e.g. 'slap <mobname>');
