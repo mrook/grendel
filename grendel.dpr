@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.85 2003/10/30 19:52:02 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.86 2003/11/07 21:03:59 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -85,6 +85,7 @@ uses
   Channels,
   Bulletinboard,
   progs,
+  events,
   area,
   race;
 
@@ -208,6 +209,9 @@ begin
 
 	writeConsole('Cleaning notes...');
 	cleanupNotes();
+
+	writeConsole('Cleaning events...');
+	cleanupEvents();
 
 	str_hash.Free();
 	
@@ -474,6 +478,7 @@ begin
 	initRaces();
 	initNotes();
 	initSystem();
+	initEvents();
 
 	{$IFDEF WIN32}
 		{$IFNDEF CONSOLEBUILD}
