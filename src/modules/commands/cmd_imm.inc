@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.2 2003/12/12 23:01:21 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.3 2004/01/27 00:17:35 hemko Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1674,7 +1674,12 @@ begin
   param := one_argument(param, objstr);
   param := one_argument(param, victstr);
 
-  vict := findCharWorld(ch, victstr);
+  // First search in room
+  vict := ch.room.findChar(ch, victstr);
+
+  // Then search global
+  if (vict = nil) then
+    vict := findCharWorld(ch, victstr);
 
   if (vict=nil) then
     begin
