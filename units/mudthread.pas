@@ -1263,6 +1263,7 @@ begin
   registerCommand('do_unlearn', do_unlearn);
   registerCommand('do_hashstats', do_hashstats);
   registerCommand('do_keylock', do_keylock);
+  registerCommand('do_holywalk', do_holywalk);
 end;
 
 begin

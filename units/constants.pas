@@ -157,20 +157,21 @@ const COND_DRUNK=1;                  { alcohol }
       POS_BASHED=14;
 
 { spell affects }
-const AFF_BLIND=BV00;
-      AFF_INVISIBLE=BV01;
-      AFF_DETECT_INVIS=BV02;
-      AFF_DETECT_HIDDEN=BV03;
-      AFF_SANCTUARY=BV04;
-      AFF_INFRAVISION=BV05;
-      AFF_POISON=BV06;
-      AFF_FLYING=BV07;
-      AFF_BERSERK=BV08;
-      AFF_AQUA_BREATH=BV09;
-      AFF_PLAGUE=BV10;
-      AFF_HIDE=BV11;
-      AFF_SNEAK=BV12;
-      AFF_ENCHANT=BV13;             { magical attacks }
+const AFF_BLIND = BV00;
+      AFF_INVISIBLE = BV01;
+      AFF_DETECT_INVIS = BV02;
+      AFF_DETECT_HIDDEN = BV03;
+      AFF_SANCTUARY = BV04;
+      AFF_INFRAVISION = BV05;
+      AFF_POISON = BV06;
+      AFF_FLYING = BV07;
+      AFF_BERSERK = BV08;
+      AFF_AQUA_BREATH = BV09;
+      AFF_PLAGUE = BV10;
+      AFF_HIDE = BV11;
+      AFF_SNEAK = BV12;
+      AFF_ENCHANT = BV13;             { magical attacks }
+      AFF_HOLYWALK = BV14;          { walk thru anything }
 
 { PC status flags}
 const PLR_NPC=BV00;
