@@ -403,6 +403,11 @@ const CON_PLAYING=0;
                 'CON_PRESS_ENTER','CON_MOTD','CON_EDITING',
                 'CON_LOGGED_OUT','CON_CHECK_PASSWORD');
 
+{ character substate }
+const SUB_NONE = 0;
+      SUB_PLAYER_DESC = 1;
+      SUB_ROOM_DESC = 2;
+
 { act targets }
 const TO_ROOM=0;
       TO_VICT=1;
