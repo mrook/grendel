@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.3 2003/12/12 22:30:12 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.4 2003/12/12 22:34:34 ***REMOVED*** Exp $
 #
 
 
@@ -60,6 +60,7 @@ clean:
 	$(RM) $(CORE)
 	$(RM) *.map
 	$(RM) *.dcu
+	$(RM) *.dpu
 	$(RM) *.drc
 	$(RM) *.dcp
 	$(MAKE) -C gmc clean
