@@ -7,10 +7,11 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 
 The Grendel Project is (c) 2000,2001 by Michiel Rook. 
-Additional code by Hemko de Visser and Oscar Martin.
+Additional code by Hemko de Visser, Roeland van Houte and Oscar Martin.
 Additional documentation and FAQs by Jeremiah Davis.
 
 
+Uses the LibXmlParser unit (c) Stefan Heymann.
 Uses the MemCheck unit (c) Jean Marc Eber & Vincent Mahon.
 Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
 Uses a modified version of the AnsiIO unit (c) Gayle Davis.
