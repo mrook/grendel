@@ -54,10 +54,11 @@ SEP					" "
 SEPS				{SEPS}*
 
 BOOLOP			"&&"|"||"|"<"|">"|"=<"|">="|"=="
-RESERV			"!"|"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"|":"|";"|"`"|"="|"/"|"?"|"-"|"+"
+RESERV			"!"|"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"|":"|";"|"`"|"="|"/"|"?"|"-"|"+"|"'"
 EXTRA				"_"
+ESCAPE      "\\\""
 
-ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
+ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}|{ESCAPE}
 
 %start INITIAL LINEMODE COMMENT
 
@@ -118,7 +119,7 @@ ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
 															varName := yytext;
 															return(LINE);
 															end;
-
+															
 <LINEMODE>"\""								begin
 															start(INITIAL);
 											        returnc(yytext[1]);
