@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.11 2001/07/17 20:42:17 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.12 2001/08/14 09:37:37 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -58,6 +58,7 @@ function translateFileName(fn : string) : string;
 implementation
 
 uses
+  mudsystem,
   dtypes;
 
 
@@ -108,10 +109,10 @@ begin
     fpos := 0;
     end;
 
-  if (c = #13) or (c = #10) then
+  if (c = #10) then
     begin
-    if (buffer[fpos] = #13) or (buffer[fpos] = #10) then
-      readChar;
+//    if (buffer[fpos] = #13) or (buffer[fpos] = #10) then
+//      readChar;
       
     inc(line);
     feol := true;
@@ -148,6 +149,7 @@ var
    c : char;
 begin
   c := ' ';
+  feol := false;
   pos := 0;
 
   while (not eof()) do
@@ -166,13 +168,14 @@ begin
         pos := MAX_LINESIZE;
         break;
         end;
-      end
-    else
+      end;
+      
+    if (c = #10) then
       break;
     end;
 
   chars[pos] := #0;
-
+   
   readLine := chars;
 end;
 
@@ -181,9 +184,9 @@ var c : char;
     number : integer;
     sign : boolean;
 begin
-  c := ' ';
+  c := readChar();
 
-  while (c in [' ', #13, #10]) do
+  while (not (c in ['0'..'9','-','+'])) do
     begin
     if (eof) then
       begin
@@ -212,15 +215,20 @@ begin
     exit;
     end;
 
-  while (c in ['0'..'9']) do
+  while (true) do
     begin
     if (eof) then
       begin
       Result := number;
       exit;
       end;
-
-    number := number * 10 + byte(c) - byte('0');
+      
+    if (not (c in ['0'..'9'])) and (c <> #13) then
+      break
+    else
+    if (c <> #13) then
+      number := number * 10 + byte(c) - byte('0');
+      
     c := readChar;
     end;
 
@@ -238,9 +246,9 @@ var c : char;
     number : cardinal;
     sign : boolean;
 begin
-  c := ' ';
+  c := readChar();
 
-  while (c in [' ', #13, #10]) do
+  while (not (c in ['0'..'9','-','+'])) do
     begin
     if (eof) then
       begin
@@ -269,7 +277,7 @@ begin
     exit;
     end;
 
-  while (c in ['0'..'9']) do
+  while (true) do
     begin
     if (eof) then
       begin
@@ -277,7 +285,12 @@ begin
       exit;
       end;
 
-    number := number * 10 + byte(c) - byte('0');
+    if (not (c in ['0'..'9'])) and (c <> #13) then
+      break
+    else
+    if (c <> #13) then
+      number := number * 10 + byte(c) - byte('0');
+      
     c := readChar;
     end;
 
@@ -286,7 +299,7 @@ begin
 
   if (c = '|') then
     inc(number, readCardinal);
-
+    
   Result := number;
 end;
 
@@ -297,7 +310,7 @@ var
   pword : pchar;
   c : char;
 begin
-  c := ' ';
+  c := readChar;
 
   while (c in [' ', #13, #10]) do
     begin
@@ -332,23 +345,24 @@ begin
 
     pword^ := readChar;
 
-    if (quoted) and (pword^ in ['''', '"', #13, #10]) then
+    if (quoted) and (pword^ in ['''', '"', #10]) then
       begin
       pword^ := #0;
       Result := word;
       exit;
       end
     else
-    if (not quoted) and (pword^ in [' ', #13, #10]) then
+    if (not quoted) and (pword^ in [' ', #10]) then
       begin
       pword^ := #0;
       Result := word;
       exit;
       end;
 
-    inc(pword);
+    if (pword^ <> #13) then
+      inc(pword);
   until (pword > word + 255);
-
+  
   Result := '';
 end;
 
