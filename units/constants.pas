@@ -229,6 +229,7 @@ const ITEM_WEAPON=1;
       ITEM_FOUNTAIN=12;
       ITEM_BLOOD=13;
       ITEM_PORTAL=14;
+      ITEM_KEY=15;
 
 { Wear constants }
 const eq_string:array[1..MAX_WEAR] of string=
