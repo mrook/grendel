@@ -157,6 +157,10 @@ type 	Root = class
         le, re : BoolExpr;
 			end;
 
+			BoolExpr_Not = class(BoolExpr)
+        ex : BoolExpr;
+			end;
+
 			BoolExpr_Rel = class(BoolExpr)
         op : string;
         le, re : Expr;
@@ -230,7 +234,7 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %token ILLEGAL 		/* illegal token */
 %token _IF _ELSE _ASM
 %token _TRUE _FALSE
-%token _AND _OR
+%token _AND _OR _NOT
 %token _RELGT _RELLT _RELGTE _RELLTE _RELEQ
 %token _RETURN _BREAK _CONTINUE
 %token _DO _SLEEP _WAIT _SIGNAL _WHILE _FOR _REQUIRE
@@ -398,14 +402,15 @@ expr 	:  { $$ := nil; }
 
 boolexpr : _TRUE				 { $$ := BoolExpr_Const.Create; $$.lineNum := yylineno; BoolExpr_Const($$).value := True; $$.lineNum := yylineno;}
 				 | _FALSE				 { $$ := BoolExpr_Const.Create; $$.lineNum := yylineno; BoolExpr_Const($$).value := False; $$.lineNum := yylineno;}
+         | _NOT boolexpr      { $$ := BoolExpr_Not.Create; $$.lineNum := yylineno; BoolExpr_Not($$).ex := $2; };
          | boolexpr _AND boolexpr	 	{ $$ := BoolExpr_And.Create; $$.lineNum := yylineno; BoolExpr_And($$).le := $1; BoolExpr_And($$).re := $3; $$.lineNum := yylineno;}
          | boolexpr _OR boolexpr	 	{ $$ := BoolExpr_Or.Create; $$.lineNum := yylineno; BoolExpr_Or($$).le := $1; BoolExpr_Or($$).re := $3; $$.lineNum := yylineno;}
          | expr _RELGT expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '>';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
          | expr _RELLT expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '<';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELGTE expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '>=';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELLTE expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '=<';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
+         | expr _RELGTE expr  { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '>=';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
+         | expr _RELLTE expr  { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '=<';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
          | expr _RELEQ expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '==';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | '(' boolexpr ')' 			 	{ $$ := $2; }
+         | '(' boolexpr ')' 	{ $$ := $2; }
          ;
 
 
@@ -623,6 +628,18 @@ begin
 
   if (expr is BoolExpr_Const) then 
 		expr.typ := _BOOL
+  else
+  if (expr is BoolExpr_Not) then 
+    begin
+	  BoolExpr_Not(expr).ex := typeBoolExpr(BoolExpr_Not(expr).ex);
+
+		t1 := BoolExpr_And(expr).le.typ;
+
+    if (t1 <> _BOOL) then
+      compilerError(expr.lineNum, 'expression should be boolean');
+
+    expr.typ := _BOOL;
+    end
   else
   if (expr is BoolExpr_And) then 
     begin
@@ -1080,6 +1097,12 @@ begin
       emit('PUSHI 1')
     else
       emit('PUSHI 0');
+    end
+  else
+  if (expr is BoolExpr_Not) then 
+    begin
+    showBoolExpr(BoolExpr_Not(expr).ex);
+    emit('NOT');
     end
   else
   if (expr is BoolExpr_And) then 

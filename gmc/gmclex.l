@@ -10,7 +10,7 @@ type
 			end;
 
 const 
-			KWSize = 28;
+			KWSize = 29;
 			KWTable : array[1..KWSize] of Keyword = (
 																							(kw:'true'; state:_TRUE), 
 																							(kw:'false'; state:_FALSE),
@@ -18,6 +18,7 @@ const
 																							(kw:'else'; state:_ELSE),
 																							(kw:'&&'; state:_AND),
 																							(kw:'||'; state:_OR),
+																							(kw:'!'; state:_NOT),
 																							(kw:'>'; state:_RELGT),
 																							(kw:'<'; state:_RELLT),
 																							(kw:'>='; state:_RELGTE),
@@ -53,8 +54,8 @@ ALPHANUM    {ALPHA}|{DIGIT}
 SEP					" "
 SEPS				{SEPS}*
 
-BOOLOP			"&&"|"||"|"<"|">"|"=<"|">="|"=="
-RESERV			"!"|"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"|":"|";"|"`"|"="|"/"|"?"|"-"|"+"|"'"
+BOOLOP			"!"|"&&"|"||"|"<"|">"|"=<"|">="|"=="
+RESERV			"*"|"("|")"|","|"."|"\~"|"|"|"["|"]"|":"|";"|"`"|"="|"/"|"?"|"-"|"+"|"'"
 EXTRA				"_"
 ESCAPE      "\\\""
 

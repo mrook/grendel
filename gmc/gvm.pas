@@ -419,6 +419,10 @@ begin
                 push(v1 / v2);
                 inc(pc);
                 end;
+      _Not    : begin
+                push(not pop());
+                inc(pc);
+                end;
       _AND    : begin
                 push(pop() and pop());
                 inc(pc);

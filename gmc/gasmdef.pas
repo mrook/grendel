@@ -28,6 +28,7 @@ const
 	_LTE = $94;
 	_GTE = $95;
 	_EQ = $96;
+	_NOT = $97;
 
 	_JMP = $A0;
 	_JNZ = $A1;
@@ -57,7 +58,7 @@ const
 	_SUBSP = $E5;
 	_MTSD = $E6;
 
-  opcodeNum = 41;
+  opcodeNum = 42;
 	
 	opcodes : array[1..opcodeNum] of opcode_trans = (
                                                 (keyword:'NOP'; opcode:_NOP),
@@ -79,6 +80,7 @@ const
                                                 (keyword:'LTE'; opcode:_LTE),
                                                 (keyword:'GTE'; opcode:_GTE),
                                                 (keyword:'EQ'; opcode:_EQ),
+                                                (keyword:'NOT'; opcode:_NOT),
 
 																								(keyword:'JMP'; opcode:_JMP),
 																								(keyword:'JNZ'; opcode:_JNZ),
