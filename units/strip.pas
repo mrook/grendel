@@ -3,7 +3,7 @@ unit strip;
 interface
 uses Sysutils;
 
-function stripl(s:string;f:char):string;
+function stripl(s:string;f:char):string;  // returns everything from string s before char f
 
 function striplend(s:string; f:char):string;
 
@@ -15,7 +15,7 @@ function CharsInStr(s:string;what:char):integer;
 
 implementation
 
-function stripl(s:string;f:char):string;
+function stripl(s:string;f:char):string;  // returns everything from string s before char f
 var i:integer;
     g:string;
 begin
