@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.2 2001/04/27 14:14:43 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.3 2001/04/27 21:23:46 xenon Exp $
 
 {
 TODO:
@@ -791,7 +791,7 @@ begin
   else
     write_console(Format('%d channels loaded from file %s and registered.', [channellist.getSize(), channelDataFile]));
 
-  writeChannelsToConsole();
+//  writeChannelsToConsole();
   channels_loaded := true;
 end;
 
