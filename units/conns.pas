@@ -60,6 +60,7 @@ var
    connection_list : GDLinkedList;
 
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
+function act_color(to_ch : GCharacter; acts : string) : string;
 
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);
@@ -124,6 +125,8 @@ var
    l, p : integer;
    v6 : TSockAddr6;
    v4 : TSockAddr;
+   t : PSockAddr;
+   funky : array[0..255] of char;
 begin
   inherited Create;
 
@@ -141,6 +144,18 @@ begin
     move(addr, v4, sizeof(v4));
 
     ip_string := inet_ntoa(v4.sin_addr);
+
+    if (system_info.lookup_hosts) then
+      begin
+      h := gethostbyaddr(@v4.sin_addr.s_addr, 4, AF_INET);
+
+      if (h <> nil) then
+        host_string := h.h_name
+      else
+        host_string := ip_string;
+      end
+    else
+      host_string := ip_string;
     end
   else
   if (addr.ss_family = AF_INET6) then
@@ -170,22 +185,11 @@ begin
       if (ip_string <> '') then
         ip_string := ip_string + ':';
 
-      ip_string := ip_string + lowercase(inttohex(p, 4));
+      ip_string := ip_string + lowercase(inttohex(p, 1));
       end;
-    end;
 
-  if (system_info.lookup_hosts) then
-    begin
-    { h := gethostbyaddr(@a.sin_addr.s_addr, 4, PF_INET);
-
-    if (h <> nil) then
-      host_string := h.h_name
-    else
-      host_string := inet_ntoa(a.sin_addr); }
-    host_string := '';
-    end
-  else
     host_string := ip_string;
+    end;
 
   new(tel_val);
 
@@ -379,7 +383,7 @@ begin
   else
     c := ch;
 
-  pclines := UMin(ch.player^.pagerlen, 5) - 2;
+  pclines := UMax(ch.player^.pagerlen, 5) - 2;
 
   c.emptyBuffer;
 
@@ -477,12 +481,50 @@ begin
     playername := 'you';
 end;
 
+function act_color(to_ch : GCharacter; acts : string) : string;
+var
+   t : integer;
+   boldflag:boolean;
+   s, i : string;
+begin
+  t := 1;
+  s := '';
+  boldflag := false;
+
+  while (t <= length(acts)) do
+    begin
+    if (acts[t] = '$') then
+      begin
+      inc(t);
+      i := '';
+
+      case acts[t] of
+        'B': boldflag := true;
+        'A': boldflag := false;
+   '0'..'9': begin
+             if (boldflag) then
+               i := to_ch.ansiColor(strtoint(acts[t]) + 8)
+             else
+               i := to_ch.ansiColor(strtoint(acts[t]));
+             end;
+      end;
+
+      s := s + i;
+      end
+    else
+      s := s + acts[t];
+
+    inc(t);
+    end;
+
+  Result := s;
+end;
+
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
 var s, i : string;
     t : integer;
     vch : GCharacter;
     obj1, obj2 : TObject;
-    boldflag:boolean;
     ex : GExit;
 begin
   vch := arg2;
@@ -605,36 +647,7 @@ begin
 
   acts := cap(s);
 
-  s := '';
-  t := 1;
-
-  boldflag := false;
-
-  while (t <= length(acts)) do
-    begin
-    if (acts[t] = '$') then
-      begin
-      inc(t);
-      i := '';
-      case acts[t] of
-        'B': boldflag := true;
-        'A': boldflag := false;
-   '0'..'9': begin
-             if (boldflag) then
-               i := to_ch.ansiColor(strtoint(acts[t]) + 8)
-             else
-               i := to_ch.ansiColor(strtoint(acts[t]));
-             end;
-      end;
-      s := s + i;
-      end
-    else
-      s := s + acts[t];
-
-    inc(t);
-    end;
-
-  act_string := s;
+  act_string := act_color(to_ch, acts);
 end;
 
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
