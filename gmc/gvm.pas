@@ -128,8 +128,9 @@ begin
   if (cb = nil) then
     begin
     cb := GCodeBlock.Create;
-
     cb.symbols := GHashTable.Create(128);
+    
+    codeCache.put(fname, cb);
 
     assign(input, translateFileName(fname));
     {$I-}
