@@ -1,7 +1,7 @@
 #Include=texts.dat
-#Include=spells.hlp
-#Include=skills.hlp
-#Include=immortal.hlp
+#Include=spells.ghp
+#Include=skills.ghp
+#Include=immortal.ghp
 #Keyword=DAMAGE
 You miss your punch at a bat.
 You tickle a bat with your punch.
