@@ -1,0 +1,300 @@
+object Form1: TForm1
+  Left = 83
+  Top = 176
+  Width = 693
+  Height = 499
+  VertScrollBar.Range = 473
+  HorzScrollBar.Range = 689
+  ActiveControl = PageControl1
+  BorderIcons = [biSystemMenu]
+  BorderStyle = fbsSingle
+  Caption = 'Grendel Management Console'
+  Color = clBackground
+  Menu = MainMenu1
+  Position = poScreenCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  TextWidth = 6
+  object PageControl1: TPageControl
+    Left = 0
+    Top = 0
+    Width = 689
+    Height = 473
+    ActivePage = TabSheet2
+    TabOrder = 0
+    object TabSheet1: TTabSheet
+      Caption = 'Console'
+      object GroupBox3: TGroupBox
+        Left = 0
+        Top = 0
+        Width = 433
+        Height = 113
+        Caption = 'Webservice'
+        TabOrder = 0
+        object Edit8: TEdit
+          Left = 40
+          Top = 24
+          Width = 193
+          Height = 21
+          TabOrder = 0
+        end
+        object Label8: TLabel
+          Left = 8
+          Top = 24
+          Width = 25
+          Height = 13
+          Caption = 'Host:'
+        end
+        object Button2: TButton
+          Left = 248
+          Top = 24
+          Width = 75
+          Height = 25
+          Caption = 'Connect'
+          TabOrder = 2
+        end
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'Area builder'
+      ImageIndex = 1
+      object GroupBox1: TGroupBox
+        Left = 0
+        Top = 8
+        Width = 673
+        Height = 89
+        Caption = 'Area info'
+        TabOrder = 0
+        object Edit1: TEdit
+          Left = 48
+          Top = 24
+          Width = 137
+          Height = 21
+          TabOrder = 0
+        end
+        object Label1: TLabel
+          Left = 8
+          Top = 24
+          Width = 31
+          Height = 13
+          Caption = 'Name:'
+        end
+        object Label2: TLabel
+          Left = 192
+          Top = 24
+          Width = 34
+          Height = 13
+          Caption = 'Author:'
+        end
+        object Edit2: TEdit
+          Left = 232
+          Top = 24
+          Width = 105
+          Height = 21
+          TabOrder = 3
+        end
+        object Label3: TLabel
+          Left = 8
+          Top = 56
+          Width = 76
+          Height = 13
+          Caption = 'Reset message:'
+        end
+        object Edit3: TEdit
+          Left = 96
+          Top = 56
+          Width = 241
+          Height = 21
+          TabOrder = 5
+        end
+        object Edit4: TEdit
+          Left = 392
+          Top = 24
+          Width = 41
+          Height = 21
+          TabOrder = 6
+        end
+        object Button1: TButton
+          Left = 440
+          Top = 24
+          Width = 17
+          Height = 25
+          Caption = #183#183#183
+          TabOrder = 7
+        end
+        object Label4: TLabel
+          Left = 352
+          Top = 24
+          Width = 28
+          Height = 13
+          Caption = 'Flags:'
+        end
+        object Label5: TLabel
+          Left = 472
+          Top = 24
+          Width = 47
+          Height = 13
+          Caption = 'Max. age:'
+        end
+        object Edit5: TEdit
+          Left = 528
+          Top = 24
+          Width = 41
+          Height = 21
+          TabOrder = 10
+        end
+        object Label6: TLabel
+          Left = 352
+          Top = 56
+          Width = 51
+          Height = 13
+          Caption = 'Avg. temp:'
+        end
+        object Edit6: TEdit
+          Left = 416
+          Top = 56
+          Width = 41
+          Height = 21
+          TabOrder = 12
+        end
+        object Label7: TLabel
+          Left = 472
+          Top = 56
+          Width = 44
+          Height = 13
+          Caption = 'Multiplier:'
+        end
+        object Edit7: TEdit
+          Left = 528
+          Top = 56
+          Width = 41
+          Height = 21
+          TabOrder = 14
+        end
+        object Button3: TButton
+          Left = 584
+          Top = 24
+          Width = 75
+          Height = 25
+          Caption = 'Open'
+          TabOrder = 15
+          OnClick = Button3Click
+        end
+        object Button4: TButton
+          Left = 584
+          Top = 56
+          Width = 75
+          Height = 25
+          Caption = 'Save'
+          TabOrder = 16
+        end
+      end
+      object GroupBox2: TGroupBox
+        Left = 0
+        Top = 104
+        Width = 449
+        Height = 337
+        Caption = 'Map editor'
+        TabOrder = 1
+        object DrawGrid1: TDrawGrid
+          Left = 12
+          Top = 25
+          Width = 421
+          Height = 296
+          ColCount = 800
+          DefaultColWidth = 8
+          DefaultRowHeight = 8
+          FixedColor = clNone
+          FixedCols = 0
+          RowCount = 800
+          FixedRows = 0
+          ScrollBars = ssAutoBoth
+          TabOrder = 0
+          OnDrawCell = DrawGrid1DrawCell
+          OnMouseMove = DrawGrid1MouseMove
+        end
+      end
+      object GroupBox4: TGroupBox
+        Left = 456
+        Top = 112
+        Width = 217
+        Height = 89
+        Caption = 'Info'
+        TabOrder = 2
+        object Label9: TLabel
+          Left = 8
+          Top = 24
+          Width = 38
+          Height = 13
+          Caption = 'Extents:'
+        end
+        object Label10: TLabel
+          Left = 64
+          Top = 24
+          Width = 57
+          Height = 13
+          Caption = '0,0,0 - 0,0,0'
+        end
+      end
+      object GroupBox5: TGroupBox
+        Left = 456
+        Top = 208
+        Width = 217
+        Height = 233
+        Caption = 'Room'
+        TabOrder = 3
+        object Edit9: TEdit
+          Left = 56
+          Top = 24
+          Width = 41
+          Height = 21
+          TabOrder = 0
+        end
+        object Label11: TLabel
+          Left = 8
+          Top = 24
+          Width = 30
+          Height = 13
+          Caption = 'Vnum:'
+        end
+        object Memo1: TMemo
+          Left = 8
+          Top = 56
+          Width = 201
+          Height = 89
+          TabOrder = 2
+        end
+      end
+    end
+  end
+  object MainMenu1: TMainMenu
+    Left = 448
+    Top = 88
+    object File1: TMenuItem
+      Caption = '&File'
+      object Exit1: TMenuItem
+        Caption = 'E&xit'
+        OnClick = Exit1Click
+      end
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '.area'
+    FilterIndex = 0
+    Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofHideReadOnly]
+    Height = 0
+    Width = 0
+    Left = 604
+    Top = 146
+  end
+  object SaveDialog1: TSaveDialog
+    FilterIndex = 0
+    Height = 0
+    Title = 'Save'
+    Width = 0
+    Left = 636
+    Top = 154
+  end
+end
