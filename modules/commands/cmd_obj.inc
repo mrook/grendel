@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.8 2003/09/16 16:29:04 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.9 2003/10/15 13:57:59 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -36,7 +36,7 @@ begin
       node_next := node.next;
       obj := node.element;
 
-      if (IS_SET(obj.flags,OBJ_NOPICKUP)) then
+      if (IS_SET(obj.flags,OBJ_NOPICKUP) and (not ch.IS_IMMORT)) then
         begin
         ch.sendBuffer('You cannot pick that up.'#13#10);
         node := node_next;
@@ -172,7 +172,7 @@ begin
       exit;
       end;
 
-    if IS_SET(obj.flags,OBJ_NOPICKUP) then
+    if (IS_SET(obj.flags,OBJ_NOPICKUP) and (not ch.IS_IMMORT)) then
       begin
       ch.sendBuffer('You cannot pick that up.'#13#10);
       exit;
