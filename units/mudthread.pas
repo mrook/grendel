@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.59 2001/07/30 14:46:57 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.60 2001/07/30 18:25:51 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -112,7 +112,10 @@ begin
   f := GCommandFunc(func_list.get(s));
   
   if (f = nil) then
+    begin
     write_console('Could not find function for command "' + s + '"');
+    f := @do_dummy;
+    end;
     
   Result := f.func;
 end;
