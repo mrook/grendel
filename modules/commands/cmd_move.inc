@@ -74,13 +74,15 @@ begin
 end;
 
 function do_move(ch : GCharacter; pexit : GExit) : boolean;
-var vict : GCharacter;
-    sneaking:boolean;
-    txt_ch,txt_room:array[0..32] of char;
-    room_pos,room_to : GRoom;
-    mv_cost:integer;
-    drunk:boolean;
-    node, node_next : GListNode;
+var 
+  vict : GCharacter;
+  sneaking:boolean;
+  txt_ch,txt_room:array[0..32] of char;
+  room_pos,room_to : GRoom;
+  mv_cost:integer;
+  drunk:boolean;
+  node, node_next : GListNode;
+  p : integer;
 begin
   do_move:=false;
   room_pos:=ch.room;
@@ -230,19 +232,32 @@ begin
 
   { when a mob blocks ch, we don't want to continue - Grimlord }
 
-(*  node := ch.room.chars.head;
+  node := ch.room.chars.head;
   while (node <> nil) do
     begin
     vict := node.element;
 
-    if (blockTrigger(vict, ch, pexit.vnum)) and (not ch.IS_HOLYWALK) then
+    if (vict.IS_NPC) then
       begin
-      ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
-      exit;
+      p := GNPC(ch).context.findSymbol('onFight');
+
+      if (p <> -1) then
+        begin
+        GNPC(ch).context.push(integer(ch));
+        GNPC(ch).context.push(integer(vict));
+        GNPC(ch).context.setEntryPoint(p);
+        GNPC(ch).context.Execute;
+        
+        if (GNPC(ch).context.pop()) and (not ch.IS_HOLYWALK) then
+          begin
+          ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
+          exit;
+          end; 
+        end;
       end;
 
     node := node.next;
-    end; *)
+    end;
 
   if (not ch.IS_FLYING) then
     mv_cost := movement_loss[room_pos.sector]
@@ -370,8 +385,26 @@ begin
     node := node_next;
     end;
 
-//  if (not ch.IS_NPC) then
-//    greetTrigger(ch);
+  node := ch.room.chars.head;
+  while (node <> nil) do
+    begin
+    vict := node.element;
+
+    if (vict.IS_NPC) then
+      begin
+      p := GNPC(ch).context.findSymbol('onGreet');
+
+      if (p <> -1) then
+        begin
+        GNPC(ch).context.push(integer(ch));
+        GNPC(ch).context.push(integer(vict));
+        GNPC(ch).context.setEntryPoint(p);
+        GNPC(ch).context.Execute;
+        end;
+      end;
+
+    node := node.next;
+    end;
 
   do_move := true;
 end;
