@@ -53,9 +53,9 @@ Grendel's TODO list with probable release date/version
 
 ! (0.4.4) (silently) prolonging spells
 ! (0.4.4) save channelignores in pfile
+! (0.4.4) Variable usage in aliases - '%' will now expand to everything typed after the alias
 
 
-- (0.4.4) Variable usage in alias, bijv %1 (voor bijv: "cm Nemesis" en dat alias cm dan staat voor "Cast 'missile' %1")
 - (0.4.4) re-implement "Switch" and "Snoop"
 - (0.4.4) command to switch tank in a group
 - (0.4.4) command to switch leadership of a group
