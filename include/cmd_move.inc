@@ -625,7 +625,9 @@ begin
     ch.sendBuffer('That door is locked.'#13#10);
     exit;
     end;
+
   REMOVE_BIT(pexit.exit_flag,EX_CLOSED);
+  
   if length(pexit.keyword)>0 then
     begin
     act(AT_REPORT,'You open '+pexit.keyword+'.',false,ch,nil,nil,TO_CHAR);

@@ -15,53 +15,6 @@ const exit_flags:array[0..12] of pchar=('isdoor','closed','locked',
                                         'nobreak','nomob','enter',
                                         'underwater');
 
-(* procedure do_rstat(ch:GCharacter;param:string);
-var a:integer;
-    buf:string;
-    pexit:GExit;
-begin
-  with ch.room do
-    begin
-    act(AT_REPORT,'['+name+']'#13#10,false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'Vnum:         '+inttostr(vnum),false,ch,nil,nil,TO_CHAR);
-
-    buf := 'Flags:       ';
-
-    if (flags=0) then
-      buf := buf + ' none'
-    else
-    for a:=0 to High(room_flags) do
-     if IS_SET(flags,1 shl a) then
-      buf := buf + ' ' + room_flags[a];
-
-    act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'Sector:       '+sector_types[sector],false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'Teledelay:    '+inttostr(teledelay),false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'Televnum:     '+inttostr(televnum),false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'Min. level:   '+inttostr(min_level),false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'Max. level:   '+inttostr(max_level),false,ch,nil,nil,TO_CHAR);
-
-    (* if (exits_first<>nil) then
-      begin
-      act(AT_REPORT,#13#10'Exits:',false,ch,nil,nil,TO_CHAR);
-      pexit:=exits_first;
-      while (pexit<>nil) do
-        begin
-        strpcopy(buf,'('+pad_integer(pexit.vnum,6)+') '+pad_string(headings[pexit.direction],10)+' [');
-        if (pexit.exit_flag=0) then
-          strcat(buf,' none')
-        else
-        for a:=0 to High(exit_flags) do
-         if IS_SET(pexit.exit_flag,1 shl a) then
-          strpcopy(strend(buf),' '+exit_flags[a]);
-        strcat(buf,' ]');
-        act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
-        pexit:=pexit.next;
-        end;
-      end;
-    end;
-end; *)
-
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
 procedure do_rstat(ch : GCharacter; param : string);
@@ -411,87 +364,38 @@ begin
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 end;
 
-{Jago 10/Jan/2001 - utility function (- move it to area.pas)}
-function getObjectWorld(ch : GCharacter; param : string) : GObject;
-var
-	arg : string;
-  obj : GObject;
-  obj_node : GListNode;
-  number, count : integer;
-begin
-
-  one_argument(param, arg);
-  number := findNumber(arg); // eg 2.sword
-
-  count := 0;
-
-  // first try looking in inventory
-  if ch.objects <> nil then
-    obj := ch.findInventory(param);
-
-  if obj <> nil then
-  begin
-     Result := obj;
-     exit;
-  end;
-
-  // then try the current room
-  if ch.room <> nil then
-    obj := ch.room.findObject(param);
-
-  if obj <> nil then
-  begin
-     Result := obj;
-     exit;
-  end;
-
-  // then try the world!
-  obj_node := object_list.head;
-  while obj_node <> nil do
-  begin
-     obj := GObject(obj_node.element);
-     // assume ch can see obj, after all ch is an imm
-     if isName(obj.name, arg) then
-     begin
-      inc(count);
-       if count = number then
-       begin
-         Result := obj;
-         exit;
-       end;
-     end;
-    obj_node := obj_node.next;
-  end;
-
-	Result := nil;
-end;
-
-{Jago 10/Jan/2001
-OSTAT : return data about an object}
+{Jago 10/Jan/2001 OSTAT : return data about an object}
+{ Revised 28/Jan/2001 - Nemesis }
 procedure do_ostat(ch : GCharacter; param : string);
-var
-	buf, buf1, arg : string;
-aff_node, obj_node : GListNode;
-aff_data : GAffect;
-obj: GObject;
-room :integer;
-in_obj, carried_by : string;
+var buf, buf1, arg : string;
+    aff_node, obj_node : GListNode;
+    aff_data : GAffect;
+    obj: GObject;
+    room :integer;
+    in_obj, carried_by : string;
 begin
 
   one_argument( param, arg );
 
   if length(arg) = 0 then
-  begin
+    begin
     ch.sendBuffer('Ostat what?' + #13#10);
     exit;
-  end;
+    end;
 
-  obj:= getObjectWorld(ch, arg);
-  if obj= nil then
-  begin
+  obj := ch.findInventory(arg);
+
+  if (obj = nil) then
+    obj := ch.room.findObject(arg);
+
+  if (obj = nil) then
+    obj := findObjectWorld(arg);
+
+  if (obj = nil) then
+    begin
     ch.sendBuffer('Nothing like that in hell, earth, or heaven.' + #13#10);
     exit;
-  end;
+    end;
 
   buf1 := 'Name: ' + obj.name + '.' + #13#10;
 
@@ -845,4 +749,244 @@ begin
     act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 end;
 
+{ Adjust scores NPC's and PC's - Nemesis }
+procedure do_ascore(ch:GCharacter;param:string);
+var arg,arg2,arg3 : string;
+    vict : GCharacter;
+    value : integer;
+    buf : string;
+begin
+  param := one_argument(param, arg);
+  param := one_argument(param, arg2);
+  one_argument(param, arg3);
 
+  if (length(arg) = 0) then
+    begin
+    ch.sendBuffer('Usage:  ASCORE <victim> <type> <value>'#13#10#13#10);
+    ch.sendBuffer('Types for both NPC and PC: hp, mana, moves, strength,'#13#10);
+    ch.sendBuffer('wisdom, intelligence, dexterity, constitution, ac, apb,'#13#10);
+    ch.sendBuffer('hitroll, alignment, gold, sex.'#13#10#13#10);
+    ch.sendBuffer('Types for PC only: bank, xptnl.'#13#10);
+    exit;
+    end;
+
+  if (length(arg) <> 0) and (length(arg2) = 0) then
+    begin
+    ch.sendBuffer('Please select <type> and <value>.'#13#10);
+    exit;
+    end;
+
+  if (length(arg) <> 0) and (length(arg2) <> 0) and (length(arg3) = 0) then
+    begin
+    ch.sendBuffer('Please enter a <value>.'#13#10);
+    exit;
+    end;
+
+  if (arg3[1] in ['0'..'9']) then
+    begin
+    value := strtoint(arg3);
+    end
+  else
+    begin
+    ch.sendBuffer('Value must be a number.'#13#10);
+    exit;
+    end;
+
+  if (uppercase(arg) = 'SELF') then
+    vict := ch
+  else
+    vict := FindCharWorld(ch,arg);
+
+  if (vict = nil) then
+    begin
+    ch.sendBuffer('That player cannot be found.'#13#10);
+    exit;
+    end;
+
+  if (uppercase(arg2) = 'HP') then
+    begin
+    if (value <= 0) then
+      begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+      end;
+
+    vict.point.max_hp := value;
+    buf := 'Max HP';
+    end
+  else
+  if (uppercase(arg2) = 'MANA') then
+    begin
+    if (value <= 0) then
+      begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+      end;
+
+    vict.point.max_mana := value;
+    buf := 'Max MANA';
+    end
+  else
+  if (uppercase(arg2) = 'STAMINA') then
+    begin
+    if (value <= 0) then
+      begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+      end;
+      
+    vict.point.max_mv := value;
+    buf := 'Max STAMINA';
+    end
+  else
+  if (uppercase(arg2) = 'STRENGTH') then
+    begin
+    if (value >= 100) then
+      begin
+      ch.sendBuffer('Max value is 99.'#13#10);
+      exit;
+      end;
+
+    vict.ability.str := value;
+    buf := 'STRENGTH';
+    end
+  else
+  if (uppercase(arg2) = 'WISDOM') then
+    begin
+    if (value >= 100) then
+      begin
+      ch.sendBuffer('Max value is 99.'#13#10);
+      exit;
+      end;
+
+    vict.ability.wis := value;
+    buf := 'WISDOM';
+    end
+  else
+  if (uppercase(arg2) = 'DEXTERITY') then
+    begin
+    if (value >= 100) then
+      begin
+      ch.sendBuffer('Max value is 99.'#13#10);
+      exit;
+      end;
+
+    vict.ability.dex := value;
+    buf := 'DEXTERITY';
+    end
+  else
+  if (uppercase(arg2) = 'INTELLIGENCE') then
+    begin
+    if (value >= 100) then
+      begin
+      ch.sendBuffer('Max value is 99.'#13#10);
+      exit;
+      end;
+
+    vict.ability.int := value;
+    buf := 'INTELLIGENCE';
+    end
+  else
+  if (uppercase(arg2) = 'CONSTITUTION') then
+    begin
+    if (value >= 100) then
+      begin
+      ch.sendBuffer('Max value is 99.'#13#10);
+      exit;
+      end;
+
+    vict.ability.con:=value;
+    buf := 'CONSTITUTION';
+    end
+  else
+  if (uppercase(arg2) = 'AC') then
+    begin
+    vict.point.ac := value;
+    buf := 'AC';
+    end
+  else
+  if (uppercase(arg2) = 'HITROLL') then
+    begin
+    vict.point.hitroll := value;
+    buf := 'HITROLL';
+    end
+  else
+  if (uppercase(arg2) = 'ALIGNMENT') then
+    begin
+    vict.alignment := value;
+    buf := 'ALIGNMENT';
+    end
+  else
+  if (uppercase(arg2) = 'APB') then
+    begin
+    vict.point.apb := value;
+    buf := 'APB';
+    end
+  else
+  if (uppercase(arg2) = 'BANK') then
+    begin
+    if (vict.IS_NPC) then
+      begin
+      ch.sendBuffer('Type not possible for NPC.'#13#10);
+      exit;
+      end;
+
+    if (value <= 0) then
+      begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+      end;
+
+    vict.player^.bankgold := value;
+    buf := 'BANK';
+    end
+  else
+  if (uppercase(arg2) = 'GOLD') then
+    begin
+    if (value <= 0) then
+      begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+      end;
+
+    vict.gold := value;
+    buf := 'GOLD';
+    end
+  else
+  if (uppercase(arg2) = 'XPTNL') then
+    begin
+    if (vict.IS_NPC) then
+      begin
+      ch.sendBuffer('Type not possible for NPC.'#13#10);
+      exit;
+      end;
+
+    if (value <= 0) then
+      begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+      end;
+      
+    vict.player^.xptogo := value;
+    buf := 'XP TNL';
+    end
+  else
+  if (uppercase(arg2) = 'SEX') then
+    begin
+    if (value > 2) or (value < 0) then
+      begin
+      ch.sendBuffer('Value must be 0 (male), 1 (female) or 2 (neutral).'#13#10);
+      exit;
+      end;
+
+    vict.sex := value;
+    buf := 'SEX';
+    end
+  else
+    begin
+    ch.sendBuffer('Wrong <type>, use ASCORE to see available types.'#13#10);
+    exit;
+    end;
+
+  act(AT_REPORT,buf + ' of $N set to ' + inttostr(value) + '.',false,ch,nil,vict,TO_CHAR);
+end;

@@ -1362,3 +1362,87 @@ begin
     act(AT_REPORT,'$N has nourished you.',false,victim,nil,ch,TO_CHAR);
   end;
 end;
+
+{ Revive player when killed - Nemesis }
+procedure do_revive(ch:GCharacter; param:string);
+var obj : GObject;
+    corpseroom : GRoom;
+    victim : GCharacter;
+    number,count : integer;
+    conn : GConnection;
+    conn_node : GListNode;
+    buf : string;
+begin
+  // Without argument shows existing corpses, decay timer and VNUM.
+
+  if (length(param) = 0) then
+    begin
+    act(AT_REPORT,'Timer - Existing corpses:' + #13#10,false,ch,nil,nil,TO_CHAR);
+
+    count := 0;
+
+    conn_node := connection_list.head;
+
+    while (conn_node <> nil) do
+      begin
+
+      conn := GConnection(conn_node.element);
+
+      obj := findObjectWorld('the corpse of ' + conn.ch.name);
+
+      if (obj <> nil) then
+        begin
+        inc(count);
+
+        buf := buf + ' (' + ansiColor(7,0) + pad_integer_front(obj.timer,2) +
+               ansiColor(2,0) + ') ' + obj.name + ' in room: ' + ansiColor(6,0) +
+               inttostr(obj.room.vnum) + ansiColor(2,0) + '.' + #13#10;
+        end;
+
+      conn_node := conn_node.next;
+      end;
+
+    if (count = 0) then
+      buf := ' None.' + #13#10;
+
+    ch.sendBuffer(buf);
+
+    exit;
+    end;
+
+  number := findNumber(param);
+  
+  // You can use 2.<player> in case of multiple corpses of same player.
+
+  obj := findObjectWorld(inttostr(number) + '.corpse of ' + param);
+
+  victim := findCharWorld(ch, param);
+
+  if (obj = nil) then
+    begin
+    ch.sendBuffer('That corpse does not exist.'#13#10);
+    exit;
+    end;
+
+  if (victim = nil) then
+    begin
+    ch.sendBuffer('That player is not logged in anymore.'#13#10);
+    exit;
+    end;
+
+  // You don't want to revive NPC's :)
+
+  if (victim.IS_NPC) then
+    begin
+    ch.sendBuffer('You can''t revive NPC''s.'#13#10);
+    exit;
+    end;
+
+  corpseroom := obj.room;
+  victim.fromRoom;
+  victim.toRoom(corpseroom);
+
+  act(AT_REPORT,'$N has revived you!',false,victim,nil,ch,TO_CHAR);
+  act(AT_REPORT,'You have revived ' + uppercase(param) + '.',true,ch,nil,nil,TO_CHAR);
+  interpret(victim, 'look _AUTO');
+end;
