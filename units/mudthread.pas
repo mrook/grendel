@@ -527,6 +527,12 @@ begin
   if (comparestr(s, 'do_fill') = 0) then
     g := do_fill
   else
+  if (comparestr(s, 'do_unlock') = 0) then
+    g := do_unlock
+  else
+  if (comparestr(s, 'do_lock') = 0) then
+    g := do_lock
+  else
     begin
     g := nil;
 

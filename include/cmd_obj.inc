@@ -928,3 +928,180 @@ begin
     exit;
     end;
 end;
+
+{ Unlock doors - Nemesis }
+procedure do_unlock(ch:GCharacter;param:string);
+var pexit : GExit;
+    room_pos : GRoom;
+    dir : integer;
+    obj, lastobj : GObject;
+    node : GListNode;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Unlock what?'#13#10);
+    exit;
+    end;
+
+  room_pos := ch.room;
+  dir := FindHeading(param);
+
+  if (dir = -1) then
+    begin
+    ch.sendBuffer('Use direction instead!'#13#10);
+    exit;
+    end;
+
+  pexit := room_pos.findExit(dir);
+
+  if (pexit = nil) then
+    begin
+    ch.sendBuffer('You don''t see a door there.'#13#10);
+    exit;
+    end;
+
+  if (not IS_SET(pexit.exit_flag,EX_ISDOOR)) then
+    begin
+    ch.sendBuffer('That is not a door.'#13#10);
+    exit;
+    end;
+
+  if (not IS_SET(pexit.exit_flag,EX_LOCKED)) then
+    begin
+    ch.sendBuffer('That door is not locked.'#13#10);
+    exit;
+    end;
+
+  if IS_SET(pexit.exit_flag,EX_LOCKED) then
+    begin
+
+    if (ch.objects.getSize = 0) then
+      begin
+      ch.sendBuffer('You don''t have a key.'#13#10);
+      exit;
+      end;
+
+    node := ch.objects.head;
+
+    while (node <> nil) do
+      begin
+
+      lastobj := node.element;
+
+      if (lastobj.item_type = ITEM_KEY) and (pexit.key = lastobj.value[1]) then
+        begin
+        act(AT_REPORT,'You unlock ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
+        act(AT_REPORT,'$n unlocks ' + pexit.keyword + '.',false,ch,nil,nil,TO_ROOM);
+
+        REMOVE_BIT(pexit.exit_flag,EX_LOCKED);
+
+        room_pos := findRoom(pexit.vnum);
+        pexit := room_pos.findExit(dir_inv[dir]);
+        REMOVE_BIT(pexit.exit_flag,EX_LOCKED);
+
+        exit;
+        end;
+
+      if (node = ch.objects.tail) then
+        begin
+        ch.sendBuffer('You lack the key.'#13#10);
+        exit;
+        end;
+
+      node := node.next;
+      end;
+    end;
+end;
+
+{ Lock doors - Nemesis }
+procedure do_lock(ch:GCharacter;param:string);
+var pexit : GExit;
+    room_pos : GRoom;
+    dir : integer;
+    obj, lastobj : GObject;
+    node : GListNode;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Lock what?'#13#10);
+    exit;
+    end;
+
+  room_pos := ch.room;
+  dir := FindHeading(param);
+
+  if (dir = -1) then
+    begin
+    ch.sendBuffer('Use direction instead!'#13#10);
+    exit;
+    end;
+
+  pexit := room_pos.findExit(dir);
+
+  if (pexit = nil) then
+    begin
+    ch.sendBuffer('You don''t see a door there.'#13#10);
+    exit;
+    end;
+
+  if (not IS_SET(pexit.exit_flag,EX_ISDOOR)) then
+    begin
+    ch.sendBuffer('That is not a door.'#13#10);
+    exit;
+    end;
+
+  if (IS_SET(pexit.exit_flag,EX_LOCKED)) then
+    begin
+    ch.sendBuffer('That door is already locked.'#13#10);
+    exit;
+    end;
+
+  if (not IS_SET(pexit.exit_flag,EX_CLOSED)) then
+    begin
+    ch.sendBuffer('That door should be closed first'#13#10);
+    exit;
+    end
+  else
+    begin
+
+    if (pexit.key > 0) then
+      begin
+
+      if (ch.objects.getSize = 0) then
+        begin
+        ch.sendBuffer('You don''t have a key.'#13#10);
+        exit;
+        end;
+
+      node := ch.objects.head;
+
+      while (node <> nil) do
+        begin
+
+        lastobj := node.element;
+
+        if (lastobj.item_type = ITEM_KEY) and (pexit.key = lastobj.value[1]) then
+          begin
+          act(AT_REPORT,'You lock ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'$n locks ' + pexit.keyword + '.',false,ch,nil,nil,TO_ROOM);
+
+          SET_BIT(pexit.exit_flag,EX_LOCKED);
+
+          room_pos := findRoom(pexit.vnum);
+          pexit := room_pos.findExit(dir_inv[dir]);
+          SET_BIT(pexit.exit_flag,EX_LOCKED);
+
+          exit;
+          end;
+
+        if (node = ch.objects.tail) then
+          begin
+          ch.sendBuffer('You lack the key.'#13#10);
+          exit;
+          end;
+
+        node := node.next;
+        end;
+      end;
+    end;
+end;

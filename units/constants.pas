@@ -603,3 +603,4 @@ const MPROG_ACT=BV01;           { mob reacts to act from ch}
 implementation
 
 end.
+
