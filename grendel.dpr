@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.75 2003/10/09 20:14:09 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.76 2003/10/10 10:29:38 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -137,7 +137,6 @@ var
    node : GListNode;
 begin
 	writeConsole('Terminating threads...');
-	pollConsole();
 	
 	mud_booted := false;
 
@@ -147,17 +146,14 @@ begin
 	Sleep(100);
 
 	writeConsole('Saving mudstate...');
-	pollConsole();
 
 	saveMudState();
 	
 	writeConsole('Unloading modules...');
-	pollConsole();
 
 	unloadModules();
 
 	writeConsole('Releasing allocated memory...');
-	pollConsole();
 
 	node := char_list.tail;
 	while (node <> nil) do
@@ -167,62 +163,49 @@ begin
 		end;
 		
 	writeConsole('Cleaning chars...');
-	pollConsole();	
 	cleanupChars();
 	
 	writeConsole('Cleaning clans...');
-	pollConsole();	
 	cleanupClans();
 
 	writeConsole('Cleaning channels...');
-	pollConsole();	
 	cleanupChannels();
 
 	writeConsole('Cleaning commands...');
-	pollConsole();	
 	cleanupCommands();
 
 	writeConsole('Cleaning connections...');
-	pollConsole();	
 	cleanupConns();
 
 	writeConsole('Cleaning help...');
-	pollConsole();	
 	cleanupHelp();
 
 	writeConsole('Cleaning skills...');
-	pollConsole();	
 	cleanupSkills();
 
 	writeConsole('Cleaning areas...');
-	pollConsole();	
 	cleanupAreas();
 
 	writeConsole('Cleaning timers...');
-	pollConsole();	
 	cleanupTimers();
 
 	writeConsole('Cleaning races...');
-	pollConsole();	
 	cleanupRaces();
 
 	writeConsole('Cleaning system...');
-	pollConsole();	
 	cleanupSystem();
 
 	writeConsole('Cleaning notes...');
-	pollConsole();	
 	cleanupNotes();
 
 	str_hash.Free;
-
+	
 	listenv4.Free();
 	listenv4 := nil;
 	listenv6.Free();
 	listenv6 := nil;
 
 	writeConsole('Cleanup complete.');
-	pollConsole();	
 
 	cleanupConsole();
 
