@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.34 2004/06/10 21:16:42 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.35 2004/08/24 19:34:38 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -787,7 +787,7 @@ begin
 
                   ch.setName(cap(argument));
                   state := CON_STATE_NEW_PASSWORD;
-                  send(#13#10'Allright, '+ch.name+', choose a password: ');
+                  send(#13#10'Alright, '+ch.name+', choose a password: ');
                   end;
 CON_STATE_NEW_PASSWORD: begin
                   if (length(argument)=0) then
