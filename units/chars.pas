@@ -1182,6 +1182,7 @@ begin
   writeln(f,'aff_flags: ',aff_flags);
   writeln(f,'Mentalstate: ',mental_state);
   writeln(f,'act_flags: ',act_flags);
+  writeln(f,'Last-login: ', DateTimeToStr(Now));
 
   with player^ do
     begin
