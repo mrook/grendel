@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.29 2001/08/12 18:08:37 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.30 2001/08/14 09:38:38 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -546,20 +546,23 @@ begin
 
   repeat
     s := af.readLine();
-
-    dam := GDamMessage.Create;
-
-    with dam do
+    
+    if (length(trim(s)) > 0) then
       begin
-      min := strtoint(left(s,' '));
-      max := strtoint(right(s,' '));
+      dam := GDamMessage.Create;
 
-      msg[1] := af.readLine();
-      msg[2] := af.readLine();
-      msg[3] := af.readLine();
+      with dam do
+        begin
+        min := strtoint(left(s,' '));
+        max := strtoint(right(s,' '));
+
+        msg[1] := af.readLine();
+        msg[2] := af.readLine();
+        msg[3] := af.readLine();
+        end;
+
+      dm_msg.insertLast(dam);
       end;
-
-    dm_msg.insertLast(dam);
   until (af.eof());
 
   af.Free();

@@ -217,15 +217,15 @@ begin
       break;
 
     temp := left(right(s, '('), ')');
-
+    
     repeat
       s := af.readLine();
-    until (trim(s) <> '');
+    until (length(trim(s)) > 0);
 
     repeat
       g := trim(s);
 
-      while (g <> '') do
+      while (length(g) > 0) do
         begin
         line := TLine.Create;
 
@@ -248,7 +248,10 @@ begin
         end;
 
       s := af.readLine();
-    until (pos('Line numbers for', s) > 0) or (s = '');
+    until (pos('Line numbers for', s) > 0) or (pos('Bound resource files', s) > 0) or (pos('Program entryp point', s) > 0);
+    
+    if (pos('Bound resource files', s) > 0) or (pos('Program entryp point', s) > 0) then
+      break;
     end;
 
   af.Free();
@@ -278,7 +281,7 @@ begin
   else
     linen := 'no line';
 
-  writeConsole(linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
+  writeConsole(linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ') (loaded at ' + IntToHex(cardinal(addr), 8) + ')');
 {$ELSE}
   writeConsole(IntToHex(integer(addr), 8));
 {$ENDIF}
