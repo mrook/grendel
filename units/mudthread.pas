@@ -1264,6 +1264,8 @@ begin
   registerCommand('do_peek', do_peek);
   registerCommand('do_oedit', do_oedit);
   registerCommand('do_olist', do_olist);
+  registerCommand('do_rlink', do_rlink);
+  registerCommand('do_rmake', do_rmake);
 end;
 
 begin

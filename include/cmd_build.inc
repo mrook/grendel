@@ -1192,4 +1192,188 @@ begin
     end;
 end;
 
+procedure do_rlink(ch : GCharacter; param : string);
+var dir:integer;
+    vnum:integer;
+    to_room : GRoom;
+    to_exit, from_exit : GExit;
+    sub : string;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: RLINK <direction> <vnum>'#13#10#13#10);
+    ch.sendBuffer('Creates a double linked exit to the designated vnum.'#13#10);
+    exit;
+    end;
+  if (ch.getTrust < LEVEL_GOD) and (ch.player^.area_fname = '') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if (ch.getTrust < LEVEL_GOD) and (ch.player^.area = nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+  dir := findHeading(sub);
+  if (dir=-1) then
+    begin
+    ch.sendBuffer('Invalid direction.'#13#10);
+    exit;
+    end;
+
+  one_argument(param,sub);
+
+  try
+    vnum := strtoint(sub);
+  except
+    ch.sendBuffer('Invalid numeric format.'#13#10);
+    exit;
+  end;
+
+  to_room := findRoom(vnum);
+
+  if (to_room = nil) then
+    begin
+    ch.sendBuffer('That vnum does not exist.'#13#10);
+    exit;
+    end;
+
+  if (ch.room.findExit(dir) <> nil) then
+    begin
+    ch.sendBuffer('An exit in that direction already exists!'#13#10);
+    exit;
+    end;
+
+  to_exit := GExit.Create;
+  to_exit.direction := dir;
+  to_exit.vnum := vnum;
+  to_exit.to_room := to_room;
+
+  ch.room.exits.insertLast(to_exit);
+
+  from_exit := GExit.Create;
+  from_exit.direction := dir_inv[dir];
+  from_exit.vnum := ch.room.vnum;
+  from_exit.to_room := ch.room;
+
+  to_room.exits.insertLast(from_exit);
+
+  ch.sendBuffer('Ok.'#13#10);
+end;
+
+function findFreeVNum(ch : GCharacter) : integer;
+var
+   room : GRoom;
+   node : GListNode;
+   vnum : integer;
+begin
+  vnum := ch.player^.r_lo;
+
+  node := room_list.head;
+  while (node <> nil) do
+    begin
+    room := node.element;
+
+    if (room.vnum > vnum) and (room.vnum<=ch.player^.r_hi) then
+      vnum:=room.vnum;
+
+    node := node.next;
+    end;
+
+  inc(vnum);
+
+  if (vnum = ch.player^.r_hi) then
+    Result := -1
+  else
+    Result := vnum;
+end;
+
+function createRoom(vnum : integer; area : GArea) : GRoom;
+var
+   room : GRoom;
+begin
+  room := GRoom.Create(vnum, area);
+  room.name := hash_string('Floating in a void');
+  room.description := 'Merely wisps of gas and steam, this room has not yet been clearly defined.';
+
+  room.node := room_list.insertLast(room);
+
+  Result := room;
+end;
+
+procedure do_rmake(ch : GCharacter; param : string);
+var dir:integer;
+    new_vnum:integer;
+    to_exit, from_exit : GExit;
+    new_room : GRoom;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: RMAKE <direction>'#13#10#13#10);
+    ch.sendBuffer('Creates a new room within your vnum range linked to the current room,'#13#10);
+    ch.sendBuffer('name and sector type are copied to the new room.'#13#10);
+    exit;
+    end;
+
+  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname='') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area=nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  dir := findHeading(param);
+
+  if (dir = -1) then
+    begin
+    ch.sendBuffer('Invalid direction.'#13#10);
+    exit;
+    end;
+
+  new_vnum:=FindFreeVNum(ch);
+  if (new_vnum=-1) then
+    begin
+    ch.sendBuffer('No more vnums available in your range. Try decreasing the size'#13#10);
+    ch.sendBuffer('of your area or asking another immortal for more a bigger range.'#13#10);
+    exit;
+    end;
+
+  if (ch.room.findExit(dir) <> nil) then
+    begin
+    ch.sendBuffer('An exit in that direction already exists!'#13#10);
+    exit;
+    end;
+
+  ch.sendBuffer('Creating room #' + inttostr(new_vnum) + '.'#13#10);
+
+  new_room := createRoom(new_vnum, ch.room.area);
+
+  new_room.name := hash_string(ch.room.name);
+  new_room.sector := ch.room.sector;
+
+  to_exit := GExit.Create;
+  to_exit.direction := dir;
+  to_exit.vnum := new_vnum;
+  to_exit.to_room := new_room;
+
+  ch.room.exits.insertLast(to_exit);
+
+  from_exit := GExit.Create;
+  from_exit.direction := dir_inv[dir];
+  from_exit.vnum := ch.room.vnum;
+  from_exit.to_room := ch.room;
+
+  new_room.exits.insertLast(from_exit);
+
+  interpret(ch,headings[dir]);
+end;
 
