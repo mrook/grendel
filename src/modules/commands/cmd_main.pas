@@ -2,7 +2,7 @@
 	Summary:
 		Main interface for commands module
 		
-	## $Id: cmd_main.pas,v 1.10 2004/05/12 22:43:47 ***REMOVED*** Exp $
+	## $Id: cmd_main.pas,v 1.11 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit cmd_main;
@@ -50,6 +50,8 @@ uses
   bulletinboard,
   modules,
   commands,
+  rooms,
+  objects,
   server;
 
 

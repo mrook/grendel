@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.6 2004/06/10 21:16:42 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.7 2004/08/24 20:00:56 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -2485,7 +2485,7 @@ begin
       Result := false;
 end;
 
-procedure build_map(var gr : TGrid; var room : GRoom);
+procedure build_map(var gr : TGrid; room : GRoom);
 var
   new_room : GRoom;
   iterator : GIterator;

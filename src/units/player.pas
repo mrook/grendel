@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.35 2004/08/24 19:34:38 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.36 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -276,6 +276,8 @@ uses
 	mudhelp,
 	clan,
 	events,
+	rooms,
+	objects,
 	server,
 	bulletinboard,
 	Channels;

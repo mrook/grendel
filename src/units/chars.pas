@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.16 2004/06/10 20:59:17 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.17 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -15,8 +15,11 @@ uses
 {$IFDEF LINUX}
     Libc,
 {$ENDIF}
-    area,
     race,
+    area,
+    base,
+    objects,
+    rooms,
 	clan,
     dtypes,
     gvm;
@@ -49,13 +52,13 @@ type
 
     GUserChannel = class
     public
-			channelname : string;
-			history : GDLinkedList;
-			ignored : boolean;
+		channelname : string;
+		history : GDLinkedList;
+		ignored : boolean;
 			
-			constructor Create(const name : string);
-			destructor Destroy(); override;
-		end;
+		constructor Create(const name : string);
+		destructor Destroy(); override;
+	end;
 
     GLearned = class
     public
@@ -68,8 +71,8 @@ type
     end;
 
     {$M+}
-    GCharacter = class
-      node_world, node_room : GListNode;
+    GCharacter = class(GEntity)
+      node_world : GListNode;
       inventory : GDLinkedList;
       equipment : GHashTable;
 
@@ -93,8 +96,6 @@ type
       _save_poison, _save_cold, _save_para,  { saving throws }
       _save_breath, _save_spell : integer;
 
-      _name, _short, _long : PString;
-
     public
       ac_mod : integer;             { AC modifier (spells?) }
       natural_ac : integer;         { Natural AC (race based for PC's) }
@@ -109,7 +110,6 @@ type
       position : integer;
       state : integer;
       mental_state : integer;
-      room : GRoom;
       substate : integer;
       trust : integer;
       kills : integer;
@@ -165,8 +165,6 @@ type
       procedure SET_LEARNED(perc : integer; skill : pointer);
 
       procedure extract(pull : boolean);
-      procedure fromRoom();
-      procedure toRoom(to_room : GRoom);
 
       function getEQ(const location : string) : GObject;
       function getWield(item_type : integer) : GObject;
@@ -195,13 +193,10 @@ type
       constructor Create();
       destructor Destroy(); override;
 
-      procedure setName(const name : string);
-      procedure setShortName(const name : string);
-      procedure setLongName(const name : string);
-      function getName() : string;
-      function getShortName() : string;
-      function getLongName() : string;
       function getRaceName() : string;
+      
+      procedure fromRoom();
+      procedure toRoom(to_room : GRoom);
 
     published
     // properties   
@@ -231,12 +226,9 @@ type
       property save_para : integer read _save_para write _save_para;
       property save_breath : integer read _save_breath write _save_breath;
       property save_spell : integer read _save_spell write _save_spell;
-
-      property name : string read getName write setName;
-      property short : string read getShortName write setShortName;
-      property long : string read getLongName write setLongName;
+      
       property rname : string read getRaceName;
-    end;
+	end;
 
     GNPC = class(GCharacter)
     public
@@ -364,16 +356,15 @@ begin
     bugreport('extract_char', 'area.pas', 'ch already extracted');
     exit;
     end;
-
-  if (room <> nil) then
-    fromRoom();
+    
+  room.removeCharacter(Self);
 
   if (not pull) then
     begin
     if (IS_EVIL) then
-      toRoom(findRoom(ROOM_VNUM_EVIL_PORTAL))
+      findRoom(ROOM_VNUM_EVIL_PORTAL).addCharacter(Self)
     else
-      toRoom(findRoom(ROOM_VNUM_GOOD_PORTAL));
+      findRoom(ROOM_VNUM_GOOD_PORTAL).addCharacter(Self);
     end
   else
     begin
@@ -383,45 +374,6 @@ begin
 
     node_world := extracted_chars.insertLast(Self);
     end;
-end;
-
-procedure GCharacter.setName(const name : string);
-begin
-  _name := hash_string(name);
-end;
-
-procedure GCharacter.setShortName(const name : string);
-begin
-  _short := hash_string(name);
-end;
-
-procedure GCharacter.setLongName(const name : string);
-begin
-  _long := hash_string(name);
-end;
-
-function GCharacter.getName() : string;
-begin
-  if (_name <> nil) then
-    Result := _name^
-  else
-    Result := '';
-end;
-
-function GCharacter.getShortName() : string;
-begin
-  if (_short <> nil) then
-    Result := _short^
-  else
-    Result := '';
-end;
-
-function GCharacter.getLongName() : string;
-begin
-  if (_long <> nil) then
-    Result := _long^
-  else
-    Result := '';
 end;
 
 function GCharacter.getRaceName() : string;
@@ -754,23 +706,13 @@ begin
     exit;
     end;
 
-  room.chars.remove(node_room);
-
-  if (IS_WEARING(ITEM_LIGHT)) and (room.light > 0) then
-    room.light := room.light - 1;
-
-  { Only PCs register as players, so increase the number! - Grimlord }
-  if (not IS_NPC) then
-    dec(room.area.nplayer);
+  room.removeCharacter(Self);
 
   room := nil;
 end;
 
 // Char to room
 procedure GCharacter.toRoom(to_room : GRoom);
-var
-	tele : GTeleport;
-	iterator : GIterator;
 begin
   if (to_room = nil) then
     begin
@@ -801,40 +743,7 @@ begin
     end;
 
   room := to_room;
-
-  if (IS_WEARING(ITEM_LIGHT)) then
-    room.light := room.light + 1;
-
-  node_room := room.chars.insertLast(Self);
-
-  { Only PCs register as players, so increase the number! - Grimlord }
-  if (not IS_NPC) then
-    inc(to_room.area.nplayer);
-
-  { check for teleports }
-  if (to_room.flags.isBitSet(ROOM_TELEPORT)) and (to_room.teledelay > 0) then
-    begin
-    iterator := teleport_list.iterator();
-
-    while (iterator.hasNext()) do
-      begin
-      tele := GTeleport(iterator.next());
-      
-      if (tele.t_room = to_room) then
-        begin
-        iterator.Free();
-        exit;
-        end;
-      end;
-      
-    iterator.Free();
-
-    tele := GTeleport.Create();
-    tele.t_room := to_room;
-    tele.timer := to_room.teledelay;
-
-    tele.node := teleport_list.insertLast(tele);
-    end;
+  room.addCharacter(Self);
 end;
 
 // Char dies

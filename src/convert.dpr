@@ -2,7 +2,7 @@
 	Summary:
 		SMAUG area convertor
 	
-	## $Id: convert.dpr,v 1.2 2004/04/21 21:44:34 ***REMOVED*** Exp $
+	## $Id: convert.dpr,v 1.3 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 program convert;
 {$APPTYPE CONSOLE}
@@ -14,6 +14,8 @@ uses
 	debug,
 	console,
 	dtypes,
+	rooms,
+	objects,
 	constants,
 	fsys,
 	area;

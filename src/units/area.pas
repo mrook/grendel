@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-	## $Id: area.pas,v 1.37 2004/08/24 19:59:01 ***REMOVED*** Exp $
+	## $Id: area.pas,v 1.38 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -21,7 +21,6 @@ uses
 
 {$M+}
 type
-    GRoom = class;
     GShop = class;
 
     GWeather = record
@@ -84,64 +83,6 @@ type
       property flags : GBitVector read _flags write _flags;
     end;
 
-    GObjectValues = array[1..4] of integer;
-
-    GObject = class
-    private
-      _name, _short, _long : PString;
-      _vnum : integer;
-    public
-      area : GArea;
-      affects : GDLinkedList;
-      contents : GDLinkedList;
-      carried_by : pointer;
-      room : GRoom;
-      value : GObjectValues;
-      
-      worn : string;
-      wear_location1, wear_location2 : string;
-
-      flags : cardinal;
-      item_type : integer;
-      weight : integer;
-      cost : integer;
-      count : integer;
-      timer : integer;
-      
-      child_count : integer; { how many of me were cloned }
-
-  	published
-      function getWeight() : integer;
-
-      function clone() : GObject;
-
-      constructor Create();
-      destructor Destroy(); override;
-
-      procedure setName(const name : string);
-      procedure setShortName(const name : string);
-      procedure setLongName(const name : string);
-      function getName() : string;
-      function getShortName() : string;
-      function getLongName() : string;
-
-      property vnum : integer read _vnum write _vnum;
-      property name : string read getName write setName;
-      property short : string read getShortName write setShortName;
-      property long : string read getLongName write setLongName;
-    end;
-
-    GExit = class
-    public
-      vnum : integer;
-      direction : integer;
-      to_room : GRoom;
-      keywords : PString;
-      flags : cardinal;
-      key : integer;
-      constructor Create();
-    end;
-
     GNPCIndex = class
     public
       str, con, dex, int, wis : integer;
@@ -182,90 +123,6 @@ type
       property arg3 : integer read _arg3 write _arg3;
     end;
 
-    GTeleport = class
-    public
-    	node : GListNode;
-      t_room : GRoom;
-      timer : integer;
-    end;
-
-    GTrack = class
-    public
-      who : string;
-      life : integer;
-      direction : integer;
-    end;
-
-    GExtraDescription = class
-    public
-      keywords : string;
-      description : string;
-    end;
-
-    GCoords = class  // x: west->east; y: south->north; z: down->up
-    public
-      x, y, z : integer;
-      constructor Create(); overload;
-      constructor Create(coords : GCoords); overload;
-      function toString() : string;
-      procedure copyTo(coords : GCoords);
-      procedure copyFrom(coords : GCoords);
-    end;
-
-    GRoom = class
-    private
-      _vnum : integer;
-      _name : PString;
-      _description : string;
-      _sector : integer;
-      _televnum, _teledelay : integer;
-      _maxlevel, _minlevel : integer;
-      _light : integer;
-      _height : integer;
-
-    public
-      area : GArea;
-      areacoords : GCoords;
-      worldcoords : GCoords; // not used yet
-      extra : GDLinkedList;
-      exits : GDLinkedList;
-      chars : GDLinkedList;
-      objects : GDLinkedList;
-      tracks : GDLinkedList;
-      flags : GBitVector;
-
-      function IS_DARK : boolean;
-
-      function findChar(c : pointer; name : string) : pointer;
-      function findRandomChar : pointer;
-      function findRandomGood : pointer;
-      function findRandomEvil : pointer;
-      function findObject(name : string) : pointer;
-
-      function findDescription(const keyword : string) : GExtraDescription;
-      function isConnectedTo(dir : integer) : GRoom;
-      function findExit(dir : integer) : GExit;
-      function findExitKeyword(s : string) : GExit;
-
-      constructor Create(vn : integer; ar : GArea);
-      destructor Destroy; override;
-
-      procedure setName(const name : string);
-      function getName() : string;
-
-    published
-      property name : string read getName write setName;
-      property description : string read _description write _description;
-      property vnum : integer read _vnum write _vnum;
-      property sector : integer read _sector write _sector;
-      property televnum : integer read _televnum write _televnum;
-      property teledelay : integer read _teledelay write _teledelay;
-      property minlevel : integer read _minlevel write _minlevel;
-      property maxlevel : integer read _maxlevel write _maxlevel;
-      property light : integer read _light write _light;
-      property height : integer read _height write _height;
-    end;
-
     GShop = class
     public
       node : GListNode;
@@ -277,13 +134,7 @@ type
 
 
 var
-   objectList : GDLinkedList;  
-   objectIndices : GHashTable;
-   
    area_list : GDLinkedList;
-   room_list : GHashTable;
-   teleport_list : GDLinkedList;
-
    npc_list : GDLinkedList;
 
 
@@ -291,19 +142,13 @@ procedure resetAreas();
 procedure processAreas();
 procedure loadAreas();
 
-function createRoom(vnum : integer; area : GArea) : GRoom;
 function findArea(const fname : string) : GArea;
 
-function findRoom(vnum : integer) : GRoom;
-function findLocation(ch : pointer; const param : string) : GRoom;
 function findNPCIndex(vnum : integer) : GNPCIndex;
 
 function instanceNPC(npcindex : GNPCIndex) : pointer;
 procedure addCorpse(c : pointer);
 function findHeading(s : string) : integer;
-function findDirectionShort(startroom, goalroom : GRoom) : string;
-
-function findObjectWorld(s : string) : GObject;
 
 procedure initAreas();
 procedure cleanupAreas();
@@ -319,6 +164,8 @@ uses
 	fight,
 	console,
 	mudsystem,
+	rooms,
+	objects,
 	conns;
 
 
@@ -446,7 +293,7 @@ begin
           r_hi := vnum;
         end;
 
-      _name := hash_string(s);
+      name := s;
       buf := '';
 
       repeat
@@ -456,23 +303,23 @@ begin
           buf := buf + s + #13#10;
       until (s = '~');
 
-      _description := buf;
+      description := buf;
 
       flags.value := af.readCardinal;
-      _minlevel := af.readInteger;
-      _maxlevel := af.readInteger;
-      _sector := af.readCardinal;
+      minlevel := af.readInteger;
+      maxlevel := af.readInteger;
+      sector := af.readCardinal;
 
-      if (_maxlevel = 0) then
-        _maxlevel := LEVEL_MAX;
+      if (maxlevel = 0) then
+        maxlevel := LEVEL_MAX;
 
-      if (_sector < 0) or (_sector >= SECT_MAX) then
+      if (sector < 0) or (sector >= SECT_MAX) then
         areaBug('loadRooms()', 'Sector type mismatch');
 
       if (flags.isBitSet(ROOM_TELEPORT)) then
         begin
-        _televnum := af.readCardinal;
-        _teledelay := af.readInteger;
+        televnum := af.readCardinal;
+        teledelay := af.readInteger;
         end;
 
       while (true) do
@@ -1504,7 +1351,7 @@ begin
     end;
     
   iterator.Free();
-
+  
   iterator := resets.iterator();
   
   while (iterator.hasNext()) do
@@ -1541,7 +1388,7 @@ begin
                 lastmob := npc;
                 inc(mobs_loaded);
 
-								npc.context.runSymbol('onReset', [integer(npc)]);
+				npc.context.runSymbol('onReset', [integer(npc)]);
                 end;
               end;
             end;
@@ -1952,20 +1799,6 @@ begin
   iterator.Free();
 end;
 
-{ Xenon 28/Apr/2001: moved createRoom() from cmd_build.inc to area.pas }
-function createRoom(vnum : integer; area : GArea) : GRoom;
-var
-   room : GRoom;
-begin
-  room := GRoom.Create(vnum, area);
-  room.name := 'Floating in a void';
-  room.description := 'Merely wisps of gas and steam, this room has not yet been clearly defined.'#13#10;
-
-  room_list.put(vnum, room);
-
-  Result := room;
-end;
-
 // Find area by filename
 function findArea(const fname : string) : GArea;
 var
@@ -1988,634 +1821,6 @@ begin
     end;
   
   iterator.Free();
-end;
-
-constructor GCoords.Create();
-begin
-  inherited Create();
-  
-  x := 0;
-  y := 0;
-  z := 0;
-end;
-
-constructor GCoords.Create(coords : GCoords);
-begin
-  inherited Create();
-  
-  copyFrom(coords);
-end;
-
-function GCoords.toString() : string;
-begin
-  Result := '(' + IntToStr(x) + ',' + IntToStr(y) + ',' + IntToStr(z) + ')';
-end;
-
-procedure GCoords.copyTo(coords : GCoords);
-begin
-  coords.x := x;
-  coords.y := y;
-  coords.z := z;
-end;
-
-procedure GCoords.copyFrom(coords : GCoords);
-begin
-  x := coords.x;
-  y := coords.y;
-  z := coords.z;
-end;
-
-// GRoom
-constructor GRoom.Create(vn : integer; ar : GArea);
-begin
-  inherited Create();
-
-  _vnum := vn;
-  _sector := 1;
-  _light := 0;
-  
-  area := ar;
-  areacoords := nil;
-  worldcoords := nil;
-
-  flags := GBitVector.Create(0);
-  extra := GDLinkedList.Create();
-  exits := GDLinkedList.Create();
-  chars := GDLinkedList.Create();
-  objects := GDLinkedList.Create();
-  tracks := GDLinkedList.Create();
-end;
-
-destructor GRoom.Destroy;
-begin
-  unhash_string(_name);
-
-  extra.clear();
-  exits.clear();
-  chars.clear();
-  objects.clear();
-  tracks.clear();
-
-  extra.Free();
-  exits.Free();
-  chars.Free();
-  objects.Free();
-  tracks.Free();
-
-  inherited Destroy();
-end;
-
-procedure GRoom.setName(const name : string);
-begin 
-  if (_name <> nil) then
-    unhash_string(_name);
-    
-  _name := hash_string(name);
-end;
-
-function GRoom.getName() : string;
-begin
-  if (_name <> nil) then
-    Result := _name^
-  else
-    Result := '';
-end;
-
-// Room is dark
-function GRoom.IS_DARK : boolean;
-begin
-  if (light > 0) then
-    begin
-    Result := false;
-    exit;
-    end;
-
-  if (sector = SECT_INSIDE) or (sector = SECT_CITY) then
-    begin
-    Result := false;
-    exit;
-    end;
-
-  if (flags.isBitSet(ROOM_DARK)) then
-    begin
-    Result := true;
-    exit;
-    end;
-
-  if (time_info.sunlight = SUN_SET) or (time_info.sunlight = SUN_DARK) then
-    begin
-    Result := true;
-    exit;
-    end;
-
-  Result := false;
-end;
-
-// Find char in room by name
-function GRoom.findChar(c : pointer; name : string) : pointer;
-var
-	iterator : GIterator;
-	num, cnt : integer;
-	ch, vict : GCharacter;
-begin
-  Result := nil;
-
-	if (name = '') then
-		exit;
-
-  if (name = 'SELF') then
-    begin
-    Result := c;
-    exit;
-    end;
-
-  ch := c;
-
-  num := findNumber(name);
-
-  name := uppercase(name);
-  cnt := 0;
-
-  iterator := chars.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
-      ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
-      isNameStart(vict.name, name) or isNameStart(vict.short, name) or
-      ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
-      (isNameAny(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
-      begin
-      inc(cnt);
-
-      if (cnt = num) then
-        begin
-        Result := vict;
-        break;
-        end;
-      end;
-    end;
-
-  iterator.Free();
-  
-  if (Result = nil) then
-  	begin
-		iterator := chars.iterator();
-
-		while (iterator.hasNext()) do
-			begin
-			vict := GCharacter(iterator.next());
-
-			if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
-				((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
-				isNameAny(vict.name, name) or isNameAny(vict.short, name) or
-				((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
-				(isNameAny(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
-				begin
-				inc(cnt);
-
-				if (cnt = num) then
-					begin
-					Result := vict;
-					break;
-					end;
-				end;
-			end;
-
-		iterator.Free();
-		end;
-end;
-
-// Find random char in room
-function GRoom.findRandomChar() : pointer;
-var
-	a, num : integer;
-  node : GListNode;
-begin
-  Result := nil;
-  
-  if (chars.size() = 0) then
-    exit;
-  
-  num := random(chars.size());
-
-  node := chars.head;
-  for a := 0 to num do
-    node := node.next;
-
-  if (node <> nil) then
-    Result := node.element;
-end;
-
-// Find random good aligned char in room
-function GRoom.findRandomGood() : pointer;
-var 
-	a, cnt, num : integer;
-	vict : GCharacter;
-	iterator : GIterator;
-begin
-  Result := nil;
-
-  cnt := 0;
-  iterator := chars.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if (vict.IS_GOOD) then
-      inc(cnt);
-    end;
-
-  iterator.Free();
-
-  num := random(cnt);
-  a := 0;
-
-  iterator := chars.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if (vict.IS_GOOD) and (a = num) then
-      begin
-      Result := vict;
-      break;
-      end;
-    end;
-
-  iterator.Free();
-end;
-
-// Find random evil aligned char in room
-function GRoom.findRandomEvil() : pointer;
-var 
-	a, cnt, num : integer;
-	vict : GCharacter;
-	iterator : GIterator;
-begin
-  Result := nil;
-
-  cnt := 0;
-  iterator := chars.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if (vict.IS_EVIL) then
-      inc(cnt);
-    end;
-
-  iterator.Free();
-
-  num := random(cnt);
-  a := 0;
-
-  iterator := chars.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if (vict.IS_EVIL) and (a = num) then
-      begin
-      Result := vict;
-      break;
-      end;
-    end;
-
-  iterator.Free();
-end;
-
-// Find object by name in room
-function GRoom.findObject(name : string) : pointer;
-var
-	iterator : GIterator;
-	obj : GObject;
-	num, cnt : integer;
-begin
-  Result := nil;
-  
-  if (name = '') then
-  	exit;
-
-  iterator := objects.iterator();
-  num := findNumber(name);
-  cnt := 0;
-
-  while (iterator.hasNext()) do
-    begin
-    obj := GObject(iterator.next());
-
-    if isObjectName(obj.name, name) or isObjectName(obj.short, name) or isObjectName(obj.long, name) then
-      begin
-      inc(cnt, obj.count);
-
-      if (cnt >= num) then
-        begin
-        Result := obj;
-        break;
-        end;
-      end;
-    end;
-    
-	iterator.Free();
-end;
-
-function GRoom.findDescription(const keyword : string) : GExtraDescription;
-var
-	iterator : GIterator;
-	s_extra : GExtraDescription;
-	s, p : integer;
-	sub, key : string;
-begin
-  Result := nil;
-  
-  if (keyword = '') then
-  	exit;
-  	
-  p := high(integer);
-
-  iterator := extra.iterator();
-  while (iterator.hasNext()) do
-    begin
-    s_extra := GExtraDescription(iterator.next());
-    key := s_extra.keywords;
-
-    while (length(key) > 0) do
-      begin
-      key := one_argument(key, sub);
-      
-      s := pos(keyword, sub);
-      if (s > 0) and (s < p) then
-        begin
-        p := s;
-        Result := s_extra;
-        end;
-      end;
-    end;
-
-	iterator.Free();
-end;
-
-{ Xenon 7/6/2001: added isConnectedTo() because I needed it for do_map() :-) }
-function GRoom.isConnectedTo(dir : integer) : GRoom;
-var
-	iterator : GIterator;
-	pexit : GExit;
-begin
-	Result := nil;
-
-  iterator := exits.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    pexit := GExit(iterator.next());
-
-    if (pexit.direction = dir) then
-    	begin
-      Result := pexit.to_room;
-      break;
-    	end;
-    end;
-    
-	iterator.Free();
-end;
-
-// Find exit by direction in room
-function GRoom.findExit(dir : integer) : GExit;
-var
-	iterator : GIterator;
-	pexit : GExit;
-begin
-  Result := nil;
-
-  iterator := exits.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    pexit := GExit(iterator.next());
-
-    if (pexit.direction = dir) then
-      begin
-      Result := pexit;
-      break;
-      end;
-    end;
-    
-	iterator.Free();
-end;
-
-// Find exit by exit keyword
-function GRoom.findExitKeyword(s : string) : GExit;
-var
-	iterator : GIterator;
-	pexit : GExit;
-begin
-  Result := nil;
-  
-  if (s = '') then
-  	exit;
-  	
-  s := uppercase(s);
-
-  iterator := exits.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    pexit := GExit(iterator.next());
-
-    if (Assigned(pexit.keywords)) and (pos(s, uppercase(pexit.keywords^)) <> 0) then
-      begin
-      Result := pexit;
-      break;
-      end;
-    end;
-    
-	iterator.Free();
-end;
-
-
-// GObject
-constructor GObject.Create();
-begin
-  inherited Create;
-  
-  _name := nil;
-  _short := nil;
-  _long := nil;
-
-  worn := '';
-  wear_location1 := '';
-  wear_location2 := '';
-  contents := GDLinkedList.Create();
-  affects := GDLinkedList.Create();
-  child_count := 0;
-  count := 1;
-end;
-
-destructor GObject.Destroy();
-var 
-  obj_in : GObject;
-begin
-  while (contents.tail <> nil) do
-    begin
-    obj_in := GObject(contents.tail.element);
-
-    obj_in.Free();
-    end;
-
-  obj_in := GObject(objectIndices[vnum]);
-  
-  if (obj_in <> nil) then
-    dec(obj_in.child_count);
-
-  if (_name <> nil) then
-    unhash_string(_name);
-    
-  if (_short <> nil) then
-    unhash_string(_short);
-
-  if (_long <> nil) then
-    unhash_string(_long);
-
-	affects.Free();
-  contents.Free();
-  
-  inherited Destroy();
-end;
-
-// Get object weight
-function GObject.getWeight() : integer;
-var 
-	we : integer;
-	iterator : GIterator;
-	obj : GObject;
-begin
-  we := count * weight;
-
-  iterator := contents.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    obj := GObject(iterator.next());
-    inc(we, obj.getWeight);
-    end;
-    
-	iterator.Free();
-
-  Result := we;
-end;
-
-procedure GObject.setName(const name : string);
-begin
-  if (_name <> nil) then
-    unhash_string(_name);
-
-  _name := hash_string(name);
-end;
-
-procedure GObject.setShortName(const name : string);
-begin
-  if (_short <> nil) then
-    unhash_string(_short);
-
-  _short := hash_string(name);
-end;
-
-procedure GObject.setLongName(const name : string);
-begin
-  if (_long <> nil) then
-    unhash_string(_long);
-
-  _long := hash_string(name);
-end;
-
-function GObject.getName() : string;
-begin
-  if (_name <> nil) then
-    Result := _name^
-  else
-    Result := '';
-end;
-
-function GObject.getShortName() : string;
-begin
-  if (_short <> nil) then
-    Result := _short^
-  else
-    Result := '';
-end;
-
-function GObject.getLongName() : string;
-begin
-  if (_long <> nil) then
-    Result := _long^
-  else
-    Result := '';
-end;
-
-
-// GExit
-constructor GExit.Create();
-begin
-  inherited Create();
-// Make sure variables are at least initialised to a value
-  vnum := -1;
-  direction := 0;
-  to_room := nil;
-  keywords := nil;
-  flags := 0;
-  key := 0;
-end;
-
-// misc
-{Jago 5/Jan/01 : func required for do_goto and do_transfer
-		- should probably be placed elsewhere }
-function findLocation(ch : pointer; const param : string) : GRoom;
-var
-  room : GRoom;
-  searchVNum : integer;
-  victim : GCharacter;
-begin
-  result := nil;
-  
-  if (param = '') then	
-  	exit;
-
-  searchVNum := StrToIntDef(param, -1);
-
-  if (searchVnum > -1) then
-    begin
-    room := findRoom(searchVNum);
-    Result := room;
-    exit;
-    end
-  else
-    begin
-    victim := findCharWorld(ch, param);
-
-    if victim <> nil then
-      begin
-      Result := victim.room;
-      exit;
-      end;
-    end;
-
- {left out obj's for today}
- (*    if ( ( obj = get_obj_world( ch, arg ) ) != NULL )
-	return obj->in_room;
-*)
-end;
-
-// Find room by vnum
-function findRoom(vnum : integer) : GRoom;
-begin
-  Result := GRoom(room_list.get(vnum));
 end;
 
 // Find npcindex by vnum
@@ -2777,140 +1982,21 @@ begin
     end;
 end;
 
-function findDirectionShort(startroom, goalroom : GRoom) : string;
-var
-  i : integer;
-begin
-  Result := '';
-  for i := DIR_NORTH to DIR_UP do
-  begin
-    if (startroom.isConnectedTo(i) = goalroom) then
-    begin
-      Result := headings_short[i];
-      exit;
-    end;
-  end;
-end;
-
-// Clone object
-function GObject.clone() : GObject;
-var
-  obj : GObject;
-  obj_in : GObject;
-  iterator : GIterator;
-begin
-  obj := GObject.Create();
-
-  obj.name := name;
-  obj.short := short;
-  obj.long := long;
-  obj.item_type := item_type;
-  obj.wear_location1 := wear_location1;
-  obj.wear_location2 := wear_location2;
-  obj.flags := flags;
-  obj.value[1] := value[1];
-  obj.value[2] := value[2];
-  obj.value[3] := value[3];
-  obj.value[4] := value[4];
-  obj.weight := weight;
-  obj.cost := cost;
-  obj.count := 1;
-  obj.vnum := vnum;
-  obj.timer := timer;
-   
-  iterator := affects.iterator();
-  
-  while (iterator.hasNext()) do
-  	begin
-  	obj.affects.insertLast(iterator.next());
-  	end;
-  
-  iterator.Free();
-  
-  obj_in := GObject(objectIndices[vnum]);
-
-  if (obj_in <> nil) then
-    inc(obj_in.child_count);
-
-  objectList.add(obj);
-
-  Result := obj;
-end;
-
-{Jago 10/Jan/2001 - utility function }
-{ Revised 28/Jan/2001 - Nemesis }
-function findObjectWorld(s : string) : GObject;
-var 
-  obj : GObject;
-  iterator : GIterator;
-  number, count : integer;
-begin
-  Result := nil;
-  
-  if (s = '') then
-  	exit;
-  	
-  number := findNumber(s); // eg 2.sword
-
-  count := 0;
-
-  iterator := objectList.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    obj := GObject(iterator.next());
-
-    if (isName(obj.name,s)) then
-      begin
-      inc(count);
-
-      if (count = number) then
-        begin
-        Result := obj;
-        exit;
-        end;
-      end;
-    end;
-end;
-
 procedure initAreas();
 begin
   area_list := GDLinkedList.Create();
 
-  room_list := GHashTable.Create(32768);
-  room_list.ownsObjects := false;
-  
-  teleport_list := GDLinkedList.Create();
-
   npc_list := GDLinkedList.Create();
   npc_list.ownsObjects := false;
-  
-  objectList := GDLinkedList.Create();
-  objectList.ownsObjects := false;
-  
-  objectIndices := GHashTable.Create(32768);
-  objectIndices.ownsObjects := false;
 end;
 
 procedure cleanupAreas();
 begin
   area_list.clear();
   area_list.Free();
-  
-  room_list.clear();
-  room_list.Free();
-
-  teleport_list.clear();
-  teleport_list.Free();
 
   npc_list.clear();
   npc_list.Free();
-
-  objectList.clear();
-  objectList.Free();
-
-  objectIndices.clear();
-  objectIndices.Free();
 end;
 
 end.

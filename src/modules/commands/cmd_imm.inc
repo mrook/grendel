@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.19 2004/06/10 20:59:16 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.20 2004/08/24 20:00:56 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -2020,27 +2020,27 @@ begin
       case ex.direction of
         DIR_NORTH:
           begin
-            inc(room.areacoords.y);
+          room.areacoords.y := room.areacoords.y + 1;
           end;
         DIR_EAST:
           begin
-            inc(room.areacoords.x);
+          room.areacoords.x := room.areacoords.x + 1;
           end;
         DIR_SOUTH:
           begin
-            dec(room.areacoords.y);
+          room.areacoords.y := room.areacoords.y - 1;
           end;
         DIR_WEST:
           begin
-            dec(room.areacoords.x);
+          room.areacoords.x := room.areacoords.x - 1;
           end;
         DIR_DOWN:
           begin
-            dec(room.areacoords.z);
+          room.areacoords.z := room.areacoords.z - 1;
           end;
         DIR_UP:
           begin
-            inc(room.areacoords.z);
+          room.areacoords.z := room.areacoords.z + 1;
           end;
       end;
       ch.sendBuffer('Created coords (#' + IntToStr(room.vnum) + '): ' + room.areacoords.toString() + #13#10);

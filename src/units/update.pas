@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.9 2004/06/10 18:10:56 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.10 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -44,6 +44,8 @@ uses
 	conns,
 	player,
 	console,
+	rooms,
+	objects,
 	Channels;
 
 

@@ -12,6 +12,7 @@ uses
   area,
   dtypes,
   modules,
+  rooms,
   commands,
   mudspell;
 

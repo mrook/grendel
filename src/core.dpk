@@ -78,6 +78,8 @@ contains
   socket,
   console,
   events,
-  debug;
+  debug,
+  rooms,
+  objects;
 
 end.

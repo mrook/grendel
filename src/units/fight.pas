@@ -2,7 +2,7 @@
 	Summary:
 		Damage & experience routines
 	
-	## $Id: fight.pas,v 1.8 2004/04/22 18:25:53 hemko Exp $
+	## $Id: fight.pas,v 1.9 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit fight;
@@ -84,6 +84,8 @@ uses
 	commands,
 	dtypes,
 	console,
+	rooms,
+	objects,
 	util,
 	Channels;
 

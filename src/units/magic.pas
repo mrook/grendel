@@ -2,7 +2,7 @@
 	Summary:
 		Various spell related functions
 		
-	## $Id: magic.pas,v 1.7 2004/04/10 22:24:03 ***REMOVED*** Exp $
+	## $Id: magic.pas,v 1.8 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit magic;
@@ -29,6 +29,8 @@ uses
 	dtypes,
 	commands,
 	mudsystem,
+	rooms,
+	objects,
 	player,
 	util,
 	fight;
@@ -372,7 +374,8 @@ begin
                           end;
                         end;
         TARGET_DEF_SELF:begin
-                        node := ch.node_room;
+        				// TODO
+                        //node := ch.node_room;
                         vict := ch;
                         end;
         TARGET_DEF_AREA:begin

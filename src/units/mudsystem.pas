@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.13 2004/06/10 18:10:56 ***REMOVED*** Exp $
+	## $Id: mudsystem.pas,v 1.14 2004/08/24 20:00:56 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -139,6 +139,7 @@ uses
 	player,
 	area,
 	fsys,
+	objects,
 	conns,
 	console,
 	Channels,
