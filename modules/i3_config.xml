@@ -1,14 +1,15 @@
 <?xml version="1.0"?>
 <!-- InterMud 3 XML Configuration -->
-<!-- $Id: i3_config.xml,v 1.1 2003/10/03 21:00:44 ***REMOVED*** Exp $ -->
+<!-- $Id: i3_config.xml,v 1.2 2003/10/29 15:47:06 ***REMOVED*** Exp $ -->
 <mud>
 	<!-- Set autoconnect to 1 to automatically connect at bootup. -->
+	<!-- Change these values or the IMC3 module will refuse to connect! -->
 	<info autoconnect="0" minlevel="1" immlevel="990" adminlevel="995" implevel="1000">
-		<name>Grendel Test</name>
-		<telnet>4444</telnet>
-		<web>www.grendelproject.nl</web>
-		<adminemail>michiel@grendelproject.nl</adminemail>
-		<openstatus>testing</openstatus>
+		<name>Your Mud Name Here</name>
+		<telnet>Your Telnet Address Here</telnet>
+		<web>Your Web Address Here</web>
+		<adminemail>Your Admin Email Here</adminemail>
+		<openstatus>Your Online Status</openstatus>
 		<mudtype>Grendel</mudtype>
 		<basemudlib>Grendel</basemudlib>
 		<mudlib>Grendel 1.0.0a1</mudlib>
@@ -18,19 +19,18 @@
 	<!-- The router information. -->
 	<router host="i3.arthmoor.com" port="9900">*arthmoor</router>
 	<router host="us-1.i3.intermud.org" port="9000" preferred="1">*gjs</router>
-	<router host="yoda.solar.local" port="9000" >*solar</router>
 	
 	<!-- The services provided by your mud. -->
 	<!-- Do not turn things on unless you KNOW your mud properly supports them! -->
 	<!-- Refer to http://www.intermud.org for public packet specifications. -->
 	<!-- Uncomment lines to turn services on. -->
 	<services>
-		<!-- <tell/> -->
-		<!-- <beep/> -->
+		<tell/>
+		<beep/>
 		<!-- <emoteto/> -->
 		<!-- <who/> -->
 		<!-- <finger/> -->
-		<!-- <locate/> -->
+		<locate/>
 		<channel/>
 		<!-- <news/> -->
 		<!-- <mail/> -->
