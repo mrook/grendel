@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.16 2004/04/04 22:13:01 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.17 2004/05/12 20:53:23 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -690,7 +690,7 @@ begin
 
   if (obj <> nil) then
     begin
-    obj.seperate();
+    obj.separate();
     obj.fromChar();
     bg_info.prize := obj;
     end
@@ -1773,7 +1773,7 @@ begin
 
   obj.worn := '';       // put it in inv no matter what
 
-  obj.seperate();
+  obj.separate();
   obj.fromChar();
   obj.toChar(ch);
 

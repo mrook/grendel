@@ -1,4 +1,4 @@
-// $Id: cmd_shops.inc,v 1.1 2003/12/12 13:19:54 ***REMOVED*** Exp $
+// $Id: cmd_shops.inc,v 1.2 2004/05/12 20:53:23 ***REMOVED*** Exp $
 
 procedure do_balance(ch:GCharacter;param:string);
 var
@@ -358,7 +358,7 @@ begin
     end;
 
   if (obj.count > 1) then 
-    obj.seperate();
+    obj.separate();
     
   obj.fromChar();
   obj.toChar(keeper);

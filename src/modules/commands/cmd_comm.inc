@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.4 2004/03/30 20:58:42 hemko Exp $
+// $Id: cmd_comm.inc,v 1.5 2004/05/12 20:53:23 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -366,8 +366,8 @@ begin
 
   act(AT_REPORT,'Auctioned $p at the price of '+inttostr(price)+'.',false,ch,obj,nil,TO_CHAR);
 
-  obj.seperate;
-  obj.fromChar;
+  obj.separate();
+  obj.fromChar();
 
   auc.pulse := CPULSE_AUCTION;
   auc.item:=obj;

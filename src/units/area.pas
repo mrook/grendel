@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.31 2004/04/21 21:42:47 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.32 2004/05/12 20:53:23 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -128,7 +128,8 @@ type
       function clone() : GObject;
       function group(obj : GObject) : boolean;
       procedure split(num : integer);
-      procedure seperate();
+      procedure seperate(); deprecated;
+      procedure separate();
 
       constructor Create();
       destructor Destroy(); override;
@@ -3072,8 +3073,14 @@ begin
     end; }
 end;
 
-// Seperate a grouped object
-procedure GObject.seperate;
+// Separate a grouped object
+procedure GObject.separate();
+begin
+  split(1);
+end;
+
+// Separate a grouped object (left for legacy reasons, typo!)
+procedure GObject.seperate();
 begin
   split(1);
 end;

@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.6 2004/04/27 14:27:30 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.7 2004/05/12 20:53:23 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -87,7 +87,7 @@ begin
       act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
       act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
 
-      obj.seperate();
+      obj.separate();
 
       if (obj_in.item_type=ITEM_MONEY) then
         begin
@@ -130,7 +130,7 @@ begin
         begin
         act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
         act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
-        obj_in.seperate();
+        obj_in.separate();
 
         if (obj_in.item_type = ITEM_MONEY) then
           begin
@@ -172,7 +172,7 @@ begin
     act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
 
-    obj.seperate();
+    obj.separate();
 
     if (obj.item_type=ITEM_MONEY) then
       begin
@@ -257,7 +257,7 @@ begin
       act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
       act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
 
-      obj.seperate;
+      obj.separate();
       obj.fromChar;
       obj.toRoom(ch.room);
       end;
@@ -286,7 +286,7 @@ begin
     ch.sendBuffer('That is not a sacrificable object.'#13#10)
   else
     begin
-    obj.seperate;
+    obj.separate();
 
     act(AT_REPORT,'You nobly sacrifice $p$7 to the gods.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n nobly sacrifices $p$7 to the gods.',true,ch,obj,nil,TO_ROOM);
@@ -344,7 +344,7 @@ begin
 	    if (obj.wear_location1 <> '') or (obj.wear_location2 <> '') then
         if (ch.equip(obj)) then
           begin
-          obj.seperate();
+          obj.separate();
           inc(cnt);
           end;
       end;
@@ -371,7 +371,7 @@ begin
       end;
 
     if (ch.equip(obj)) then
-      obj.seperate;
+      obj.separate();
     end;
 end;
 
@@ -677,7 +677,7 @@ begin
     exit;
     end;
 
-  obj.seperate();
+  obj.separate();
 
   if not (obj.item_type in [ITEM_DRINK,ITEM_FOUNTAIN]) then
     ch.sendBuffer('You cannot drink that.'#13#10)
@@ -739,7 +739,7 @@ begin
     act(AT_REPORT,'Your stomach would not respond nicely when eating this!',false,ch,nil,nil,TO_CHAR)
   else
     begin
-    obj.seperate;
+    obj.separate();
 
     act(AT_REPORT,'You eat $p.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n eats $p.',false,ch,obj,nil,TO_ROOM);
@@ -910,7 +910,7 @@ begin
 
 			inc(counter);
 
-			obj.seperate;
+			obj.separate();
 			obj.fromChar;
 			obj.toChar(vict);
 
@@ -941,7 +941,7 @@ begin
     exit;
     end;
 
-  obj.seperate;
+  obj.separate();
   obj.fromChar;
   obj.toChar(vict);
 
@@ -1002,7 +1002,7 @@ begin
 
         inc(counter);
 
-        obj.seperate;
+        obj.separate();
         obj.fromChar;
         obj.toObject(obj_in);
         end;
@@ -1051,7 +1051,7 @@ begin
       act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
       act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
 
-      obj.seperate;
+      obj.separate();
       obj.fromChar;
       obj.toObject(obj_in);
       end;
