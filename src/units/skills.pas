@@ -2,120 +2,123 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $
+  ##	$Id: skills.pas,v 1.5 2004/02/17 11:41:19 ***REMOVED*** Exp $
 }
 
 unit skills;
 
 interface
 
+
 uses
-    SysUtils,
-    chars,
-    dtypes,
-    conns,
-    util,
-    constants;
+	SysUtils,
+	chars,
+	dtypes,
+	util,
+	constants;
+
 
 type
-    GSkill = class;
+	GSkill = class;
 
-    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
+	SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
 
-    GModifier = record
-      apply_type : GApplyTypes;
-      modifier : longint;
-    end;
+	GModifier = record
+		apply_type : GApplyTypes;
+		modifier : longint;
+	end;
 
-    GAffect = class
-    private
-      _name : PString;      
-      _wear_msg : string;
-      _duration : integer;
+	GAffect = class
+	private
+		_name : PString;      
+		_wear_msg : string;
+		_duration : integer;
 
-		public
-      modifiers : array of GModifier;
-      node : GListNode;
+	public
+		modifiers : array of GModifier;
+		node : GListNode;
 
-			procedure modify(ch : GCharacter; add : boolean);
-			procedure applyTo(ch : GCharacter);
+		procedure modify(ch : GCharacter; add : boolean);
+		procedure applyTo(ch : GCharacter);
 
-      procedure setName(const name : string);
-      function getName() : string;
-			
-		published
-      property name : string read getName write setName;
-      property wear_msg : string read _wear_msg write _wear_msg;
-      property duration: integer read _duration write _duration;
-    end;
+		procedure setName(const name : string);
+		function getName() : string;
 
-    GSkill = class
-    private
-      _name : PString;
+	published
+		property name : string read getName write setName;
+		property wear_msg : string read _wear_msg write _wear_msg;
+		property duration: integer read _duration write _duration;
+	end;
 
-		public      
-      id : integer;
+	GSkill = class
+	private
+		_name : PString;
 
-      func : SPEC_FUNC;
+	public      
+		id : integer;
 
-      affects : GDLinkedList;
-      prereqs : GDLinkedList;
+		func : SPEC_FUNC;
 
-      skill_type : integer;
-      min_mana : integer;
-      min_lvl : integer;
-      beats : integer;
-      target : integer;
+		affects : GDLinkedList;
+		prereqs : GDLinkedList;
 
-      dicenum, dicesize, diceadd : integer;
+		skill_type : integer;
+		min_mana : integer;
+		min_lvl : integer;
+		beats : integer;
+		target : integer;
 
-      dam_msg : string;
-      start_char, start_vict, start_room : string;
-      hit_char, hit_vict, hit_room : string;
-      miss_char, miss_vict, miss_room : string;
-      die_char, die_vict, die_room : string;
-      imm_char, imm_vict, imm_room : string;
+		dicenum, dicesize, diceadd : integer;
 
-      constructor Create();
-      destructor Destroy(); override;
-    
-      procedure setName(const name : string);
-      function getName() : string;
-    
-    published
-      property name : string read getName write setName;    	
-    end;
+		dam_msg : string;
+		start_char, start_vict, start_room : string;
+		hit_char, hit_vict, hit_room : string;
+		miss_char, miss_vict, miss_room : string;
+		die_char, die_vict, die_room : string;
+		imm_char, imm_vict, imm_room : string;
+
+		constructor Create();
+		destructor Destroy(); override;
+
+		procedure setName(const name : string);
+		function getName() : string;
+
+	published
+		property name : string read getName write setName;    	
+	end;
+
 
 var
    skill_table : GDLinkedList;
 
+
 { gsn's }
 var
-   gsn_slashing_weapons : GSkill;
-   gsn_second_attack : GSkill;
-   gsn_third_attack : GSkill;
-   gsn_fourth_attack : GSkill;
-   gsn_fifth_attack : GSkill;
-   gsn_enhanced_damage : GSkill;
-   gsn_dual_wield : GSkill;
-   gsn_slashing : GSkill;
-   gsn_piercing : GSkill;
-   gsn_concussion : GSkill;
-   gsn_whipping : GSkill;
-   gsn_kick : GSkill;
-   gsn_bash : GSkill;
-   gsn_poison : GSkill;
-   gsn_sneak : GSkill;
-   gsn_swim : GSkill;
-   gsn_searching : GSkill;
-   gsn_backstab : GSkill;
-   gsn_circle : GSkill;
-   gsn_rescue : GSkill;
-   gsn_dodge : GSkill;
-   gsn_track : GSkill;
-   gsn_peek : GSkill;
-   gsn_hide : GSkill;
-   gsn_lockpick : GSkill;
+	gsn_slashing_weapons : GSkill;
+	gsn_second_attack : GSkill;
+	gsn_third_attack : GSkill;
+	gsn_fourth_attack : GSkill;
+	gsn_fifth_attack : GSkill;
+	gsn_enhanced_damage : GSkill;
+	gsn_dual_wield : GSkill;
+	gsn_slashing : GSkill;
+	gsn_piercing : GSkill;
+	gsn_concussion : GSkill;
+	gsn_whipping : GSkill;
+	gsn_kick : GSkill;
+	gsn_bash : GSkill;
+	gsn_poison : GSkill;
+	gsn_sneak : GSkill;
+	gsn_swim : GSkill;
+	gsn_searching : GSkill;
+	gsn_backstab : GSkill;
+	gsn_circle : GSkill;
+	gsn_rescue : GSkill;
+	gsn_dodge : GSkill;
+	gsn_track : GSkill;
+	gsn_peek : GSkill;
+	gsn_hide : GSkill;
+	gsn_lockpick : GSkill;
 
 
 procedure load_skills();
@@ -137,16 +140,19 @@ procedure update_affects();
 procedure initSkills();
 procedure cleanupSkills();
 
+
 implementation
 
+
 uses
-    strip,
-    fsys,
-    magic,
-    fight,
-    console,
-    update,
-    mudsystem;
+	strip,
+	fsys,
+	magic,
+	fight,
+	console,
+	player,
+	update,
+	mudsystem;
 
 
 // Find skill by name

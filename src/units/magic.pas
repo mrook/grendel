@@ -1,33 +1,38 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $)
+  @lastmod($Id: magic.pas,v 1.5 2004/02/17 11:41:19 ***REMOVED*** Exp $)
 }
 
 unit magic;
 
 interface
 
+
 uses
-    skills,
-    chars;
+	skills,
+	chars;
+
 
 function findFunc(s:string) : SPEC_FUNC;
-
 procedure magic_timer(ch, victim : GCharacter; sn : GSkill);
+
 
 implementation
 
+
 uses
-    SysUtils,
-    constants,
-    area,
-    dtypes,
-    commands,
-    mudsystem,
-    console,
-    conns,
-    util,
-    fight;
+	SysUtils,
+	constants,
+	area,
+	dtypes,
+	commands,
+	mudsystem,
+	console,
+	conns,
+	player,
+	util,
+	fight;
+	
 
 // TODO: Weird function URANGE(5, 50+, 5) always returns 5 imho - Nemesis
 function saving_throw(level, save : integer; vict: GCharacter) : boolean;
