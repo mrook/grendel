@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.26 2004/03/17 00:21:33 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.27 2004/03/21 09:49:21 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -1601,7 +1601,7 @@ begin
               obj := tempobj.clone();
 
 	            obj.toChar(npc);
-	            npc.equip(obj);
+	            npc.equip(obj, true);
 
 	            lastobj := obj;
 	            end

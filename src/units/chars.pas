@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.12 2004/03/14 19:53:05 hemko Exp $
+  ## $Id: chars.pas,v 1.13 2004/03/21 09:49:21 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -182,7 +182,7 @@ type
       function getWield(item_type : integer) : GObject;
       function getDualWield() : GObject;
       procedure affectObject(obj : GObject; remove: boolean);
-      function equip(obj : GObject) : boolean;
+      function equip(obj : GObject; silent : boolean = false) : boolean;
 
       procedure die(); virtual;
 
@@ -1017,7 +1017,7 @@ begin
 end;
 
 // Equip object
-function GCharacter.equip(obj : GObject) : boolean;
+function GCharacter.equip(obj : GObject; silent : boolean = false) : boolean;
 var
   bodypart : GBodyPart;
 begin
@@ -1053,9 +1053,12 @@ begin
       Result := false;
       exit;
       end;
-      
-    act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
-    act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+
+	if (not silent) then
+		begin
+		act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
+		act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+		end;
 
     obj.fromChar();
     obj.worn := obj.wear_location1;
@@ -1075,9 +1078,12 @@ begin
       exit;
       end;
       
-    act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
-    act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
-
+	if (not silent) then
+		begin
+		act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
+		act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+		end;
+		
     obj.fromChar();
     obj.worn := obj.wear_location2;
     obj.toChar(Self);
@@ -1090,78 +1096,6 @@ begin
     Result := false;
     end; 
 end;
-
-(* const wr_string:array[WEAR_RFINGER..WEAR_EYES, 1..2] of string =
-      (('on your finger', 'on $s finger'),
-       ('on your finger', 'on $s finger'),
-       ('around your neck', 'around $s neck'),
-       ('around your neck', 'around $s neck'),
-       ('on your body', 'on $s body'),
-       ('on your head', 'on $s head'),
-       ('on your legs', 'on $s legs'),
-       ('on your feet', 'on $s feet'),
-       ('on your hands', 'on $s hands'),
-       ('on your arms', 'on $s arms'),
-       ('as your shield', 'as $s shield'),
-       ('about your body', 'about $s body'),
-       ('around your waist', 'around $s waist'),
-       ('around your right wrist', 'around $s right wrist'),
-       ('around your left wrist', 'around $s left wrist'),
-       ('near your head', 'near $s head'),
-       ('in your hand', 'in $s hand'),
-       ('in your hand', 'in $s hand'),
-       ('on your shoulder', 'on $s shoulder'),
-       ('on your shoulder', 'on $s shoulder'),
-       ('on your face', 'on $s face'),
-       ('in your ear', 'in $s ear'),
-       ('in your ear', 'in $s ear'),
-       ('on your ankle', 'on $s ankle'),
-       ('on your ankle', 'on $s ankle'),
-       ('on your eyes', 'on $s eyes'));
-begin
-  equip := true;
-
-  if IS_SET(obj.flags,OBJ_ANTI_GOOD) and IS_GOOD then
-    begin
-    act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
-    act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
-
-    obj.fromChar;
-    obj.toRoom(room);
-    exit;
-    end;
-
-  if IS_SET(obj.flags,OBJ_ANTI_EVIL) and IS_EVIL then
-    begin
-    act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
-    act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
-
-    obj.fromChar;
-    obj.toRoom(room);
-    exit;
-    end;
-
-  if (obj.wear1 > 0) and (getEQ(obj.wear1) = nil) then      { Wear on spot #1}
-    begin
-    act(AT_REPORT,'You wear $p ' + wr_string[obj.wear1, 1] + '.',false, Self, obj, nil, TO_CHAR);
-    act(AT_REPORT,'$n wears $p ' + wr_string[obj.wear1, 2] + '.',false, Self, obj, nil, TO_ROOM);
-    obj.wear_location := obj.wear1;
-    affectObject(obj, false);
-    end
-  else
-  if (obj.wear2 > 0) and (getEQ(obj.wear2) = nil) then      { Wear on spot #2}
-    begin
-    act(AT_REPORT,'You wear $p ' + wr_string[obj.wear2, 1] + '.',false, Self, obj, nil, TO_CHAR);
-    act(AT_REPORT,'$n wears $p ' + wr_string[obj.wear2, 2] + '.',false, Self, obj, nil, TO_ROOM);
-    obj.wear_location := obj.wear2;
-    affectObject(obj, false);
-    end
-  else                                              { No spots left }
-    begin
-    act(AT_REPORT,'You are already wearing something there!',false,Self,nil,nil,TO_CHAR);
-    equip := false;
-    end; 
-end; *)
 
 function GCharacter.calcxp2lvl : cardinal;
 begin
