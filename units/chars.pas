@@ -122,6 +122,7 @@ type
       kills : integer;
       wait : integer;
       skills_learned : GDLinkedList;
+      max_skills, max_spells : integer;
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
       npc_index : GNPCIndex;
@@ -184,7 +185,9 @@ type
 
       function LEARNED(skill : pointer) : integer;
       procedure SET_LEARNED(perc : integer; skill : pointer);
-
+      function getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
+      function getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
+      
       procedure extract(pull : boolean);
       procedure quit;
       procedure fromRoom;
@@ -708,6 +711,8 @@ begin
     end;
 end;
 
+// Xenon 10/Apr/2001: Modified SET_LEARNED() to remove skill from linked list when perc = 0
+
 procedure GCharacter.SET_LEARNED(perc : integer; skill : pointer);
 var
    g : GLearned;
@@ -730,7 +735,44 @@ begin
   if (g = nil) then
     skills_learned.insertLast(GLearned.Create(perc, skill))
   else
-    g.perc := perc;
+    if (perc > 0) then
+      g.perc := perc
+    else
+      skills_learned.remove(node);
+end;
+
+function GCharacter.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
+var
+  node : GListNode;
+  g : GLearned;
+begin
+  Result := 0;
+  node := skills_learned.head;
+
+  while (node <> nil) do
+  begin
+    g := node.element;
+    if (GSkill(g.skill).skill_type <> SKILL_SPELL) then
+      inc(Result);
+    node := node.next;
+  end;
+end;
+
+function GCharacter.getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
+var
+  node : GListNode;
+  g : GLearned;
+begin
+  Result := 0;
+  node := skills_learned.head;
+
+  while (node <> nil) do
+  begin
+    g := node.element;
+    if (GSkill(g.skill).skill_type = SKILL_SPELL) then
+      inc(Result);
+    node := node.next;
+  end;
 end;
 
 function GCharacter.load(fn : string) : boolean;
@@ -792,6 +834,8 @@ begin
 
     aliases := GDLinkedList.Create;
     skills_learned := GDLinkedList.Create;
+    max_skills := 0;
+    max_spells := 0;
     end;
 
   with point do
@@ -882,6 +926,16 @@ begin
           a:=striprbeg(a,' ');
           ability.wis:=strtoint(stripl(a,' '));
           end
+        else
+        if (g = 'MAX_SKILLS') then
+        begin
+          max_skills := strtoint(striprbeg(a,' '))
+        end
+        else
+        if (g = 'MAX_SPELLS') then
+        begin
+          max_spells := strtoint(striprbeg(a,' '))
+        end
         else
         if g='APB' then
           point.apb:=strtoint(striprbeg(a,' '))
@@ -1289,6 +1343,24 @@ begin
     point.hitroll:=UMax((level div 5)+50,100);
     end;
 
+  if (max_skills = 0) then
+  begin
+    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
+              'The pfile of this character lacks a Max_skills field. ' +
+              'Fixing this *now* by setting these fields to race-max value. ' +
+              'Make sure to (force) save this player.');
+    max_skills := race.max_skills;
+  end;
+  
+  if (max_spells = 0) then
+  begin
+    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
+              'The pfile of this character lacks a Max_spells field. ' +
+              'Fixing this *now* by setting these fields to race-max value. ' +
+              'Make sure to (force) save this player.');
+    max_spells := race.max_spells;
+  end;
+  
   calcAC;
   calcRank;
 
@@ -1384,6 +1456,9 @@ begin
   with ability do
     writeln(f,'Stats: ',str,' ',con,' ',dex,' ',int,' ',wis);
 
+  writeln(f, 'Max_skills: ', max_skills);
+  writeln(f, 'Max_spells: ', max_spells);
+  
   with point do
     begin
     writeln(f,'APB: ',apb);
