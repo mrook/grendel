@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.1 2003/12/12 13:19:55 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.2 2004/02/11 20:02:42 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -32,11 +32,11 @@ uses
 
 
 type
-  GInterMudModule = class(TInterfacedObject, IModuleInterface)
-  published
-  	procedure registerModule();
-  	procedure unregisterModule();
-  end;
+	GInterMudModule = class(TInterfacedObject, IModuleInterface)
+	published
+		procedure registerModule();
+		procedure unregisterModule();
+	end;
   
 
 var
@@ -55,7 +55,7 @@ begin
 	
 	if (length(cmd) = 0) then
 		begin
-		ch.sendBuffer('Usage: I3 <connect/status/mudlist/chanlist/chat/listen/tell/locate/beep/who/finger/help>'#13#10);
+		ch.sendBuffer('Usage: I3 <(dis)connect/status/mudlist/chanlist/chat/listen/tell/locate/beep/who/finger/help>'#13#10);
 		exit;
 		end;
 	
@@ -69,7 +69,7 @@ begin
 		else
 			begin
 			i3.setDebugLevel(2);
-			ch.sendBuffer('I3 debugging turned off.'#13#10);
+			ch.sendBuffer('I3 debugging turned on.'#13#10);
 			end;
 		end
 	else
@@ -81,7 +81,19 @@ begin
 			exit;
 			end;
 			
-		i3.wait := 2;
+		i3.connect();
+		ch.sendBuffer('Ok.'#13#10);
+		end
+	else
+	if (prep(cmd) = 'DISCONNECT') then
+		begin
+		if (not i3.isConnected) then
+			begin
+			ch.sendBuffer('Not connected.'#13#10);
+			exit;
+			end;
+			
+		i3.disconnect();
 		ch.sendBuffer('Ok.'#13#10);
 		end
 	else
@@ -602,7 +614,7 @@ end;
 
 procedure GInterMudModule.registerModule();
 begin
-  i3 := GInterMud.Create(1);
+	i3 := GInterMud.Create(1);
 	i3.FreeOnTerminate := true;
 	
 	registerCommand('do_i3', do_i3);
@@ -616,7 +628,7 @@ begin
 	unregisterField('i3flag');
 	unregisterField('i3replyname');
 	
-  unregisterCommand('do_i3');
+	unregisterCommand('do_i3');
   
 	i3.Terminate();
 

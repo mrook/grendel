@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.1 2003/12/12 13:19:55 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.2 2004/02/11 20:02:42 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -13,7 +13,7 @@ interface
 
 uses
 	Classes,
-  dtypes,
+	dtypes,
 	socket,
 	imc3_chan,
 	imc3_mud,
@@ -62,6 +62,9 @@ type
 		procedure writePacket(msg : string);
 		
 	published
+		procedure connect();
+		procedure disconnect();
+		
 		procedure sendPacket();
 		
 		procedure writeBuffer(msg : string);
@@ -89,7 +92,6 @@ type
 		
 		property connectedRouter : GRouter_I3 read router;
 		property isConnected : boolean read connected;
-		property wait : integer read _wait write _wait;
 	end;
 
 
@@ -129,7 +131,7 @@ begin
 	socket := GSocket4.Create();
 	
 	reconattempts := 0;
-	wait := 0;
+	_wait := 0;
 end;
 
 destructor GInterMud.Destroy();
@@ -138,6 +140,26 @@ begin
 	this_mud.Free();
 	
 	inherited Destroy();
+end;
+
+procedure GInterMud.connect();
+begin
+	if (isConnected) then
+		exit;
+		
+	_wait := 2;
+end;
+
+procedure GInterMud.disconnect();
+begin
+	if (not isConnected) then
+		exit;
+	
+	debug('Disconnecting from server');
+		
+	connected := false;
+	shutdown();
+	socket.disconnect();
 end;
 
 // bool I3_write_packet( char *msg )
@@ -826,51 +848,51 @@ end;
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
-    handleStartupReply(packet)
-  else
+		handleStartupReply(packet)
+	else
 	if (packet.packet_type = 'mudlist') then
-    handleMudList(packet)
-  else
-  if (packet.packet_type = 'chanlist-reply') then
-  	handleChanList(packet)
-  else
-  if (packet.packet_type = 'channel-m') then
-  	handleChannelMessage(packet)
-  else
-  if (packet.packet_type = 'channel-e') then
-  	handleChannelEmote(packet)
-  else
-  if (packet.packet_type = 'locate-req') then
-  	handleLocateRequest(packet)
-  else
-  if (packet.packet_type = 'locate-reply') then
-  	handleLocateReply(packet)
-  else
-  if (packet.packet_type = 'tell') then
-  	handleTell(packet)
-  else
-  if (packet.packet_type = 'beep') then
-  	handleBeep(packet)
-  else
-  if (packet.packet_type = 'who-req') then
-  	handleWhoReq(packet)
-  else
-  if (packet.packet_type = 'who-reply') then
-  	handleWhoReply(packet)
-  else
-  if (packet.packet_type = 'finger-req') then
-  	handleFingerReq(packet)
-  else
-  if (packet.packet_type = 'finger-reply') then
-  	handleFingerReply(packet)
-  else
-  if (packet.packet_type = 'error') then
-  	handleError(packet)
-  else
-  	begin
-  	debug('unknown packet "' + packet.packet_type + '"', 0);
+		handleMudList(packet)
+	else
+	if (packet.packet_type = 'chanlist-reply') then
+  		handleChanList(packet)
+	else
+	if (packet.packet_type = 'channel-m') then
+  		handleChannelMessage(packet)
+	else
+	if (packet.packet_type = 'channel-e') then
+  		handleChannelEmote(packet)
+	else
+	if (packet.packet_type = 'locate-req') then
+  		handleLocateRequest(packet)
+	else
+	if (packet.packet_type = 'locate-reply') then
+  		handleLocateReply(packet)
+	else
+	if (packet.packet_type = 'tell') then
+  		handleTell(packet)
+	else
+	if (packet.packet_type = 'beep') then
+  		handleBeep(packet)
+	else
+	if (packet.packet_type = 'who-req') then
+  		handleWhoReq(packet)
+	else
+	if (packet.packet_type = 'who-reply') then
+  		handleWhoReply(packet)
+	else
+	if (packet.packet_type = 'finger-req') then
+  		handleFingerReq(packet)
+	else
+	if (packet.packet_type = 'finger-reply') then
+  		handleFingerReply(packet)
+	else
+	if (packet.packet_type = 'error') then
+  		handleError(packet)
+	else
+  		begin
+	  	debug('unknown packet "' + packet.packet_type + '"', 0);
 		debug(packet.toString(), 0);
-  	end;
+	  	end;
 end;
 
 procedure GInterMud.shutdown();
@@ -878,8 +900,8 @@ begin
 	saveMudList();
 	saveChanList();
 	
-  writeHeader('shutdown', this_mud.name, '', router.name, '');
-  writeBuffer('0');
+	writeHeader('shutdown', this_mud.name, '', router.name, '');
+	writeBuffer('0');
 	writeBuffer(',})' + #13);  
 
 	sendPacket();
@@ -910,16 +932,19 @@ begin
 	router := this_mud.preferredRouter;
 	
 	if (this_mud.autoconnect) then
-		_wait := 2;
+		connect();
 	
 	while (not Terminated) do
 		begin
 		if (_wait > 0) then
 			dec(_wait);
 
+		Sleep(100);
+
 		try
 			if (not connected) and (_wait = 1) then
 				begin
+				debug('Trying to connect to ' + router.name);
 				if (socket.connect(router.ipaddress, router.port)) then
 					begin
 					writeConsole('I3: Connected to ' + router.ipaddress + ' port ' + IntToStr(router.port));
@@ -931,7 +956,7 @@ begin
 				else
 					begin
 					writeConsole('I3: Could not connect to ' + router.ipaddress + ' port ' + IntToStr(router.port));
-        	inc(reconattempts);
+			        	inc(reconattempts);
 
 					if (reconattempts <= 5) then
 						_wait := 10
@@ -940,12 +965,13 @@ begin
 						_wait := 500
 					else
 						begin
-            _wait := -2;	{ Abandon attempts - probably an ISP failure anyway if this happens :) }
+						_wait := -2;	{ Abandon attempts - probably an ISP failure anyway if this happens :) }
 						writeConsole('Abandoning attempts to reconnect to Intermud-3 router. Too many failures.');
-	   				end;
+	   					end;
 					end;
 				end
 			else
+			if (connected) then
 				begin
 				if (socket.canRead()) then
 					begin
@@ -962,8 +988,6 @@ begin
 						inc(inputPointer, ret);
 						end;
 					end;
-
-				Sleep(10);
 
 				if (inputPointer > 0) then
 					begin
@@ -1012,16 +1036,22 @@ begin
 					end;
 				end;
 			except
-				on E : Exception do debug(E.Message);
+				on E : Exception do 
+					begin
+					debug(E.Message);
+					connected := socket.isValid();
+					
+					if (not connected) then
+						begin
+						debug('Connection lost, waiting for reconnect');
+						_wait := 500;
+						end;
+					end;
 			end;
 		end;
 
 	if (connected) then
-		begin
-		shutdown();
-		connected := false;
-		socket.disconnect();
-		end;
+		disconnect();
 end;
 
 // void I3_send_error( char *mud, char *user, char *code, char *message ) 
@@ -1164,7 +1194,7 @@ end;
 
 procedure GInterMud.setDebugLevel(debugLevel : integer = 0);
 begin
-  Self.debugLevel := debugLevel;
+	Self.debugLevel := debugLevel;
 end;
 
 end.
