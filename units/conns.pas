@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.53 2003/10/22 13:12:34 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.54 2003/10/23 08:14:30 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -174,17 +174,13 @@ end;
 
 destructor GConnection.Destroy();
 begin
-  connection_list.remove(node);
-  
   _socket.Free();
 
   inherited Destroy();
 end;
 
 procedure GConnection.Execute();
-begin
-  FreeOnTerminate := true;
-  
+begin 
   read();
   
   if (Assigned(FOnOpen)) then
@@ -196,7 +192,7 @@ begin
   	begin
   	_lastupdate := Now();
   	
-		sleep(100);
+		sleep(50);
 
   	if (Assigned(FOnTick)) then
   		if (not FOnTick()) then 
@@ -214,6 +210,8 @@ begin
   	
 	if (Assigned(FOnClose)) then
 		FOnClose();
+
+  connection_list.remove(node);  
 end;
 
 procedure GConnection.send(s : PChar; len : integer);
@@ -928,7 +926,7 @@ end;
 
 procedure gameLoop();
 begin
-  while (not system_info.terminated) and (not Application.Terminated) do
+  while (not system_info.terminated) do
     begin
     if (listenv4 <> nil) then
       begin
@@ -943,7 +941,7 @@ begin
       end;
 
     {$IFDEF WIN32}
-      Application.ProcessMessages();
+    Application.ProcessMessages();
     {$ENDIF}
 
 		pollConsole();
