@@ -5,7 +5,7 @@
 ; which are substrings of the command name (so 'l' with name 'look')
 ; will be discarded.
 ;
-; $Id: commands.dat,v 1.37 2004/03/21 21:19:39 ***REMOVED*** Exp $
+; $Id: commands.dat,v 1.38 2004/04/05 13:14:23 ***REMOVED*** Exp $
 
 #command
 name: down
@@ -523,7 +523,7 @@ function: do_showprompt
 #command
 name: skills
 function: do_skills
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 #end
 
 #command
@@ -544,14 +544,14 @@ function: do_socials
 #command
 name: spells
 function: do_spells
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 #end
 
 #command
 name: stand
 alias: wake
 function: do_stand
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 #end
 
 #command
