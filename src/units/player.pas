@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.36 2004/08/24 20:00:56 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.37 2004/08/24 20:32:49 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -134,7 +134,6 @@ type
 		wimpy : integer;
 		aliases : GDLinkedList;
 		pracs : integer;
-		max_skills, max_spells : integer;
 		bamfin, bamfout : string;
 		taunt : string;
 		channels : GDLinkedList;
@@ -1235,9 +1234,6 @@ begin
   aliases := GDLinkedList.Create();
   skills_learned := GDLinkedList.Create();
 
-  max_skills := 0;
-  max_spells := 0;
-
   pracs := 10; // default for new players(?)
 
   channels := GDLinkedList.Create();
@@ -1638,12 +1634,6 @@ begin
           a := right(a,' ');
           wis := strtoint(left(a,' '));
           end
-        else
-        if (g = 'MAX_SKILLS') then
-          max_skills := strtoint(right(a,' '))
-        else
-        if (g = 'MAX_SPELLS') then
-          max_spells := strtoint(right(a,' '))
         else
         if (g = 'PRACTICES') then
           pracs := strtoint(right(a,' '))
@@ -2161,12 +2151,6 @@ begin
     race := GRace(raceList.head.element);
     end;
 
-  if (max_skills = 0) then
-    max_skills := race.max_skills;
-
-  if (max_spells = 0) then
-    max_spells := race.max_spells;
-
   calcAC();
   calcRank();
   
@@ -2273,9 +2257,6 @@ begin
 		af.writeLine('Pagerlen: ' + IntToStr(pagerlen));
 
 		af.writeLine('Stats: ' + IntToStr(str) + ' ' + IntToStr(con) + ' ' + IntToStr(dex) + ' ' + IntToStr(int) + ' ' + IntToStr(wis));
-
-		af.writeLine('Max_skills: ' + IntToStr(max_skills));
-		af.writeLine('Max_spells: ' + IntToStr(max_spells));
 
 		af.writeLine('APB: ' + IntToStr(apb));
 		af.writeLine('Mana: ' + IntToStr(mana) + ' ' + IntToStr(max_mana));

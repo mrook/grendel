@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.7 2004/08/24 20:00:56 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.8 2004/08/24 20:32:49 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -304,7 +304,7 @@ begin
   if (not victim.IS_NPC) then
   begin
     buf := Format('Max skillslots: %d.  Max spellslots: %d.  Practices left: %d.' + #13#10,
-                  [GPlayer(victim).max_skills, GPlayer(victim).max_spells, GPlayer(victim).pracs]);
+                  [GPlayer(victim).race.max_skills, GPlayer(victim).race.max_spells, GPlayer(victim).pracs]);
 
     buf1 := buf1 + buf;
   end;
@@ -900,42 +900,6 @@ begin
     GPlayer(vict).xptogo := value;
     buf := 'XP TNL';
     end
-  else
-  if (uppercase(arg2) = 'MAXSKILLS') then
-  begin
-    if (vict.IS_NPC) then
-    begin
-      ch.sendBuffer('Type not possible for NPC.'#13#10);
-      exit;
-    end;
-      
-    if (value <= 0) then
-    begin
-      ch.sendBuffer('Value must be > 0.'#13#10);
-      exit;
-    end;
-
-    GPlayer(vict).max_skills := value;
-    buf := 'MAXSKILLS';
-  end
-  else
-  if (uppercase(arg2) = 'MAXSPELLS') then
-  begin
-    if (vict.IS_NPC) then
-    begin
-      ch.sendBuffer('Type not possible for NPC.'#13#10);
-      exit;
-    end;
-    
-    if (value <= 0) then
-    begin
-      ch.sendBuffer('Value must be >= 0.'#13#10);
-      exit;
-    end;
-    
-    GPlayer(vict).max_spells := value;
-    buf := 'MAXSPELLS';
-  end
   else
   if (uppercase(arg2) = 'PRACS') then
   begin

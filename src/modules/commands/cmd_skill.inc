@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.3 2004/05/24 20:38:00 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.4 2004/08/24 20:32:49 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -289,7 +289,7 @@ begin
     end;
 
   if (not ch.IS_NPC()) then
-    buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(GPlayer(ch).max_spells - GPlayer(ch).getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
+    buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(GPlayer(ch).race.max_spells - GPlayer(ch).getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
     
   delete(buf, length(buf) - 2, 2);
   ch.sendPager(buf);
@@ -328,7 +328,7 @@ begin
 		buf := buf + #13#10;
 
 	if (not ch.IS_NPC()) then
-		buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(GPlayer(ch).max_skills - GPlayer(ch).getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
+		buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(GPlayer(ch).race.max_skills - GPlayer(ch).getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
 
 	ch.sendPager(act_string(buf, ch, nil, nil, nil));
 end;
@@ -394,10 +394,10 @@ begin
     if (sn = nil) or (vict.LEARNED(sn) = 0) then
       act(AT_REPORT, '$N doesn''t teach this skill.',false,ch,nil,vict,TO_CHAR)
     else
-      if ((sn.skill_type <> SKILL_SPELL) and (GPlayer(ch).max_skills - GPlayer(ch).getUsedSkillslots() <= 0)) then
+      if ((sn.skill_type <> SKILL_SPELL) and (GPlayer(ch).race.max_skills - GPlayer(ch).getUsedSkillslots() <= 0)) then
         act(AT_REPORT, 'You have no more free skillslots!', false, ch, nil, nil, TO_CHAR)
       else
-      if ((sn.skill_type = SKILL_SPELL) and (GPlayer(ch).max_spells - GPlayer(ch).getUsedSpellslots() <= 0)) then
+      if ((sn.skill_type = SKILL_SPELL) and (GPlayer(ch).race.max_spells - GPlayer(ch).getUsedSpellslots() <= 0)) then
         act(AT_REPORT, 'You have no more free spellslots!', false, ch, nil, nil, TO_CHAR)
       else
 {    if (sn.skill_type = SKILL_SPELL) and (ch.skills_learned.getSize() = ch.race.max_spells) then
