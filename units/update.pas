@@ -91,9 +91,9 @@ begin
       if IS_SET(ch.room.flags,ROOM_MANAROOM) then
         mana_gain:=mana_gain*2;
         
-      hp:=UMax(hp+hp_gain,max_hp);
-      mv:=UMax(mv+mv_gain,max_mv);
-      mana:=UMax(mana+mana_gain,max_mana);
+      hp := UMin(hp + hp_gain, max_hp);
+      mv := UMin(mv + mv_gain, max_mv);
+      mana := UMin(mana + mana_gain, max_mana);
       end;
 
     node := node.next;
