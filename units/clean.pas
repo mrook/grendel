@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.14 2001/07/31 21:47:27 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.15 2001/08/09 12:05:31 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -35,6 +35,7 @@ uses
     area,
     util,
     timers,
+    debug,
 {$IFDEF WIN32}
     Winsock2,
 {$ENDIF}
@@ -87,75 +88,87 @@ var
 begin
   a := 0;
   repeat
-    inc(a);
+    try
+      inc(a);
 
-    if (a = 15) then
-      begin
-      AutoSave;
-      a := 0;
-      end;
-
-{$IFNDEF NOCRASHDETECTION}
-    node := connection_list.head;
-
-    while (node <> nil) do
-      begin
-      node_next := node.next;
-      conn := node.element;
-
-      if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
+      if (a = 15) then
         begin
-        bugreport('GCleanThread.Execute', 'clean..pas', 'Thread of ' + conn.ch.name^ + ' probably died');
+        AutoSave;
+        a := 0;
+        end;
+  
+      {$IFNDEF NOCRASHDETECTION}
+      node := connection_list.head;
 
-        conn.ch.emptyBuffer;
+      while (node <> nil) do
+        begin
+        node_next := node.next;
+        conn := node.element;
 
-        conn.send('Your previous command possibly triggered an illegal action on this server.'#13#10);
-        conn.send('The administration has been notified, and you have been disconnected'#13#10);
-        conn.send('to prevent any data loss.'#13#10);
-        conn.send('Your character is linkless, and it would be wise to reconnect as soon'#13#10);
-        conn.send('as possible.'#13#10);
+        if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
+          begin
+          bugreport('GCleanThread.Execute', 'clean..pas', 'Thread of ' + conn.ch.name^ + ' probably died');
 
-        conn.ch.conn := nil;
+          conn.ch.emptyBuffer;
 
-        act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
-        SET_BIT(conn.ch.flags,PLR_LINKLESS);
+          conn.send('Your previous command possibly triggered an illegal action on this server.'#13#10);
+          conn.send('The administration has been notified, and you have been disconnected'#13#10);
+          conn.send('to prevent any data loss.'#13#10);
+          conn.send('Your character is linkless, and it would be wise to reconnect as soon'#13#10);
+          conn.send('as possible.'#13#10);
 
-        conn.Free;
+          conn.ch.conn := nil;
 
-{$IFDEF LINUX}
-	pthread_kill(conn.thread.handle, 9);
-{$ENDIF}
-{$IFDEF WIN32}
-        TerminateThread(conn.thread.handle, 1);
-{$ENDIF}
+          act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
+          SET_BIT(conn.ch.flags,PLR_LINKLESS);
+
+          conn.Free;
+
+          {$IFDEF LINUX}
+        	pthread_kill(conn.thread.handle, 9);
+          {$ENDIF}
+          {$IFDEF WIN32}
+          TerminateThread(conn.thread.handle, 1);
+          {$ENDIF}
+
+          node := node_next;
+          continue;
+          end;
 
         node := node_next;
-        continue;
+        end;
+      {$ENDIF}
+
+      if (GTimerThread(timer_thread).last_update + THREAD_TIMEOUT < Now()) then
+        begin
+        bugreport('GCleanThread.Execute', 'clean.pas', 'Timer thread probably died');
+
+        {$IFDEF LINUX}
+        pthread_kill(timer_thread.handle, 9);
+        {$ENDIF}
+        {$IFDEF WIN32}
+        TerminateThread(timer_thread.handle, 1);
+        {$ENDIF}
+
+        timer_thread := GTimerThread.Create;
         end;
 
-      node := node_next;
-      end;
-{$ENDIF}
+      cleanChars;
+      cleanObjects;
 
-    if (GTimerThread(timer_thread).last_update + THREAD_TIMEOUT < Now()) then
-      begin
-      bugreport('GCleanThread.Execute', 'clean.pas', 'Timer thread probably died');
-
-{$IFDEF LINUX}
-      pthread_kill(timer_thread.handle, 9);
-{$ENDIF}
-{$IFDEF WIN32}
-      TerminateThread(timer_thread.handle, 1);
-{$ENDIF}
-
-      timer_thread := GTimerThread.Create;
-      end;
-
-    cleanChars;
-    cleanObjects;
-
-    sleep(10000);
-  until (Terminated);
+      sleep(10000);
+    except
+      on E : EExternal do
+        begin
+        bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
+        outputError(E);
+        end;
+      on E : Exception do
+        bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed: ' + E.Message)
+      else
+        bugreport('GCleanThread.Execute', 'clean.pas', 'Clean thread failed to execute correctly');
+    end;    
+  until (Terminated); 
 end;
 
 end.
