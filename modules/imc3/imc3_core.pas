@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.24 2003/11/10 09:27:42 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.25 2003/11/11 20:52:33 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -517,11 +517,17 @@ end;
 procedure GInterMud.handleChannelMessage(packet : GPacket_I3);
 var
 	channel_name, visname, message, text : string;
+	channel : GChannel_I3;
 begin
 	channel_name := GString(packet.fields[6]).value;
 	visname := GString(packet.fields[7]).value;
 	message := GString(packet.fields[8]).value;
 	text := Format('[%s] %s@%s: %s$7', [channel_name, visname, packet.originator_mudname, message]);
+	
+	channel := GChannel_I3(chanList[channel_name]);
+	
+	if (channel <> nil) then
+		channel.updateHistory(text);
 	
 	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;
@@ -529,6 +535,7 @@ end;
 procedure GInterMud.handleChannelEmote(packet : GPacket_I3);
 var
 	channel_name, visname, message, text : string;
+	channel : GChannel_I3;
 begin
 	channel_name := GString(packet.fields[6]).value;
 	visname := GString(packet.fields[7]).value;
@@ -539,6 +546,11 @@ begin
 	message := FastReplace(message, '$N', visname);
 	
 	text := Format('[%s] %s$7', [channel_name, message]);
+	
+	channel := GChannel_I3(chanList[channel_name]);
+	
+	if (channel <> nil) then
+		channel.updateHistory(text);
 	
 	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;

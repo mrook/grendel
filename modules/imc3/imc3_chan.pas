@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_chan.pas,v 1.3 2003/10/03 21:00:28 ***REMOVED*** Exp $
+	$Id: imc3_chan.pas,v 1.4 2003/11/11 20:52:33 ***REMOVED*** Exp $
 }
 unit imc3_chan;
 
@@ -27,12 +27,16 @@ type
     layout_m, layout_e : string;
     status : integer;
     i3perm : integer;
-    history : array[1..MAX_I3HISTORY] of string;
+    history : TStringList;
     flags : integer;
     
   published
+  	constructor Create();
+  	
   	procedure load(parser : TXmlParser);
   	procedure save(writer : GFileWriter);
+  	
+  	procedure updateHistory(msg : string);
   end;
 
 
@@ -51,7 +55,14 @@ uses
 	SysUtils,
 	util;
 	
+
+constructor GChannel_I3.Create();
+begin
+	inherited Create();
 	
+	history := TStringList.Create();
+end;
+
 procedure GChannel_I3.load(parser : TXmlParser);
 begin
 	while (parser.Scan()) do
@@ -81,6 +92,18 @@ begin
 	writer.writeLine('		<name>' + I3_name + '</name>');
 	writer.writeLine('		<mud>' + host_mud + '</mud>');
 	writer.writeLine('	</channel>');
+end;
+
+procedure GChannel_I3.updateHistory(msg : string);
+var
+	hist : string;
+begin
+	hist := '[' + FormatDateTime('hh:nn', Now) + '] ' + msg;
+	
+	history.Add(hist);
+	
+	if (history.count > MAX_I3HISTORY) then
+		history.Delete(0);
 end;
 	
 function findChannel(name : string) : GChannel_I3;
