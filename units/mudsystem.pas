@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.21 2001/06/06 18:59:54 xenon Exp $
+// $Id: mudsystem.pas,v 1.22 2001/07/14 13:19:22 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -160,7 +160,7 @@ end;
 
 procedure write_log(s:string);
 begin
-  s := '[' + DateTimeToStr(now) + '] [LOG] ' + s;
+  s := '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] [LOG] ' + s;
 
   if TTextRec(logfile).mode=fmOutput then
     system.writeln(logfile,s);

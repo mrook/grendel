@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.30 2001/05/12 14:25:12 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.31 2001/07/14 13:19:21 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -582,9 +582,7 @@ procedure boot_mud;
 var s : string;
 begin
   { open a standard log file, filename is given by current system time }
-  TimeSeparator := '_';
-  AssignFile(LogFile, 'log\' + TimeToStr(time) + '_' + DateToStr(date) + '.log');
-  TimeSeparator := ':';
+  AssignFile(LogFile, 'log\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log');
 
   {$I-}
   rewrite(LogFile);
