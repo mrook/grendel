@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.11 2004/03/19 15:37:24 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.12 2004/03/19 15:40:42 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -155,7 +155,9 @@ end;
 
 procedure cleanupDebug();
 begin
+{$IFDEF WIN32}
 	JclStopExceptionTracking();
+{$ENDIF}
 end;
 	
 end.
