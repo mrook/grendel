@@ -51,14 +51,18 @@ end;
 
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
-	if (consoleMemo = nil) then
-		exit;
-		
-	if (debugLevel = 0) then
-		begin
-		consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
-		Application.ProcessMessages();
-		end;
+	try
+		if (consoleMemo = nil) then
+			exit;
+
+		if (debugLevel = 0) then
+			begin
+			consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
+			Application.ProcessMessages();
+			end;
+	except
+		on E : Exception do reportException(E);
+	end;
 end;
 
 procedure GConsoleModule.registerModule();
