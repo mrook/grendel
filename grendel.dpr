@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.82 2003/10/22 13:13:18 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.83 2003/10/23 08:18:37 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -124,7 +124,7 @@ begin
     if (conn.state = CON_PLAYING) and (not conn.ch.IS_NPC) then
       GPlayer(conn.ch).quit
     else
-      conn.socket.disconnect();
+      conn.Terminate();
     end;
     
   iterator.Free();
@@ -637,24 +637,24 @@ begin
 	if (ExceptObj <> nil) then
 		begin
 		e := ExceptObj as Exception;
-		writeConsole('[EX:' + E.ClassName + '] ' + E.Message);
+		writeConsole('[EX Main:' + E.ClassName + '] ' + E.Message);
+		end;
+		
+	strings := TStringList.Create();
 
-	  strings := TStringList.Create();
-	
-	  JclLastExceptStackListToStrings(strings, False, False, False);
-  
-  	if (strings.count > 0) then
-  		begin
-		  //writeConsole('Possible bug detected, stacktrace follows:');
+	JclLastExceptStackListToStrings(strings, False, False, False);
 
-	  	for a := 0 to strings.count - 1 do
-	    	writeConsole(strings[a]);
-	    end
-		else
-			writeConsole('No stacktrace available.');
-    
-	  strings.Free();
-	  end;
+	if (strings.count > 0) then
+		begin
+		writeConsole('Stacktrace follows:');
+
+		for a := 0 to strings.count - 1 do
+			writeConsole(strings[a]);
+		end
+	else
+		writeConsole('No stacktrace available.');
+
+	strings.Free();
 end;
 
 function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; stdcall;
