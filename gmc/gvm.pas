@@ -555,27 +555,15 @@ begin
     end;
   except
     on E : EVariantError do
-      vmError(owner, 'stack error: ' + E.Message);
-  end;
-
-{  writeln('Execution halted.');
-
-  if (sp > 0) then
-    begin
-    writeln(#13#10'Stack layout on termination:'#13#10);
-
-    for i := 0 to sp - 1 do
       begin
-      writeln('[', i, '] ', stack[i]);
+      vmError(owner, 'stack error: ' + E.Message);
+
+      // reset state, stop program
+      sp := -1;
+      bp := 0;
+      pc := -1;
       end;
-    end;
-
-  writeln(#13#10'Data segment:'#13#10);
-
-  for i := 0 to dataSize - 1 do
-    begin
-    writeln('[R', i, '] ', data[i]);
-    end; }
+  end;
 end;
 
 procedure setVMError(method : GVMError);
