@@ -62,6 +62,9 @@ type
 
     procedure load(cb : GCodeBlock);
 		procedure execute;
+		
+		constructor Create();
+		destructor Destroy();
 	end;
 
 var
@@ -167,6 +170,18 @@ begin
 end;
 
 // GContext
+constructor GContext.Create();
+begin
+	inherited Create();
+end;
+
+destructor GContext.Destroy();
+begin
+	SetLength(data, 0);
+	
+	inherited Destroy();
+end;
+
 function GContext.findSymbol(id : string) : integer;
 var
   sym : GSymbol;
