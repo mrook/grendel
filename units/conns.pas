@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.39 2003/10/03 18:04:31 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.40 2003/10/06 21:24:33 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -812,7 +812,7 @@ begin
 
 		pollConsole();
     
-    sleep(5);
+    sleep(25);
     end;
 end;
 
