@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.25 2001/04/22 20:03:37 xenon Exp $
+// $Id: cmd_imm.inc,v 1.26 2001/04/23 11:18:22 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1720,10 +1720,10 @@ var
   i : integer;
   node : GListNode;
   nt : TNameTemplate;
-  template_nr_str : string;
   template_nr : integer;
   amount_str : string;
   amount, count : integer;
+  arg1 : string;
 begin
   nt := nil;
   count := 1;
@@ -1739,8 +1739,10 @@ begin
     ch.sendBuffer('Namegenerator is not enabled at this moment. (Error loading tables? File missing?)'#13#10);
     exit;
   end;
+
+  param := one_argument(param, arg1);
   
-  if (param = 'list') then
+  if (arg1 = 'list') then
   begin
     node := NameTemplateList.head;
     for i := 1 to (NameTemplateList.getSize()) do
@@ -1755,14 +1757,22 @@ begin
     exit;
   end;
 
-  if (param = 'reload') then
+  if (arg1 = 'reload') then
   begin
     reloadNameTables();
+    ch.sendBuffer('Done reloading nametables.'#13#10);
     exit;
   end;
-  
-  param := one_argument(param, template_nr_str);
-  template_nr := StrToInt(template_nr_str);
+
+  try
+    template_nr := StrToInt(arg1);
+  except
+    on E: EConvertError do
+    begin
+      ch.sendBuffer(Format('Invalid argument ''%s''.'#13#10, [arg1]));
+      exit;
+    end;
+  end;
 
   if ((template_nr > NameTemplateList.getsize()) or (template_nr < 1)) then
   begin
