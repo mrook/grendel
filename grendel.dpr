@@ -65,8 +65,10 @@ uses
   clean in 'units\clean.pas',
   Winsock2 in 'units\winsock2.pas',
   progs in 'units\progs.pas',
-  md5 in 'units\md5.pas' {$IFDEF __DEBUG},
-  MemCheck in 'units\MemCheck.pas' {$ENDIF},
+  md5 in 'units\md5.pas',
+{$IFDEF __DEBUG}
+  MemCheck in 'units\MemCheck.pas',
+{$ENDIF}
   timers in 'units\timers.pas',
   debug in 'units\debug.pas';
 
