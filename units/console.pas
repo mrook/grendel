@@ -136,6 +136,9 @@ begin
 {$IFDEF CONSOLEBUILD}
   writeln(FormatDateTime('[tt] ', timestamp) + text);
 {$ENDIF}
+{$IFDEF LINUX}
+  writeln(FormatDateTime('[tt] ', timestamp) + text);
+{$ENDIF}
 end;
 
 

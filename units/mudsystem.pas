@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.30 2001/08/14 09:38:38 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.31 2001/08/16 20:58:23 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -151,6 +151,9 @@ begin
   writeLog(text);
 
 {$IFDEF CONSOLEBUILD}
+  writeln(text);
+{$ENDIF}
+{$IFDEF LINUX}
   writeln(text);
 {$ENDIF}
 end;
