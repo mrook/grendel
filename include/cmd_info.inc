@@ -1523,7 +1523,11 @@ begin
 
   if (vict <> nil) and (not vict.IS_NPC) then
     begin
-    act(AT_REPORT,vict.name + ' is currently online.',false,ch,nil,nil,TO_CHAR);
+    if (not vict.IS_SAME_ALIGN(ch)) then
+      ch.sendBuffer('That player is not found on your side.'#13#10)
+    else
+      act(AT_REPORT,vict.name + ' is currently online.',false,ch,nil,nil,TO_CHAR);
+
     exit;
     end
   else
@@ -1532,7 +1536,7 @@ begin
 
     if (not FileExists('players\' + arg + '.usr')) then
       begin
-      ch.sendBuffer('That player cannot be found.'#13#10);
+      ch.sendBuffer('That player is not found on your side.'#13#10);
       exit;
       end
     else
