@@ -858,6 +858,7 @@ begin
     begin
     ch.sendBuffer('Ok.'#13#10);
     banned_masks.delete(a);
+    save_system;
     end
   else
     ch.sendBuffer('That mask is not in the ban list.'#13#10);
