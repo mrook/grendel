@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.7 2003/10/30 19:44:08 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.8 2003/10/31 10:14:04 ***REMOVED*** Exp $
 #
 
 
@@ -24,6 +24,7 @@ CONVERT=convert.exe
 CORE=core.bpl
 
 MAKE=$(CURDIR)/make
+RM=del
 endif
 
 
@@ -35,6 +36,7 @@ GRENDEL=grendel
 COPYOVER=copyover
 CONVERT=convert
 CORE=bplcore.so
+RM=rm
 endif
 
 
@@ -47,13 +49,15 @@ CORE_SOURCES=core.dpk units/*.pas gmc/*.pas contrib/*.pas
 
 
 all:	$(GRENDEL) $(COPYOVER)
-	cd gmc && $(MAKE)
-	cd modules && $(MAKE)
+	$(MAKE) -C gmc
+	$(MAKE) -C modules
       
 clean:
-	rm $(GRENDEL) $(COPYOVER) $(CORE)
-	cd gmc && $(MAKE) clean
-	cd modules && $(MAKE) clean
+	$(RM) $(GRENDEL) 
+	$(RM) $(COPYOVER) 
+	$(RM) $(CORE)
+	$(MAKE) -C gmc clean
+	$(MAKE) -C modules clean
 
 $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
 	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ujcl

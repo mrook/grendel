@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.5 2003/10/30 19:57:34 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.6 2003/10/31 10:14:04 ***REMOVED*** Exp $
 #
 
 
@@ -26,6 +26,8 @@ WEBSERVICE=webservice.bpl
 
 CORE_SYM=..\\core
 CORE_FILE=..\\core.bpl
+
+RM=del
 endif
 
 
@@ -41,6 +43,8 @@ WEBSERVICE=bplwebservice.so
 
 CORE_SYM=../core
 CORE_FILE=../bplcore.so
+
+RM=rm
 endif
 
 
@@ -52,7 +56,11 @@ MODULES=$(COMMANDS) $(SPELLER) $(STATUS)
 all:	$(MODULES)
 
 clean:
-	rm $(MODULES)
+	$(RM) $(COMMANDS)
+	$(RM) $(SPELLER)
+	$(RM) $(STATUS)
+	$(RM) $(IMC3)
+	$(RM) $(WEBSERVICE)
 
 $(COMMANDS):	core_commands.dpk commands/* $(CORE_FILE)
 	$(DCC) core_commands.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ucommands

@@ -4,7 +4,7 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.4 2003/10/30 19:44:09 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.5 2003/10/31 10:14:04 ***REMOVED*** Exp $
 #
 
 
@@ -23,6 +23,8 @@ GASM=gasm.exe
 
 CORE_SYM=..\\core
 CORE_FILE=..\\core.bpl
+
+RM=del
 endif
 
 ifdef LINUX
@@ -34,6 +36,8 @@ GASM=gasm
 
 CORE_SYM=../core
 CORE_FILE=../bplcore.so
+
+RM=rm
 endif
 
 
@@ -47,7 +51,8 @@ GASM_SOURCES=gasm.dpr
 all:	$(GMCC) $(GASM)
       
 clean:
-	rm $(GMCC) $(GASM)
+	$(RM) $(GMCC)
+	$(RM) $(GASM)
 	
 $(GMCC_SOURCES): $(GMCC_LEXFILES)
 	yacc gmcc gmcc.dpr
