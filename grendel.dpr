@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.62 2001/10/25 22:02:48 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.63 2002/08/01 20:17:05 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -669,19 +669,23 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+// fail-safe device, will catch unhandled exceptions and reboot server
 procedure handleException(ExceptObject: TObject; ExceptAddr: Pointer); far;
 begin
   if (ExceptObject is EExternal) then
     begin
-    writeConsole('Uncaught external exception encountered:');
+    writeLog('Uncaught external exception encountered:');
     outputError(EExternal(ExceptObject));
     end
   else
   if (ExceptObject is Exception) then
-    writeConsole('Uncaught exception: ' + Exception(ExceptObject).Message)
+    writeLog('Uncaught exception: ' + Exception(ExceptObject).Message)
   else
-    writeConsole('Uncaught exception encountered!');
-    
+    writeLog('Uncaught exception encountered!');
+
+  Flush(LogFile);
+  CloseFile(LogFile);
+   
   halt(1);
 end;
 
@@ -690,16 +694,15 @@ var
 
 begin
   old_exitproc := ExitProc;
-  
+
   tm := Now();
 
   bootServer();
-  
+
+  // initialize the 'fail-safe device' after boot
   ExceptProc := @handleException;
-  
-  JITEnable := 1;
   DebugHook := 1;
-   
+
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
     from_copyover;
