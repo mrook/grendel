@@ -1914,6 +1914,28 @@ begin
     end;
 end;
 
+{ Xenon 20/Feb/2001: like findInventory searches thru inv, findEquipment searches thru stuff being worn }
+function GCharacter.findEquipment(s : string) : GObject;
+var obj : GObject;
+    node : GListNode;
+begin
+  findEquipment := nil;
+  node := objects.head;
+
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (obj.wear_location <> WEAR_NULL) and ((pos(s, obj.name^) <> 0) or (pos(s, obj.short^) <> 0)) then
+      begin
+      findEquipment := obj;
+      exit;
+      end;
+
+    node := node.next;
+    end;
+end;
+
 { Added 2.<char> - Nemesis }
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
 var
