@@ -2,7 +2,7 @@
   Summary:
   	Buffered filereader & writer
   
-  ## $Id: fsys.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ## $Id: fsys.pas,v 1.5 2004/03/22 22:25:23 ***REMOVED*** Exp $
 }
 
 unit fsys;
@@ -101,7 +101,7 @@ begin
   //  raise Exception.Create(fn + ': 0 length file');
 
   fpos := 0;
-  fline := 0;
+  fline := 1;
   feol := false;
 end;
 
