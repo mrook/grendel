@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.10 2001/04/26 21:27:22 xenon Exp $
+// $Id: dtypes.pas,v 1.11 2001/04/27 14:14:43 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -52,6 +52,13 @@ type
 
     GHASH_FUNC = function(size, prime : cardinal; key : string) : integer;
 
+    GHashValue = class
+      key : string;
+      refcount : integer;
+      value : TObject;
+    end;
+
+    // loosely based on the Java2 hashing classes
     GHashTable = class
       hashsize : cardinal;
       hashprime : cardinal;
@@ -60,27 +67,27 @@ type
 
       hashFunc : GHASH_FUNC;
 
-      procedure clean;
+      procedure clear();
 
-      function getUsed : integer;
+//      function containsKey(key : string) : boolean;
+//      function containsValue(value : TObject) : boolean;
+      function isEmpty() : boolean;
+      function size() : integer;
+
+      function _get(key : string) : GHashValue;
+
+      function get(key : string) : TObject;
+      procedure put(key : string; value : TObject);
+      procedure remove(key : string);
+
       function getHash(key : string) : integer;
       procedure setHashFunc(func : GHASH_FUNC);
       function findPrimes(n : integer) : GPrimes;
 
       procedure hashStats; virtual;
-      procedure hashPointer(ptr : pointer; key : string);
 
       constructor Create(size : integer);
       destructor Destroy; override;
-    end;
-
-    GHashObject = class(GHashTable)
-      procedure hashObject(obj : TObject; key : string);
-    end;
-
-    GHashString = class(GHashTable)
-      procedure hashString(str : GString; key : string);
-      procedure hashStats; override;
     end;
 
     GException = class(Exception)
@@ -93,7 +100,7 @@ type
 const STR_HASH_SIZE = 1024;
 
 var
-   str_hash : GHashString;
+   str_hash : GHashTable;
 
 function hash_string(src : string) : PString; overload;
 function hash_string(src : PString) : PString; overload;
@@ -382,16 +389,88 @@ begin
   hashFunc := func;
 end;
 
-procedure GHashTable.hashPointer(ptr : pointer; key : string);
+function GHashTable._get(key : string) : GHashValue;
 var
-   hash : integer;
+  hash : integer;
+  node : GListNode;
 begin
+  Result := nil;
+
   hash := getHash(key);
 
-  bucketList[hash].insertLast(ptr);
+  node := bucketList[hash].head;
+
+  while (node <> nil) do
+    begin
+    if (GHashValue(node.element).key = key) then
+      begin
+      Result := node.element;
+      break;
+      end;
+
+    node := node.next;
+    end;
 end;
 
-function GHashTable.getUsed : integer;
+function GHashTable.get(key : string) : TObject;
+var
+  hv : GHashValue;
+begin
+  Result := nil;
+
+  hv := _get(key);
+
+  if (hv <> nil) then
+    Result := hv.value;
+end;
+
+procedure GHashTable.put(key : string; value : TObject);
+var
+   hash : integer;
+   hv : GHashValue;
+begin
+  hv := _get(key);
+
+  if (hv <> nil) then
+    begin
+    inc(hv.refcount);
+    end
+  else
+    begin
+    hash := getHash(key);
+
+    hv := GHashValue.Create;
+    hv.refcount := 1;
+    hv.key := key;
+    hv.value := value;
+
+    bucketList[hash].insertLast(hv);
+    end;
+end;
+
+procedure GHashTable.remove(key : string);
+var
+  hash : integer;
+  fnode, node : GListNode;
+begin
+  fnode := nil;
+  hash := getHash(key);
+
+  node := bucketList[hash].head;
+
+  while (node <> nil) do
+    begin
+    if (GHashValue(node.element).key = key) then
+      begin
+      fnode := node.element;
+      break;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+function GHashTable.size() : integer;
 var
    i : integer;
    total : integer;
@@ -403,7 +482,12 @@ begin
     total := total + bucketList[i].getSize;
     end;
 
-  getUsed := total;
+  Result := total;
+end;
+
+function GHashTable.isEmpty() : boolean;
+begin
+  Result := size() = 0;
 end;
 
 procedure GHashTable.hashStats;
@@ -434,7 +518,7 @@ begin
   writeln('Load factor : ' + floattostrf(load, ffFixed, 7, 4));
 end;
 
-procedure GHashTable.clean;
+procedure GHashTable.clear();
 var
    i : integer;
 begin
@@ -480,16 +564,8 @@ begin
   inherited Destroy;
 end;
 
-
-// GHashObject
-procedure GHashObject.hashObject(obj : TObject; key : string);
-begin
-  hashPointer(obj, key);
-end;
-
-
 // GHashString
-procedure GHashString.hashString(str : GString; key : string);
+{ procedure GHashString.hashString(str : GString; key : string);
 begin
   hashPointer(str, key);
 end;
@@ -521,112 +597,70 @@ begin
     end;
 
   writeln('Byte savings (used/saved): ', inttostr(bytesused), '/', inttostr(wouldhave - bytesused), ' (', (bytesused * 100) div wouldhave, '%/', ((wouldhave - bytesused) * 100) div wouldhave, '%)');
-end;
+end; }
 
 function hash_string(src : string) : PString;
 var
-   hash : integer;
-   node, fnode : GListNode;
-   g : GString;
+  hv : GHashValue;
+  g : GString;
 begin
-  hash := str_hash.getHash(src);
+  hv := str_hash._get(src);
 
-  node := str_hash.bucketList[hash].head;
-  fnode := nil;
-
-  while (node <> nil) do
+  if (hv <> nil) then
     begin
-    if (comparestr(GString(node.element).value, src) = 0) then
-      begin
-      fnode := node;
-      break;
-      end;
-
-    node := node.next;
-    end;
-
-  if (fnode <> nil) then
-    begin
-    g := fnode.element;
-    hash_string := @g.value;
-    fnode.refcount := fnode.refcount + 1;
+    hash_string := @GString(hv.value).value;
+    inc(hv.refcount);
     end
   else
     begin
     g := GString.Create(src);
-    str_hash.bucketList[hash].insertLast(g);
+
+    str_hash.put(src, g);
+
     hash_string := @g.value;
     end;
 end;
 
 function hash_string(src : PString) : PString;
 var
-   hash : integer;
-   node, fnode : GListNode;
-   g : GString;
+  hv : GHashValue;
+  g : GString;
 begin
-  hash := str_hash.getHash(src^);
+  hv := str_hash._get(src^);
 
-  node := str_hash.bucketList[hash].head;
-  fnode := nil;
-
-  while (node <> nil) do
+  if (hv <> nil) then
     begin
-    if (comparestr(GString(node.element).value, src^) = 0) then
-      begin
-      fnode := node;
-      break;
-      end;
-
-    node := node.next;
-    end;
-
-  if (fnode <> nil) then
-    begin
-    g := fnode.element;
-    hash_string := @g.value;
-    fnode.refcount := fnode.refcount + 1;
+    hash_string := @GString(hv.value).value;
+    inc(hv.refcount);
     end
   else
     begin
     g := GString.Create(src^);
-    str_hash.bucketList[hash].insertLast(g);
+
+    str_hash.put(src^, g);
+
     hash_string := @g.value;
     end;
 end;
 
 procedure unhash_string(var src : PString);
 var
-   hash : integer;
-   node, fnode : GListNode;
+  hv : GHashValue;
+  g : GString;
 begin
   if (src = nil) then
     exit;
 
-  hash := str_hash.getHash(src^);
-    
-  node := str_hash.bucketList[hash].head;
-  fnode := nil;
+  hv := str_hash._get(src^);
 
-  while (node <> nil) do
+  if (hv <> nil) then
     begin
-    if (comparestr(GString(node.element).value, src^) = 0) then
+    dec(hv.refcount);
+
+    if (hv.refcount <= 0) then
       begin
-      fnode := node;
-      break;
-      end;
-
-    node := node.next;
-    end;
-
-  if (fnode <> nil) then
-    begin
-    dec(fnode.refcount);
-
-    if (fnode.refcount <= 0) then
-      begin
-      GString(fnode.element).Free;
-      str_hash.bucketList[hash].remove(fnode);
+      hv.value.Free;
+      str_hash.remove(src^);
       end;
 
     src := nil;
@@ -649,6 +683,6 @@ begin
 end;
 
 begin
-  str_hash := GHashString.Create(STR_HASH_SIZE);
+  str_hash := GHashTable.Create(STR_HASH_SIZE);
 end.
 

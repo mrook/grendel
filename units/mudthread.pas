@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.47 2001/04/26 21:39:03 xenon Exp $
+// $Id: mudthread.pas,v 1.48 2001/04/27 14:14:43 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -58,7 +58,7 @@ type
     end;
 
 var
-   commands : GHashObject;
+   commands : GHashTable;
    func_list : GDLinkedList;
 
 procedure load_commands;
@@ -141,7 +141,7 @@ begin
     exit;
     end;
 
-  commands := GHashObject.Create(32);
+  commands := GHashTable.Create(128);
   commands.setHashFunc(firstHash);
 
   repeat
@@ -191,7 +191,7 @@ begin
 
     if (assigned(cmd.ptr)) then
       begin
-      commands.hashObject(cmd, cmd.name);
+      commands.put(cmd.name, cmd);
 
       if (alias <> nil) then
         begin
@@ -202,7 +202,7 @@ begin
         alias.position := cmd.position;
         alias.addarg0 := cmd.addarg0;
 
-        commands.hashObject(alias, alias.name);
+        commands.put(alias.name, alias);
         end;
       end
     else
@@ -327,7 +327,7 @@ begin
 
     while (node <> nil) do
       begin
-      gc := node.element;
+      gc := GCommand(GHashValue(node.element).value);
       if (cmdline = gc.name) or
          ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
          ((copy(cmdline, 1, length(gc.name)) = gc.name) and (length(cmdline) = 1))

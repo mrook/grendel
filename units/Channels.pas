@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.1 2001/04/26 21:47:29 xenon Exp $
+// $Id: Channels.pas,v 1.2 2001/04/27 14:14:43 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -676,7 +676,7 @@ begin
       cmd.ptr := @channelCommunicate;
       cmd.addArg0 := true;
 
-      commands.hashObject(cmd, cmd.name);
+      commands.put(cmd.name, cmd);
 
       if (chan.alias <> '') then
       begin
@@ -688,7 +688,7 @@ begin
         alias.ptr := cmd.ptr;
         alias.addArg0 := cmd.addArg0;
 
-        commands.hashObject(alias, alias.name);
+        commands.put(alias.name, alias);
       end;
     end;
     

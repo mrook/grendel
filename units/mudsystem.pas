@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.18 2001/04/26 21:33:57 xenon Exp $
+// $Id: mudsystem.pas,v 1.19 2001/04/27 14:14:43 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -84,7 +84,7 @@ var
    boot_info : GBoot;
    bg_info : GBattleground;
 
-   socials : GHashObject;
+   socials : GHashTable;
    dm_msg : GDLinkedList;
 
    clean_thread : GCleanThread;
@@ -394,35 +394,15 @@ begin
       social.Free;
       end
     else
-      socials.hashObject(social, social.name);
+      socials.put(social.name, social);
   until eof(f);
 
   closefile(f);
 end;
 
 function findSocial(cmd : string) : GSocial;
-var
-   hash : integer;
-   node : GListNode;
-   social : GSocial;
 begin
-  hash := socials.getHash(cmd);
-  findSocial := nil;
-
-  node := socials.bucketList[hash].head;
-
-  while (node <> nil) do
-    begin
-    social := node.element;
-
-    if (cmd = social.name) then
-      begin
-      findSocial := social;
-      break;
-      end;
-
-    node := node.next;
-    end;
+  Result := GSocial(socials.get(cmd));
 end;
 
 { Xenon 19/Feb/2001 :   - added socials on objects
@@ -644,7 +624,7 @@ begin
 end;
 
 initialization
-socials := GHashObject.Create(512);
+socials := GHashTable.Create(512);
 socials.setHashFunc(firstHash);
 dm_msg := GDLinkedList.Create;
 auction_good := GAuction.Create;
