@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.49 2001/04/29 16:56:04 xenon Exp $
+// $Id: mudthread.pas,v 1.50 2001/04/30 16:24:47 xenon Exp $
 
 unit mudthread;
 
@@ -1320,6 +1320,9 @@ begin
   registerCommand('do_channel', do_channel);
   registerCommand('do_vnums', do_vnums);
   registerCommand('do_aranges', do_aranges);
+  registerCommand('do_rlist', do_rlist);
+  registerCommand('do_rdelete', do_rdelete);
+  registerCommand('do_coordgen', do_coordgen);
 end;
 
 begin
