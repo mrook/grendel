@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.77 2003/10/15 13:49:40 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.78 2003/10/15 14:55:09 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -673,7 +673,7 @@ begin
 
   ExceptProc := nil;
 
-  JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
+  JclStackTrackingOptions := JclStackTrackingOptions + [stStaticModuleList,stExceptFrame];
   SetUnhandledExceptionFilter(@ExceptionFilter);
 
   JclStartExceptionTracking;
