@@ -166,7 +166,7 @@ begin
       if (cnt = 0) then
         ch.sendBuffer('  nothing.'#13#10);
 
-      if IS_SET(ch.player^.cfg_flags, CFG_AUTOPEEK) then
+      if (not ch.IS_NPC) and (IS_SET(ch.player^.cfg_flags, CFG_AUTOPEEK)) then
       begin
         ch.sendBuffer(#13#10);
         interpret(ch, 'peek ' + vict.name^);
