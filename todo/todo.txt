@@ -1,0 +1,31 @@
+Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal priority)
+
+! level messages with amounts
+! tracking
+! copyover procedure
+! show bamfin/bamfout with their respective commands
+! taunt messages (configurable by player) will be sent at kill to (dead) target
+! Mobs can't cast spells > lvl 100
+            
+* Area casting on yourself bugs (?)
+* Better online construction (autocreate exit+room when moving), object
+* edit/instance, mobile create/edit/instance, reset edit etc.
+- some form of classes/professions/guilds/religions/whatever
+- more help text
+- skills: Disarm, Steal, Lockpick, Hide
+- reloadarea command
+- 'group self' to disband group
+- race specifics
+- spell/skill trees
+- bugtrack/report system 
+- ban code update (with masks/wildcards)
+- online suggest (pray) history
+- clan competition for wps/pkillnum
+- channel history, for gt/ct/chat/raid
+- last command (checks last login time for user, only for admins)
+- purge command (strips char of objects, only for admins)
+- unlearn
+
+l abbreviation of clanname (3-4 chars) in who list
+l 'drink' without params should drink from first fountain in room
+
