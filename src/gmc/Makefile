@@ -4,7 +4,7 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.6 2004/06/25 14:53:09 ***REMOVED*** Exp $
+# $Id$
 #
 
 
@@ -65,8 +65,8 @@ all:	$(GMCC) $(GASM)
 clean:
 
 $(GMCC_SOURCES): $(GMCC_LEXFILES)
-	yacc gmcc gmcc.dpr
-	lex gmclex
+	dyacc gmcc gmcc.dpr
+	dlex -o gmclex
 
 $(GMCC):	$(GMCC_SOURCES) $(CORE_FILE)
 	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS)
