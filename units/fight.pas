@@ -912,14 +912,14 @@ begin
       if (vch.CHAR_DIED) or (ch.CHAR_DIED) then
         break;
 
-      { Group members AUTO-assist }
+      { Group members AUTO-assist other group members }
       node_room := ch.room.chars.head;
 
       while (node_room <> nil) do
         begin
         gch := node_room.element;
 
-        if (gch <> ch) and (gch.leader=ch) and (gch.room = ch.room) then
+        if (gch <> ch) and (gch.leader=ch.leader) and (gch.room = ch.room) then
          if (gch.fighting = nil) and (gch.position = POS_STANDING) then
           if (gch.IS_NPC) or (IS_SET(gch.player^.cfg_flags, CFG_ASSIST)) then
             begin
