@@ -1,6 +1,6 @@
 package core;
 
-{$R *.RES}
+{$R *.res}
 {$ALIGN ON}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -27,9 +27,47 @@ package core;
 {$IMPLICITBUILD OFF}
 
 requires
+{$IFDEF WIN32}
   vcl50;
+{$ENDIF}
+{$IFDEF LINUX}
+  baseclx;
+{$ENDIF}
 
 contains
+{$IFDEF LINUX}
+  ansiio in 'units/ansiio.pas',
+  area in 'units/area.pas',
+  bulletinboard in 'units/bulletinboard.pas',
+  Channels in 'units/Channels.pas',
+  chars in 'units/chars.pas',
+  clan in 'units/clan.pas',
+  clean in 'units/clean.pas',
+  conns in 'units/conns.pas',
+  constants in 'units/constants.pas',
+  debug in 'units/debug.pas',
+  dtypes in 'units/dtypes.pas',
+  fight in 'units/fight.pas',
+  fsys in 'units/fsys.pas',
+  gasmdef in 'gmc/gasmdef.pas',
+  gvm in 'gmc/gvm.pas',
+  LibXmlParser in 'units/LibXmlParser.pas',
+  magic in 'units/magic.pas',
+  md5 in 'units/md5.pas',
+  mudhelp in 'units/mudhelp.pas',
+  mudspell in 'units/mudspell.pas',
+  mudsystem in 'units/mudsystem.pas',
+  mudthread in 'units/mudthread.pas',
+  NameGen in 'units/NameGen.pas',
+  progs in 'units/progs.pas',
+  race in 'units/race.pas',
+  skills in 'units/skills.pas',
+  strip in 'units/strip.pas',
+  timers in 'units/timers.pas',
+  update in 'units/update.pas',
+  util in 'units/util.pas',
+  modules in 'units/modules.pas';
+{$ELSE}
   ansiio in 'units\ansiio.pas',
   area in 'units\area.pas',
   bulletinboard in 'units\bulletinboard.pas',
@@ -63,5 +101,6 @@ contains
   util in 'units\util.pas',
   modules in 'units\modules.pas',
   Winsock2 in 'units\winsock2.pas';
+{$ENDIF}
 
 end.

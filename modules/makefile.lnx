@@ -9,5 +9,5 @@ clean:
 	rm -f $(MODULES)
 
 core_commands.bpl:	core_commands.dpk commands/*
-	$(DCC) core_commands.dpk $(DCC_FLAGS) -LUcore
+	$(DCC) core_commands.dpk $(DCC_FLAGS) -LU../core
 

@@ -1,6 +1,6 @@
 package core_commands;
 
-{$R *.RES}
+{$R *.res}
 {$ALIGN ON}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -27,9 +27,17 @@ package core_commands;
 {$DESCRIPTION 'Grendel Core Commands'}
 
 requires
+{$IFDEF WIN32}
   vcl50;
+{$ENDIF}
+{$IFDEF LINUX}
+  baseclx;
+{$ENDIF}
 
 contains
+{$IFDEF LINUX}
+  main in 'commands/main.pas';
+{$ELSE}
   main in 'commands\main.pas';
- 
+{$ENDIF} 
 end.

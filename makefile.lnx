@@ -4,30 +4,22 @@ DCC_FLAGS=-Q -D+ -V- -W+ -O+
 GRENDEL=grendel
 GRENDEL_SOURCES=grendel.dpr
 
-COPYOVER=copyover
-COPYOVER_SOURCES=copyover.dpr
-
 CONVERT=convert
 CONVERT_SOURCES=convert.dpr
 
 CORE=core.bpl
 CORE_SOURCES=core.dpk units/*.pas
 
-all:	$(GRENDEL) $(COPYOVER) $(CONVERT)
-	cd modules
-	make -f makefile.lnx
+all:	$(GRENDEL) $(CONVERT)
+	cd modules && make -f makefile.lnx
       
 clean:
-	rm -f $(GRENDEL) $(COPYOVER) $(CONVERT) $(CORE)
-	cd modules
-	make -f makefile.lnx clean
+	rm -f $(GRENDEL) $(CONVERT) $(CORE)
+	cd modules && make -f makefile.lnx clean
 
 $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
 	$(DCC) $(GRENDEL_SOURCES) $(DCC_FLAGS) -GD -LUcore
 	
-$(COPYOVER):	$(COPYOVER_SOURCES) $(CORE)
-	$(DCC) $(COPYOVER_SOURCES) $(DCC_FLAGS) -LUcore
-
 $(CONVERT):	$(CONVERT_SOURCES) $(CORE)
 	$(DCC) $(CONVERT_SOURCES) $(DCC_FLAGS) -LUcore
 

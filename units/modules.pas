@@ -37,7 +37,11 @@ var
   hndl : HMODULE;
   module : GModule;
 begin
+{$IFDEF LINUX}
+   if (FindFirst('modules' + PathDelimiter + 'bpl*.so', faAnyFile, t) = 0) then
+{$ELSE}
    if (FindFirst('modules' + PathDelimiter + '*.bpl', faAnyFile, t) = 0) then
+{$ENDIF}
     repeat     
       try
         hndl := LoadPackage('modules' + PathDelimiter + t.name);
@@ -52,7 +56,7 @@ begin
 
         write_console('Loaded ' + t.name + ' (' + module.desc + ')');
       except
-        bugreport('loadModules()', 'grendel.dpr', 'Unable to load module ' + t.name);
+        bugreport('loadModules()', 'modules.pas', 'Unable to load module ' + t.name);
       end;
     until (FindNext(t) <> 0);
 
