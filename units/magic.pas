@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.12 2001/07/17 15:24:13 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.13 2001/08/04 22:10:13 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -286,7 +286,7 @@ end;
 
 procedure spell_generic(ch,victim:GCharacter; sn : GSkill);
 var vict,check:GCharacter;
-    node : GListNode;
+    node, node_next : GListNode;
     dam:integer;
 begin
   with sn do
@@ -362,6 +362,8 @@ begin
       act(AT_SPELL,start_room,false,ch,nil,vict,TO_ROOM);
 
     repeat
+      node_next := node.next;
+      
       if (length(hit_vict) > 0) and (ch <> vict) and (not vict.CHAR_DIED) then
         begin
         act(AT_SPELL,hit_vict,false,ch,nil,vict,TO_VICT);
@@ -405,7 +407,7 @@ begin
           TARGET_OFF_AREA:begin
                           while (node <> nil) do
                             begin
-                            node := node.next;
+                            node := node_next;
 
                             if (node = nil) then
                               begin
@@ -420,13 +422,15 @@ begin
                               if (vict.IS_NPC or vict.IS_SAME_ALIGN(check)) then
                                 break;
                               end;
+
+                            node_next := node.next;
                             end;
                           end;
           TARGET_DEF_SELF: vict := nil;
           TARGET_DEF_AREA:begin
                           while (node <> nil) do
                             begin
-                            node := node.next;
+                            node := node_next;
 
                             if (node = nil) then
                               begin
@@ -438,6 +442,8 @@ begin
 
                             if (ch.IS_SAME_ALIGN(vict)) and (not vict.IS_NPC) then
                                break;
+
+                            node_next := node.next;
                             end;
                           end;
         else
