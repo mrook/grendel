@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.3 2004/01/24 19:58:37 hemko Exp $
+  ##  $Id: commands.pas,v 1.4 2004/02/05 20:38:04 hemko Exp $
 }
 
 unit commands;
@@ -345,7 +345,7 @@ begin
     
     if (a >= cmd.level) then
       begin
-      if (not ch.state in cmd.allowed_states) then
+      if not (ch.state in cmd.allowed_states) then
         case ch.state of
             STATE_SLEEPING: ch.sendBuffer('You are off to dreamland.'#13#10);
           STATE_MEDITATING: ch.sendBuffer('You must break out of your trance first.'#13#10);
