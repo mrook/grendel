@@ -2,7 +2,7 @@
 	Summary:
 		NT Service main unit
 	
-	## $Id: servicemain.pas,v 1.1 2004/03/22 14:55:49 ***REMOVED*** Exp $
+	## $Id: servicemain.pas,v 1.2 2004/03/22 16:01:36 ***REMOVED*** Exp $
 }
 
 unit servicemain;
@@ -15,9 +15,9 @@ uses
 type
   TServiceGrendel = class(TService)
     procedure ServiceExecute(Sender: TService);
-    procedure ServiceStop(Sender: TService);
+    procedure ServiceStop(Sender: TService; var Stopped: Boolean);
     procedure ServiceStart(Sender: TService; var Started: Boolean);
-    procedure ServiceAfterInstall(Sender: TService; var Stopped: Boolean);
+    procedure ServiceAfterInstall(Sender: TService);
   private
     { Private declarations }
     procedure serverTick();
