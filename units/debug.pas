@@ -7,6 +7,7 @@ uses
   
 //procedure outputError(addr : pointer);
 procedure outputError(E : EExternal);
+procedure readMapFile(module, fname : string);
 
 implementation
 
@@ -18,6 +19,7 @@ uses
     Math,
     Classes,
     strip,
+    fsys,
     mudsystem;
 
 type
@@ -25,12 +27,14 @@ type
       section : cardinal;
       startAddress : cardinal;
       name : string;
+      module : string;
     end;
 
     TLine = class
       section, address : cardinal;
       linenr : cardinal;
       filename : string;
+      module : string;
     end;
 
 var
@@ -98,7 +102,7 @@ begin
 end;
 {$ENDIF}
 
-function findSymbol(section, addr : cardinal) : TSymbol;
+function findSymbol(module : string; section, addr : cardinal) : TSymbol;
 var
    a : integer;
    res, symbol : TSymbol;
@@ -109,7 +113,7 @@ begin
     begin
     symbol := symbols[a];
 
-    if (symbol.section = section) and (addr >= symbol.startAddress) then
+    if (symbol.module = module) and (symbol.section = section) and (addr >= symbol.startAddress) then
       begin
       if (res <> nil) and (res.startAddress > symbol.startAddress) then
         continue;
@@ -121,7 +125,7 @@ begin
   Result := res;
 end;
 
-function findLine(section, offset : cardinal) : TLine;
+function findLine(module : string; section, offset : cardinal) : TLine;
 var
    a : integer;
    res, line : TLine;
@@ -132,7 +136,7 @@ begin
     begin
     line := lines[a];
 
-    if (offset >= line.address) and (line.section = section) then
+    if (line.module = module) and (offset >= line.address) and (line.section = section) then
       begin
       if (res <> nil) and (res.address > line.address) then
         continue;
@@ -161,41 +165,38 @@ begin
   Result := x;
 end;
 
-procedure readMapfile;
+procedure readMapfile(module, fname : string);
 var
-   f : textfile;
+   af : GFileReader;
    s, g : string;
    symbol : TSymbol;
    line : TLine;
    temp : string;
 begin
-  assignfile(f, 'grendel.map');
-
-  {$I-}
-  reset(f);
-  {$I+}
-
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileReader.Create(fname);
+  except
     write_console('Could not load mapfile, symbol info disabled.');
     exit;
-    end;
+  end;
 
   repeat
-    readln(f, s);
-  until (pos('Address', s) > 0) and (pos('Publics by Name', s) > 0);
+    s := af.readLine();
+  until (pos('Address', s) > 0) and (pos('Publics by Value', s) > 0);
 
   repeat
-    readln(f, s);
+    s := af.readLine();
   until (trim(s) <> '');
 
-  repeat
+  while (pos('Line numbers for',s) = 0) do
+    begin
     g := trim(s);
 
     if (g <> '') then
       begin
       symbol := TSymbol.Create;
 
+      symbol.module := module;
       symbol.section := strtointdef('$' + left(g, ':'), 0);
 
       g := right(g, ':');
@@ -206,22 +207,18 @@ begin
       symbols.add(symbol);
       end;
 
-    readln(f, s);
-  until (s = '');
+    s := af.readLine();
+    end;
 
   while (true) do
     begin
-    repeat
-      readln(f, s);
-    until (pos('Line numbers for', s) > 0) or (eof(f));
-
-    if (eof(f)) then
+    if (af.eof()) then
       break;
 
     temp := left(right(s, '('), ')');
 
     repeat
-      readln(f, s);
+      s := af.readLine();
     until (trim(s) <> '');
 
     repeat
@@ -231,6 +228,7 @@ begin
         begin
         line := TLine.Create;
 
+        line.module := module;
         line.filename := temp;
         line.linenr := strtointdef(left(g, ' '), 0);
 
@@ -248,11 +246,11 @@ begin
         g := trim(right(g, ' '));
         end;
 
-      readln(f, s);
-    until (s = '');
+      s := af.readLine();
+    until (pos('Line numbers for', s) > 0) or (s = '');
     end;
 
-  closefile(f);
+  af.Free();
 end;
 
 procedure showAddress(addr : pointer);
@@ -265,9 +263,9 @@ var
 begin
 {$IFDEF WIN32}
   GetLogicalAddress(addr, modu, 1024, section, offset);
-
-  symbol := findSymbol(section, offset);
-  line := findLine(section, offset);
+  
+  symbol := findSymbol(ExtractFileName(modu), section, offset);
+  line := findLine(ExtractFileName(modu), section, offset);
 
   if (symbol <> nil) then
     symboln := symbol.name
@@ -318,6 +316,7 @@ begin
   symbols := TList.Create;
   lines := TList.Create;
 
-  readMapfile;
+  readMapFile('grendel.exe', 'grendel.map');
+  readMapfile('core.bpl', 'core.map');
 end.
 
