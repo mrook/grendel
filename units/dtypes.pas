@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.13 2001/04/28 15:14:36 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.14 2001/04/29 16:55:41 xenon Exp $
 
 unit dtypes;
 
@@ -377,6 +377,7 @@ end;
 
 function GHashTable.getHash(key : variant) : integer;
 begin
+  Result := 0;
   if (varType(key) = varString) then
     Result := hashFunc(hashsize, hashprime, key)
   else

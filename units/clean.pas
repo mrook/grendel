@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.6 2001/04/26 21:18:50 xenon Exp $
+// $Id: clean.pas,v 1.7 2001/04/29 16:55:41 xenon Exp $
 
 unit clean;
 
@@ -111,6 +111,7 @@ begin
       node_next := node.next;
       conn := node.element;
 
+{$IFNDEF NOCRASHDETECTION}
       if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
         begin
         bugreport('update_main', 'timers.pas', 'Thread of ' + conn.ch.name^ + ' probably died',
@@ -138,7 +139,8 @@ begin
         node := node_next;
         continue;
         end;
-
+{$ENDIF}
+        
       node := node_next;
       end;
 

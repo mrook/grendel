@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.48 2001/04/27 14:14:43 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.49 2001/04/29 16:56:04 xenon Exp $
 
 unit mudthread;
 
@@ -22,7 +22,8 @@ uses
     util,
     bulletinboard,
     mudhelp,
-    mudsystem;
+    mudsystem,
+    Typinfo;
 
 type
     GGameThread = class(TThread)
@@ -1317,6 +1318,8 @@ begin
   registerCommand('do_apropos', do_apropos);
   registerCommand('do_say', do_say);
   registerCommand('do_channel', do_channel);
+  registerCommand('do_vnums', do_vnums);
+  registerCommand('do_aranges', do_aranges);
 end;
 
 begin
