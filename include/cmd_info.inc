@@ -109,9 +109,15 @@ var a:integer;
     brief:boolean;
     r,act_str:string;
 begin
-  if IS_SET(ch.aff_flags,AFF_BLIND) then
+  if (IS_SET(ch.aff_flags,AFF_BLIND)) then
     begin
     ch.sendBuffer('You can''t see a thing!'#13#10);
+    exit;
+    end;
+
+  if (ch.room.IS_DARK) and (not ch.IS_HOLYLIGHT) then
+    begin
+    ch.sendBuffer('It''s pitch black, you can''t see a thing!'#13#10);
     exit;
     end;
 
@@ -1233,8 +1239,10 @@ begin
     ch.sendBuffer('You attempt to sneak.'#13#10);
   if (IS_SET(ch.aff_flags, AFF_HIDE)) then
     ch.sendBuffer('You attempt to hide.'#13#10);
-  if (IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if (IS_SET(ch.player^.flags, PLR_HOLYWALK)) then
     ch.sendBuffer('Holy walk is on.'#13#10);
+  if (IS_SET(ch.player^.flags, PLR_HOLYLIGHT)) then
+    ch.sendBuffer('Holy light is on.'#13#10);
 
   h:=0;
   act(AT_REPORT, #13#10'$B$1[$B$7Current affects:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);

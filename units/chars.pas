@@ -167,6 +167,8 @@ type
       function IS_AFFECT(affect : integer) : boolean;
       function IS_DRUNK : boolean;
       function IS_WEARING(item_type : integer) : boolean;
+      function IS_HOLYWALK : boolean;
+      function IS_HOLYLIGHT : boolean;
       function CAN_FLY : boolean;
       function CAN_SEE(vict : GCharacter) : boolean;
       function IS_AFK : boolean;
@@ -579,6 +581,34 @@ begin
       end;
 
     node := node.next;
+    end;
+end;
+
+function GCharacter.IS_HOLYWALK : boolean;
+begin
+  Result := false;
+
+  if (IS_NPC) then
+    exit;
+
+  if (IS_SET(player^.flags, PLR_HOLYWALK)) then
+    begin
+    Result := true;
+    exit;
+    end;
+end;
+
+function GCharacter.IS_HOLYLIGHT : boolean;
+begin
+  Result := false;
+
+  if (IS_NPC) then
+    exit;
+
+  if (IS_SET(player^.flags, PLR_HOLYLIGHT)) then
+    begin
+    Result := true;
+    exit;
     end;
 end;
 

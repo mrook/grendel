@@ -949,6 +949,13 @@ position: 0
 #end
 
 #command
+name: holylight
+function: do_holylight
+level: 990
+position: 0
+#end
+
+#command
 name: holywalk
 function: do_holywalk
 level: 990

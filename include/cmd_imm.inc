@@ -1489,15 +1489,29 @@ end;
 
 procedure do_holywalk(ch : GCharacter; param : string);
 begin
-  if (IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if (IS_SET(ch.player^.flags, PLR_HOLYWALK)) then
     begin
     ch.sendBuffer('Holy walk off.'#13#10);
-    REMOVE_BIT(ch.aff_flags, AFF_HOLYWALK);
+    REMOVE_BIT(ch.player^.flags, PLR_HOLYWALK);
     end
   else
     begin
     ch.sendBuffer('Holy walk on.'#13#10);
-    SET_BIT(ch.aff_flags, AFF_HOLYWALK);
+    SET_BIT(ch.player^.flags, PLR_HOLYWALK);
+    end;
+end;
+
+procedure do_holylight(ch : GCharacter; param : string);
+begin
+  if (IS_SET(ch.player^.flags, PLR_HOLYLIGHT)) then
+    begin
+    ch.sendBuffer('Holy light off.'#13#10);
+    REMOVE_BIT(ch.player^.flags, PLR_HOLYLIGHT);
+    end
+  else
+    begin
+    ch.sendBuffer('Holy light on.'#13#10);
+    SET_BIT(ch.player^.flags, PLR_HOLYLIGHT);
     end;
 end;
 

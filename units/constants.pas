@@ -171,8 +171,6 @@ const AFF_BLIND = BV00;
       AFF_HIDE = BV11;
       AFF_SNEAK = BV12;
       AFF_ENCHANT = BV13;             { magical attacks }
-      AFF_HOLYWALK = BV14;          { walk thru anything }
-      AFF_HOLYLIGHT = BV15;         { see anything }
 
 { PC status flags}
 const PLR_NPC=BV00;
@@ -183,6 +181,8 @@ const PLR_NPC=BV00;
       PLR_DENY=BV06;            { denied? }
       PLR_FROZEN=BV07;          { frozen }
       PLR_SILENCED=BV08;        { silenced }
+      PLR_HOLYWALK = BV09;          { walk thru anything }
+      PLR_HOLYLIGHT = BV10;         { see anything }
 
 { Config flags }
 const CFG_ASSIST=BV01;

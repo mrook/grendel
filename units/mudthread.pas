@@ -1289,6 +1289,7 @@ begin
   registerCommand('do_loadarea', do_loadarea);
   registerCommand('do_reset', do_reset);
   registerCommand('do_map', do_map);
+  registerCommand('do_holylight', do_holylight);
 end;
 
 begin

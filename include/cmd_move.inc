@@ -97,7 +97,7 @@ begin
     end;
 
   { if exit is hidden or it is secret and closed then no exit - Grimlord }
-  if (pexit=nil) or (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if (pexit=nil) or (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) and (not ch.IS_HOLYWALK) then
     begin
     ch.sendBuffer('You can''t go in that direction.'#13#10);
     exit;
@@ -170,13 +170,13 @@ begin
     exit;
     end;
 
-  if (IS_SET(pexit.to_room.flags,ROOM_SOLITARY)) and (pexit.to_room.chars.getSize > 0) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if (IS_SET(pexit.to_room.flags,ROOM_SOLITARY)) and (pexit.to_room.chars.getSize > 0) and (not ch.IS_HOLYWALK) then
     begin
     ch.sendBuffer('Only one person can enter that room at a time.'#13#10);
     exit;
     end;
 
-  if (IS_SET(pexit.flags, EX_CLOSED)) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if (IS_SET(pexit.flags, EX_CLOSED)) and (not ch.IS_HOLYWALK) then
     begin
     act(AT_REPORT, 'The $d is closed.', false, ch, nil, pexit, TO_CHAR);
     exit;
@@ -184,19 +184,19 @@ begin
 
   if (room_pos.sector=SECT_AIR) or (room_to.sector=SECT_AIR) or
    IS_SET(pexit.flags, EX_FLY) then
-    if (not ch.IS_FLYING) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+    if (not ch.IS_FLYING) and (not ch.IS_HOLYWALK) then
      begin
      ch.sendBuffer('You''d need to fly to get there.'#13#10);
      exit;
      end;
 
-  if (room_pos.sector = SECT_NOPASSAGE) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if (room_pos.sector = SECT_NOPASSAGE) and (not ch.IS_HOLYWALK) then
     begin
     ch.sendBuffer('You cannot fly, walk or swim there... it''s too dangerous.'#13#10);
     exit;
     end;
 
-  if ((room_pos.sector = SECT_WATER_NOSWIM) or (room_to.sector = SECT_WATER_NOSWIM)) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+  if ((room_pos.sector = SECT_WATER_NOSWIM) or (room_to.sector = SECT_WATER_NOSWIM)) and (not ch.IS_HOLYWALK) then
     begin
     ch.sendBuffer('That water is too deep to swim in, you need a boat!'#13#10);
     exit;
@@ -216,7 +216,7 @@ begin
     { when this mob blocks ch, we don't want to continue - Grimlord }
     vict := node.element;
     
-    if (blockTrigger(vict, ch, pexit.vnum)) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+    if (blockTrigger(vict, ch, pexit.vnum)) and (not ch.IS_HOLYWALK) then
       begin
       ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
       exit;
