@@ -7,29 +7,39 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 1. Introduction
 
-It has been a month since the 0.3.3 release, and here is 0.3.4!
+Development is going great, here's 0.3.5 already!
 
-The biggest changes since 0.3.3:
-  - the OLC system is pretty much back now, still a wee bit unstable,
-    some features missing, but already quite usable, with one big
-    cool plus: spell checking! (only english language supported now)
-    To use this, please download dicts.zip from the website,
-    as this contains the needed dictionaries.
-  - Some beautifications on info commands by Xenon
-  - Integrated debug routines, helps us (and maybe you) to trace
-    wicked bugs, also features a nice Dead Thread Detector (tm);
-    should players blow up your server, the system will detect this,
-    catch & kill the thread and set the offending player in a linkless state.
-  - race format has been revamped and updated, with a corresponding raceinfo
-    command - this has also opened up the way to a few nice features
-    like spell/skillslots etc.
-  - holywalk, peek, keylock, last; to just name a few cool new commands.
-  - timers are much more stable (and much more generic, but that's code issue),
-    enabling better recovery from a bug, and better tracing of such a bug.
-  - string sharing (with the string hash table) was fixed, reducing memory usage
-  - inventory handling was updated
-  - copyover more stable
-  - tintin/jmc and other clients should work again
+The biggest changes since 0.3.4:
+  - some additions were made to the OLC system by Xenon,
+    namely an overhead map display and a number of bug fixes
+  - spamming/auto-login now works correctly
+  - new affects system, very generic, very spiffy,
+    supports about everything (heck, it can even
+    toast a sandwhich in the proper configuration! :)
+  - added some nice drunken speech code provided by Nemesis
+  - restructured the cleaning & timing threads - code
+    is where it belongs now, and the cleaning thread
+    is now acting as a watchdog for the timer & client
+    threads - should the timer thread blow up, it'll
+    try to repair things and restart it, should a client thread
+    crash, the clean thread will disconnect the player
+    and kill the offending thread.
+    Testing shows that this feature increases stability
+    and uptime greatly, something we all want in a server.
+  - support for ITEM_LIGHT was added, as well as a 'holylight'
+  - added dynamic prompts, users can define their own prompt now
+  - changed the internal representation of skills quite a bit,
+    the fixed array indexing is completely gone.
+  - numerous bugfixes: re-enabled host lookups (only for ipv4
+    for the time being), fixed a number of crash bugs, fixed 
+    the lack of kill xp, and a number of other small things.
+
+A small note about the directory structure:
+
+WinZip doesn't save empty directories, so to have your server run
+correctly, you'll need to create two directores: "backup" and "logs".
+As of this release, a standard immortal character, 'Grendel', is included
+which can be used as a starting point for your own immortal(s).
 
 
 2. Features
@@ -101,13 +111,9 @@ be any endless loops.
 
 6. Known problems
 
-As of this release, most of the OLC commands are back. Any stability issues with
-these will be fixed ASAP.
-There are still a few things left unfinished, like the affects system.
-These, and other outstanding issues, can be found in todo\todo.txt.
-It could be that there still are other things not re-implemented from the 
-original source, afaik everything is back in there, but if you see anything
-missing, contact me about it.
+It's relatively safe to say that 100% of the old functionality is back,
+on top of the shitloads of new features that already are in there.
+Should you see anything missing, do not hesitate to mail me.
 
 Again, there were a lot of stability fixes, and the server has become even more
 skilled at fixing its own problems, so uptime should have been increased greatly.
