@@ -946,18 +946,22 @@ var
    f : textfile;
    node, node_ex : GListNode;
    ex : GExit;
+   extra : GExtraDescription;
    room : GRoom;
    npcindex : GNPCIndex;
    reset : GReset;
+   prog : GProgram;
+   shop : GShop;
+   obj : GObjectIndex;
 begin
-  assign(f, fn);
+  assign(f, 'areas\' + fn);
   {$I-}
   rewrite(f);
   {$I+}
 
   if (IOResult <> 0) then
     begin
-    writeln('Could not open ', paramstr(2), '!');
+    bugreport('GArea.save', 'area.pas', 'Could not open ' + fn + '!', 'For some reason, the file mentioned could not be opened for writing.');
     exit;
     end;
 
@@ -976,7 +980,10 @@ begin
     room := node.element;
 
     if (room.area <> Self) then
+      begin
+      node := node.next;
       continue;
+      end;
 
     writeln(f, '#', room.vnum);
     writeln(f, room.name^);
@@ -1005,6 +1012,18 @@ begin
       node_ex := node_ex.next;
       end;
 
+    node_ex := room.extra.head;
+    while (node_ex <> nil) do
+      begin
+      extra := node_ex.element;
+
+      writeln(f, 'D ', extra.keywords);
+      write(f, extra.description);
+      writeln(f, '~');
+
+      node_ex := node_ex.next;
+      end;
+
     writeln(f, 'S');
 
     node := node.next;
@@ -1019,14 +1038,79 @@ begin
     begin
     npcindex := node.element;
 
+    if (npcindex.area <> Self) then
+      begin
+      node := node.next;
+      continue;
+      end;
+
     writeln(f, '#', npcindex.vnum);
-    
+
     writeln(f, npcindex.name^);
     writeln(f, npcindex.short^);
     writeln(f, npcindex.long^);
 
-    writeln(f, npcindex.level, ' ', npcindex.sex);
+    write(f, npcindex.level, ' ', npcindex.sex);
+
+    if (npcindex.clan <> nil) then
+      writeln(f, '''' + npcindex.clan.name + '''')
+    else
+      writeln(f);
+
     writeln(f, npcindex.natural_ac, ' ', npcindex.act_flags, ' ', npcindex.gold, ' ', npcindex.height, ' ', npcindex.weight);
+
+    node_ex := npcindex.programs.head;
+    while (node_ex <> nil) do
+      begin
+      prog := node_ex.element;
+
+      case prog.prog_type of
+             MPROG_ACT : write(f, '> on_act ');
+           MPROG_GREET : write(f, '> on_greet ');
+        MPROG_ALLGREET : write(f, '> on_allgreet ');
+           MPROG_ENTER : write(f, '> on_enter ');
+           MPROG_DEATH : write(f, '> on_death ');
+           MPROG_BRIBE : write(f, '> on_bribe ');
+           MPROG_FIGHT : write(f, '> on_fight ');
+            MPROG_RAND : write(f, '> on_rand ');
+           MPROG_BLOCK : write(f, '> on_block ');
+           MPROG_RESET : write(f, '> on_reset ');
+           MPROG_GIVE  : write(f, '> on_give ');
+      end;
+
+      writeln(f, prog.args);
+
+      write(f, prog.code);
+      writeln(f,'~');
+
+      node_ex := node_ex.next;
+      end;
+
+    node := node.next;
+    end;
+
+  writeln(f, '#END');
+  writeln(f);
+  writeln(f, '#OBJECTS');
+
+  node := obj_list.head;
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (obj.area <> Self) then
+      begin
+      node := node.next;
+      continue;
+      end;
+
+    writeln(f, '#',obj.vnum);
+    writeln(f, obj.name^);
+    writeln(f, obj.short^);
+    writeln(f, obj.long^);
+    writeln(f, obj.item_type,' ',obj.wear1,' ',obj.wear2);
+    writeln(f, obj.value[1],' ',obj.value[2],' ',obj.value[3],' ',obj.value[4]);
+    writeln(f, obj.weight,' ',obj.flags,' ',obj.cost);
 
     node := node.next;
     end;
@@ -1041,6 +1125,30 @@ begin
     reset := node.element;
 
     writeln(f, reset.reset_type, ' ', reset.arg1, ' ', reset.arg2, ' ', reset.arg3);
+
+    node := node.next;
+    end;
+
+  writeln(f, '#END');
+  writeln(f);
+  writeln(f, '#SHOPS');
+
+  node := shop_list.head;
+  while (node <> nil) do
+    begin
+    shop := node.element;
+
+    if (shop.area <> Self) then
+      begin
+      node := node.next;
+      continue;
+      end;
+
+    writeln(f, shop.keeper);
+    writeln(f, shop.item_buy[1],' ',shop.item_buy[2],' ',
+               shop.item_buy[3],' ',shop.item_buy[4],' ',shop.item_buy[5]);
+    writeln(f, shop.open_hour,' ',shop.close_hour);
+    writeln(f, '~');
 
     node := node.next;
     end;
