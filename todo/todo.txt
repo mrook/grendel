@@ -35,6 +35,8 @@ Grendel's TODO list with probable release date/version
 ! mobprog compiling to some sort of pseudo stack machine code
 ! channel history, for gt/ct/chat/raid
 ! (0.4.0) add named affects
+! (0.4.0) have mudstatus save when shutting down (mudstatus defined as: mudtime, weather, etc.)
+! (0.4.0) bugtrack/report system (webbased)
 
 
 * (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
@@ -56,13 +58,11 @@ Grendel's TODO list with probable release date/version
 - (0.4.2) some form of classes/professions/guilds/religions/whatever
         	-> probably Schools	
 - (0.4.2) reloadarea command
-- (0.4.2) bugtrack/report system 
 
 - (0.4.3) more help text
 - (0.4.3) modularized mud, pluggable objects (like timers, sets of commands, etc.)
 - (0.4.3) "real life" sleep - players need sleep to keep from falling down after 2 days,
           some rooms (with beds) have better sleep ratios etc.
-- (0.4.3) have mudstatus save when shutting down (mudstatus defined as: mudtime, weather(?), etc.)
 
 
 l implementation of the mud sound protocol
