@@ -47,6 +47,8 @@ type
        char_no_arg, others_no_arg: string;
        char_found, others_found, vict_found : string;
        char_auto, others_auto : string;
+       char_object : string;      // Xenon (19/Feb/2001) : for objects (e.g. 'lick rapier')
+       others_object : string;
      end;
 
      GDamMessage = class
@@ -374,7 +376,13 @@ begin
         vict_found := striprbeg(s,' ')
       else
       if g='OTHERSFOUND' then
-        others_found := striprbeg(s,' ');
+        others_found := striprbeg(s,' ')
+      else
+      if g='CHAROBJECT' then
+        char_object := striprbeg(s,' ')
+      else
+      if g='OTHERSOBJECT' then
+        others_object := striprbeg(s,' ');
       until (uppercase(s)='#END') or eof(f);
 
     if (findSocial(social.name) <> nil) then
@@ -418,6 +426,7 @@ function checkSocial(c : pointer; cmd, param : string) : boolean;
 var social : GSocial;
     chance : integer;
     ch, vict : GCharacter;
+    obj : GObject;
 begin
   social := findSocial(cmd);
 
@@ -433,19 +442,30 @@ begin
     begin
     vict := ch.room.findChar(ch, param);
 
+    obj := ch.room.findObject(param);
+    if (obj = nil) then
+      obj := ch.findEquipment(param);
+    if (obj = nil) then
+      obj := ch.findInventory(param);
+
     if (length(param)=0) then
       begin
-      act(AT_SOCIAL,char_no_arg,false,ch,nil,vict,TO_CHAR);
-      act(AT_SOCIAL,others_no_arg,false,ch,nil,vict,TO_ROOM);
+      if (length(char_no_arg) = 0) then
+        act(AT_SOCIAL,' ',false,ch,nil,vict,TO_CHAR)
+      else
+        act(AT_SOCIAL,char_no_arg,false,ch,nil,vict,TO_CHAR);
+
+      if (length(others_no_arg) <> 0) then
+        act(AT_SOCIAL,others_no_arg,false,ch,nil,vict,TO_ROOM);
       end
     else
-    if vict=ch then
+    if (vict = ch) then
       begin
       act(AT_SOCIAL,char_auto,false,ch,nil,vict,TO_CHAR);
       act(AT_SOCIAL,others_auto,false,ch,nil,vict,TO_ROOM);
       end
     else
-    if vict=nil then
+    if (vict = nil) then
       act(AT_SOCIAL,'They are not here.',false,ch,nil,nil,TO_CHAR)
     else
       begin
@@ -597,6 +617,7 @@ end;
 
 initialization
 socials := GHashObject.Create(512);
+socials.setHashFunc(firstHash);
 dm_msg := GDLinkedList.Create;
 auction_good := GAuction.Create;
 auction_evil := GAuction.Create;
