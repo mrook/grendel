@@ -3,8 +3,9 @@
 
 <race xmlns="http://www.grendelproject.nl/xml/">
 	<name>Dark-Elf</name>
+	<short>Del</short>
 	<alignment>-1000</alignment>
-	<convert>false</convert>
+	<convert>true</convert>
 	<skills>10</skills>
 	<spells>35</spells>
 	<statmax>

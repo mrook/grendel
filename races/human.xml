@@ -2,7 +2,8 @@
 <!DOCTYPE race SYSTEM "race.dtd">
 
 <race xmlns="http://www.grendelproject.nl/xml/">
-    <name>Human</name>
+	<name>Human</name>
+	<short>Hum</short>
 	<alignment>0</alignment>
 	<convert>true</convert>
 	<skills>15</skills>

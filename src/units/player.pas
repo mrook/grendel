@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.26 2004/03/26 21:14:26 hemko Exp $
+	## $Id: player.pas,v 1.27 2004/03/30 19:25:11 hemko Exp $
 }
 unit player;
 
@@ -612,7 +612,7 @@ var
 	iterator : GIterator;
 	race : GRace;
 	digest : MD5Digest;
-	h,top,x,temp:integer;
+	top, x, temp : integer;
 	buf, pwd : string;
 begin
 	case state of
@@ -844,23 +844,23 @@ CON_STATE_CHECK_PASSWORD: begin
                   state := CON_STATE_NEW_RACE;
                   send(#13#10'Available races: '#13#10#13#10);
 
-                  h:=1;
                   iterator := raceList.iterator();
 
                   while (iterator.hasNext()) do
                     begin
                     race := GRace(iterator.next());
+                    
+                    if (race.convert) then
+                      begin
+	                    buf := '  [' + ANSIColor(11,0) + race.short + ANSIColor(7,0) + ']  ' + pad_string(race.name, 15);
 
-                    buf := '  ['+inttostr(h)+']  '+pad_string(race.name,15);
+	                    if (race.def_alignment < 0) then
+	                      buf := buf + ANSIColor(12,0) + '<- EVIL' + ANSIColor(7,0);
 
-                    if (race.def_alignment < 0) then
-                      buf := buf + ANSIColor(12,0) + '<- EVIL'+ANSIColor(7,0);
+	                    buf := buf + #13#10;
 
-                    buf := buf + #13#10;
-
-                    send(buf);
-
-                    inc(h);
+	                    send(buf);
+	                    end;
                     end;
                     
                   iterator.Free();
@@ -868,68 +868,23 @@ CON_STATE_CHECK_PASSWORD: begin
                   send(#13#10'Choose a race: ');
                   end;
     CON_STATE_NEW_RACE: begin
-                  if (length(argument)=0) then
+                  if (length(argument) = 0) then
                     begin
                     send(#13#10'Choose a race: ');
                     exit;
                     end;
 
-                  try
-                    x:=strtoint(argument);
-                  except
-                    x:=-1;
-                  end;
+                  race := findRace(argument);
 
-                  race := nil;
-                  iterator := raceList.iterator();
-                  h := 1;
-
-                  while (iterator.hasNext()) do
+                  if (race = nil) or (race.convert = false) then
                     begin
-                    if (h = x) then
-                      begin
-                      race := GRace(iterator.next());
-                      break;
-                      end
-                    else
-                      iterator.next();
-
-                    inc(h);
-                    end;
-                    
-                  iterator.Free();
-
-                  if (race = nil) then
-                    begin
-                    send('Not a valid race.'#13#10);
-
-                    h:=1;
-										iterator := raceList.iterator();
-
-										while (iterator.hasNext()) do
-											begin
-											race := GRace(iterator.next());
-
-                      buf := '  ['+inttostr(h)+']  '+pad_string(race.name,15);
-
-                      if (race.def_alignment < 0) then
-                        buf := buf + ANSIColor(12,0) + '<- EVIL'+ANSIColor(7,0);
-
-                      buf := buf + #13#10;
-
-                      send(buf);
-
-                      inc(h);
-                      end;
-
-										iterator.Free();
-										
+                    send('Not a valid race.'#13#10);										
                     send(#13#10'Choose a race: ');
                     exit;
                     end;
 
                   ch.race := race;
-                  send(race.description);
+                  send(race.description + #13#10#13#10);
                   send('250 stat points will be randomly distributed over your five attributes.'#13#10);
                   send('It is impossible to get a lower or a higher total of stat points.'#13#10);
 
@@ -1277,8 +1232,8 @@ begin
   edit_buffer := '';
   edit_dest := nil;
 
-  aliases := GDLinkedList.Create;
-  skills_learned := GDLinkedList.Create;
+  aliases := GDLinkedList.Create();
+  skills_learned := GDLinkedList.Create();
 
   max_skills := 0;
   max_spells := 0;

@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.8 2004/03/26 17:00:15 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.9 2004/03/30 19:25:11 hemko Exp $
 }
 
 unit race;
@@ -41,7 +41,7 @@ type
 	private
 		node : GListNode;
 
-		_name, _description : string;
+		_name, _short, _description : string;
 		_str_bonus, _con_bonus, _dex_bonus, _int_bonus, _wis_bonus : integer;
 		_def_alignment : integer;
 		_max_skills, _max_spells : integer;
@@ -57,6 +57,7 @@ type
 		destructor Destroy(); override;
 		
 		property name : string read _name;
+		property short : string read _short;
 		property description : string read _description;
 		
 		property str_bonus : integer read _str_bonus;
@@ -100,6 +101,7 @@ implementation
 uses
 	LibXmlParser,
 	console,
+	chars,
 	skills;
 
 
@@ -121,6 +123,7 @@ begin
   
   _convert := false;
   _name := '';
+  _short := '';
   _description := '';
   _def_alignment := 0;    // fill in default values
   _str_bonus := 0;
@@ -213,6 +216,36 @@ begin
     end;
 end;
 
+// Load the bonuses
+procedure loadBonus(parser : TXmlParser; race : GRace);
+begin
+while (parser.Scan()) do
+		case parser.CurPartType of // Here the parser tells you what it has found
+		  ptContent:
+		    begin
+		    if (prep(parser.CurName) = 'INT') then
+					race._int_bonus := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'WIS') then
+		    	race._wis_bonus := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'DEX') then
+		    	race._dex_bonus := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'STR') then
+		    	race._str_bonus := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'CON') then
+		    	race._con_bonus := StrToInt(parser.CurContent);		    
+		    end;
+		  ptEndTag:
+		  	begin
+		  	if (prep(parser.CurName) = 'BONUS') then
+		  		exit;
+		  	end;
+		end;
+end;
+
 // Load the saves
 procedure loadSaves(parser : TXmlParser; race : GRace);
 begin
@@ -252,6 +285,8 @@ var
   t : TSearchRec;
   parser : TXmlParser;
   race : GRace;
+  sk : GSkill;
+  g : GLearned;
 begin
 	race := nil;
 	
@@ -279,7 +314,13 @@ begin
 			          loadBodyParts(parser, race)
 			        else
 			        if (prep(parser.CurName) = 'STATMAX') then
-			          loadStatMax(parser, race);
+			          loadStatMax(parser, race)			         
+			        else
+			        if (prep(parser.CurName) = 'BONUS') then
+			        	loadBonus(parser, race)
+			        else
+			        if (prep(parser.CurName) = 'SAVES') then
+			        	loadSaves(parser, race);
 			        end;
 			      ptContent:
 			        begin
@@ -289,10 +330,38 @@ begin
                 writeConsole('   Race: ' + race.name);
 			          end
 			        else
+			        if (prep(parser.CurName) = 'SHORT') then
+			        	race._short := cap(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'ALIGNMENT') then
+			        	race._def_alignment := StrToInt(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'CONVERT') then
+			        	race._convert := StrToBool(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'SKILLS') then
+			        	race._max_skills := StrToInt(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'SPELLS') then
+							 	race._max_spells := StrToInt(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'ABILITY') then
+			        	begin
+								sk := findSkill(parser.CurContent);
+
+            		if (sk <> nil) then
+            			begin
+		            	g := GLearned.Create(100, sk);
+		              g.node := race.abilities.insertLast(g);
+		              end
+		            else
+		              bugreport('loadRaces', 'race.pas', 'Unknown skill ' + parser.CurContent);
+			        	end
+			        else
 			        if (prep(parser.CurName) = 'DESCRIPTION') then
 			          race._description := parser.CurContent;
 			        end;
-      			ptEndTag   : // Process End-Tag here (Parser.CurName)
+      			ptEndTag: // Process End-Tag here (Parser.CurName)
 							begin
 							if (prep(parser.CurName) = 'RACE') then
 								race.node := raceList.insertLast(race);
@@ -306,7 +375,7 @@ begin
 	parser.Free();
 end;
 
-// Find race by name
+// Find race by name / short name
 function findRace(const name : string) : GRace;
 var
    iterator : GIterator;
@@ -320,7 +389,7 @@ begin
     begin
     race := GRace(iterator.next);
 
-    if (comparestr(name, race.name) = 0) then
+    if (comparestr(prep(name), prep(race.name)) = 0) or (comparestr(prep(name), prep(race.short)) = 0) then
       begin
       Result := race;
       break;

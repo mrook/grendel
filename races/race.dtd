@@ -13,10 +13,11 @@
 <!ELEMENT int (#PCDATA)>
 <!ELEMENT para (#PCDATA)>
 <!ELEMENT poison (#PCDATA)>
-<!ELEMENT race (name, alignment, convert, skills, spells, statmax, bonus, saves, description, body)>
+<!ELEMENT race (name, short, alignment, convert, skills, spells, statmax, bonus, saves, description, body)>
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT room_message (#PCDATA)>
 <!ELEMENT saves (poison, cold, para, breath, spell)>
+<!ELEMENT short (#PCDATA)>
 <!ELEMENT skills (#PCDATA)>
 <!ELEMENT spell (#PCDATA)>
 <!ELEMENT spells (#PCDATA)>
