@@ -541,12 +541,12 @@ begin
   if (ch.clan <> nil) then
     act(AT_REPORT,'   Thou art a proud member of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR);
 
-  (* if (not ch.IS_NPC) then
+  if (not ch.IS_NPC) then
    if ch.player^.area_fname<>'' then
     act(AT_REPORT,'   Thou hast been assigned $B$7'+ch.player^.area_fname+'$A$7. '#13#10+
         '   Thee construction ranges art: '+inttostr(ch.player^.r_lo)+' '+inttostr(ch.player^.r_hi)+' '+
         inttostr(ch.player^.m_lo)+' '+inttostr(ch.player^.m_hi)+' '+
-        inttostr(ch.player^.o_lo)+' '+inttostr(ch.player^.o_hi)+'.',false,ch,nil,nil,TO_CHAR); *)
+        inttostr(ch.player^.o_lo)+' '+inttostr(ch.player^.o_hi)+'.',false,ch,nil,nil,TO_CHAR);
 
   buf1 := #13#10' $8[$4*$8]$3 ' + add_chars(70, '', '-') + ' $8[$4*$8]';
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
