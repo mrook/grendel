@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.8 2004/03/18 09:55:52 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.9 2004/04/02 11:29:24 ***REMOVED*** Exp $
 #
 
 
@@ -47,7 +47,7 @@ STATUS=bplstatus.so
 IMC3=bplimc3.so
 WEBSERVICE=bplwebservice.so
 
-MODULES=$(COMMANDS) $(SPELLER) $(STATUS) $(IMC3)
+MODULES=$(COMMANDS) $(SPELLER) $(IMC3)
 
 CORE_SYM=../core
 CORE_FILE=../bplcore.so
@@ -56,7 +56,7 @@ RM=rm -f
 endif
 
 
-DCC_FLAGS=-Q '-$$W+' -GD
+DCC_FLAGS=-Q -V '-$$W+' -GD
 
 
 all:	$(MODULES)
