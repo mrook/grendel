@@ -1,4 +1,4 @@
-// $Id: cmd_move.inc,v 1.4 2004/03/04 19:39:50 ***REMOVED*** Exp $
+// $Id: cmd_move.inc,v 1.5 2004/03/06 14:26:10 hemko Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
@@ -57,12 +57,14 @@ begin
     if (track.who = ch.name) and (track.direction = pexit.direction) then
       begin
       track.life := 150;
+      iterator.Free();
       exit;
       end;
-    end;    
+    end;
+
   iterator.Free();
 
-  track := GTrack.Create;
+  track := GTrack.Create();
 
   track.who := ch.name;
   track.direction := pexit.direction;
