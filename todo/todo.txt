@@ -56,9 +56,8 @@ l abbreviation of clanname (3-4 chars) in who list
 l mud police!
 l online suggest (pray) history
 
-
-
 -- not really code specific, but still open issues: --
 
 * general format for docs (docwrite-HOWTO something), both
   for HTML and plaintext docs
+

@@ -1360,7 +1360,8 @@ begin
   if (snooped_by <> nil) then
     GConnection(snooped_by.conn).send(s);
 
-  if (conn = nil) or (not IS_NPC and (player^.snooping <> nil)) then
+// Xenon 21/Feb/2001: I think someone snooping still wants to see output of his own commands
+  if (conn = nil) {or (not IS_NPC and (player^.snooping <> nil))} then
     exit;
 
   c := conn;
@@ -1501,7 +1502,11 @@ begin
   buf := buf + '> ';
 
   if (snooped_by <> nil) then
+  begin
+    if IS_SET(snooped_by.player^.cfg_flags,CFG_BLANK) then   // Xenon 21/Feb/2001: send extra blank line if config says so
+      GConnection(snooped_by.conn).send(#13#10);
     GConnection(snooped_by.conn).send(buf);
+  end;
 
   if (not IS_NPC) then
    if IS_SET(player^.cfg_flags,CFG_BLANK) then
