@@ -961,6 +961,8 @@ begin
 
   act(AT_REPORT,'You give $N $p.',false, ch, obj, vict, TO_CHAR);
   act(AT_REPORT,'$n gives $N $p.',false, ch, obj, vict, TO_ROOM);
+
+  giveTrigger(vict, ch, obj);
 end;
 
 { Put objects into container - Nemesis }

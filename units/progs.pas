@@ -48,6 +48,7 @@ procedure deathTrigger(ch, victim : GCharacter);
 procedure resetTrigger(ch : GCharacter);
 procedure actTrigger(npc, actor : GCharacter; s : string);
 function blockTrigger(ch, victim : GCharacter; vnum : integer) : boolean;
+procedure giveTrigger(npc, actor : GCharacter; obj : GObject);
 
 implementation
 
@@ -128,6 +129,12 @@ begin
     begin
     prog_type:=MPROG_RESET;
     SET_BIT(npc.mpflags,MPROG_RESET);
+    end
+  else
+  if g='ON_GIVE' then
+    begin
+    prog_type:=MPROG_GIVE;
+    SET_BIT(npc.mpflags,MPROG_GIVE);
     end
   else
     bugreport('GProgram.load', 'progs.pas', 'illegal trigger type', '');
@@ -784,6 +791,33 @@ begin
 
   if (IS_SET(ch.npc_index.mpflags, MPROG_RESET)) then
     percentCheck(ch, nil, nil, MPROG_RESET);
+end;
+
+{ GiveTrigger - Nemesis }
+procedure giveTrigger(npc, actor : GCharacter; obj : GObject);
+var prg : GProgram;
+    node : GListNode;
+begin
+  if (not npc.IS_NPC) then
+    exit;
+
+  node := npc.npc_index.programs.head;
+
+  while (node <> nil) do
+    begin
+    prg := node.element;
+
+    if (prg.prog_type = MPROG_GIVE) then
+      begin
+      if (prg.args = uppercase(obj.name^)) then
+        begin
+        obj.extract;
+        prg.driver(npc, actor, nil);
+        end;
+      end;
+
+    node := node.next;
+    end;
 end;
 
 begin

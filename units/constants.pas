@@ -598,6 +598,7 @@ const MPROG_ACT=BV01;           { mob reacts to act from ch}
       MPROG_RAND=BV08;          { random trigger, update_chars }
       MPROG_BLOCK=BV09;         { mob is blocking an exit }
       MPROG_RESET=BV10;         { mob is reset }
+      MPROG_GIVE=BV11;          { mob gets object }
                                 
 implementation
 
