@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.30 2003/10/10 10:30:03 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.31 2003/10/15 13:46:53 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -383,7 +383,7 @@ end;
 }
 function GHashTableIterator.getCurrent() : TObject;
 begin
-	Result := current;
+	Result := GHashValue(current.element).value;
 end;
 
 {
@@ -728,8 +728,11 @@ begin
   if (varType(key) = varString) then
     Result := hashFunc(hashsize, hashprime, key)
   else
-  if (varType(key) = varInteger) then
-    Result := (cardinal(key) * hashprime) mod hashsize;
+  if (varType(key) in [varSmallint,varInteger,varShortInt,varByte,varWord,varLongWord]) then
+    Result := (cardinal(key) * hashprime) mod hashsize
+  else
+  { shouldn't be here }
+  	raise Exception.Create('Impossible to determine hashkey for unknown variant type ' + VarTypeAsText(VarType(key)));
 end;
 
 {
