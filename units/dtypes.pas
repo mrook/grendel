@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.11 2001/04/27 14:14:43 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.12 2001/04/27 19:39:12 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -659,12 +659,12 @@ begin
 
     if (hv.refcount <= 0) then
       begin
-      hv.value.Free;
       str_hash.remove(src^);
+      hv.value.Free;
       end;
-
-    src := nil;
     end;
+
+  src := nil;
 end;
 
 // GException
