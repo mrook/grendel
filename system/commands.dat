@@ -1002,6 +1002,13 @@ position: 0
 #end
 
 #command
+name: namegen
+function: do_namegen
+level: 990
+position: 0
+#end
+
+#command
 name: nourish
 function: do_nourish
 level: 995

@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.20 2001/04/10 20:39:00 xenon Exp $
+  $Id: grendel.dpr,v 1.21 2001/04/14 21:40:33 xenon Exp $
 }
 
 program grendel;
@@ -71,7 +71,9 @@ uses
   MemCheck in 'units\MemCheck.pas',
   timers in 'units\timers.pas',
   debug in 'units\debug.pas',
-  mudspell in 'units\mudspell.pas';
+  mudspell in 'units\mudspell.pas',
+  LibXmlParser in 'units\LibXmlParser.pas',
+  NameGen in 'units\NameGen.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;

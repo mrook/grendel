@@ -1700,3 +1700,80 @@ begin
   ch.toRoom(saveroom);
 end;
 
+{ Xenon 12/Apr/2001: execute a command at a players location }
+procedure do_namegen(ch : GCharacter; param : string);
+var
+  i : integer;
+  node : GListNode;
+  nt : TNameTemplate;
+  template_nr_str : string;
+  template_nr : integer;
+  amount_str : string;
+  amount, count : integer;
+begin
+  count := 1;
+  
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage:  NAMEGEN list|<template #> [amount to generate]'#13#10);
+    exit;
+  end;
+
+  if (param = 'list') then
+  begin
+    node := NameTemplateList.head;
+    for i := 1 to (NameTemplateList.getSize()) do
+    begin
+      if (node = nil) then
+        break;
+      nt := TNameTemplate(node.element);
+      act(AT_REPORT, Format('   $B$1[$7%2d$1]$A$7   %s', [i, nt.template_name]), false, ch, nil, nil, TO_CHAR);
+
+      node := node.next;
+    end;
+    exit;
+  end;
+
+  param := one_argument(param, template_nr_str);
+  template_nr := StrToInt(template_nr_str);
+
+  if ((template_nr > NameTemplateList.getsize()) or (template_nr < 1)) then
+  begin
+    ch.sendBuffer('Template number out of range.'#13#10);
+    exit;
+  end;
+  
+  param := one_argument(param, amount_str);
+  if (amount_str <> '') then
+  begin
+    try
+      amount := StrToInt(amount_str);
+    except
+      ch.sendBuffer('Please specify a number for amount to generate.'#13#10);
+      exit;
+    end;
+    if ((amount > 20) or (amount < 1)) then
+    begin
+      ch.sendBuffer('Amount to generate out of range (1 < amount < 20).'#13#10);
+      exit;
+    end
+    else
+      count := amount;
+  end;
+
+  node := NameTemplateList.head;
+  for i := 1 to template_nr do
+  begin
+    if (node = nil) then
+      break;
+    nt := TNameTemplate(node.element);
+    node := node.next;
+  end;
+  
+  act(AT_REPORT, Format('$B$1[$7Nametemplate ''%s''$1]$A$7', [nt.template_name]) + #13#10, false, ch, nil, nil, TO_CHAR);
+  for i := 1 to count do
+  begin
+    act(AT_REPORT, Format('  $B$1[$7%2d$1]$A$7   %s', [i, generateName(nt.template_name)]), false, ch, nil, nil, TO_CHAR);
+  end
+end;
+

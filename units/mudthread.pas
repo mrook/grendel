@@ -73,7 +73,8 @@ uses
     timers,
     debug,
     mudspell,
-    fight;
+    fight,
+    NameGen;
 
 constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
 begin
@@ -1297,6 +1298,7 @@ begin
   registerCommand('do_holylight', do_holylight);
   registerCommand('do_prompt', do_prompt);
   registerCommand('do_at', do_at);
+  registerCommand('do_namegen', do_namegen);
 end;
 
 begin
