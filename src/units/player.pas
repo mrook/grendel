@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.31 2004/04/15 17:47:22 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.32 2004/05/12 22:39:27 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -1540,7 +1540,7 @@ var
 	num, d, x : longint;
   af : GFileReader;
   g , a, t : string;
-  obj : GObject;
+  obj, lastobj : GObject;
   aff : GAffect;
   len, modif, inner : integer;
   s : string;
@@ -1991,12 +1991,23 @@ begin
       repeat
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
-          obj := GObject.Create();
-
-				  obj.worn := g;
-				  
-				  if (obj.worn = 'none') then
-				    obj.worn := '';
+          if (g = '##') then
+          	begin
+          	obj := GObject.Create();
+          	obj.worn := '';
+          	obj.toObject(lastobj);
+          	end
+          else
+          	begin
+          	obj := GObject.Create();
+			obj.worn := g;
+			
+			if (obj.worn = 'none') then
+				obj.worn := '';
+				
+			obj.toChar(Self);
+			lastobj := obj;
+			end;
 
           with obj do
             begin
@@ -2072,11 +2083,9 @@ begin
 							g := af.readLine();
         			end;
         		end;
-
-					objectList.add(obj);
-					            
-          obj.toChar(Self);         
-          end;
+			
+			objectList.add(obj);
+			end;		            
       until (uppercase(g) = '#END') or (af.eof);
 
       if (uppercase(g) = '#END') then
@@ -2162,7 +2171,7 @@ var
 	af : GFileWriter;
 	temp : TDateTime;
 	h : integer;
-	obj : GObject;
+	obj, obj_in : GObject;
 	al : GAlias;
 	g : GLearned;
 	aff : GAffect;
@@ -2415,7 +2424,30 @@ begin
 					end;
 
 				inner_iterator.Free();
-				end;				
+				end;
+				
+			if (obj.contents.size() > 0) then
+				begin
+				inner_iterator := obj.contents.iterator();
+				
+				while (inner_iterator.hasNext()) do
+					begin
+					obj_in := GObject(inner_iterator.next());
+			
+					af.writeLine('##');
+
+					af.writeLine(IntToStr(obj_in.vnum));
+
+					af.writeLine(obj_in.name);
+					af.writeLine(obj_in.short);
+					af.writeLine(obj_in.long);
+					af.writeLine(IntToStr(obj_in.item_type) + ' ' + obj_in.wear_location1 + ' ' + obj_in.wear_location2);
+					af.writeLine(IntToStr(obj_in.value[1]) + ' ' + IntToStr(obj_in.value[2]) + ' ' + IntToStr(obj_in.value[3]) + ' ' + IntToStr(obj_in.value[4]));
+					af.writeLine(IntToStr(obj_in.weight) + ' ' + IntToStr(obj_in.flags) + ' ' + IntToStr(obj_in.cost) + ' ' + IntToStr(obj_in.count));
+					end;
+					
+				inner_iterator.Free();
+				end;
 			end;
 
 		iterator.Free();
@@ -2479,6 +2511,29 @@ begin
 						af.writeLine('');
 						end;
 					end;
+				inner_iterator.Free();
+				end;
+
+			if (obj.contents.size() > 0) then
+				begin
+				inner_iterator := obj.contents.iterator();
+				
+				while (inner_iterator.hasNext()) do
+					begin
+					obj_in := GObject(inner_iterator.next());
+			
+					af.writeLine('##');
+
+					af.writeLine(IntToStr(obj_in.vnum));
+
+					af.writeLine(obj_in.name);
+					af.writeLine(obj_in.short);
+					af.writeLine(obj_in.long);
+					af.writeLine(IntToStr(obj_in.item_type) + ' ' + obj_in.wear_location1 + ' ' + obj_in.wear_location2);
+					af.writeLine(IntToStr(obj_in.value[1]) + ' ' + IntToStr(obj_in.value[2]) + ' ' + IntToStr(obj_in.value[3]) + ' ' + IntToStr(obj_in.value[4]));
+					af.writeLine(IntToStr(obj_in.weight) + ' ' + IntToStr(obj_in.flags) + ' ' + IntToStr(obj_in.cost) + ' ' + IntToStr(obj_in.count));
+					end;
+					
 				inner_iterator.Free();
 				end;
 			end;
