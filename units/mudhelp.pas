@@ -1,4 +1,4 @@
-// $Id: mudhelp.pas,v 1.9 2001/07/17 15:24:13 ***REMOVED*** Exp $
+// $Id: mudhelp.pas,v 1.10 2001/08/03 21:33:49 ***REMOVED*** Exp $
 
 unit mudhelp;
 
@@ -161,6 +161,11 @@ begin
         keys := right(s, '=');
         keyword:=true;
         text:='';
+
+        // jago .. clear all variables
+        related := '';
+        syntax := '';
+        helptype := '';
         end
       else
       if (g = '#TYPE') then
