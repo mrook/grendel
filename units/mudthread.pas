@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: mudthread.pas,v 1.76 2002/08/03 19:14:00 ***REMOVED*** Exp $)
+  @lastmod($Id: mudthread.pas,v 1.77 2002/08/14 18:15:53 ***REMOVED*** Exp $)
 }
 
 unit mudthread;
@@ -306,7 +306,7 @@ begin
 
         if (uppercase(al.alias) = cmdline) then
           begin
-          ale := al.expand;
+          ale := stringreplace(al.expand, '%', param, [rfReplaceAll]);
           
           while (pos(':', ale) > 0) do
             begin
