@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.5 2004/02/28 11:16:32 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -13,6 +13,10 @@ interface
 procedure initDebug();
 procedure cleanupDebug();
 
+{$IFDEF LINUX}
+procedure listBackTrace();
+{$ENDIF}
+
 
 implementation
 
@@ -22,6 +26,9 @@ uses
 	Windows,
 	JclHookExcept,
 	JclDebug,
+{$ENDIF}
+{$IFDEF LINUX}
+	Libc,
 {$ENDIF}
 	SysUtils,
 	Classes,
@@ -66,6 +73,31 @@ end;
 {$ENDIF}
 
 {$IFDEF LINUX}
+function backtrace(var __array; __size : integer) : integer; cdecl; external 'libc.so.6' name 'backtrace';
+
+procedure findSymbol(addr : pointer);
+var
+	info : TDLInfo;
+begin
+	dladdr(addr, info);
+	
+	writeln('(', IntToHex(integer(addr), 8), ') ', info.dli_sname, ' in ', info.dli_fname);
+end;
+
+procedure listBackTrace();
+var
+	l, ret : integer;
+	x : array[0..15] of pointer;
+begin
+	ret := backtrace(x, 16);
+	
+	for l := 0 to ret - 1 do
+		begin
+		findSymbol(x[l]);
+		//writeln('backtrace: ', IntToHex(integer(x[l]), 8));
+		end;
+end;
+
 procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
 var
 	E : Exception;
@@ -73,6 +105,8 @@ begin
 	E := ExceptObject as Exception;
 
 	writeln('[EX] ' + E.ClassName + ': ' + E.Message);
+	
+	listBackTrace();
 
 	if (E is EControlC) then
 		grace_exit := true;
@@ -84,12 +118,12 @@ end;
 procedure initDebug();
 begin
 {$IFDEF WIN32}
-  // initialize the debug 'fail-safe device'
+	// initialize the debug 'fail-safe device'
 
-  ExceptProc := nil;
+	ExceptProc := nil;
 
-  JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
-  SetUnhandledExceptionFilter(@ExceptionFilter);
+	JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
+	SetUnhandledExceptionFilter(@ExceptionFilter);
 
 	JclStartExceptionTracking;
 	JclInitializeLibrariesHookExcept;
