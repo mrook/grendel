@@ -1271,6 +1271,7 @@ begin
   registerCommand('do_acreate', do_acreate);
   registerCommand('do_aset', do_aset);
   registerCommand('do_astat', do_astat);
+  registerCommand('do_raceinfo', do_raceinfo);
 end;
 
 begin

@@ -398,6 +398,11 @@ level: 100
 #end
 
 #command
+name: raceinfo
+function: do_raceinfo
+#end
+
+#command
 name: remove
 function: do_remove
 #end

@@ -733,7 +733,7 @@ begin
           sex := strtoint(striprbeg(a, ' '))
         else
         if g='RACE' then
-          race := findRace(pchar(striprbeg(a, ' ')))
+          race := findRace(striprbeg(a, ' '))
         else
         if (g = 'ALIGNMENT') then
           alignment := strtoint(striprbeg(a, ' '))

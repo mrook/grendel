@@ -28,7 +28,7 @@ var
 
 procedure load_races;
 
-function findRace(name : pchar) : GRace;
+function findRace(name : string) : GRace;
 
 implementation
 
@@ -174,7 +174,7 @@ begin
   FindClose(t);
 end;
 
-function findRace(name : pchar) : GRace;
+function findRace(name : string) : GRace;
 var
    node : GListNode;
    race : GRace;

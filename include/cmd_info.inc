@@ -1845,3 +1845,148 @@ begin
       end;
     end;
 end;
+
+procedure do_raceinfo(ch : GCharacter; param : string);
+procedure get_longest_racename(var len : integer);
+var
+  node : GListNode;
+  race : GRace;
+begin
+  len := 0;
+  race := nil;
+  node := race_list.head;
+
+  while (node <> nil) do
+  begin
+    race := node.element;
+
+    if (length(race.name) > len) then
+      len := length(race.name);
+      
+    node := node.next;
+  end;
+end;
+
+function get_nearest_racematch(name : string) : GRace;
+var
+  node : GListNode;
+  race : GRace;
+begin
+  race := nil;
+  node := race_list.head;
+
+  name := uppercase(name);
+  
+  while (node <> nil) do
+  begin
+    race := node.element;
+
+    if (pos(name, uppercase(race.name)) <> 0) then
+    begin
+      get_nearest_racematch := race;
+      exit;
+    end;
+
+    node := node.next;
+  end;
+  get_nearest_racematch := nil;
+end;
+
+var
+  arg : string;
+  node : GListNode;
+  race : GRace;
+  buf, str, header, buf_good, buf_evil, legenda : string;
+  conv_str : string;
+  maxlen : integer;
+begin
+  one_argument(param, arg);
+
+  if (length(arg) = 0) then
+  begin
+    header := '$B$1Racename        A   B   C   D   E  |  S1  S2  S3  S4  S5  |  M1 M2  |  Convertable?$A$7'#13#10#13#10;
+    buf_good := '$B$7----[Races of the Creatures of $B$6Light$B$7]----$A$7'#13#10#13#10 + header;
+    buf_evil := '$B$7----[Races of the Creatures of $A$8Darkness$B$7]----$A$7'#13#10#13#10 + header;
+
+    legenda := #13#10#13#10 +
+               '$B$1Bonusses:     A: Str, B: Con, C: Dex, D: Int, E: Wis'#13#10 +
+               'Saves versus: S1: Poison, S2: Cold, S3: Para, S4: Breath, S5: Spell'#13#10 +
+               'Max slots:    M1: Skills, M2: Spells$A$7';
+
+    get_longest_racename(maxlen);
+    
+    race := nil;
+    node := race_list.head;
+
+    while (node <> nil) do
+    begin
+      race := node.element;
+
+      with race do
+      begin
+        if (race.convert) then
+          conv_str := 'X'
+        else
+          conv_str := '';
+          
+        if (race.def_alignment >= 0) then    // align good
+        begin
+          buf_good := buf_good + Format('$B$2%s$A$7: %3d %3d %3d %3d %3d  | %3d %3d %3d %3d %3d  |  %2d %2d  |  %s'#13#10, [pad_string(name, maxlen + 1), str_bonus, con_bonus, dex_bonus, int_bonus, wis_bonus, save_poison, save_cold, save_para, save_breath, save_spell, max_skills, max_spells, conv_str]);
+        end
+        else
+        begin
+          buf_evil := buf_evil + Format('$B$4%s$A$7: %3d %3d %3d %3d %3d  | %3d %3d %3d %3d %3d  |  %2d %2d  |  %s'#13#10, [pad_string(name, maxlen + 1), str_bonus, con_bonus, dex_bonus, int_bonus, wis_bonus, save_poison, save_cold, save_para, save_breath, save_spell, max_skills, max_spells, conv_str]);
+        end;
+        
+      end;
+      
+      node := node.next;
+    end;
+
+    buf := buf_good + #13#10 + buf_evil + legenda + #13#10;
+    act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+  end
+  else
+  begin
+    race := get_nearest_racematch(arg);
+    if (race <> nil) then
+    begin
+      buf := '';
+      with race do
+      begin
+        if (race.def_alignment >= 0) then
+        begin
+          buf := buf + Format('$B$7[$2%s$7]$A$7', [race.name]) + #13#10#13#10;
+          str := '$B$2Good$A$7';
+        end
+        else
+        begin
+          buf := buf + Format('$B$7[$4%s$7]$A$7', [race.name]) + #13#10#13#10;
+          str := '$B$4Evil$A$7';
+        end;
+        buf := buf + Format('Alignment:             %s', [str]) + #13#10;
+        buf := buf + Format('Strength bonus:        $B$7%d$A$7', [str_bonus]) + #13#10;
+        buf := buf + Format('Constitution bonus:    $B$7%d$A$7', [con_bonus]) + #13#10;
+        buf := buf + Format('Dexterity bonus:       $B$7%d$A$7', [dex_bonus]) + #13#10;
+        buf := buf + Format('Intelligence bonus:    $B$7%d$A$7', [int_bonus]) + #13#10;
+        buf := buf + Format('Wisdom bonus:          $B$7%d$A$7', [wis_bonus]) + #13#10#13#10;
+        buf := buf + Format('Save vs. poison:       $B$7%d$A$7', [save_poison]) + #13#10;
+        buf := buf + Format('Save vs. cold:         $B$7%d$A$7', [save_cold]) + #13#10;
+        buf := buf + Format('Save vs. para:         $B$7%d$A$7', [save_para]) + #13#10;
+        buf := buf + Format('Save vs. breath:       $B$7%d$A$7', [save_breath]) + #13#10;
+        buf := buf + Format('Save vs. spell:        $B$7%d$A$7', [save_spell]) + #13#10#13#10;
+        buf := buf + Format('Max skillslots:        $B$7%d$A$7', [max_skills]) + #13#10;
+        buf := buf + Format('Max spellslots:        $B$7%d$A$7', [max_spells]) + #13#10#13#10;
+        buf := buf + Format('Description:', []) + #13#10#13#10;
+        buf := buf + Format('$B$7%s$A$7', [description]);
+      end;
+      
+      act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+    end
+    else
+    begin
+      act(AT_REPORT, 'No race like that found.', false, ch, nil, nil, TO_CHAR);
+    end;
+  end;
+end;
+

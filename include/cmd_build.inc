@@ -183,7 +183,6 @@ end;
 {Jago 10/Jan/2001
 MSTAT : return data about a mobile - can also be used on players}
 { Xenon 20/Feb/2001: renamed do_mstat() to do_pstat() }
-
 procedure do_pstat(ch : GCharacter; param : string);
 var
 	buf, buf1, arg, gender, exp, vnum, room_vnum, wimpy : string;
