@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.13 2003/10/30 19:50:20 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.14 2003/11/04 16:40:50 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -206,6 +206,11 @@ var
 
 procedure registerField(field : GPlayerField);
 procedure unregisterField(name : string);
+
+function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
+function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
+
+function existsPlayer(name : string) : boolean;
 
 procedure initPlayers();
 procedure cleanupPlayers();
@@ -2719,6 +2724,96 @@ end;
 procedure unregisterField(name : string);
 begin
 	fieldList.remove(prep(name));
+end;
+
+
+function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
+var
+	iterator : GIterator;
+	vict : GCharacter;
+	number,count : integer;
+begin
+  Result := nil;
+
+  number := findNumber(name); // eg 2.char
+
+  if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
+    begin
+    Result := ch;
+    exit;
+    end;
+
+  count := 0;
+
+  iterator := char_list.iterator();
+
+  while (iterator.hasNext()) do
+    begin
+    vict := GCharacter(iterator.next());
+
+    if ((isName(vict.name,name)) or (isName(vict.short,name))) and (not vict.IS_NPC) then
+      begin    
+      if (ch <> nil) and (not ch.CAN_SEE(vict)) then
+        continue;
+
+      inc(count);
+
+      if (count = number) then
+        begin
+        Result := vict;
+        exit;
+        end;
+      end;
+    end;
+    
+  iterator.Free();
+end;
+
+function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
+var
+   iterator : GIterator;
+   vict : GCharacter;
+   number,count : integer;
+begin
+  Result := nil;
+
+  number := findNumber(name); // eg 2.char
+
+  if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
+    begin
+    Result := ch;
+    exit;
+    end;
+
+  count := 0;
+
+  iterator := char_list.iterator();
+
+  while (iterator.hasNext()) do
+    begin
+    vict := GCharacter(iterator.next());
+
+    if (lowercase(vict.name) = lowercase(name)) and (not vict.IS_NPC) then
+      begin    
+      if (ch <> nil) and (not ch.CAN_SEE(vict)) then
+        continue;
+
+      inc(count);
+
+      if (count = number) then
+        begin
+        Result := vict;
+        exit;
+        end;
+      end;
+    end;
+    
+  iterator.Free();
+end;
+
+function existsPlayer(name : string) : boolean;
+begin
+	Result := FileExists('players\' + name + '.usr');
 end;
 
 

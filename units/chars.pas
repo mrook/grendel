@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.77 2003/11/03 13:23:22 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.78 2003/11/04 16:40:50 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -263,8 +263,6 @@ var
    extracted_chars : GDLinkedList;
 
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
-function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
-function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
 
 procedure cleanExtractedChars();
 
@@ -1291,90 +1289,6 @@ begin
     end;
     
 	iterator.Free();
-end;
-
-function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
-var
-	iterator : GIterator;
-	vict : GCharacter;
-	number,count : integer;
-begin
-  Result := nil;
-
-  number := findNumber(name); // eg 2.char
-
-  if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
-    begin
-    Result := ch;
-    exit;
-    end;
-
-  count := 0;
-
-  iterator := char_list.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if ((isName(vict.name,name)) or (isName(vict.short,name))) and (not vict.IS_NPC) then
-      begin    
-      if (ch <> nil) and (not ch.CAN_SEE(vict)) then
-        continue;
-
-      inc(count);
-
-      if (count = number) then
-        begin
-        Result := vict;
-        exit;
-        end;
-      end;
-    end;
-    
-  iterator.Free();
-end;
-
-function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
-var
-   iterator : GIterator;
-   vict : GCharacter;
-   number,count : integer;
-begin
-  Result := nil;
-
-  number := findNumber(name); // eg 2.char
-
-  if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
-    begin
-    Result := ch;
-    exit;
-    end;
-
-  count := 0;
-
-  iterator := char_list.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    vict := GCharacter(iterator.next());
-
-    if (lowercase(vict.name) = lowercase(name)) and (not vict.IS_NPC) then
-      begin    
-      if (ch <> nil) and (not ch.CAN_SEE(vict)) then
-        continue;
-
-      inc(count);
-
-      if (count = number) then
-        begin
-        Result := vict;
-        exit;
-        end;
-      end;
-    end;
-    
-  iterator.Free();
 end;
 
 { GLearned }
