@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.7 2004/05/12 20:53:23 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.8 2004/05/12 22:43:47 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -1283,4 +1283,174 @@ begin
 			ch.sendBuffer('You lack the key.'#13#10);
       end;
     end;
+end;
+
+procedure do_load(ch : GCharacter; param : string);
+var
+	bow, arrow, obj : GObject;
+	iterator : GIterator;
+begin
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Load what?'#13#10);
+		exit;
+		end;
+		
+	bow := ch.getWield(ITEM_BOW);
+
+	if (bow = nil) then
+		begin
+		ch.sendBuffer('You must wield a bow.'#13#10);
+		exit;
+		end;
+		
+	if (bow.value[2] > 0) then
+		begin
+		ch.sendBuffer('Your bow is already loaded.'#13#10);
+		exit;
+		end;
+		
+	arrow := nil;
+
+	iterator := ch.inventory.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		obj := GObject(iterator.next());
+		
+		if (obj.item_type = ITEM_ARROW) and (obj.value[1] = bow.value[1]) then
+			begin
+			arrow := obj;
+			break;
+			end;
+		end;
+		
+	iterator.Free();
+	
+	if (arrow = nil) then
+		begin
+		ch.sendBuffer('You are not carrying any arrows of the correct type!'#13#10);
+		exit;
+		end;
+		
+	bow.value[2] := arrow.vnum;
+
+	act(AT_REPORT, 'You load $p with $P.', false, ch, bow, arrow, TO_CHAR);
+	act(AT_REPORT, '$n loads $p with $P.', false, ch, bow, arrow, TO_ROOM);
+	
+	arrow.separate();
+	arrow.fromChar();
+	arrow.Free();
+end;
+
+procedure do_draw(ch : GCharacter; param : string);
+var
+	obj, belt, bow : GObject;
+	iterator, inner_iterator : GIterator;
+begin
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Draw what?'#13#10);
+		exit;
+		end;
+		
+	if (ch.getEQ('leftwield') <> nil) and (ch.getEQ('rightwield') <> nil) then
+		begin
+		ch.sendBuffer('You need a free hand.'#13#10);
+		exit;
+		end;
+		
+	bow := nil;
+	iterator := ch.equipment.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		belt := GObject(iterator.next());
+		
+		if (belt.item_type = ITEM_BELT) then
+			begin	
+			inner_iterator := belt.contents.iterator();
+
+			while (inner_iterator.hasNext()) do
+				begin
+				obj := GObject(inner_iterator.next());
+	
+				if (isObjectName(obj.name, param) or isObjectName(obj.short, param)) then
+					begin
+					bow := obj;
+					break;
+					end;
+				end;
+				
+			inner_iterator.Free();
+			end;
+		end;
+
+	iterator.Free();
+	
+	if (bow = nil) then
+		begin
+		ch.sendBuffer('You are not carrying that.'#13#10);
+		exit;
+		end;
+
+	act(AT_REPORT, 'You draw $p.', false, ch, bow, nil, TO_CHAR);
+	act(AT_REPORT, '$n draws $p.', false, ch, bow, nil, TO_ROOM);
+
+	bow.fromObject();
+	bow.toChar(ch);
+	ch.equip(bow, true);
+end;
+
+procedure do_sheath(ch : GCharacter; param : string);
+var
+	belt, weapon, obj : GObject;
+	iterator : GIterator;
+begin
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Sheath what?'#13#10);
+		exit;
+		end;
+		
+	weapon := ch.findEquipment(param);
+	
+	if (weapon = nil) then
+		begin
+		ch.sendBuffer('You are not wearing that.'#13#10);
+		exit;
+		end;
+		
+	if (weapon.item_type <> ITEM_WEAPON) and (weapon.item_type <> ITEM_BOW) then
+		begin
+		ch.sendBuffer('That is not a weapon.'#13#10);
+		exit;
+		end;
+		
+	iterator := ch.equipment.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		obj := GObject(iterator.next());
+		
+		if (obj.item_type = ITEM_BELT) then
+			begin
+			belt := obj;
+			break;
+			end;
+		end;
+		
+	iterator.Free();
+	
+	if (belt = nil) then
+		begin
+		ch.sendBuffer('You can''t find a place to sheath your weapon!'#13#10);
+		exit;
+		end;
+		
+	act(AT_REPORT, 'You sheath $p.', false, ch, weapon, nil, TO_CHAR);
+	act(AT_REPORT, '$n sheaths $p.', false, ch, weapon, nil, TO_ROOM);
+	
+	weapon.fromChar();
+	weapon.toObject(belt);
 end;

@@ -2,7 +2,7 @@
   Summary:
     Constants
     
-  ## $Id: constants.pas,v 1.11 2004/05/06 20:33:39 ***REMOVED*** Exp $
+  ## $Id: constants.pas,v 1.12 2004/05/12 22:43:48 ***REMOVED*** Exp $
 }
 
 unit constants;
@@ -213,6 +213,9 @@ const ITEM_WEAPON=1;
       ITEM_BLOOD=13;
       ITEM_PORTAL=14;
       ITEM_KEY=15;
+      ITEM_BOW=16;
+      ITEM_ARROW=17;
+      ITEM_BELT=18;
 
 // do NOT just change the order of these exit constants; used in a couple for-loops
 { directions }
