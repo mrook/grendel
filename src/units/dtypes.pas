@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.14 2004/03/26 17:00:15 ***REMOVED*** Exp $
+	##	$Id: dtypes.pas,v 1.15 2004/06/10 17:54:23 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -88,6 +88,7 @@ type
 		function getCurrent() : TObject; virtual; abstract;	{ Abstract getCurrent() }
 		function hasNext() : boolean; virtual; abstract;		{ Abstract hasNext() }
 		function next() : TObject; virtual; abstract;				{ Abstract next() }
+		procedure remove(); virtual; abstract;
 	end;
 
 	{
@@ -125,6 +126,7 @@ type
 		property tail : GListNode read _tail;
 		
 		property ownsObjects : boolean read _owns write _owns;
+		property serial : integer read _serial;
 	end;
 
 	{
@@ -168,6 +170,7 @@ type
 	GHashTable = class
 	private
 		_owns : boolean;
+		_serial : integer;
 
 		hashprime : integer;
 		hashsize : integer;										{ Size of hash table }
@@ -204,6 +207,7 @@ type
 		property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
 		property buckets[index : integer] : GDLinkedList read getBucket;
 		property bucketcount : integer read hashsize;
+		property serial : integer read _serial;
 	end;
 	
 	{
@@ -225,7 +229,7 @@ type
 
 var
 	{	Global string hash table }
-  str_hash : GHashTable;
+	str_hash : GHashTable;
   
 
 function hash_string(const src : string) : PString; overload;
@@ -247,69 +251,74 @@ uses
 
 
 type
-		{
-			Iterator class for double linked lists
-		}
-    GDLinkedListIterator = class(GIterator)
-    private
-      current : GListNode;
+	{
+		Iterator class for double linked lists
+	}
+	GDLinkedListIterator = class(GIterator)
+	private
+		current, last : GListNode;
+		list : GDLinkedList;
+		serial : integer;
 
-    published
-      constructor Create(list : GDLinkedList);
+	published
+		constructor Create(list : GDLinkedList);
 
-			function getCurrent() : TObject; override;
-      function hasNext() : boolean; override;
-      function next() : TObject; override;
-    end;
+		function getCurrent() : TObject; override;
+		function hasNext() : boolean; override;
+		function next() : TObject; override;
+		procedure remove(); override;
+	end;
 
-		{
-			Iterator class for hash tables
-		}
-    GHashTableIterator = class(GIterator)
-    private
-      tbl : GHashTable;
-      cursor : integer;
-      current : GListNode;
+	{
+		Iterator class for hash tables
+	}
+	GHashTableIterator = class(GIterator)
+	private
+		tbl : GHashTable;
+		cursor : integer;
+		current : GListNode;
+		serial : integer;
 
-    published
-      constructor Create(table : GHashTable);
+	published
+		constructor Create(table : GHashTable);
 
-			function getCurrent() : TObject; override;
-      function hasNext() : boolean; override;
-      function next() : TObject; override;
-    end;
+		function getCurrent() : TObject; override;
+		function hasNext() : boolean; override;
+		function next() : TObject; override;
+		procedure remove(); override;
+	end;
     
-    		{
-    			Singleton info class
-    		}
-    		GSingletonInfo = class
-    		private
-    			_instanceType : TClass;
-    			_instance : TObject;
-    			_refcount : integer;
-    			
-    		published
-    			property instanceType : TClass read _instanceType write _instanceType;
-    			property instance : TObject read _instance write _instance;
-    			property refcount : integer read _refcount write _refcount;	
-    		end;
+	{
+    		Singleton info class
+    	}
+    	GSingletonInfo = class
+    	private
+    		_instanceType : TClass;
+    		_instance : TObject;
+    		_refcount : integer;
     		
-		{
-			Singleton manager class
-		}
-		GSingletonManager = class
-		private
-			infoList : TList;
+    	published
+    		property instanceType : TClass read _instanceType write _instanceType;
+    		property instance : TObject read _instance write _instance;
+    		property refcount : integer read _refcount write _refcount;	
+    	end;
+    	
+	{
+		Singleton manager class
+	}
+	GSingletonManager = class
+	private
+		infoList : TList;
 			
-		public
-			constructor Create();
-			destructor Destroy(); override;
-			
-		published
-			procedure addInstance(instance : TObject);
-			function findInstance(classType : TClass) : TObject;
-			function removeInstance(classType : TClass) : boolean;
-		end;
+	public
+		constructor Create();
+		destructor Destroy(); override;
+		
+	published
+		procedure addInstance(instance : TObject);
+		function findInstance(classType : TClass) : TObject;
+		function removeInstance(classType : TClass) : boolean;
+	end;
 				
 
 
@@ -319,8 +328,8 @@ type
 const STR_HASH_SIZE = 1024;
 
 var
-  { Instance of singleton manager }
-  singletonManager : GSingletonManager;
+	{ Instance of singleton manager }
+	singletonManager : GSingletonManager;
 
 
 {
@@ -406,9 +415,12 @@ end;
 }
 constructor GDLinkedListIterator.Create(list : GDLinkedList);
 begin
-  inherited Create();
+	inherited Create();
 
-  current := list.head;
+	Self.list := list;
+	serial := list.serial;
+	current := list.head;
+	last := nil;
 end;
 
 {
@@ -417,6 +429,9 @@ end;
 }
 function GDLinkedListIterator.getCurrent() : TObject;
 begin
+	if (serial <> list.serial) then	
+		raise Exception.Create('Concurrent modification');
+		
 	if (current <> nil) then
 		Result := current.element
 	else
@@ -429,7 +444,10 @@ end;
 }
 function GDLinkedListIterator.hasNext() : boolean;
 begin
-  Result := (current <> nil);
+	if (serial <> list.serial) then	
+		raise Exception.Create('Concurrent modification');
+		
+	Result := (current <> nil);
 end;
 
 {
@@ -438,14 +456,30 @@ end;
 }
 function GDLinkedListIterator.next() : TObject;
 begin
-  Result := nil;
+	if (serial <> list.serial) then	
+		raise Exception.Create('Concurrent modification');
+		
+	Result := nil;
 
-  if (hasNext()) then
-    begin
-    Result := current.element;
+	if (hasNext()) then
+		begin
+		last := current;
+		
+		Result := current.element;
 
-    current := current.next;
-    end;
+		current := current.next;
+		end;
+end;
+
+{
+}
+procedure GDLinkedListIterator.remove();
+begin
+	if (current <> nil) then
+		begin
+		list.remove(last);
+		serial := list.serial;
+		end;
 end;
 
 
@@ -459,6 +493,7 @@ begin
 
   tbl := table;
 
+  serial := tbl.serial;
   current := nil;
   cursor := 0;
 
@@ -480,6 +515,9 @@ end;
 }
 function GHashTableIterator.getCurrent() : TObject;
 begin
+	if (serial <> tbl.serial) then	
+		raise Exception.Create('Concurrent modification');
+		
 	Result := GHashValue(current.element).value;
 end;
 
@@ -489,6 +527,9 @@ end;
 }
 function GHashTableIterator.hasNext() : boolean;
 begin
+	if (serial <> tbl.serial) then	
+		raise Exception.Create('Concurrent modification');
+		
   Result := (current <> nil);
 end;
 
@@ -498,6 +539,9 @@ end;
 }
 function GHashTableIterator.next() : TObject;
 begin
+	if (serial <> tbl.serial) then	
+		raise Exception.Create('Concurrent modification');
+		
   Result := nil;
 
   if (hasNext()) then
@@ -522,6 +566,12 @@ begin
         end;
       end;
     end;
+end;
+
+{
+}
+procedure GHashTableIterator.remove();
+begin
 end;
 
 
@@ -558,6 +608,8 @@ function GDLinkedList.insertLast(element : pointer) : GListNode;
 var
 	node : GListNode;
 begin
+	inc(_serial);
+	
 	node := GListNode.Create(element, _tail, nil);
 
 	if (_head = nil) then
@@ -570,7 +622,6 @@ begin
 	Result := node;
 
 	inc(_size);
-	inc(_serial);
 end;
 
 {
@@ -581,6 +632,8 @@ function GDLinkedList.insertFirst(element : pointer) : GListNode;
 var
 	node : GListNode;
 begin
+	inc(_serial);
+	
 	node := GListNode.Create(element, nil, _head);
 	
 	if (_head <> nil) then
@@ -591,7 +644,6 @@ begin
 	Result := node;
 
 	inc(_size);
-	inc(_serial);
 end;
 
 {
@@ -611,6 +663,8 @@ function GDLinkedList.insertAfter(tn : GListNode; element : pointer) : GListNode
 var
    node : GListNode;
 begin
+	inc(_serial);
+	
 	node := GListNode.Create(element, tn, tn.next);
 
 	if (tn.next <> nil) then
@@ -624,7 +678,6 @@ begin
 	Result := node;
 
 	inc(_size);
-	inc(_serial);
 end;
 
 {
@@ -635,6 +688,8 @@ function GDLinkedList.insertBefore(tn : GListNode; element : pointer) : GListNod
 var
    node : GListNode;
 begin
+	inc(_serial);
+	
 	node := GListNode.Create(element, tn.prev, tn);
 
 	if (tn.prev <> nil) then
@@ -648,7 +703,6 @@ begin
 	Result := node;
 
 	inc(_size);
-	inc(_serial);
 end;
 
 {
@@ -679,6 +733,8 @@ end;
 }
 procedure GDLinkedList.remove(node : GListNode);
 begin
+	inc(_serial);
+	
 	if (node.prev = nil) then
 		_head := node.next
 	else
@@ -690,7 +746,6 @@ begin
 		node.next.prev := node.prev;
 
 	dec(_size);
-	inc(_serial);
 	node.Free();
 end;
 
@@ -997,6 +1052,8 @@ begin
 		end
 	else
 		begin
+		inc(_serial);
+		
 		hv := _get(key);
 
 		if (hv <> nil) then
@@ -1023,6 +1080,8 @@ var
   hash : integer;
   fnode, node : GListNode;
 begin
+	inc(_serial);
+	
   fnode := nil;
   hash := getHash(key);
 
@@ -1111,6 +1170,8 @@ procedure GHashTable.clear();
 var
    i : integer;
 begin
+	inc(_serial);
+	
   for i := 0 to hashsize - 1 do
     begin
     bucketList[i].ownsObjects := ownsObjects;
@@ -1143,6 +1204,7 @@ begin
   hashFunc := defaultHash;
 
 	_owns := true;
+	_serial := 1;
 end;
 
 {
