@@ -1,16 +1,6 @@
-The Grendel Project - A Windows MUD Server		(c) 2000-2002 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
+---------------------------------------------------------------------------------
 
-
-NOTE: Previous Grendel releases were licensed using a modified version of the GPL2
-license, starting from 0.4.0, The Grendel Project will use the BSD License instead.
-
-
-Copyright (c) 2000-2002, Michiel Rook.
-All rights reserved.
-
-
-The following statements are not meant to be a limitation, they serve
-merely as a protection of the work of The Grendel Project.
 
 If you use, and possibly like, Grendel, you are encouraged to let me know
 by sending a postcard to the following address:
@@ -19,6 +9,38 @@ by sending a postcard to the following address:
 	***REMOVED***
 	***REMOVED***
 	The Netherlands
+
+
+NOTE: Grendel releases prior to version 0.4.0 were licensed using a modified version 
+of the GPL2 license. Releases from 0.4.0 and up use the BSD License instead,
+and releases from 0.4.5 onwards are also classed classed as being a Smaug derivative.
+For more information, see the Smaug, Merc and Diku licenses (look below).
+
+NOTE: The BSD License allows users to use BSD Licensed software in commercial applications.
+The DIKU license does not, and thus takes priority!
+
+
+Copyright (c) 2000-2003 Michiel Rook.
+All rights reserved.
+
+The Grendel Project, in part or in whole, can not be used as a source of income 
+or profit. See 'license.diku' for details.
+
+
+Diku Mud is copyright (C) 1990, 1991 by Sebastian Hammer, Michael Seifert,
+Hans Henrik St{rfeldt, Tom Madsen, and Katja Nyboe.  Their license agreement
+is in the file 'license.diku'.
+
+Merc Diku Mud is a derivative of the original Diku Mud.  Merc Diku Mud contains
+substantial enhancements to Diku Mud.  These enhancements are copyright 1992,
+1993 by Michael Chastain, Michael Quan, and Mitchell Tse.  Their license
+agreement is in the file 'license.merc'.
+
+SMAUG is a derivative of the version 2.1 distribution of Merc Diku Mud.
+SMAUG contains substantial enhancements to Merc Diku Mud, including some
+features of the original Diku Mud that were removed by the Merc team.
+SMAUG is C() 1994, 1995, 1996, 1997, 1998 by Derek Snider. Their license
+agreement is in the file 'license.smaug'.
 
 
 Redistribution and use in source and binary forms, with or without modification, 

@@ -1,8 +1,8 @@
-The Grendel Project - A Windows MUD Server        (c) 2000-2002 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
 
 
 
-= Coding guidelines & tips ===================================================
+= Coding guidelines & tips ======================================================
 
 
 This document is not only meant for the people working on the official Grendel

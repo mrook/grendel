@@ -1,8 +1,8 @@
-The Grendel Project - A Windows MUD Server        (c) 2000-2002 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
 
 
 
-= GMC introductory guide & specification ======================================
+= GMC introductory guide & specification ========================================
 
 
 GMC (or Grendel MUD C if you will) is a language similar to C, devised for

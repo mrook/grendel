@@ -1,19 +1,16 @@
-The Grendel Project - A Windows MUD Server        (c) 2000-2002 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
 
 
 
-= Last minute information =====================================================
+= Last minute information =======================================================
 
 
 1. Introduction
 
-It's time for a new Grendel release, this one consisting of mostly
-bug-fixes, small enhancements, gameplay tweaks, etc.
+It's time for a new Grendel release, this one is focused on fixing
+a few licensing issues, kindly pointed out by KaVir (kavir@kavir.org).
 
-Among the bugs fixed were some serious security issues - see
-www.grendelproject.nl/bugtrack/ - as well as a number of memory leaks.
-
-Check the file "ChangeLog" for the full list of fixes.
+Check the file "ChangeLog" for the details.
 
 Enjoy!
 
@@ -156,8 +153,6 @@ please mail everything you did, so we can reproduce the error and help you out.
 You will need either Delphi 5 or Kylix 1 to compile the Grendel sources,
 earlier versions are not supported.
 
-Support for Delphi 6 will be introduced in 0.4.1.
-
 
 8. Contact information
 
@@ -178,21 +173,15 @@ Developers:
   Oscar Martin          (jago@grendelproject.nl)        code, field testing
   Jeremiah Davis        (woodstock@grendelproject.nl)   documentation
 
-Mailinglists:
-
-	grendel-announce@yahoogroups.com  - announcements (new releases, etc.)
-
-	grendel-mudserver@yahoogroups.com - coding, suggestions, support
-
-  If you have trouble subscribing, you can go to our website
-  (http://www.grendelproject.nl/) and sign up there.
+Forum / website:
+  http://www.grendelproject.nl/
 
 Postcards:
   
   If you use and like Grendel, I'd very much appreciate it if you
   send a postcard to me:
 
-	Michiel Rook
-	***REMOVED***
-	***REMOVED***
-	The Netherlands
+  Michiel Rook
+  ***REMOVED***
+  ***REMOVED***
+  The Netherlands

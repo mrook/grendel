@@ -1,16 +1,20 @@
 #KEYWORD=M_DESCRIPTION_
-                   The Grendel Project - A Windows MUD Server
+                The Grendel Project - A Windows/Linux MUD Server
 
-                 *  Copyright (c) 1998-2003 by Michiel Rook  *
-
-                     * Additional code by Roeland van Houte *
-                       * Oscar Martin and Hemko de Visser *
-
-
-
-              The Grendel website: http://www.grendelproject.nl/
+                   *  Copyright (c) 2000-2003 Michiel Rook  *
+                    * Additional code by Roeland van Houte *
+                * Oscar Martin, Brad Taylor and Hemko de Visser *
+                         
+                         http://www.grendelproject.nl/
 
 
+        Original SMAUG code written by Thoric (Derek Snider) with Altrag, 
+        Blodkai, Haus, Narn, Scryn, Swordbearer, Tricops, Gorog, Rennard, 
+                        Grishnakh, Fireblade and Nivek.
+
+ Original MERC 2.1 code by Hatchet, Furey, and Kahn. Original DikuMUD code by:
+ Hans Staerfeldt, Katja Nyboe, Tom Madsen, Michael Seifert && Sebastian Hammer
+  
 #END=0
 #KEYWORD=MOTD
 -------------------------------------------------------------------------------
@@ -73,4 +77,89 @@ hear a voice whisper...
 Sorry, you're on your own.
 
 #END=0
+#KEYWORD=SMAUG
+.                               [WWW.SMAUG.ORG]
+         /     _      _            _      _    _____
+        /      |\    /|     /\     |      |   /     \     ***************
+       /       | \  / |    /  \    |      |  |            *   \\._.//   *
+      /        |  \/  |   /    \   |      |  |            *   (0...0)   *
+     /_______  |      |  |______|  |      |  |            *    ).:.(    *
+            /  |      |  |      |  |      |  |            *    {o o}    *
+           /   |      |  |      |  |      |  |     __     *   / ' ' \   *
+          /    |      |  |      |  |      |  |       |    *-'^.VxvxV.^'-*
+         /     |      |  |      |   \____/    \_____/     ***************
+        /
+            [S]imulated [M]edieval multi-[U]ser [A]dventure [G]ame
 
+SMAUG 1.4 is a Merc2.1 derivative written by Thoric (Derek Snider) with help
+from Altrag, Blodkai, Haus, Narn, Scryn, Swordbearer, Tricops, Gorog, Rennard,
+Grishnakh, Fireblade and Nivek.
+#END=0
+#KEYWORD=MERC
+SMAUG was originally based on the Merc 2.1 code which was created by Furey,
+Hatchet, and Kahn.
+This original code base is available as Merc_21.tar.gz via FTP from:
+ftp.tcp.com, ftp.math.okstate.edu and ftp.game.org.
+E-mail to 'merc-request@kpc.com' to join the merc mailing list.
+
+Merc would like to thank ...
+  ... Diku Mud for their code base.
+  ... The Free Software Foundation and DJ Delorie for kick-ass tools.
+  ... Copper Mud and Alfa Mud for releasing their code and worlds.
+  ... Aod of Generic for ... well, everything.  You're a hoopy frood, Aod.
+  ... Alander for many ideas and contributions.
+  ... John Brothers of Silly for permission to use Silly code and worlds.
+  ... Zrin for administering the mailing list.
+  ... Abaddon for proofreading our comm.c.
+  ... Hind, Quin, Vic, Diavolo, Oleg, Trienne, and others for porting help.
+  ... Diavolo, Grodyn, Morgenes, and others for code and bug fixes.
+  ... Raff, Doctor, VampLestat, Nirrad, Tyrst, PinkF, Chris, Glop for worlds.
+  ... the players and imps of Mud Dome, Final Mud, Mud Lite, Vego Mud, Rivers
+      of Mud, Ruhr Mud, and Mystic Realms for bug reports, ideas, new code,
+      and hours of enjoyment.
+                                Share and enjoy.
+#END=0
+#KEYWORD=DIKU
+.         SMAUG was originally based on the Merc 2.1 code which was
+              based on the orignal DIKUMud code created by:
+
+                       The Original DIKUMud Team:
+
+          Katja Nyboe               [Superwoman] (katz@freja.diku.dk)
+          Tom Madsen              [Stormbringer] (noop@freja.diku.dk)
+          Hans Henrik Staerfeldt           [God] (bombman@freja.diku.dk)
+          Michael Seifert                 [Papi] (seifert@freja.diku.dk)
+          Sebastian Hammer               [Quinn] (quinn@freja.diku.dk)
+
+                     Additional contributions from:
+
+ Michael Curran  - the player title collection and additional locations.
+ Bill Wisner     - for being the first to successfully port the game,
+                   uncovering several old bugs, uh, inconsistencies,
+                   in the process.
+
+         And: Mads Haar and Stephan Dahl for additional locations.
+
+  The Original DIKUMud was Developed at the Department of Computer Science
+                     at the University of Copenhagen.
+#END=0
+#KEYWORD=CREDITS ABOUT
+%INFO%, %VERSION%. %COPYRIGHT%.
+Additional code by Roeland van Houte, Oscar Martin, Brad Taylor
+and Hemko de Visser.
+Additional documentation and FAQs by Jeremiah Davis.
+
+Uses the LibXmlParser unit (c) Stefan Heymann.
+Uses the MemCheck unit (c) Jean Marc Eber & Vincent Mahon.
+Uses the RegExpr unit (C) Andrey V. Sorokin.
+Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
+Uses a modified version of the AnsiIO unit (c) Gayle Davis.
+Uses parts of the Delphi Implementation of MD5 Algorithm (c) Matthias Fichtner.
+Uses parts of the Delphi Fundamentals library (c) David Butler.
+Uses parts of the FastStrings library (c) Peter Morris.
+Uses parts of the Jedi Code Library (c) Project JEDI.
+
+Contains (translated) parts of SMAUG, MERC and DIKU.
+
+See 'help smaug', 'help merc' and 'help diku' for more info.
+#END=0

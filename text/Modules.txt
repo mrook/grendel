@@ -1,8 +1,8 @@
-The Grendel Project - A Windows MUD Server        (c) 2000-2002 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
 
 
 
-= Modules ====================================================================
+= Modules =======================================================================
 
 
 As of 0.4.0 final, the Grendel source contains so called 'modules'. These

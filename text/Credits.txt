@@ -1,13 +1,13 @@
-The Grendel Project - A Windows MUD Server        (c) 2000-2002 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
 
 
 
-= Credits =====================================================================
+= Credits =======================================================================
 
 
 
-The Grendel Project is (c) 2000-2002 by Michiel Rook. 
-Additional code by Hemko de Visser, Roeland van Houte and Oscar Martin.
+The Grendel Project is (c) 2000-2003 by Michiel Rook. 
+Additional code by Hemko de Visser, Roeland van Houte, Brad Taylor and Oscar Martin.
 Additional documentation and FAQs by Jeremiah Davis.
 
 
@@ -20,5 +20,6 @@ Uses parts of the Delphi Implementation of MD5 Algorithm (c) Matthias Fichtner.
 Uses parts of the Delphi Fundamentals library (c) David Butler.
 Uses parts of the FastStrings library (c) Peter Morris.
 
-Parts based on Smaug, (c) Derek Snider and Emlen, (c) Owen Emlen.
+Contains (translated) parts of SMAUG, MERC and DIKU.
 
+See 'help smaug', 'help merc' and 'help diku' for more info.
