@@ -10,9 +10,9 @@ function URange(min, value, max : longint) : longint;
 function UMax(value, max : longint) : longint;
 function UMin(value, min : longint) : longint;
 
-function IS_SET(value, bit : integer) : boolean;
-procedure SET_BIT(var value : integer; bit : integer);
-procedure REMOVE_BIT(var value : integer; bit : integer);
+function IS_SET(value, bit : cardinal) : boolean;
+procedure SET_BIT(var value : cardinal; bit : cardinal);
+procedure REMOVE_BIT(var value : cardinal; bit : cardinal);
 
 function pad_integer(s, num : integer) : string;
 function pad_integer_front(s, num : integer) : string;
@@ -69,17 +69,17 @@ begin
     UMin := value;
 end;
 
-function IS_SET(value, bit : integer) : boolean;
+function IS_SET(value, bit : cardinal) : boolean;
 begin
   IS_SET := ((value and bit) = bit);
 end;
 
-procedure SET_BIT(var value : integer; bit : integer);
+procedure SET_BIT(var value : cardinal; bit : cardinal);
 begin
   value := value or bit;
 end;
 
-procedure REMOVE_BIT(var value : integer; bit : integer);
+procedure REMOVE_BIT(var value : cardinal; bit : cardinal);
 begin
   if (IS_SET(value, bit)) then
     dec(value, bit);
