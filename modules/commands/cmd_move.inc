@@ -382,7 +382,7 @@ begin
       vict.in_command := true;
 
       act(AT_REPORT,'You follow $N '+headings[pexit.direction]+'.',false,vict,nil,ch,TO_CHAR);
-      do_move(vict,pexit);
+      interpret(vict, headings[pexit.direction]);
       vict.emptyBuffer;
 
       vict.in_command := false;
