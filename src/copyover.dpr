@@ -5,180 +5,199 @@ uses
 	SysUtils,
 	Classes,
 	Windows,
-	Winsock2;
+	WinSock2,
+	debug,
+	console,
+	socket;
 
 
-const pipeName : pchar = '\\.\pipe\grendel';
+const 
+	pipeName : pchar = '\\.\pipe\grendel';
+	
 
 type
    	Connection = class
-			socket : TSocket;
-			name : string;
-		end;
+		socket : TSocket;
+		name : string;
+	end;
+	
+  	GConsoleCopyover = class(GConsoleWriter)
+  	public
+		procedure write(timestamp : TDateTime; const text : string); override;
+  	end;
+	
 
 var
-   pipe : THandle;
-   a, w, len : cardinal;
-   prot : TWSAProtocol_Info;
-	 g : array[0..1023] of char;
-	 suc : boolean;
-   sock : TSocket;
-   hWSAData : TWSAData;
-   ver : integer;
-   c : Connection;
-	 conns : TList;
-   SI: TStartupInfo;
-   PI: TProcessInformation;
-	 f : file;
-   ret : integer;
+	prot : TWSAProtocol_Info;
+	pipe : THandle;
+	connectionList : TList;
+	a, w, len : cardinal;
+	g : array[0..1023] of char;
+	suc : boolean;
+	sock : TSocket;
+	c : Connection;
+	SI: TStartupInfo;
+	PI: TProcessInformation;
+	f : file;
+	ret : integer;
+	cons : GConsole;
+	
 
+procedure GConsoleCopyover.write(timestamp : TDateTime; const text : string);
+begin
+	writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
+end;	
 
 begin
-  conns := TList.Create;
+	cons := GConsole.Create();
+	cons.attachWriter(GConsoleLogWriter.Create('copyover'));
+	cons.attachWriter(GConsoleCopyover.Create());
+	
+	initDebug();
+	connectionList := TList.Create();
 
-  ver := WINSOCK_VERSION;
+	cons.write('Starting copyover...');
 
-  if (WSAStartup(ver, hWSAData) <> 0) then
-    exit;
-    
-  writeln('Starting copyover...');
+	pipe := INVALID_HANDLE_VALUE;
 
-  pipe := INVALID_HANDLE_VALUE;
-
-  while (true) do
-    begin
-    pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
+	while (true) do
+		begin
+		pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
 
 		if (pipe <> INVALID_HANDLE_VALUE) then
-      break;
+			break;
 
-    ret := GetLastError();
+		ret := GetLastError();
 
-    if (ret <> ERROR_PIPE_BUSY) and (ret <> ERROR_FILE_NOT_FOUND) then
+		if (ret <> ERROR_PIPE_BUSY) and (ret <> ERROR_FILE_NOT_FOUND) then
 			exit;
- 
-    // All pipe instances are busy, so wait a second
-    if (ret = ERROR_PIPE_BUSY) then
-      if (not WaitNamedPipe(pipeName, 500)) then
-        exit;
+
+		// All pipe instances are busy, so wait a second
+		if (ret = ERROR_PIPE_BUSY) then
+			if (not WaitNamedPipe(pipeName, 500)) then
+				exit;
 		end;
 
-  sock := -1;
+	sock := -1;
 
-  repeat
-    suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
-     
-    if (not suc) or (w < sizeof(prot)) then
-      break;
+	repeat
+		suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
 
-    if (suc) then
-  		sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
+		if (not suc) or (w < sizeof(prot)) then
+			break;
 
-    suc := ReadFile(pipe, len, 4, w, nil);
+		if (suc) then
+			sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
 
-    if (not suc) or (w < 4) then
-      break;
+		suc := ReadFile(pipe, len, 4, w, nil);
 
-    suc := ReadFile(pipe, g, len, w, nil);
+		if (not suc) or (w < 4) then
+			break;
 
-    if (not suc) or (w < len) then
-      break;
+		suc := ReadFile(pipe, g, len, w, nil);
+
+		if (not suc) or (w < len) then
+			break;
 
 		if (suc) and (sock <> -1) then
-      begin
-  		g[len] := #0;
+			begin
+			g[len] := #0;
 
 			c := Connection.Create;			
 			c.socket := sock;
 			c.name := g;
 
-			conns.Add(c);
+			connectionList.add(c);
 			end;
-  until (not suc);
+	until (not suc);
 
-  CloseHandle(pipe);
+	CloseHandle(pipe);
 
-  // give Grendel time to die
-  sleep(1000);
+	// give Grendel time to die
+	sleep(1000);
 
-  // check for any new grendel.exe in dir "bin\"
-  if (FileExists('bin\grendel.exe')) then
-    begin
+	// check for any new grendel.exe in dir "bin\"
+	if (FileExists('bin\grendel.exe')) then
+		begin
 		if (CopyFile('bin\grendel.exe', 'grendel.exe', false)) then
-      begin
-  		assign(f, 'bin\grendel.exe');
-      erase(f);
-      end;
-    end;
+			begin
+			assign(f, 'bin\grendel.exe');
+			erase(f);
+			end;
+		end;
 
-  // check for a new core.bpl in dir "bin\"
-  if (FileExists('bin\core.bpl')) then
-    begin
-		if (CopyFile('bin\core.bpl', 'core.bpl', false)) then
-      begin
-  		assign(f, 'bin\core.bpl');
-      erase(f);
-      end;
-    end;
+	// check for a new core.bpl in dir "bin\"
+	if (FileExists('bin\core.bpl')) then
+		begin
+			if (CopyFile('bin\core.bpl', 'core.bpl', false)) then
+			begin
+			assign(f, 'bin\core.bpl');
+			erase(f);
+			end;
+		end;
 
 	strpcopy(g, #13#10'In the void of space, you look around... fragments of memory flash by...'#13#10);
 
-  for w := 0 to conns.count - 1 do
-    begin
-		c := conns.items[w];
+	if (connectionList.Count > 0) then
+		begin
+		for w := 0 to connectionList.Count - 1 do
+			begin
+			c := connectionList.items[w];
 
-		send(c.socket, g, strlen(g), 0);
+			send(c.socket, g, strlen(g), 0);
+			end;
 		end;
 
-  sleep(1000);
+	sleep(1000);
 
-  writeln('Spawning new process...');
+	cons.write('Spawning new process...');
 
-  FillChar(SI, SizeOf(SI), 0);
-  SI.cb := SizeOf(SI);
-  SI.wShowWindow := sw_show;
+	FillChar(SI, SizeOf(SI), 0);
+	SI.cb := SizeOf(SI);
+	SI.wShowWindow := sw_show;
 
-  if (not CreateProcess('grendel.exe', 'copyover', Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
-    exit;
+	if (not CreateProcess('grendel.exe', 'copyover', Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
+		exit;
 
-  pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 1, 0, 0, 10000, nil);
-  
-  if (not ConnectNamedPipe(pipe, nil)) then
-    exit;
+	pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 1, 0, 0, 10000, nil);
 
-  writeln('Duplicating connections...');
+	if (not ConnectNamedPipe(pipe, nil)) then
+		exit;
 
-  for a := 0 to conns.count - 1 do
-    begin
-		c := conns.items[a];
+	cons.write('Duplicating connections...');
 
-    if (WSADuplicateSocket(c.socket, PI.dwProcessId, @prot) = -1) then
-      exit;
+	if (connectionList.Count > 0) then
+		begin
+		for a := 0 to connectionList.Count - 1 do
+			begin
+			c := connectionList.items[a];
 
-    if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
+			if (WSADuplicateSocket(c.socket, PI.dwProcessId, @prot) = -1) then
 			exit;
 
-		strpcopy(g, c.name);
-    len := strlen(g);
+			if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
+			exit;
 
-    if (not WriteFile(pipe, len, 4, w, nil)) then
-      exit;
+			strpcopy(g, c.name);
+			len := strlen(g);
 
-    if (not WriteFile(pipe, g, len, w, nil)) then
-      exit;
+			if (not WriteFile(pipe, len, 4, w, nil)) then
+			exit;
 
-    closesocket(c.socket);
-    end;
+			if (not WriteFile(pipe, g, len, w, nil)) then
+			exit;
 
-  CloseHandle(pipe);
+			closesocket(c.socket);
+			end;
+		end;
 
-  WSACleanup;
-  
-  writeln('Cleaned up.');
+	CloseHandle(pipe);
+
+	cons.write('Cleaned up.');
 end.
 {$ENDIF}
 {$IFDEF LINUX}
 begin
-	writeln('Not implemented for this platform.');
+	cons.write('Not implemented for this platform.');
 end.
 {$ENDIF}
