@@ -50,34 +50,32 @@ Grendel's TODO list with probable release date/version
 * (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 
 
-- (0.4.1) implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
-  isSpellName() and enforce their use throughout the code
-- (0.4.1) expand tracking system
-
-
 * (0.4.2) Better online construction (autocreate exit+room when moving),
           mobile create/edit, reset edit etc.
-- (0.4.2) use coordinates and mpfindpath code to make mobiles more intelligent
-- (0.4.2) new area format using XML
+* (0.4.2) expand tracking system
 - (0.4.2) better damage/xp system (more balanced)
-- (0.4.2) some form of classes/professions/guilds/religions/whatever
-        	-> probably Schools	
 - (0.4.2) reloadarea command
 - (0.4.2) online suggest (pray) history
+- (0.4.2) abbreviation of clanname (3-4 chars) in who list (with toggle on/off)
+- (0.4.2) (optional) schools
+- (0.4.2) (optional) "real life" sleep - players need sleep to keep from falling 
+          down after 2 days, some rooms (with beds) have better sleep ratios etc.
+- (0.4.2) (optional) mud police
 
 
-- (0.4.3) "real life" sleep - players need sleep to keep from falling down after 2 days,
-          some rooms (with beds) have better sleep ratios etc.
-- (0.4.3) (optional) mud police
-- (0.4.3) IMC (intermud communication): both channels *and* noteboards
-          (perhaps separate server for noteboard, or whatever)
-- (0.4.3) abbreviation of clanname (3-4 chars) in who list
-
-
-- (0.4.4) fully customizable mud - experience formulas, experience per level, 
+- (0.5.0) new area format using XML
+- (0.5.0) use coordinates and mpfindpath code to make mobiles more intelligent
+- (0.5.0) implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
+  isSpellName() and enforce their use throughout the code
+- (0.5.0) revise grouping system: generalize GObject to some form of object 'list'
+          (possibly named GItem), which can contain 1 or more GItems or subsets
+          of GItem, something along those lines
+- (0.5.0) fully customizable mud - experience formulas, experience per level, 
         	damage formulas, number of stats, stat maximums, health/mana/movement maximums
-- (0.4.4) arbitrary fields in pfiles/areas, stored in a
+- (0.5.0) arbitrary fields in pfiles/areas, stored in a
           associative array, possibly with trigger/callback
+- (0.5.0) IMC (intermud communication): both channels *and* noteboards
+          (perhaps separate server for noteboard, or whatever)
 
 
 l implementation of the mud sound protocol
