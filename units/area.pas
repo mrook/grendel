@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.65 2003/10/22 13:12:32 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.66 2003/10/23 08:09:07 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -183,6 +183,7 @@ type
 
     GTeleport = class
     public
+    	node : GListNode;
       t_room : GRoom;
       timer : integer;
     end;

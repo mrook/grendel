@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.24 2003/10/22 13:12:38 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.25 2003/10/23 08:09:09 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -495,7 +495,7 @@ begin
       while (room.chars.size() > 0) do
         teleportChar(GCharacter(room.chars.head.element), dest);
 
-      { TODO teleport_list.remove(tele.node); }
+      teleport_list.remove(tele.node);
       end;
     end;
     

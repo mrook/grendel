@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.75 2003/10/22 13:12:33 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.76 2003/10/23 08:09:08 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -858,7 +858,7 @@ begin
     tele.t_room := to_room;
     tele.timer := to_room.teledelay;
 
-    teleport_list.insertLast(tele);
+    tele.node := teleport_list.insertLast(tele);
     end;
 end;
 
