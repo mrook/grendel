@@ -526,18 +526,18 @@ const RESULT_NONE=0;
       RESULT_BUG=4;
 
 { timer types }
-const TIMER_UNKNOWN=0;
+const TIMER_GAME = 0;                { game timer, used internally }
       TIMER_COMBAT=1;                { combat timer }
       TIMER_SEARCH=2;                { search }
       TIMER_BACKSTAB=3;              { backstab }
-      TIMER_CIRCLE=4;
+      TIMER_CIRCLE=4;                { circle }
       TIMER_CAST=5;                  { casting timer }
-      TIMER_TRACK=6;
+      TIMER_TRACK=6;                 { tracking }
 
       TIMER_MAX = TIMER_TRACK;
 
-      timer_names : array[TIMER_UNKNOWN..TIMER_MAX] of string =
-      ('unknown', 'combat', 'search', 'backstab', 'circle', 'cast', 'track');
+      timer_names : array[TIMER_GAME..TIMER_MAX] of string =
+      ('game', 'combat', 'search', 'backstab', 'circle', 'cast', 'track');
 
 { combat types }
 const COMBAT_MOBILE=0;               { mobile/same align }

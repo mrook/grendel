@@ -116,12 +116,12 @@ begin
       node := node.next;
       end;
 
-    timer := timerSet(ch, TIMER_COMBAT);
+    timer := hasTimer(ch, TIMER_COMBAT);
 
     if (timer <> nil) then
-      timer.rounds := combat_timer[COMBAT_MOBILE]
+      timer.counter := combat_timer[COMBAT_MOBILE]
     else
-      addTimer(ch,nil,TIMER_COMBAT,nil,-1,combat_timer[COMBAT_MOBILE]);
+      registerTimer(TIMER_COMBAT, nil, combat_timer[COMBAT_MOBILE], ch, nil, -1);
 
     if (ch.fighting.IS_NPC) then
       begin

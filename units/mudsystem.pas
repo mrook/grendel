@@ -8,7 +8,6 @@ uses
     constants,
     strip,
     clean,
-    timers,
     dtypes,
     util;
 
@@ -85,7 +84,7 @@ var
    dm_msg : GDLinkedList;
 
    clean_thread : GCleanThread;
-   timer_thread : GTimerThread;
+   timer_thread : TThread;
 
    auction_good, auction_evil : GAuction;
 

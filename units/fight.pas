@@ -71,6 +71,7 @@ implementation
 
 uses
     progs,
+    timers,
     update;
 
 procedure stopfighting(ch : GCharacter);
@@ -298,7 +299,7 @@ begin
     begin
     act(AT_FIGHT_HIT, '$B$4OUCH$7!$A$7 You lost your concentration!',false,oppnt,nil,ch,TO_CHAR);
 
-    removeTimer(oppnt, TIMER_CAST);
+    unregisterTimer(oppnt, TIMER_CAST);
 
     oppnt.position := POS_FIGHTING;
     end;
@@ -456,10 +457,10 @@ begin
 
   if (oppnt.point.hp<0) then
     begin
-    removeTimer(ch,TIMER_CAST);
-    removeTimer(oppnt,TIMER_CAST);
-    removeTimer(ch,TIMER_COMBAT);
-    removeTimer(oppnt,TIMER_COMBAT);
+    unregisterTimer(ch, TIMER_CAST);
+    unregisterTimer(ch, TIMER_COMBAT);
+    unregisterTimer(oppnt, TIMER_CAST);
+    unregisterTimer(oppnt, TIMER_COMBAT);
 
     oppnt.position:=POS_STANDING;
     ch.position:=POS_STANDING;

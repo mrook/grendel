@@ -2,7 +2,8 @@
 
 { The complete quit procedure, which even logs off NPCs! - Grimlord }
 procedure do_quit(ch : GCharacter; param : string);
-var timer : GTimer;
+var
+   timer : GTimer;
 begin
   if (ch.position = POS_FIGHTING) then
     begin
@@ -10,13 +11,13 @@ begin
     exit;
     end;
 
-  timer := timerSet(ch, TIMER_COMBAT);
+  timer := hasTimer(ch, TIMER_COMBAT);
 
   if (timer <> nil) then
     begin
     ch.sendBuffer('You have recently fled out of combat or have encountered a member'#13#10);
     ch.sendBuffer('of the opposite alignment. Therefor you are not allowed to quit.'#13#10);
-    ch.sendBuffer('Please wait another '+inttostr(round(timer.rounds/CPULSE_TICK))+' gameticks to quit.'#13#10);
+    ch.sendBuffer('Please wait another '+inttostr(round(timer.counter / CPULSE_TICK))+' gameticks to quit.'#13#10);
     exit;
     end;
 

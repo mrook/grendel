@@ -161,7 +161,7 @@ begin
         act(AT_REPORT,'You begin to utter some strange incantations...',false,ch,nil,nil,TO_CHAR);
         act(AT_REPORT,'$n begins to utter some strange incantations...',false,ch,nil,nil,TO_ROOM);
 
-        addTimer(ch,victim,TIMER_CAST,magic_timer,sn,skill_table[sn].beats);
+        registerTimer(TIMER_CAST, magic_timer, skill_table[sn].beats, ch, victim, sn);
         end;
       end
     else

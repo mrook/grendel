@@ -59,6 +59,7 @@ uses
     md5,
     update,
     progs,
+    timers,
     fight;
 
 constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
@@ -698,7 +699,7 @@ begin
     if (ch.position = POS_CASTING) then
       begin
       act(AT_REPORT, 'You stop casting.', false, ch, nil, nil, TO_CHAR);
-      removeTimer(ch,TIMER_CAST);
+      unregisterTimer(ch, TIMER_CAST);
       ch.position := POS_STANDING;
       end;
 

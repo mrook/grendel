@@ -465,7 +465,7 @@ begin
 
   ch.position := POS_SEARCHING;
 
-  addTimer(ch,nil,TIMER_SEARCH,search_timer,gsn_searching,6);
+  registerTimer(TIMER_SEARCH, search_timer, 6, ch, nil, gsn_searching);
 end;
 
 procedure backstab_timer(ch,victim:GCharacter;sn:integer);
@@ -599,7 +599,7 @@ begin
     end;
 
   ch.sendBuffer('You move stealthily, attempting to get behind your target...'#13#10);
-  addTimer(ch,victim,TIMER_BACKSTAB,backstab_timer,gsn_backstab,8);
+  registerTimer(TIMER_BACKSTAB, backstab_timer, 8, ch, victim, gsn_backstab);
   ch.position:=POS_BACKSTAB;
 end;
 
@@ -652,7 +652,7 @@ begin
     end;
 
   act(AT_REPORT,'You attempt to circle behind your target...',false,ch,nil,nil,TO_CHAR);
-  addTimer(ch,ch.fighting,TIMER_CIRCLE,circle_timer,gsn_circle,10);
+  registerTimer(TIMER_CIRCLE, circle_timer, 10, ch, ch.fighting, gsn_circle);
   ch.position:=POS_CIRCLE;
 end;
 
@@ -784,6 +784,6 @@ begin
   if (vict <> nil) then
     ch.tracking := vict.name^;
 
-  addTimer(ch, vict, TIMER_TRACK, track_timer, gsn_track, 4);
+  registerTimer(TIMER_TRACK, track_timer, 4, ch, vict, gsn_track);
 end;
 

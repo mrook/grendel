@@ -308,7 +308,7 @@ begin
 
   if (ch.tracking <> '') then
     begin
-    removeTimer(ch, TIMER_TRACK);
+    unregisterTimer(ch, TIMER_TRACK);
     interpret(ch, 'track');
     end;
 
