@@ -136,8 +136,8 @@
   
   Grendel features a copyover (a.k.a. hot reboot) system similar to that
   of other MUD codebases. It is present in both the Linux and the Windows
-  builds, with one difference: the Windows system has the ability to "copy over"
-  (hence the name) a new version of the grendel.exe file.
+  builds, with one difference: the Windows system has the ability to 
+  "copy over" (hence the name) a new version of the grendel.exe file.
 
   To achieve this, place the new grendel.exe (and/or core.bpl) in the "bin"
   directory, and start copyover.
@@ -200,4 +200,4 @@
     
   -------------------------------------------------------------------------
 
-  $Id: Readme.txt,v 1.4 2004/04/08 21:28:50 ***REMOVED*** Exp $
+  $Id: Readme.txt,v 1.5 2004/04/08 22:11:03 ***REMOVED*** Exp $
