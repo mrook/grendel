@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.34 2001/06/14 18:19:41 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.35 2001/06/17 21:20:42 ***REMOVED*** Exp $
 
 unit area;
 
@@ -108,7 +108,9 @@ type
       procedure toObject(obj : GObject);
       procedure fromObject;
 
-      function getWeight : integer;
+      function getWeight() : integer;
+      function getVnum() : integer;
+      function getName() : string;
 
       function clone : GObject;
       function group(obj : GObject) : boolean;
@@ -118,6 +120,8 @@ type
       constructor Create;
       destructor Destroy; override;
     published
+      property vnum : integer read getVnum;
+      property pname : string read getName;
     end;
 
     GExit = class
@@ -2495,6 +2499,21 @@ begin
   getWeight := we;
 end;
 
+function GObject.getVnum() : integer;
+begin
+  Result := obj_index.vnum;
+end;
+
+function GObject.getName() : string;
+begin
+  if (name <> nil) then
+    Result := name^
+  else
+    Result := '';
+end;
+
+
+// GExit
 constructor GExit.Create();
 begin
   inherited Create();
