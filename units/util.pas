@@ -7,8 +7,8 @@ uses
     ansiio;
 
 function URange(min, value, max : longint) : longint;
-function UMax(value, max : longint) : longint;
-function UMin(value, min : longint) : longint;
+function UMax(op1, op2 : longint) : longint;
+function UMin(op1, op2 : longint) : longint;
 
 function IS_SET(value, bit : cardinal) : boolean;
 procedure SET_BIT(var value : cardinal; bit : cardinal);
@@ -47,6 +47,8 @@ uses
     constants,
     strip;
 
+// returns value if min <= value <= max, or min when value < min
+// or max when value > max
 function URange(min, value, max : longint) : longint;
 begin
   if (value < min) then
@@ -58,20 +60,22 @@ begin
     URange := value;
 end;
 
-function UMax(value, max : longint) : longint;
+// returns the maximum of the two operands
+function UMax(op1, op2 : longint) : longint;
 begin
-  if (value > max) then
-    UMax := max
+  if (op1 > op2) then
+    UMax := op1
   else
-    UMax := value;
+    UMax := op2;
 end;
 
-function UMin(value, min : longint) : longint;
+// returns the minimum of the two operands
+function UMin(op1, op2 : longint) : longint;
 begin
-  if (value < min) then
-    UMin := min
+  if (op1 < op2) then
+    UMin := op1
   else
-    UMin := value;
+    UMin := op2;
 end;
 
 function IS_SET(value, bit : cardinal) : boolean;
