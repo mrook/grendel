@@ -1,4 +1,4 @@
-// $Id: command.inc,v 1.14 2001/04/20 18:50:55 xenon Exp $
+// $Id: command.inc,v 1.15 2001/04/21 18:31:21 ***REMOVED*** Exp $
 
 {$F+}
 
@@ -449,17 +449,18 @@ begin
       if (note.board = ch.player^.active_board) then
         begin
         inc(counter);
-        buf := buf + ansiColor(2,0) + pad_integer_front(note.number,3) + '>  ' + pad_string(note.author,20) + note.subject + #13#10;
+        buf := buf + ch.ansiColor(15) + ' ' + pad_integer_front(note.number,3) + ch.ansiColor(7) + '>   ' + pad_string(note.author,20) + ' ' + note.subject + #13#10;
         end;
 
       node := node.next;
       end;
 
     if (counter = 0) then
-      buf := ansiColor(2,0) + 'There are no notes on this board.' + #13#10;
+      buf := ch.ansiColor(7) + 'There are no notes on this board.' + #13#10;
 
-    buf := ansiColor(2,0) + 'Num   Author              Subject' + #13#10 +
-           ansiColor(2,0) + '===   ==================  ======================' + #13#10 + buf;
+    buf := ch.ansiColor(8) + '[' + ch.ansiColor(9) + 'Num ' + ch.ansiColor(8) + '] ' +
+           ch.ansiColor(8) + '[' + ch.ansiColor(9) + 'Author            ' + ch.ansiColor(8) + '] ' +
+           ch.ansiColor(8) + '[' + ch.ansiColor(9) + 'Subject               ' + ch.ansiColor(8) + ']' + #13#10 + #13#10 + buf;
 
     ch.sendPager(buf);
     exit;
@@ -488,14 +489,12 @@ begin
       exit;
       end;
 
-    buf := ansiColor(2,0) + add_chars(77, '=== NOTE ', '=') + #13#10 +
-           ansiColor(2,0) + 'Number:  ' + ansiColor(7,0) + inttostr(note.number) + #13#10 +
-           ansiColor(2,0) + 'Date:    ' + ansiColor(7,0) + note.date + #13#10 +
-           ansiColor(2,0) + 'Author:  ' + ansiColor(7,0) + note.author + #13#10 +
-           ansiColor(2,0) + 'Subject: ' + ansiColor(7,0) + note.subject + #13#10 +
-           ansiColor(2,0) + add_chars(77, '-', '-') + #13#10 +
-           ansiColor(7,0) + note.text +
-           ansiColor(2,0) + add_chars(77, '=', '=') + #13#10;
+    buf := ch.ansiColor(3) + add_chars(76, '---- Note by ' + note.author, '-') + #13#10 +
+           ch.ansiColor(7) + 'Date:    ' + ch.ansiColor(7) + note.date + #13#10 +
+           ch.ansiColor(7) + 'Subject: ' + ch.ansiColor(7) + note.subject + #13#10 +
+           ch.ansiColor(3) + add_chars(76, '', '-') + #13#10#13#10 +
+           ch.ansiColor(7) + note.text +
+           ch.ansiColor(3) + add_chars(76, '', '-') + #13#10;
 
     ch.sendPager(buf);
 
@@ -590,8 +589,7 @@ begin
 
   if (length(arg1) = 0) then
     begin
-    ch.sendBuffer(ansiColor(2,0) + 'Num       Name New Description'#13#10);
-    ch.sendBuffer(ansiColor(2,0) + '=== ========== === ================'#13#10);
+    act(AT_REPORT, '$8[$B$1Num$A$8] [$B$1Name      $A$8] [$B$1New$A$8] [$B$1Description$A$8]'#13#10,false,ch,nil,nil,TO_CHAR);
 
     for i:=1 to BOARD_MAX-1 do
       begin
@@ -616,18 +614,18 @@ begin
       if (i = BOARD_IMM) then
         begin
         if (ch.IS_IMMORT) then
-          ch.sendBuffer(ansiColor(2,0) + ' ' + inttostr(i) + '> ' + pad_string_front(board_names[i],10) + ' ' + pad_integer_front(counter,3) + ' ' + board_descr[i] + #13#10);
+          act(AT_REPORT, '$B$7 ' + pad_integer_front(i, 2) + '$A$7>   ' + pad_string(board_names[i],10) + '   ' + pad_integer(counter,3) + '   ' + board_descr[i],false,ch,nil,nil,TO_CHAR);
         end
       else
-        ch.sendBuffer(ansiColor(2,0) + ' ' + inttostr(i) + '> ' + pad_string_front(board_names[i],10) + ' ' + pad_integer_front(counter,3) + ' ' + board_descr[i] + #13#10);
+        act(AT_REPORT, '$B$7 ' + pad_integer_front(i, 2) + '$A$7>   ' + pad_string(board_names[i],10) + '   ' + pad_integer(counter,3) + '   ' + board_descr[i],false,ch,nil,nil,TO_CHAR);
       end;
 
-    ch.sendBuffer(#13#10 + ansiColor(2,0) + 'Your current board is ' + board_names[ch.player^.active_board] + '.'#13#10);
+    ch.sendBuffer(#13#10 + ch.ansiColor(7) + 'Your current board is ' + board_names[ch.player^.active_board] + '.'#13#10);
 
     if (ch.player^.active_board = BOARD_NEWS) and (not ch.IS_IMMORT) then
-      ch.sendBuffer(ansiColor(2,0) + 'You can only read from this board.'#13#10)
+      ch.sendBuffer(ch.ansiColor(7) + 'You can only read from this board.'#13#10)
     else
-      ch.sendBuffer(ansiColor(2,0) + 'You can both read and write on this board.'#13#10);
+      ch.sendBuffer(ch.ansiColor(7) + 'You can both read and write on this board.'#13#10);
     end;
 end;
 

@@ -1304,6 +1304,7 @@ begin
   registerCommand('do_at', do_at);
   registerCommand('do_namegen', do_namegen);
   registerCommand('do_note', do_note);
+  registerCommand('do_board', do_board);
 end;
 
 begin

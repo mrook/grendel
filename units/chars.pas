@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.34 2001/04/20 12:17:02 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.35 2001/04/21 18:31:20 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1678,13 +1678,13 @@ begin
 
   if (substate = SUB_SUBJECT) then
     begin
-    sendBuffer(ansiColor(2) + #13#10 + 'Subject: ');
+    sendBuffer(ansiColor(7) + #13#10 + 'Subject: ');
     GConnection(conn).state := CON_EDITING;
     exit;
     end;
 
-  GConnection(conn).send(ansiColor(2) + #13#10 + 'Use ~ on a blank line to end.'#13#10);
-  GConnection(conn).send(ansiColor(2) + '----------------------------------------------------------------------'#13#10'>');
+  GConnection(conn).send(ansiColor(7) + #13#10 + 'Use ~ on a blank line to end.'#13#10);
+  GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------'#13#10'> ');
 
   edit_buffer := text;
   GConnection(conn).afk := true;
@@ -1764,18 +1764,18 @@ begin
 
     if (uppercase(text) = 'V') then
       begin
-      GConnection(conn).send(ansiColor(2) + 'Current text:' + #13#10);
-      GConnection(conn).send(ansiColor(2) + '----------------------------------------------------------------------' + #13#10);
-      GConnection(conn).send(ansiColor(2) + edit_buffer + #13#10);
-      GConnection(conn).send(ansiColor(2) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
+      GConnection(conn).send(ansiColor(7) + 'Current text:' + #13#10);
+      GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
+      GConnection(conn).send(ansiColor(7) + edit_buffer + #13#10);
+      GConnection(conn).send(ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
       exit;
       end;
 
     if (uppercase(text) = 'C') then
       begin
-      GConnection(conn).send(ansiColor(2) + 'Ok. Continue writing...' + #13#10);
-      GConnection(conn).send(ansiColor(2) + '----------------------------------------------------------------------' + #13#10);
-      GConnection(conn).send(ansiColor(2) + edit_buffer);
+      GConnection(conn).send(ansiColor(7) + 'Ok. Continue writing...' + #13#10);
+      GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
+      GConnection(conn).send(ansiColor(7) + edit_buffer);
       GConnection(conn).state := CON_EDITING;
       sendPrompt;
       exit;
@@ -1787,19 +1787,19 @@ begin
       exit;
       end;
 
-    GConnection(conn).send(#13#10 + ansiColor(2) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
+    GConnection(conn).send(#13#10 + ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
     exit;
     end;
 
   if (text = '~') then
     begin
     GConnection(conn).state := CON_EDIT_HANDLE;
-    GConnection(conn).send(#13#10 + ansiColor(2) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
+    GConnection(conn).send(#13#10 + ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
     exit;
     end;
 
   edit_buffer := edit_buffer + text + #13#10;
-  GConnection(conn).send(ansiColor(2) + '> ');
+  GConnection(conn).send(ansiColor(7) + '> ');
 end;
 
 function GCharacter.ansiColor(color : integer) : string;

@@ -131,6 +131,12 @@ position: 7
 #end
 
 #command
+name: board
+function: do_board
+position: 5
+#end
+
+#command
 name: brag
 function: do_brag
 position: 4
@@ -350,6 +356,12 @@ position: 5
 name: meditate
 function: do_meditate
 position: 6
+#end
+
+#command
+name: note
+function: do_note
+position: 5
 #end
 
 #command
