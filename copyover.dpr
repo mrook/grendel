@@ -1,9 +1,10 @@
 program copyover;
 {$APPTYPE CONSOLE}
+{$IFDEF WIN32}
 uses
-  SysUtils,
+	SysUtils,
 	Classes,
-  Windows,
+	Windows,
 	Winsock2;
 
 
@@ -175,4 +176,9 @@ begin
   
   writeln('Cleaned up.');
 end.
-
+{$ENDIF}
+{$IFDEF LINUX}
+begin
+	writeln('Not implemented for this platform.');
+end.
+{$ENDIF}
