@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.39 2001/05/11 14:25:05 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.40 2001/06/09 13:09:48 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -117,7 +117,7 @@ begin
     exit;
     end;
 
-  if (ch.room.IS_DARK) and (not ch.IS_HOLYLIGHT) then
+  if (not ch.CAN_SEE(ch.room)) then
     begin
     ch.sendBuffer('It''s pitch black, you can''t see a thing!'#13#10);
     exit;
@@ -154,10 +154,13 @@ begin
       begin
       if (not vict.IS_NPC) then
         act(AT_REPORT,vict.name^+'$7 is known as $B$6' + GPlayer(vict).rank+'$A$7 amongst'+
-        ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR);
+        ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR)
+      else 
+        if vict.short^ <> '' then
+         act(AT_REPORT, vict.short^ + #13#10, false, ch, nil, vict, TO_CHAR);
 
-      w1 := UMin(round((vict.hp / vict.max_hp)*5),0);
-      w2 := UMin(round((vict.mv / vict.max_mv)*5),0);
+      w1 := UMax(round((vict.hp / vict.max_hp)*5),0);
+      w2 := UMax(round((vict.mv / vict.max_mv)*5),0);
 
       act(AT_REPORT,vict.name^+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
 
@@ -857,9 +860,9 @@ begin
 
         buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name^,12);
 
-        buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMin(round((vict.hp / vict.max_hp) * 5), 0)], 10);
+        buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMax(round((vict.hp / vict.max_hp) * 5), 0)], 10);
 
-        buf1 := buf1 + '$B$1' + pad_string(mv_perc[UMin(round((vict.mv / vict.max_mv) * 5), 0)], 12);
+        buf1 := buf1 + '$B$1' + pad_string(mv_perc[UMax(round((vict.mv / vict.max_mv) * 5), 0)], 12);
 
         if (not vict.IS_NPC) then
           buf1 := buf1 + inttostr(GPlayer(vict).xptogo);
@@ -1044,7 +1047,7 @@ begin
     begin
     vict := node.element;
 
-    if (vict <> ch) and (not vict.IS_NPC) and (vict.room.area = ch.room.area) then
+    if (vict <> ch) and (not vict.IS_NPC) and (vict.room.area = ch.room.area) and (ch.IS_SAME_ALIGN(vict)) then
       begin
       buf := pad_string(vict.name^,20) + '   ' + vict.room.name^ + #13#10;
       ch.sendBuffer(buf);

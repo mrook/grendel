@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.8 2001/05/11 14:24:22 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.9 2001/06/09 13:09:48 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -131,6 +131,16 @@ end;
 
 procedure spell_summon(ch,victim:GCharacter;sn:GSkill);
 begin
+  // Jago 18May2001 : check ch <> vict
+  // note: could make the spell not castable on self, but this is more fun ;)
+  if ch = victim then
+    begin
+    act(AT_SPELL,'You attempt to summon yourself into the room.',false,ch,nil,victim,TO_CHAR);
+    act(AT_SPELL,'Silly, you''re already here!',false,ch,nil,victim,TO_CHAR);
+    act(AT_SPELL,'$n attempts to summon $N. Duh.',false,victim,nil,ch,TO_ROOM);
+    exit;
+    end;
+
   if victim.position<>POS_FIGHTING then
     begin
     act(AT_SPELL,'You summon $N into the room.',false,ch,nil,victim,TO_CHAR);

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.40 2001/05/11 14:25:01 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.41 2001/06/09 13:09:48 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -148,7 +148,7 @@ type
       function IS_KEYLOCKED : boolean; virtual;
       function IS_EDITING : boolean; virtual;
       function CAN_FLY : boolean; virtual;
-      function CAN_SEE(vict : GCharacter) : boolean; virtual;
+      function CAN_SEE(target : TObject) : boolean; virtual;
 
       function LEARNED(skill : pointer) : integer;
       procedure SET_LEARNED(perc : integer; skill : pointer);
@@ -517,6 +517,7 @@ begin
   xptogo := round((20 * power(level, 1.2)) * (1 + (random(3) / 10)));
 
   title := 'the Newbie Adventurer';
+  rank := 'an apprentice';
   snooping := nil;
 
   cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI or CFG_AUTOPEEK;
@@ -940,8 +941,10 @@ begin
     Result := true;
 end;
 
-{ can ch see vict? }
-function GCharacter.CAN_SEE(vict : GCharacter) : boolean;
+{ can ch see ? }
+function GCharacter.CAN_SEE(target : TObject) : boolean;
+var
+  vict : GCharacter;
 begin
   CAN_SEE := true;
 
@@ -951,16 +954,24 @@ begin
   if (not IS_AWAKE) then
     CAN_SEE := false;
 
-  if (vict.IS_INVIS) and (not (IS_SET(aff_flags, AFF_DETECT_INVIS)
-   or IS_IMMORT)) then
-    CAN_SEE:=false;
-
-  if (vict.IS_HIDDEN) and (not (IS_SET(aff_flags, AFF_DETECT_HIDDEN)
-   or IS_IMMORT)) then
+  if (room.IS_DARK) and (not IS_HOLYLIGHT) and (not IS_SET(aff_flags, AFF_INFRAVISION)) then
     CAN_SEE := false;
 
-  if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
-    CAN_SEE := false;
+  if (target is GCharacter) then
+    begin
+    vict := GCharacter(target);
+
+    if (vict.IS_INVIS) and (not (IS_SET(aff_flags, AFF_DETECT_INVIS)
+     or IS_IMMORT)) then
+      CAN_SEE:=false;
+
+    if (vict.IS_HIDDEN) and (not (IS_SET(aff_flags, AFF_DETECT_HIDDEN)
+     or IS_IMMORT)) then
+      CAN_SEE := false;
+
+    if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
+      CAN_SEE := false;
+    end;
 
   if (IS_SET(aff_flags, AFF_BLIND)) then
     CAN_SEE := false;
