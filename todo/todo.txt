@@ -27,6 +27,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! skill/spellslots
 ! dynamic prompts, not the hardcoded bla, but redefinable by the user
 ! show current map status in olc (map command)
+! practice sessions
 
 
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
@@ -44,7 +45,6 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - race specifics
   -> add field to race format for racial abilities like Infravision etc.
 - bugtrack/report system 
-- practice sessions
 - modularized mud, pluggable objects (like timers, sets of commands, etc.)
 - spells: Mistform (walk thru doors, ethereal bla)
 - "real life" sleep - players need sleep to keep from falling down after 2 days,
@@ -63,6 +63,9 @@ l abbreviation of clanname (3-4 chars) in who list
 l mud police!
 l online suggest (pray) history
 l mobprog compiling to some sort of pseudo stack machine code
+l fully customizable mud - experience formulas, experience per level, 
+	damage formulas, number of stats, stat maximums, health/mana/movement maximums
+l bodypart damage/armor ?
 
 -- random ideas --
 
