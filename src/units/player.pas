@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.9 2004/02/18 18:51:40 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.10 2004/02/18 20:48:00 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -1402,7 +1402,7 @@ end;
 // Load player file
 function GPlayer.load(fn : string) : boolean;
 var
-	d, x : longint;
+	num, d, x : longint;
   af : GFileReader;
   g , a, t : string;
   obj : GObject;
@@ -1851,12 +1851,18 @@ begin
     if (s = '#OBJECTS') then
       begin
       inc(inner);
-      repeat
-        g := af.readLine;
+      g := af.readLine;
 
+      repeat
+      	writeConsole('g at start: ' + g);
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
           obj := GObject.Create();
+
+				  obj.worn := g;
+				  
+				  if (obj.worn = 'none') then
+				    obj.worn := '';
 
           with obj do
             begin
@@ -1894,15 +1900,53 @@ begin
               count := 1;
 
             room := nil;
-            end;
+  
+						g := af.readToken();
+						
+						writeConsole('reading ' + obj.name + ' => ' + g);
+
+						if (g = 'A') then
+							begin
+							aff := GAffect.Create();
+
+							aff.name := af.readToken();
+							aff.wear_msg := '';
+
+							aff.duration := af.readInteger();
+							num := 1;
+
+							while (not af.eol) and (af.readToken() = '{') do
+								begin
+								setLength(aff.modifiers, num);
+
+								aff.modifiers[num - 1].apply_type := findApply(af.readToken);
+
+								g := af.readToken();
+
+								modif := cardinal(findSkill(g));
+
+								if (modif = 0) then
+									modif := strtointdef(g, 0);
+
+								aff.modifiers[num - 1].modifier := modif;
+
+								g := af.readToken();
+
+								inc(num);
+								end;
+							
+							writeConsole('last token: ' + g + IntTostr(integer(af.eol)));
+
+							obj.affects.insertLast(aff);
+
+							g := af.readLine();
+							
+							writeConsole('last line: ' + g);
+        			end;
+        		end;
 
 					obj.node_world := objectList.insertLast(obj);
-					
-				  obj.worn := g;
-				  
-				  if (obj.worn = 'none') then
-				    obj.worn := '';
-	            
+					            
           obj.toChar(Self);         
           end;
       until (uppercase(g) = '#END') or (af.eof);
@@ -1996,7 +2040,7 @@ var
 	aff : GAffect;
 	fl : cardinal;
 	tc : GUserChannel;
-	iterator : GIterator;
+	iterator, inner_iterator : GIterator;
 	w1, w2 : string;
 	field : GPlayerField;
 begin
@@ -2161,7 +2205,7 @@ begin
 							af.writeInteger(modifiers[h].modifier);
 					end;
 
-					af.writeString(' } ');
+					af.writeString(' }');
 					end;
 
 				af.writeLine('');
@@ -2203,6 +2247,41 @@ begin
 			af.writeLine(IntToStr(obj.item_type) + ' ' + obj.wear_location1 + ' ' + obj.wear_location2);
 			af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
 			af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
+
+			if (obj.affects.size() > 0) then
+				begin
+				inner_iterator := obj.affects.iterator();
+				
+				while (inner_iterator.hasNext()) do
+					begin
+					aff := GAffect(inner_iterator.next());
+					
+					with aff do
+						begin
+						af.writeString('A "' + name + '" ');
+						af.writeInteger(duration);
+
+						for h := 0 to length(modifiers) - 1 do
+							begin
+							af.writeString(' { ');
+
+							af.writeString(printApply(modifiers[h].apply_type) + ' ');
+
+							case modifiers[h].apply_type of
+								APPLY_STRIPNAME: af.writeString(PString(modifiers[h].modifier)^);
+								else
+									af.writeInteger(modifiers[h].modifier);
+							end;
+
+							af.writeString(' }');
+							end;
+
+						af.writeLine('');
+						end;
+					end;
+
+				inner_iterator.Free();
+				end;				
 			end;
 
 		iterator.Free();
@@ -2234,6 +2313,40 @@ begin
 			af.writeLine(IntToStr(obj.item_type) + ' ' + w1 + ' ' + w2);
 			af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
 			af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
+
+			if (obj.affects.size() > 0) then
+				begin
+				inner_iterator := obj.affects.iterator();
+				
+				while (inner_iterator.hasNext()) do
+					begin
+					aff := GAffect(inner_iterator.next());
+					
+					with aff do
+						begin
+						af.writeString('A "' + name + '" ');
+						af.writeInteger(duration);
+
+						for h := 0 to length(modifiers) - 1 do
+							begin
+							af.writeString(' { ');
+
+							af.writeString(printApply(modifiers[h].apply_type) + ' ');
+
+							case modifiers[h].apply_type of
+								APPLY_STRIPNAME: af.writeString(PString(modifiers[h].modifier)^);
+								else
+									af.writeInteger(modifiers[h].modifier);
+							end;
+
+							af.writeString(' }');
+							end;
+
+						af.writeLine('');
+						end;
+					end;
+				inner_iterator.Free();
+				end;
 			end;
 
 		iterator.Free();

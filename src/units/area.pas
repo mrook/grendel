@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.9 2004/02/15 18:51:04 hemko Exp $
+  ## $Id: area.pas,v 1.10 2004/02/18 20:48:00 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -727,7 +727,7 @@ begin
 
         aff.name := af.readToken();
         aff.wear_msg := '';
-
+        
         aff.duration := af.readInteger();
         num := 1;
 
@@ -751,7 +751,7 @@ begin
           inc(num);
           end;
 
-        aff.node := affects.insertLast(aff);
+        affects.insertLast(aff);
 
         s := af.readLine;
         end;
@@ -2372,6 +2372,7 @@ begin
   if (_long <> nil) then
     unhash_string(_long);
 
+	affects.Free();
   contents.Free();
   
   inherited Destroy();
@@ -2871,6 +2872,7 @@ function GObject.clone() : GObject;
 var
   obj : GObject;
   obj_in : GObject;
+  iterator : GIterator;
 begin
   obj := GObject.Create();
 
@@ -2890,6 +2892,15 @@ begin
   obj.count := 1;
   obj.vnum := vnum;
   obj.timer := timer;
+   
+  iterator := affects.iterator();
+  
+  while (iterator.hasNext()) do
+  	begin
+  	obj.affects.insertLast(iterator.next());
+  	end;
+  
+  iterator.Free();
   
   obj_in := GObject(objectIndices[vnum]);
 
