@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.61 2001/10/05 21:49:48 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.62 2001/10/25 22:02:48 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -424,9 +424,7 @@ begin
     Sleep(1000);
 
     { give operator/logfile a message }
-    bugreport('CRASH', 'grendel.dpr', 'CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
-
-    writeConsole('---- CRASH TERMINATE. REBOOTING SERVER ----');
+    writeConsole('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
 
     { close logfile }
     if TTextRec(logfile).mode=fmOutput then
@@ -671,6 +669,22 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+procedure handleException(ExceptObject: TObject; ExceptAddr: Pointer); far;
+begin
+  if (ExceptObject is EExternal) then
+    begin
+    writeConsole('Uncaught external exception encountered:');
+    outputError(EExternal(ExceptObject));
+    end
+  else
+  if (ExceptObject is Exception) then
+    writeConsole('Uncaught exception: ' + Exception(ExceptObject).Message)
+  else
+    writeConsole('Uncaught exception encountered!');
+    
+  halt(1);
+end;
+
 var
   tm : TDateTime;
 
@@ -680,7 +694,12 @@ begin
   tm := Now();
 
   bootServer();
-    
+  
+  ExceptProc := @handleException;
+  
+  JITEnable := 1;
+  DebugHook := 1;
+   
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
     from_copyover;
