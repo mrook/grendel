@@ -1,17 +1,17 @@
 require "glib.c"
 
-void onAct(external ch, external target, string arg)
+void onEmoteTarget(external ch, external target, string name)
 {
-  if (match(arg, "* bows*") == true)
-  {
-    do("say Good day, " + target.name);
-  }
+	if ((name == "BOW") && (ch.name == "Syra"))
+	{
+		do("say Good day, " + target.name + "!");
+	}
 }
 
-void onGive(external ch, external target, external obj)
+void onAct(external ch, external target, string arg)
 {
-  if (obj.vnum == 104)
-  {
-    do("say Thank you!");
-  }
 }
+
+
+export onEmoteTarget
+export onAct
