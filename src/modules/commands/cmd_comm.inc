@@ -1,43 +1,46 @@
-// $Id: cmd_comm.inc,v 1.5 2004/05/12 20:53:23 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.6 2004/06/10 18:08:08 ***REMOVED*** Exp $
 
-procedure do_say(ch:GCharacter;param:string);
+procedure do_say(ch : GCharacter; param : string);
 begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Say what?'#13#10);
-    exit;
-    end;
-  case param[length(param)] of
-    '!':begin
-        act(AT_SAY,'You exclaim, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
-        act(AT_SAY,'$n exclaims, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
-        end;
-    '?':begin
-        act(AT_SAY,'You ask, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
-        act(AT_SAY,'$n asks, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
-        end;
-    ')':if (param[length(param)-1]=':') or (param[length(param)-2]=':') then
-          begin
-          act(AT_SAY,'You grin, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
-          act(AT_SAY,'$n grins, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
-          end
-        else
-        if (param[length(param)-2]=';') or (param[length(param)-2]='3') then
-          begin
-          act(AT_SAY,'You whink, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
-          act(AT_SAY,'$n whink, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
-          end
-        else
-          begin
-          act(AT_SAY,'You say, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
-          act(AT_SAY,'$n says, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
-          end;
-     else
-       begin
-       act(AT_SAY,'You say, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
-       act(AT_SAY,'$n says, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
-       end;
-  end;
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Say what?'#13#10);
+		exit;
+		end;
+		
+	param := cleanCommandLine(param);
+		
+	case param[length(param)] of
+	'!':	begin
+			act(AT_SAY,'You exclaim, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
+			act(AT_SAY,'$n exclaims, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
+			end;
+	'?':	begin
+			act(AT_SAY,'You ask, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
+			act(AT_SAY,'$n asks, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
+			end;
+	')':	if (param[length(param)-1]=':') or (param[length(param)-2]=':') then
+				begin
+				act(AT_SAY,'You grin, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
+				act(AT_SAY,'$n grins, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
+				end
+			else
+			if (param[length(param)-2]=';') or (param[length(param)-2]='3') then
+				begin
+				act(AT_SAY,'You wink, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
+				act(AT_SAY,'$n wink, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
+				end
+			else
+				begin
+				act(AT_SAY,'You say, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
+				act(AT_SAY,'$n says, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
+			end;
+	else
+		begin
+		act(AT_SAY,'You say, ''' + param + '''',false,ch,nil,nil,TO_CHAR);
+		act(AT_SAY,'$n says, ''' + param + '''',false,ch,nil,nil,TO_ROOM);
+		end;
+	end;
 end;
 
 procedure do_tell(ch:GCharacter;param:string);
@@ -45,141 +48,168 @@ var
 	vict : GPlayer;
 	sub : string;
 begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Talk what to whom?'#13#10);
-    exit;
-    end;
+	if (length(param)=0) then
+		begin
+		ch.sendBuffer('Talk what to whom?'#13#10);
+		exit;
+		end;
 
-  param := one_argument(param, sub);
-  vict := GPlayer(findPlayerWorld(ch,sub));
+	param := cleanCommandLine(one_argument(param, sub));
+	vict := GPlayer(findPlayerWorld(ch, sub));
 
-  if (vict = nil) then
-    begin
-    ch.sendBuffer('They are not here.'#13#10);
-    exit;
-    end;
+	if (vict = nil) then
+		begin
+		ch.sendBuffer('They are not here.'#13#10);
+		exit;
+		end;
 
-  if (vict = ch) then
-    begin
-    ch.sendBuffer('You talk to yourself and are surprised that you receive no answer.'#13#10);
-    exit;
-    end;
+	if (vict = ch) then
+		begin
+		ch.sendBuffer('You talk to yourself and are surprised that you receive no answer.'#13#10);
+		exit;
+		end;
 
-  if (vict.afk) then
-    begin
-    ch.sendBuffer('That player is away from the keyboard right now.'#13#10);
-    exit;
-    end;
+	if (vict.afk) then
+		begin
+		ch.sendBuffer('That player is away from the keyboard right now.'#13#10);
+		exit;
+		end;
 
-  vict.reply := GPlayer(ch);
-  act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,vict,TO_CHAR);
-  act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,vict,TO_VICT);
+	vict.reply := GPlayer(ch);
+	act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,vict,TO_CHAR);
+	act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,vict,TO_VICT);
 end;
 
 procedure do_reply(ch : GCharacter;param:string);
 begin
-  if (ch.IS_NPC) or (length(param)=0) then
-    begin
-    ch.sendBuffer('Reply what?'#13#10);
-    exit;
-    end;
+	if (ch.IS_NPC) or (length(param)=0) then
+		begin
+		ch.sendBuffer('Reply what?'#13#10);
+		exit;
+		end;
 
-  if (GPlayer(ch).reply.CHAR_DIED) then
-    begin
-    GPlayer(ch).reply := nil;
-    ch.sendBuffer('They are not here.'#13#10);
-    exit;
-    end;
+	if (GPlayer(ch).reply.CHAR_DIED) then
+		begin
+		GPlayer(ch).reply := nil;
+		ch.sendBuffer('They are not here.'#13#10);
+		exit;
+		end;
 
-  if (GPlayer(ch).reply.afk) then
-    begin
-    ch.sendBuffer('That player is away from the keyboard right now.'#13#10);
-    exit;
-    end;
+	if (GPlayer(ch).reply.afk) then
+		begin
+		ch.sendBuffer('That player is away from the keyboard right now.'#13#10);
+		exit;
+		end;
+		
+	param := cleanCommandLine(param);
 
-  GPlayer(ch).reply.reply := GPlayer(ch);
+	GPlayer(ch).reply.reply := GPlayer(ch);
 
-  act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,GPlayer(ch).reply,TO_CHAR);
-  act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,GPlayer(ch).reply,TO_VICT);
+	act(AT_TELL,'You tell $N, ''' + param + '''',false,ch,nil,GPlayer(ch).reply,TO_CHAR);
+	act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,GPlayer(ch).reply,TO_VICT);
 end;
 
 procedure do_suggest(ch:GCharacter;param:string);
 var 
-  f : textfile;
-  he : GHistoryElement;
-  iterator : GIterator; 
+	f : textfile;
+	he : GHistoryElement;
+	iterator : GIterator; 
 begin
-  if (length(param) = 0) then
-    begin
-    if (ch.IS_IMMORT()) then
-      begin
-      iterator := suggestHistory.iterator();
-      
-      while (iterator.hasNext()) do
-        begin
-        he := GHistoryElement(iterator.next());
-       
-        ch.sendBuffer(he.contents^ + #13#10);
-        end;
-      end
-    else
-      begin
-      ch.sendBuffer('Suggest what?'#13#10);
-      exit;
-      end;
-    end;
-    
-  act(AT_SUGGEST,'You suggest, '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  writeConsole(ch.name+' suggested '''+param+'''');
+	if (length(param) = 0) then
+		begin
+		if (ch.IS_IMMORT()) then
+			begin
+			iterator := suggestHistory.iterator();
 
-  assignfile(f, 'system\suggest.dat');
-  append(f);
-  writeln(f, DateTimeToStr(Now),'> ', 'Suggestion by ',ch.name,': ',param);
-  closefile(f);
+			while (iterator.hasNext()) do
+				begin
+				he := GHistoryElement(iterator.next());
 
-  he := GHistoryElement.Create(ch.name+' suggested '''+param+'''');
-  
-  suggestHistory.insertLast(he);
+				ch.sendBuffer(he.contents^ + #13#10);
+				end;
+				
+			iterator.Free();
+			end
+		else
+			begin
+			ch.sendBuffer('Suggest what?'#13#10);
+			exit;
+			end;
+		end;
+		
+	param := cleanCommandLine(param);
 
-  if (suggestHistory.size() > CHANNEL_HISTORY_MAX) then
-    suggestHistory.remove(suggestHistory.head);
+	act(AT_SUGGEST,'You suggest, '''+param+'''.',false,ch,nil,nil,TO_CHAR);
+	writeConsole(ch.name+' suggested '''+param+'''');
+
+	assignfile(f, 'system\suggest.dat');
+	append(f);
+	writeln(f, DateTimeToStr(Now),'> ', 'Suggestion by ',ch.name,': ',param);
+	closefile(f);
+
+	he := GHistoryElement.Create(ch.name+' suggested '''+param+'''');
+
+	suggestHistory.insertLast(he);
+
+	if (suggestHistory.size() > CHANNEL_HISTORY_MAX) then
+	suggestHistory.remove(suggestHistory.head);
 end;
 
 procedure do_pray(ch:GCharacter;param:string);
 var
-  he : GHistoryElement;
-  iterator : GIterator;
+	he : GHistoryElement;
+	iterator : GIterator;
 begin
-  if (length(param) = 0) then
-    begin
-    if (ch.IS_IMMORT()) then
-      begin
-      iterator := prayHistory.iterator();
-      
-      while (iterator.hasNext()) do
-        begin
-        he := GHistoryElement(iterator.next());
-       
-        ch.sendBuffer(he.contents^ + #13#10);
-        end;
-      end
-    else
-      begin
-      ch.sendBuffer('Pray what?'#13#10);
-      exit;
-      end;
-    end;
-    
-  act(AT_PRAY, 'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  writeConsole(ch.name + ' prays ''' + param + '''');
-  
-  he := GHistoryElement.Create(ch.name + ' prays ''' + param + '''');
-  
-  prayHistory.insertLast(he);
+	if (length(param) = 0) then
+		begin
+		if (ch.IS_IMMORT()) then
+			begin
+			iterator := prayHistory.iterator();
 
-  if (prayHistory.size() > CHANNEL_HISTORY_MAX) then
-    prayHistory.remove(prayHistory.head);
+			while (iterator.hasNext()) do
+				begin
+				he := GHistoryElement(iterator.next());
+
+				ch.sendBuffer(he.contents^ + #13#10);
+				end;
+				
+			iterator.Free();
+			end
+		else
+			begin
+			ch.sendBuffer('Pray what?'#13#10);
+			exit;
+			end;
+		end;
+		
+	param := cleanCommandLine(param);
+
+	act(AT_PRAY, 'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
+	writeConsole(ch.name + ' prays ''' + param + '''');
+
+	he := GHistoryElement.Create(ch.name + ' prays ''' + param + '''');
+
+	prayHistory.insertLast(he);
+
+	if (prayHistory.size() > CHANNEL_HISTORY_MAX) then
+	prayHistory.remove(prayHistory.head);
+end;
+
+procedure do_emote(ch:GCharacter;param:string);
+begin
+	if (length(param)=0) then
+		begin
+		ch.sendBuffer('EMOTE <string>'#13#10);
+		exit;
+		end;
+		
+	param := cleanCommandLine(param);
+
+	if (not (param[length(param)] in ['.','!','?'])) then
+		param := param + '.';
+
+	act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_CHAR);
+	act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_ROOM);
 end;
 
 procedure do_clanadd(ch:GCharacter;param:string);
@@ -281,21 +311,6 @@ begin
       act(AT_REPORT,'$B$1[$7Clan object$1]$A$7:   $B$2' + str,false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,'$B$1[$7Minimum level$1]$A$7: $B$2' + inttostr(minlevel),false,ch,nil,nil,TO_CHAR);
       end;
-end;
-
-procedure do_emote(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('EMOTE <string>'#13#10);
-    exit;
-    end;
-
-  if not (param[length(param)] in ['.','!','?']) then
-    param := param + '.';
-
-  act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_ROOM);
 end;
 
 procedure do_auction(ch:GCharacter;param:string);

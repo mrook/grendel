@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.7 2004/04/12 20:49:02 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.8 2004/06/10 18:04:23 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -355,7 +355,7 @@ begin
     exit;
     end;
     
-  param := one_argument(param, arg0);
+  param := cleanCommandLine(one_argument(param, arg0));
   chan := lookupChannel(arg0);
 
   if (ch = nil) then
