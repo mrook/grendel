@@ -28,6 +28,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! dynamic prompts, not the hardcoded bla, but redefinable by the user
 ! show current map status in olc (map command)
 ! practice sessions
+! online search through helpfiles (so like 'apropos sect' to find all
+  helppages with the word sect in them)
 
 
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
@@ -53,6 +55,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 - implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
+- have mudstatus save when shutting down (mudstatus defined as: mudtime, weather(?), etc.)
 
 l implementation of the mud sound protocol
 l new area format using XML
@@ -72,8 +75,6 @@ l bodypart damage/armor ?
 * IMC (intermud communication): both channels *and* noteboards
   (perhaps separate server for noteboard, or whatever)
 * slashdot-like moderation system on noteboards
-* online search through helpfiles (so like 'apropos sect' to find all
-  helppages with the word sect in them)
 
 -- not really code specific, but still open issues: --
 
