@@ -49,6 +49,9 @@ Wishlist for the 1.0.x tree
 
 * remove all references to grouping from core code, object grouping should
   be an output feature to remove client clutter
+
+* get rid of GObject.fromChar/toChar/etc., GObject should not know where
+  it is kept/contained, responsibility of GRoom/GCharacter etc.
      
 ! Bags and containers should be saveable
     
