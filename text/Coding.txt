@@ -49,8 +49,11 @@ The other units are quite specific to the server functionality itself.
 
 3. Design hints
 
-- Use as much OOP as possible. Try to encapsulate your stuff in classes.
-  I know this style hasn't propagated throughout the whole source yet, but in
-  time it will - especially when looking at the future modularized version of the MUD.
+- Try to code as generic as possible, so that others might be able to use 
+  your work.
+  
+- Use OOP wisely. Place much used code in classes to avoid redundancy,
+  and design your classes flexible.
 
+- Use the OOP extensions Delphi is giving you, most notably (published) properties.
 
