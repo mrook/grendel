@@ -64,7 +64,7 @@ procedure do_addcustom(ch : GCharacter; param : string);
 begin
   if (length(param) = 0) then
     begin
-    ch.sendBuffer('ADDCUSTOM <word to add to custom dictionary'#13#10);
+    ch.sendBuffer('ADDCUSTOM <word to add to custom dictionary>'#13#10);
     exit;
     end;
     
