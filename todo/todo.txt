@@ -23,6 +23,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! holywalk (walk thru anything)
 ! reimplement editing
 ! rework affects system
+! spells: Cure Poison
+! skill/spellslots
 
 
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
@@ -37,12 +39,10 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 	-> probably Schools	
 - more help text
 - skills: Disarm, Steal, Lockpick, Hide
-- spells: Cure Poison
 - reloadarea command
 - race specifics
   -> add field to race format for racial abilities like Infravision etc.
 - bugtrack/report system 
-- skill/spellslots
 - practice sessions
 - modularized mud, pluggable objects (like timers, sets of commands, etc.)
 - spells: Mistform (walk thru doors, ethereal bla)
@@ -61,6 +61,7 @@ l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
 l mud police!
 l online suggest (pray) history
+l mobprog compiling to some sort of pseudo stack machine code
 
 -- not really code specific, but still open issues: --
 
