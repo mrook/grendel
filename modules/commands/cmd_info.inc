@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.15 2003/11/03 15:51:02 hemko Exp $
+// $Id: cmd_info.inc,v 1.16 2003/11/07 16:31:52 hemko Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1882,11 +1882,34 @@ begin
 end;
 
 { Last-login of player - Nemesis }
-procedure do_last(ch:GCharacter;param:string);
+procedure do_last(ch : GCharacter; param : string);
+
+function calcTimeDiff(last : TDateTime) : string;
+var tim : TDateTime;
+    days, hours, minutes, seconds : integer;
+begin
+  tim := Now;
+
+  days := DiffDays(last, Now);
+  hours := DiffHours(last, Now);
+  minutes := DiffMinutes(last, Now);
+  seconds := DiffSeconds(last, Now);
+
+  dec(seconds, 60 * minutes);
+  dec(minutes, 60 * hours);
+  dec(hours, 24 * days);
+
+  result := IntToStr(days) + ' day(s), ' +
+            IntToStr(hours) + ' hour(s), ' +
+            IntToStr(minutes) + ' minute(s) and ' +
+            IntToStr(seconds) + ' second(s)';
+end;
+
 var vict : GCharacter;
-    s, g, arg, arg2, race, last_login : string;
+    s, g, arg, arg2, race : string;
     f : textfile;
     level : integer;
+    last : TDateTime;
 begin
   level := 0;
   param := one_argument(param, arg);
@@ -1911,8 +1934,6 @@ begin
     end
   else
     begin
-    last_login := '';
-
     if (not FileExists('players\' + arg + '.usr')) then
       begin
       ch.sendBuffer('That player is not found on your side.'#13#10);
@@ -1935,19 +1956,22 @@ begin
           race := right(s, ' ')
         else
         if (g = 'LAST-LOGIN') then
-          last_login := right(s, ' ');
+          last := StrToDateTime(right(s, ' '));
 
       until eof(f);
 
       closefile(f);
 
       if (uppercase(arg2) = 'INFO') then
-        act(AT_REPORT,arg + ' is a level ' + inttostr(level) + ' ' + race + '.',false,ch,nil,nil,TO_CHAR);
-
-      if (length(last_login) = 0) then
+        act(AT_REPORT,arg + ' is a level ' + inttostr(level) + ' ' + race + '.', false, ch, nil, nil, TO_CHAR);
+        
+      if (last = 0) then
         act(AT_REPORT, arg + ' has been away too long to remember.', false, ch, nil, nil, TO_CHAR)
       else
-        act(AT_REPORT,arg + ' was last on at: ' + last_login + '.',false,ch,nil,nil,TO_CHAR);
+        begin
+        act(AT_REPORT, arg + ' was last on at: ' + FormatDateTime('ddd mmm dd hh:nn:ss yyyy', last) + '.', false, ch, nil, nil, TO_CHAR);
+        act(AT_REPORT,'This is ' + calcTimeDiff(last) + ' ago.', false, ch, nil, nil, TO_CHAR);
+        end;
       end;
     end;
 end;

@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.23 2003/10/30 19:48:27 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.24 2003/11/07 16:31:52 hemko Exp $)
 }
 
 unit util;
@@ -40,6 +40,7 @@ function mudAnsi(color : integer) : string;
 function isName(name, substr : string) : boolean;
 function isObjectName(name, substr : string) : boolean;
 
+function DiffSeconds (const D1, D2 : TDateTime) : Integer;
 function DiffMinutes (const D1, D2 : TDateTime) : Integer;
 function DiffHours (const D1, D2 : TDateTime) : Integer;
 function DiffDays (const D1, D2 : TDateTime) : Integer;
@@ -53,8 +54,8 @@ function escape(str : string) : string;
 implementation
 
 uses
-	FastStrings,
-	constants;
+  FastStrings,
+  constants;
 
 // returns value if min <= value <= max, or min when value < min
 // or max when value > max
@@ -290,6 +291,11 @@ const
   OneSecond      = OneMinute / 60.0;
   OneMillisecond = OneSecond / 1000.0;
 
+function DiffSeconds (const D1, D2 : TDateTime) : Integer;
+begin
+  Result := Trunc ((D2 - D1) / OneSecond);
+end;
+
 function DiffMinutes (const D1, D2 : TDateTime) : Integer;
 begin
   Result := Trunc ((D2 - D1) / OneMinute);
@@ -354,49 +360,49 @@ end;
 
 function removeQuotes(str : string) : string;
 var
-	s : string;
-	x : integer;
+  s : string;
+  x : integer;
 begin
-	if (length(str) = 0) then
-		begin
-		Result := '';
-		exit;
-		end;
-			
-	x := 1;
-	s := '';
-	
-	while (x <= length(str)) do
-		begin
-		if (str[x] = '\') then
-			inc(x);
-		
-		s := s + str[x];
-		inc(x);
-		end;
+  if (length(str) = 0) then
+    begin
+    Result := '';
+    exit;
+    end;
+      
+  x := 1;
+  s := '';
+  
+  while (x <= length(str)) do
+    begin
+    if (str[x] = '\') then
+      inc(x);
+    
+    s := s + str[x];
+    inc(x);
+    end;
 
-	if (s[1] = '"') then
-		s[1] := ' ';
-	
-	if (s[length(s)] = '"') then
-		s[length(s)] := ' ';
-		
-	Result := Trim(s);
+  if (s[1] = '"') then
+    s[1] := ' ';
+  
+  if (s[length(s)] = '"') then
+    s[length(s)] := ' ';
+    
+  Result := Trim(s);
 end;
 
 function escape(str : string) : string;
 var
-	i : integer;
+  i : integer;
 begin
-	Result := '';
-	
-	for i := 1 to length(str) do
-		begin
-		if (str[i] in ['"','\']) then
-			Result := Result + '\';
-			
-		Result := Result + str[i];
-		end;
+  Result := '';
+  
+  for i := 1 to length(str) do
+    begin
+    if (str[i] in ['"','\']) then
+      Result := Result + '\';
+      
+    Result := Result + str[i];
+    end;
 end;
 
 end.
