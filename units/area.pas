@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.67 2003/11/03 13:23:21 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.68 2003/12/09 22:39:24 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -687,6 +687,12 @@ begin
 
       wear_location1 := af.readToken;
       wear_location2 := af.readToken;
+      
+      if (IntToStr(StrToIntDef(wear_location1, 0)) = wear_location1) then
+      	writeConsole('hint on line ' + IntToStr(af.line) + ': wear_location1 no longer numeric (now ' + wear_location1 + ')');
+      	
+      if (IntToStr(StrToIntDef(wear_location2, 0)) = wear_location2) then
+      	writeConsole('hint on line ' + IntToStr(af.line) + ': wear_location2 no longer numeric (now ' + wear_location2 + ')');
       
       if (wear_location1 = 'none') then
         wear_location1 := '';
