@@ -1,3 +1,5 @@
+// $Id: timers.pas,v 1.10 2001/04/26 21:44:42 xenon Exp $
+
 unit timers;
 
 interface
