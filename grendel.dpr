@@ -289,8 +289,9 @@ begin
      if (skill_table[n] <> nil) then
       begin
       skill_table[n].prereqs.smallClean;
+      skill_table[n].affects.smallClean;
       skill_table[n].prereqs.Free;
-      skill_table[n].affect.Free;
+      skill_table[n].affects.Free;
       skill_table[n].Free;
       end;
 
@@ -566,7 +567,6 @@ end;
 
 procedure boot_mud;
 var s : string;
-    t : TInAddr;
 begin
   { open a standard log file, filename is given by current system time }
   TimeSeparator := '_';

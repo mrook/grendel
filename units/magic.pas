@@ -31,20 +31,23 @@ begin
   saving_throw:=number_percent<=chance;
 end;
 
-procedure spell_acid_arrow(ch,victim:GCharacter;sn:integer);
-var af:GAffect;
+procedure spell_acid_arrow(ch, victim : GCharacter; sn : integer);
+var af : GAffect;
 begin
-  if saving_throw(ch.level,victim.point.save_poison,victim) then
+  if (saving_throw(ch.level,victim.point.save_poison,victim)) then
     begin
     act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
     damage(ch,victim,40,sn);
     end
   else
     begin
-    af.sn:=sn;
-    af.duration:=(ch.level div 8);
-    af.aff_flag:=AFF_POISON;
-    doAffect(victim,af);
+    af.sn := sn;
+    af.duration := (ch.level div 8);
+    af.apply_type := APPLY_AFFECT;
+    af.modifier := AFF_POISON;
+
+    af.applyTo(victim);
+
     damage(ch,victim,55,sn);
     end;
 end;
@@ -76,11 +79,13 @@ begin
     end
   else
     begin
-    af := GAffect.Create;
-    af.sn:=sn;
-    af.duration:=(ch.level div 8);
-    af.aff_flag:=AFF_POISON;
-    doAffect(victim,af);
+    af.sn := sn;
+    af.duration := (ch.level div 8);
+    af.apply_type := APPLY_AFFECT;
+    af.modifier := AFF_POISON;
+
+    af.applyTo(victim);
+
     act(AT_SPELL,'You have succesfully poisoned $N!',false,ch,nil,victim,TO_CHAR);
     act(AT_SPELL,'You are poisoned!',false,ch,nil,victim,TO_VICT);
     act(AT_SPELL,'$N has been poisoned!',false,ch,nil,victim,TO_NOTVICT);
@@ -239,8 +244,20 @@ begin
 end;
 
 procedure spell_affect(ch,caster:GCharacter;sn:integer);
+var
+   node : GListNode;
+   aff : GAffect;
 begin
-  doAffect(ch,skill_table[sn].affect);
+  node := skill_table[sn].affects.head;
+
+  while (node <> nil) do
+    begin
+    aff := node.element;
+
+    aff.applyTo(ch);
+
+    node := node.next;
+    end;
 end;
 
 procedure spell_generic(ch,victim:GCharacter;sn:integer);
@@ -355,7 +372,7 @@ begin
         damage(ch,vict,dam,sn);
         end;
 
-      if (not vict.CHAR_DIED) and (affect <> nil) then
+      if (not vict.CHAR_DIED) and (affects.getSize() > 0) then
         spell_affect(vict,ch,sn);
 
       case target of

@@ -60,6 +60,7 @@ type
       name, short, long : PString;
       area : GArea;
       flags : cardinal;
+      affects : GDLinkedList;
       item_type,wear1,wear2:integer;
       value : GObjectValues;
       weight:integer;
@@ -251,7 +252,7 @@ destructor GNPCIndex.Destroy;
 begin
   programs.clean;
   programs.Destroy;
-  
+
   inherited Destroy;
 end;
 
@@ -554,10 +555,11 @@ procedure GArea.loadObjects;
 var s:string;
     num:integer;
     o_index:GObjectIndex;
+    aff : GAffect;
 begin
-  repeat
-    s := af.readLine;
+  s := af.readLine;
 
+  repeat
     if (uppercase(s) = '#END') then
       exit;
 
@@ -576,6 +578,7 @@ begin
       end;
 
     o_index := GObjectIndex.Create;
+    o_index.affects := GDLinkedList.Create;
     o_index.area := Self;
 
     with o_index do
@@ -619,6 +622,21 @@ begin
       cost := af.readInteger;
 
       obj_count:=0;
+
+      s := af.readWord;
+
+      if (s = 'A') then
+        begin
+        aff := GAffect.Create;
+
+        aff.sn := -1;
+        aff.apply_type := findApply(af.readWord);
+        aff.modifier := af.readInteger;
+        aff.duration := af.readInteger;
+        aff.node := affects.insertLast(aff);
+
+        s := af.readLine;
+        end;
       end;
 
     obj_list.insertLast(o_index);

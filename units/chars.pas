@@ -5,7 +5,7 @@ interface
 uses
     SysUtils,
     Math,
-    Winsock,
+    Winsock2,
     constants,
     strip,
     area,
@@ -20,16 +20,6 @@ uses
 
 type
     GCharacter = class;
-
-    GAffect = class
-      sn : integer;
-      aff_type : char;
-      aff_flag : longint;
-      duration : longint;
-      modifier : longint;
-
-      node : GListNode;
-    end;
 
     GTrophy = record
       name : string;
@@ -175,6 +165,7 @@ type
       function IS_SHOPKEEPER : boolean;
       function IS_OUTSIDE : boolean;
       function IS_AFFECT(affect : integer) : boolean;
+      function IS_DRUNK : boolean;
       function CAN_FLY : boolean;
       function CAN_SEE(vict : GCharacter) : boolean;
       function IS_AFK : boolean;
@@ -234,8 +225,6 @@ uses
     mudthread;
 
 constructor GCharacter.Create;
-var
-   h : integer;
 begin
   inherited Create;
 
@@ -256,8 +245,6 @@ end;
 
 destructor GCharacter.Destroy;
 var
-   s : integer;
-   node : GListNode;
    obj : GObject;
 begin
   if (player <> nil) then
@@ -562,6 +549,14 @@ end;
 function GCharacter.IS_AFFECT(affect : integer) : boolean;
 begin
   IS_AFFECT := IS_SET(aff_flags, affect);
+end;
+
+function GCharacter.IS_DRUNK : boolean;
+begin
+  if (IS_NPC) then
+    IS_DRUNK := false
+  else
+    IS_DRUNK := (player^.condition[COND_DRUNK] > 80);
 end;
 
 function GCharacter.CAN_FLY : boolean;
@@ -1015,18 +1010,18 @@ begin
             begin
             sn := findSkill(g);
 
-            g:=stripl(a,' ');
-            aff_type:=g[1];
-            a:=striprbeg(a,' ');
-            duration:=strtoint(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            modifier:=strtoint(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            aff_flag:=strtoint(stripl(a,' '));
+            g := stripl(a, ' ');
+            apply_type := findApply(g);
+
+            a := striprbeg(a, ' ');
+            duration := strtointdef(stripl(a, ' '), 0);
+
+            a := striprbeg(a, ' ');
+            modifier := strtointdef(stripl(a, ' '), 0);
             end;
 
           if (aff.sn <> -1) then
-            doAffect(Self, aff);
+            aff.applyTo(Self);
           end;
       until (uppercase(a)='#END') or (af.eof);
 
@@ -1194,7 +1189,10 @@ var
    fl : cardinal;
 begin
   if (IS_NPC) then
+    begin
+    Result := false;
     exit;
+    end;
 
   assignfile(f, 'players\' + fn + '.usr');
 
@@ -1300,7 +1298,7 @@ begin
 
     with aff do
       writeln(f,'Affect: ''',skill_table[sn].name,''' ',
-               aff_type,' ',duration,' ',modifier,' ',aff_flag);
+               integer(apply_type), ' ', duration, ' ', modifier);
 
     node := node.next;
     end;
@@ -1768,6 +1766,9 @@ begin
 end;
 
 procedure GCharacter.affectObject(obj : GObject; remove : boolean);
+var
+   node : GListNode;
+   aff : GAffect;
 begin
   with obj do
     case obj.item_type of
@@ -1777,6 +1778,20 @@ begin
                   dec(point.max_mana, obj.value[3])
                 else
                   inc(point.max_mana, obj.value[3]);
+    end;
+
+  if (obj.obj_index <> nil) then
+    begin
+    node := obj.obj_index.affects.head;
+
+    while (node <> nil) do
+      begin
+      aff := node.element;
+
+      aff.modify(Self, not remove);
+
+      node := node.next;
+      end;
     end;
 end;
 
@@ -1860,7 +1875,7 @@ end;
 
 procedure GCharacter.calcAC;
 var
-   i,dex_mod:integer;
+   dex_mod:integer;
    node : GListNode;
    obj : GObject;
 begin

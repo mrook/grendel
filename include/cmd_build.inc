@@ -348,25 +348,6 @@ begin
      	if (victim.npc_index.programs.getSize > 0) then
        	buf1 := buf1 + 'Mobile has mobprogs.' + #13#10;
 
-
-  paf_node := victim.affects.head;
-  while paf_node <> nil do
-  begin
-  	paf := GAffect(paf_node.element);
-
-   buf := Format('Spell: "%s" modifies %s by %d for %d hours with bits %s.' 
-+ #13#10,
-                 [skill_table[paf.sn].name,
-                 '?', // affLocName(paf.location
-                 paf.modifier,
-                 paf.duration,
-                 affectBitName(paf.aff_flag)]);
-
-   buf1 := buf1 + buf;
-
-   paf_node := paf_node.next;
-  end;
-
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 end;
 
@@ -1222,7 +1203,9 @@ begin
 
   num:=0;
   act(AT_REPORT, '$B$1[$B$7Nr$B$1] [$B$7VNum$B$1]  [$B$7Name$B$1]$A$7',false,ch,nil,nil,TO_CHAR);
+
   node := obj_list.head;
+
   while (node <> nil) do
     begin
     obj := node.element;

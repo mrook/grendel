@@ -450,7 +450,7 @@ begin
   { thx to Haus for the following lines - Grimlord }
   if (not ch.IS_NPC) then
     begin
-    if (ch.player^.condition[COND_DRUNK]>10) then
+    if (ch.IS_DRUNK) then
       ch.sendBuffer('   Thou art drunk.'#13#10);
 
     if (ch.player^.condition[COND_THIRST]=0) then
@@ -1245,35 +1245,36 @@ begin
     begin
     aff := node.element;
 
-    with aff do
-      begin
-      buf := skill_table[sn].name + ', which will wear off';
+    if (aff.sn <> -1) then
+      with aff do
+        begin
+        buf := skill_table[sn].name + ', which will wear off';
 
-      if duration=1 then
-        buf := buf + ' any moment'
-      else
-      if duration<4 then
-        buf := buf + ' in a few hours'
-      else
-      if duration<7 then
-        buf := buf + ' in about a quarter of a day'
-      else
-      if duration<13 then
-        buf := buf + ' in half a day'
-      else
-      if duration<25 then
-        buf := buf + ' in about a day'
-      else
-      if duration<49 then
-        buf := buf + ' in a day or two'
-      else
-        buf := buf + ' after several days';
+        if duration=1 then
+          buf := buf + ' any moment'
+        else
+        if duration<4 then
+          buf := buf + ' in a few hours'
+        else
+        if duration<7 then
+          buf := buf + ' in about a quarter of a day'
+        else
+        if duration<13 then
+          buf := buf + ' in half a day'
+        else
+        if duration<25 then
+          buf := buf + ' in about a day'
+        else
+        if duration<49 then
+          buf := buf + ' in a day or two'
+        else
+          buf := buf + ' after several days';
 
-      buf := buf + '.'#13#10;
+        buf := buf + '.'#13#10;
 
-      ch.sendBuffer(buf);
-      inc(h);
-      end;
+        ch.sendBuffer(buf);
+        inc(h);
+        end;
 
     node := node.next;
     end;
