@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.9 2004/05/18 09:22:28 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.10 2004/05/18 12:08:12 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var 
@@ -505,156 +505,185 @@ begin
 end;
 
 procedure do_score(ch : GCharacter; param : string);
-var buf1 : string;
-    i:integer;
+var 
+	buf1 : string;
+	i, j, minh, maxh : integer;
 begin
-  buf1 := ' $8[$4*$8]$3 ' + add_chars(70, '---- Your score ', '-') + ' $8[$4*$8]';
-  act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
+	buf1 := ' $8[$4*$8]$3 ' + add_chars(70, '---- Your score ', '-') + ' $8[$4*$8]';
+	act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 
-  if (not ch.IS_NPC) and (not ch.IS_IMMORT) then
-    begin
-    act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art known as $B$6' + GPlayer(ch).rank+'$A$7 amongst'+
-        ' thy $B$4'+ch.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).xptot)+'$A$7 experience points'+
-        ' and need $B$3'+inttostr(GPlayer(ch).xptogo)+'$A$7 to level.',false,ch,nil,nil,TO_CHAR);
-    end
-  else
-  if (ch.IS_IMMORT) then
-    act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
+	if (not ch.IS_NPC) and (not ch.IS_IMMORT) then
+		begin
+		act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art known as $B$6' + GPlayer(ch).rank+'$A$7 amongst'+
+		' thy $B$4'+ch.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,nil,TO_CHAR);
+		act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).xptot)+'$A$7 experience points'+
+		' and need $B$3'+inttostr(GPlayer(ch).xptogo)+'$A$7 to level.',false,ch,nil,nil,TO_CHAR);
+		end
+	else
+	if (ch.IS_IMMORT) then
+		act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
 
-  if (not ch.IS_NPC) then
-    act(AT_REPORT,'   Thou art $B$3'+inttostr(GPlayer(ch).getAge)+'$A$7 years of age ('+inttostr(GPlayer(ch).getPlayed div 60)+' hours).'#13#10,false,ch,nil,nil,TO_CHAR);
+	if (ch.sex = 1) then
+		begin
+		minh := (ch.race.avgheight_female * (100 - ch.race.avgheight_adjust)) div 100;
+		maxh := (ch.race.avgheight_female * (100 + ch.race.avgheight_adjust)) div 100;
+		end
+	else
+		begin
+		minh := (ch.race.avgheight_male * (100 - ch.race.avgheight_adjust)) div 100;
+		maxh := (ch.race.avgheight_male * (100 + ch.race.avgheight_adjust)) div 100;
+		end;
 
-  act(AT_REPORT,'   Health:   $B$3'+pad_integer(ch.hp,5)+'$A$7/$B$3'+pad_integer(ch.max_hp,5)+
-                '$A$7     Attack Power Bonus: $B$3'+pad_integer(ch.apb,4)+
-                '$A$7     Total kills: $B$3'+inttostr(ch.kills),false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,'   Stamina:  $B$3'+pad_integer(ch.mv,5)+'$A$7/$B$3'+pad_integer(ch.max_mv,5)+
-                '$A$7     Hitroll:            $B$3'+pad_integer(ch.hitroll,4)+
-                '$A$7     Alignment:   $B$3'+inttostr(ch.alignment),false,ch,nil,nil,TO_CHAR);
+	j := Max(1, maxh - minh);
+	i := Max(0, ((ch.height - minh) * 100) div j);
+	
+	if (i >= 0) and (i < 20) then
+		act(AT_REPORT, '   You are considered small by your people.', false, ch, nil, nil, TO_CHAR)
+	else
+	if (i >= 20) and (i < 40) then
+		act(AT_REPORT, '   You are considered relatively small by your people.', false, ch, nil, nil, TO_CHAR)
+	else
+	if (i >= 40) and (i < 60) then
+		act(AT_REPORT, '   You are considered of average length by your people.', false, ch, nil, nil, TO_CHAR)
+	else
+	if (i >= 60) and (i < 80) then
+		act(AT_REPORT, '   You are considered relatively tall by your people.', false, ch, nil, nil, TO_CHAR)
+	else
+	if (i >= 80) then
+		act(AT_REPORT, '   You are considered tall by your people.', false, ch, nil, nil, TO_CHAR);
 
-  if (ch.IS_NPC) then
-    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.mana,5)+'$A$7/$B$3'+pad_integer(ch.max_mana,5)+
-                  '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+#13#10,false,ch,nil,nil,TO_CHAR)
-  else
-    act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.mana,5)+'$A$7/$B$3'+pad_integer(ch.max_mana,5)+
-                  '$A$7     Level:              $B$3'+pad_integer(ch.level,4)+
-                  '$A$7     Wimpy:       $B$3'+inttostr(GPlayer(ch).wimpy)+#13#10,false,ch,nil,nil,TO_CHAR);
+	if (not ch.IS_NPC) then
+		act(AT_REPORT,'   Thou art $B$3'+inttostr(GPlayer(ch).getAge)+'$A$7 years of age ('+inttostr(GPlayer(ch).getPlayed div 60)+' hours).'#13#10,false,ch,nil,nil,TO_CHAR);
 
-  if (ch.IS_IMMORT) and (ch.IS_WIZINVIS) then
-    act(AT_REPORT,'   WizLevel: $B$3'+pad_integer(GPlayer(ch).wiz_level,3)+#13#10,false,ch,nil,nil,TO_CHAR);
+	act(AT_REPORT,'   Health:   $B$3'+pad_integer(ch.hp,5)+'$A$7/$B$3'+pad_integer(ch.max_hp,5)+
+		'$A$7     Attack Power Bonus: $B$3'+pad_integer(ch.apb,4)+
+		'$A$7     Total kills: $B$3'+inttostr(ch.kills),false,ch,nil,nil,TO_CHAR);
+	act(AT_REPORT,'   Stamina:  $B$3'+pad_integer(ch.mv,5)+'$A$7/$B$3'+pad_integer(ch.max_mv,5)+
+		'$A$7     Hitroll:            $B$3'+pad_integer(ch.hitroll,4)+
+		'$A$7     Alignment:   $B$3'+inttostr(ch.alignment),false,ch,nil,nil,TO_CHAR);
 
-  if (not ch.IS_NPC) then
-    act(AT_REPORT,'   You have $B$3'+IntToStr(GPlayer(ch).pracs)+'$A$7 practice sessions left.',false,ch,nil,nil,TO_CHAR);
+	if (ch.IS_NPC) then
+		act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.mana,5)+'$A$7/$B$3'+pad_integer(ch.max_mana,5)+
+			'$A$7     Level:              $B$3'+pad_integer(ch.level,4)+#13#10,false,ch,nil,nil,TO_CHAR)
+	else
+		act(AT_REPORT,'   Mana:     $B$3'+pad_integer(ch.mana,5)+'$A$7/$B$3'+pad_integer(ch.max_mana,5)+
+			'$A$7     Level:              $B$3'+pad_integer(ch.level,4)+
+			'$A$7     Wimpy:       $B$3'+inttostr(GPlayer(ch).wimpy)+#13#10,false,ch,nil,nil,TO_CHAR);
 
-  if (not ch.IS_NPC) then
-    act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).bg_points)+'$A$7 battleground points.',false,ch,nil,nil,TO_CHAR);
+	if (ch.IS_IMMORT) and (ch.IS_WIZINVIS) then
+		act(AT_REPORT,'   WizLevel: $B$3'+pad_integer(GPlayer(ch).wiz_level,3)+#13#10,false,ch,nil,nil,TO_CHAR);
 
-  if (ch.getTrust > ch.level) then
-    act(AT_REPORT,'   Thou art trusted by the gods at level '+inttostr(ch.getTrust)+'.',false,ch,nil,nil,TO_CHAR);
+	if (not ch.IS_NPC) then
+		act(AT_REPORT,'   You have $B$3'+IntToStr(GPlayer(ch).pracs)+'$A$7 practice sessions left.',false,ch,nil,nil,TO_CHAR);
 
-  { thx to Haus for the following lines - Grimlord }
-  if (not ch.IS_NPC) then
-    begin
-    if (ch.IS_DRUNK) then
-      ch.sendBuffer('   Thou art drunk.'#13#10);
+	if (not ch.IS_NPC) then
+		act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(GPlayer(ch).bg_points)+'$A$7 battleground points.',false,ch,nil,nil,TO_CHAR);
 
-    if (GPlayer(ch).condition[COND_THIRST]=0) then
-      ch.sendBuffer('   Thou art dehydrating.'#13#10);
+	if (ch.getTrust > ch.level) then
+		act(AT_REPORT,'   Thou art trusted by the gods at level '+inttostr(ch.getTrust)+'.',false,ch,nil,nil,TO_CHAR);
 
-    if (GPlayer(ch).condition[COND_FULL]=0) then
-      ch.sendBuffer('   Thou art starving to death.'#13#10);
-    end;
+	{ thx to Haus for the following lines - Grimlord }
+	if (not ch.IS_NPC) then
+		begin
+		if (ch.IS_DRUNK) then
+			ch.sendBuffer('   Thou art drunk.'#13#10);
 
-  if (ch.state <> STATE_SLEEPING) then
-   case ch.mental_state div 10 of
-     -10:ch.sendBuffer('   You are barely conscious.'#13#10);
-      -9:ch.sendBuffer('   You can barely keep your eyes open.'#13#10);
-      -8:ch.sendBuffer('   You are extremely drowsy.'#13#10);
-      -7:ch.sendBuffer('   You feel very unmotivated.'#13#10);
-      -6:ch.sendBuffer('   You feel sedated.'#13#10);
-      -5:ch.sendBuffer('   You feel sleepy.'#13#10);
-      -4:ch.sendBuffer('   You feel tired.'#13#10);
-      -3:ch.sendBuffer('   You could use a rest.'#13#10);
-      -2:ch.sendBuffer('   You feel okay.'#13#10);
-      -1:ch.sendBuffer('   You feel fine.'#13#10);
-       0:ch.sendBuffer('   You feel great.'#13#10);
-       1:ch.sendBuffer('   You feel energetic.'#13#10);
-       2:ch.sendBuffer('   Your mind is racing.'#13#10);
-       3:ch.sendBuffer('   You cannot think normally.'#13#10);
-       4:ch.sendBuffer('   You are very much off balance.'#13#10);
-       5:ch.sendBuffer('   Your mind seems to be exploding.'#13#10);
-       6:ch.sendBuffer('   Your mind and body are losing their connection.'#13#10);
-       7:ch.sendBuffer('   Reality is slipping away.'#13#10);
-       8:ch.sendBuffer('   You have no idea of what is real and what not.'#13#10);
-       9:ch.sendBuffer('   You feel like a god.'#13#10);
-      10:ch.sendBuffer('   You feel a rival of Grimlord.'#13#10);
-    else
-      ch.sendBuffer('   Help! You are completely messed up!'#13#10);
-    end
-  else
-  if (ch.mental_state>45) then
-    ch.sendBuffer('   Your sleep is filled with strange dreams.'#13#10)
-  else
-  if (ch.mental_state>25) then
-   ch.sendBuffer('   Your sleep is uneasy.'#13#10)
-  else
-  if (ch.mental_state<-35) then
-    ch.sendBuffer('   Your body relaxes as you are deep in a much needed sleep.'#13#10)
-  else
-  if (ch.mental_state<-25) then
-    ch.sendBuffer('   You are in deep slumber.'#13#10);
+		if (GPlayer(ch).condition[COND_THIRST]=0) then
+			ch.sendBuffer('   Thou art dehydrating.'#13#10);
 
-  if (not ch.IS_NPC) then
-    begin
-    act(AT_REPORT,'   Thou art carrying $B$2'+inttostr(ch.gold)+'$A$7 coins and hast $B$2'+
-                  inttostr(GPlayer(ch).bankgold)+'$A$7 coins stored at a bank.',false,ch,nil,nil,TO_CHAR);
+		if (GPlayer(ch).condition[COND_FULL]=0) then
+			ch.sendBuffer('   Thou art starving to death.'#13#10);
+		end;
 
-    i := (ch.carried_weight*10) div ((ch.str div 2) + 10);
+	if (ch.state <> STATE_SLEEPING) then
+		case ch.mental_state div 10 of
+			-10:ch.sendBuffer('   You are barely conscious.'#13#10);
+			-9:ch.sendBuffer('   You can barely keep your eyes open.'#13#10);
+			-8:ch.sendBuffer('   You are extremely drowsy.'#13#10);
+			-7:ch.sendBuffer('   You feel very unmotivated.'#13#10);
+			-6:ch.sendBuffer('   You feel sedated.'#13#10);
+			-5:ch.sendBuffer('   You feel sleepy.'#13#10);
+			-4:ch.sendBuffer('   You feel tired.'#13#10);
+			-3:ch.sendBuffer('   You could use a rest.'#13#10);
+			-2:ch.sendBuffer('   You feel okay.'#13#10);
+			-1:ch.sendBuffer('   You feel fine.'#13#10);
+			0:ch.sendBuffer('   You feel great.'#13#10);
+			1:ch.sendBuffer('   You feel energetic.'#13#10);
+			2:ch.sendBuffer('   Your mind is racing.'#13#10);
+			3:ch.sendBuffer('   You cannot think normally.'#13#10);
+			4:ch.sendBuffer('   You are very much off balance.'#13#10);
+			5:ch.sendBuffer('   Your mind seems to be exploding.'#13#10);
+			6:ch.sendBuffer('   Your mind and body are losing their connection.'#13#10);
+			7:ch.sendBuffer('   Reality is slipping away.'#13#10);
+			8:ch.sendBuffer('   You have no idea of what is real and what not.'#13#10);
+			9:ch.sendBuffer('   You feel like a god.'#13#10);
+			10:ch.sendBuffer('   You feel a rival of Grimlord.'#13#10);
+		else
+			ch.sendBuffer('   Help! You are completely messed up!'#13#10);
+		end
+	else
+	if (ch.mental_state>45) then
+		ch.sendBuffer('   Your sleep is filled with strange dreams.'#13#10)
+	else
+	if (ch.mental_state>25) then
+		ch.sendBuffer('   Your sleep is uneasy.'#13#10)
+	else
+	if (ch.mental_state<-35) then
+		ch.sendBuffer('   Your body relaxes as you are deep in a much needed sleep.'#13#10)
+	else
+	if (ch.mental_state<-25) then
+		ch.sendBuffer('   You are in deep slumber.'#13#10);
 
-    if i<25 then
-      buf1 := 'You are unburdened'
-    else
-    if i<50 then
-      buf1 := 'No trouble carrying this'
-    else
-    if i<75 then
-      buf1 := 'No problem yet'
-    else
-    if i<100 then
-      buf1 := 'Heavy, but not unbearable'
-    else
-    if i<125 then
-      buf1 := 'Quite heavy'
-    else
-    if i<150 then
-      buf1 := 'You are slowed by this'
-    else
-    if i<175 then
-      buf1 := 'VERY heavy'
-    else
-    if i<200 then
-      buf1 := 'Almost unbearable'
-    else
-      buf1 := 'Unbearable';
+	if (not ch.IS_NPC) then
+		begin
+		act(AT_REPORT,'   Thou art carrying $B$2'+inttostr(ch.gold)+'$A$7 coins and hast $B$2'+
+		inttostr(GPlayer(ch).bankgold)+'$A$7 coins stored at a bank.',false,ch,nil,nil,TO_CHAR);
 
-    act(AT_REPORT,'   Thou art carrying a weight of $B$2'+inttostr(ch.carried_weight)+'$A$7 kg(s). ($B$7'+buf1+'$A$7)',false,ch,nil,nil,TO_CHAR);
-    end;
+		i := (ch.carried_weight*10) div ((ch.str div 2) + 10);
 
-  if (not ch.IS_NPC) and (GPlayer(ch).clanleader) then
-    act(AT_REPORT,'   Thou art the great leader of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR)
-  else
-  if (ch.clan <> nil) then
-    act(AT_REPORT,'   Thou art a proud member of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR);
+		if i<25 then
+			buf1 := 'You are unburdened'
+		else
+		if i<50 then
+			buf1 := 'You have no trouble carrying your load'
+		else
+		if i<75 then
+			buf1 := 'You are sweating under your load'
+		else
+		if i<100 then
+			buf1 := 'Your load is heavy, but not unbearable'
+		else
+		if i<125 then
+			buf1 := 'Your load is quite heavy'
+		else
+		if i<150 then
+			buf1 := 'You are slowed by your load'
+		else
+		if i<175 then
+			buf1 := 'Your load is VERY heavy'
+		else
+		if i<200 then
+			buf1 := 'Your load is almost unbearable'
+		else
+			buf1 := 'Unbearable';
 
-  if (not ch.IS_NPC) then
-   if GPlayer(ch).area_fname<>'' then
-    act(AT_REPORT,'   Thou hast been assigned $B$7'+GPlayer(ch).area_fname+'$A$7. '#13#10+
-        '   Thee construction ranges art: '+inttostr(GPlayer(ch).r_lo)+' '+inttostr(GPlayer(ch).r_hi)+' '+
-        inttostr(GPlayer(ch).m_lo)+' '+inttostr(GPlayer(ch).m_hi)+' '+
-        inttostr(GPlayer(ch).o_lo)+' '+inttostr(GPlayer(ch).o_hi)+'.',false,ch,nil,nil,TO_CHAR);
+		act(AT_REPORT,'   Thou art carrying a weight of $B$2'+inttostr(ch.carried_weight)+'$A$7 kg(s). ($B$7'+buf1+'$A$7)',false,ch,nil,nil,TO_CHAR);
+		end;
 
-  buf1 := #13#10' $8[$4*$8]$3 ' + add_chars(70, '', '-') + ' $8[$4*$8]';
-  act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
+	if (not ch.IS_NPC) and (GPlayer(ch).clanleader) then
+		act(AT_REPORT,'   Thou art the great leader of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR)
+	else
+	if (ch.clan <> nil) then
+		act(AT_REPORT,'   Thou art a proud member of $B$3'+ch.clan.name+'$A$7.',false,ch,nil,nil,TO_CHAR);
+
+	if (not ch.IS_NPC) and (GPlayer(ch).area_fname <> '') then
+		act(AT_REPORT,'   Thou hast been assigned $B$7'+GPlayer(ch).area_fname+'$A$7. '#13#10+
+			'   Thee construction ranges art: '+inttostr(GPlayer(ch).r_lo)+' '+inttostr(GPlayer(ch).r_hi)+' '+
+			inttostr(GPlayer(ch).m_lo)+' '+inttostr(GPlayer(ch).m_hi)+' '+
+			inttostr(GPlayer(ch).o_lo)+' '+inttostr(GPlayer(ch).o_hi)+'.',false,ch,nil,nil,TO_CHAR);
+
+	buf1 := #13#10' $8[$4*$8]$3 ' + add_chars(70, '', '-') + ' $8[$4*$8]';
+	act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 end;
 
 procedure do_stats(ch:GCharacter;param:string);
@@ -1858,7 +1887,7 @@ begin
 
   sReport := '"' + hp + '/' + max_hp + ' hp, ' +
              mana + '/' + max_mana + ' mana, ' +
-             mv + '/' + max_mv + ' mv." ' + #13#10;
+             mv + '/' + max_mv + ' mv." ';
 
   act(AT_REPORT, 'You report: ' + sReport , false, ch, nil, nil,TO_CHAR);
   act(AT_REPORT, '$n reports: ' + sReport, false, ch, nil, nil, TO_ROOM);
