@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.24 2004/03/13 19:14:43 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.25 2004/03/14 20:27:10 hemko Exp $
 }
 
 unit area;
@@ -1107,7 +1107,7 @@ begin
 			if (to_room = nil) then
 				begin
 				bugreport('processAreas()', 'area.pas', 'exit ' + headings[pexit.direction] +
-									' from room #' + IntToStr(room.vnum) + ' to unexisting room # '+ IntToStr(pexit.vnum));
+									' from room #' + IntToStr(room.vnum) + ' to unexisting room #' + IntToStr(pexit.vnum));
 
 				room.exits.remove(node_exit);
 
