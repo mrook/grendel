@@ -69,6 +69,8 @@ contains
   socket in 'units/socket.pas',
   console in 'units/console.pas';
 {$ELSE}
+  memdebug in 'units\memdebug.pas',
+  memcheck in 'units\memcheck.pas',
   ansiio in 'units\ansiio.pas',
   area in 'units\area.pas',
   bulletinboard in 'units\bulletinboard.pas',
@@ -87,7 +89,6 @@ contains
   LibXmlParser in 'units\LibXmlParser.pas',
   magic in 'units\magic.pas',
   md5 in 'units\md5.pas',
-  MemCheck in 'units\MemCheck.pas',
   mudhelp in 'units\mudhelp.pas',
   mudsystem in 'units\mudsystem.pas',
   mudthread in 'units\mudthread.pas',
