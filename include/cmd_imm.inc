@@ -238,7 +238,7 @@ begin
     act(AT_REPORT,'You suddenly feel a pressure on you...',false,vict,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have become more powerful!'#13#10,false,vict,nil,nil,TO_CHAR);
 
-    if (vict.level = 500) then
+    if (lev = 500) then
       begin
       { Set hps etc. to immortal level }
       vict.point.max_hp:=15000;
@@ -1514,3 +1514,50 @@ begin
     SET_BIT(ch.aff_flags, AFF_HOLYWALK);
     end;
 end;
+
+{ Xenon 20/Feb/2001: take an object from a player }
+procedure do_take(ch : GCharacter; param : string);
+var
+   victstr,objstr : string;
+   vict : GCharacter;
+   obj : GObject;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage:  TAKE <object> <character>'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param, objstr);
+  param := one_argument(param, victstr);
+
+  vict := findCharWorld(ch, victstr);
+
+  if (vict=nil) then
+    begin
+    ch.sendBuffer('That character does not exist.'#13#10);
+    exit;
+    end;
+
+  obj := vict.findEquipment(objstr);
+  if (obj = nil) then
+  obj := vict.findInventory(objstr);
+
+  if (obj = nil) then
+    begin
+    ch.sendBuffer('That character does not have that object.'#13#10);
+    exit;
+    end;
+
+  obj.wear_location := WEAR_NULL;       // put it in inv no matter what
+
+  obj.seperate;
+  obj.fromChar;
+  obj.toChar(ch);
+
+  act(AT_REPORT,'$N takes $p from you.',false, vict, obj, ch, TO_CHAR);
+  act(AT_REPORT,'$n takes $p from $N.',false, ch, obj, vict, TO_NOTVICT);
+  act(AT_REPORT,'You take $p from $N.',false, ch, obj, vict, TO_CHAR);
+end;
+
+

@@ -88,14 +88,6 @@ begin
   ch.sendBuffer('This is a DUMMY command. Please contact the ADMINISTRATION.'#13#10);
 end;
 
-function commandHash(size, prime : cardinal; key : string) : integer;
-begin
-  if (length(key) >= 1) then
-    Result := (byte(key[1]) * prime) mod size
-  else
-    Result := 0;
-end;
-
 function findCommand(s : string) : COMMAND_FUNC;
 var
    g : COMMAND_FUNC;
@@ -137,7 +129,7 @@ begin
     end;
 
   commands := GHashObject.Create(32);
-  commands.setHashFunc(commandHash);
+  commands.setHashFunc(firstHash);
 
   repeat
     repeat
@@ -1264,6 +1256,7 @@ begin
   registerCommand('do_hashstats', do_hashstats);
   registerCommand('do_keylock', do_keylock);
   registerCommand('do_holywalk', do_holywalk);
+  registerCommand('do_take', do_take);
 end;
 
 begin
