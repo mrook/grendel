@@ -92,6 +92,7 @@ procedure unhash_string(var src : PString);
 
 
 function defaultHash(size, prime : cardinal; key : string) : integer;
+function firstHash(size, prime : cardinal; key : string) : integer;
 
 implementation
 
@@ -285,6 +286,15 @@ begin
 
   defaultHash := val mod size;
 end;
+
+function firstHash(size, prime : cardinal; key : string) : integer;
+begin
+  if (length(key) >= 1) then
+    Result := (byte(key[1]) * prime) mod size
+  else
+    Result := 0;
+end;
+
 
 function GHashTable.findPrimes(n : integer) : GPrimes;
 var
