@@ -1,7 +1,7 @@
 .AUTODEPEND
 
 DCC=dcc32
-DCC_FLAGS=-Q -D- -W+ -O+
+DCC_FLAGS=-CC -Q -D- -W+ -O+
 
 GMCC=gmcc.exe
 GMCC_SOURCES=gmcc.dpr 
