@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.16 2004/05/18 12:07:08 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.17 2004/06/10 18:03:48 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -64,9 +64,13 @@ procedure initCommands();
 procedure loadCommands();
 procedure cleanupCommands();
 
+function cleanCommandLine(const line : string) : string;
+
 implementation
 
 uses
+	FastStrings,
+	FastStringFuncs,
     conns,
     fsys,
     strip,
@@ -238,18 +242,20 @@ begin
 end;
 
 // Strip '$' from commandline
-procedure clean_cmdline(var line : string);
+function cleanCommandLine(const line : string) : string;
 var
-   d : integer;
+	d : integer;
 begin
-  d := pos('$', line);
+	Result := line;
+	
+	d := FastCharPos(Result, '$', 1);
 
-  while (d > 0) do
-    begin
-    delete(line, d, 1);
+	while (d > 0) do
+		begin
+		delete(Result, d, 2);
 
-    d := pos('$', line);
-    end;
+		d := FastCharPos(Result, '$', d);
+		end;
 end;
 
 // Interpret the command
@@ -323,8 +329,6 @@ begin
   // Char is being snooped
   if (ch.snooped_by <> nil) then
     GPlayer(ch.snooped_by).conn.send(line + #13#10);
-
-  clean_cmdline(line);
 
   param := one_argument(line, cmdline);
   cmdline := uppercase(cmdline);
