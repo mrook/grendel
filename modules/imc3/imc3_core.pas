@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.13 2003/10/28 22:06:45 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.14 2003/10/29 12:59:14 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -61,7 +61,7 @@ type
 		procedure writeHeader(identifier, originator_mudname, originator_username, target_mudname, target_username : string);
 		
 		procedure sendError(mud, user, code, msg : string);
-		procedure sendChannelListen(channel : GChannel_I3; lconnect : boolean);
+		procedure sendChannelListen(user : string; channel : GChannel_I3; lconnect : boolean);
 		procedure sendChannelMessage(channel : GChannel_I3; name, msg : string);
 		procedure sendChannelEmote(channel : GChannel_I3; name, msg : string);
 		procedure sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
@@ -569,7 +569,13 @@ begin
 	
 	visname := GString(packet.fields[6]).value;
 	msg := GString(packet.fields[7]).value;
-	
+
+	if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_TELL)) then
+		begin
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting tells.');
+		exit;
+		end;
+
 	if (pl <> nil) then
 		pl.sendBuffer(Format('%s@%s tells you: %s' + #13#10, [visname, packet.originator_mudname, msg]))
 	else
@@ -587,6 +593,12 @@ begin
 	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
 	
 	visname := GString(packet.fields[6]).value;
+
+	if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_BEEP)) then
+		begin
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting beeps.');
+		exit;
+		end;
 	
 	if (pl <> nil) then
 		pl.sendBuffer(Format('%s@%s beeps you.'#7 + #13#10, [visname, packet.originator_mudname]))
@@ -828,9 +840,9 @@ begin
 end;
 
 // void I3_send_channel_listen( I3_CHANNEL *channel, bool lconnect ) 
-procedure GInterMud.sendChannelListen(channel : GChannel_I3; lconnect : boolean);
+procedure GInterMud.sendChannelListen(user : string; channel : GChannel_I3; lconnect : boolean);
 begin
-	writeHeader('channel-listen', this_mud.name, '', router.name, '');
+	writeHeader('channel-listen', this_mud.name, user, router.name, '');
 	writeBuffer('"');
 	writeBuffer(channel.I3_name);
 	writeBuffer('",');

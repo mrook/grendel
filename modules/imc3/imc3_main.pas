@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.11 2003/10/28 22:12:08 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.12 2003/10/29 12:59:15 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -16,11 +16,13 @@ implementation
 uses
 	SysUtils,
 	chars,
+	player,
 	commands,
 	dtypes,
 	util,
 	modules,
 	strip,
+	imc3_const,
 	imc3_chan,
 	imc3_mud,
 	imc3_core;
@@ -28,9 +30,18 @@ uses
 
 type
   GInterMudModule = class(TInterfacedObject, IModuleInterface)
+  published
   	procedure registerModule();
   	procedure unregisterModule();
   end;
+  
+  GInterMudFlag = class(GPlayerField)
+  public
+  	function default() : TObject; override;
+  	function fromString(s : string) : TObject; override;
+  	function toString(x : TObject) : string; override;
+  end;
+  
 
 
 var
@@ -115,7 +126,7 @@ begin
 				channel := GChannel_I3(iterator.next());
 
 				ch.sendBuffer('Listening to ' + channel.I3_name + #13#10);
-				i3.sendChannelListen(channel, true);
+				i3.sendChannelListen(ch.name, channel, true);
 				end;
 
 			iterator.Free();
@@ -127,7 +138,7 @@ begin
 			if (channel <> nil) then
 				begin
 				ch.sendBuffer('Listening to ' + channel.I3_name + #13#10);
-				i3.sendChannelListen(channel, true);
+				i3.sendChannelListen(ch.name, channel, true);
 				end
 			else
 				ch.sendBuffer('Unknown channel, use I3 CHANLIST to view a list of all available channels.'#13#10);
@@ -150,9 +161,30 @@ begin
 	else
 	if (prep(cmd) = 'TELL') then
 		begin
-		if (length(arg) = 0) or (length(param) = 0) then
+		if (length(arg) = 0) then
 			begin
 			ch.sendBuffer('Usage: I3 tell <user@mud> <message>'#13#10);
+			ch.sendBuffer('Usage: I3 tell [on]/[off]'#13#10);
+			exit;
+			end;
+			
+		if (prep(arg) = 'ON') then
+			begin
+			(GPlayer(ch).fields['i3flag'] as GBitVector).removeBit(I3_TELL);
+			ch.sendBuffer('You now send and receive i3tells.'#13#10);
+			exit;
+			end;
+
+		if (prep(arg) = 'OFF') then
+			begin
+			(GPlayer(ch).fields['i3flag'] as GBitVector).setBit(I3_TELL);
+			ch.sendBuffer('You no longer send and receive i3tells.'#13#10);
+			exit;
+			end;
+			
+		if ((GPlayer(ch).fields['i3flag'] as GBitVector).isBitSet(I3_TELL)) then
+			begin
+			ch.sendBuffer('Your i3tells are turned off.'#13#10);
 			exit;
 			end;
 
@@ -241,16 +273,38 @@ procedure GInterMudModule.registerModule();
 begin
   i3 := GInterMud.Create(1);
 	i3.FreeOnTerminate := true;
+	
 	registerCommand('do_i3', do_i3);
+	
+	registerField(GInterMudFlag.Create('i3flag'));
 end;
 
 procedure GInterMudModule.unregisterModule();
 begin
+	unregisterField('i3flag');
+	
   unregisterCommand('do_i3');
+  
 	i3.Terminate();
 
 	{ Give thread a chance to terminate and free }
 	Sleep(250);
+end;
+
+
+function GInterMudFlag.default() : TObject;
+begin
+	Result := GBitVector.Create(0);
+end;
+
+function GInterMudFlag.fromString(s : string) : TObject;
+begin
+	Result := GBitVector.Create(StrToIntDef(s, 0));
+end;
+
+function GInterMudFlag.toString(x : TObject) : string;
+begin
+	Result := IntToStr((x as GBitVector).value);
 end;
 
 
