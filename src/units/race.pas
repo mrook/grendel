@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.9 2004/03/30 19:25:11 hemko Exp $
+	## $Id: race.pas,v 1.10 2004/04/03 16:03:48 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -139,6 +139,7 @@ begin
   _max_skills := 10;
   _max_spells := 10;
   _abilities := GDLinkedList.Create();
+  _abilities.ownsObjects := false;
   _bodyparts := GHashTable.Create(32);
 end;
 
@@ -286,7 +287,6 @@ var
   parser : TXmlParser;
   race : GRace;
   sk : GSkill;
-  g : GLearned;
 begin
 	race := nil;
 	
@@ -347,15 +347,12 @@ begin
 			        else
 			        if (prep(parser.CurName) = 'ABILITY') then
 			        	begin
-								sk := findSkill(parser.CurContent);
+						sk := findSkill(parser.CurContent);
 
-            		if (sk <> nil) then
-            			begin
-		            	g := GLearned.Create(100, sk);
-		              g.node := race.abilities.insertLast(g);
-		              end
-		            else
-		              bugreport('loadRaces', 'race.pas', 'Unknown skill ' + parser.CurContent);
+            			if (sk <> nil) then
+            				race.abilities.add(sk)
+		            	else
+							bugreport('loadRaces', 'race.pas', 'Unknown skill ' + parser.CurContent);
 			        	end
 			        else
 			        if (prep(parser.CurName) = 'DESCRIPTION') then
