@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.17 2004/03/06 18:29:30 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.18 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -1354,9 +1354,8 @@ begin
     end;
 
   npc := GNPC.Create();
-  npc.context := GContext.Create();
+  npc.context := GContext.Create(npc);
   npc.context.load(npcindex.prog);
-  npc.context.owner := npc;
 
   with npc do
     begin
@@ -1419,7 +1418,6 @@ var
 	node_reset : GListNode;
 	iterator : GIterator;
 	buf : string;
-	p : integer;
 begin
   lastobj := nil;
   lastmob := nil;
@@ -1473,14 +1471,7 @@ begin
                 lastmob := npc;
                 inc(mobs_loaded);
 
-                p := npc.context.findSymbol('onReset');
-
-                if (p <> -1) then
-                  begin
-                  npc.context.push(integer(npc));
-                  npc.context.setEntryPoint(p);
-                  npc.context.Execute;
-                  end;
+								npc.context.runSymbol('onReset', [integer(npc)]);
                 end;
               end;
             end;
@@ -2078,7 +2069,7 @@ begin
 
   if (name = 'SELF') then
     begin
-    Result := ch;
+    Result := c;
     exit;
     end;
 

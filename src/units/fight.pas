@@ -2,7 +2,7 @@
 	Summary:
 		Damage & experience routines
 	
-	## $Id: fight.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: fight.pas,v 1.5 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit fight;
@@ -273,7 +273,6 @@ var
 	dm : GDamMessage;
 	a : array[1..3] of string;
 	s1, s2 : string;
-	p : integer;
 begin
   damage := RESULT_NONE;
 
@@ -512,15 +511,7 @@ begin
 
     if (oppnt.IS_NPC) then
       begin
-      p := GNPC(oppnt).context.findSymbol('onDeath');
-
-      if (p <> -1) then
-        begin
-        GNPC(oppnt).context.push(integer(ch));
-        GNPC(oppnt).context.push(integer(oppnt));
-        GNPC(oppnt).context.setEntryPoint(p);
-        GNPC(oppnt).context.Execute;
-        end;
+      GNPC(oppnt).context.runSymbol('onDeath', [integer(oppnt), integer(ch)]);
 
       if (oppnt.snooped_by <> nil) and (GPlayer(oppnt.snooped_by).switching = oppnt) then
         interpret(oppnt, 'return sub');
@@ -899,7 +890,6 @@ var
   ch, vch, gch : GCharacter;
   iter_world, iter_room : GIterator;
   conn : GPlayerConnection;
-  p : integer;
 begin
   iter_world := char_list.iterator();
 
@@ -1039,17 +1029,7 @@ begin
     ch := GCharacter(iter_world.next());
 
     if (ch.IS_NPC) and (ch.fighting <> nil) then
-      begin
-      p := GNPC(ch).context.findSymbol('onFight');
-
-      if (p <> -1) then
-        begin
-        GNPC(ch).context.push(integer(ch.fighting));
-        GNPC(ch).context.push(integer(ch));
-        GNPC(ch).context.setEntryPoint(p);
-        GNPC(ch).context.Execute;
-        end;
-      end;
+      GNPC(ch).context.runSymbol('onFight', [integer(ch.fighting), integer(ch)])
     end;
 
   iter_world.Free();

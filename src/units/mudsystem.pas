@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.7 2004/02/28 15:53:24 hemko Exp $
+	## $Id: mudsystem.pas,v 1.8 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -472,11 +472,11 @@ end;
 { Xenon 19/Feb/2001 :   - added socials on objects
                         - added checks on social-strings (if empty, ignore) to fix odd behaviour i noticed }
 function checkSocial(c : pointer; const cmd, param : string) : boolean;
-var social : GSocial;
-    chance : integer;
-    ch, vict : GCharacter;
-    obj : GObject;
-    t : integer;
+var 
+	social : GSocial;
+	chance : integer;
+	ch, vict : GCharacter;
+	obj : GObject;
 begin
   social := findSocial(cmd);
 
@@ -531,7 +531,7 @@ begin
     if vict=nil then            // victim not there, e.g. 'lick blablablabla'
       act(AT_SOCIAL,'They are not here.',false,ch,nil,nil,TO_CHAR)
     else
-    begin                     // victim, e.g. 'lick grimlord'
+    	begin                     // victim, e.g. 'lick grimlord'
       if (length(char_found) = 0) then
         ch.sendBuffer(' ')
       else
@@ -542,21 +542,11 @@ begin
         act(AT_SOCIAL,vict_found,false,ch,nil,vict,TO_VICT);
 
       if ((not ch.IS_NPC)) and (vict.IS_NPC) and (vict.IS_AWAKE) then
-      begin
+      	begin
         if (ch <> vict) then
-        begin
-          t := GNPC(vict).context.findSymbol('onEmoteTarget');
-
-          if (t <> -1) then
-          begin
-            GNPC(vict).context.push(name);
-            GNPC(vict).context.push(integer(ch));   // actor
-            GNPC(vict).context.push(integer(vict)); // vict
-            GNPC(vict).context.setEntryPoint(t);
-            GNPC(vict).context.Execute;
-          end
-          else
-          begin
+        	begin
+        	if (not GNPC(vict).context.runSymbol('onEmoteTarget', [integer(vict), integer(ch), name])) then
+	          begin
             chance := random(10);
             case chance of
               1,2,3,4,5,6:begin
@@ -580,10 +570,10 @@ begin
                           act(AT_SOCIAL,'You slap $N.',false,vict,nil,ch,TO_CHAR);
                           end;
             end;
-          end;
-        end;
-      end;
-    end;
+          	end;
+        	end;
+      	end;
+    	end;
     end;
 
   Result := true;

@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.8 2004/02/27 22:24:20 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.9 2004/03/06 20:18:40 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -2472,11 +2472,13 @@ begin
           GNPC(vict).context.Free();
           GNPC(vict).context := nil;
           end;
-        GNPC(vict).context := GContext.Create();
+          
+        GNPC(vict).context := GContext.Create(vict);
         GNPC(vict).context.load(GNPC(vict).npc_index.prog);
-        GNPC(vict).context.owner := vict;
+        
         if (uppercase(param) <> 'SILENT') then
           interpret(vict, 'emote receives new instructions and twitches violently.');
+          
         inc(count2);
         end;
       end;

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.14 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.15 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -3232,12 +3232,11 @@ begin
     HIDE_VIS := (not ch.CAN_SEE(vict)) and (hideinvis);
 end;
 
-var txt : string;
-    vch : GCharacter;
-    to_ch : GCharacter;
-    t : integer;
-
-    node : GListNode;
+var 
+	txt : string;
+	vch : GCharacter;
+	to_ch : GCharacter;
+	node : GListNode;
 
 label wind;
 begin
@@ -3298,18 +3297,7 @@ begin
     to_ch.sendBuffer(to_ch.ansiColor(atype) + txt + #13#10);
 
     if (to_ch.IS_NPC) and (to_ch <> ch) then
-      begin
-      t := GNPC(to_ch).context.findSymbol('onAct');
-
-      if (t <> -1) then
-        begin
-        GNPC(to_ch).context.push(txt);
-        GNPC(to_ch).context.push(integer(ch));
-        GNPC(to_ch).context.push(integer(to_ch));
-        GNPC(to_ch).context.setEntryPoint(t);
-        GNPC(to_ch).context.Execute;
-        end;
-      end;
+      GNPC(to_ch).context.runSymbol('onAct', [integer(to_ch), integer(ch), txt]);
 
 wind:
      if (typ = TO_CHAR) or (typ = TO_VICT) or (typ = TO_IMM) then

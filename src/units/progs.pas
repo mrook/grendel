@@ -2,7 +2,7 @@
   Summary:
   	Interface with GMC virtual machine
   	
-	## $Id: progs.pas,v 1.4 2004/02/28 15:53:24 hemko Exp $
+	## $Id: progs.pas,v 1.5 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit progs;
@@ -119,7 +119,7 @@ var
   prop : PPropInfo;
 begin
   Result := 0;
-
+  
   if (varType(obj) = varString) then
     begin
     Result := integer(findCharWorld(nil, obj));
@@ -137,7 +137,9 @@ begin
         tkFloat:   Result := GetFloatProp(s, prop);
         tkLString:  Result := GetStrProp(s, prop);
         tkVariant: Result := GetVariantProp(s, prop);
-      end;
+      end
+		else
+			writeConsole('VM error: unknown field "' + member + '"');
     end;
 end;
 

@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.3 2004/02/15 18:51:05 hemko Exp $
+	## $Id: update.pas,v 1.4 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -106,10 +106,6 @@ begin
       mv := UMin(mv + mv_gain, max_mv);
       mana := UMin(mana + mana_gain, max_mana);
       end;
-
-    // progress the script
-    if (ch.IS_NPC) and (GNPC(ch).npc_index.prog <> nil) then
-      GNPC(ch).context.Execute;
     end;
     
   iterator.Free();
@@ -351,14 +347,7 @@ begin
           end;
         end;
 
-      p := GNPC(ch).context.findSymbol('onTick');
-
-      if (p <> -1) then
-        begin
-        GNPC(ch).context.push(integer(ch));
-        GNPC(ch).context.setEntryPoint(p);
-        GNPC(ch).context.Execute;
-        end;
+      GNPC(ch).context.runSymbol('onTick', [integer(ch)]);
       end
     else
     if (not ch.IS_NPC) then

@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.8 2004/03/04 19:44:20 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.9 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -252,7 +252,7 @@ type
 
     published
     	constructor Create();
-    	destructor Destroy();
+    	destructor Destroy(); override;
     	
       function IS_IMMORT : boolean; override;
       function IS_NPC : boolean; override;

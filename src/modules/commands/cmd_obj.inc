@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.2 2003/12/12 23:01:23 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.3 2004/03/06 20:18:40 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -950,18 +950,7 @@ begin
   act(AT_REPORT,'$n gives $N $p.',false, ch, obj, vict, TO_ROOM);
 
   if (vict.IS_NPC) then
-    begin
-    p := GNPC(vict).context.findSymbol('onGive');
-
-    if (p <> -1) then
-      begin
-      GNPC(vict).context.push(integer(obj));
-      GNPC(vict).context.push(integer(ch));
-      GNPC(vict).context.push(integer(vict));
-      GNPC(vict).context.setEntryPoint(p);
-      GNPC(vict).context.Execute;
-      end;
-    end;
+  	GNPC(vict).context.runSymbol('onGive', [integer(vict), integer(ch), integer(obj)]);
 end;
 
 { Put objects into container - Nemesis }

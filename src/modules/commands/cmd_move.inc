@@ -1,4 +1,4 @@
-// $Id: cmd_move.inc,v 1.5 2004/03/06 14:26:10 hemko Exp $
+// $Id: cmd_move.inc,v 1.6 2004/03/06 20:18:40 ***REMOVED*** Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
@@ -82,7 +82,6 @@ var
   mv_cost : integer;
   drunk : boolean;
   iterator : GIterator;
-  p : integer;
 begin
   do_move := false;
   room_pos := ch.room;
@@ -233,16 +232,9 @@ begin
 
     if (vict.IS_NPC) then
       begin
-      p := GNPC(vict).context.findSymbol('onBlock');
-
-      if (p <> -1) then
-        begin
-        GNPC(vict).context.push(integer(ch));
-        GNPC(vict).context.push(integer(vict));
-        GNPC(vict).context.setEntryPoint(p);
-        GNPC(vict).context.Execute;
-        
-        if (GNPC(vict).context.pop()) and (not ch.IS_HOLYWALK) then
+      if (GNPC(vict).context.runSymbol('onBlock', [integer(vict), integer(ch)])) then	
+      	begin       
+        if (GNPC(vict).context.getResult()) and (not ch.IS_HOLYWALK) then
           begin
           ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
           exit;
@@ -384,17 +376,7 @@ begin
     vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) then
-      begin
-      p := GNPC(vict).context.findSymbol('onGreet');
-
-      if (p <> -1) then
-        begin
-        GNPC(vict).context.push(integer(ch));
-        GNPC(vict).context.push(integer(vict));
-        GNPC(vict).context.setEntryPoint(p);
-        GNPC(vict).context.Execute;
-        end;
-      end;
+      GNPC(vict).context.runSymbol('onGreet', [integer(vict), integer(ch)]);
     end;
   iterator.Free();
     

@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.3 2004/03/04 19:11:03 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.4 2004/03/06 20:18:40 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -55,6 +55,7 @@ type
   end;
 
 	GContext = class
+	private
   	stack : array[0..stackSize] of variant;
 	  data : array of variant;
 	  pc, sp, bp : integer;
@@ -64,18 +65,24 @@ type
 	  owner : TObject;
     block : GCodeBlock;
 
+	protected
+		procedure run();
+
+		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
+
 		function findSymbol(const id : string) : integer;
     procedure setEntryPoint(addr : integer);
 
 		procedure push(v : variant);
-		function pop : variant;
+		function pop() : variant;
 
-		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
-
+	public
     procedure load(cb : GCodeBlock);
-		procedure execute;
+
+		function runSymbol(const id : string; params : array of variant) : boolean;
+		function getResult() : variant;
 		
-		constructor Create();
+		constructor Create(owner : TObject);
 		destructor Destroy(); override;
 	end;
 
@@ -188,9 +195,11 @@ begin
 end;
 
 // GContext
-constructor GContext.Create();
+constructor GContext.Create(owner : TObject);
 begin
 	inherited Create();
+	
+	Self.owner := owner;
 end;
 
 destructor GContext.Destroy();
@@ -232,7 +241,7 @@ begin
   stack[sp] := v;
 end;
 
-function GContext.pop : variant;
+function GContext.pop() : variant;
 begin
   if (sp < 0) then
     vmError(owner, 'data stack underflow');
@@ -358,7 +367,7 @@ begin
 end;
 
 
-procedure GContext.Execute;
+procedure GContext.run();
 var
 	i : integer;
   f : single;
@@ -628,6 +637,33 @@ begin
       pc := -1;
       end;
   end;
+end;
+
+function GContext.runSymbol(const id : string; params : array of variant) : boolean;
+var
+	addr : integer;
+	i : integer;
+begin
+	Result := false;
+	
+	addr := findSymbol(id);
+	
+	if (addr <> - 1) then
+		begin
+		// parameters in params are left to right, we need to push them in reverse
+		for i := length(params) - 1 downto 0 do
+			push(params[i]);
+			
+		setEntryPoint(addr);
+		run();
+		
+		Result := true;
+		end;
+end;
+
+function GContext.getResult() : variant;
+begin
+	Result := pop();
 end;
 
 procedure setVMError(method : GVMError);
