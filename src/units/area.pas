@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-	## $Id: area.pas,v 1.38 2004/08/24 20:00:56 ***REMOVED*** Exp $
+	## $Id$
 }
 
 unit area;
@@ -397,8 +397,6 @@ var
 	sk : GSkill;
 	npc : GNPCIndex;
 	g : GLearned;
-//    prog : GProgram;
-//    progfile : string;
 begin
   npc := nil;
   s := af.readLine;
@@ -1145,33 +1143,6 @@ begin
       writeln(f);
 
     writeln(f, npcindex.natural_ac, ' ', npcindex.act_flags, ' ', npcindex.gold, ' ', npcindex.height, ' ', npcindex.weight);
-
-{    node_ex := npcindex.programs.head;
-    while (node_ex <> nil) do
-      begin
-      prog := node_ex.element;
-
-      case prog.prog_type of
-             MPROG_ACT : write(f, '> on_act ');
-           MPROG_GREET : write(f, '> on_greet ');
-        MPROG_ALLGREET : write(f, '> on_allgreet ');
-           MPROG_ENTER : write(f, '> on_enter ');
-           MPROG_DEATH : write(f, '> on_death ');
-           MPROG_BRIBE : write(f, '> on_bribe ');
-           MPROG_FIGHT : write(f, '> on_fight ');
-            MPROG_RAND : write(f, '> on_rand ');
-           MPROG_BLOCK : write(f, '> on_block ');
-           MPROG_RESET : write(f, '> on_reset ');
-           MPROG_GIVE  : write(f, '> on_give ');
-      end;
-
-      writeln(f, prog.args);
-
-      write(f, prog.code);
-      writeln(f,'~');
-
-      node_ex := node_ex.next;
-      end; }
 
     node_ex := npcindex.skills_learned.head;;
     while (node_ex <> nil) do
