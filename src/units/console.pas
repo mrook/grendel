@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.7 2004/03/18 09:56:22 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.8 2004/03/19 15:34:41 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -19,7 +19,7 @@ uses
 type
 	GConsoleWriter = class
 	public
-		procedure write(timestamp : TDateTime; const text : string); virtual; abstract;
+		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); virtual; abstract;
 	end;
   
 	GConsoleLogWriter = class(GConsoleWriter)
@@ -30,7 +30,7 @@ type
 		constructor Create(moduleName : string);
 		destructor Destroy(); override;
 	
-		procedure write(timestamp : TDateTime; const text : string); override;
+		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
 	end;
 
 	GConsole = class(GSingleton)
@@ -44,7 +44,7 @@ type
 		destructor actualDestroy(); override;
 
 	published
-		procedure write(const text : string);
+		procedure write(const text : string; debugLevel : integer = 0);
 		procedure poll();
 
 		procedure attachWriter(writer : GConsoleWriter);
@@ -54,7 +54,7 @@ type
 	end;
 
   
-procedure writeConsole(const text : string);
+procedure writeConsole(const text : string; debugLevel : integer = 0);
 procedure pollConsole();
 
 
@@ -64,6 +64,7 @@ implementation
 uses
 	mudsystem,
 	fsys,
+	debug,
 	server;
 
 
@@ -72,10 +73,12 @@ type
 	private
 		_timestamp : TDateTime;
 		_text : string;
+		_debugLevel : integer;
 
 	public
 		property timestamp : TDateTime read _timestamp write _timestamp;
 		property text : string read _text write _text;
+		property debugLevel : integer read _debugLevel write _debugLevel;
 	end;
   
 
@@ -121,28 +124,30 @@ begin
 end;
 
 { Write a message to the console }
-procedure GConsole.write(const text : string);
+procedure GConsole.write(const text : string; debugLevel : integer = 0);
 var
   he : GConsoleHistoryElement;
   timestamp : TDateTime;
 begin
-  timestamp := Now();
+	timestamp := Now();
 
-  he := GConsoleHistoryElement.Create();
-  he.timestamp := timestamp;
-  he.text := text;
-  history.add(he);
+	he := GConsoleHistoryElement.Create();
+	he.timestamp := timestamp;
+	he.text := text;
+	he.debugLevel := debugLevel;
+	history.add(he);
 
-  if (history.size() > CONSOLE_HISTORY_MAX) then
-  	begin
-  	GConsoleHistoryElement(history.head.element).Free();
-    history.remove(history.head);
-    end;
-    
-  he := GConsoleHistoryElement.Create();
-  he.timestamp := timestamp;
-  he.text := text;
-  queue.add(he);
+	if (history.size() > CONSOLE_HISTORY_MAX) then
+		begin
+		GConsoleHistoryElement(history.head.element).Free();
+		history.remove(history.head);
+		end;
+
+	he := GConsoleHistoryElement.Create();
+	he.timestamp := timestamp;
+	he.text := text;
+	he.debugLevel := debugLevel;
+	queue.add(he);
   
 	if (not serverBooted) then
 		poll();
@@ -161,13 +166,13 @@ begin
 	
 		queue.remove(queue.head);
   
-  	iterator := writers.iterator();
+  		iterator := writers.iterator();
   
 		while (iterator.hasNext()) do
 			begin
 			writer := GConsoleWriter(iterator.next());
-
-			writer.write(he.timestamp, he.text);
+			
+			writer.write(he.timestamp, he.text, he.debugLevel);
 			end;    
 
 		iterator.Free();
@@ -201,9 +206,9 @@ begin
   iterator.Free();
 end;
 
-procedure writeConsole(const text : string);
+procedure writeConsole(const text : string; debugLevel : integer = 0);
 begin
-	cons.write(text);
+	cons.write(text, debugLevel);
 end;
 
 procedure pollConsole();
@@ -238,7 +243,7 @@ begin
 end;
 
 { Writes to logfile }
-procedure GConsoleLogWriter.write(timestamp : TDateTime; const text : string);
+procedure GConsoleLogWriter.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
 	if (TTextRec(logfile).mode = fmOutput) then
 		begin
