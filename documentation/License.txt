@@ -39,7 +39,7 @@ agreement is in the file 'license.merc'.
 SMAUG is a derivative of the version 2.1 distribution of Merc Diku Mud.
 SMAUG contains substantial enhancements to Merc Diku Mud, including some
 features of the original Diku Mud that were removed by the Merc team.
-SMAUG is C() 1994, 1995, 1996, 1997, 1998 by Derek Snider. Their license
+SMAUG is (C) 1994, 1995, 1996, 1997, 1998 by Derek Snider. Their license
 agreement is in the file 'license.smaug'.
 
 
