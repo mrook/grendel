@@ -198,6 +198,6 @@ end.
 {$ENDIF}
 {$IFDEF LINUX}
 begin
-	cons.write('Not implemented for this platform.');
+	writeln('Not implemented for this platform.');
 end.
 {$ENDIF}
