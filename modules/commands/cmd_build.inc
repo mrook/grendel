@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.1 2001/07/28 20:53:25 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.2 2001/07/30 14:46:54 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -2139,13 +2139,6 @@ begin
           no_errors:=false;
           ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
           end; }
-
-
-        if (not checkWords(room.description)) then
-          begin
-          no_errors:=false;
-          ch.sendBuffer('('+inttostr(room.vnum)+') possibly misspelled word(s), [' + trim(misspelled_words) + ']'#13#10);
-          end;
         end;
 
       node := node.next;

@@ -31,6 +31,9 @@ var
 implementation
 
 uses
+  chars,
+  util,
+  mudthread,
   mudsystem;
 
 procedure loadModules();
@@ -73,7 +76,7 @@ begin
         
     module_list.put(name, module);
 
-    write_console('Loaded ' + name + ' (' + module.desc + ')');
+    write_console('Loaded module ' + name + ' (' + module.desc + ')');
   except
     on E : Exception do raise GException.Create('modules.pas:addModule()',E.Message);
   end;
@@ -89,7 +92,9 @@ begin
     if (module = nil) then
       raise GException.Create('modules.pas:addModule()','Module not loaded');
       
-    write_console('Unloaded ' + module.fname);
+    UnloadPackage(module.handle);
+      
+    write_console('Unloaded module ' + module.fname);
     
     module_list.remove(name);
     module.Free;
@@ -98,6 +103,48 @@ begin
   end;
 end;
 
+procedure do_modules(ch : GCharacter; param : string);
+var
+  iterator : GIterator;
+  module : GModule;
+  arg : string;
+begin
+  if (length(param) = 0) then
+    begin
+    iterator := module_list.iterator();
+      
+    ch.sendBuffer('Registered modules:'#13#10#13#10);
+  
+    while (iterator.hasNext()) do
+      begin
+      module := GModule(iterator.next());
+    
+      ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
+      end;
+    end
+  else
+    begin
+    param := one_argument(param, arg);
+    
+    if (arg = 'load') then
+      try
+        addModule(param);
+      except
+        on E : GException do
+          ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
+      end
+    else
+    if (arg = 'unload') then
+      try
+        removeModule(param);
+      except
+        on E : GException do
+          ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
+      end;
+    end;
+end;
+
 begin
   module_list := GHashTable.Create(128);
+  registerCommand('do_modules', do_modules);
 end.

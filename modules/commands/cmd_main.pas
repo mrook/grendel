@@ -1,4 +1,4 @@
-unit main;
+unit cmd_main;
 
 interface
 
@@ -21,7 +21,6 @@ uses
   channels,
   race,
   clan,
-  mudspell,
   magic,
   area,
   update,
@@ -659,7 +658,7 @@ end;
 {$INCLUDE cmd_skill.inc}
 
 // registering with the caller
-begin
+initialization
   registerCommand('do_quit', do_quit);
   registerCommand('do_save', do_save);
   registerCommand('do_afk', do_afk);
@@ -848,6 +847,197 @@ begin
   registerCommand('do_coordgen', do_coordgen);
   registerCommand('do_findpath', do_findpath);
   registerCommand('do_reload', do_reload);
-  registerCommand('do_modules', do_modules);
   registerCommand('do_cloak', do_cloak);
+
+finalization
+  unregisterCommand('do_quit');
+  unregisterCommand('do_save');
+  unregisterCommand('do_afk');
+  unregisterCommand('do_help');
+  unregisterCommand('do_remort');
+  unregisterCommand('do_delete');
+  unregisterCommand('do_wimpy');
+  unregisterCommand('do_time');
+  unregisterCommand('do_weather');
+  unregisterCommand('do_look');
+  unregisterCommand('do_inventory');
+  unregisterCommand('do_equipment');
+  unregisterCommand('do_score');
+  unregisterCommand('do_stats');
+  unregisterCommand('do_who');
+  unregisterCommand('do_title');
+  unregisterCommand('do_group');
+  unregisterCommand('do_follow');
+  unregisterCommand('do_armor');
+  unregisterCommand('do_config');
+  unregisterCommand('do_visible');
+  unregisterCommand('do_trophy');
+  unregisterCommand('do_ditch');
+  unregisterCommand('do_world');
+  unregisterCommand('do_where');
+  unregisterCommand('do_kill');
+  unregisterCommand('do_north');
+  unregisterCommand('do_south');
+  unregisterCommand('do_east');
+  unregisterCommand('do_west');
+  unregisterCommand('do_up');
+  unregisterCommand('do_down');
+  unregisterCommand('do_sleep');
+  unregisterCommand('do_wake');
+  unregisterCommand('do_meditate');
+  unregisterCommand('do_rest');
+  unregisterCommand('do_sit');
+  unregisterCommand('do_stand');
+  unregisterCommand('do_flee');
+  unregisterCommand('do_flurry');
+  unregisterCommand('do_assist');
+  unregisterCommand('do_disengage');
+  unregisterCommand('do_cast');
+  unregisterCommand('do_bash');
+  unregisterCommand('do_kick');
+  unregisterCommand('do_fly');
+  unregisterCommand('do_sneak');
+  unregisterCommand('do_spells');
+  unregisterCommand('do_skills');
+  unregisterCommand('do_learn');
+  unregisterCommand('do_practice');
+  unregisterCommand('do_enter');
+  unregisterCommand('do_search');
+  unregisterCommand('do_backstab');
+  unregisterCommand('do_circle');
+  unregisterCommand('do_tell');
+  unregisterCommand('do_reply');
+  unregisterCommand('do_suggest');
+  unregisterCommand('do_pray');
+  unregisterCommand('do_emote');
+  unregisterCommand('do_shutdown');
+  unregisterCommand('do_echo');
+  unregisterCommand('do_wizinvis');
+  unregisterCommand('do_sla');
+  unregisterCommand('do_slay');
+  unregisterCommand('do_affects');
+  unregisterCommand('do_socials');
+  unregisterCommand('do_advance');
+  unregisterCommand('do_get');
+  unregisterCommand('do_wear');
+  unregisterCommand('do_remove');
+  unregisterCommand('do_drop');
+  unregisterCommand('do_swap');
+  unregisterCommand('do_drink');
+  unregisterCommand('do_eat');
+  unregisterCommand('do_scalp');
+  unregisterCommand('do_give');
+  unregisterCommand('do_throw');
+  unregisterCommand('do_alias');
+  unregisterCommand('do_clanadd');
+  unregisterCommand('do_clanremove');
+  unregisterCommand('do_clan');
+  unregisterCommand('do_brag');
+  unregisterCommand('do_force');
+  unregisterCommand('do_restore');
+  unregisterCommand('do_goto');
+  unregisterCommand('do_transfer');
+  unregisterCommand('do_peace');
+  unregisterCommand('do_areas');
+  unregisterCommand('do_connections');
+  unregisterCommand('do_uptime');
+  unregisterCommand('do_grace');
+  unregisterCommand('do_open');
+  unregisterCommand('do_close');
+  unregisterCommand('do_consider');
+  unregisterCommand('do_scan');
+  unregisterCommand('do_sacrifice');
+  unregisterCommand('do_bgset');
+  unregisterCommand('do_battle');
+  unregisterCommand('do_auction');
+  unregisterCommand('do_bid');
+  unregisterCommand('do_balance');
+  unregisterCommand('do_withdraw');
+  unregisterCommand('do_deposit');
+  unregisterCommand('do_list');
+  unregisterCommand('do_buy');
+  unregisterCommand('do_sell');
+  unregisterCommand('do_rescue');
+  unregisterCommand('do_disconnect');
+  unregisterCommand('do_wizhelp');
+  unregisterCommand('do_rstat');
+  unregisterCommand('do_pstat');
+  unregisterCommand('do_ostat');
+  unregisterCommand('do_report');
+  unregisterCommand('do_destroy');
+  unregisterCommand('do_loadup');
+  unregisterCommand('do_freeze');
+  unregisterCommand('do_silence');
+  unregisterCommand('do_log');
+  unregisterCommand('do_snoop');
+  unregisterCommand('do_switch');
+  unregisterCommand('do_return');
+  unregisterCommand('do_sconfig');
+  unregisterCommand('do_track');
+  unregisterCommand('do_bamfin');
+  unregisterCommand('do_bamfout');
+  unregisterCommand('do_mload');
+  unregisterCommand('do_oload');
+  unregisterCommand('do_mfind');
+  unregisterCommand('do_ofind');
+  unregisterCommand('do_put');
+  unregisterCommand('do_sset');
+  unregisterCommand('do_taunt');
+  unregisterCommand('do_nourish');
+  unregisterCommand('do_mana');
+  unregisterCommand('do_fill');
+  unregisterCommand('do_unlock');
+  unregisterCommand('do_lock');
+  unregisterCommand('do_pset');
+  unregisterCommand('do_revive');
+  unregisterCommand('do_setpager');
+  unregisterCommand('do_autoloot');
+  unregisterCommand('do_autosac');
+  unregisterCommand('do_password');
+  unregisterCommand('do_ban');
+  unregisterCommand('do_allow');
+  unregisterCommand('do_last');
+  unregisterCommand('do_unlearn');
+  unregisterCommand('do_hashstats');
+  unregisterCommand('do_keylock');
+  unregisterCommand('do_take');
+  unregisterCommand('do_holywalk');
+  unregisterCommand('do_prename');
+  unregisterCommand('do_peek');
+  unregisterCommand('do_ocreate');
+  unregisterCommand('do_oedit');
+  unregisterCommand('do_olist');
+  unregisterCommand('do_redit');
+  unregisterCommand('do_rlink');
+  unregisterCommand('do_rmake');
+  unregisterCommand('do_rclone');
+  unregisterCommand('do_aassign');
+  unregisterCommand('do_ranges');
+  unregisterCommand('do_acreate');
+  unregisterCommand('do_aset');
+  unregisterCommand('do_astat');
+  unregisterCommand('do_raceinfo');
+  unregisterCommand('do_checkarea');
+  unregisterCommand('do_savearea');
+  unregisterCommand('do_loadarea');
+  unregisterCommand('do_reset');
+  unregisterCommand('do_map');
+  unregisterCommand('do_holylight');
+  unregisterCommand('do_prompt');
+  unregisterCommand('do_at');
+  unregisterCommand('do_namegen');
+  unregisterCommand('do_note');
+  unregisterCommand('do_board');
+  unregisterCommand('do_apropos');
+  unregisterCommand('do_say');
+  unregisterCommand('do_channel');
+  unregisterCommand('do_vnums');
+  unregisterCommand('do_aranges');
+  unregisterCommand('do_rlist');
+  unregisterCommand('do_rdelete');
+  unregisterCommand('do_coordgen');
+  unregisterCommand('do_findpath');
+  unregisterCommand('do_reload');
+  unregisterCommand('do_cloak');
+
 end.

@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.58 2001/07/30 13:00:20 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.59 2001/07/30 14:46:57 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -66,13 +66,13 @@ type
     end;
 
 var
-   commands : GHashTable;
-   func_list : GDLinkedList;
+   func_list, commands : GHashTable;
 
 procedure load_commands;
 procedure interpret(ch : GCharacter; line : string);
 
 procedure registerCommand(name : string; func : COMMAND_FUNC);
+procedure unregisterCommand(name : string);
 
 implementation
 
@@ -82,7 +82,6 @@ uses
     update,
     timers,
     debug,
-    mudspell,
     fight,
     NameGen,
     Channels;
@@ -100,56 +99,44 @@ end;
 
 procedure do_dummy(ch : GCharacter; param : string);
 begin
-  ch.sendBuffer('This is a DUMMY command. Please contact the ADMINISTRATION.'#13#10);
+  ch.sendBuffer('This is a DUMMY command, and doesn''t perform any action.'#13#10);
+  ch.sendBuffer('Either this command has not been implemented yet,'#13#10);
+  ch.sendBuffer('or the server is reconfiguring itself with new code.'#13#10);
+  ch.sendBuffer('Please contact the administration if this persists for more than an hour.'#13#10);
 end;
 
 function findCommand(s : string) : COMMAND_FUNC;
 var
-   node : GListNode;
    f : GCommandFunc;
 begin
-  Result := nil;
-
-  node := func_list.head;
-
-  while (node <> nil) do
-    begin
-    f := node.element;
-
-    if (f.name = s) then
-      begin
-      Result := f.func;
-      exit;
-      end;
-
-    node := node.next;
-    end;
-
-  write_console('Could not find command "' + s + '"');
+  f := GCommandFunc(func_list.get(s));
+  
+  if (f = nil) then
+    write_console('Could not find function for command "' + s + '"');
+    
+  Result := f.func;
 end;
 
 procedure load_commands;
-var f:textfile;
-    s,g:string;
-    cmd : GCommand;
-    alias : GCommand;
+var 
+  af : GFileReader;
+  s,g:string;
+  cmd : GCommand;
+  alias : GCommand;
 begin
-  assignfile(f, translateFileName('system\commands.dat'));
-  {$I-}
-  reset(f);
-  {$I+}
-  if IOResult<>0 then
-    begin
+  try
+    af := GFileReader.Create(SystemDir + 'commands.dat');
+  except
     bugreport('load_commands', 'mudthread.pas', 'could not open system\commands.dat');
     exit;
-    end;
+  end;
 
   repeat
     repeat
-      readln(f,s);
-    until (uppercase(s) = '#COMMAND') or eof(f);
+      s := af.readLine();
+    until (uppercase(s) = '#COMMAND') or (af.eof());
 
-    if (eof(f)) then
+    if (af.eof()) then
       break;
 
     alias := nil;
@@ -158,7 +145,7 @@ begin
 
     with cmd do
       repeat
-      readln(f,s);
+      s := af.readLine();
       g:=uppercase(left(s,':'));
 
       if g='NAME' then
@@ -187,7 +174,7 @@ begin
         begin
           addarg0 := (trim(uppercase(right(s,' '))) = 'TRUE');
         end;
-      until (uppercase(s)='#END') or eof(f);
+      until (uppercase(s)='#END') or (af.eof());
 
     if (assigned(cmd.ptr)) then
       begin
@@ -212,9 +199,9 @@ begin
       if (alias <> nil) then
         alias.Free;
       end;
-  until eof(f);
+  until (af.eof());
 
-  closefile(f);
+  af.Free();
 end;
 
 procedure clean_cmdline(var line : string);
@@ -1109,21 +1096,15 @@ end;
 procedure registerCommand(name : string; func : COMMAND_FUNC);
 var
    g : GCommandFunc;
-   node : GListNode;
+   c : GCommand;
+   iterator : GIterator;
 begin
-  node := func_list.head;
-
-  while (node <> nil) do
+  g := GCommandFunc(func_list.get(name));
+  
+  if (g <> nil) then
     begin
-    g := node.element;
-
-    if (g.name = name) or (pointer(@g.func) = pointer(@func)) then
-      begin
-      bugreport('registerCommand', 'mudthread.pas', 'Command ' + name + ' registered twice.');
-      exit;
-      end;
-
-    node := node.next;
+    bugreport('registerCommand', 'mudthread.pas', 'Command ' + name + ' registered twice.');
+    exit;
     end;
 
   g := GCommandFunc.Create;
@@ -1131,11 +1112,58 @@ begin
   g.name := name;
   g.func := func;
 
-  func_list.insertLast(g);
+  func_list.put(name, g);
+  
+  iterator := commands.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    c := GCommand(iterator.next());
+    
+    if (c.func_name = name) then
+      begin
+//      write_console('Found empty command with my name: ' + c.name);
+      c.ptr := func;
+      end;
+    end;  
+end;
+
+procedure unregisterCommand(name : string);
+var
+  g : GCommandFunc;
+  c : GCommand;
+  iterator : GIterator;
+begin
+  g := GCommandFunc(func_list.get(name));
+  
+  if (g = nil) then
+    begin
+    bugreport('unregisterCommand', 'mudthread.pas', 'Command ' + name + ' not registered');
+    exit;
+    end
+  else
+    begin
+    iterator := commands.iterator();
+    
+    while (iterator.hasNext()) do
+      begin
+      c := GCommand(iterator.next());
+      
+      if (@c.ptr = @g.func) then
+        begin
+//        write_console('Resetting command with my name: ' + c.name);
+        c.ptr := do_dummy;
+        end;
+      end;
+    
+    func_list.remove(name);
+    
+    g.Free();
+    end;
 end;
 
 begin
-  func_list := GDLinkedList.Create;
+  func_list := GHashTable.Create(128);
   commands := GHashTable.Create(128);
   commands.setHashFunc(firstHash);
 end.

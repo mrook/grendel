@@ -1,7 +1,7 @@
 DCC=/usr/local/kylix/bin/dcc
 DCC_FLAGS=-Q -D+ -V- -W+ -O+ -GD
 
-MODULES=bplcore_commands.so
+MODULES=bplcore_commands.so bplspeller.so
 
 all:	$(MODULES)
 
@@ -9,5 +9,7 @@ clean:
 	rm -f $(MODULES)
 
 bplcore_commands.so:	core_commands.dpk commands/*
-	$(DCC) core_commands.dpk $(DCC_FLAGS) -LU../core
+	$(DCC) core_commands.dpk $(DCC_FLAGS) -LU../core -Ucommands
 
+bplspeller.so: speller.dpk speller/*
+	$(DCC) speller.dpk $(DCC_FLAGS) -LU../core -Uspeller

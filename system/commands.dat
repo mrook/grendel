@@ -852,6 +852,13 @@ position: 0
 #end
 
 #command
+name: spellcheck
+function: do_spellcheck
+level: 993
+position: 0
+#end
+
+#command
 name: sset
 function: do_sset
 level: 993

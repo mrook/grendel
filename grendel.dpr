@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.43 2001/07/30 11:12:44 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.44 2001/07/30 14:46:53 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -73,7 +73,6 @@ uses
   MemCheck in 'units\MemCheck.pas',
   timers in 'units\timers.pas',
   debug in 'units\debug.pas',
-  mudspell in 'units\mudspell.pas',
   LibXmlParser in 'units\LibXmlParser.pas',
   NameGen in 'units\NameGen.pas',
   bulletinboard in 'units\bulletinboard.pas',
@@ -107,7 +106,6 @@ uses
   md5 in 'units/md5.pas',
   timers in 'units/timers.pas',
   debug in 'units/debug.pas',
-  mudspell in 'units/mudspell.pas',
   LibXmlParser in 'units/LibXmlParser.pas',
   NameGen in 'units/NameGen.pas',
   bulletinboard in 'units/bulletinboard.pas',

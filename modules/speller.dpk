@@ -1,4 +1,4 @@
-package core_commands;
+package speller;
 
 {$R *.res}
 {$ALIGN ON}
@@ -24,7 +24,7 @@ package core_commands;
 {$IMAGEBASE $400000}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
-{$DESCRIPTION 'Grendel Core Commands'}
+{$DESCRIPTION 'Spellchecker'}
 
 requires
 {$IFDEF WIN32}
@@ -36,8 +36,10 @@ requires
 
 contains
 {$IFDEF LINUX}
-  cmd_main in 'commands/cmd_main.pas';
+  speller_main in 'speller/speller_main.pas',
+  mudspell in 'speller/mudspell.pas';
 {$ELSE}
-  cmd_main in 'commands\cmd_main.pas';
+  speller_main in 'speller\speller_main.pas',
+  mudspell in 'speller\mudspell.pas';
 {$ENDIF} 
 end.

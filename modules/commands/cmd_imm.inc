@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.4 2001/07/30 13:00:16 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.5 2001/07/30 14:46:55 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -941,47 +941,6 @@ begin
   status:=GetHeapStatus;
   act(AT_REPORT,'Heap allocated:    ' + inttostr(status.totalallocated)+' byte(s)',false,ch,nil,nil,TO_CHAR);
 {$ENDIF}
-end;
-
-procedure do_modules(ch : GCharacter; param : string);
-var
-  iterator : GIterator;
-  module : GModule;
-  arg : string;
-begin
-  if (length(param) = 0) then
-    begin
-    iterator := module_list.iterator();
-      
-    ch.sendBuffer('Registered modules:'#13#10#13#10);
-  
-    while (iterator.hasNext()) do
-      begin
-      module := GModule(iterator.next());
-    
-      ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
-      end;
-    end
-  else
-    begin
-    param := one_argument(param, arg);
-    
-    if (arg = 'load') then
-      try
-        addModule(param);
-      except
-        on E : GException do
-          ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
-      end
-    else
-    if (arg = 'unload') then
-      try
-        removeModule(param);
-      except
-        on E : GException do
-          ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
-      end;
-    end;
 end;
 
 procedure do_switch(ch:GCharacter;param:string);
