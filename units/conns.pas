@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.34 2001/08/16 20:56:38 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.35 2001/09/02 21:53:01 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -74,6 +74,9 @@ procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharact
 function playername(from_ch, to_ch : GCharacter) : string;
 
 procedure gameLoop();
+
+procedure initConns();
+procedure cleanupConns();
 
 implementation
 
@@ -708,6 +711,15 @@ begin
     end;
 end;
 
+procedure initConns();
 begin
   connection_list := GDLinkedList.Create;
+end;
+
+procedure cleanupConns();
+begin
+  connection_list.clean();
+  connection_list.Free();
+end;
+
 end.

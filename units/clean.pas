@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.16 2001/08/11 22:02:04 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.17 2001/09/02 21:53:01 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -154,8 +154,8 @@ begin
         timer_thread := GTimerThread.Create;
         end;
 
-      cleanChars;
-      cleanObjects;
+      cleanExtractedChars();
+      cleanExtractedObjects();
 
       sleep(10000);
     except

@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.67 2001/08/26 19:20:35 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.68 2001/09/02 21:53:02 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -74,6 +74,9 @@ procedure interpret(ch : GCharacter; line : string);
 
 procedure registerCommand(name : string; func : COMMAND_FUNC);
 procedure unregisterCommand(name : string);
+
+procedure initCommands();
+procedure cleanupCommands();
 
 implementation
 
@@ -1141,6 +1144,8 @@ begin
       c.ptr := func;
       end;
     end;  
+   
+  iterator.Free();
 end;
 
 procedure unregisterCommand(name : string);
@@ -1175,11 +1180,23 @@ begin
     
     g.Free();
     end;
+    
+  iterator.Free();
 end;
 
+procedure initCommands();
 begin
   func_list := GHashTable.Create(128);
   commands := GHashTable.Create(128);
   commands.setHashFunc(firstHash);
-end.
+end;
 
+procedure cleanupCommands();
+begin
+  func_list.clear();
+  func_list.Free();
+
+  commands.Free();
+end;
+
+end.

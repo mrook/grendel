@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.21 2001/08/16 10:53:57 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.22 2001/09/02 21:53:03 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -110,6 +110,8 @@ function removeAffectName(ch:GCharacter; name : string):boolean;
 function removeAffectFlag(ch:GCharacter; flag : integer):boolean;
 procedure update_affects;
 
+procedure initSkills();
+procedure cleanupSkills();
 
 implementation
 
@@ -714,7 +716,16 @@ begin
   inherited Destroy;
 end;
 
+procedure initSkills();
 begin
   skill_table := GDLinkedList.Create;
+end;
+
+procedure cleanupSkills();
+begin
+  skill_table.clean();
+  skill_table.Free();
+end;
+
 end.
 

@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.57 2001/08/16 10:53:55 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.58 2001/09/02 21:52:59 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -60,6 +60,9 @@ uses
   Winsock2,
   {$IFNDEF CONSOLEBUILD}
   systray,
+  {$ENDIF}
+  {$IFDEF __DEBUG}
+  memdebug,
   {$ENDIF}
 {$ENDIF}
 {$IFDEF LINUX}
@@ -128,6 +131,8 @@ begin
     else
       conn.sock.disconnect();
     end;
+    
+  iterator.Free();
 end;
 
 procedure cleanupServer();
@@ -143,7 +148,12 @@ begin
     Sleep(250);
 
     saveMudState();
-  
+
+    {$IFDEF __DEBUG}
+    writeConsole('Dumping memory debug...');
+    dumpMemory();
+    {$ENDIF}
+
     unloadModules();
 
     writeConsole('Releasing allocated memory...');
@@ -162,73 +172,37 @@ begin
       node := object_list.tail;
       end;
 
-    cleanChars;
-    cleanObjects;
+    cleanupChars();
+    cleanupClans();
+    cleanupChannels();
+    cleanupCommands();
+    cleanupConns();
+    cleanupHelp();
+    cleanupSkills();
+    cleanupAreas();
+    cleanupTimers();
+    cleanupRaces();
+    cleanupSystem();
+    cleanupNotes();
 
-    char_list.Free;
-    object_list.Free;
+    {$IFDEF WIN32}      
+      {$IFNDEF CONSOLEBUILD}
+      unregisterSysTray();
+      cleanupSysTray();
+      {$ENDIF}
+    {$ENDIF}
 
-    // clean up rooms and all
-    area_list.clean;
-    room_list.clear;
-    shop_list.clean;
-    teleport_list.clean;
-    extracted_object_list.clean;
-    extracted_chars.clean;
-    npc_list.clean;
-    obj_list.Clean;
-    race_list.clean;
-    clan_list.clean;
-    help_files.clean;
-    dm_msg.clean;
-    notes.clean;
-
-    notes.Free;
-    area_list.Free;
-    room_list.Free;
-    shop_list.Free;
-    teleport_list.Free;
-    extracted_object_list.Free;
-    extracted_chars.Free;
-    npc_list.Free;
-    obj_list.Free;
-    race_list.Free;
-    clan_list.Free;
-    help_files.Free;
-    dm_msg.Free;
-
-    skill_table.Free;
-
-    socials.Free;
     str_hash.Free;
-    auction_good.Free;
-    auction_evil.Free;
-    banned_masks.Free;
-
-    if (namegenerator_enabled) then
-    begin
-      PhonemeList.Clean();
-      PhonemeList.Free();
-      NameTemplateList.Clean();
-      NameTemplateList.Free();
-    end;
-    
-    connection_list.clean;
-    connection_list.Free;
-    commands.Free;
 
     listenv4.Free();
     listenv4 := nil;
     listenv6.Free();
     listenv6 := nil;
 
-    {$IFDEF WIN32}      
-      {$IFNDEF CONSOLEBUILD}
-      unregisterSysTray();
-      {$ENDIF}
-    {$ENDIF}
+    cleanupConsole();
+    cleanupDebug();
 
-    writeConsole('Cleanup complete.');
+    writeDirect('Cleanup complete.');
   except
     on E : EExternal do
       begin
@@ -329,7 +303,7 @@ begin
 
   if (pipe = INVALID_HANDLE_VALUE) then
     begin
-    writeln('Could not create pipe: ', GetLastError);
+    writeConsole('Could not create pipe: ' + IntToStr(GetLastError()));
     exit;
     end;
 
@@ -494,16 +468,41 @@ begin
 
   writeDirect(version_info + ', ' + version_number + '.');
   writeDirect(version_copyright + '.');
-  writeConsole('Booting server...');
 
   try
+    writeDirect('Initializing memory pool...');
+    init_progs();
+    initClans();
+    initCommands();
+    initConns();
+    initHelp();
+    initConsole();
+    initChannels();
+    initDebug();
+    initChars();
+    initSkills();
+    initAreas();
+    initTimers();
+    initRaces();
+    initNotes();
+    initSystem();
+
+    {$IFDEF WIN32}
+      {$IFNDEF CONSOLEBUILD}
+      initSysTray();
+      {$ENDIF}
+    {$ENDIF}
+
+    writeConsole('Reading debug info...');
+    readMapFile('grendel.exe', 'grendel.map');
+    readMapfile('core.bpl', 'core.map');
+
+    writeConsole('Booting server...');
     load_system;
 
     s := FormatDateTime('ddddd', Now);
     writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
-    writeConsole('Initializing GMC contexts...');
-    init_progs;
     writeConsole('Loading skills...');
     load_skills;
     writeConsole('Loading races...');
@@ -528,9 +527,6 @@ begin
     load_damage;
     writeConsole('Loading mud state...');
     loadMudState();
-
-{    writeConsole('String hash stats: ');
-    str_hash.hashStats; }
 
     randomize;
 
@@ -562,6 +558,17 @@ begin
     clean_thread := GCleanThread.Create;
 
     calculateonline;
+
+    {$IFDEF WIN32}
+      {$IFNDEF CONSOLEBUILD}
+      registerSysTray();
+      {$ENDIF}  
+    {$ENDIF}
+
+    {$IFDEF __DEBUG}
+    writeConsole('Enabling memory debugger...');
+    enableMemoryDebug();
+    {$ENDIF}
   except
     on E: Exception do
       begin
@@ -664,14 +671,15 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+var
+  t : string;
+
 begin
   old_exitproc := ExitProc;
 
-{$IFDEF __DEBUG}
-  MemChk;
-{$ENDIF}
-
   bootServer();
+  
+  t := 'x';
    
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
@@ -683,9 +691,7 @@ begin
 {$IFDEF WIN32}
   {$IFDEF CONSOLEBUILD}
   SetConsoleCtrlHandler(@controlHandler, true);
-  {$ELSE}
-  registerSysTray();
-  {$ENDIF}  
+  {$ENDIF}
 {$ENDIF}
 
   try

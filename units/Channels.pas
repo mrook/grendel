@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.11 2001/08/16 10:53:57 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.12 2001/09/02 21:53:00 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -80,6 +80,9 @@ function lookupChannel(chname : string) : GChannel;
 procedure to_channel(ch : GCharacter; arg : string; chanstr : string; color : integer); overload;
 procedure to_channel(ch : GCharacter; arg : string; channel : GChannel; color : integer; localecho : boolean); overload;
 procedure do_channel(ch : GCharacter; param : string);
+
+procedure initChannels();
+procedure cleanupChannels();
 
 implementation
 
@@ -260,8 +263,8 @@ end;
 
 procedure to_channel(ch : GCharacter; arg : string; channel : GChannel; color : integer; localecho : boolean); overload;
 var
-   vict : GCharacter;
-   node, node_next : GListNode;
+  iterator : GIterator;
+  vict : GCharacter;
 begin
   if (not channels_loaded) then
   begin
@@ -278,13 +281,11 @@ begin
   if localecho and (ch <> nil) then // this is for clannotifies/groupnotifies
     act(color, arg, false, ch, nil, nil, TO_CHAR);
 
-  node_next := char_list.head;
-  while (node_next <> nil) do
-  begin
-    node := node_next;
-    node_next := node_next.next;
+  iterator := char_list.iterator();
 
-    vict := node.element;
+  while (iterator.hasNext()) do
+    begin
+    vict := GCharacter(iterator.next());
 
 {    if (channel <> CHANNEL_AUCTION) and (channel <> CHANNEL_CLAN) and (vict=ch) then continue;
     if (channel = CHANNEL_CHAT) and (not ch.IS_SAME_ALIGN(vict)) then continue;
@@ -327,6 +328,8 @@ begin
     else
       act(color, arg, false, vict, nil, ch, TO_CHAR);
   end;
+  
+  iterator.Free();
 end;
 
 function lookupChannel(chname : string) : GChannel;
@@ -908,16 +911,20 @@ begin
     to_channel(nil, FormatDateTime('[tt] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);
 end;
 
-initialization
+procedure initChannels();
+begin
   channellist := GDLinkedList.Create();
   channels_loaded := false;
   
   registerConsoleDriver(GConsoleChannel.Create());
-  
-finalization
+end;
+
+procedure cleanupChannels();
+begin
   channels_loaded := false;
   channellist.clean();
   channellist.Free();
-  
+end;
+
 end.
 

@@ -1,4 +1,4 @@
-// $Id: mudhelp.pas,v 1.10 2001/08/03 21:33:49 ***REMOVED*** Exp $
+// $Id: mudhelp.pas,v 1.11 2001/09/02 21:53:02 ***REMOVED*** Exp $
 
 unit mudhelp;
 
@@ -19,8 +19,10 @@ var
    help_files : GDLinkedList;
 
 procedure load_help(fname:string);
-
 function findHelp(text : string) : GHelp;
+
+procedure initHelp();
+procedure cleanupHelp();
 
 implementation
 
@@ -292,8 +294,16 @@ begin
     end;
 end;
 
-
+procedure initHelp();
 begin
   help_files := GDLinkedList.Create;
+end;
+
+procedure cleanupHelp();
+begin
+  help_files.clean();
+  help_files.Free();
+end;
+
 end.
 

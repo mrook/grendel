@@ -1,4 +1,4 @@
-// $Id: timers.pas,v 1.16 2001/08/11 22:02:07 ***REMOVED*** Exp $
+// $Id: timers.pas,v 1.17 2001/09/02 21:53:04 ***REMOVED*** Exp $
 
 unit timers;
 
@@ -57,6 +57,9 @@ procedure unregisterTimer(name_ : string); overload;
 procedure unregisterTimer(ch : GCharacter; timer_type : integer); overload;
 
 function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
+
+procedure initTimers();
+procedure cleanupTimers();
 
 implementation
 
@@ -444,7 +447,7 @@ begin
   regenerate_chars;
 end;
 
-
+procedure initTimers();
 begin
   timer_list := GDLinkedList.Create;
 
@@ -452,4 +455,12 @@ begin
   registerTimer('auction', update_auction, 1, true);
   registerTimer('gamehour', update_gamehour, CPULSE_GAMEHOUR, true);
   registerTimer('second', update_sec, CPULSE_PER_SEC, true);
+end;
+
+procedure cleanupTimers();
+begin
+  timer_list.clean();
+  timer_list.Free();
+end;
+
 end.

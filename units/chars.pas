@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.58 2001/08/26 19:20:34 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.59 2001/09/02 21:53:00 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -313,13 +313,6 @@ type
     end;
     {$M-}
 
-    GExtractedCharacter = class
-      node : GListNode;
-
-      ch : GCharacter;
-      pull : boolean;
-    end;
-
 var
    char_list : GDLinkedList;
    extracted_chars : GDLinkedList;
@@ -327,7 +320,10 @@ var
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
 function findPlayerWorld(ch : GCharacter; name : string) : GPlayer;
 
-procedure cleanChars;
+procedure cleanExtractedChars();
+
+procedure initChars();
+procedure cleanupChars();
 
 implementation
 
@@ -421,8 +417,6 @@ end;
 procedure GCharacter.extract(pull : boolean);
 { set pull to false if you wish for character to stay
   alive, e.g. in portal or so. don't set to false for NPCs - Grimlord }
-var
-   ext : GExtractedCharacter;
 begin
   if (CHAR_DIED) then
     begin
@@ -432,12 +426,6 @@ begin
 
   if (room <> nil) then
     fromRoom;
-
-  ext := GExtractedCharacter.Create;
-  ext.ch := Self;
-  ext.pull := pull;
-
-  ext.node := extracted_chars.insertLast(ext);
 
   if (not pull) then
     begin
@@ -452,6 +440,7 @@ begin
       GConnection(conn).ch := nil;
 
     char_list.remove(node_world);
+    node_world := extracted_chars.insertLast(Self);
     end;
 end;
 
@@ -486,8 +475,8 @@ end;
 
 function GCharacter.CHAR_DIED : boolean;
 var
-   ext : GExtractedCharacter;
-   node : GListNode;
+  iterator : GIterator;
+  ch : GCharacter;
 begin
   CHAR_DIED := false;
 
@@ -497,20 +486,20 @@ begin
     exit;
     end;
 
-  node := extracted_chars.head;
-
-  while (node <> nil) do
+  iterator := extracted_chars.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    ext := node.element;
+    ch := GCharacter(iterator.next());
 
-    if (ext.ch = Self) then
+    if (ch = Self) then
       begin
       CHAR_DIED := true;
-      exit;
+      break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 procedure GCharacter.sendPrompt;
@@ -628,9 +617,12 @@ begin
 
     node := node_next;
     end;
-
+ 
   channels.clean();
   channels.Free();
+
+  skills_learned.clean();
+  skills_learned.Free();
 
   inherited Destroy;
 end;
@@ -2794,29 +2786,8 @@ begin
         end;
       end;
     end;
-end;
-
-procedure cleanChars;
-var
-   ext : GExtractedCharacter;
-   node : GListNode;
-begin
-  while (true) do
-    begin
-    node := extracted_chars.tail;
-
-    if (node = nil) then
-      exit;
-
-    ext := node.element;
-
-    extracted_chars.remove(node);
-
-    if (ext.pull) then
-      ext.ch.Free;
-
-    ext.free;
-    end;
+    
+  iterator.Free();
 end;
 
 { GLearned }
@@ -2828,9 +2799,25 @@ begin
   skill := skill_;
 end;
 
-initialization
-char_list := GDLinkedList.Create;
-extracted_chars := GDLinkedList.Create;
+procedure cleanExtractedChars();
+begin
+  extracted_chars.clean();
+end;
+
+procedure initChars();
+begin
+  char_list := GDLinkedList.Create;
+  extracted_chars := GDLinkedList.Create;
+end;
+
+procedure cleanupChars();
+begin
+  char_list.clean();
+  char_list.Free();
+
+  extracted_chars.clean();
+  extracted_chars.Free();
+end;
 
 end.
 

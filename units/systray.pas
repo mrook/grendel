@@ -12,6 +12,9 @@ procedure addMenuSeparator();
 procedure registerMenuItem(name : string; callback : GMenuCallBack);
 procedure unregisterMenuItem(name : string);
 
+procedure initSysTray();
+procedure cleanupSysTray();
+
 implementation
 
 uses
@@ -275,7 +278,8 @@ begin
 end;
 
 
-initialization
+procedure initSysTray();
+begin
   menu := CreatePopupMenu();
   menuitems := GDLinkedList.Create();
 
@@ -285,8 +289,14 @@ initialization
   addMenuSeparator();
   registerMenuItem('About', aboutProc);
   addMenuSeparator();
+end;
   
-finalization
+procedure cleanupSysTray();
+begin
   DestroyMenu(menu);
+  
+  menuitems.clean();
+  menuitems.Free();
+end;
   
 end.

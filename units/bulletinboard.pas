@@ -22,6 +22,9 @@ function findNote(board, number : integer) : GNote;
 function noteNumber(board : integer) : integer;
 procedure postNote(c : pointer; text : string);
 
+procedure initNotes();
+procedure cleanupNotes();
+
 implementation
 
 uses
@@ -204,6 +207,15 @@ begin
   save_notes;
 end;
 
+procedure initNotes();
 begin
   notes := GDLinkedList.Create;
+end;
+
+procedure cleanupNotes();
+begin
+  notes.clean();
+  notes.Free();
+end;
+
 end.

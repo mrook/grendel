@@ -5,9 +5,12 @@ interface
 uses
   SysUtils;
   
-//procedure outputError(addr : pointer);
+function returnAddress(addr : pointer) : string;
 procedure outputError(E : EExternal);
 procedure readMapFile(module, fname : string);
+
+procedure initDebug();
+procedure cleanupDebug();
 
 implementation
 
@@ -63,14 +66,14 @@ begin
     exit;
     end;
 
-  hMod := HMODULE(mbi.AllocationBase);
+  hMod := HMODULE(mbi.allocationBase);
 
   if (GetModuleFileName(hMod, szModule, len) = 0) then
     begin
     Result := false;
     exit;
     end;
-
+    
   // Point to the DOS header in memory
   pDosHdr := PImageDosHeader(hMod);
 
@@ -83,6 +86,7 @@ begin
 
   // Iterate through the section table, looking for the one that encompasses
   // the linear address.
+  
   for i := 0 to pNtHdr^.FileHeader.NumberOfSections - 1 do
     begin
     sectionStart := pSection^.VirtualAddress;
@@ -257,33 +261,42 @@ begin
   af.Free();
 end;
 
-procedure showAddress(addr : pointer);
+function returnAddress(addr : pointer) : string;
 var
    section, offset : cardinal;
    modu : array[0..1023] of char;
+   fname : pchar;
    symbol : TSymbol;
    line : TLine;
    symboln, linen : string;
+   oldShowdebug : boolean;
 begin
+  if (addr = nil) then
+    begin
+    Result := '';
+    exit;
+    end;
+    
 {$IFDEF WIN32}
   GetLogicalAddress(addr, modu, 1024, section, offset);
-  
+   
   symbol := findSymbol(ExtractFileName(modu), section, offset);
+
   line := findLine(ExtractFileName(modu), section, offset);
 
   if (symbol <> nil) then
     symboln := symbol.name
   else
-    symboln := 'no symbol';
+    symboln := 'no symbol'; 
 
   if (line <> nil) then
     linen := line.filename + ':' + IntToStr(line.linenr)
   else
     linen := 'no line';
 
-  writeConsole(linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ') (loaded at ' + IntToHex(cardinal(addr), 8) + ')');
+  Result := linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')';
 {$ELSE}
-  writeConsole(IntToHex(integer(addr), 8));
+  Result := IntToHex(integer(addr), 8);
 {$ENDIF}
 end;
 
@@ -300,8 +313,8 @@ begin
   writeConsole('Exception message: "' + E.Message + '".');
   
   try
-    writeConsole('Call stack follows:');
-    showAddress(addr);
+    writeConsole('Call stack follows: ');
+    writeConsole(returnAddress(addr));
 
     FillCallStack(st, 0);
 
@@ -310,7 +323,7 @@ begin
       if (st[a] = nil) then
         continue;
 
-      showAddress(st[a]);
+      writeConsole(returnAddress(st[a]));
       end;
   except
     writeConsole('Unable to read call stack.');
@@ -320,11 +333,16 @@ begin
 {$ENDIF}
 end;
 
+procedure initDebug();
 begin
   symbols := TList.Create;
   lines := TList.Create;
+end;
 
-  readMapFile('grendel.exe', 'grendel.map');
-  readMapfile('core.bpl', 'core.map');
+procedure cleanupDebug();
+begin
+  symbols.Free();
+  lines.Free();
+end;
+ 
 end.
-

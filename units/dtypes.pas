@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.23 2001/08/18 22:07:58 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.24 2001/09/02 21:53:02 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -86,7 +86,7 @@ type
       procedure put(key : variant; value : TObject);
       procedure remove(key : variant);
 
-      function getHash(key : variant) : integer;
+      function getHash(key : variant) : cardinal;
       procedure setHashFunc(func : GHASH_FUNC);
       function findPrimes(n : integer) : GPrimes;
 
@@ -512,14 +512,15 @@ begin
   findPrimes := numbers;
 end;
 
-function GHashTable.getHash(key : variant) : integer;
+function GHashTable.getHash(key : variant) : cardinal;
+{$O-}
 begin
   Result := 0;
   if (varType(key) = varString) then
     Result := hashFunc(hashsize, hashprime, key)
   else
   if (varType(key) = varInteger) then
-    Result := (key * hashprime) mod hashsize;
+    Result := (cardinal(key) * hashprime) mod hashsize;
 end;
 
 procedure GHashTable.setHashFunc(func : GHASH_FUNC);
@@ -770,7 +771,8 @@ begin
     if (hv.refcount <= 0) then
       begin
       str_hash.remove(src^);
-      hv.value.Free;
+      hv.value.Free();
+      hv.Free();
       end;
     end;
 

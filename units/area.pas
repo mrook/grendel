@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.49 2001/08/16 10:53:56 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.50 2001/09/02 21:52:59 ***REMOVED*** Exp $
 
 unit area;
 
@@ -276,9 +276,12 @@ procedure addCorpse(c : pointer);
 function findHeading(s : string) : integer;
 function findDirectionShort(startroom, goalroom : GRoom) : string;
 
-procedure cleanObjects;
+procedure cleanExtractedObjects();
 
 function findObjectWorld(s : string) : GObject;
+
+procedure initAreas();
+procedure cleanupAreas();
 
 implementation
 
@@ -2330,21 +2333,17 @@ begin
 end;
 
 procedure GObject.extract;
-var obj_in : GObject;
-    node : GListNode;
+var 
+  obj_in : GObject;
 begin
   object_list.remove(node_world);
   node_world := nil;
 
-  node := contents.head;
-
-  while (node <> nil) do
+  while (contents.tail <> nil) do
     begin
-    obj_in := node.element;
+    obj_in := contents.tail.element;
 
     obj_in.extract;
-
-    node := node.next;
     end;
 
   if (room <> nil) then
@@ -2863,24 +2862,9 @@ begin
   split(1);
 end;
 
-procedure cleanObjects;
-var
-   ext : GObject;
-   node : GListNode;
+procedure cleanExtractedObjects();
 begin
-  while (true) do
-    begin
-    node := extracted_chars.tail;
-
-    if (node = nil) then
-      exit;
-
-    ext := node.element;
-
-    extracted_object_list.remove(node);
-
-    ext.Free;
-    end;
+  extracted_object_list.clean();
 end;
 
 {Jago 10/Jan/2001 - utility function }
@@ -2920,15 +2904,41 @@ begin
   Result := nil;
 end;
 
-initialization
-area_list := GDLinkedList.Create;
-room_list := GHashTable.Create(32768);
-object_list := GDLinkedList.Create;
-shop_list := GDLinkedList.Create;
-teleport_list := GDLinkedList.Create;
-extracted_object_list := GDLinkedList.Create;
+procedure initAreas();
+begin
+  area_list := GDLinkedList.Create;
+  room_list := GHashTable.Create(32768);
+  object_list := GDLinkedList.Create;
+  shop_list := GDLinkedList.Create;
+  teleport_list := GDLinkedList.Create;
+  extracted_object_list := GDLinkedList.Create;
 
-npc_list := GDLinkedList.Create;
-obj_list := GDLinkedList.Create;
+  npc_list := GDLinkedList.Create;
+  obj_list := GDLinkedList.Create;
+end;
+
+procedure cleanupAreas();
+begin
+  area_list.clean();
+  area_list.Free();
+  
+  room_list.clear();
+  room_list.Free();
+
+  object_list.clean();
+  object_list.Free();
+  
+  shop_list.clean();
+  shop_list.Free();
+  
+  teleport_list.clean();
+  teleport_list.Free();
+  
+  extracted_object_list.clean();
+  extracted_object_list.Free();
+
+  npc_list.clean();
+  npc_list.Free();
+end;
 
 end.

@@ -26,6 +26,9 @@ procedure load_clans;
 
 function findClan(s : string) : GClan;
 
+procedure initClans();
+procedure cleanupClans();
+
 implementation
 
 uses
@@ -158,6 +161,16 @@ begin
     end;
 end;
 
+procedure initClans();
 begin
   clan_list := GDLinkedList.Create;
+end;
+
+procedure cleanupClans();
+begin
+  clan_list.clean();
+  clan_list.Free();
+end;
+
+
 end.

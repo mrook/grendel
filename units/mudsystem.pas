@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.31 2001/08/16 20:58:23 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.32 2001/09/02 21:53:02 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -134,6 +134,9 @@ function checkSocial(c : pointer; cmd, param : string) : boolean;
 
 procedure loadMudState();
 procedure saveMudState();
+
+procedure initSystem();
+procedure cleanupSystem();
 
 implementation
 
@@ -732,13 +735,28 @@ begin
   end;
 end;
 
-initialization 
+procedure initSystem();
+begin
   socials := GHashTable.Create(512);
   socials.setHashFunc(firstHash);
   dm_msg := GDLinkedList.Create;
   auction_good := GAuction.Create;
   auction_evil := GAuction.Create;
   banned_masks := TStringList.Create;
+end;
+
+procedure cleanupSystem();
+begin
+  socials.clear();
+  socials.Free();
+
+  dm_msg.clean();
+  dm_msg.Free();
+  
+  auction_good.Free();
+  auction_evil.Free();
+  banned_masks.Free();
+end;
 
 end.
 

@@ -39,6 +39,8 @@ procedure unregisterConsoleDriver(writer : GConsoleWriter);
 procedure writeConsole(text : string);
 procedure fetchConsoleHistory(max : integer; callback : GConsoleWriter);
 
+procedure initConsole();
+procedure cleanupConsole();
 
 implementation
 
@@ -82,7 +84,7 @@ begin
   he.timestamp := timestamp;
   he.text := text;
   history.insertLast(he);
-  
+
   if (history.getSize() > CONSOLE_HISTORY_MAX) then
     history.remove(history.head);
 
@@ -93,8 +95,8 @@ begin
     writer := GConsoleWriter(iterator.next());
     
     writer.write(timestamp, text);
-    end;
-    
+    end;    
+   
   iterator.Free();
 end;
 
@@ -141,15 +143,21 @@ begin
 {$ENDIF}
 end;
 
-
-initialization
+procedure initConsole();
+begin
   writers := GDLinkedList.Create();
   history := GDLinkedlist.Create();
   
   registerConsoleDriver(GConsoleDefault.Create());
+end;
 
-finalization
+procedure cleanupConsole();
+begin
   writers.clean();
   writers.Free();
+  
+  history.clean();
+  history.Free();
+end;
 
 end.

@@ -32,6 +32,9 @@ procedure load_races;
 
 function findRace(name : string) : GRace;
 
+procedure initRaces();
+procedure cleanupRaces();
+
 implementation
 
 uses
@@ -228,6 +231,15 @@ begin
     end;
 end;
 
+procedure initRaces();
 begin
   race_list := GDLinkedList.Create;
+end;
+
+procedure cleanupRaces();
+begin
+  race_list.clean();
+  race_list.Free();
+end;
+
 end.
