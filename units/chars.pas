@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.37 2001/04/26 21:17:46 xenon Exp $
+// $Id: chars.pas,v 1.38 2001/04/30 16:22:33 xenon Exp $
 
 unit chars;
 
@@ -1774,7 +1774,7 @@ begin
     exit;
     end;
 
-  GConnection(conn).send(ansiColor(7) + #13#10 + 'Use ~ on a blank line to end.'#13#10);
+  GConnection(conn).send(ansiColor(7) + #13#10 + 'Use ~ on a blank line to end. Use .h on a blank line to get help.'#13#10);
   GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------'#13#10'> ');
 
   edit_buffer := text;
@@ -1798,34 +1798,49 @@ end;
 procedure GCharacter.sendEdit(text : string);
 var note : GNote;
 begin
-  if (substate = SUB_NOTE) then
-    begin
-    postNote(Self, text);
-
-    edit_buffer := '';
-    substate := SUB_NONE;
-
-    GConnection(conn).state := CON_PLAYING;
-    GConnection(conn).afk := false;
-
-    sendBuffer('Note posted.'#13#10);
-
-    act(AT_REPORT,'You are now back at your keyboard.',false,Self,nil,nil,TO_CHAR);
-    act(AT_REPORT,'$n finished $s note and is now back at the keyboard.',false,Self,nil,nil,TO_ROOM);
-
-    if (player^.active_board = BOARD_IMM) then
+  case substate of
+    SUB_NOTE:
       begin
-      act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_IMM);
-      act(AT_REPORT,'Written by ' + name^ + '.',false,Self,nil,nil,TO_IMM);
+        postNote(Self, text);
+
+        edit_buffer := '';
+        substate := SUB_NONE;
+
+        GConnection(conn).state := CON_PLAYING;
+        GConnection(conn).afk := false;
+
+        sendBuffer('Note posted.'#13#10);
+
+        act(AT_REPORT,'You are now back at your keyboard.',false,Self,nil,nil,TO_CHAR);
+        act(AT_REPORT,'$n finished $s note and is now back at the keyboard.',false,Self,nil,nil,TO_ROOM);
+
+        if (player^.active_board = BOARD_IMM) then
+          begin
+          act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_IMM);
+          act(AT_REPORT,'Written by ' + name^ + '.',false,Self,nil,nil,TO_IMM);
+          end
+        else
+          begin
+          act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_ALL);
+          act(AT_REPORT,'Written by ' + name^ + '.', false, Self, nil, nil, TO_ALL);
+          end;
+
+        exit;
+      end;
+    SUB_ROOM_DESC :
+      begin
+        interpret(Self, 'redit');
+        GConnection(conn).state := CON_PLAYING;
+        GConnection(conn).afk := false;
+        edit_buffer := '';
+        substate := SUB_NONE;
+        edit_dest := nil;
       end
     else
-      begin
-      act(AT_REPORT,'There is a new note on the ' + board_names[player^.active_board] + ' board.', false, Self, nil, nil, TO_ALL);
-      act(AT_REPORT,'Written by ' + name^ + '.', false, Self, nil, nil, TO_ALL);
-      end;
-
-    exit;
+    begin
+      bugreport('GCharacter.sendEdit()', 'chars.pas', 'unrecognized substate', 'The substate this character is in has not been recognized.');
     end;
+  end;
 end;
 
 procedure GCharacter.editBuffer(text : string);
@@ -1887,7 +1902,37 @@ begin
     GConnection(conn).state := CON_EDIT_HANDLE;
     GConnection(conn).send(#13#10 + ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
     exit;
+    end
+  else
+  if (text[1] = '.') then
+  begin
+    text := uppercase(text);
+    case text[2] of
+      'H' :
+        begin
+          GConnection(conn).send(ansiColor(7) + '.h  this help' + #13#10);
+          GConnection(conn).send(ansiColor(7) + '.c  clear current text' + #13#10);
+          GConnection(conn).send(ansiColor(7) + '.v  see current text' + #13#10);
+        end;
+      'C' :
+        begin
+          edit_buffer := '';
+          GConnection(conn).send(ansiColor(7) + 'Ok, buffer cleared.' + #13#10);
+        end;
+      'V' :
+        begin
+          GConnection(conn).send(ansiColor(7) + 'Current text:' + #13#10);
+          GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
+          GConnection(conn).send(ansiColor(7) + edit_buffer + #13#10);
+        end
+    else
+      begin
+        GConnection(conn).send(ansiColor(7) + 'Enter .h on a blank line for help.' + #13#10);
+      end;
     end;
+    sendPrompt;
+    exit;
+  end;
 
   edit_buffer := edit_buffer + text + #13#10;
   GConnection(conn).send(ansiColor(7) + '> ');
@@ -1966,6 +2011,9 @@ begin
   if (IS_IMMORT) then
     buf := buf + '#' + inttostr(room.vnum) + ' [' + sector_types[room.sector] + '] ';
 
+  if (IS_IMMORT) and (room.areacoords <> nil) then
+    buf := buf + room.areacoords.toString() + ' ';
+    
   t := 1;
   s := '';
 
@@ -2063,10 +2111,26 @@ begin
     bugreport('GCharacter.toRoom', 'chars.pas', 'room null, moving to portal',
               'Character was forced to re-move to portal.');
 
-    if (IS_EVIL)  then
-      to_room := findRoom(ROOM_VNUM_EVIL_PORTAL)
-    else
-      to_room := findRoom(ROOM_VNUM_GOOD_PORTAL);
+    if (IS_IMMORT) then
+    begin
+      to_room := findRoom(ROOM_VNUM_IMMORTAL_PORTAL);
+      if (to_room = nil) then
+      begin
+        bugreport('GCharacter.toRoom', 'chars.pas', 'immortal portal not found',
+                  'This immortal could not be moved to the immortal portal because '+
+                  'it doesn''t exit. Immortals get moved to this room when they ' +
+                  'logged out in a room that has now been removed.'#13#10 +
+                  'To fix this, please create a room with vnum #' + IntToStr(ROOM_VNUM_IMMORTAL_PORTAL) + ', ' +
+                  'or change the ROOM_VNUM_IMMORTAL_PORTAL constant in constants.pas to an ' +
+                  'existing vnum and recompile Grendel.');
+      end;
+    end;
+
+    if (to_room = nil) then      
+      if (IS_EVIL) then
+        to_room := findRoom(ROOM_VNUM_EVIL_PORTAL)
+      else
+        to_room := findRoom(ROOM_VNUM_GOOD_PORTAL);
 
     if (to_room = nil) then
       begin
