@@ -145,8 +145,11 @@ begin
     begin
     t := ch.room.findChar(ch, param);
 
-    if t=nil then
+    if (t = nil) then
       ch.sendBuffer('They are not here.'#13#10)
+    else
+    if (t = ch) then
+      ch.sendBuffer('You can''t slay yourself!'#13#10)
     else
       begin
       act(AT_SLAY,'You slay $N in cold blood!',false,ch,nil,t,TO_CHAR);
@@ -278,7 +281,11 @@ begin
 end;
 
 procedure do_destroy(ch:GCharacter;param:string);
-var vict:GCharacter;
+var
+   vict : GCharacter;
+   f : textfile;
+   s,g : string;
+   level : integer;
 begin
   if (length(param)=0) then
     begin
@@ -287,23 +294,68 @@ begin
     exit;
     end;
 
-  vict:=findCharWorld(ch,param);
+  vict := findCharWorld(ch,param);
+
   if (vict=nil) then
-    begin
-    ch.sendBuffer('That character does not exist.'#13#10);
-    exit;
-    end;
-
+    ch.sendBuffer('That character does not exist.'#13#10)
+  else
   if (vict.IS_NPC) then
+    ch.sendBuffer('Can only destroy players.'#13#10)
+  else
+  if (vict.IS_IMMORT) then
+    ch.sendBuffer('That player cannot be destroyed.'#13#10)
+  else
+  if (vict = ch) then
+    ch.sendBuffer('Use DELETE to erase yourself.'#13#10)
+  else
     begin
-    ch.sendBuffer('Can only destroy players.'#13#10);
-    exit;
+    stopfighting(vict);
+    vict.sendBuffer(#13#10 + findHelp('M_DESTROY_').text);
+    vict.emptyBuffer;
+    vict.quit;
+
+    ch.sendBuffer('Ok.'#13#10);
+    write_console(vict.name + ' has been destroyed.');
+
+    assignfile(f, 'players\' + vict.name + '.usr');
+    rename(f, 'backup\' + vict.name + '.usr');
     end;
 
-  vict.sendBuffer(#13#10 + findHelp('M_DESTROY_').text);
-  vict.emptyBuffer;
-  vict.quit;
-  ch.sendBuffer('Ok.'#13#10);
+  if FileExists('players\' + param + '.usr') then
+    begin
+
+    assignfile(f,'players\' + param + '.usr');
+    reset(f);
+
+    repeat
+      readln(f, s);
+
+      g := uppercase(stripl(s, ':'));
+
+      if (g = 'LEVEL') then
+        begin
+        level := strtoint(striprbeg(s, ' '));
+
+        if (level >= 990) then
+          begin
+          ch.sendBuffer('That player cannot be purged.'#13#10);
+          exit;
+          end;
+        end;
+    until (eof(f));
+
+    closefile(f);
+
+    write_console(param + ' has been destroyed.');
+    ch.sendBuffer('Ok.'#13#10);
+
+    rename(f, 'backup\' + vict.name + '.usr');
+    end
+  else
+    begin
+    ch.sendBuffer('That player cannot be found.'#13#10);
+    exit;
+    end;
 end;
 
 {Jago 5/Jan/01 : implemented do_force to use GCharacter instead of CHAR_DATA}
