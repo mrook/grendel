@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.32 2001/06/06 19:04:17 xenon Exp $
+// $Id: area.pas,v 1.33 2001/06/09 20:56:08 ***REMOVED*** Exp $
 
 unit area;
 
@@ -250,6 +250,7 @@ function findLocation(ch : pointer; param : string) : GRoom;
 function findNPCIndex(vnum : integer) : GNPCIndex;
 function findObjectIndex(vnum : integer) : GObjectIndex;
 
+function instanceNPC(npcindex : GNPCIndex) : pointer;
 function instanceObject(o_index : GObjectIndex) : GObject;
 procedure addCorpse(c : pointer);
 function findHeading(s : string) : integer;
@@ -1302,6 +1303,79 @@ begin
   closefile(f);
 end;
 
+{jago - utility func, move to area.pas}
+function instanceNPC(npcindex : GNPCIndex) : pointer;
+var
+  npc : GNPC;
+begin
+  // note : this func doesnt check
+  // npcindex.count + 1 < reset.max
+  // this is so imms can mload more npcs than the reset maximum
+
+  // this func does not place the npc in a room, the calling func is
+  // responsible for that
+
+  if (npcindex = nil) then
+    begin
+    bugreport('instanceNPC', 'area.pas', 'npc_index null',
+              'The index to create a npc from is invalid.');
+    Result := nil;
+    exit;
+    end;
+
+  npc := GNPC.Create;
+  npc.context := GContext.Create;
+  npc.context.load(npcindex.prog);
+  npc.context.owner := npc;
+
+  with npc do
+    begin
+    str := npcindex.str;
+    con := npcindex.con;
+    dex := npcindex.dex;
+    int := npcindex.int;
+    wis := npcindex.wis;
+    hp:=npcindex.hp;
+    max_hp:=npcindex.hp;
+    mv:=npcindex.mv;
+    max_mv:=npcindex.mv;
+    mana:=npcindex.mana;
+    max_mana:=npcindex.mana;
+    natural_ac:=npcindex.natural_ac;
+    ac_mod:=0;
+    hitroll:=npcindex.hitroll;
+
+    damnumdie:=npcindex.damnumdie;
+    damsizedie:=npcindex.damsizedie;
+    apb:=npcindex.apb;
+    skills_learned := npcindex.skills_learned;
+    clan:=npcindex.clan;
+    conn:=nil;
+    npc.room := nil;
+    position:=POS_STANDING;
+    npc.npc_index := npcindex;
+
+    name := hash_string(npcindex.name);
+    short := hash_string(npcindex.short);
+    long := hash_string(npcindex.long);
+
+    sex:=npcindex.sex;
+    race:=npcindex.race;
+    alignment:=npcindex.alignment;
+    level:=npcindex.level;
+    weight:=npcindex.weight;
+    height:=npcindex.height;
+    act_flags:=npcindex.act_flags;
+    end;
+
+  inc(npcindex.count);
+  npc.node_world := char_list.insertLast(npc);
+
+  npc.calcAC;
+
+  Result := npc;
+end;
+
 procedure GArea.reset;
 var reset : GReset;
     npc, vict, lastmob : GNPC;
@@ -1352,53 +1426,8 @@ begin
             if (npcindex.count < reset.arg3) then
               begin
 
-              npc := GNPC.Create;
-              npc.context := GContext.Create;
-              npc.context.load(npcindex.prog);
-              npc.context.owner := npc;
-
-              with npc do
-                begin
-                str := npcindex.str;
-                con := npcindex.con;
-                dex := npcindex.dex;
-                int := npcindex.int;
-                wis := npcindex.wis;
-                hp:=npcindex.hp;
-                max_hp:=npcindex.hp;
-                mv:=npcindex.mv;
-                max_mv:=npcindex.mv;
-                mana:=npcindex.mana;
-                max_mana:=npcindex.mana;
-                natural_ac:=npcindex.natural_ac;
-                ac_mod:=0;
-                hitroll:=npcindex.hitroll;
-{                  point.dam_type:=npcindex.dam_type; }
-                damnumdie:=npcindex.damnumdie;
-                damsizedie:=npcindex.damsizedie;
-                apb:=npcindex.apb;
-                skills_learned := npcindex.skills_learned;
-                clan:=npcindex.clan;
-                conn:=nil;
-                npc.room := findRoom(reset.arg2);
-                position:=POS_STANDING;
-                npc.npc_index := npcindex;
-
-                name := hash_string(npcindex.name);
-                short := hash_string(npcindex.short);
-                long := hash_string(npcindex.long);
-
-                sex:=npcindex.sex;
-                race:=npcindex.race;
-                alignment:=npcindex.alignment;
-                level:=npcindex.level;
-                weight:=npcindex.weight;
-                height:=npcindex.height;
-                act_flags:=npcindex.act_flags;
-                end;
-
-              inc(npcindex.count);
-              npc.node_world := char_list.insertLast(npc);
+              npc := instanceNPC(npcindex);
+              npc.room := findRoom(reset.arg2);
 
               if (npc.room = nil) then
                 begin

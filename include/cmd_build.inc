@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.31 2001/06/06 18:47:26 xenon Exp $
+// $Id: cmd_build.inc,v 1.32 2001/06/09 20:56:09 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -568,80 +568,6 @@ begin
 
   act(AT_WHITE, '$n has created $p!', false, ch, obj, nil, TO_ROOM);
   ch.sendBuffer('Ok.');
-end;
-
-{jago - utility func, move to area.pas}
-function instanceNPC(npcindex : GNPCIndex) : GCharacter;
-var
-  npc : GNPC;
-begin
-
-  // note : this func doesnt check
-  // npcindex.count + 1 < reset.max
-  // this is so imms can mload more npcs than the reset maximum
-
-  // this func does not place the npc in a room, the calling func is
-  // responsible for that
-
-  if (npcindex = nil) then
-  begin
-    bugreport('instanceNPC', 'area.pas', 'npc_index null',
-              'The index to create a npc from is invalid.');
-    Result := nil;
-    exit;
-  end;
-
-  npc := GNPC.Create;
-
-  with npc do
-  begin
-    str:=npcindex.str;
-    con:=npcindex.con;
-    dex:=npcindex.dex;
-    int:=npcindex.int;
-    wis:=npcindex.wis;
-
-    hp:=npcindex.hp;
-    max_hp:=npcindex.hp;
-    mv:=npcindex.mv;
-    max_mv:=npcindex.mv;
-    mana:=npcindex.mana;
-    max_mana:=npcindex.mana;
-    natural_ac:=npcindex.natural_ac;
-    ac_mod:=0;
-    hitroll:=npcindex.hitroll;
-
-    damnumdie:=npcindex.damnumdie;
-    damsizedie:=npcindex.damsizedie;
-    apb:=npcindex.apb;
-    skills_learned := npcindex.skills_learned;
-    clan:=npcindex.clan;
-    conn:=nil;
-
-    npc.room := nil;//findRoom(reset.arg2);
-
-    position:=POS_STANDING;
-    npc.npc_index := npcindex;
-
-    name := hash_string(npcindex.name);
-    short := hash_string(npcindex.short);
-    long := hash_string(npcindex.long);
-
-    sex:=npcindex.sex;
-    race:=npcindex.race;
-    alignment:=npcindex.alignment;
-    level:=npcindex.level;
-    weight:=npcindex.weight;
-    height:=npcindex.height;
-    act_flags:=npcindex.act_flags;
-  end; {with}
-
-  inc(npcindex.count);
-  npc.node_world := char_list.insertLast(npc);
-
-  npc.calcAC;
-
-  Result := npc;
 end;
 
 {Jago 17/Jan/2001 - MLOAD - load a NPC}
