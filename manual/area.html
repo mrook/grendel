@@ -1,0 +1,298 @@
+<html>
+<head>
+<meta name="Creator" content="Michiel Rook">
+<title>
+The Grendel Project
+</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body background="images/bg.jpg">
+<p>This file covers most of the Grendel Area File Specification valid for server
+version v0.3.3. Not everything is included, for I want you to have something
+to discover, left for your own imagination.</p>
+<p>The best way to create areas is to read, read and re-read this specification,
+till you can dream it. Also, take a look at the sample areas included with
+the Grendel distribution, for in those areas is included everything that
+can be done with areas.</p>
+<p>Included in the Grendel distribution is a simple but powerful area
+builder, useful for beginners ready to learn, without having to bother about
+area code complexities. I recommend learning area coding by hand however,
+for sometimes you can encounter an error (or a feature you need) which
+cannot be solved using the builder.</p>
+<p>Shortcuts into the helpfile:
+<ul>
+<li><a href="#Areas">Area structure</a>
+<li><a href="#Rooms">Rooms</a>
+<li><a href="#Mobiles">Mobiles</a>
+<li><a href="#Objects">Objects</a>
+<li><a href="#Resets">Resets</a>
+<li><a href="#Install">Installing a new area</a>
+<li><a href="#Ansi">Adding color to your area</a>
+</ul></p>
+<p><b><cite>Note: </cite></b>All of the flags, numbers and other constants that
+can be used in area files can be found in the <a href="tables.html">tables</a> file.</p>
+<a name="Areas"></a>
+<p><b>1. Area structure</b></p>
+<p>A Grendel Area File is made up out of several sections. Each section
+starts with a crossmark (<kbd>`#'</kbd>) followed by an identifier. These sections
+can be <kbd>#AREA</kbd>, <kbd>#ROOMS</kbd>, <kbd>#OBJECTS</kbd>,
+<kbd>#MOBILES</kbd> and <kbd>#RESETS</kbd>. A <kbd>#AREA</kbd> section marks
+the beginning of a new area file and cannot be left out. The server expects
+this mark to begin necessary preparations, so leaving this out will
+probably crash it. The other identifiers mark the start of a separate
+section of code, for rooms, objects, mobiles or resets.
+All of these sections, <b>except for the <kbd>#AREA</kbd> section</b>, need
+to be ended using <kbd>#END</kbd>. Failure to do so will give unpredictable
+results. A <kbd>#AREA</kbd> section needs to be ended using a dollarsign
+(<kbd>'$'</kbd>). This marks the end of the area file and nothing more will
+be read beyond this marker.
+You can add blank lines between the sections, but this is not necessary,
+it only helps readability.</p>
+<p>The area section consists of a few lines of information. On the first line,
+you type the name of the area, on the second the name of the author.
+On a new line, you type the message players see when the area resets. On the
+next line, you type the maximum age the area is allowed to reach (e.g. after
+how many gamerounds (about 75 secs) will the area reset).
+The last line is for three values: the temperature multiplier, the average
+temperature and any area flags (see: <a href="tables.html#AREA_">tables.html</a>).
+The temperature of an area is calculated by a sine wave which takes the
+hour of the day as a parameter. With the temperature multiplier as amplitude,
+it swings around the average temperature.</p>
+<p><b><cite>Note: </cite></b>You cannot nest blocks of code within one another:
+the server will either crash or dismiss it as useless information.</p>
+<a name="Rooms"></a>
+<p><b>2. Rooms</b></p>
+<p>You start a new block of rooms by typing <kbd>#ROOMS</kbd>. On a new line
+you type a crossmark (<kbd>'#'</kbd>) followed by the virtual number you
+are assigning to the room. On a new line you put the short description of the
+room. After that you can type the long description. This description can
+be as long as you like (currently the max is 8192 bytes), and has to be ended
+by a line with a tilde (<kbd>'~'</kbd>) on it.</p>
+<p>On a new line you can type flags (see: <a href="tables.html#ROOM_">tables.html</a>),
+minimum level, maximum level, sector type (see: <a href="tables.html#SECT_">tables.html</a>),
+and two optional values: the teleport vnum and the teleport delay.
+Type these numbers one after the other on the same line. You do not have
+to type the last two numbers (teleport info) if you don't use them.</p>
+<p>The next (and last) part of the room information is the exit information.
+Here you can describe doorways, exits, portals, whatever you like to be
+in your room. For a new exit, type <kbd>'D'</kbd> followed by the target
+vnum, direction (see: <a href="tables.html#DIR_">tables.html</a>),
+flags (see: <a href="tables.html#EX_">tables.html</a>),
+used key (-1 for no key) and <b>optionally</b>, a keyword (e.g. crack).
+You can enclose multiple words with single-quotes to make sure
+they are processed as <b>1</b> word.
+After the exits, you must type a line with <kbd>'S'</kbd> on it.</p>
+<p><b><cite>Note: </cite></b>You <b>must</b> type <kbd>'S'</kbd> when ending
+a single room. Failure to do so will give unpredictable results.</p>
+<p><b><cite>Note: </cite></b>One area file can consist of several <kbd>#ROOMS</kbd>
+sections.</p>
+<p>Below is a sample room. It doesn't have any extra flags, an exit north to #6,
+an exit down to #7 (with a few keywords) and sector type SECT_FIELD.
+<pre>
+#5
+A sample room
+This room is just a sample and isn't for real.
+Feel free to look around a bit.
+~
+0 0 0 3
+D 6 1 0 0
+D 7 5 0 0 'steel door' gate
+S
+</pre></p>
+<p>Below is a another sample room. This one doesn't have any exits, but is a
+teleport room (televnum=21, teledelay=8), sector type SECT_AIR.
+<pre>
+#20
+A sample teleport room
+After two seconds, this room will teleport you to room 21.
+~
+32768 0 0 13 21 8
+S
+</pre></p>
+<a name="Mobiles"></a>
+<p><b>3. Mobiles</b></p>
+<p>Mobiles are the artificially intelligent (ahum) population of a mud. They are
+also called NPCs (non-player characters). It is however not so that mobiles
+are strictly <cite>mobile</cite>, e.g. you can force them to stick in one
+place and not move. Mobiles can be quite powerful, so you have to be careful what
+you do with the properties: look at the balance of your mud, call/mail the
+administrator and don't create too powerful NPCs.</p>
+<p>Some tips on mobiles:
+<ul>
+<li>Level and hitpoints determine the xp (the builder comes
+with a formula) one gets for killing the mobile, so you want those to have a
+connection more or less</li>
+<li>Make sure the mobile is up to the task it is
+given (e.g. a guard should have lots of hp and apb, otherwise it won't be
+guarding long)</li>
+<li>When writing a new xp area, define a certain level range
+and build the mobiles according to that range: don't make the mobiles too
+easy, nor too hard to kill</li>
+<li>It is senseless to write an exact specification
+for mobiles: just try out what settings work for you and your mud.</li></ul></p>
+<p>You start a new block of mobiles by type <kbd>#MOBILES</kbd>. As with a
+room, you then type a crossmark and the vnum on a new line. Then, in order
+of appearance and on single lines, you type the name, short and long
+description of the mobile. On a new line you type the level and the sex
+of the mobile. 
+If you want to specify a damage roll and damage type for the mobile, type them
+on this line in the form <kbd>0d0+0 [damage type]</kbd>. The first represents
+the damage roll, as used in RPGs, the second is the damage type. 
+On the next line you type AC, any flags (see: <a href="tables.html#ACT_">tables.html</a>),
+the gold it carries, the height (in centimeters) and the weight (in ounces).</p>
+<p>Below is a sample mobile:</p>
+<pre>
+#1
+a sample mobile
+a sample mobile is here
+a sample mobile wanders around here
+15 2
+5 0 0 0 0
+</pre>
+<p><b><cite>Note: </cite>The area format listed in the 0.2.16 documentation
+contains a flaw and is not correct. Use this format instead.</b></p>
+<p><b><cite>Note: </cite></b>Don't use a capital as the first letter in the name,
+short and long description. When necessary, the mud will capitalize a sentence before
+it is send to players. This way you won't have irritating capitals popping into
+the middle of a line.</p>
+<a name="Objects"></a>
+<p><b>4. Objects</b></p>
+<p>The word explains itself. Objects come in all types and sizes, but the
+most basic thing about them is that you can pick them up and take them
+with you. There are a lot of different object types, for there is money,
+weapons, armor, fountains, food, drinks, etc. etc. Objects, as mobiles,
+define the behaviour of your mud: what can players do or not do, what
+do they possess, is it hard to get particular items, etc. etc.</p>
+<p>A new object section starts with <kbd>#OBJECTS</kbd>. As usual, you start
+by typing a crossmark followed by the vnum of the object. Just as with mobiles,
+you type name, short and long description on three seperate lines. On the
+next line you type the item type (see: <a href="tables.html#ITEM_">tables.html</a>),
+and the 2 wearing positions (see: <a href="tables.html#WEAR_">tables.html</a>).
+The next line is for the four values that further
+define the object (see: <a href="tables.html#ITEM_">tables.html</a>).
+On the last line you type the weight of the object (in ounces), any
+flags (see: <a href="tables.html#OBJ_">tables.html</a>) and the average cost
+of the object in copper coins.</p>
+<p>Below is a sample object:</p>
+<pre>#1
+a sample sword
+a sample, small sword
+a sample lies here, abandoned
+1 17 18
+0 1 6 1
+55 0</pre>
+<p>This is a 1d6 slasher, which can be worn in both hands (left & right)
+and weighs 55 ounces (=5.5 kg). No special flags are given.</p>
+<a name="Resets"></a>
+<p><b>5. Resets</b></p>
+<p>Resets define the last part of your area. Without resets, simply nothing
+will be visibile, no mobiles, no objects, just the rooms. With resets, you
+determine where mobiles appear, if they are carrying objects, etc. etc.</p>
+<p>A new section of resets is started by typing <kbd>#RESETS</kbd>.
+To create a new reset, type (on one line) the reset type, optionally followed by a
+double-point (<kbd>':'</kbd>) and the three arguments. Currently, these values
+are valid for the reset type: reset mobile to room (M), reset object to room (O),
+equip object to mobile (E), give object to mobile (G), insert object into
+object (I), and reset door (D). These resets will be discussed seperately.</p>
+<p><b>(M) Reset mobile to room</b></p>
+<p>This reset comes in the form <kbd>'M: 0 0 0'</kbd>. The first number is
+the vnum of the mobile, the second the vnum of the room and the third is
+the maximum number of times that particular mobile may appear in the <b>entire</b>
+mud. As I have noted while explaining this to my builders, it can become quite
+complicated in certain cases, so I will name some difficulties you will no
+doubt run into:
+<ul>
+<li>Typing a mobile reset with a maximum count of 3 does <b>NOT</b> create 3 mobiles,
+it enables you to type 3 resets of the same sort!
+<li>When typing two resets for the same mobile after another, while setting
+the maximum count to 1 prevents the second line from executing.
+</ul></p>
+<p><b>(O) Reset object to room</b></p>
+<p>This reset form is quite similar to that of (M). The first number is the
+vnum of the object, the second number the vnum of the room and the third
+is the maximum count. The same rules as with (M) apply, with one extra:
+when players are in the area this reset belongs to, the reset is not executed.</p>
+<p><b>(E) Equip object to mobile</b></p>
+<p>This reset is quite a different type and needs to be paid attention to.
+If you wish to equip a mobile with an object, you must include this type of
+reset <b>directly</b> after the reset for that mobile. E.g. this reset applies
+to the last mobile that has been reset. The first number is the object vnum,
+the second number is the load chance: if a percentage roll is lower or equal
+to this number, the reset is executed, otherwise it is not. The third number
+is an optional number, so if you don't want to use it, just type 0.
+This number can define a specific mobile vnum to equip to object to.
+In certain cases, this can be useful, but beware: if you have more than one
+mobile using this vnum, only the first will be equipped!</p>
+<p><b>(G) Give object to mobile</b></p>
+<p>This reset is quite similar to (E), with one exception: the number for
+load chance is unused and can take any value. Here, the third number is
+optional too.</p>
+<p><b>(I) Insert object into object</b></p>
+<p>This reset behaves like (E), it must be included right after a (O), (E)
+or (G) reset, and will spawn a new object into the object of that reset.
+The first argument is the vnum of the object to be spawned, the third argument
+is the world max. The second argument is currently unused.</p>
+<p><b>(D) Reset door</b></p>
+<p>This reset changes the state of an exit, and its reverse exit. The first
+argument is the vnum of the room, the second argument is the direction of the exit
+(north/south/etc.) and the third argument is the state of the door.
+</p>
+<table align="center">
+<tr>
+  <td colspan=2><b>Valid states:</b></td>
+</tr>
+<tr>
+  <td>0&nbsp;&nbsp;</td>
+  <td>open door</td>
+</tr>
+<tr>
+  <td>1</td>
+  <td>closed door</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>closed secret door</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>locked door</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>locked secret door</td>
+</tr>
+</table>
+</p>
+<a name="Install"></a>
+<p><b>6. Installing a new area</b></p>
+<p>Use an editor (like Notepad) and open up the file
+<kbd>areas\area.list</kbd>. Add a line (before the dollarsign) with the
+filename of your new area, save it and reboot the server. That's all.</p>
+<a name="Ansi"></a>
+<p><b>7. Adding color to your area</b></p>
+<p>You may wish to use ANSI coloring to cheer up your mud a bit. ANSI
+coloring can be very useful when creating objects. The grade of coloring
+usually determines the value and worth of the object: e.g. a superb
+blade would be colored quite a lot, with bold coloring (shining), while
+a simple cloak would tend to have less bright coloring.</p>
+<p>You can use colors almost everywhere in Grendel. Beware however that you
+do not OVERcolor your areas, otherwise people will get annoyed: aggressive
+ANSI can be deadly. When you wish to add an ANSI color, type a dollarsign
+and a number ranging from 0 to 15. The colors from 8 to 15 are the same as
+the colors from 0 to 7 with the exception that they are bold. The following
+sample line helps illustrate this:</p>
+<p><pre>
+$2darkgreen $7gray $15white $4darkred
+</pre></p>
+<p>Some tips:
+<ul>
+<li>Don't overcolor your MUD, this will add to your bandwidth usage,
+as well to the rate of whine-mails dropping in your box.</li>
+<li>Try to match the coloring with the description of the object/mobile.</li>
+</ul>
+</p>
+<p><form method="get" action="body.html">
+<input type="submit" value="Back"></form></p>
+</body>
+</html>
