@@ -193,7 +193,7 @@ minlevel: 50
 mana: 50
 target: 3
 function: spell_generic
-affects: I 2 6 0
+affects: apply_int 2 6
 hitchar: You feel smart.
 hitroom: $N looks very smart.
 wearoff: You feel less bright.
@@ -207,7 +207,7 @@ minlevel: 28
 mana: 32
 target: 3
 function: spell_generic
-affects: - 0 12 512
+affects: apply_affect 512 12
 wearoff: You can no longer breath under water.
 hitvict: You now have the ability to breath under water.
 hitroom: $n's face glows a watery blue.
@@ -221,7 +221,7 @@ minlevel: 12
 mana: 16
 target: 4
 function: spell_generic
-affects: A -2 12 0
+affects: apply_ac -2 12
 hitvict: You are surrounded by a strange $3barrier$6.
 hitroom: A strange $3barrier$6 surrounds $N.
 wearoff: The barrier dissolves.
@@ -235,7 +235,7 @@ minlevel: 16
 mana: 18
 target: 1
 function: spell_generic
-affects: - 0 12 1
+affects: apply_affect 1 12
 hitchar: You have succesfully blinded $N!
 hitvict: You are blinded!
 hitroom: $N tears at $S eyes, blinded!
@@ -250,7 +250,18 @@ minlevel: 22
 mana: 20
 target: 4
 function: spell_generic
-affects: U 0 0 1
+affects: apply_stripspell Blindness 0
+#end
+
+#skill
+type: spell
+name: Cure Poison
+rounds: 11
+minlevel: 22
+mana: 20
+target: 4
+function: spell_generic
+affects: apply_stripspell Poison 0
 #end
 
 #skill
@@ -264,7 +275,7 @@ function: spell_generic
 wearoff: You can no longer spot invisible things.
 hitchar: Your vision extends beyond the normal.
 hitroom: $N's eyes glow an eerie color.
-affects: - 0 16 4
+affects: apply_affect 4 16
 #end
 
 #skill
@@ -278,7 +289,7 @@ function: spell_generic
 wearoff: You no longer feel enchanted.
 hitchar: You feel enchanted by a strange power.
 hitroom: $N looks as if $E is enchanted.
-affects: - 0 12 8192
+affects: apply_affect 8192 12
 #end
 
 #skill
@@ -291,7 +302,7 @@ target: 4
 function: spell_generic
 hitvict: You look a lot better.
 hitroom: $N looks a lot better.
-affects: h 100 0 0
+affects: apply_hp 100 0
 #end
 
 #skill
@@ -305,7 +316,7 @@ function: spell_generic
 hitroom: $N looks a bit better.
 hitvict: You look a bit better.
 hitroom: $N looks a bit better.
-affects: h 12 0 0
+affects: apply_hp 12 0
 #end
 
 #skill
@@ -329,7 +340,7 @@ function: spell_generic
 hitchar: You slowly fade away into invisibility.
 hitroom: $N waves $S hands and fades away.
 wearoff: Your invisibility slowly ebbs away.
-affects: - 0 12 2
+affects: apply_affect 2 12
 #end
 
 #skill
@@ -340,24 +351,10 @@ minlevel: 20
 mana: 20
 target: 3
 function: spell_generic
-affects: f 1 10 128
+affects: apply_affect 128 10
 hitchar: You are lifted off the ground by the wind.
 hitroom: A gust of wind lifts $N off the ground.
 wearoff: You gently float down to the ground.
-#end
-
-#skill
-type: spell
-name: Mass Funk
-rounds: 15
-minlevel: 50
-mana: 50
-target: 5
-affects: U 1 10 0
-wearoff: You feel less funky.
-function: spell_generic
-hitvict: You feel funky!
-hitroom: $N looks funky!
 #end
 
 #skill
@@ -379,7 +376,7 @@ minlevel: 5
 mana: 10
 target: 4
 function: spell_generic
-affects: A -1 12 0
+affects: apply_ac -1 12
 hitvict: You feel protected.
 hitroom: $N looks protected.
 wearoff: You no longer feel protected.
