@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.2 2003/10/17 09:04:00 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.3 2003/10/17 11:05:57 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -17,12 +17,28 @@ uses
 	chars;
 
 type
-    GPlayer = class(GCharacter)
+		GPlayer = class;
+		
+		GPlayerConnection = class(GConnection)
     protected
     	_state : integer;
+      _ch : GPlayer;
+      
+      procedure OnOpenEvent();
+      procedure OnInputEvent();
+      procedure OnCloseEvent();
+      
+    public
+    	property state : integer read _state write _state;
+    	
+    	property ch: GPlayer read _ch write _ch;
+		end;
+		
+    GPlayer = class(GCharacter)   	
+    protected
       _keylock: boolean;
       _afk : boolean;
-    	
+    
     public
       edit_buffer : string;
       edit_dest : pointer;
@@ -67,13 +83,13 @@ type
 
       ld_timer : integer;
       
-      conn : GConnection;
+      conn : GPlayerConnection;
 
       active_board : integer;
       boards : array[BOARD1..BOARD_MAX-1] of integer;
       subject : string;
 
-      constructor Create;
+      constructor Create(conn : GPlayerConnection);
       destructor Destroy; override;
 
     published
@@ -111,15 +127,10 @@ type
       procedure editBuffer(text : string);
       procedure sendEdit(text : string);
 
-    	property state : integer read _state write _state;
     	property keylock : boolean read _keylock write _keylock;
     	property afk : boolean read _afk write _afk;
     end;
 
-
-var
-	playerList : GDLinkedList;
-	
 
 implementation
 
@@ -142,14 +153,48 @@ uses
 	Channels;
 	
 
+// GPlayerConnection
+procedure GPlayerConnection.OnOpenEvent();
+begin
+end;
+
+procedure GPlayerConnection.OnInputEvent();
+begin
+end;
+
+procedure GPlayerConnection.OnCloseEvent();
+begin
+	if (not ch.CHAR_DIED) and ((state = CON_PLAYING) or (state = CON_EDITING)) then
+		begin
+		writeConsole('(' + IntToStr(socket.getDescriptor) + ') ' + ch.name + ' has lost the link');
+
+		if (ch.level >= LEVEL_IMMORTAL) then
+			interpret(ch, 'return');
+
+		ch.conn := nil;
+
+		act(AT_REPORT,'$n has lost $s link.',false,ch,nil,nil,TO_ROOM);
+		SET_BIT(ch.flags,PLR_LINKLESS);
+		end
+	else
+	if (state = CON_LOGGED_OUT) then
+		dec(system_info.user_cur)
+	else
+		begin
+		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
+		ch.Free;
+		end;
+end;
+
+
 // GPlayer
-constructor GPlayer.Create();
+constructor GPlayer.Create(conn : GPlayerConnection);
 var
    iterator : GIterator;
    chan : TChannel;
    tc : TChannel;
 begin
-  inherited Create;
+  inherited Create();
 
   pagerlen := 25;
   xptogo := round((20 * power(level, 1.2)) * (1 + (random(3) / 10)));
@@ -207,12 +252,18 @@ begin
   hitroll := 50;
 
   position := POS_STANDING;
-  state := STATE_IDLE;
   bash_timer := -2;
   cast_timer := 0;
   bashing := -2;
   mental_state := -10;
   in_command := false;
+  
+  keylock := false;
+  afk := false;
+
+	Self.conn := conn;
+  conn.state := STATE_IDLE;
+  conn.ch := Self;
 
   if (IS_GOOD) then
     room := findRoom(ROOM_VNUM_GOOD_PORTAL)
@@ -221,8 +272,6 @@ begin
     room := findRoom(ROOM_VNUM_EVIL_PORTAL);
 
   fighting := nil;
-  
-  playerList.add(Self);
 end;
 
 destructor GPlayer.Destroy();
@@ -389,7 +438,7 @@ end;
 
 function GPlayer.IS_EDITING : boolean;
 begin
-  IS_EDITING := state = CON_EDITING;
+  IS_EDITING := conn.state = CON_EDITING;
 end;
 
 function GPlayer.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
@@ -1310,7 +1359,7 @@ begin
 
   edit_buffer := text;
   afk := true;
-  state := CON_EDITING;
+  conn.state := CON_EDITING;
 end;
 
 procedure GPlayer.stopEditing;
@@ -1320,7 +1369,7 @@ begin
   edit_buffer := '';
   substate := SUB_NONE;
   afk := false;
-  state := CON_PLAYING;
+  conn.state := CON_PLAYING;
 
   sendBuffer('You are now back at your keyboard.'#13#10);
   act(AT_REPORT,'$n has returned to $s keyboard.',false,Self,nil,nil,to_room);
@@ -1337,7 +1386,7 @@ begin
         edit_buffer := '';
         substate := SUB_NONE;
 
-        state := CON_PLAYING;
+        conn.state := CON_PLAYING;
         afk := false;
 
         sendBuffer('Note posted.'#13#10);
@@ -1361,7 +1410,7 @@ begin
     SUB_ROOM_DESC :
       begin
         interpret(Self, 'redit');
-        state := CON_PLAYING;
+        conn.state := CON_PLAYING;
         afk := false;
         edit_buffer := '';
         substate := SUB_NONE;
@@ -1686,16 +1735,6 @@ begin
     r:='a god';
 
   rank := r;
-end;
-
-
-procedure initPlayers();
-begin
-end;
-
-procedure cleanupPlayers();
-begin
-	playerList.
 end;
 
 

@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: commands.pas,v 1.1 2003/10/16 16:06:04 ***REMOVED*** Exp $)
+  @lastmod($Id: commands.pas,v 1.2 2003/10/17 11:05:56 ***REMOVED*** Exp $)
 }
 
 unit commands;
@@ -74,6 +74,7 @@ uses
     update,
     timers,
     fight,
+    player,
     NameGen,
     Channels;
 
@@ -220,233 +221,235 @@ begin
     exit;
     end;
     
-  with ch do
-    begin
-    { Check if keyboard is locked - Nemesis }
-    if (conn <> nil) and (not IS_NPC) and (IS_KEYLOCKED) then
-      begin
-      if (length(line) = 0) then
-        begin
-        sendBuffer('Enter your password to unlock keyboard.'#13#10);
-        exit;
-        end;
+	{ Check if keyboard is locked - Nemesis }
+	if (not ch.IS_NPC) then
+		begin
+		if (GPlayer(ch).conn <> nil) and (ch.IS_KEYLOCKED) then
+			begin
+			if (length(line) = 0) then
+				begin
+				ch.sendBuffer('Enter your password to unlock keyboard.'#13#10);
+				exit;
+				end;
 
-      if (not MD5Match(GPlayer(ch).md5_password, MD5String(line))) then
-        begin
-        sendBuffer('Wrong password!'#13#10);
-        exit;
-        end
-      else
-        begin
-        GConnection(conn).afk := false;
-        GConnection(conn).keylock := false;
+			if (not MD5Match(GPlayer(ch).md5_password, MD5String(line))) then
+				begin
+				ch.sendBuffer('Wrong password!'#13#10);
+				exit;
+				end
+			else
+				begin
+				GPlayer(ch).afk := false;
+				GPlayer(ch).keylock := false;
 
-        act(AT_REPORT,'You are now back at your keyboard.',false,ch,nil,nil,to_char);
-        act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
-        exit;
-        end;
-      end;
+				act(AT_REPORT,'You are now back at your keyboard.',false,ch,nil,nil,to_char);
+				act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
+				exit;
+				end;
+			end;
 
-    { AFK revised with keylock - Nemesis }
-    if (conn <> nil) and (IS_AFK) and (not IS_NPC) and (not IS_KEYLOCKED) then
-      begin
-      GConnection(conn).afk := false;
+		{ AFK revised with keylock - Nemesis }
+		if (GPlayer(ch).conn <> nil) and (ch.IS_AFK) and (not ch.IS_KEYLOCKED) then
+			begin
+			GPlayer(ch).afk := false;
 
-      act(AT_REPORT,'You are now back at your keyboard.',false,ch,nil,nil,to_char);
-      act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
-      end;
+			act(AT_REPORT,'You are now back at your keyboard.',false,ch,nil,nil,to_char);
+			act(AT_REPORT,'$n has returned to $s keyboard.',false,ch,nil,nil,to_room);
+			end;
+		end;
 
-    timer := hasTimer(ch, TIMER_ACTION);
-    if (timer <> nil) then
-      begin
-      act(AT_REPORT, 'You stop your ' + timer.name + '.', false, ch, nil, nil, TO_CHAR);
-      unregisterTimer(ch, TIMER_ACTION);
-      end;
+	timer := hasTimer(ch, TIMER_ACTION);
+	if (timer <> nil) then
+		begin
+		act(AT_REPORT, 'You stop your ' + timer.name + '.', false, ch, nil, nil, TO_CHAR);
+		unregisterTimer(ch, TIMER_ACTION);
+		end;
 
-    if (length(line) = 0) then
-      begin
-      ch.sendBuffer(' ');
-      exit;
-      end;
+	if (length(line) = 0) then
+		begin
+		ch.sendBuffer(' ');
+		exit;
+		end;
 
-    if (snooped_by <> nil) then
-        GConnection(snooped_by.conn).send(line + #13#10);
+	{ TODO:
+	if (ch.snooped_by <> nil) then
+		GConnection(snooped_by.conn).send(line + #13#10); }
 
-    clean_cmdline(line);
+	clean_cmdline(line);
 
-    param := one_argument(line, cmdline);
-    cmdline := uppercase(cmdline);
+	param := one_argument(line, cmdline);
+	cmdline := uppercase(cmdline);
 
-    // check for aliases first
-    if (not ch.IS_NPC) then
-      begin
-      node := GPlayer(ch).aliases.head;
+	// check for aliases first
+	if (not ch.IS_NPC) then
+		begin
+		node := GPlayer(ch).aliases.head;
 
-      while (node <> nil) do
-        begin
-        al := node.element;
+		while (node <> nil) do
+			begin
+			al := node.element;
 
-        if (uppercase(al.alias) = cmdline) then
-          begin
-          ale := stringreplace(al.expand, '%', param, [rfReplaceAll]);
-          
-          while (pos(':', ale) > 0) do
-            begin
-            line := left(ale, ':');
-            ale := right(ale, ':');
-            
-            interpret(ch, line);
-            end;
-            
-          line := ale + ' ' + param;
-          param := one_argument(line, cmdline);
-          cmdline := uppercase(cmdline);
+			if (uppercase(al.alias) = cmdline) then
+				begin
+				ale := stringreplace(al.expand, '%', param, [rfReplaceAll]);
 
-          break;
-          end;
+				while (pos(':', ale) > 0) do
+					begin
+					line := left(ale, ':');
+					ale := right(ale, ':');
 
-        node := node.next;
-        end;
-      end;
+					interpret(ch, line);
+					end;
 
-    cmd := nil;
+				line := ale + ' ' + param;
+				param := one_argument(line, cmdline);
+				cmdline := uppercase(cmdline);
 
-    hash := commandList.getHash(cmdline);
-    node := commandList.bucketList[hash].head;
+				break;
+				end;
 
-    while (node <> nil) do
-      begin
-      gc := GCommand(GHashValue(node.element).value);
-           
-      if (cmdline = gc.name) or
-         ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
-         ((copy(cmdline, 1, length(gc.name)) = gc.name) and (length(cmdline) = 1))
-         then
-        begin
-        cmd := gc;
-        break;
-        end;
+			node := node.next;
+			end;
+		end;
 
-      node := node.next;
-      end;
+	cmd := nil;
 
-    if (cmd <> nil) then
-      begin
-      a := ch.getTrust;
+	hash := commandList.getHash(cmdline);
+	node := commandList.bucketList[hash].head;
 
-      if (a >= cmd.level) then
-        begin
-        if (not (state in cmd.allowed_states)) then
-          case state of
-              STATE_SLEEPING: ch.sendBuffer('You are off to dreamland.'#13#10);
-            STATE_MEDITATING: ch.sendBuffer('You must break out of your trance first.'#13#10);
-               STATE_RESTING: ch.sendBuffer('You feel too relaxed to do this.'#13#10);
-              STATE_FIGHTING: ch.sendBuffer('You are fighting!'#13#10);
-          end
-        else
-          begin
-          try
-            if (system_info.log_all) or (ch.logging) then
-              writeConsole(ch.name + ': ' + line);
-            if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
-              writeConsole(ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+	while (node <> nil) do
+		begin
+		gc := GCommand(GHashValue(node.element).value);
+
+		if (cmdline = gc.name) or
+			 ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
+			 ((copy(cmdline, 1, length(gc.name)) = gc.name) and (length(cmdline) = 1))
+			 then
+			begin
+			cmd := gc;
+			break;
+			end;
+
+		node := node.next;
+		end;
+
+	if (cmd <> nil) then
+		begin
+		a := ch.getTrust;
+
+		if (a >= cmd.level) then
+			begin
+			if (not (ch.state in cmd.allowed_states)) then
+				case ch.state of
+						STATE_SLEEPING: ch.sendBuffer('You are off to dreamland.'#13#10);
+					STATE_MEDITATING: ch.sendBuffer('You must break out of your trance first.'#13#10);
+						 STATE_RESTING: ch.sendBuffer('You feel too relaxed to do this.'#13#10);
+						STATE_FIGHTING: ch.sendBuffer('You are fighting!'#13#10);
+				end
+			else
+				begin
+				try
+					if (system_info.log_all) or (ch.logging) then
+						writeConsole(ch.name + ': ' + line);
+					if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
+						writeConsole(ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
 //            time := GetTickCount;
 
-            if cmd.addarg0 then
-              cmd.ptr(ch, cmdline + ' ' + param)
-            else
-              cmd.ptr(ch, param);
+					if cmd.addarg0 then
+						cmd.ptr(ch, cmdline + ' ' + param)
+					else
+						cmd.ptr(ch, param);
 
-            ch.last_cmd := @cmd.ptr;
+					ch.last_cmd := @cmd.ptr;
 
-          except
+				except
 {            on E : EExternal do
-              begin
-              bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - External exception');
-              outputError(E);
-              end;
-              
-            on E : Exception do
-              bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - ' + E.Message);
-              
-            else
-              bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - Unknown exception'); }
-          end;
-          end;
-        end
-      else
-        cmd := nil;
-      end;
+						begin
+						bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - External exception');
+						outputError(E);
+						end;
 
-    if (cmd = nil) and (not checkSocial(ch, cmdline, param)) then
-      begin
-      a := random(9);
-      if a<1 then
-        cmdline := 'Sorry, that command doesn''t exist in my vocabulaire!'
-      else
-      if a<2 then
-        cmdline := 'I don''t understand you.'
-      else
-      if a<3 then
-        cmdline := 'What are you saying?'
-      else
-      if a<4 then
-        cmdline := 'Learn some english!'
-      else
-      if a<5 then
-        cmdline := 'Hey, I don''t know that command. Try again.'
-      else
-      if a<6 then
-        cmdline := 'What??'
-      else
-      if a<7 then
-        cmdline := 'Huh?'
-      else
-      if a<8 then
-        cmdline := 'Yeah, right!'
-      else
-      if a<9 then
-        cmdline := 'What you say??';
+					on E : Exception do
+						bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - ' + E.Message);
 
-      act(AT_DGREEN, cmdline, false, ch, nil, nil, TO_CHAR);
-      end;
-  end;
+					else
+						bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - Unknown exception'); }
+				end;
+				end;
+			end
+		else
+			cmd := nil;
+		end;
+
+	if (cmd = nil) and (not checkSocial(ch, cmdline, param)) then
+		begin
+		a := random(9);
+		if a<1 then
+			cmdline := 'Sorry, that command doesn''t exist in my vocabulaire!'
+		else
+		if a<2 then
+			cmdline := 'I don''t understand you.'
+		else
+		if a<3 then
+			cmdline := 'What are you saying?'
+		else
+		if a<4 then
+			cmdline := 'Learn some english!'
+		else
+		if a<5 then
+			cmdline := 'Hey, I don''t know that command. Try again.'
+		else
+		if a<6 then
+			cmdline := 'What??'
+		else
+		if a<7 then
+			cmdline := 'Huh?'
+		else
+		if a<8 then
+			cmdline := 'Yeah, right!'
+		else
+		if a<9 then
+			cmdline := 'What you say??';
+
+		act(AT_DGREEN, cmdline, false, ch, nil, nil, TO_CHAR);
+		end;
 end;
 
 //jago : new func for finding if a new connection is from an already connected player
-function findDualConnection(conn: GConnection; const name: string): GPlayer;
+function findDualConnection(conn: GPlayerConnection; const name: string): GPlayer;
 var
-  node: GListNode;
-  dual: GConnection;
+  iterator : GIterator;
+  dual: GPlayerConnection;
 begin
   Result := nil;
-  node := connection_list.head;
+  iterator := connection_list.iterator();
 
-  while node <> nil do
-  begin
-    dual := GConnection(node.element);
+  while (iterator.hasNext()) do
+  	begin
+    dual := GPlayerConnection(iterator.next());
 
     // is there another conn with exactly the same name?
     if  (dual <> conn)  and Assigned(dual)
     and Assigned(dual.ch) and (lowercase(dual.ch.name) = lowercase(name)) then
-    begin
+    	begin
       Result := dual.ch;
       exit;
-    end;
-
-    node := node.next;
-  end;
+	    end;
+	  end;
+	  
+	iterator.Free();
 end;
 
-procedure nanny(conn : GConnection; argument : string);
-var ch, vict : GPlayer;
-    tmp : GCharacter;
-    iterator : GIterator;
-    race : GRace;
-    digest : MD5Digest;
-    h,top,x,temp:integer;
-    buf, pwd : string;
+procedure nanny(conn : GPlayerConnection; argument : string);
+var 
+	ch, vict : GPlayer;
+	tmp : GCharacter;
+	iterator : GIterator;
+	race : GRace;
+	digest : MD5Digest;
+	h,top,x,temp:integer;
+	buf, pwd : string;
 begin
   ch := conn.ch;
 
@@ -536,7 +539,7 @@ begin
                   vict := findDualConnection(conn, ch.name); // returns nil if player is not dual connected
 
                   if not Assigned(vict) then
-                    vict := findPlayerWorldEx(nil, ch.name);
+                    vict := GPlayer(findPlayerWorldEx(nil, ch.name));
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin

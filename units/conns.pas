@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.47 2003/10/17 09:04:00 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.48 2003/10/17 11:05:56 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -41,9 +41,9 @@ const
 type
 		GConnection = class;
 		
-		GConnectionOpenEvent = procedure(owner : GConnection) of object;
-		GConnectionCloseEvent = procedure(owner : GConnection) of object;
-		GConnectionInputEvent = procedure(owner : GConnection) of object;
+		GConnectionOpenEvent = procedure() of object;
+		GConnectionCloseEvent = procedure() of object;
+		GConnectionInputEvent = procedure() of object;
 		
     GConnection = class(TThread)
     protected
@@ -69,9 +69,9 @@ type
 
       _lastupdate : TDateTime;
       
-      FOpenEvent : GConnectionOpenEvent;
-      FCloseEvent : GConnectionCloseEvent;
-      FInputEvent : GConnectionInputEvent;
+      FOnOpen : GConnectionOpenEvent;
+      FOnClose : GConnectionCloseEvent;
+      FOnInput : GConnectionInputEvent;
       
     protected
     	procedure Execute(); override;
@@ -105,9 +105,9 @@ type
     	
     	property last_update : TDateTime read _lastupdate;
     	
-    	property OnOpen : GConnectionOpenEvent read FOpenEvent write FOpenEvent;
-    	property OnClose : GConnectionCloseEvent read FCloseEvent write FCloseEvent;
-    	property OnInput : GConnectionInputEvent read FInputEvent write FInputEvent;
+    	property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
+    	property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
+    	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
     end;
 
 var
@@ -143,11 +143,7 @@ begin
   inherited Create(false);
 
   _socket := socket;
-  _ch := nil;
-  _state := CON_ACCEPTED;
   _idle := 0;
-  _keylock := false;
-  _afk := false;
 
   node := connection_list.insertLast(Self);
   
@@ -194,26 +190,8 @@ begin
 			readBuffer();
   	end;
 
-	if (not ch.CHAR_DIED) and ((state = CON_PLAYING) or (state = CON_EDITING)) then
-		begin
-		writeConsole('(' + IntToStr(socket.getDescriptor) + ') ' + ch.name + ' has lost the link');
-
-		if (ch.level >= LEVEL_IMMORTAL) then
-			interpret(ch, 'return');
-
-		ch.conn := nil;
-
-		act(AT_REPORT,'$n has lost $s link.',false,ch,nil,nil,TO_ROOM);
-		SET_BIT(ch.flags,PLR_LINKLESS);
-		end
-	else
-	if (state = CON_LOGGED_OUT) then
-		dec(system_info.user_cur)
-	else
-		begin
-		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
-		ch.Free;
-		end;
+	if (Assigned(FOnClose)) then
+		FOnClose();
 end;
 
 procedure GConnection.send(s : string);

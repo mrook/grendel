@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.23 2003/10/16 16:07:30 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.24 2003/10/17 11:05:57 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -79,6 +79,7 @@ uses
     update,
     area,
     conns,
+    player,
     Channels;
 
 
@@ -335,7 +336,7 @@ end;
 procedure update_main;
 var
    node, node_next : GListNode;
-   conn : GConnection;
+   conn : GPlayerConnection;
 begin
   node := connection_list.head;
 
