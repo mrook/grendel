@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.2 2003/12/12 23:01:14 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.3 2003/12/28 12:20:33 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -602,7 +602,7 @@ begin
           begin
           if (pos('>', s) <> 0) then
             begin
-            progfile := 'progs\' + right(s, ' ');
+            progfile := 'progs' + PathDelimiter + right(s, ' ');
             prog := loadCode(progfile);
             if (prog = nil) then
               areaBug('loadNPCs', 'error loading ''' + progfile + '''; file doesn''t exist?');
@@ -1236,6 +1236,9 @@ begin
 
       node_ex := node_ex.next;
       end;
+      
+    if (npcindex.progfile <> '') then
+    	writeln(f, '>', right(npcindex.progfile, PathDelimiter));
     end;
   iterator.Free();
 
