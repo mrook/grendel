@@ -1,0 +1,129 @@
+0 0
+You miss your #w at $N.
+$N misses $S #w at you.
+$N misses $S #w at $n.
+
+1 3
+You tickle $N with your #w.
+$N tickles you with $S #w.
+$N tickles $n with $S #w.
+
+4 8
+You barely #w $N.
+$N barely #W you.
+$N barely #W $n.
+
+9 12
+You #w $N.
+$N #W you.
+$N #W $n.
+
+13 17
+You #w $N hard.
+$N #W you hard.
+$N #W $n hard.
+
+18 22
+You #w $N very hard.
+$N #W you very hard.
+$N #W $n very hard.
+
+23 28
+You #w $N extremely hard.
+$N #W you extremely hard.
+$N #W $n extremely hard.
+
+29 35
+You hit $N with your #w.
+$N hits you with $S #w.
+$N hits $n with $S #w.
+
+36 42
+You injure $N with your skillful #w.
+$N injures you with $S skillful #w.
+$N injures $n with $S skillful #w.
+
+43 49
+$N winces in pain with your forceful #w.
+You wince in pain with $N's forceful #w.
+$n winces in pain with $N's forceful #w.
+
+50 57
+$N cries out in agony with your powerful #w.
+You cry out in agony with $N's powerful #w.
+$n cries out in agony with $N's powerful #w.
+
+58 65
+You devastate $N with your agonizing #w!
+$N devastates you with $S agonizing #w!
+$N devastates $n with $S agonizing #w!
+
+66 74
+You mangle $N with your outstanding #w!
+$N mangles you with $S outstanding #w!
+$N mangles $n with $S outstanding #w!
+
+75 85
+You MUTILATE $N with your furious #w!
+$N MUTILATES you with $S furious #w!
+$N MUTILATES $n with $S furious #w!
+
+86 98
+You DECIMATE $N with your incredible #w!
+$N DECIMATES you with $S incredible #w!
+$N DECIMATES $n with $S incredible #w!
+
+99 115
+You ObliteratE $N with your unsurpassed #w!
+$N ObliterateS you with $S unsurpassed #w!
+$N ObliterateS $n with $S unsurpassed #w!
+
+116 139
+You MASSACRE $N to pieces with your unforgettable #w!
+$N MASSACRES you to pieces with $S unforgettable #w!
+$N MASSACRES $n to pieces with $S unforgettable #w!
+
+140 169
+You --- ANNIHILATE --- $N with your deadly #w!
+$N --- ANNIHILATES --- you with $S deadly #w!
+$N --- ANNIHILATES --- $n with $S deadly #w!
+
+170 209
+You <<== LIQUIFY ==>> $N with your terrifying #w!
+$N <<== LIQUIFIES ==>> you with $S terrifying #w!
+$N <<== LIQUIFIES ==>> $n with $S terrifying #w!
+
+210 269
+You *** SLAUGHTER *** $N with your masterful #w!
+$N *** SLAUGHTERS *** you with $S masterful #w!
+$N *** SLAUGHTERS *** $n with $S masterful #w!
+
+270 329
+You {<<< EVISCERATE >>>} $N with your unsurvivable #w!
+$N {<<< EVISCERATES >>>} you with $S unsurvivable #w.
+$N {<<< EVISCERATES >>>} $n with $S unsurvivable #w!
+
+330 399
+You % % %  VAPORIZE  % % % $N with your SUPERB #w!!!
+$N % % %  VAPORIZES  % % % you with $S SUPERB #w!!!
+$N % % %  VAPORIZES  % % % $n with $S SUPERB #w!!!
+
+400 499
+You [[< == ATOMIZE == >]] $N with your #w!!
+$N [[< == ATOMIZES == >]] you with $S #w!!
+$N [[< == ATOMIZES == >]] $n with $S #w!!
+
+500 619
+You < - < ILLUMINATE > - > $N with your TERRIBLE #w!!
+$N < - < ILLUMINATES > - > you with $S TERRIBLE #w!!
+$N < - < ILLUMINATES > - > $n with $S TERRIBLE #w!!
+
+620 749
+You ___... DESTROY ...___ $N with your AGONIZING #w!!!
+$N ___... DESTROYS ...___ you with $S AGONIZING #w!!!
+$N ___... DESTROYS ...___ $n with $S AGONIZING #w!!!
+
+750 32000
+You -< { { : : : DISINTEGRATE : : : } } >- $N with your GODLY #w!!!!
+$N -< { { : : : DISINTEGRATES : : : } } >- you with $S GODLY #w!!!!
+$N -< { { : : : DISINTEGRATES : : : } } >- $n with $S GODLY #w!!!!

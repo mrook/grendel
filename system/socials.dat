@@ -1,0 +1,4069 @@
+#SOCIAL
+name: beckon
+charnoarg: You beckon everyone to follow you.
+othersnoarg: $n beckons for everyone to follow.
+charfound: You beckon $N to follow.
+othersfound: $n beckons $N to follow, you wonder what's going on.
+victfound: $n beckons you to follow.
+charauto: You beckon yourself to follow... Why don't you respond?
+othersauto: $n beckons $mself to follow and looks a bit confused.
+#END
+
+#SOCIAL
+name: bonk
+charnoarg: You bonk everybody on their heads for being SO stupid.
+othersnoarg: $n bonks everybody on the head for being SUCH a fool!
+charfound: You bonk $N on the head for being such a morron.
+othersfound: $n bonks $N in the head for being a fool.
+victfound: $n bonks you on the head for being SUCH a morron!
+charauto: You bonk yourself on the head and are amazed at the sight.
+othersauto: $n bonks $mself on the head and grimaces in pain.
+#END
+
+#SOCIAL
+name: tip
+charnoarg: You tip your hat gallantly.
+othersnoarg: $n tips $s hat gallantly.
+charfound: You tip your hat at $N.
+othersfound: $n tips $s hat at $N.
+victfound: $n tips $s hat at you.
+charauto: You tip your hat at yourself. Hello to you too!
+othersauto: $n tries to tip $s hat at $mself but misses.
+#END
+
+#SOCIAL
+Name: accuse 
+charnoarg: Accuse whom? 
+othersnoarg: $n is in an accusing mood. 
+charfound: You look accusingly at $N. 
+othersfound: $n looks accusingly at $N. 
+victfound: $n looks accusingly at you. 
+charauto: You accuse yourself. 
+othersauto: $n seems to have a bad conscience. 
+#END
+
+#SOCIAL
+Name: ack 
+charnoarg: You gasp and say 'ACK!' at your mistake. 
+othersnoarg: $n ACKS at $s big mistake. 
+charfound: You ACK $M. 
+othersfound: $n ACKS $N. 
+victfound: $n ACKS you. 
+charauto: You ACK yourself. 
+othersauto: $n ACKS $mself. Must be a bad day. 
+#END
+
+#SOCIAL
+Name: addict 
+charnoarg: You stand and admit to all in the room, 'Hi, I'm $n, and I'm a mud addict.' 
+othersnoarg: $n stands and says, 'Hi, I'm $n, and I'm a mud addict.' 
+charfound: You tell $M that you are addicted to $S love. 
+othersfound: $n tells $N that $e is addicted to $S love. 
+victfound: $n tells you that $e is addicted to your love. 
+charauto: You stand and admit to all in the room, 'Hi, I'm $n, and I'm a mud addict.' 
+othersauto: $n stands and says, 'Hi, I'm $n, and I'm a mud addict.' 
+#END
+
+#SOCIAL
+Name: adore 
+charnoarg: You are looking for someone to adore! 
+othersnoarg: $n is looking for someone to adore! 
+charfound: You look at $N with adoring eyes. 
+othersfound: $n looks at $N with adoring eyes. 
+victfound: $n looks at you with adoring eyes. 
+charauto: Aww! You adore yourself! 
+othersauto: $n adores $mself soooo much! 
+#END
+
+#SOCIAL
+Name: again 
+charnoarg: You think, "not again!" 
+othersnoarg: $n hits $s head on a tree and cries, "Not AGAIN!?" 
+charfound: You beg $N to do it again! You must have enjoyed the first time. 
+othersfound: $n looks at $N and says, "Thank you, may I have another?" 
+victfound: $n begs you for a repeat performance. Do it again! 
+charauto: You make a mental note to do that again. 
+othersauto: $n makes a mental note to do what $e just did more often! 
+#END
+
+#SOCIAL
+Name: agree 
+charnoarg: You seem to be in an agreeable mood. 
+othersnoarg: $n seems to agree. 
+charfound: You agree with $M. 
+othersfound: $n agrees with $N. 
+victfound: $n agrees with you. 
+charauto: Well I hope you would agree with yourself! 
+othersauto: $n agrees with $mself, of course. 
+#END
+
+#SOCIAL
+Name: ahem 
+charnoarg: You clear your throat loudly and look slowly around. 
+othersnoarg: $n clears $s throat loudly and looks around. 
+charfound: You cock an eyebrow at $N and clear your throat. 
+othersfound: $n cocks an eyebrow at $N and clears $s throat. 
+victfound: $n cocks an eyebrow at you and clears $s throat. 
+charauto: You quickly clear your throat and glance around nervously. 
+othersauto: $n suddenly clears $s throat and glances around nervously. 
+#END
+
+#SOCIAL
+Name: alfalfa 
+charnoarg: You hear a strange voice yell 'Spaaanky!' 
+othersnoarg: $n's eyes look puzzled as $e hears strange voices... 
+charfound: You point a finger, making a lone hair on the back of $N's noggin sproing to attention. 
+othersfound: $n points a finger, making a lone hair on the back of $N's noggin sproing to attention. 
+victfound: $n points a finger, making a lone hair on the back of your noggin sproing to attention. 
+charauto: Buy some mousse. 
+othersauto: $n dreams of mousse. 
+#END
+
+#SOCIAL
+Name: alligator 
+charnoarg: You hop around like you were just bitten by an alligator. 
+othersnoarg: $n was just bitten by an alligator!! OW!! 
+charfound: You throw an alligator at $N. 
+othersfound: $n throws an alligator at $N!! 
+victfound: $n throws an alligator at you!! 
+charauto: You wrestle with an alligator. 
+othersauto: $n wrestles with an alligator, the alligator seems to have the upper hand. 
+#END
+
+#SOCIAL
+Name: apologize 
+charnoarg: You apologize for your behavior. 
+othersnoarg: $n apologizes for $s rude behavior. 
+charfound: You apologize to $M. 
+othersfound: $n apologizes to $N. 
+victfound: $n apologizes to you. 
+charauto: You apologize to yourself. 
+othersauto: $n apologizes to $mself. Hmmmm. 
+#END
+
+#SOCIAL
+Name: applaud 
+charnoarg: Clap, clap, clap. 
+othersnoarg: $n gives a round of applause. 
+charfound: You clap at $S actions. 
+othersfound: $n claps at $N's actions. 
+victfound: $n gives you a round of applause. You MUST'VE done something good! 
+charauto: You applaud at yourself. Boy, are we conceited! 
+othersauto: $n applauds at $mself. Boy, are we conceited! 
+#END
+
+#SOCIAL
+Name: arf 
+charnoarg: You exclaim, "Arf! Arf! Arf!" 
+othersnoarg: $n exclaims, "Arf! Arf! Arf!" 
+charfound: You look at $N and exclaim, "Arf! Arf! Arf!" 
+othersfound: $n looks at $N and exclaims, "Arf! Arf! Arf!" 
+victfound: $n looks at you and exclaims, "Arf! Arf! Arf!" 
+charauto: You run around the room exclaiming, "Arf! Arf! Arf!" 
+othersauto: $n runs around the room exclaiming, "Arf! Arf! Arf!" 
+#END
+
+#SOCIAL
+Name: babble 
+charnoarg: You begin to babble like an idiot. 
+othersnoarg: $n begins to babble like an idiot. 
+charfound: You begin to babble at $N and $E can't understand a word you are saying. 
+othersfound: $n tries to say something to $N but just babbles like an idiot. 
+victfound: $n tries to talk to you but just babbles like an idiot. 
+charauto: You babble at yourself. 
+othersauto: $n begins to babble like an idiot. 
+#END
+
+#SOCIAL
+Name: babe 
+charnoarg: You strike a pose in your most babe-like style! 
+othersnoarg: $n strikes a pose in $s most babe-like style! 
+charfound: You look at $N and think, "Wow! What a babe!" 
+othersfound: $n looks at $N and thinks, "Wow! What a babe!" 
+victfound: $n thinks you are a supreme babe! 
+charauto: You think you are a babe! 
+othersauto: $n seems to think that $e is a babe! 
+#END
+
+#SOCIAL
+Name: baffle 
+charnoarg: You scrunch up your face cuz you are totally baffled! 
+othersnoarg: $n scrunches up $s face cuz $e is totally baffled! 
+charfound: You scrunch up your face at $N cuz $S behavior totally baffles you! 
+othersfound: $n scrunches up $s face at $N cuz $n is totally baffled by $N! 
+victfound: $n scrunches up $s face at you cuz you totally baffle $m! 
+charauto: You baffle yourself. 
+othersauto: $n seems to be baffled by $s own thoughts. 
+#END
+
+#SOCIAL
+Name: bagel 
+charnoarg: You pop a bagel in the fire and toast it till it's golden brown. 
+othersnoarg: $n pops a bagel in the fire and toasts it till it's golden brown. 
+charfound: You pull a golden brown bagel from the fire and give it to $N. 
+othersfound: $n pulls a golden brown bagel from the fire and gives it to $N. 
+victfound: $n pulls a golden brown bagel from the fire and gives it to you. 
+charauto: Your pull a golden brown bagel from the fire and pop it in your mouth. Yummy! 
+othersauto: $n pulls a golden brown bagel from the fire and pops it into $s mouth. Yummy! 
+#END
+
+#SOCIAL
+Name: bah 
+charnoarg: You utter "Bah" out of frustration. 
+othersnoarg: $n says, "Bah" and turns away in contempt. 
+charfound: You utter incoherent words in your state of anxiety. 
+othersfound: $n begins making sheeplike noises. 
+victfound: $n bahs at you. 
+charauto: Talking to yourself again? 
+othersauto: $n is obviously frustrated at something or someone.. 
+#END
+
+#SOCIAL
+Name: banana 
+charnoarg: Daylight come, me want go home. 
+othersnoarg: $n leans way back, and bellows forth, 'DAAAAAAAYO!' 
+charfound: You sneak up on $N, and sing, 'DAAAAAYO!' Bananas are dancing before $S eyes. 
+othersfound: $n sneaks up behind $N and screams 'DAAAAAAAAAAAAAY-O' at the top of $s lungs.. Bananas are dancing before $S eyes now. 
+victfound: DAAAAAYO! Ack! Bananas! Bananas everywhere! $n snickers at your predicament. 
+charauto: Daylight come, me want go home. 
+othersauto: $n bellows forth, 'DAAAAAYO!' and dances a little rumba. 
+#END
+
+#SOCIAL
+Name: bandaid 
+charnoarg: You search for a bandage for your wounds. 
+othersnoarg: $n searches for a bandaid.
+charfound: You give $M a bandaid. 
+othersfound: $n gives $N a bandaid.
+victfound: $n gives you a bandaid. Hope it helps :( 
+charauto: You put a bandaid over your finger. Does it feel better now? 
+othersauto: $n puts a bandaid over $s finger. 
+#END
+
+#SOCIAL
+Name: barf 
+charnoarg: You scream out "I'm gonna be sick!" and then heave your stomach contents onto the ground. 
+othersnoarg: $n is so sick that $e tells everyone "I gotta barf!". 
+charfound: You yell at $N "Run! I gotta barf" and then spill out your dinner on $N. 
+othersfound: $n barfs all over $N! Yecchh what a mess! 
+victfound: $n has just projectile vomited all over your nice, clean armor! 
+charauto: You say to yourself "Am I ever sick!" and then barf up your dinner! 
+othersauto: $n begins to projectile vomit over everything in the room! 
+#END
+
+#SOCIAL
+Name: bark 
+charnoarg: Woof! Woof! 
+othersnoarg: $n barks like a dog. 
+charfound: You bark at $M. 
+othersfound: $n barks at $N. 
+victfound: $n barks at you. 
+charauto: You bark at yourself. Woof! Woof! 
+othersauto: $n barks at $mself. Woof! Woof! 
+#END
+
+#SOCIAL
+Name: bashful 
+charnoarg: For some reason, you start feeling very bashful. 
+othersnoarg: $n begins looking quite bashful. 
+charfound: You look up at $N, look at the ground and bashfully trace figure eights with your foot. 
+othersfound: $n looks at $N, then bashfully stares at $s feet. 
+victfound: $n looks up at you, then bashfully traces figure eights with $s foot. 
+charauto: For some reason, you start feeling very bashful. 
+othersauto: $n begins looking quite bashful. 
+#END
+
+#SOCIAL
+Name: bbl 
+charnoarg: You announce that you will be back later. 
+othersnoarg: $n announces that $e'll be back later. 
+charfound: You inform $M that you will be back later. 
+othersfound: $n informs $N that $e will be back later 
+victfound: $n informs you that $e will be back later 
+charauto: You mumble to yourself that you'll be back later. 
+othersauto: $n mumbles to $mself that $e'll be back later. 
+#END
+
+#SOCIAL
+Name: bearhug 
+charnoarg: You hug a grizzly bear. 
+othersnoarg: $n hugs a flea-infested grizzly bear. 
+charfound: You bearhug $M. 
+othersfound: $n bearhugs $N. Some ribs break. 
+victfound: $n bearhugs you. Wonder what's coming next? 
+charauto: You bearhug yourself. 
+othersauto: $n bearhugs $mself. 
+#END
+
+#SOCIAL
+Name: beer 
+charnoarg: You draw a cold, frosty beer. 
+othersnoarg: $n downs a cold, frosty beer. 
+charfound: You draw a cold, frosty beer for $N. 
+othersfound: $n draws a cold, frosty beer for $N. 
+victfound: $n draws a cold, frosty beer for you. 
+charauto: You pour yourself a cold, frosty beer and think, "It just doesn't get better than this." 
+othersauto: $n draws $mself a beer. 
+#END
+
+#SOCIAL
+Name: beg 
+charnoarg: You beg the gods for mercy. 
+othersnoarg: The gods fall down laughing at $n's request for mercy. 
+charfound: You desperately beg for a favor from $N. 
+othersfound: $n gets on $s knees begging for a favor from $N..how unbecoming. 
+victfound: $n is begging you for something. 
+charauto: Begging yourself for money doesn't help. 
+othersauto: $n begs for a favor. 
+#END
+
+#SOCIAL
+Name: behead 
+charnoarg: You look around for some heads to cut off. 
+othersnoarg: $n looks around for some heads to cut off. 
+charfound: You grin evilly at $N and brandish your weapon. 
+othersfound: $n grins evilly at $N while brandishing $s weapon! 
+victfound: $n grins evilly at you, brandishing $s weapon. 
+charauto: I really don't think you want to do that... 
+othersauto: $n is so desperate for exp that $e tries to decapitate $mself! 
+#END
+
+#SOCIAL
+Name: bkiss 
+charnoarg: Blow a kiss to whom? 
+othersnoarg: $n blows at $s hand. 
+charfound: You blow a kiss to $M. 
+othersfound: $n blows a kiss to $N. Touching, ain't it? 
+victfound: $n blows a kiss to you. Not as good as a real one, huh? 
+charauto: You blow a kiss to yourself. 
+othersauto: $n blows a kiss to $mself. Weird. 
+#END
+
+#SOCIAL
+Name: blank 
+charnoarg: You get a blank look on your face. 
+othersnoarg: $n gets a blank look on $s face. 
+charfound: You look at $N but draw a complete blank. 
+othersfound: $n looks at $N but draws a blank. 
+victfound: $n looks at you and draws a total blank. 
+#END
+
+#SOCIAL
+Name: blast 
+charnoarg: You count down 10 9 8 7 6 5 4 3 2 1 and blast off! 
+othersnoarg: $n counts down 10 9 8 7 6 5 4 3 2 1 and blasts off. 
+charfound: You look at $N and give $M a real blast. 
+othersfound: $n looks at $N and gives $M a real blast! 
+victfound: $n looks at you and gives you a real blast! 
+charauto: Do you really think that's polite? 
+othersauto: $n looks as though $e wants a blast. 
+#END
+
+#SOCIAL
+Name: bleed 
+charnoarg: You bleed all over the room! 
+othersnoarg: $n bleeds all over the room! Get out of $s way! 
+charfound: You bleed all over $M! 
+othersfound: $n bleeds all over $N. Better leave, you may be next! 
+victfound: $n bleeds all over you! YUCK! 
+charauto: You bleed all over yourself! 
+othersauto: $n bleeds all over $mself. 
+#END
+
+#SOCIAL
+Name: bleh 
+charnoarg: You grimace as if tasting something hideous and say "BLEH!" 
+othersnoarg: $n sticks $s tongue out and says "Bleh!" 
+charfound: You "bleh!" right in $N's face! 
+othersfound: $n says "bleh!" while making a horrid face at $N. 
+victfound: $n looks right at you and says "BLEH!" 
+charauto: You bleh at yourself in response to something disagreeable. 
+othersauto: $n blehs at the thought of something. 
+#END
+
+#SOCIAL
+Name: blink 
+charnoarg: You blink in utter disbelief. 
+othersnoarg: $n blinks in utter disbelief. 
+charfound: You blink at $M in confusion. 
+othersfound: $n blinks at $N in confusion. 
+victfound: $n blinks at you in confusion. 
+charauto: You are sooooooooooooo confused 
+othersauto: $n blinks at $mself in complete confusion. 
+#END
+
+#SOCIAL
+Name: blownose 
+charnoarg: You blow your nose loudly. 
+othersnoarg: $n blows $s nose loudly. 
+charfound: You blow your nose on $S shirt. 
+othersfound: $n blows $s nose on $N's shirt. 
+victfound: $n blows $s nose on your shirt. 
+charauto: You blow your nose on your shirt. 
+othersauto: $n blows $s nose on $s shirt. 
+#END
+
+#SOCIAL
+Name: blunk 
+charnoarg: You try to blink but blunk instead. 
+othersnoarg: $n tries to blink but $e blunks instead. 
+charfound: You blunk at $N. 
+othersfound: $n blunks at $N. 
+victfound: $n blunks at you. 
+#END
+
+#SOCIAL
+Name: blush 
+charnoarg: Your cheeks are burning. 
+othersnoarg: $n blushes. 
+charfound: You get all flustered up seeing $M. 
+othersfound: $n blushes as $e sees $N here. 
+victfound: $n blushes as $e sees you here. Such an effect on people! 
+charauto: You blush at your own folly. 
+othersauto: $n blushes as $e notices $s boo-boo. 
+#END
+
+#SOCIAL
+Name: boggle 
+charnoarg: You boggle in complete incomprehension. 
+othersnoarg: $n boggles in complete incomprehension. 
+charfound: You boggle in complete incomprehension of $S actions. 
+othersfound: $n boggles in complete incomprehension of $N's actions. 
+victfound: $n boggles in complete incomprehension of your actions. 
+charauto: You boggle in complete incomprehension of your own actions. Confused? 
+othersauto: $n boggles, plain and simple. 
+#END
+
+#SOCIAL
+Name: bounce 
+charnoarg: BOIINNNNNNGG! 
+othersnoarg: $n bounces around. 
+charfound: You bounce onto $S lap. 
+othersfound: $n bounces onto $N's lap. 
+victfound: $n bounces onto your lap. 
+charauto: You bounce your head like a basketball. 
+othersauto: $n plays basketball with $s head. 
+#END
+
+#SOCIAL
+Name: bow 
+charnoarg: You bow deeply. 
+othersnoarg: $n bows deeply. 
+charfound: You bow before $M. 
+othersfound: $n bows before $N. 
+victfound: $n bows before you. 
+charauto: You kiss your toes. 
+othersauto: $n folds up like a jack knife and kisses $s own toes. 
+#END
+
+#SOCIAL
+Name: brainstorm 
+charnoarg: Ignoring the cautions of the gods themselves, you turn your brain on. 
+othersnoarg: $n, ignoring the gods' many cautions, turns $s brain on.
+charfound: $N shivers in terror as thoughts begin to flow through your mighty noggin.
+othersfound: $N shivers in terror as thoughts begin to flow through $n's mighty noggin.
+victfound: You shiver in terror as you notice thoughts flowing through $n's mighty noggin.
+charauto: Even the gods themselves don't know what might possibly be done about you and your noggin.
+othersauto: $n attempts to squeeze some thoughts from $s noggin, making the gods themselves, terrorized by this display, run.
+#END
+
+#SOCIAL
+Name: brb
+charnoarg: You announce that you will be right back.
+othersnoarg: $n says in a stern voice, 'I'll be back!'
+charfound: You announce to $M that you will be right back.
+othersfound: $n says to $N in a stern voice, 'I'll be back!'
+victfound: $n says to you in a stern voice, 'I'll be right back!'
+charauto: You mumble to yourself, 'I'll be right back'
+othersauto: $n mumbles to $mself, 'I'll be right back, won't I?'
+#END
+
+#SOCIAL
+Name: bristle
+charnoarg: You clench your teeth and bristle with anger.
+othersnoarg: $n clenches $s teeth and bristles with anger.
+charfound: You glare at $N, bristling with anger.
+othersfound: $n glares at $N, bristling with anger.
+victfound: $n glares at you, bristling with anger.
+charauto: Your bristle at your foolishness.
+othersauto: $n bristles at $mself and $s foolishness.
+#END
+
+#SOCIAL
+Name: brownie
+charnoarg: You munch on a delicious brownie ... You begin to feel light headed.
+othersnoarg: $n munches on a funny-looking brownie. $n begins to feel light headed.
+charfound: You give $N a funny-looking brownie.
+othersfound: $n gives $N a funny-looking brownie.
+victfound: $n gives you a funny-looking brownie. Be careful!
+charauto: You look very strange giving yourself a brownie.
+othersauto: $n gives $mself a brownie, $e might be a BIT strange.
+#END
+
+#SOCIAL
+Name: brush
+charnoarg: Brush what? Who? Where?
+othersnoarg: $n seems to be looking for someone to brush.
+charfound: You brush out $S hair for $M. Very thoughtful.
+othersfound: $n brushes $N's hair for $M. Looks better now.
+victfound: $n brushes out your hair. How nice of $m.
+charauto: You brush out your hair. There - much better.
+othersauto: $n brushes out $s hair. Looks much better now.
+#END
+
+#SOCIAL
+Name: bungee
+charnoarg: You look around slyly, trying to find someone to kick off the mud.
+othersnoarg: $n looks around slyly, trying to find someone to kick off the mud.
+charfound: You whip out a bungee cord, stick it on $N, and kick $M off the mud!
+othersfound: $n whips out a bungee cord, sticks it on $N, and pushes $M off the mud.
+victfound: $n whips out a bungee cord, sticks it on you, and pushes you off the mud!! Eeeep!
+charauto: You connect yourself to a bungee cord, and jump off the mud! Bombs away!!
+othersauto: $n connects itself to a bungee cord and jumps off the mud! Phew, you were hoping $E would leave soon!
+#END
+
+#SOCIAL
+Name: bunny
+charnoarg: You strike a pose just like a widdle bunny hunny. Awww.
+othersnoarg: $n strikes a pose just like a widdle bunny hunny. Awww.
+charfound: You look at $N and say, "That's my widdle bunny hunny!"
+othersfound: $n looks at $N and says, "That's my widdle bunny hunny!"
+victfound: $n looks at you and says, "That's my widdle bunny hunny!"
+charauto: Awww... Do you miss your bunny?
+othersauto: $n looks as though $e misses $s little bunny. Aww...
+#END
+
+#SOCIAL
+Name: burp
+charnoarg: You burp loudly.
+othersnoarg: $n burps loudly.
+charfound: You burp loudly to $M in response.
+othersfound: $n burps loudly in response to $N's remark.
+victfound: $n burps loudly in response to your remark.
+charauto: You burp at yourself.
+othersauto: $n burps at $mself. What a sick sight.
+#END
+
+#SOCIAL
+Name: bye
+charnoarg: You say goodbye to all in the room.
+othersnoarg: $n says goodbye to everyone in the room.
+charfound: You say goodbye to $N.
+othersfound: $n says goodbye to $N.
+victfound: $n says goodbye to you.
+charauto: You say goodbye to yourself. Contemplating suicide?
+othersauto: $n says goodbye to $mself. Is $e contemplating suicide?
+#END
+
+#SOCIAL
+Name: cackle
+charnoarg: You throw back your head and cackle with insane glee!
+othersnoarg: $n throws back $s head and cackles with insane glee!
+charfound: You cackle gleefully at $N.
+othersfound: $n cackles gleefully at $N.
+victfound: $n cackles gleefully at you. Better keep your distance from $m.
+charauto: You cackle at yourself. Now, THAT'S strange!
+othersauto: $n is really crazy now! $e cackles at $mself.
+#END
+
+#SOCIAL
+Name: caress
+charnoarg: Who needs to be caressed?
+othersnoarg: $n caresses $s hands softly because no one else will.
+charfound: You gently caress $S face.
+othersfound: $n gently caresses $N's face.
+victfound: $n gently caresses your face.
+charauto: You gently caress your face. My, what soft skin.
+othersauto: $n gently caresses $s face.
+#END
+
+#SOCIAL
+Name: catnap
+charnoarg: You curl into a tiny ball and go to sleep.
+othersnoarg: $n curls $mself into a tiny ball and goes to sleep.
+charfound: You curl up in $S lap and go to sleep.
+othersfound: $n curls up in $N's lap and goes to sleep.
+victfound: $n curls up in your lap and goes to sleep.
+charauto: You curl into a tiny ball and go to sleep.
+othersauto: $n curls $mself into a tiny ball and goes to sleep.
+#END
+
+#SOCIAL
+Name: challenge
+charnoarg: Challenge who?
+othersnoarg: $n is looking for someone to challenge to a fight to the death!
+charfound: You challenge $N to a fight to the death.
+othersfound: $n challenges $N to a fight to the death.
+victfound: $n challenges you to a fight to the death.
+charauto: Challenge YOURSELF to a fight to the death? I think not...
+othersauto: $n tries to challenge $mself, how odd.
+#END
+
+#SOCIAL
+Name: charge
+charnoarg: Geronimo!!!
+othersnoarg: $n runs smack dab into a nearby wall. Oh, sweet victory...
+charfound: You duck your head and charge toward $N.
+othersfound: $n ducks $s head, stamps $s foot three times and charges toward $N.
+victfound: $n lowers $s head, stamps $s foot three times and runs toward you screaming.. 
+charauto: You scream, 'Geronimo!,' as you chase yourself about the room.
+othersauto: $n screams, 'Geronimo!,' as they chase themself about the room.
+#END
+
+#SOCIAL
+Name: cheer
+charnoarg: And the peasants rejoiced...
+othersnoarg: $n emits an unrivaled cheer! Woo!
+charfound: You show your wild enthusiasm for your new fri#End, $N.
+othersfound: $n cheers maniacally as $N shows them who's boss.
+victfound: $n cheers you on like it's going out of style.
+charauto: Go me!
+othersauto: $n thinks $e's pretty damned neat. Go $n!!!
+#END
+
+#SOCIAL
+Name: cheesecake
+charnoarg: You wish you had some cheesecake....yummmm.
+othersnoarg: $n wishes $e had some cheesecake....yummmm.
+charfound: You start begging $N for some cheesecake...how pathetic.
+othersfound: $n is begging $N for some cheesecake...how pathetic.
+victfound: $n tells you 'Please! I'll do anything, just give me some cheesecake!'
+charauto: Desperate for cheesecake, you start nibbling on yourself! Yuck!
+othersauto: $n starts thinking $e is a cheesecake and begins to nibble on $mself. Yuck!
+#END
+
+#SOCIAL
+Name: chicken
+charnoarg: You peer around the room for cowards.
+othersnoarg: $n is looking for a coward.
+charfound: You grin at $N and say 'Chicken?'
+othersfound: $n grins at $N and says 'Chicken?'
+victfound: $n grins at you and says, 'Chicken?'
+charauto: You can't believe what a chicken you are.
+othersauto: $n shamefully admits $e's a chicken.
+#END
+
+#SOCIAL
+Name: chill
+charnoarg: You mutter the words "chill out" to no one in particular.
+othersnoarg: $n stares off into space and mutters "chill out" to $s imaginary fri#Ends. They must be on crack or something.
+charfound: You wish $N would just chill out!
+othersfound: $n turns to $N and shouts, "Chill out, freako!"
+victfound: $n turns to you and shouts "Chill out, freako!"
+charauto: You chill.
+othersauto: $n chills. They're so cool.
+#END
+
+#SOCIAL
+Name: chocolate
+charnoarg: You are suffering from chocolate withdrawals.
+othersnoarg: $n is suffering from chocolate withdrawls.
+charfound: You have given $N a Hershey Kiss. How Sweet !
+othersfound: $n gives $N a big Hershey's kiss. How sweet!
+victfound: $n has given you a big Hershey's Kiss. Awwwwww
+charauto: You suddenly feel like a Hershey's Kiss. You drool uncontrollably.
+othersauto: $n is suffering from a big chocolate witdrawl.
+#END
+
+#SOCIAL
+Name: chortle
+charnoarg: You chortle with glee.
+othersnoarg: $n chortles with glee.
+charfound: You chortle loudly at $M.
+othersfound: $n chortles loudly at $N.
+victfound: $n chortles loudly at you.
+charauto: You chortle loudly to yourself.
+othersauto: $n chortles loudly to $mself.
+#END
+
+#SOCIAL
+Name: chuckle
+charnoarg: You chuckle politely.
+othersnoarg: $n chuckles politely.
+charfound: You chuckle at $S joke.
+othersfound: $n chuckles at $N's joke.
+victfound: $n chuckles at your joke.
+charauto: You chuckle at your own joke, since no one else would.
+othersauto: $n chuckles at $s own joke, since none of you would.
+#END
+
+#SOCIAL
+Name: cigar
+charnoarg: You light up a big cigar. All the females leave the room.
+othersnoarg: $n lights up a big cigar. All the females leave the room.
+charfound: You give $N a big cigar and light it for $M. All the females flee the room.
+othersfound: $n gives a big cigar to $N and light it for $M. All the females flee the room.
+victfound: $n gives you a big cigar and lights it for you. All the females flee the room.
+charauto: You give a cigar to yourself, are you feeling ok?
+othersauto: $n gives $mself a cigar. Hmmmmm.
+#END
+
+#SOCIAL
+Name: clap
+charnoarg: You clap your hands together.
+othersnoarg: $n shows $s approval by clapping $s hands together.
+charfound: You clap at $S performance.
+othersfound: $n claps at $N's performance.
+victfound: $n claps at your performance.
+charauto: You clap at your own performance.
+othersauto: $n claps at $s own performance.
+#END
+
+#SOCIAL
+Name: clue
+charnoarg: You want to give a clue to yourself? You must have no clue, eh?
+othersnoarg: $n thinks $e has a clue ... but $e is wrong.
+charfound: You try to give $N a clue ... but $E is totally clueless ... whadda dork, eh?
+othersfound: $n tries to give $N a clue ... but $E is totally clueless ... whadda dork, eh?
+victfound: $n tries to give you a clue ... $e must think you are totally clueless, eh?
+charauto: You want to give yourself a clue? Bonehead!
+othersauto: $n tries to give themself a clue ... but $e is totally clueless, eh?
+#END
+
+#SOCIAL
+Name: coffee
+charnoarg: You wish someone would give you a cup of coffee.
+othersnoarg: $n wishes someone would offer $m a cup of coffee.
+charfound: You pour a steaming hot cup of coffee and give it to $N.
+othersfound: $n pours a steaming hot cup of coffee and gives it to $n.
+victfound: $n pours a steaming hot cup of coffee and gives it to you.
+charauto: You pour yourself a cup of coffee. It is a necessity of mud life.
+othersauto: $n pours a steaming hot cup of coffee. Bet you had one too!
+#END
+
+#SOCIAL
+Name: comb
+charnoarg: You comb your hair - perfect.
+othersnoarg: $n combs $s hair, how dashing!
+charfound: You patiently untangle $N's hair - what a mess!
+othersfound: $n tries patiently to untangle $N's hair.
+victfound: $n pulls your hair in an attempt to comb it.
+charauto: You pull your hair, but it will not be combed.
+othersauto: $n tries to comb $s tangled hair.
+#END
+
+#SOCIAL
+Name: comfort
+charnoarg: Do you feel uncomfortable?
+othersnoarg: $n tries to comfort $mself, $e looks uncomfortable.
+charfound: You comfort $M.
+othersfound: $n comforts $N.
+victfound: $n comforts you.
+charauto: You make a vain attempt to comfort yourself.
+othersauto: $n has no one to comfort $m but $mself.
+#END
+
+#SOCIAL
+Name: cookie
+charnoarg: You munch thoughtfully on a chocolate-chip cookie.
+othersnoarg: $n munches thoughtfully on a chocolate-chip cookie.
+charfound: You give a delectable chocolate-chip cookie to $N.
+othersfound: $n gives a delectable chocolate-chip cookie to $N.
+victfound: $n gives a delectable chocolate-chip cookie to you.
+charauto: You want to give a cookie to yourself? 
+othersauto: $n tries to give a cookie to $mself. How selfish!
+#END
+
+#SOCIAL
+Name: cough
+charnoarg: You cough to clear your throat and eyes and nose and....
+othersnoarg: $n coughs loudly.
+charfound: You cough loudly. It must be $S fault, $E gave you this cold.
+othersfound: $n coughs loudly, and glares at $N, like it is $S fault.
+victfound: $n coughs loudly, and glares at you. Did you give $m that cold?
+charauto: You cough loudly. Why don't you take better care of yourself?
+othersauto: $n coughs loudly. $n should take better care of $mself.
+#END
+
+#SOCIAL
+Name: cower
+charnoarg: What are you afraid of?
+othersnoarg: $n cowers in the corner from claustrophobia.
+charfound: You cower in the corner at the sight of $M.
+othersfound: $n cowers in the corner at the sight of $N.
+victfound: $n cowers in the corner at the sight of you.
+charauto: You cower in the corner at the thought of yourself. You scaredy cat!
+othersauto: $n cowers in the corner. What is wrong with $m now?
+#END
+
+#SOCIAL
+Name: cringe
+charnoarg: You cringe in terror.
+othersnoarg: $n cringes in terror!
+charfound: You cringe away from $M.
+othersfound: $n cringes away from $N in mortal terror.
+victfound: $n cringes away from you.
+charauto: I beg your pardon?
+othersauto: $n cringes away from $mself, that has to be difficult.
+#END
+
+#SOCIAL
+Name: croak
+charnoarg: You attempt to sing, but it sounds more like a croak. Take lessons :P
+othersnoarg: $n is in obvious need of singing lessons as $m begins to croak out a song! 
+charfound: You begin croaking out the song "Row Row Row Your Boat" to $N. Hmmm.
+othersfound: $n begins to croak to $N. You realize that $m is attempting to sing "Row Row Row Your Boat". Ick.
+victfound: $n looks at you and begins to croak out a song. Ugh!
+charauto: You hum to yourself.
+othersauto: $n begins to croak to $mself.
+#END
+
+#SOCIAL
+Name: croon
+charnoarg: You croon out a tune to everyone in the room.
+othersnoarg: $n croons out a tune to everyone in the room.
+charfound: You croon out a tune to $N.
+othersfound: $n croons out a tune to $N.
+victfound: $n croons out a tune to you.
+#END
+
+#SOCIAL
+Name: cruel
+charnoarg: You make a face so cruel that everyone takes a step back in fear!
+othersnoarg: $n makes a face so cruel that everyone takes a step back in fear!
+charfound: You give $N a look so cruel that $E fears for $S life!
+othersfound: $n gives $N a look so cruel that $E fears for $S life!
+victfound: $n gives you a look so cruel that you fear for your life!
+#END
+
+#SOCIAL
+Name: crush
+charnoarg: You squint and hold two fingers up, saying 'I'm crushing your heads!'
+othersnoarg: $n squints and holds two fingers up, saying 'I'm crushing your heads!'
+charfound: You hold two fingers up at $M and say, 'I'm crushing your head!'
+othersfound: $n holds two fingers up at $N and says, 'I'm crushing your head!'
+victfound: $n holds two fingers up at you and says, 'I'm crushing your head!'
+charauto: You crush yourself. YEEEEOOOUUUUCH!
+othersauto: $n crushes $mself into the ground. OUCH!
+#END
+
+#SOCIAL
+Name: cry
+charnoarg: Waaaaah ...
+othersnoarg: $n bursts into tears.
+charfound: You cry on $S shoulder.
+othersfound: $n cries on $N's shoulder.
+victfound: $n cries on your shoulder.
+charauto: You cry to yourself.
+othersauto: $n sobs quietly to $mself.
+#END
+
+#SOCIAL
+Name: cuddle
+charnoarg: Whom do you feel like cuddling today?
+othersnoarg: $n looks like $e needs someone to cuddle.
+charfound: You cuddle $M.
+othersfound: $n cuddles $N.
+victfound: $n cuddles you.
+charauto: You must feel very cuddly indeed ... :)
+othersauto: $n cuddles up to $s shadow. What a sorry sight.
+#END
+
+#SOCIAL
+Name: curse
+charnoarg: You swear loudly for a long time.
+othersnoarg: $n swears: @*&^%@*&!
+charfound: You swear at $M.
+othersfound: $n swears at $N.
+victfound: $n swears at you! Where are $s manners?
+charauto: You swear at your own mistakes.
+othersauto: $n starts swearing at $mself. Why don't you help?
+#END
+
+#SOCIAL
+Name: curtsey
+charnoarg: You curtsey to your audience.
+othersnoarg: $n curtseys gracefully.
+charfound: You curtsey to $M.
+othersfound: $n curtseys gracefully to $N.
+victfound: $n curtseys gracefully for you.
+charauto: You curtsey to your audience (yourself).
+othersauto: $n curtseys to $mself, since no one is paying attention to $m.
+#END
+
+#SOCIAL
+Name: cute
+charnoarg: You flash your dimples thinking you are as cute as Marian.
+othersnoarg: $n flashes $s dimples. $n thinks $e is as cute as Marian.
+charfound: You look at $N and wish $E was as cute as Marian.
+othersfound: $n looks at $N and wishes $E was as cute as Marian.
+victfound: $n looks at you and wishes you were as cute as Marian.
+#END
+
+#SOCIAL
+Name: dance
+charnoarg: Feels silly, doesn't it?
+othersnoarg: $n tries to break dance, but nearly breaks $s neck!
+charfound: You sweep $M into a romantic waltz.
+othersfound: $n sweeps $N into a romantic waltz.
+victfound: $n sweeps you into a romantic waltz.
+charauto: You skip and dance around by yourself.
+othersauto: $n dances a pas-de-une.
+#END
+
+#SOCIAL
+Name: dazzle
+charnoarg: You dazzling flirt you. No one can resist this smile.
+othersnoarg: Dazzling is the only word to describe $n's smile.
+charfound: You attempt to dazzle $N as you flash $M a huge smile and stand straight.
+othersfound: A flash of white nearly blinds you as $n smiles . 
+victfound: $n has the most amazing teeth , you think as $e flashes you an incredible smile.
+charauto: If you can't kill them, perhaps this dazzling smile will work?
+othersauto: $n dazzles everyone with $s smile.
+#END
+
+#SOCIAL
+Name: dive
+charnoarg: You dive into the ocean.
+othersnoarg: $n dives into the ocean.
+charfound: You dive behind $M and hide.
+othersfound: $n dives behind $N and hides.
+victfound: $n dives behind you and hides.
+charauto: You take a dive.
+othersauto: $n takes a dive.
+#END
+
+#SOCIAL
+Name: dizzy
+charnoarg: You are so dizzy from all this chatter.
+othersnoarg: $n spins twice and hits the ground, dizzy from all this chatter.
+charfound: You are dizzy from all of $N's chatter.
+othersfound: $n spins twice and hits the ground, dizzy from all $N's chatter.
+victfound: $n spins twice and hits the ground, dizzy from all your chatter.
+charauto: You are dizzy from lack of air. Don't talk so much!
+othersauto: $n spins twice and falls to the ground from lack of air.
+#END
+
+#SOCIAL
+Name: doh
+charnoarg: You slap your forehead and say '"DOH!"
+othersnoarg: $n slaps $mself on the head and yells, "DOH!"
+charfound: You backhand $N's forehead and say, "DOH!."
+othersfound: $n slaps $N on the head and says, "DOH!".
+victfound: $n looks at you with disdain before slapping your forehead and saying, "DOH!"
+charauto: Slapping your forehead, you yell "DOH!" at yourself.
+othersauto: $n keeps hitting $mself in the head and uttering, "Doh!"
+#END
+
+#SOCIAL
+Name: douse
+charnoarg: Douse who?
+othersnoarg: $n mutters something about the heat and pours cold water over $mself. Great, now there's a a large puddle of water near you.
+charfound: You slowly and methodically dump a bucket of ice over $N
+othersfound: Smirking, $n pours ice water on $N! That should cool $M off!
+victfound: $n has doused you with ice water. That should calm you.
+charauto: Hmmm...did that cool you off? 
+othersauto: Complaining of the heat, $n pours cold water over $s head.
+#END
+
+#SOCIAL
+Name: doze
+charnoarg: Your chin drops to your chest as you suddenly get dozy.
+othersnoarg: $n's eyes get heavy as $s head drops in a sudden doze.
+charfound: You weave your hands in a hypnotic pattern trying to make $N sleepy.
+othersfound: $n weaves $s hands in a hypnotic pattern, attempting to put $N to sleep.
+victfound: $n weaves $s hands in a hypnotic pattern. You start to feel dozy.
+charauto: You weave your hands in an odd pattern, suddenly finding yourself dozing off.
+othersauto: $n weaves $s hands in an odd pattern, looking surprized to be dozing off.
+#END
+
+#SOCIAL
+Name: drool
+charnoarg: You drool on yourself.
+othersnoarg: $n drools on $mself.
+charfound: You drool all over $N.
+othersfound: $n drools all over $N.
+victfound: $n drools all over you.
+charauto: You drool on yourself.
+othersauto: $n drools on $mself.
+#END
+
+#SOCIAL
+Name: duck
+charnoarg: Whew! That was close!
+othersnoarg: $n is narrowly missed by a low-flying dragon.
+charfound: You duck behind $M. Whew! That was close!
+othersfound: $n ducks behind $N to avoid the fray.
+victfound: $n ducks behind you to avoid the fray.
+charauto: You duck behind yourself. Oww that hurts!
+othersauto: $n tries to duck behind $mself. $n needs help getting untied now.
+#END
+
+#SOCIAL
+Name: eek
+charnoarg: Visions of rabid rodents invade your thoughts and cause you to Eeeeeeeek loudly!
+othersnoarg: $n screams, "EEeeeeeek Rabid Rodent, Rabid Rodent!", and runs past you in fear.
+charfound: Oh no! $N the rabid rodent! Run!!!
+othersfound: $n looks at $N and screams, "Eeeek Rapid Rodent, Rabid Rodent!"
+victfound: $n grabs $s mousetrap, wishing only despair on your foul, rodent soul.
+charauto: Oh no! $n the rabid rodent! Run!!!
+othersauto: $n begins to nibble on $s mousetrap. Stranger things...
+#END
+
+#SOCIAL
+Name: eep
+charnoarg: You eep!
+othersnoarg: $n eeps!
+charfound: You look at $N and say 'Eep!'
+othersfound: $n looks at $N and says 'Eep'!
+victfound: $n looks at you and says 'Eep'!
+charauto: You want to eep yourself? No way!
+#END
+
+#SOCIAL
+Name: eh
+charnoarg: You look around and exclaim, "How's it going, eh?"
+othersnoarg: $n looks around and exclaims, "How's it going, eh?"
+charfound: You look at $N and exclaim, "How's it going $N, eh?"
+othersfound: $n looks at $N and exclaims, "How's it going $N, eh?" What a hoser!
+victfound: $n looks at you and exclaims, "How's it going, eh?" What a hoser!
+#END
+
+#SOCIAL
+Name: embrace
+charnoarg: Who do you want to hold?
+othersnoarg: $n looks around for someone to hold close to $m.
+charfound: You hold $M in a warm and loving embrace.
+othersfound: $n holds $N in a warm and loving embrace.
+victfound: $n holds you in a warm and loving embrace.
+charauto: You hold yourself in a warm and loving embrace. Feels silly doesn't it?
+othersauto: $n holds $mself in a warm and loving embrace. $e looks pretty silly.
+#END
+
+#SOCIAL
+Name: evilgrin
+charnoarg: You grin so evilly that everyone's alignment drops to -1000.
+othersnoarg: $n grins so evilly that everyone's alignment drops to -1000.
+charfound: You grin so evilly at $M that $S alignment drops to -1000.
+othersfound: $n grins so evilly at $N that $S alignment drops to -1000.
+victfound: $n grins so evilly at you that your alignment drops to -1000.
+charauto: You grin so evilly at yourself that your alignment drops to -1000.
+othersauto: $n grins so evilly that $s alignment drops to -1000.
+#END
+
+#SOCIAL
+Name: excellent
+charnoarg: You grin and say 'Excellent, Party on'
+othersnoarg: $n grins and says 'Excellent, Party on'
+charfound: You tell $N, 'Excellent, Party on dude'
+othersfound: $n tells $N 'Excellent, Party on dude'
+victfound: $n tells you 'Excellent, Party on dude'
+charauto: You think to yourself 'Excellent, I can party on!'
+othersauto: $n looks like $e is enoying a good thought.
+#END
+
+#SOCIAL
+Name: eyebrow
+charnoarg: You raise an eyebrow.
+othersnoarg: $n raises an eyebrow.
+charfound: You raise an eyebrow at $M.
+othersfound: $n raises an eyebrow at $N.
+victfound: $n raises an eyebrow at you.
+charauto: You raise an eyebrow at yourself. That hurt!
+othersauto: $n raises an eyebrow at $mself. That must have hurt!
+#END
+
+#SOCIAL
+Name: faint
+charnoarg: You feel dizzy and hit the ground like a board.
+othersnoarg: $n's eyes roll back in $s head and $e crumples to the ground.
+charfound: You faint into $S arms.
+othersfound: $n faints into $N's arms.
+victfound: $n faints into your arms. How romantic.
+charauto: You look down at your condition and faint.
+othersauto: $n looks down at $s condition and faints dead away.
+#END
+
+#SOCIAL
+Name: fakerep
+charnoarg: You report: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+othersnoarg: $n reports: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+charfound: You report: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+othersfound: $n reports: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+victfound: $n reports: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+charauto: You report: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+othersauto: $n reports: 12874/13103 hp 9238/10230 mana 2483/3451 mv 2.31E13 xp.
+#END
+
+#SOCIAL
+Name: fear
+charnoarg: You are overcome by fear and begin shaking uncontrollably.
+othersnoarg: $n is overcome by fear and begins shaking uncontrollbly.
+charfound: You look at $N and are overcome by fear.
+othersfound: $n looks at $N and is overcome by fear. $n's knees start knocking.
+victfound: $n takes one look at you and is overcome by fear. $n's knees begin to knock and $s legs buckle.
+#END
+
+#SOCIAL
+Name: fiddledeedee
+charnoarg: You exclaim, 'Oh! Fiddle-dee-dee!'
+othersnoarg: $n exclaims, 'Oh! Fiddle-dee-dee!'
+charfound: You tell $M, 'Fiddle-dee-dee!'
+othersfound: $n looks at $M and says, 'Fiddle-dee-dee!'
+victfound: $n looks at you and says, 'Fiddle-dee-dee!'
+charauto: You mutter to yourself. Fiddle-dee-dee.
+othersauto: $n mutters to $mself. Fiddle-dee-dee.
+#END
+
+#SOCIAL
+Name: flex
+charnoarg: You flex.
+othersnoarg: $n flexes. Must think $e's buff.
+charfound: You flex for $M. Impressive!
+othersfound: $n flexes in a vain attempt at impressing $N.
+victfound: You watch $n flex. Are you impressed, or what?
+charauto: You flex, just to make sure you still got it.
+othersauto: $n flexes $s muscles.
+#END
+
+#SOCIAL
+Name: flip
+charnoarg: You flip head over heels.
+othersnoarg: $n flips head over heels.
+charfound: You flip $M over your shoulder.
+othersfound: $n flips $N over $s shoulder.
+victfound: $n flips you over $s shoulder. Hmmmm.
+charauto: You tumble all over the room.
+othersauto: $n does some nice tumbling and gymnastics.
+#END
+
+#SOCIAL
+Name: flirt
+charnoarg: Wink wink!
+othersnoarg: $n flirts -- probably needs a date, huh?
+charfound: You flirt with $M.
+othersfound: $n flirts with $N.
+victfound: $n wants you to show some interest and is flirting with you.
+charauto: You flirt with yourself.
+othersauto: $n flirts with $mself. Hoo boy.
+#END
+
+#SOCIAL
+Name: flutter
+charnoarg: You flutter your eyelashes.
+othersnoarg: $n flutters $s eyelashes.
+charfound: You flutter your eyelashes at $M.
+othersfound: $n flutters $s eyelashes in $N's direction.
+victfound: $n looks at you and flutters $s eyelashes.
+charauto: You flutter your eyelashes at the thought of yourself.
+othersauto: $n flutters $s eyelashes at no one in particular.
+#END
+
+#SOCIAL
+Name: fondle
+charnoarg: You suddenly have the urge to fondle someone
+othersnoarg: $n is looking for someone to fondle, get out while you can!
+charfound: You fondly fondle $N.
+othersfound: $n starts fondling $N, maybe they should get a room
+victfound: $n fondly fondles you.
+charauto: You start fondling yourself, lonely eh?
+othersauto: $n starts fondling $mself. Hey it's the 90's, it's allowed
+#END
+
+#SOCIAL
+Name: footrub
+charnoarg: You glance around the room looking for someone to rub your feet.
+othersnoarg: $n glances around the room looking for someone to rub $s feet.
+charfound: You ask $N to rub your tired feet.
+othersfound: $n asks $N to rub $s tired feet. Better leave before $e asks you.
+victfound: $n asks you to rub $s tired feet. Better leave your gloves on.
+charauto: You rub your tired feet, waiting for a refresh.
+othersauto: $n rubs $s tired feet. $e sure could use a refresh.
+#END
+
+#SOCIAL
+Name: french
+charnoarg: Kiss whom?
+othersnoarg: $n is looking for someone to kiss.
+charfound: You give $N a long and passionate kiss.
+othersfound: $n kisses $N passionately.
+victfound: $n gives you a long and passionate kiss.
+charauto: You gather yourself in your arms and try to kiss yourself.
+othersauto: $n makes an attempt at kissing $mself.
+#END
+
+#SOCIAL
+Name: frolick
+charnoarg: You throw confetti into the air and frolick about with gleeful abandon.
+othersnoarg: $n throws confetti into the air and frolicks about with gleeful abandon.
+charfound: You take $N's hand and frolick about with gleeful abandon.
+othersfound: $n takes $N's hand and frolicks about with gleeful abandon.
+victfound: $n takes your hand and frolicks about with gleeful abandon.
+#END
+
+#SOCIAL
+Name: frown
+charnoarg: What's bothering you ?
+othersnoarg: $n frowns.
+charfound: You frown at what $N did.
+othersfound: $n frowns at what $N did.
+victfound: $n frowns at what you did.
+charauto: You frown at yourself. Poor baby.
+othersauto: $n frowns at $mself. Poor baby.
+#END
+
+#SOCIAL
+Name: fstar
+charnoarg: A falling star catches your eye.
+othersnoarg: $n is looking for a falling star to wish upon.
+charfound: You and $N make a wish upon a falling star.
+othersfound: $n and $N wistfully gaze upon a falling star.
+victfound: $n wishes upon a falling star for $N's happiness.
+charauto: You make a wish upon a falling star.
+othersauto: $n watches a falling star.
+#END
+
+#SOCIAL
+Name: fume
+charnoarg: You grit your teeth and fume with rage.
+othersnoarg: $n grits $s teeth and fumes with rage.
+charfound: You stare at $M, fuming.
+othersfound: $n stares at $N, fuming with rage.
+victfound: $n stares at you, fuming with rage!
+charauto: That's right - hate yourself!
+othersauto: $n clenches $s fists and stomps his feet, fuming with anger.
+#END
+
+#SOCIAL
+Name: gag
+charnoarg: You gag.
+othersnoarg: $n suddenly starts gagging.
+charfound: You start gagging in $N's direction.
+othersfound: $n starts gagging in $N's direction.
+victfound: $n starts gagging in your direction.
+charauto: You attempt to gag yourself.
+othersauto: $n attempts to gag $mself.
+#END
+
+#SOCIAL
+Name: gasp
+charnoarg: You gasp in astonishment.
+othersnoarg: $n gasps in astonishment.
+charfound: You gasp as you realize what $E did.
+othersfound: $n gasps as $e realizes what $N did.
+victfound: $n gasps as $e realizes what you did.
+charauto: You look at yourself and gasp!
+othersauto: $n takes one look at $mself and gasps in astonisment!
+#END
+
+#SOCIAL
+Name: gawk
+charnoarg: You gawk at everyone around you.
+othersnoarg: $n gawks at everyone in the room.
+charfound: You gawk at $M.
+othersfound: $n gawks at $N.
+victfound: $n gawks at you.
+charauto: You gawk as you think what you must look like to others.
+othersauto: $n is gawking again. What is on $s mind?
+#END
+
+#SOCIAL
+Name: gbhug
+charnoarg: You hug a great big grizzly bear.
+othersnoarg: $n hugs a great big grizzly bear.
+charfound: You give $N a great big bearhug. Ooooof!
+othersfound: $n gives a great big bearhug to $N. Oooof!
+victfound: $n gives you a great big bearhug. Ooooof!
+#END
+
+#SOCIAL
+Name: ghug
+charnoarg: GROUP HUG! GROUP HUG!
+othersnoarg: $n hugs you all in a big group hug. How sweet!
+charfound: GROUP HUG! GROUP HUG!
+othersfound: $n hugs you all in a big group hug. How sweet!
+victfound: $n hugs you all in a big group hug. How sweet!
+charauto: GROUP HUG! GROUP HUG!
+othersauto: $n hugs you all in a big group hug. How sweet!
+#END
+
+#SOCIAL
+Name: giggle
+charnoarg: You giggle.
+othersnoarg: $n giggles.
+charfound: You giggle at $M.
+othersfound: $n giggles at $N's actions.
+victfound: $n giggles at you. Hope it's not contagious!
+charauto: You giggle at yourself. You must be nervous or something.
+othersauto: $n giggles at $mself. $e must be nervous or something.
+#END
+
+#SOCIAL
+Name: girn
+charnoarg: You try to grin, but somehow get it slightly wrong.
+othersnoarg: $n tries to grin, but somehow gets it slightly wrong.
+charfound: You try to grin at $N, but $E gives you a funny look.
+othersfound: $n tries to grin at $N, but screws it up badly.
+victfound: $n turns $s lips in a sad attempt at a lopsided grin.
+charauto: Your face becomes a ghastly mask as you fail to grin.
+othersauto: $n's face becomes a strange death mask as $s tries to grin.
+#END
+
+#SOCIAL
+Name: gjob
+charnoarg: You leap in the air and yell "Good Job!"
+othersnoarg: $n pats $mself on the back and smiles.
+charfound: You plant a great big gold star on $N.
+othersfound: $n congratulates $N for a job well done.
+victfound: $n sticks a gold star on your forehead and says "Good Job!"
+charauto: You try and stick a gold star on your forehead in order to get attention for your good work.
+othersauto: $n tries to praise $mself for a job well done.
+#END
+
+#SOCIAL
+Name: glare
+charnoarg: You glare at nothing in particular.
+othersnoarg: $n glares around $m.
+charfound: You glare icily at $M.
+othersfound: $n glares at $N.
+victfound: $n glares icily at you, you feel cold to your bones.
+charauto: You glare icily at your feet, they are suddenly very cold.
+othersauto: $n glares at $s feet, what is bothering $m?
+#END
+
+#SOCIAL
+Name: glower
+charnoarg: You glower in frustration. Having a bad day?
+othersnoarg: $n glowers in frustration.
+charfound: You glower at $N in frustration over what $E said.
+othersfound: $n glowers at $N in frustration.
+victfound: $n glowers at you in frustration. Did you say something?
+charauto: You glower at yourself. Having a bad day?
+othersauto: $n glowers at $mself. Maybe $e's having a bad day.
+#END
+
+#SOCIAL
+Name: gnight
+charnoarg: You tell everyone goodnight.
+othersnoarg: $n tells everyone goodnight.
+charfound: You give $N a soft goodnight kiss and wave to $M.
+othersfound: $n gives $N a soft goodnight kiss then waves to $M.
+victfound: $n gives you a soft goodnight kiss and then waves to you.
+charauto: You say goodnight to yourself.
+othersauto: $n says goodnight to $mself, $e must really be tired.
+#END
+
+#SOCIAL
+Name: gobble
+charnoarg: You clear your throat and gobble several times.
+othersnoarg: $n clears $s throat and gobbles most musically.
+charfound: You clear your throat and gobble profusely at $N.
+othersfound: $n clears $s throat and gobbles like a turkey at $N.
+victfound: $n clears $s throat and gobbles like a turkey at you.
+charauto: Gobbling at yourself? Okaaaay then.
+othersauto: $n starts gobbling to $mself. How odd.
+#END
+
+#SOCIAL
+Name: goose
+charnoarg: You honk like a goose!
+othersnoarg: It dawns on you that $n looks a lot like a goose.
+charfound: You goose $N!
+othersfound: $n attempts to goose $N! Uh oh...
+victfound: $n gooses you and then runs away giggling!
+charauto: You try to hatch a goose egg.
+othersauto: $n nonchalantly sits on a goose egg and waits patiently.
+#END
+
+#SOCIAL
+Name: gratz
+charnoarg: Congratulate who?
+othersnoarg: $n is looking for someone to congratulate.
+charfound: You congratulate $N with a big slap on $S back!
+othersfound: $n congratulates $N with a big hearty slap on the back!
+victfound: $n congratulates you with a big slap on your back!
+charauto: You want to congratulate yourself? You must be an egomaniac!
+othersauto: $n congratulates $mself. What a goof!
+#END
+
+#SOCIAL
+Name: greet
+charnoarg: You greet everyone in the room.
+othersnoarg: $n greets you with a pleasant smile.
+charfound: You warmly greet $N, saying "Well met, $N! How fare thee, on this fine day?"
+othersfound: $n greets $N warmly.
+victfound: $n smiles at you and says, "How fare thee on this fine day, $N?"
+#END
+
+#SOCIAL
+Name: grimace
+charnoarg: You contort your face in disgust.
+othersnoarg: $n grimaces in disgust.
+charfound: You grimace in disgust at $M.
+othersfound: $n grimaces in disgust at $N.
+victfound: $n grimaces in disgust at you.
+charauto: You grimace at yourself in disgust.
+othersauto: $n grimaces at $mself in disgust.
+#END
+
+#SOCIAL
+Name: grin
+charnoarg: You grin evilly.
+othersnoarg: $n grins evilly.
+charfound: You grin evilly at $M.
+othersfound: $n grins evilly at $N.
+victfound: $n grins evilly at you. Hmmm. Better keep your distance.
+charauto: You grin at yourself. You must be getting very bad thoughts.
+othersauto: $n grins at $mself. You must wonder what's in $s mind.
+#END
+
+#SOCIAL
+Name: grip
+charnoarg: You tighten your grip on your weapon, preparing for battle.
+othersnoarg: $n tightens $s grip on $s weapon, preparing for battle.
+charfound: You grip your weapon, preparing for battle with $N!
+othersfound: $n tightens $s grip on $s weapon, preparing for battle with $N!
+victfound: $n tightens $s grip on $s weapon, preparing for battle with you!
+charauto: You attempt to get a grip on yourself.
+othersauto: $n attempts to get a grip on $mself.
+#END
+
+#SOCIAL
+Name: gripe
+charnoarg: You gripe.
+othersnoarg: $n gripes about anything and everything to any who will listen.
+charfound: You gripe to $N about everything from the plague to chastity belts.
+othersfound: $n gripes to $N. 
+victfound: $n gripes non stop. Perhaps $s armor is a bit too tight?
+charauto: You gripe to no one in particular.
+othersauto: $n is griping about something.
+#END
+
+#SOCIAL
+Name: groan
+charnoarg: You groan loudly.
+othersnoarg: $n groans loudly.
+charfound: You groan at the sight of $M.
+othersfound: $n groans at the sight of $N.
+victfound: $n groans at the sight of you.
+charauto: You groan as you realize what you have done.
+othersauto: $n groans as $e realizes what $e has done.
+#END
+
+#SOCIAL
+Name: grope
+charnoarg: You madly look around for someone to grope.
+othersnoarg: $n is looking for someone to grope, RUN AWAY!
+charfound: You grope $N!
+othersfound: $n gropes $N, maybe you should leave them alone.
+victfound: $n gropes you!
+charauto: You start groping yourself. Looking for love in all the wrong places, maybe?
+othersauto: $n starts groping $mself, maybe you should leave $m alone.
+#END
+
+#SOCIAL
+Name: grovel
+charnoarg: You grovel in the dirt.
+othersnoarg: $n grovels in the dirt.
+charfound: You grovel before $M.
+othersfound: $n grovels in the dirt before $N.
+victfound: $n grovels in the dirt before you.
+charauto: That seems a little silly to me.
+othersauto: $n starts groveling to $mself, I think there might be a problem here.
+#END
+
+#SOCIAL
+Name: growl
+charnoarg: Grrrrrrrrrr ...
+othersnoarg: $n growls.
+charfound: Grrrrrrrrrr ... take that, $N!
+othersfound: $n growls at $N. Better leave the room before the fighting starts.
+victfound: $n growls at you. Hey, two can play it that way!
+charauto: You growl at yourself. Boy, do you feel bitter!
+othersauto: $n growls at $mself. This could get interesting...
+#END
+
+#SOCIAL
+Name: grumble
+charnoarg: You grumble.
+othersnoarg: $n grumbles.
+charfound: You grumble to $M.
+othersfound: $n grumbles to $N.
+victfound: $n grumbles to you.
+charauto: You grumble under your breath.
+othersauto: $n grumbles under $s breath.
+#END
+
+#SOCIAL
+Name: grunt
+charnoarg: GRNNNHTTTT.
+othersnoarg: $n grunts like a pig.
+charfound: GRNNNHTTTT.
+othersfound: $n grunts to $N. What a pig!
+victfound: $n grunts to you. What a pig!
+charauto: GRNNNHTTTT.
+othersauto: $n grunts to nobody in particular. What a pig!
+#END
+
+#SOCIAL
+Name: gulp
+charnoarg: You gulp nervously and loosen your neckwear.
+othersnoarg: $n gulps nervously and loosens $s neckwear.
+charfound: You loosen your neckwear and gulp nervously under $N's gaze.
+othersfound: $n loosens $s neckwear and gulps nervously at $N.
+victfound: $n loosens $s neckwear and gulps nervously at you.
+charauto: You gulp nervously and loosen your neckwear.
+othersauto: $n gulps nervously and loosens $s neckwear.
+#END
+
+#SOCIAL
+Name: hair
+charnoarg: You run your fingers through your hair.
+othersnoarg: $n runs $s fingers through $s hair, how vain!
+charfound: You run your fingers through $N's hair.
+othersfound: $n runs $s fingers through $N's hair, how sweet.
+victfound: $n runs $s fingers through your hair soothingly.
+charauto: Having a bad hair day?
+othersauto: $n seems to be having a bad hair day.
+#END
+
+#SOCIAL
+Name: hand
+charnoarg: Kiss whose hand?
+charfound: You kiss $S hand.
+othersfound: $n kisses $N's hand. How continental!
+victfound: $n kisses your hand. How continental!
+charauto: You kiss your own hand.
+othersauto: $n kisses $s own hand.
+#END
+
+#SOCIAL
+Name: happy
+charnoarg: You look happy! =)
+othersnoarg: $n Looks happy! Awww whatta chum!
+charfound: You force $N to yell, 'HAPPY HAPPY JOY JOY!!'
+othersfound: $n forces you to yell, 'HAPPY HAPPY JOY JOY!!'
+charauto: You yell, 'HAPPY HAPPY JOY JOY!!'
+othersauto: $n yells, 'HAPPY HAPPY JOY JOY!!' Don't mind $m, $e's a bit looney.
+#END
+
+#SOCIAL
+Name: haus
+charnoarg: $n sighs and dreams of $s hero... Haus.
+othersnoarg: $n sighs and dreams of $s hero... Haus
+charfound: Pret#Ending you're Haus, you flex and attempt to summon a pet Name:d Balzhur.
+othersfound: $n imitates Haus and tries to summon a huge demon to attack you!
+victfound: Your attempt to impress someone while pret#Ending to be Haus will surely not be met with favor from the Gods.
+charauto: Your meager attempt at being like Haus is pitiful.
+othersauto: $n tries to be like Haus, but fails miserably.
+#END
+
+#SOCIAL
+Name: hay
+charnoarg: You look around the room and ask everyone, "How are you?"
+othersnoarg: $n looks around the room and asks everyone, "How are you?"
+charfound: You look at $N and ask "How are you?"
+othersfound: $n looks at $N and asks "How are you?"
+victfound: $n looks at you and asks, "How are you?"
+#END
+
+#SOCIAL
+Name: heal
+charnoarg: You start yelling for a heal!
+othersnoarg: $n yells 'Hey, how about a heal? I'm DYING here!'
+charfound: You start yelling at $N for a heal!
+othersfound: $n yells 'Hey $N, how about a heal? I'm DYING here!'
+victfound: $n yells 'Hey $N, how about a heal? I'm DYING here!'
+charauto: You start yelling for a heal!
+othersauto: $n yells 'Hey, how about a heal? I'm DYING here!'
+#END
+
+#SOCIAL
+Name: heh
+charnoarg: You seem to get a laugh from something saying, "heh heh heh".
+othersnoarg: $n seems to get a laugh from something saying, "heh heh heh".
+charfound: You seem to get a laugh from $N and say, "heh heh heh".
+othersfound: $n seems to get a laugh from $N and says, "heh heh heh".
+victfound: $n seems to get a laugh from you and says, "heh heh heh".
+#END
+
+#SOCIAL
+Name: hello
+charnoarg: You say hello to everyone in the room.
+othersnoarg: $n says hello to everyone in the room.
+charfound: You tell $N how truly glad you are to see $M.
+othersfound: $n tells $N 'Hi!'
+victfound: $n tells you how truly glad $e is that you are here.
+charauto: You greet yourself enthusiastically.
+othersauto: $n greets $mself enthusiastically. How odd.
+#END
+
+#SOCIAL
+Name: hercules
+charnoarg: You strut around, acting like Hercules.
+othersnoarg: $n struts around, acting like $e is Hercules.
+charfound: You pose for $N, acting like you are Hercules.
+othersfound: $n poses for $N, acting like $e is Hercules.
+victfound: $n poses for you, acting like $e is Hercules.
+charauto: You think you are Hercules!
+othersauto: $n seems to think $e's Hercules.
+#END
+
+#SOCIAL
+Name: hfive
+charnoarg: You jump into the air and attempt to give no one a high five, and land flat on your face! Ouch!
+othersnoarg: $n jumps in the air attempting to give an invisible person a high five! Whatta fool!
+charfound: You jump into the air and give $N a MEGA high five! Woo hoo!
+othersfound: $n jumps into the air and gives $N a MEGA high five!
+victfound: $n jumps into the air and gives you a MEGA high five! Woo hoo!
+charauto: You jump into the air, and perform the ever exciting triple flip, half twist, piked, high five with yourself!
+othersauto: $n jumps into the air, and for the lack of anything else to do, high fives itself!
+#END
+
+#SOCIAL
+Name: hfoot
+charnoarg: You clasp your feet behind your back.
+othersnoarg: $n clasps $s feet behind $s back.
+charfound: You hold $N's foot in your hand.
+othersfound: $n holds $N's foot in $s hand.
+victfound: $n holds your foot in $s hand. Awwww ... isn't $e sweet?
+#END
+
+#SOCIAL
+Name: hhand
+charnoarg: You clasp your hands behind your back.
+othersnoarg: $n clasps $s hands behind $s back.
+charfound: You take $N's hand in yours.
+othersfound: $n holds $N's hand. Awwww aren't they cute?
+victfound: $n holds your hand lovingly.
+charauto: You clasp your hands behind your back.
+othersauto: $n clasps $s hands behind $s back.
+#END
+
+#SOCIAL
+Name: hiccup
+charnoarg: You hiccup loudly.
+othersnoarg: $n hiccups loudly.
+charfound: You hiccup loudly at $M. How rude!
+othersfound: $n hiccups at $n. How rude!
+victfound: $n hiccups at you. How rude!
+charauto: You hiccup to yourself. How musical.
+othersauto: $n hiccups to $mself. How musical.
+#END
+
+#SOCIAL
+Name: hiss
+charnoarg: You bare your teeth and hiss spitefully.
+othersnoarg: $n bares $s teeth and hisses spitefully.
+charfound: You hiss spitefully at $N through bared teeth.
+othersfound: $n hisses spitefully at $N through bared teeth.
+victfound: $n hisses spitefully at you through bared teeth.
+charauto: You bare your teeth and hiss spitefully.
+othersauto: $n bares $s teeth and hisses spitefully.
+#END
+
+#SOCIAL
+Name: hmm
+charnoarg: You Hmmmm out loud.
+othersnoarg: $n thinks, 'Hmmmm.'
+charfound: You gaze thoughtfully at $M and say 'Hmmm.'
+othersfound: $n gazes thoughtfully at $N and says 'Hmmm.'
+victfound: $n gazes thoughtfully at you and says 'Hmmm.'
+charauto: You Hmmmm out loud.
+othersauto: $n thinks, 'Hmmmm.'
+#END
+
+#SOCIAL
+Name: homage
+charnoarg: You look around for someone to pay homage to.
+othersnoarg: $n looks around for someone to pay homage to.
+charfound: You pay homage to $N.
+othersfound: $n pays homage to $N.
+victfound: $n acknowledges your superiority.
+charauto: You look for someone to proclaim your superior.
+othersauto: $n looks around for someone to pay homage to.
+#END
+
+#SOCIAL
+Name: honk
+charnoarg: You pull out a huge hankie and honk your nose loudly.
+othersnoarg: $n pulls out a huge hankie and honks $s nose loudly.
+charfound: You pull out a large hankie and honk your nose at $N.
+othersfound: $n pulls out a large hankie and honks $s nose at $N.
+victfound: $n pulls out a large hankie and honks $s nose at you.
+charauto: You want to honk yourself? Sounds illegal.
+othersauto: $n tries to honk $mself. I'd be leery of $n.
+#END
+
+#SOCIAL
+Name: hop
+charnoarg: You hop around like a frog.
+othersnoarg: $n hops around like a frog.
+charfound: You hop onto $N's head. Youch!
+othersfound: $n hops onto $N's head. Youch!
+victfound: $n hops right on top of your head. Ouchie Wouchies!!!
+othersauto: $n hops around like a little kid.
+#END
+
+#SOCIAL
+Name: hoser
+charnoarg: You think "Where can I get some beer and back bacon, eh?"
+othersnoarg: $n is thinking that $e is a real hoser.
+charfound: You point out that $N has all the characteristics of a hoser!
+othersfound: $n screams out "$N is a hoser eh!!"
+victfound: $n yells out to you, "Hey! Pass the beer and back bacon, eh? We got hosers in here!"
+charauto: You say to yourself "Boy am I a hoser."
+othersauto: $n proudly proclaims $mself to be a hoser. Now if $e could just find the bottle opener?
+#END
+
+#SOCIAL
+Name: how
+charnoarg: You ask, "how?"
+othersnoarg: $n asks, "how?"
+charfound: You ask $N, "how?"
+othersfound: $n asks $N, "how?"
+victfound: $n asks you, "how?"
+charauto: You ask yourself, "how could this happen to me?"
+othersauto: $n asks $mself, "how could this happen to me?"
+#END
+
+#SOCIAL
+Name: hrm
+charnoarg: You hrm. Hrm.
+othersnoarg: You hear $n hrm.
+charfound: You hrm in the direction of $N. Hrm!
+othersfound: $n hrms at $N. $e isn't too normal.
+victfound: $n hrms in your general direction. Is that normal?
+charauto: You hrm yourself into submission.
+othersauto: $n hrms quietly. $e must be in deep thought.
+#END
+
+#SOCIAL
+Name: hshake
+charnoarg: You look for someone to shake hands with.
+othersnoarg: $n looks in vain for someone to shake hands with.
+charfound: You shake $N's hand.
+othersfound: $n shakes $N's hand.
+victfound: $n shakes your hand.
+charauto: You shake hands with yourself.
+othersauto: $n shakes hands with $mself.
+#END
+
+#SOCIAL
+Name: hthink
+charnoarg: You close your eyes and think happy thoughts.
+othersnoarg: $n closes $s eyes and starts muttering happy thoughts, happy thoughts.
+charfound: You pat $N on $S back and say "Remember, happy thoughts."
+othersfound: $n pats $N on $S back and says, "Remember, Happy Thoughts. Think of your happy place."
+victfound: $n reminds you to think "Happy Thoughts!"
+charauto: You look around with a goofy smile and mutter, "Must think Happy Thoughts."
+othersauto: $n is wandering around with a goofy look on $s face whispering "Happy Thoughts" to no one in particular.
+#END
+
+#SOCIAL
+Name: hug
+charnoarg: Hug whom?
+othersnoarg: $n is looking for someone to hug, $e must be lonesome.
+charfound: You hug $M.
+othersfound: $n hugs $N.
+victfound: $n hugs you.
+charauto: You hug yourself.
+othersauto: $n hugs $mself in a vain attempt to get fri#Endship.
+#END
+
+#SOCIAL
+Name: hum
+charnoarg: Hmm Hmm Hmm Hmmmmmmm.
+othersnoarg: $n hums like a bee with a chest cold.
+charfound: You hum a little ditty for $M. Hmm Hmm Hmm Hmmmmmm.
+othersfound: $n hums a little ditty for $N. Hmm Hmm Hmm Hmmmmmm.
+victfound: $n hums a little ditty for you. Hmm Hmm Hmm Hmmmmmm.
+charauto: Hmm Hmm Hmmmmmmm.
+othersauto: $n hums like a bee with a chest cold.
+#END
+
+#SOCIAL
+Name: ick
+charnoarg: You ick.
+othersnoarg: $n icks!
+charfound: You look at $N and go 'ick'!
+othersfound: $n looks at $N and goes 'ick'!
+victfound: $n looks at you and goes 'ick'!
+#END
+
+#SOCIAL
+Name: innocent
+charnoarg: You do your best to look utterly innocent.
+othersnoarg: $n looks innocently about $mself.
+charfound: You do your best to convince $N of your innocence.
+othersfound: $n does $s best to convince $N of $s innocence.
+victfound: $n gives you the most innocent look you have ever seen.
+charauto: You try to convince yourself of your innocence.
+othersauto: $n does $s best to prove $s innocence to all, especially $mself.
+#END
+
+#SOCIAL
+Name: jade
+charnoarg: You worship Jade even though she isn't a deity.
+othersnoarg: $n tries to act like Jade but fails miserably.
+charfound: You try to impress $N by trying to impersonate Jade.
+othersfound: $n is obviously under mental duress as $e tries to act like Jade and slay you all with a smile.
+victfound: $n is dressed like Jade. Report $m at once for Impersonating a Goddess!
+charauto: You dream of being Jadelike
+othersauto: $n has had one too many magic mushrooms and fancies $mself being Jadelike. Bwahahhahaha
+#END
+
+#SOCIAL
+Name: jealous
+charnoarg: You are jealous.
+othersnoarg: $n is jealous.
+charfound: You are jealous of $N for stealing your love.
+othersfound: $n is jealous of $N for stealing $s love.
+victfound: $n is jealous of you for stealing $s love.
+charauto: You are jealous of your own studliness.
+othersauto: $n is jealous of $mself, what a dork.
+#END
+
+#SOCIAL
+Name: jest
+charnoarg: You smirk at nothing, and say 'Just kidding!' Time to log off?
+othersnoarg: $n smirks at nothing, and says 'Just kidding!' Time for $m to log off.
+charfound: You smirk at $N, and say 'Just kidding!'
+othersfound: $n smirks at $N, and says 'Just kidding!'
+victfound: $n smirks at you, and says 'Just kidding!'
+charauto: You smirk at yourself, and say 'Just kidding!' By Thoric, you've lost it.
+othersauto: $n smirks at $mself, and says 'Just kidding!' By Thoric, $e has lost it.
+#END
+
+#SOCIAL
+Name: joy
+charnoarg: You are filled with an overwhelming feeling of joy.
+othersnoarg: $n filled with an overwhelming feeling of joy. Happy. Happy. Joy. Joy.
+charfound: You look at $N and exclaim, "Happy. Happy. Joy. Joy."
+othersfound: $n looks at $N and exclaims, "Happy. Happy. Joy. Joy."
+victfound: $n looks at you and exclaims, "Happy. Happy. Joy. Joy."
+#END
+
+#SOCIAL
+Name: juggle
+charnoarg: You whip out your flaming torches and begin juggling them madly before the group of awed onlookers!
+othersnoarg: $n whips out $s flaming torches and begins to juggle them. Wow. What skill, what grace!
+charfound: You whip out your flaming torches and begin to juggle for $N. Won't $E think you're great NOW? 
+othersfound: $n whips out a bunch of flaming torches to begin $s juggling act. You wonder if this room is non-flammable. Hmmm.
+victfound: $n gets a crazy look in $s eyes as $e pulls out some flaming torches and begins to juggle. You look around for a fire-extinguisher.
+charauto: Feeling very proud of yourself, you begin to juggle three VERY sharp swords. No one can beat you now. NO ONE. Mwahahahaha..
+othersauto: $n pulls out some VERY sharp swords and begins to juggle them with a crazed look in $s eyes. Maybe its time to leave ... 
+#END
+
+#SOCIAL
+Name: kiss
+charnoarg: Isn't there someone you want to kiss?
+othersnoarg: $n looks for someone to kiss.
+charfound: You kiss $M.
+othersfound: $n kisses $N.
+victfound: $n kisses you.
+charauto: All the lonely people :(
+othersauto: $n tries to kiss $mself. $e's lonely!
+#END
+
+#SOCIAL
+Name: kitchie
+charnoarg: You make a funny face and say, "kitchie kitchie koo".
+othersnoarg: $n makes a funny face and says, "kitchie kitchie koo".
+charfound: You tickle $N saying, "kitchie kitchie koo"
+othersfound: $n tickles $N saying, "kitchie kitchie koo"
+victfound: $n tickles you saying, "kitchie kitchie koo".
+#END
+
+#SOCIAL
+Name: kitten
+charnoarg: You meow like a kitten.
+othersnoarg: $n meows like a kitten.
+charfound: You love $N's little kitten. Awwww.
+othersfound: $n loves $N's little kitten. Awwww.
+victfound: $n loves your little kitten. Awwww.
+charauto: You think that you are a cute little kitten. Meeeeow.
+othersauto: $n thinks $e is a cute little kitten. Meeeeow.
+#END
+
+#SOCIAL
+Name: kkong
+charnoarg: You beat your chest and moan like the animal you are!
+othersnoarg: $n beats $s chest and reveals $s true animal nature.
+charfound: You beat your chest to show $N what a brute you are!
+othersfound: $n swings from a vine and beats $s chest to impress $N.
+victfound: $n jumps from vine to vine pounding $s chest in some ancient mating ritual.
+charauto: You pound your chest to practice courting.
+othersauto: $n beats $s chest to practice for an upcoming mating ritual.
+#END
+
+#SOCIAL
+Name: kneel
+charnoarg: You kneel down.
+othersnoarg: $n kneels down.
+charfound: You kneel before $N.
+othersfound: $n kneels before $N.
+victfound: $n kneels before you.
+charauto: You drop to your knees.
+othersauto: $n kneels down.
+#END
+
+#SOCIAL
+Name: koochie
+charnoarg: You make a funny face and say, "koochie koochie koo".
+charfound: You tickle $N saying, "koochie koochie koo".
+othersfound: $n tickles $N saying, "koochie koochie koo".
+victfound: $n tickles you saying, "koochie koochie koo".
+#END
+
+#SOCIAL
+Name: lag
+charnoarg: You complain about the terrible lag.
+othersnoarg: $n starts complaining about the terrible lag.
+charfound: You complain to $N about the terrible lag.
+othersfound: $n complains to $N about the terrible lag.
+victfound: $n complains to you about the terrible lag.
+charauto: You start muttering about the awful lag.
+othersauto: $n starts muttering about the awful lag.
+#END
+
+#SOCIAL
+Name: lalala
+charnoarg: You try to sing. Best you can manage is 'la la la'.
+othersnoarg: $n goes 'la la la'
+charfound: You croon to $N 'la la la'.
+othersfound: $n croons to $N 'la la la'.
+victfound: $n croons to you 'la la la'.
+charauto: You want to 'la la la' yourself?
+#END
+
+#SOCIAL
+Name: lap
+charnoarg: You look around for a cuddly lap to climb into.
+othersnoarg: $n is looking around for a cuddly lap to climb into.
+charfound: You climb into $N's lap and cuddle up with $M.
+othersfound: $n climbs into $N's lap and cuddles up with $M.
+victfound: $n climbs into your lap and cuddles up with you.
+charauto: You try to climb into your own lap and cuddle with yourself. Are you lonely?
+othersauto: $n looks awful funny trying to crawl up into $s own lap and cuddle.
+#END
+
+#SOCIAL
+Name: laugh
+charnoarg: You laugh.
+othersnoarg: $n laughs.
+charfound: You laugh at $N mercilessly.
+othersfound: $n laughs at $N mercilessly.
+victfound: $n laughs at you mercilessly. Hmmmmph.
+charauto: You laugh at yourself. I would, too.
+othersauto: $n laughs at $mself. Let's all join in!!!
+#END
+
+#SOCIAL
+Name: leer
+charnoarg: You begin to leer at nothing in particular.
+othersnoarg: $n leers around $m. 
+charfound: You leer at $N with pure contempt.
+othersfound: $n leers at $N unabashedly.
+victfound: $n makes $N feel vulnerable with $s unabashed leer.
+charauto: You leer at yourself and think "mmmmmmm, I look good!"
+othersauto: $n leers at $mself and smiles.
+#END
+
+#SOCIAL
+Name: lick
+charnoarg: You lick your lips and smile.
+othersnoarg: $n licks $s lips and smiles.
+charfound: You lick $M.
+othersfound: $n licks $N.
+victfound: $n licks you.
+charauto: You lick yourself.
+othersauto: $n licks $mself - YUCK.
+#END
+
+#SOCIAL
+Name: loom
+charnoarg: You loom menacingly. Few are impressed.
+charfound: You loom menacingly over $N, intimidating $M slightly.
+othersfound: $n looms menacingly over $N. You remain unimpressed.
+victfound: $n looms menacingly over you. Ooooooo.
+charauto: Now stop that. Self-loomination is impossible.
+#END
+
+#SOCIAL
+Name: love
+charnoarg: You love the whole world.
+othersnoarg: $n loves everybody in the world.
+charfound: You tell your true feelings to $N.
+othersfound: $n whispers softly to $N.
+victfound: $n whispers to you sweet words of love.
+charauto: Well, we already know you love yourself (lucky someone does!)
+othersauto: $n loves $mself, can you believe it?
+#END
+
+#SOCIAL
+Name: lust
+charnoarg: You are getting lusty feelings!
+othersnoarg: $n looks around lustily.
+charfound: You stare lustily at $N.
+othersfound: $n stares lustily at $N.
+victfound: $n stares lustily at you.
+charauto: You stare lustily at...youself?
+othersauto: $n looks $mself up and down lustily.
+#END
+
+#SOCIAL
+Name: mad
+charnoarg: A crazed look of insanity spreads slowly over your face.
+othersnoarg: A crazed look of insanity spreads slowly over $n's face.
+charfound: You turn to $N and posit, "You're quite mad, you know?"
+othersfound: $n inquires of $N as to whether $E is aware that $E is mentally ill.
+victfound: $n inquires of you as to whether you are aware that you are mentally ill.
+charauto: If you think you're crazy now, wait till you figure out you're talking to yourself.
+othersauto: $n mulls $s own ill mental health.
+#END
+
+#SOCIAL
+Name: maim
+charnoarg: Who do you want to maim?
+othersnoarg: $n is looking for someone to maim.
+charfound: You maim $M with your dull fingernails.
+othersfound: $n raises $s hand and tries to maim $N to pieces.
+victfound: $n raises $s hand and paws at you. You've been maimed!
+charauto: You maim yourself with your dull fingernails.
+othersauto: $n raises $s hand and maims $mself to pieces.
+#END
+
+#SOCIAL
+Name: manners
+charnoarg: You wonder where people get their manners from these days.
+othersnoarg: $n wonders where people get their manners from these days.
+charfound: You wonder where $N learned $S manners.
+othersfound: $n wonders where $N learned $S manners.
+victfound: $n wonders where you learned your manners.
+#END
+
+#SOCIAL
+Name: marshmallow
+charnoarg: $n looks around fer a nice, fat, squishy, MARSHMALLOW to stick in $s hot chocolate!
+othersnoarg: $n looks around fer a nice, fat, squishy, MARSHMALLOW to stick in $s hot chocolate!
+charfound: You point at $N and pinching $S widdle, cute cheek, say 'Mmm you look as scrumptious as a marshmallow!'
+othersfound: $n thinks $N looks like a widdle, cute, marshmallow! Don't you agree? Awwwww
+victfound: $n points at you and pinches your widdle, cute cheek, and says 'Mmm you look as scrumptious as a marshmallow!'
+charauto: You wrap your body up into a little ball and dive into the hot chocolate yelling, 'Marshmallows away!!!'
+othersauto: $n wraps $s body up into a little ball and dives into the hot chocolate yelling, 'Marshmallows away!!!'
+#END
+
+#SOCIAL
+Name: massage
+charnoarg: Massage what? Thin air?
+charfound: You gently massage $N's shoulders.
+othersfound: $n massages $N's shoulders.
+victfound: $n gently massages your shoulders. Ahhhhhhhhhh ...
+charauto: You practice yoga as you try to massage yourself.
+othersauto: $n gives a show on yoga positions, trying to massage $mself.
+#END
+
+#SOCIAL
+Name: mean
+charnoarg: You look meaner than a junkyard dog!
+othersnoarg: $n looks meaner than a junkyard dog!
+charfound: You give $N the meanest look $E has ever seen!
+othersfound: $n gives $N the meanest look $E has ever seen!
+victfound: $n gives you the meanest look you have ever seen!
+#END
+
+#SOCIAL
+Name: melt
+charnoarg: Your heart begins to melt as you think of someone special.
+othersnoarg: $n begins to melt before your very eyes.
+charfound: You have melted into $S arms!
+othersfound: $n appears to melt into $N's arms! Must be love ...
+victfound: $n melts at the thought of you!
+charauto: You begin to melt.
+othersauto: $n is ranting like a lunatic.
+#END
+
+#SOCIAL
+Name: men
+charnoarg: You throw your hands in the air and say "BAH! Do men even think?!'
+othersnoarg: $n wonders why men were ever invented.
+charfound: You give $N an understanding look and say "At least they're good for opening cans."
+othersfound: $n commiserates with $N about the existence of men.
+victfound: $n says "Men should come with warning labels" to you.
+charauto: You wish you could trade men for EQ.
+othersauto: $n wishes $e could trade men for EQ.
+#END
+
+#SOCIAL
+Name: meow
+charnoarg: MEOW.
+othersnoarg: $n meows. What's $e going to do next, wash $mself with $s tongue?
+charfound: You meow at $M, hoping $E will give you some milk.
+othersfound: $n meows at $N, hoping $E will give $m some milk. 
+victfound: $n meows at you. Maybe $e wants some milk.
+charauto: You meow like a kitty cat.
+othersauto: $n meows like a kitty cat.
+#END
+
+#SOCIAL
+Name: milk
+charnoarg: You pour yourself a glass of cold creamy milk and drink it down.
+othersnoarg: $n pours $mself a glass of cold creamy milk and gulps it down.
+charfound: You pour a glass of cold creamy milk for $N and give it to $M.
+othersfound: $n pours a glass of cold creamy milk and gives it to $N.
+victfound: $n pours a glass of cold creamy milk and hands it to you.
+charauto: You hoist a glass of cold creamy milk and gulp it down.
+othersauto: $n hoists a glass of cold frothy milk and gulps it down.
+#END
+
+#SOCIAL
+Name: miss
+charnoarg: Your heart pines for a special someone that you miss so much. Awwww.
+othersnoarg: $n's heart pines for a special someone $e misses so much. Awwwww.
+charfound: You tell $N that your heart has been aching cuz you've missed $M so much. Awww.
+othersfound: $n tells $N that $s heart has been aching cuz $e missed $M so much. Awww.
+victfound: $n tells you that $s heart has been aching cuz $e missed you so much. Awww.
+#END
+
+#SOCIAL
+Name: mistletoe
+charnoarg: You point at the mistletoe above your head, and pucker up.
+othersnoarg: $n points to the mistletoe above $s head, and puckers up.
+charfound: You point to the mistletoe above $N's head, puckering up.
+othersfound: $n points to the mistletoe above $N's head, and puckers up.
+victfound: $n points to the mistletoe above your head, puckering up.
+charauto: You point at the mistletoe above your head, and pucker up.
+othersauto: $n points to the mistletoe above $s head, and puckers up.
+#END
+
+#SOCIAL
+Name: mmm
+charnoarg: You go mmMMmmMMmmMMmm.
+othersnoarg: $n says 'mmMMmmMMmmMMmm.'
+charfound: You go mmMMmmMMmmMMmm.
+othersfound: $n says 'mmMMmmMMmmMMmm.'
+victfound: $n thinks of you and says, 'mmMMmmMMmmMMmm.'
+charauto: You think of yourself and go mmMMmmMMmmMMmm.
+othersauto: $n thinks of $mself and says 'mmMMmmMMmmMMmm.'
+#END
+
+#SOCIAL
+Name: moan
+charnoarg: You start to moan.
+othersnoarg: $n starts moaning.
+charfound: You moan for the loss of $M.
+othersfound: $n moans for the loss of $N.
+victfound: $n moans at the sight of you. Hmmmm.
+charauto: You moan at yourself.
+othersauto: $n makes $mself moan.
+#END
+
+#SOCIAL
+Name: moi
+charnoarg: You look demure and ask, "moi?"
+othersnoarg: $n looks demure and asks, "moi?"
+charfound: You look at $N demurely and ask, "moi?"
+othersfound: $n looks demurely at $N and asks, "moi?"
+victfound: $n looks at you demurely and asks, "moi?"
+#END
+
+#SOCIAL
+Name: monkey
+charnoarg: You run around looking for a tree to swing on...maybe a banana.
+othersnoarg: $n is looking for a tree to swing on...maybe a banana.
+charfound: You climb all over $N like a love-struck monkey.
+othersfound: $n is climbing all over $N like a love-struck monkey.
+victfound: $n climbs all over you like a love-struck monkey.
+charauto: You make a monkey out of yourself.
+othersauto: $n is making a monkey out of $mself.
+#END
+
+#SOCIAL
+Name: mooch
+charnoarg: You beg for money, weapons, coins.
+othersnoarg: $n says 'Spare change?'
+charfound: You beg $N for money, weapons, coins.
+othersfound: $n begs you for favors of the insidious type...
+victfound: $n begs you for favors of the insidious type...
+charauto: You beg for money, weapons, coins.
+othersauto: $n says 'Spare change?'
+#END
+
+#SOCIAL
+Name: moocow
+charnoarg: You make cow noises. Mooooooooooooooooooo!
+othersnoarg: $n Mooooooooooooooooooooooooos like a cow.
+charfound: You make cow noises at $M. Mooooooooooooooooooo!
+othersfound: $n Mooooooooooooooooooooooooos like a cow at $N.
+victfound: $n looks at you and Mooooooooooooooooooooooooos like a cow.
+charauto: You make cow noises. Mooooooooooooooooooo!
+othersauto: $n Mooooooooooooooooooooooooos like a cow.
+#END
+
+#SOCIAL
+Name: moon
+charnoarg: You howl at the moon. Is that fur on your knuckles?
+othersnoarg: $n howls at the moon. Is that fur on $s knuckles?
+charfound: You howl at $N. Feeling a little feral are we?
+othersfound: $n howls at $N. Could be that $e is feeling a bit feral?
+victfound: $n howls at you. Could $e be feeling a bit feral?
+charauto: Howling to yourself? The moon does seem a bit bright tonight..
+othersauto: $n is howling to $mself. Must be a bright moon tonight..
+#END
+
+#SOCIAL
+Name: muffin
+charnoarg: You bite into a big warm muffin. Yummy!
+othersnoarg: $n bites into a big warm muffin. Yummy!
+charfound: You give $N a big warm muffin. Yummy!
+othersfound: $n gives $N a big warm muffin. Yummy!
+victfound: $n gives you a big warm muffin. Yum! Yum! Yummy!
+#END
+
+#SOCIAL
+Name: muhaha
+charnoarg: You laugh diabolically. MUHAHAHAHAHAHA!.
+othersnoarg: $n laughs diabolically. MUHAHAHAHAHAHA!..
+charfound: You laugh at $M diabolically. MUHAHAHAHAHAHA!..
+othersfound: $n laughs at $N diabolically. MUHAHAHAHAHAHA!..
+victfound: $n laughs at you diabolically. MUHAHAHAHAHAHA!..
+charauto: Muhaha at yourself?? Weird.
+#END
+
+#SOCIAL
+Name: mumble
+charnoarg: You mumble incoherently.
+othersnoarg: $n is mumbling under $s breath.
+charfound: You mumble to $N, hoping $E will listen.
+othersfound: $n is mumbling something to $N.
+victfound: $n looks right at you and starts mumbling. Uh-oh.
+charauto: You mumble to yourself.
+othersauto: $n is mumbling something to $mself.
+#END
+
+#SOCIAL
+Name: mutter
+charnoarg: You mutter distractedly.
+othersnoarg: $n mutters distractedly.
+charfound: You mutter to yourself and shake your head at $M.
+othersfound: $n mutters distractedly and shakes $s head at $N.
+victfound: $n mutters distractedly and shakes $s head at you.
+charauto: You mutter dithyrambically to yourself.
+othersauto: $n mutters at $mself.
+#END
+
+#SOCIAL
+Name: nag
+charnoarg: You feel nagged.
+othersnoarg: $n feels nagged.
+charfound: You nag $N. Nag $M like a hag!
+othersfound: $n nags $N. Nags $M like a hag!
+victfound: $n nags you. Nags you like a hag!
+#END
+
+#SOCIAL
+Name: nail
+charnoarg: You nibble nervously on your nails.
+othersnoarg: $n nibbles nervously on $s fingernails.
+charfound: You nibble nervously on your nails.
+othersfound: $n nibbles nervously on $s fingernails.
+victfound: $n nibbles nervously on your fingernails. Yuck!
+charauto: You nibble nervously on your nails.
+othersauto: $n nibbles nervously on $s fingernails.
+#END
+
+#SOCIAL
+Name: nibble
+charnoarg: Nibble on whom?
+charfound: You nibble on $N's ear.
+othersfound: $n nibbles on $N's ear.
+victfound: $n nibbles on your ear.
+charauto: You nibble on your OWN ear.
+othersauto: $n nibbles on $s OWN ear.
+#END
+
+#SOCIAL
+Name: nod
+charnoarg: You nod solemnly.
+othersnoarg: $n nods solemnly.
+charfound: You nod in agreement to $M.
+othersfound: $n nods in agreement to $N.
+victfound: $n nods in agreement with you.
+charauto: You nod at yourself. Are you getting senile?
+othersauto: $n nods at $mself. $e must be getting senile.
+#END
+
+#SOCIAL
+Name: nog
+charnoarg: You nog yourself!
+othersnoarg: $n nogs $sself.
+charfound: You nog $N.
+othersfound: $n nogs $N.
+victfound: $n nogs you.
+charauto: You nog yourself. Prevert!
+othersauto: $n nogs $mself. What a pervert!
+#END
+
+#SOCIAL
+Name: noogie
+charnoarg: You noogie.
+charfound: You grind your knuckles into the top of $N's head.
+othersfound: $n grinds $s knuckles into the top of $N's head.
+victfound: $n grinds $s knuckles into the top of your head with glee.
+charauto: Doesn't that hurt?
+othersauto: $n grinds $s knuckles into $s head, oblivious to the pain.
+#END
+
+#SOCIAL
+Name: nose
+charnoarg: You wiggle your nose.
+othersnoarg: $n wiggles $s nose.
+charfound: You tweak $S nose.
+othersfound: $n tweaks $N's nose.
+victfound: $n tweaks your nose.
+charauto: You tweak your own nose!
+othersauto: $n tweaks $s own nose!
+#END
+
+#SOCIAL
+Name: nudge
+charnoarg: Nudge whom?
+charfound: You nudge $M.
+othersfound: $n nudges $N.
+victfound: $n nudges you.
+charauto: You nudge yourself, for some strange reason.
+othersauto: $n nudges $mself, to keep $mself awake.
+#END
+
+#SOCIAL
+Name: nuzzle
+charnoarg: Nuzzle whom?
+charfound: You nuzzle $S neck softly.
+othersfound: $n softly nuzzles $N's neck.
+victfound: $n softly nuzzles your neck.
+charauto: I'm sorry, fri#End, but that's impossible.
+#END
+
+#SOCIAL
+Name: ogle
+charnoarg: Whom do you want to ogle?
+charfound: You ogle $M like $E was a piece of meat.
+othersfound: $n ogles $N. Maybe you should leave them alone for awhile?
+victfound: $n ogles you. Guess what $e is thinking about?
+charauto: You ogle yourself. You may just be too weird for this mud.
+othersauto: $n ogles $mself. Better hope that $e stops there.
+#END
+
+#SOCIAL
+Name: ohno
+charnoarg: Oh no! You did it again!
+othersnoarg: Oh no! $n did it again!
+charfound: You exclaim to $M, 'Oh no! I did it again!'
+othersfound: $n exclaims to $N, 'Oh no! I did it again!'
+victfound: $n exclaims to you, 'Oh no! I did it again!'
+charauto: You exclaim to yourself, 'Oh no! I did it again!'
+othersauto: $n exclaims to $mself, 'Oh no! I did it again!'
+#END
+
+#SOCIAL
+Name: oink
+charnoarg: Ooooooink! You're such a pig!
+othersnoarg: $n is acting like a pig!
+charfound: You look at $N and bellow 'Oooooink!'
+othersfound: $n looks at $N and bellows 'Ooooink!'
+victfound: $n looks at you and bellows 'Ooooink!' $e must think you are a pig!
+charauto: You start thinking that you are acting like a pig, stop that!
+othersauto: $n thinks that $e is acting like a pig!
+#END
+
+#SOCIAL
+Name: ooo
+charnoarg: You go ooOOooOOooOOoo.
+othersnoarg: $n says, 'ooOOooOOooOOoo.'
+charfound: You go ooOOooOOooOOoo.
+othersfound: $n says, 'ooOOooOOooOOoo.'
+victfound: $n thinks of you and says, 'ooOOooOOooOOoo.'
+charauto: You go ooOOooOOooOOoo.
+othersauto: $n says, 'ooOOooOOooOOoo.'
+#END
+
+#SOCIAL
+Name: oops
+charnoarg: You put your finger in your mouth and say, "Oopsie! Did I do that?"
+othersnoarg: $n puts $s finger in $s mouth and says, "Oopsie! Did I do that?"
+charfound: You look at $N and say, "Oopsie! Did I do that to you $N?"
+othersfound: $n looks at $N and says, "Oopsie! Did I do that to $N?"
+victfound: $n looks at you and says, "Oopsie! Did I do that to you $N?"
+charauto: You want to oops yourself? Sounds demented.
+othersauto: $n wants to oops $mself. $n must be delusional.
+#END
+
+#SOCIAL
+Name: ouch
+charnoarg: You say 'ouchie wouchies'!
+othersnoarg: $n says 'ouchie wouchies'!
+charfound: You look at $N and think 'ouchie wouchies'!
+othersfound: $n looks at $N and thinks 'ouchie wouchies'!
+victfound: $n looks at you and thinks 'ouchie wouchies'!
+#END
+
+#SOCIAL
+Name: owl
+charnoarg: You turn your head around in a circle and ask, "Who? Who? Who?"
+othersnoarg: $n turns $s head around in a circle and asks "Who? Who? Who?"
+charfound: You turn your head around in a circle and ask $N "Who? Who? Who?"
+othersfound: $n turns $s head around in a circle and asks "Who? Who? Who?"
+victfound: $n turns $s head around in a circle and asks you, "Who? Who? Who?"
+#END
+
+#SOCIAL
+Name: pace
+charnoarg: You pace around the room in agitation.
+othersnoarg: $n paces around the room with an agitated expression.
+charfound: You pace around $N, wearing a path around $M.
+othersfound: $n paces around $N, wearing a rather large path .
+victfound: $n paces around you. It's starting to make your head spin.
+charauto:  You pace around yourself, making yourself quite dizzy.
+othersauto: $n paces around $mself, looking rather dizzy.
+#END
+
+#SOCIAL
+Name: pant
+charnoarg: You begin to pant loudly and sloppily.
+othersnoarg: $n begins to pant loudly.
+charfound: You begin to pant loudly at $N.
+othersfound: $n begins to pant loudly at $N.
+victfound: $n begins to pant loudly at you.
+#END
+
+#SOCIAL
+Name: pants
+charnoarg: You remove your pants.
+othersnoarg: $n removes $s pants.
+charfound: You politely ask $N to remove $S pants.
+othersfound: $n politely asks $N to remove $S pants.
+victfound: $n politely asks you to remove your pants and any other non-essential garments.
+charauto: You hastily put on your pants.
+othersauto: $n hastily puts on $s pants.
+#END
+
+#SOCIAL
+Name: passout
+charnoarg: You totter for a bit, then fall flat on your face.
+othersnoarg: $n totters a bit and passes out flat on $s face.
+charfound: You pass out cold, toppling on to $N. Poor sot.
+othersfound: $n topples on to $N, passed out cold. Poor sot.
+victfound: $n topples on to you, passed out cold. Poor sot.
+charauto: You try to catch yourself as you pass out, but fail miserably.
+othersauto: $n tries to catch $mself as $e passes out, but fails miserably.
+#END
+
+#SOCIAL
+Name: pat
+charnoarg: Pat whom?
+charfound: You pat $N on $S back.
+othersfound: $n pats $N on $S back.
+victfound: $n pats you on your back.
+charauto: You pat yourself on your back.
+othersauto: $n pats $mself on the back.
+#END
+
+#SOCIAL
+Name: peck
+charnoarg: You peck for seeds on the ground.
+othersnoarg: $n pecks for seeds on the ground.
+charfound: You give $M a little peck on the cheek.
+othersfound: $n gives $N a small peck on the cheek.
+victfound: $n gives you a sweet peck on the cheek.
+charauto: You kiss your own pectoral muscles.
+othersauto: $n pecks $mself on $s pectoral muscles.
+#END
+
+#SOCIAL
+Name: peer
+charnoarg: You peer intently about your surroundings.
+othersnoarg: $n peers intently about the area, looking for thieves no doubt.
+charfound: You peer at $M quizzically.
+othersfound: $n peers at $N quizzically.
+victfound: $n peers at you quizzically.
+charauto: You peer intently about your surroundings.
+othersauto: $n peers intently about the area, looking for thieves no doubt.
+#END
+
+#SOCIAL
+Name: phew
+charnoarg: Phew! That was too close for words...
+othersnoarg: $n wipes $s brow with obvious relief.
+charfound: You share your obvious relief with $M.
+othersfound: $n glances at $N, a look of obvious relief on $s face.
+victfound: $n glances at you, a look of obvious relief on $s face.
+charauto: You mutter to yourself in obvious relief, wiping your brow.
+othersauto: $n mutters in obvious relief, wiping $s brow.
+#END
+
+#SOCIAL
+Name: pinch
+charnoarg: You pinch yourself to see if you're really awake!
+othersnoarg: $n prepares to pinch someone .
+charfound: You pinch $N playfully..awww. 
+othersfound: $n pinches $N! Must be some strange courting ritual...
+victfound: $n pinches your cheeks and smiles.
+charauto: You pinch yourself and find that it wasn't a good idea. Ow!
+othersauto: $n pinches $mself. Now that's lonely!
+#END
+
+#SOCIAL
+Name: point
+charnoarg: Point at whom?
+charfound: You point at $M accusingly.
+othersfound: $n points at $N accusingly.
+victfound: $n points at you accusingly.
+charauto: You point proudly at yourself.
+othersauto: $n points proudly at $mself.
+#END
+
+#SOCIAL
+Name: poke
+charnoarg: Poke whom?
+charfound: You poke $M in the ribs.
+othersfound: $n pokes $N in the ribs.
+victfound: $n pokes you in the ribs.
+charauto: You poke yourself in the ribs, feeling very silly.
+othersauto: $n pokes $mself in the ribs, looking very sheepish.
+#END
+
+#SOCIAL
+Name: ponder
+charnoarg: You ponder the question.
+othersnoarg: $n sits down and thinks deeply.
+charfound: You ponder $N's behaviour.
+othersfound: $n ponders $N's behaviour.
+victfound: $n ponders your behaviour.
+charauto: You ponder your own incomprehensible self.
+othersauto: $n ponders $e inner workings.
+#END
+
+#SOCIAL
+Name: possum
+charnoarg: You do your best imitation of a corpse.
+othersnoarg: $n hits the ground... DEAD.
+charfound: You do your best imitation of a corpse.
+othersfound: $n hits the ground... DEAD.
+victfound: $n hits the ground... DEAD.
+charauto: You do your best imitation of a corpse.
+othersauto: $n hits the ground... DEAD.
+#END
+
+#SOCIAL
+Name: pounce
+charnoarg: Pounce on whom?
+othersnoarg: $n is looking for someone to pounce on.
+charfound: You pounce on $N, pinning $M to the ground.
+othersfound: $n pounces on $N, pinning $M to the ground.
+victfound: $n pounces on you, pinning you to the ground.
+charauto: You try pouncing on yourself, but it doesn't quite work.
+othersauto: $n tries to pounce on $mself, but it doesn't quite work.
+#END
+
+#SOCIAL
+Name: pout
+charnoarg: Ah, don't take it so hard.
+othersnoarg: $n pouts.
+charfound: You pout at the way $N is treating you.
+othersfound: $n pouts at the way $e is being treated by $N.
+victfound: $n pouts at the way you are treating $m.
+#END
+
+#SOCIAL
+Name: pray
+charnoarg: You feel righteous, and maybe a little foolish.
+othersnoarg: $n begs and grovels to the powers that be.
+charfound: You crawl in the dust before $M.
+othersfound: $n falls down and grovels in the dirt before $N.
+victfound: $n kisses the dirt at your feet.
+charauto: Talk about narcissism ...
+othersauto: $n mumbles a prayer to $mself.
+#END
+
+#SOCIAL
+Name: propose
+charnoarg: You look around for someone to marry.
+othersnoarg: $n desperately seeks someone to marry.
+charfound: You fall onto your knees, and beg $N to marry you!
+othersfound: $n drops to $s knees and begs $N to take $s hand in marriage!
+victfound: $n drops to one knee and begs you to become $s significant other for all eternity!
+charauto: You love yourself so much that you would marry yourself if you could.
+othersauto: $n loves $mself far too much.
+#END
+
+#SOCIAL
+Name: puke
+charnoarg: You make loud wretching noises and puke on the ground.
+othersnoarg: $n makes loud wretching noises and pukes on the ground.
+charfound: You make loud wretching noises and puke on $N's shoes. Ewwwww!
+othersfound: $n makes loud wretching noises and pukes on $N's shoes. Ewwww!
+victfound: $n makes loud wretching noises and pukes on your shoes. Ewwwww!
+charauto: After emptying your stomach you look down and see that you are ankle deep in puke!
+othersauto: $n emptied $s stomach here and has left the room ankle deep in puke!
+#END
+
+#SOCIAL
+Name: pulse
+charnoarg: A vein in your head begins to pulse as you feel a killer headache begin to form.
+othersnoarg: A vein begins to bulge on $n's forehead. $e looks stressed!
+#END
+
+#SOCIAL
+Name: punch
+charnoarg: Punch whom?
+charfound: You punch $M playfully.
+othersfound: $n punches $N playfully.
+victfound: $n punches you playfully. OUCH!
+charauto: You punch yourself. You deserve it.
+othersauto: $n punches $mself. Why don't you join in?
+#END
+
+#SOCIAL
+Name: purr
+charnoarg: MMMMEEEEEEEEOOOOOOOOOWWWWWWWWWWWW.
+othersnoarg: $n purrs contentedly.
+charfound: You purr contentedly in $S lap.
+othersfound: $n purrs contentedly in $N's lap.
+victfound: $n purrs contentedly in your lap.
+charauto: You purr at yourself.
+othersauto: $n purrs at $mself. Must be a cat thing.
+#END
+
+#SOCIAL
+Name: quack
+charnoarg: You quack like a duck!
+othersnoarg: $n quacks like a duck!
+charfound: You quack at $N. Quack! Quack! Quack!
+othersfound: $n quacks at $N. Quack! Quack! Quack!
+victfound: $n quacks at you. Quack! Quack! Quack!
+#END
+
+#SOCIAL
+Name: raise
+charnoarg: You raise your hand in response.
+othersnoarg: $n raises $s hand in response.
+charfound: You raise your hand in response.
+othersfound: $n raises $s hand in response.
+victfound: $n raises $s hand in response to you.
+charauto: You raise your hand in response.
+othersauto: $n raises $s hand in response.
+#END
+
+#SOCIAL
+Name: rampage
+charnoarg: You rampage merrily.
+othersnoarg: $n rampages merrily.
+charfound: You rampage all over $N in a very merry manner.
+othersfound: $n rampages all over $N in a very merry manner.
+victfound: $n rampages all over you in a very merry manner.
+charauto: You rampage all over yourself.
+othersauto: $n rampages all over $mself.
+#END
+
+#SOCIAL
+Name: rant
+charnoarg: You begin to rant and rave like a lunatic..
+othersnoarg: $n begins to rant and rave like a lunatic..
+charfound: You rant and rave because of $N's actions.
+othersfound: $N rants and raves because of $N's actions.
+victfound: $n rants and raves because of something you did.
+charauto: You rant and rave at yourself. You ok?
+othersauto: $n rants and raves at $mself.
+#END
+
+#SOCIAL
+Name: ready
+charnoarg: You dig down into the dirt, ready to do battle.
+othersnoarg: $n digs down into the dirt, obviously ready to do battle.
+charfound: You nod, alerting $N that this foe must now die miserably.
+othersfound: $n nods, alerting $N that their unlucky foe must now die miserably.
+victfound: $n nods, signaling you that your foe must now die miserably.
+charauto: You give yourself a neat motivational speech.
+othersauto: $n withdraws into the clutches of some sort of motivational mantra.
+#END
+
+#SOCIAL
+Name: repop
+charnoarg: You begin to squeak like a mouse, hoping for a contagion.
+othersnoarg: $n begins to squeak like a mouse. Straaange.
+charfound: Sorry, $N won't be able to conjure squeakies any faster than you.
+othersfound: $n begs $N to conjure some squeakies. Shrink recomm#Endations?
+victfound: $n grovels at your boots, drooling rabidly in hopes of squeakies.
+charauto: Not even a mouse...
+othersauto: $n desperately scours the room in pursuit of those elusive squeakies.
+#END
+
+#SOCIAL
+Name: ridicule
+charnoarg: You feel very ridiculous.
+othersnoarg: $n feels very sheepish.
+charfound: You point and laugh at $N. What a geek.
+othersfound: $n falls down laughing, pointing at $N.
+victfound: $n is pointing and laughing at you.
+charauto: You feel rather foolish, and grin sheepishly.
+othersauto: Feeling foolish, $n laughs sheepishly at $self.
+#END
+
+#SOCIAL
+Name: roar
+charnoarg: You ROAR like a dragon.
+othersnoarg: $n ROARS with a ferocity that shakes the earth!
+charfound: You ROAR in $N's face.
+othersfound: $n ROARS at $N. (Obviously this is the part where you should feel intimidated)
+victfound: As $n roars in your face you curse the fact that toothpaste is hundreds of years away from being invented.
+charauto: You ROARRRRRR!
+othersauto: $n ROARS loudly to establish $s dominance.
+#END
+
+#SOCIAL
+Name: rofl
+charnoarg: You roll on the floor laughing hysterically.
+othersnoarg: $n rolls on the floor laughing hysterically.
+charfound: You laugh your head off at $S remark.
+othersfound: $n rolls on the floor laughing at $N's remark.
+victfound: $n can't stop laughing at your remark.
+charauto: You roll on the floor and laugh at yourself.
+othersauto: $n laughs at $mself. Join in the fun.
+#END
+
+#SOCIAL
+Name: roll
+charnoarg: You roll your eyes.
+othersnoarg: $n rolls $s eyes.
+charfound: You roll your eyes at $M.
+othersfound: $n rolls $s eyes at $N.
+victfound: $n rolls $s eyes at you.
+charauto: You roll your eyes at yourself.
+othersauto: $n rolls $s eyes at $mself.
+#END
+
+#SOCIAL
+Name: rub
+charnoarg: You rub your eyes. How long have you been at this?
+othersnoarg: $n rubs $s eyes. $n must have been playing all day.
+charfound: You rub your eyes. Has $N been playing as long as you have?
+othersfound: $n rubs $s eyes. $n must have been playing all day.
+victfound: $n rubs $s eyes. Have you been playing as long as $m?
+charauto: You rub your eyes. How long have you been at this?
+othersauto: $n rubs $s eyes. $n must have been playing all day.
+#END
+
+#SOCIAL
+Name: ruffle
+charnoarg: You've got to ruffle SOMEONE.
+charfound: You ruffle $N's hair playfully.
+othersfound: $n ruffles $N's hair playfully.
+victfound: $n ruffles your hair playfully.
+charauto: You ruffle your hair.
+othersauto: $n ruffles $s hair.
+#END
+
+#SOCIAL
+Name: runaway
+charnoarg: You scream 'RUN AWAY! RUN AWAY!'.
+othersnoarg: $n screams 'RUN AWAY! RUN AWAY!'.
+charfound: You scream '$N, QUICK! RUN AWAY!'.
+othersfound: $n screams '$N, QUICK! RUN AWAY!'.
+victfound: $n screams '$N, QUICK! RUN AWAY!'.
+charauto: You desperately look for somewhere to run to!
+othersauto: $n looks like $e's about to run away.
+#END
+
+#SOCIAL
+Name: sad
+charnoarg: You put on a glum expression.
+othersnoarg: $n looks particularly glum today. *sniff*
+charfound: You give $M your best glum expression.
+othersfound: $n looks at $N glumly. *sniff* Poor $n.
+victfound: $n looks at you glumly. *sniff* Poor $n.
+charauto: You bow your head and twist your toe in the dirt glumly.
+othersauto: $n bows $s head and twists $s toe in the dirt glumly.
+#END
+
+#SOCIAL
+Name: salute
+charnoarg: You salute smartly.
+othersnoarg: $n salutes smartly.
+charfound: You salute $M.
+othersfound: $n salutes $N.
+victfound: $n salutes you.
+charauto: Huh?
+#END
+
+#SOCIAL
+Name: sandwich
+charnoarg: You whip out a samwhich and munch quietly.
+othersnoarg: $n whips out a samwich and begins to munch quietly.
+charfound: You whip out a samwich and give it to $N. Maybe $E will like you now.
+othersfound: $n whips out a samwhich and gives it to $N. $n hopes $E will like $m now.
+victfound: $n whips out a samwhich and gives it to you. $n hopes you will like $m now.
+#END
+
+#SOCIAL
+Name: scowl
+charnoarg: You scowl angrily.
+othersnoarg: $n scowls angrily.
+charfound: You scowl angrily at $M.
+othersfound: $n scowls angrily at $N.
+victfound: $n scowls angrily at you.
+charauto: You scowl angrily at yourself.
+othersauto: $n scowls angrily at $mself.
+#END
+
+#SOCIAL
+Name: scream
+charnoarg: ARRRRRRRRRRGH!!!!!
+othersnoarg: $n screams loudly!
+charfound: ARRRRRRRRRRGH!!!!! Yes, it MUST have been $S fault!!!
+othersfound: $n screams loudly at $N. Better leave before $n blames you, too!!!
+victfound: $n screams at you! That's not nice! *sniff*
+charauto: You scream at yourself. Yes, that's ONE way of relieving tension!
+othersauto: $n screams loudly at $mself! Is there a full moon up?
+#END
+
+#SOCIAL
+Name: serenade
+charnoarg: You raise your clear voice towards the sky.
+othersnoarg: $n has begun to sing.
+charfound: You sing a ballad to $M.
+othersfound: $n sings a ballad to $N.
+victfound: $n sings a ballad to you! How sweet!
+charauto: You sing a little ditty to yourself.
+othersauto: $n sings a little ditty to $mself.
+#END
+
+#SOCIAL
+Name: shake
+charnoarg: You shake your head.
+othersnoarg: $n shakes $s head.
+charfound: You shake your head in response to $N's question.
+othersfound: $n shakes $s head in $N's direction.
+victfound: $n shakes $s head in response to your question.
+charauto: You are shaken by yourself.
+othersauto: $n shakes and quivers like a bowl full of jelly.
+#END
+
+#SOCIAL
+Name: shame
+charnoarg: You are ashamed of yourself.
+othersnoarg: $n is ashamed of $mself.
+charfound: You point at $N and say, "shame! shame!"
+othersfound: $n points at $N and says, "shame! shame!"
+victfound: $n points at you and says, "shame! shame!"
+#END
+
+#SOCIAL
+Name: shhh
+charnoarg: You frown and say, "Shhhhhh"
+othersnoarg: $n asks everyone to please be quiet.
+charfound: You tell $N to be quiet.
+othersfound: $n attempts to make $N close $S mouth in the interest of peace.
+victfound: $n has asked you to please be quiet.
+charauto: You remind yourself to shaddup.
+othersauto: $n oddly tells $mself to be quiet. Those darn voices again.
+#END
+
+#SOCIAL
+Name: shiver
+charnoarg: Brrrrrrrrr.
+othersnoarg: $n shivers uncomfortably.
+charfound: You shiver at the thought of fighting $M.
+othersfound: $n shivers at the thought of fighting $N.
+victfound: $n shivers at the suicidal thought of fighting you.
+charauto: You shiver to yourself?
+othersauto: $n scares $mself to shivers.
+#END
+
+#SOCIAL
+Name: shopping
+charnoarg: You announce it's time to go shopping. All the males flee the room!
+othersnoarg: $n announces it's time to go shopping. All the males flee the room!
+charfound: You tell $N it's time to go shopping. All the males flee the room!
+othersfound: $n tells $N it's time to go shopping. All the males flee the room!
+victfound: $n tells you it's time to go shopping. All the males flee the room!
+#END
+
+#SOCIAL
+Name: shrug
+charnoarg: You shrug.
+othersnoarg: $n shrugs helplessly.
+charfound: You shrug in response to $S question.
+othersfound: $n shrugs in response to $N's question.
+victfound: $n shrugs in response to your question.
+charauto: You shrug to yourself.
+othersauto: $n shrugs to $mself. What a strange person.
+#END
+
+#SOCIAL
+Name: shudder
+charnoarg: Your body shivers in uncontrollable revulsion.
+othersnoarg: $n convulses as $e shudders in disgust.
+charfound: Just looking at $N makes you want to wretch!
+othersfound: $n shudders in disgust at $N!
+victfound: $n shudders in disgust at your wretched behavior!
+charauto: You disgust yourself.
+othersauto: $n shudders with repulsion as $e thinks of $s behavior.
+#END
+
+#SOCIAL
+Name: sigh
+charnoarg: You sigh.
+othersnoarg: $n sighs loudly.
+charfound: You sigh as you think of $M.
+othersfound: $n sighs at the sight of $N.
+victfound: $n sighs as $e thinks of you. Touching, huh?
+charauto: You sigh at yourself. You MUST be lonely.
+othersauto: $n sighs at $mself. What a sorry sight.
+#END
+
+#SOCIAL
+Name: silly
+charnoarg: You announce that you are just a big old silly.
+othersnoarg: $n announces that $e is just a big old silly.
+charfound: You think $N is a big old silly.
+othersfound: $n thinks $N is a big old silly.
+victfound: $n thinks you are a big old silly.
+#END
+
+#SOCIAL
+Name: slap
+charnoarg: Slap whom?
+othersnoarg: $n raises $s hand spastically as if to slap an unseen annoyance.
+charfound: You rear back and slap $M with all your might.
+othersfound: $n rears back and slaps $N for $S stupidity.
+victfound: $n rears back and slaps you cruelly for your stupidity. OUCH!
+charauto: You slap yourself. You deserve it.
+othersauto: $n slaps $mself. Why don't you join in?
+#END
+
+#SOCIAL
+Name: slaughter
+charnoarg: Wielding a massive cleaver, you prowl for unsuspecting meat.
+othersnoarg: $n grips a massive cleaver tightly, grinning mischievously.
+charfound: Your cleaver swings carelessly as you chop $N into itsy bitsy pieces.
+othersfound: $n's cleaver cuts through the air, then through $N... repeatedly.
+victfound: That's gonna leave a mark.
+charauto: Chop, chop, chop. Ouch, ouch, ouch.
+othersauto: A-chopping $n will go...
+#END
+
+#SOCIAL
+Name: slime
+charnoarg: Slime who?
+charfound: You dump a bucket of slime all over $N. How cavalier!
+othersfound: $n dumps a bucket of slime all over $N. How cavalier!
+victfound: $n dumps a bucket of slime all over you. Eeeeeeeew! How gross!
+charauto: You want to slime yourself? Don't be silly!
+#END
+
+#SOCIAL
+Name: slobber
+charnoarg: You slobber all over the floor.
+othersnoarg: $n slobbers all over the floor.
+charfound: You slobber all over $M.
+othersfound: $n slobbers all over $N.
+victfound: $n slobbers all over you.
+charauto: You slobber all down your front.
+othersauto: $n slobbers all over $mself.
+#END
+
+#SOCIAL
+Name: slurp
+charnoarg: Slurp! Slurp!
+othersnoarg: $n slurps $s drink noisily.
+charfound: You slurp $N!
+othersfound: $n takes $N's face into $s hands and slurps $M! 
+victfound: $n grabs ahold of your face and slurps you!
+charauto: That's really not possible.
+othersauto: $n tries to do something not physically possible.
+#END
+
+#SOCIAL
+Name: smile
+charnoarg: You smile happily.
+othersnoarg: $n smiles happily.
+charfound: You smile at $M.
+othersfound: $n beams a smile at $N.
+victfound: $n smiles at you.
+charauto: You smile at yourself.
+othersauto: $n smiles at $mself.
+#END
+
+#SOCIAL
+Name: smirk
+charnoarg: You smirk.
+othersnoarg: $n smirks.
+charfound: You smirk at $S saying.
+othersfound: $n smirks at $N's saying.
+victfound: $n smirks at your saying.
+charauto: You smirk at yourself. Okay ...
+othersauto: $n smirks at $s own 'wisdom'.
+#END
+
+#SOCIAL
+Name: smite
+charnoarg: You are in the mood to smite someone.
+othersnoarg: $n is in a smiting mood. Runaway!!!
+charfound: You attempt to smite $N!
+othersfound: $n attempts to SMITE $N with a single mighty blow!
+victfound: $n smites you with a single blow!
+charauto: Smiting oneself is not permitted by the Gods.
+othersauto: $n tries to smite $mself. Fortunately, the Gods intervened just in time.
+#END
+
+#SOCIAL
+Name: smooch
+charnoarg: You are searching for someone to smooch.
+othersnoarg: $n is looking for someone to smooch.
+charfound: You give $M a nice, wet smooch.
+othersfound: $n and $N are smooching in the corner.
+victfound: $n smooches you passionately on the lips.
+charauto: You smooch yourself.
+othersauto: $n smooches $mself. Yuck.
+#END
+
+#SOCIAL
+Name: snap
+charnoarg: PRONTO ! You snap your fingers.
+othersnoarg: $n snaps $s fingers.
+charfound: You snap back at $M.
+othersfound: $n snaps back at $N.
+victfound: $n snaps back at you!
+charauto: You snap yourself to attention.
+othersauto: $n snaps $mself to attention.
+#END
+
+#SOCIAL
+Name: snarl
+charnoarg: You grizzle your teeth and look mean.
+othersnoarg: $n snarls angrily.
+charfound: You snarl at $M.
+othersfound: $n snarls at $N.
+victfound: $n snarls at you, for some reason.
+charauto: You snarl at yourself.
+othersauto: $n snarls at $mself.
+#END
+
+#SOCIAL
+Name: sneer
+charnoarg: You sneer in contempt.
+othersnoarg: $n sneers in contempt.
+charfound: You sneer at $M in contempt.
+othersfound: $n sneers at $N in contempt.
+victfound: $n sneers at you in contempt.
+charauto: You sneer at yourself in contempt.
+othersauto: $n sneers at $mself in contempt.
+#END
+
+#SOCIAL
+Name: sneeze
+charnoarg: Gesundheit!
+othersnoarg: $n sneezes.
+charfound: You sneeze all over $N.
+othersfound: $n sneezes all over $N. Ewwww!
+victfound: $n sneezes all over you. How rude!
+#END
+
+#SOCIAL
+Name: sngrin
+charnoarg: You grin mischieviously.
+othersnoarg: $n grins as if $s thoughts are mischevious.
+charfound: You give $N your award winning sneaky grin..
+othersfound: $n gives $N a very sneaky looking grin.
+victfound: $n gives you a grin that makes you reach for your coin purse to see if it's there.
+charauto: You grin mischieviously.
+othersauto: $n grins in a way that makes you reach for your coin purse to see if it's there.
+#END
+
+#SOCIAL
+Name: snicker
+charnoarg: You snicker softly.
+othersnoarg: $n snickers softly.
+charfound: You snicker with $M about your shared secret.
+othersfound: $n snickers with $N about their shared secret.
+victfound: $n snickers with you about your shared secret.
+charauto: You snicker at your own evil thoughts.
+othersauto: $n snickers at $s own evil thoughts.
+#END
+
+#SOCIAL
+Name: sniff
+charnoarg: You sniff sadly. *SNIFF*
+othersnoarg: $n sniffs sadly.
+charfound: You sniff sadly at the way $E is treating you.
+othersfound: $n sniffs sadly at the way $N is treating $m.
+victfound: $n sniffs sadly at the way you are treating $m.
+charauto: You sniff sadly at your lost opportunities.
+othersauto: $n sniffs sadly at $mself. Something MUST be bothering $m.
+#END
+
+#SOCIAL
+Name: snore
+charnoarg: Zzzzzzzzzzzzzzzzz.
+othersnoarg: $n snores loudly.
+#END
+
+#SOCIAL
+Name: snorkel
+charnoarg: You stick your head under water and blow bubbles out of your nose.
+othersnoarg: $n sticks $s head under water and blows bubbles out of $s nose.
+charfound: You invite $N to go snorkeling with you.
+othersfound: $n invites $N to go snorkling with $m.
+victfound: $n invites you to go snorkeling with $m.
+#END
+
+#SOCIAL
+Name: snort
+charnoarg: You snort in disgust.
+othersnoarg: $n snorts in disgust.
+charfound: You snort at $M in disgust.
+othersfound: $n snorts at $N in disgust.
+victfound: $n snorts at you in disgust.
+charauto: You snort at yourself in disgust.
+othersauto: $n snorts at $mself in disgust.
+#END
+
+#SOCIAL
+Name: snowball
+charnoarg: Whom do you want to throw a snowball at?
+charfound: You throw a snowball in $N's face.
+othersfound: $n throws a snowball at $N.
+victfound: $n throws a snowball at you.
+charauto: You throw a snowball at yourself.
+othersauto: $n throws a snowball at $mself.
+#END
+
+#SOCIAL
+Name: snuggle
+charnoarg: Who?
+charfound: you snuggle $M.
+othersfound: $n snuggles up to $N.
+victfound: $n snuggles up to you.
+charauto: You snuggle up, getting ready to sleep.
+othersauto: $n snuggles up, getting ready to sleep.
+#END
+
+#SOCIAL
+Name: snuke
+charnoarg: You attempt to smile, but have your fingers on the wrong keys.
+othersnoarg: $n tries to smile, but has $s fingers on the wrong keys.
+charfound: You try to smile at $N, but have your fingers on the wrong keys.
+othersfound: $n attempts to smile at $N, but has $s fingers on the wrong keys!
+victfound: $n attempts to smile at you, but has $s fingers on the wrong keys!
+charauto: You snuke yourself.
+othersauto: $n snukes $mself.
+#END
+
+#SOCIAL
+Name: social
+charnoarg: You pray to the God's for a new social
+othersnoarg: Desperately begs for a new social
+#END
+
+#SOCIAL
+Name: spam
+charnoarg: You gobble down a can of spam. Oink!
+othersnoarg: $n gobbles down a can of spam. Oink!
+charfound: You hurl a can of Spam at $N. Hey! No spamming allowed here!
+othersfound: $n hurls a can of Spam at $N. Silly $n ... $e thinks that is spamming.
+victfound: $n hurls a can of Spam at you. What a fool! I bet $e thinks $e is spamming you.
+charauto: You want to spam yourself? Forget it!
+#END
+
+#SOCIAL
+Name: spank
+charnoarg: Spank whom?
+charfound: You spank $M playfully.
+othersfound: $n spanks $N playfully.
+victfound: $n spanks you playfully. OUCH!
+charauto: You spank yourself. Kinky!
+othersauto: $n spanks $mself. Kinky!
+#END
+
+#SOCIAL
+Name: spin
+charnoarg: You twirl in a graceful pirouette.
+othersnoarg: $n twirls in a graceful pirouette.
+charfound: You spin $M on one finger.
+othersfound: $n spins $N on $s finger.
+victfound: $n spins you around on $s finger.
+charauto: You spin yourself around and around and around....
+othersauto: $n spins $mself around and around and around...
+#END
+
+#SOCIAL
+Name: spit
+charnoarg: You spit.
+othersnoarg: $n spits like a camel..get out of the way!!
+charfound: You spit on $N. This is how the plague spreads.
+othersfound: $n has spit on $N. Obviously how the plague spread.
+victfound: $n hocks a big glob of spit at you! Ewwww
+charauto: You spit on yourself.
+othersauto: $n spits into the wind. Unfortunately the wind is blowing towards $m.
+#END
+
+#SOCIAL
+Name: spum
+charnoarg: You are so spammed you are now spummed.
+othersnoarg: $n is so spammed $e is now spummed.
+charfound: You spam $N so much $E is now spummed.
+othersfound: $n spams $N so hard $E is now spummed.
+victfound: $n spams you so hard you are now spummed.
+#END
+
+#SOCIAL
+Name: squeak
+charnoarg: You squeak like a mouse.
+othersnoarg: $n squeaks like a mouse.
+charfound: You squeak at $M.
+othersfound: $n squeaks at $N. Is $e a man or a mouse?
+victfound: $n squeaks at you. Is $e a man or a mouse?
+charauto: You squeak at yourself like a mouse.
+othersauto: $n squeaks at $mself like a mouse.
+#END
+
+#SOCIAL
+Name: squeal
+charnoarg: You squeal with delight.
+othersnoarg: $n squeals with delight.
+charfound: You squeal at $M.
+othersfound: $n squeals at $N. Wonder why?
+victfound: $n squeals at you. You must be doing something good.
+charauto: You squeal at yourself.
+othersauto: $n squeals at $mself.
+#END
+
+#SOCIAL
+Name: squeeze
+charnoarg: Where, what, how, whom?
+charfound: You squeeze $M fondly.
+othersfound: $n squeezes $N fondly.
+victfound: $n squeezes you fondly.
+charauto: You squeeze yourself - try to relax a little!
+othersauto: $n squeezes $mself.
+#END
+
+#SOCIAL
+Name: squint
+charnoarg: Bright light! Bright light!
+othersnoarg: $n hides $s wee pupils from Ra's menacing globe.
+charfound: $N glows with energy!
+othersfound: $n hides $s wee pupils from $N's radiant aura.
+victfound: $n hides $s wee pupils from your radiant aura.
+charauto: You attempt to invert your eyeballs. That's GOTTA hurt.
+othersauto: $n tries to hide $s wee pupils from themself. They glow with strangeness!
+#END
+
+#SOCIAL
+Name: squirm
+charnoarg: You squirm guiltily.
+othersnoarg: $n squirms guiltily. Looks like $e did it.
+charfound: You squirm in front of $M.
+othersfound: $n squirms in front of $N.
+victfound: $n squirms in front of you. You make $m nervous.
+charauto: You squirm and squirm and squirm....
+othersauto: $n squirms and squirms and squirm.....
+#END
+
+#SOCIAL
+Name: squish
+charnoarg: You squish your toes into the sand.
+othersnoarg: $n squishes $s toes into the sand.
+charfound: You squish $M between your legs.
+othersfound: $n squishes $N between $s legs.
+victfound: $n squishes you between $s legs.
+charauto: You squish yourself.
+othersauto: $n squishes $mself. OUCH.
+#END
+
+#SOCIAL
+Name: stare
+charnoarg: You stare at the sky.
+othersnoarg: $n stares at the sky.
+charfound: You stare dreamily at $N, completely lost in $S eyes..
+othersfound: $n stares dreamily at $N.
+victfound: $n stares dreamily at you, completely lost in your eyes.
+charauto: You stare dreamily at yourself - enough narcissism for now.
+othersauto: $n stares dreamily at $mself - NARCISSIST!
+#END
+
+#SOCIAL
+Name: steam
+charnoarg: You are so angry that two sharp blasts of steam come whistling out of your ears.
+othersnoarg: $n is so angry that two sharp blasts of steam come whistling out of $s ears.
+charfound: You are so angry at $N that two sharp blasts of steam come whistling out of your ears.
+othersfound: $n is so angry at $N that two sharp blasts of steam come whistling out of $s ears!
+victfound: $n is so angry at you that two sharp blasts of steam come whistling out of $s ears!
+#END
+
+#SOCIAL
+Name: stomp
+charnoarg: You stomp your feet and pout like the baby you are.
+othersnoarg: $n stomps $s feet and throws a tantrum like a baby.
+charfound: $n kicks $s feet on the ground for what $N did to $s.
+othersfound: $n stomps $s feet and throws a tantrum at $N.
+victfound: $n stomps $s feet like a baby.
+charauto: You stomp your feet in a virtual temper tantrum.
+othersauto: $n throws a tantrum. What a baby!
+#END
+
+#SOCIAL
+Name: stone
+charnoarg: $n kicks a stone at nothing in particular.
+charfound: You begin to pelt $M with large stones.
+othersfound: $n attempts to stone $N to death! Eeeek!
+victfound: $n throws several stones at you! Owwww. Are you gonna take that?
+charauto: The gods don't allow suicide.
+othersauto: $n picks up a rock and throws it straight up in the air. Watch out!
+#END
+
+#SOCIAL
+Name: stretch
+charnoarg: You stretch and relax your sore muscles.
+othersnoarg: $n stretches luxuriously. Makes you want to, doesn't it?
+charfound: You stretch and relax your sore muscles.
+othersfound: $n stretches luxuriously. Makes you want to, doesn't it?
+victfound: $n stretches luxuriously. Makes you want to, doesn't it?
+charauto: You stretch and relax your sore muscles.
+othersauto: $n stretches luxuriously. Makes you want to, doesn't it?
+#END
+
+#SOCIAL
+Name: strut
+charnoarg: Strut your stuff.
+othersnoarg: $n struts, thinking $e's far too sexy for this mud.
+charfound: You strut to get $S attention.
+othersfound: $n struts, hoping to get $N's attention.
+victfound: $n struts, hoping to get your attention.
+charauto: You strut to yourself, lost in your own world.
+othersauto: $n struts to $mself, lost in $s own world.
+#END
+
+#SOCIAL
+Name: stud
+charnoarg: You strike a pose in your most studly style!
+othersnoarg: $n strikes a pose in $s most studly style!
+charfound: You think $N is a supreme stud!
+othersfound: $n looks at $N and thinks, "Wow! What a stud!"
+victfound: $n thinks you are a supreme stud!
+#END
+
+#SOCIAL
+Name: stuff
+charnoarg: You stuff your imaginary fri#End into an extradimensional portal.
+othersnoarg: $n stuffs $s imaginary fri#End into an extradimensional portal.
+charfound: You stuff $N into an extradimensional portal...where $E belongs.
+othersfound: $n stuffs $N into an extradimensional portal...where $E belongs.
+victfound: $n stuffs you into an extradimensional portal...where you belong.
+charauto: You attempt to dive head first into an extradimensional portal.
+othersauto: $n attempts to hide by diving head first into an extradimensional portal.
+#END
+
+#SOCIAL
+Name: suffer
+charnoarg: No xp again? You suffer at the hands of fate.
+othersnoarg: $n is suffering. Looks like $e can't seem to level.
+charfound: You tell $M how you suffer whenever you're away from $M.
+othersfound: $n tells $N that $e suffers whenever they're apart.
+victfound: $n tells you that $e suffers whenever you're apart.
+charauto: No xp again? You suffer at the hands of fate.
+othersauto: $n is suffering. Looks like $e can't seem to level.
+#END
+
+#SOCIAL
+Name: sulk
+charnoarg: You sulk.
+othersnoarg: $n sulks in the corner.
+#END
+
+#SOCIAL
+Name: sweetheart
+charnoarg: You are looking for someone to call sweetheart.
+othersnoarg: $n is looking for someone to call sweetheart.
+charfound: You croon to $N, "Let me call you sweetheart. I'm in love with you."
+victfound: $n croons to you, "Let me call you sweetheart. I'm in love with you."
+#END
+
+#SOCIAL
+Name: sweetie
+charnoarg: You look for your sweetie but cannot find them.
+othersnoarg: $n looks for $s sweetie but cannot find them.
+charfound: You spot $N and coo, "Hello Sweetie!"
+othersfound: $n spots $N and coos, "Hello Sweetie!"
+victfound: $n spots you and coos, "Hello Sweetie!"
+#END
+
+#SOCIAL
+Name: swoon
+charnoarg: You swoon in ecstacy.
+othersnoarg: $n swoons in ecstacy.
+charfound: You swoon in ecstacy at the thought of $M.
+othersfound: $n swoons in ecstacy at the thought of $N.
+victfound: $n swoons in ecstacy as $e thinks of you.
+charauto: You swoon in ecstacy.
+othersauto: $n swoons in ecstacy.
+#END
+
+#SOCIAL
+Name: tackle
+charnoarg: You can't tackle the AIR!
+charfound: You run over to $M and bring $M down!
+othersfound: $n runs over to $N and tackles $M to the ground!
+victfound: $n runs over to you and tackles you to the ground!
+charauto: You wrap your arms around yourself, and throw yourself to the ground.
+othersauto: $n wraps $s arms around $mself and brings $mself down!?
+#END
+
+#SOCIAL
+Name: tag
+charnoarg: You shout, "Enough killing! Let's play some tag!"
+othersnoarg: $n says, "Enough killing! Let's play some tag!"
+charfound: You slap $N on the back and scream, "You're it slowpoke!"
+othersfound: $n slaps $N on the back and screams, "You're it slowpoke!"
+victfound: $n slaps you on the back and screams, "You're it slowpoke!"
+charauto: You dodge your left hand, but are led directly into your right! Fool!
+othersauto: $n dodges $s left hand, but is led directly into $s right! Fool!
+#END
+
+#SOCIAL
+Name: tamale
+charnoarg: You are a hot tamale. Arriba!
+othersnoarg: $n is one hot tamale. Arriba!
+charfound: You look at $N and think, "Wow! What a hot tamale!"
+othersfound: $n looks at $N and thinks, "Wow! What a hot tamale!"
+victfound: $n looks at you and thinks, "Wow! What a hot tamale!"
+#END
+
+#SOCIAL
+Name: tap
+charnoarg: You tap your foot impatiently.
+othersnoarg: $n taps $s foot impatiently.
+charfound: You tap your foot impatiently. Will $E ever be ready?
+othersfound: $n taps $s foot impatiently as $e waits for $N.
+victfound: $n taps $s foot impatiently as $e waits for you.
+charauto: You tap yourself on the head. Ouch!
+othersauto: $n taps $mself on the head.
+#END
+
+#SOCIAL
+Name: taunt
+charnoarg: You peer around you, looking for someone to taunt.
+othersnoarg: $n wants to taunt someone.
+charfound: You taunt $M. Hope $E doesn't make you do it a second time!
+othersfound: $n is taunting $N.
+victfound: $n taunts you cruelly, and threatens to do it again! Watch out!
+charauto: You really can't taunt yourself.
+othersauto: $n attempts to taunt $mself. Perhaps $e needs help?
+#END
+
+#SOCIAL
+Name: teapot
+charnoarg: Where do your arms go again?..
+othersnoarg: $n tries to remember the words to that song...
+charfound: You place your arms in position and begin singing "I'm a little teapot, short and stout"
+othersfound: $n gets $s hands in position and beings doing the teapot dance.
+victfound: $n puts $s hands in position and begins singing "I'm a little teapot, short and stout", to you.
+charauto: You being doing the teapot dance for your own amusement..bored maybe?
+othersauto: $n begins singing and dancing to I'm a little teapot, better call the asylum.
+#END
+
+#SOCIAL
+Name: tease
+charnoarg: You look for someone to tease.
+othersnoarg: $n searches for a victim to tease.
+charfound: You tease $M playfully.
+othersfound: $n is such a tease!
+victfound: $n teases you playfully.
+charauto: You attempt to tease yourself. Pick on someone else!
+othersauto: $n tries to tease $mself. What a loon.
+#END
+
+#SOCIAL
+Name: tee
+charnoarg: You say "tee hee" showing off your cute dimples.
+othersnoarg: $n shows off $s cute dimples saying, "tee hee".
+charfound: You show off your cute dimples to $N saying, "tee hee".
+othersfound: $n shows of $s cute dimples to $N saying, "tee hee".
+victfound: $n shows off $s cute dimples to you saying, "tee hee".
+#END
+
+#SOCIAL
+Name: temple
+charnoarg: You want to do what?? And to whom??
+charfound: You begin to rub $S temples, attempting to reduce $S stress.
+othersfound: $n begins to rub $N's temples... $E begins to relax.
+victfound: $n begins to carefully massage your temples... Your stress melts away.
+charauto: You rub your temples, your patience wearing thin.
+othersauto: $n rubs $s temples, looking rather impatient.
+#END
+
+#SOCIAL
+Name: tendril
+charnoarg: You reach up and move a stray strand of hair from your eyes.
+othersnoarg: $n reaches up to remove a stray whisp of hair from $s eyes.
+charfound: You gently move a stray whisp of hair from $N's eyes.
+othersfound: $n reaches up to move a stray strand of hair from $N's eyes.
+victfound: $n gently pushes the hair from your eyes.
+charauto: You reach up and move a stray strand of hair from your eyes.
+othersauto: $n casually flips the hair from in front of $s eyes
+#END
+
+#SOCIAL
+Name: thank
+charnoarg: Thank you too.
+charfound: You thank $N heartily.
+othersfound: $n thanks $N heartily.
+victfound: $n thanks you heartily.
+charauto: You thank yourself since nobody else wants to !
+othersauto: $n thanks $mself since you won't.
+#END
+
+#SOCIAL
+Name: throttle
+charnoarg: Whom do you want to throttle?
+charfound: You throttle $M till $E is blue in the face.
+othersfound: $n throttles $N about the neck, until $E passes out. THUNK!
+victfound: $n throttles you about the neck until you pass out. THUNK!
+charauto: That might hurt! Better not do it!
+othersauto: $n is getting a crazy look in $s eye again.
+#END
+
+#SOCIAL
+Name: thwap
+charnoarg: You swing about in vain trying to thwap someone.
+othersnoarg: $n tries in vain to thwap someone who isn't here.
+charfound: You THWAP $N for being a moron.
+othersfound: $n THWAPS $N for being a moron.
+victfound: $n THWAPS you for being a moron. 
+charauto: You thwap yourself in the forehead. You loser.
+othersauto: $n thwaps $mself for being a moron.
+#END
+
+#SOCIAL
+Name: tickle
+charnoarg: Whom do you want to tickle?
+charfound: You tickle $N.
+othersfound: $n tickles $N.
+victfound: $n tickles you - hee hee hee.
+charauto: You tickle yourself, how funny!
+othersauto: $n tickles $mself.
+#END
+
+#SOCIAL
+Name: tingle
+charnoarg: You feel all warm and tingly!
+othersnoarg: $n smiles contentedly, feeling all warm and tingly!
+charfound: You feel all tingly as you set your eyes upon $N!
+othersfound: $N tingles with delight as $E is graced with a smile from $n.
+victfound: $n stares at you with a warm, tingly look on $s face! You slowly back away..
+charauto: You feel all warm and tingly!
+othersauto: $n smiles contentedly, feeling all warm and tingly!
+#END
+
+#SOCIAL
+Name: tipcap
+charnoarg: You tip your cap to everyone in the room.
+othersnoarg: $n tips $s cap to everyone in the room.
+charfound: You tip your cap to $N.
+othersfound: $n tips $s cap to $N. My how chivalrous!
+victfound: $n tips $s cap to you. My how chivalrous!
+charauto: You tip your cap to yourself, hoping someone may take the hint and acknowledge your presence.
+othersauto: $n tips $s cap to $mself, hoping in vain to have $s presence acknowledged.
+#END
+
+#SOCIAL
+Name: tissue
+charnoarg: You search for a tissue.
+othersnoarg: $n searches for a tissue.
+charfound: You give $M a tissue. Awwww.
+othersfound: $n gallantly gives $N a tissue.
+victfound: $n hands you a tissue in an attempt to ease your pain.
+charauto: You search for a tissue. Hope you find one quickly.
+othersauto: $n looks for a tissue. Poor baby :(.
+#END
+
+#SOCIAL
+Name: tkiss
+charnoarg: You will enjoy it more if you choose someone to kiss.
+charfound: You give $M a soft, t#Ender kiss.
+othersfound: $n gives $N a soft, t#Ender kiss.
+victfound: $n gives you a soft, t#Ender kiss.
+charauto: You'd better not, people may start to talk!
+#END
+
+#SOCIAL
+Name: tomato
+charnoarg: You heft a large, rotten tomato and say "Ketchup anyone?"
+othersnoarg: $n hefts a rotten tomato and wonders if you would like to come a bit closer.
+charfound: You whip a rotten tomato at $N!
+othersfound: $n whips a rotten tomato at $N!
+victfound: $n whips a rotten tomato at you! SPLAT!!!
+charauto: You toss a tomato straight up in the air. SPLAT!! Boy it looks like you got tomato sauce all over your face.
+othersauto: Look out!! $n is the wild tomato tosser everyone warned you about.
+#END
+
+#SOCIAL
+Name: tongue
+charnoarg: You stick your tongue out. How childish!
+othersnoarg: $n sticks $s tongue out. How juvenile of $m!
+charfound: You stick out your tongue at $N. How impressed $E is with you now!
+othersfound: $n sticks $s tongue out at $N, apparently thinking this will impress $M. Whadda jerk!
+victfound: $n sticks $s tongue out at you, apparently thinking it will impress you. Whadda fool!
+charauto: You stick your tongue out. How childish!
+othersauto: $n sticks $s tongue out. How juveneille of $m!
+#END
+
+#SOCIAL
+Name: torture
+charnoarg: You have to torture someone!
+charfound: You torture $M with rusty weapons, Mwaahhhhh!!
+othersfound: $n tortures $N with rusty weapons, $E must have been REAL bad!
+victfound: $n tortures you with rusty weapons! What did you DO!?!
+charauto: You torture yourself with rusty weapons. Was it good for you?
+othersauto: $n tortures $mself with rusty weapons. Looks like $e enjoys it!?
+#END
+
+#SOCIAL
+Name: touche
+charnoarg: With a cry of 'TOUCHE!' you smite your imaginary opponent.
+othersnoarg: $n waves $s sword around in the air, doing $s Zorro impression or something.
+charfound: You touch your sword to $S chest and say 'Touche!'
+othersfound: $n touches $s sword to $N's chest and says 'Touche!'
+victfound: $n touches $s sword to your chest and says 'Touche!'
+charauto: With an amazing flourish of steel, you drive your sword into your own chest.
+othersauto: $n drives $s sword into $s own chest and gurgles, 'Touche..' before falling dead.
+#END
+
+#SOCIAL
+Name: tralala
+charnoarg: You try to sing. Best you can manage is 'tra la la'.
+othersnoarg: $n goes 'tra la la'
+charfound: You croon to $N 'tra la la'.
+othersfound: $n croons to $N 'tra la la'.
+victfound: $n croons to you 'tra la la'.
+#END
+
+#SOCIAL
+Name: tsk
+charnoarg: You tsk.
+othersnoarg: $n tsks.
+charfound: You tsk at $N.
+othersfound: $n looks at $N and says 'tsk tsk tsk'.
+victfound: $n looks at you, shakes $s head and says 'tsk tsk tsk'.
+charauto: You want to tsk yourself? I don't think so.
+#END
+
+#SOCIAL
+Name: tuck
+charnoarg: You search in vain for someone to tuck you in.
+othersnoarg: $n is looking for someone to tuck $m in.
+charfound: You smile at $N and tuck $M into bed.
+othersfound: $n smiles at $N and tucks $M into bed.
+victfound: $n tucks you into bed and smiles at you.
+charauto: You tuck yourself into a ball and roll across the room.
+othersauto: $n tucks $mself into a ball and rolls across the room.
+#END
+
+#SOCIAL
+Name: tummy
+charnoarg: You rub your tummy and wish you'd bought a pie at the bakery.
+othersnoarg: $n rubs $s tummy and wishes $e'd bought a pie at the bakery.
+charfound: You rub your tummy and ask $M for some food.
+othersfound: $n rubs $s tummy and asks $N for some food.
+victfound: $n rubs $s tummy and asks you for some food. Please?
+charauto: You rub your tummy and wish you'd bought a pie at the bakery.
+othersauto: $n rubs $s tummy and wishes $e'd bought a pie at the bakery.
+#END
+
+#SOCIAL
+Name: turkey
+charnoarg: You stand up full and gobble like a turkey.
+othersnoarg: $n rises up and gobbles like a turkey.
+charfound: You look at $N and think what a turkey!
+othersfound: $n looks at $N and thinks, "What a turkey!"
+victfound: $n looks at you and wishes you were a big turkey. Is Thanksgiving coming?
+#END
+
+#SOCIAL
+Name: turtle
+charnoarg: You pull your head back into your shell.
+othersnoarg: $n pulls $s head back into $s shell.
+charfound: You pull your head back into your shell in an effort to hide from $N.
+othersfound: $n pulls $s head back into $s head in an effort to hide from $N.
+victfound: $n pulls $s head back into $s shell in an effort to hide from you.
+charauto: You want to turn into a turtle? Try building a cocoon!
+othersauto: $n wants to be a turtle. Perhaps $e should build a cocoon!
+#END
+
+#SOCIAL
+Name: twiddle
+charnoarg: You patiently twiddle your thumbs.
+othersnoarg: $n patiently twiddles $s thumbs.
+charfound: You twiddle $S ears.
+othersfound: $n twiddles $N's ears.
+victfound: $n twiddles your ears.
+charauto: You twiddle your ears like Dumbo.
+othersauto: $n twiddles $s own ears like Dumbo.
+#END
+
+#SOCIAL
+Name: twitch
+charnoarg: You twitch nervously.
+othersnoarg: $n twitches nervously.
+charfound: Your left eye begins to twitch uncontrollably.
+othersfound: $n begins to twitch uncontrollably.
+victfound: $n twitches repeatedly.
+charauto: You twitch.
+othersauto: $n is twitching uncontrollably.
+#END
+
+#SOCIAL
+Name: type
+charnoarg: You throw up yor handz in dizgust at yur losy typing skils.
+othersnoarg: $n couldn't type a period if there was only one key on the keyboard.
+charfound: You throw up yor handz in dizgust at yur losy typing skils.
+othersfound: $n couldn't type a period if there was only one key on the keyboard.
+victfound: $n couldn't type a period if there was only one key on the keyboard.
+charauto: You throw up yor handz in dizgust at yur losy typing skils.
+othersauto: $n couldn't type a period if there was only one key on the keyboard.
+#END
+
+#SOCIAL
+Name: ugh
+charnoarg: You scratch your head and say, "uggghh, I should know this."
+othersnoarg: $n scratches $s head and says, "Ugggggh, I should know this."
+charfound: You take one look at $N and run away screaming "Uggggggh!"
+othersfound: $n looks at $N and screams, "Ugggggggghhhhh! in pure terror! 
+victfound: $n covers $s eyes and runs off screaming, "UGGGGGH!", after looking at you.
+charauto: You ugh at yourself in contempt.
+othersauto: $n catches a glimpse of $self in a mirror and screams, "UGGGGGGGGH"!
+#END
+
+#SOCIAL
+Name: uplift
+charnoarg: You summon a mystical hand to provide aid.
+othersnoarg: $n tries to summon a mystical hand to do $s bidding.
+charfound: You summon a healing hand for $N, but it backfires! A demon hand appears and begins to thrash $M about the head repeatedly!
+othersfound: $N is slapped from afar by a strange mystical hand.
+victfound: A mystical hand appears in front of you and *THWAPS* you hard!
+charauto: You attempt to summon a mystical hand to do your bidding.
+othersauto: You watch in horror as the mystical hand is summoned by $n. The spell backfires and the hand begins to beat $m senseless!
+#END
+
+#SOCIAL
+Name: vbite
+charnoarg: You bare your fangs.
+othersnoarg: $n bares $s fangs and peers around nonchalantly.
+charfound: You sensually brush $N's neck with your lips before sucking $S blood!
+othersfound: $n softly brushes $N's neck with $s lips, and then BITES!
+victfound: $n bites your neck! Ouchhhh!
+charauto: Now, if you could bite your own neck..I'd worry.
+othersauto: $n is in danger of hurting $mself.
+#END
+
+#SOCIAL
+Name: village
+charnoarg: You know there's a village idiot in every village. Why can't you find it here?? You boggle.
+othersnoarg: $n searches for the town imbecile in vain. You notice the "Village Idiot" sign attached to $s armor.
+charfound: You dub $N the new Village idiot.
+othersfound: $n proudly introduces $N, the Village Idiot!
+victfound: $n has dubbed thee Village Idiot! Congratulations!
+charauto: Ack! You realize you're the village idiot they all talk about!
+othersauto: $n prances around proclaiming $mself village idiot!
+#END
+
+#SOCIAL
+Name: waddle
+charnoarg: You waddle around, imitating a penguin.
+othersnoarg: $n waddles around imitating a penguin. Maybe $e will squawk next!
+charfound: You waddle at $N, like a penguin!
+othersfound: $n waddles at $N like a penguin! Maybe $e will squawk next!
+victfound: $n waddles at you like a penguin! Maybe $e will squawk next!
+charauto: You waddle at yourself like a penguin! Feeling alright?
+othersauto: $n waddles at $mself like a penguin! Wonder if $e is feeling alright.
+#END
+
+#SOCIAL
+Name: waggle
+charnoarg: You waggle your finger at nothing! Feeling delusional?
+othersnoarg: $n waggles $s finger at nothing. Is $e feeling ok?
+charfound: You waggle your finger at $N. What did $E do?
+othersfound: $n waggles $s finger at $N, for some reason.
+victfound: $n waggles $s finger at you! What did you do?'
+charauto: You waggle your finger at yourself! Have you lost it?
+othersauto: $n waggles $s finger at $mself! $e is really gone now...
+#END
+
+#SOCIAL
+Name: wave
+charnoarg: You wave.
+othersnoarg: $n waves happily.
+charfound: You wave goodbye to $N.
+othersfound: $n waves goodbye to $N.
+victfound: $n waves goodbye to you. Have a good journey.
+charauto: Are you going on adventures as well?
+othersauto: $n waves goodbye to $mself.
+#END
+
+#SOCIAL
+Name: wedgie
+charnoarg: You give the air a wedgie??
+othersnoarg: $n gives the air a wedgie? What a weirdo!!
+charfound: You give $N a monster wedgie! OWWWW!!!
+othersfound: $n gives $N a wedgie, run or you might be next!
+victfound: Your leggings violently go into your butt as $n gives you a monster wedgie! OWWWW!!!
+charauto: You give yourself a wedgie??--Kinky!!
+othersauto: $n pulls $s leggings up violently! --Kinky!!
+#END
+
+#SOCIAL
+Name: weep
+charnoarg: You weep uncontrollably. You are unconsolable.
+othersnoarg: $n begins to weep uncontrollably breaking down into a huge sobbing fit.
+charfound: You begin to weep uncontrollably. What has $N done to make you so unconsolable?
+othersfound: $n begins to weep uncontrollably. What has $N done to make $m so unconsolable?
+victfound: $n begins to weep uncontrollably. What have you done to $m?
+#END
+
+#SOCIAL
+Name: what
+charnoarg: You ask, "what?"
+othersnoarg: $n asks, "what?"
+charfound: You ask $N, "what?"
+othersfound: $n asks $N, "what?"
+victfound: $n asks you, "what?"
+#END
+
+#SOCIAL
+Name: whee
+charnoarg: You jump up into the air and shout, "Wheeeee!"
+othersnoarg: $n jumps up into the air and hollers, "Wheeeee!"
+charfound: You are so happy to see $N you jump into the air and holler, "Wheeeeeee!"
+othersfound: $n is so happy to see $N that $e jumps into the air and hollers, "Wheeeeee!"
+victfound: $n is so happy to see you that $e jumps into the air and hollers, "Wheeeeee!"
+#END
+
+#SOCIAL
+Name: when
+charnoarg: You ask, "when?"
+othersnoarg: $n asks, "when?"
+charfound: You ask $N, "when?"
+othersfound: $n asks $N, "when?"
+victfound: $n asks you, "when?"
+#END
+
+#SOCIAL
+Name: whimper
+charnoarg: You whimper loud enough for the entire room to hear.
+othersnoarg: $n whimpers loudly.
+charfound: You whimper in fear of $N.
+othersfound: $n whimpers in fear of $N.
+victfound: $n whimpers in fear of you.
+charauto: You whimper quietly to yourself.
+othersauto: $n whimpers quietly in the corner.
+#END
+
+#SOCIAL
+Name: whine
+charnoarg: You whine like the great whiners of the century.
+othersnoarg: $n whines 'I want to be an immortal already. I need more hitpoints..I...'
+charfound: You whine to $M like the great whiners of the century.
+othersfound: $n whines to $N 'I want to be an immortal already. I need more hp...I..'
+victfound: $n whines to you 'I want to be an immortal already. I need more hp...I...'
+charauto: You whine like the great whiners of the century.
+othersauto: $n whines 'I want to be an immortal already. I need more hitpoints..I...'
+#END
+
+#SOCIAL
+Name: whistle
+charnoarg: You whistle appreciatively.
+othersnoarg: $n whistles appreciatively.
+charfound: You whistle at the sight of $M.
+othersfound: $n whistles at the sight of $N.
+victfound: $n whistles at the sight of you.
+charauto: You whistle a little tune to yourself.
+othersauto: $n whistles a little tune to $mself.
+#END
+
+#SOCIAL
+Name: why
+charnoarg: You look up at the heavens and cry out, "why? why? why?"
+othersnoarg: $n looks up at the heavens and cries out, "why? why? why?"
+charfound: You ask $N, "why? why? why?"
+othersfound: $n asks $N, "why? why? why?"
+victfound: $n asks you, "why? why? why?"
+charauto: You look up at the heavens and ask, "why me?"
+othersauto: $n looks up at the heavens and asks, "why me?"
+#END
+
+#SOCIAL
+Name: wicked
+charnoarg: Your face lights up as you exclaim, "Wicked!"
+othersnoarg: $n's face lights up as $e exclaims, "Wicked!"
+charfound: You look at $N and exclaim, "Wicked!"
+othersfound: $n looks at $N and exclaims, "Wicked!"
+victfound: $n looks at you and exclaims, "Wicked!"
+#END
+
+#SOCIAL
+Name: wiggle
+charnoarg: You wiggle your bottom.
+othersnoarg: $n wiggles $s bottom.
+charfound: You wiggle your bottom toward $M.
+othersfound: $n wiggles $s bottom toward $N.
+victfound: $n wiggles $s bottom towards you.
+charauto: You wiggle about like a fish.
+othersauto: $n wiggles about like a fish.
+#END
+
+#SOCIAL
+Name: wince
+charnoarg: You wince. Ouch!
+othersnoarg: $n winces. Ouch!
+charfound: You wince at $M.
+othersfound: $n winces at $N.
+victfound: $n winces at you.
+charauto: You wince at yourself. Ouch!
+othersauto: $n winces at $mself. Ouch!
+#END
+
+#SOCIAL
+Name: wink
+charnoarg: You wink suggestively.
+othersnoarg: $n winks suggestively.
+charfound: You wink suggestively at $N.
+othersfound: $n winks at $N.
+victfound: $n winks suggestively at you.
+charauto: You wink at yourself ?? - what are you up to ?
+othersauto: $n winks at $mself - something strange is going on...
+#END
+
+#SOCIAL
+Name: witch
+charnoarg: You announce to all that you are indeed a witch!
+othersnoarg: $n announces that $e is a witch. You wonder where that frog came from.
+charfound: You whisper to $N that you are a witch. $N is afraid you will turn $M into a frog.
+othersfound: $n informs $N that $e is a witch and is trying to remember the spell to turn $N into a frog.
+victfound: $n informs you $e is a witch and is trying to remember the spell to turn you into a frog.
+charauto: You think you are a witch? Hmmm ... you could be right.
+othersauto: $n thinks $e is a witch and $e probably is right.
+#END
+
+#SOCIAL
+Name: women
+charnoarg: You wonder why women go to the bathroom together.
+othersnoarg: $n ponders why women do the things they do.
+charfound: You shrug in response to $N and say "women, can't live with em, can't shoot em and get away with it"
+othersfound: $n tries to explain the mystery of women and the way they think to $N, with no apparant luck.
+victfound: $n says "Bah..women, i don't understand them", to you.
+charauto: You wish you could understand women, why do they do that??
+othersauto: $n tries to figure out women, get back to $m in a couple hundred years.
+#END
+
+#SOCIAL
+Name: woof
+charnoarg: You lift your head towards the moon and cry, "Wooooof"
+othersnoarg: $n looks around and barks, "woof!"
+charfound: You look at $N and "woof" loudly.
+othersfound: $n barks at $N. (The asylum may be short a few clients)
+victfound: $n looks at you and says, "woof, woof, woof!"
+charauto: You bark at yourself. (The mud administrators suggest you seek professional help)
+othersauto: The mud administrators suggest $N seek professional help as barking is not a normal action.
+#END
+
+#SOCIAL
+Name: woohoo
+charnoarg: You grin and shout 'WooHoo!!!'
+othersnoarg: $n grins and shouts 'WooHoo!!!'.
+charfound: You grin at $N and shout 'WooHoo!!!'.
+othersfound: $n grins at $N and shouts 'WooHoo!!!'.
+victfound: $n grins at you and shouts 'WooHoo!!!'.
+charauto: You shout 'WooHoo!!!'.
+othersauto: $n shouts 'WooHoo!!!'.
+#END
+
+#SOCIAL
+Name: worship
+charnoarg: You worship the powers that be.
+othersnoarg: $n worships the powers that be.
+charfound: You drop to your knees in homage of $M.
+othersfound: $n prostrates $mself before $N.
+victfound: $n believes you are all powerful.
+charauto: You worship yourself.
+othersauto: $n worships $mself - ah, the conceitedness of it all.
+#END
+
+#SOCIAL
+Name: wriggle
+charnoarg: You wriggle your toes for all to see. Oooh! You sexy thing!
+othersnoarg: $n wriggles $s toes for all to see. Oooh! What a sexy thing!
+charfound: You wriggle your sexy toes for $N. Ooooh! You sexy thing!
+othersfound: $n wriggles $s toes for $N. Oooh! What a sexy thing $e is!
+victfound: $n wriggles $s toes for you. Oooh. What a sexy thing $e is!
+#END
+
+#SOCIAL
+Name: xena
+charnoarg: You make like Xena and puff out your chest!
+othersnoarg: $n makes like Xena and puffs out $s chest.
+#END
+
+#SOCIAL
+Name: yabba
+charnoarg: You jump into the air and holler, "Yabba Dabba Doo!"
+othersnoarg: $n jumps up and hollers, "Yabba Dabba Doo!"
+charfound: You look at $N and holler, "Yabba Dabba Doo!"
+othersfound: $n looks at $N and hollers, "Yabba Dabba Doo!"
+victfound: $n looks at you and hollers, "Yabba Dabba Doo!"
+#END
+
+#SOCIAL
+Name: yawn
+charnoarg: You must be tired.
+othersnoarg: $n yawns.
+charfound: You yawn widely in the middle of $S sentence.
+othersfound: $n yawns widely while $N prattles on.
+victfound: $n yawns widely in the middle of your sentence.
+charauto: Even boring yourself now, eh?
+othersauto: $n yawns, apparently boring even $mself.
+#END
+
+#SOCIAL
+Name: yoga
+charnoarg: You begin to do some yogic meditations.
+othersnoarg: $n begins to do some yogic meditations. Ooooo.
+charfound: You begin to show $N some of your yogic flying.
+othersfound: $n begins showing $N some yogic flying techniques.
+victfound: $n begins showing you some yogic flying techniques.
+charauto: You jump up in the air and begin yogic flying!
+othersauto: $n jumps up in the air and begins to yoga fly around the room.
+#END
+
+#SOCIAL
+Name: yoyo
+charnoarg: You whip out a yoyo and begin to play with it.
+othersnoarg: $n whips out a yoyo and begins to play with it.
+charfound: You look at $N and think, "What a yoyo!"
+othersfound: $n looks at $N and thinks, "What a yoyo!"
+victfound: $n looks at you and thinks, "What a yoyo!"
+charauto: You wish you were a yoyo? Get a grip!
+othersauto: $n wishes $e was a yoyo. $n is a nutbar!
+#END
+
+#SOCIAL
+Name: yummy
+charnoarg: Your rub your tummy and say "Yummy!".
+othersnoarg: $n rubs $s tummy and exclaims, "Yummy!"
+charfound: You look at $N and exclaim, "Yummy!"
+othersfound: $n looks at $N and exclaims, "Yummy!"
+victfound: $n looks at you and exclaims, "Yummy!"
+charauto: You think you are yummy? How conceited!
+othersauto: $n thinks $e is yummy. How conceited!
+#END
+
+#SOCIAL
+Name: zombie
+charnoarg: You shuffle through the room, a dazed look on your face, gurgling randomly. Maybe it's time to log off...
+othersnoarg: $n shuffles through the room, a dazed look on $s face, gurgling randomly. Maybe it's time to logoff...
+charfound: You eye $N hungrily, uttering the word, 'Brraaaaaiiiinnnssss...'
+othersfound: $n eyes $N hungrily, and utters the word 'Braaaaiiiinnnnnns...' Hrm, maybe it's time to get outta here.
+victfound: $n eyes $N hungrily, and utters the word 'Braaaaiiiinnnnnsss...' Better leave before $e turns on you...
+charauto: You look into the mirror and see a hallow eyed, slack jawed, drooling, sleep deprived creature staring back at you.
+othersauto: $n wanders around the room, a slack jawed, drooling, sleep deprived creature, mumbling something about brains...
+#END

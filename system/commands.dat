@@ -1,0 +1,1079 @@
+; the server uses a hash search on the first character of the command,
+; so 'l' will point to the command 'look', but ONLY if 'look' is the
+; first 'l' in the list.
+; a command can have an alias too, simply alias: <name>, aliases
+; which are substrings of the command name (so 'l' with name 'look')
+; will be discarded.
+
+#command
+name: down
+function: do_down
+position: 9
+#end
+
+#command
+name: east
+function: do_east
+position: 9
+#end
+
+#command
+name: north
+function: do_north
+position: 9
+#end
+
+#command
+name: south
+function: do_south
+position: 9
+#end
+
+#command
+name: west
+function: do_west
+position: 9
+#end
+
+#command
+name: up
+function: do_up
+position: 9
+#end
+
+#command
+name: look
+function: do_look
+position: 5
+#end
+
+
+; now the other commands
+
+#command
+name: a
+position: 4
+function: do_auctalk
+#end
+
+#command
+name: affects
+alias: aff
+position: 4
+function: do_affects
+#end
+
+#command
+name: afk
+position: 4
+function: do_afk
+#end
+
+#command
+name: alias
+position: 4
+function: do_alias
+#end
+
+#command
+name: armor
+alias: arm
+position: 4
+function: do_armor
+#end
+
+#command
+name: assist
+function: do_assist
+position: 8
+#end
+
+#command
+name: auction
+function: do_auction
+position: 7
+#end
+
+#command
+name: babbel
+function: do_babbel
+position: 4
+#end
+
+#command
+name: backstab
+alias: bs
+position: 8
+function: do_backstab
+#end
+
+#command
+name: balance
+function: do_balance
+#end
+
+#command
+name: bash
+function: do_bash
+position: 8
+#end
+
+#command
+name: battle
+function: do_battle
+position: 7
+#end
+
+#command
+name: bid
+function: do_bid
+position: 7
+#end
+
+#command
+name: brag
+function: do_brag
+position: 4
+#end
+
+#command
+name: buy
+function: do_buy
+#end
+
+#command
+name: cast
+alias: c
+function: do_cast
+position: 5
+#end
+
+#command
+name: chat
+alias: .
+position: 4
+function: do_chat
+#end
+
+#command
+name: circle
+function: do_circle
+#end
+
+#command
+name: clan
+function: do_clan
+position: 4
+#end
+
+#command
+name: clantalk
+function: do_clantalk
+position: 4
+#end
+
+#command
+name: close
+function: do_close
+#end
+
+#command
+name: consider
+function: do_consider
+#end
+
+#command
+name: config
+function: do_config
+position: 4
+#end
+
+#command
+name: ct
+function: do_clantalk
+position: 4
+#end
+
+#command
+name: deposit
+function: do_deposit
+#end
+
+#command
+name: disengage
+function: do_disengage
+#end
+
+#command
+name: ditch
+function: do_ditch
+#end
+
+#command
+name: drink
+function: do_drink
+#end
+
+#command
+name: drop
+function: do_drop
+#end
+
+#command
+name: eat
+function: do_eat
+#end
+
+#command
+name: emote
+alias: :
+function: do_emote
+position: 4
+#end
+
+#command
+name: enter
+function: do_enter
+#end
+
+#command
+name: equipment
+function: do_equipment
+position: 4
+#end
+
+#command
+name: flee
+alias: fl
+function: do_flee
+position: 8
+#end
+
+#command
+name: flurry
+alias: flu
+function: do_flurry
+position: 8
+#end
+
+#command
+name: fly
+function: do_fly
+#end
+
+#command
+name: follow
+function: do_follow
+#end
+
+#command
+name: get
+function: do_get
+#end
+
+#command
+name: give
+function: do_give
+#end
+
+#command
+name: group
+function: do_group
+#end
+
+#command
+name: help
+function: do_help
+#end
+
+#command
+name: inventory
+function: do_inventory
+position: 4
+#end
+
+#command
+name: keylock
+function: do_keylock
+position: 4
+#end
+
+#command
+name: kill
+alias: ki
+function: do_kill
+position: 8
+#end
+
+#command
+name: kick
+function: do_kick
+position: 8
+#end
+
+#command
+name: last
+function: do_last
+#end
+
+#command
+name: learn
+function: do_learn
+position: 9
+#end
+
+#command
+name: list
+function: do_list
+position: 9
+#end
+
+#command
+name: mana
+function: do_mana
+position: 5
+#end
+
+#command
+name: meditate
+function: do_meditate
+position: 6
+#end
+
+#command
+name: open
+function: do_open
+#end
+
+#command
+name: password
+function: do_password
+#end
+
+#command
+name: practice
+function: do_practice
+#end
+
+#command
+name: pray
+function: do_pray
+#end
+
+#command
+name: put
+function: do_put
+#end
+
+#command
+name: quit
+function: do_quit
+position: 4
+#end
+
+#command
+name: raid
+alias: \
+function: do_raid
+position: 4
+level: 100
+#end
+
+#command
+name: remove
+function: do_remove
+#end
+
+#command
+name: reply
+function: do_reply
+#end
+
+#command
+name: report
+function: do_report
+position: 5
+#end
+
+#command
+name: rescue
+function: do_rescue
+#end
+
+#command
+name: rest
+function: do_rest
+position: 4
+#end
+
+#command
+name: sacrifice
+alias: sac
+function: do_sacrifice
+#end
+
+#command
+name: save
+function: do_save
+#end
+
+#command
+name: say
+function: do_say
+#end
+
+#command
+name: scan
+alias: sca
+function: do_scan
+#end
+
+#command
+name: scalp
+function: do_scalp
+#end
+
+#command
+name: score
+function: do_score
+position: 4
+#end
+
+#command
+name: search
+function: do_search
+#end
+
+#command
+name: sell
+function: do_sell
+#end
+
+#command
+name: setpager
+function: do_setpager
+#end
+
+#command
+name: sit
+function: do_sit
+position: 4
+#end
+
+#command
+name: skills
+function: do_skills
+position: 4
+#end
+
+#command
+name: sleep
+function: do_sleep
+#end
+
+#command
+name: sneak
+function: do_sneak
+#end
+
+#command
+name: socials
+function: do_socials
+#end
+
+#command
+name: spells
+function: do_spells
+position: 4
+#end
+
+#command
+name: stand
+alias: wake
+function: do_stand
+position: 4
+#end
+
+#command
+name: stats
+function: do_stats
+position: 4
+#end
+
+#command
+name: suggest
+function: do_suggest
+#end
+
+#command
+name: swap
+function: do_swap
+#end
+
+#command
+name: taunt
+function: do_taunt
+#end
+
+#command
+name: tell
+function: do_tell
+position: 4
+#end
+
+#command
+name: track
+function: do_track
+position: 9
+#end
+
+#command
+name: trophy
+function: do_trophy
+#end
+
+#command
+name: throw
+function: do_throw
+#end
+
+#command
+name: time
+function: do_time
+position: 4
+#end
+
+#command
+name: title
+function: do_title
+position: 4
+#end
+
+#command
+name: unlearn
+function: do_unlearn
+position: 4
+#end
+
+#command
+name: wake
+function: do_wake
+#end
+
+#command
+name: wear
+function: do_wear
+#end
+
+#command
+name: weather
+function: do_weather
+#end
+
+#command
+name: where
+function: do_where
+position: 4
+#end
+
+#command
+name: who
+function: do_who
+position: 4
+#end
+
+#command
+name: wield
+function: do_wear
+#end
+
+#command
+name: wimpy
+function: do_wimpy
+#end
+
+#command
+name: withdraw
+function: do_withdraw
+#end
+
+#command
+name: world
+function: do_world
+position: 4
+#end
+
+#command
+name: visible
+alias: vis
+function: do_visible
+#end
+
+#command
+name: yell
+function: do_yell
+#end
+
+; special commands (guilds/clans/remort)
+
+#command
+name: cadd
+function: do_clanadd
+#end
+
+#command
+name: cremove
+function: do_clanremove
+#end
+
+#command
+name: remort
+function: do_remort
+level: 100
+#end
+
+; You don't want to do this!! :P
+
+#command
+name: delete
+function: do_delete
+position: 9
+#end
+
+; building commands
+
+#command
+name: aassign
+function: do_aassign
+level: 996
+position: 0
+#end
+
+#command
+name: acreate
+function: do_acreate
+level: 999
+position: 0
+#end
+
+#command
+name: areas
+function: do_areas
+level: 993
+position: 0
+#end
+
+#command
+name: aset
+function: do_aset
+level: 993
+position: 0
+#end
+
+#command
+name: astat
+function: do_astat
+level: 993
+position: 0
+#end
+
+#command
+name: checkarea
+function: do_checkarea
+level: 993
+position: 0
+#end
+
+#command
+name: goto
+function: do_goto
+level: 990
+position: 0
+#end
+
+#command
+name: loadarea
+function: do_loadarea
+level: 993
+position: 0
+#end
+
+#command
+name: mfind
+function: do_mfind
+level: 990
+position: 0
+#end
+
+#command
+name: mload
+function: do_mload
+level: 993
+position: 0
+#end
+
+#command
+name: mstat
+function: do_mstat
+level: 990
+position: 0
+#end
+
+#command
+name: ocreate
+function: do_ocreate
+level: 993
+position: 0
+#end
+
+#command
+name: oedit
+function: do_oedit
+level: 993
+position: 0
+#end
+
+#command
+name: ofind
+function: do_ofind
+level: 990
+position: 0
+#end
+
+#command
+name: oinvoke
+function: do_oinvoke
+level: 993
+position: 0
+#end
+
+#command
+name: oload
+function: do_oload
+level: 993
+position: 0
+#end
+
+#command
+name: olist
+function: do_olist
+level: 993
+position: 0
+#end
+
+#command
+name: ostat
+function: do_ostat
+level: 990
+position: 0
+#end
+
+#command
+name: ranges
+function: do_ranges
+level: 996
+position: 0
+#end
+
+#command
+name: rclone
+function: do_rclone
+level: 993
+position: 0
+#end
+
+#command
+name: redit
+function: do_redit
+level: 993
+position: 0
+#end
+
+#command
+name: rlink
+function: do_rlink
+level: 993
+position: 0
+#end
+
+#command
+name: rmake
+function: do_rmake
+level: 993
+position: 0
+#end
+
+#command
+name: rstat
+function: do_rstat
+level: 990
+position: 0
+#end
+
+#command
+name: savearea
+function: do_savearea
+level: 993
+position: 0
+#end
+
+#command
+name: sset
+function: do_sset
+level: 993
+position: 0
+#end
+
+
+; misc. immortal commands
+
+#command
+name: advance
+function: do_advance
+level: 999
+position: 0
+#end
+
+#command
+name: allow
+function: do_allow
+level: 996
+position: 0
+#end
+
+#command
+name: ascore
+function: do_ascore
+level: 997
+position: 0
+#end
+
+#command
+name: bamfin
+function: do_bamfin
+level: 990
+position: 0
+#end
+
+#command
+name: bamfout
+function: do_bamfout
+level: 990
+position: 0
+#end
+
+#command
+name: ban
+function: do_ban
+level: 996
+position: 0
+#end
+
+#command
+name: bgset
+function: do_bgset
+level: 995
+position: 0
+#end
+
+#command
+name: connections
+function: do_connections
+level: 995
+position: 0
+#end
+
+#command
+name: destroy
+function: do_destroy
+level: 998
+position: 0
+#end
+
+#command
+name: disconnect
+function: do_disconnect
+level: 995
+position: 0
+#end
+
+#command
+name: echo
+function: do_echo
+level: 994
+position: 0
+#end
+
+#command
+name: force
+function: do_force
+level: 993
+position: 0
+#end
+
+#command
+name: freeze
+function: do_freeze
+level: 996
+position: 0
+#end
+
+#command
+name: grace
+function: do_grace
+level: 999
+position: 0
+#end
+
+#command
+name: hashstats
+function: do_hashstats
+level: 1000
+position: 0
+#end
+
+#command
+name: holywalk
+function: do_holywalk
+level: 990
+position: 0
+#end
+
+#command
+name: immtalk
+function: do_immtalk
+level: 990
+position: 0
+#end
+
+#command
+name: loadup
+function: do_loadup
+level: 998
+position: 0
+#end
+
+#command
+name: log
+function: do_log
+level: 995
+position: 0
+#end
+
+#command
+name: nourish
+function: do_nourish
+level: 995
+position: 0
+#end
+
+#command
+name: peace
+function: do_peace
+level: 991
+position: 0
+#end
+
+#command
+name: reset
+function: do_reset
+level: 995
+position: 0
+#end
+
+#command
+name: restore
+function: do_restore
+level: 995
+position: 0
+#end
+
+#command
+name: return
+function: do_return
+level: 998
+position: 0
+#end
+
+#command
+name: sconfig
+function: do_sconfig
+level: 1000
+position: 0
+#end
+
+#command
+name: shutdown
+function: do_shutdown
+level: 999
+#end
+
+#command
+name: silence
+function: do_silence
+level: 996
+position: 0
+#end
+
+#command
+name: sla
+function: do_sla
+level: 995
+position: 0
+#end
+
+#command
+name: slay
+function: do_slay
+level: 995
+position: 0
+#end
+
+#command
+name: snoop
+function: do_snoop
+level: 998
+position: 0
+#end
+
+#command
+name: switch
+function: do_switch
+level: 998
+position: 0
+#end
+
+#command
+name: thunder
+function: do_thunder
+level: 995
+position: 0
+#end
+
+#command
+name: transfer
+function: do_transfer
+level: 995
+position: 0
+#end
+
+#command
+name: uptime
+function: do_uptime
+level: 1000
+position: 0
+#end
+
+#command
+name: wizhelp
+function: do_wizhelp
+level: 990
+position: 0
+#end
+
+#command
+name: wizinvis
+function: do_wizinvis
+level: 990
+position: 0
+#end

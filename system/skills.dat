@@ -1,0 +1,555 @@
+; first all offensive spells
+
+#skill
+Type: Spell
+Name: Acid Arrow
+Rounds: 5
+Minlevel: 8
+Mana: 15
+Target: 1
+Function: spell_acid_arrow
+dammsg: $5Acid Arrow$6
+#end
+
+#skill
+type: spell
+name: Avalanche
+rounds: 15
+minlevel: 56
+mana: 60
+target: 2
+function: spell_generic
+startchar: You point your hands to the earth and call of an avalanche!
+startroom: $n points $s hands to the earth and summons an avalanche!
+dammsg: Avalanche
+dice: 8d20+10
+#end
+
+#skill
+Type: Spell
+Name: Burning Hands
+Rounds: 6
+Minlevel: 5
+Mana: 12
+Target: 1
+Function: spell_burning_hands
+dammsg: $B$4Burning Hands$A$6
+#end
+
+#skill
+type: spell
+name: Creeping Doom
+rounds: 14
+minlevel: 45
+mana: 30
+target: 1
+function: spell_generic
+dammsg: $8Creeping Doom$6
+dice: 5d22+10
+#end
+
+#skill
+type: spell
+name: Dust Devil
+rounds: 5
+mana: 12
+minlevel: 3
+target: 1
+dammsg: $B$6Dust Devil$A$6
+function: spell_generic
+dice: 3d10+5
+#end
+
+#skill
+Type: Spell
+Name: Lightning
+Rounds: 11
+Minlevel: 25
+Mana: 25
+Target: 1
+Function: spell_lightning
+dammsg: $B$6Lightning$A$6
+#end
+
+#skill
+Type: Spell
+Name: Magic Missile
+Rounds: 4
+Minlevel: 1
+Mana: 7
+Target: 1
+Function: spell_magic_missile
+dammsg: $4Magic Missile$6
+#end
+
+#skill
+type: spell
+name: Puncture
+rounds: 6
+minlevel: 10
+mana: 10
+target: 1
+dammsg: puncture
+function: spell_generic
+hitchar: You puncture $N with your needle!
+hitvict: You are punctured by $N's needle!
+hitroom: $n sends a needle flying towards $N.
+dice: 4d7+2
+#end
+
+#skill
+type: spell
+name: Rain of Energy
+rounds: 14
+minlevel: 40
+mana: 40
+target: 2
+function: spell_generic
+dice: 3d30+10
+dammsg: Rain of Energy
+#end
+
+#skill
+type: spell
+name: Ray of Sunlight
+rounds: 14
+minlevel: 85
+mana: 60
+target: 1
+function: spell_generic
+dice: 8d30+20
+dammsg: Ray of $B$6Sunlight$A$7
+#end
+
+#skill
+type: spell
+name: Sandstorm
+rounds: 7
+minlevel: 6
+mana: 14
+target: 1
+function: spell_generic
+dammsg: storm of $6sand
+dice: 6d8+10
+#end
+
+#skill
+Type: Spell
+Name: Vortex
+Rounds: 11
+Minlevel: 18
+Mana: 20
+Target: 1
+Function: spell_vortex
+dammsg: $9Vortex$6
+#end
+
+#skill
+type: spell
+name: Voice of Thunder
+rounds: 15
+minlevel: 60
+mana: 50
+target: 2
+startchar: You raise your voice into a booming thunder of pain!
+startroom: $n raises $s voice and sends a booming thunder through the room!
+dammsg: $B$4Voice $7of $6Thunder$A$6
+function: spell_generic
+dice: 3d40+30
+#end
+
+#skill
+Type: Spell
+Name: Winds of Chaos
+Rounds: 12
+Minlevel: 30
+Mana: 35
+Target: 1
+Function: spell_winds
+dammsg: Chaotic Winds
+#end
+
+#skill
+type: spell
+name: Dispel Evil
+rounds: 15
+minlevel: 200
+mana: 150
+target: 1
+startchar: You begin to chant holy words of protection and dispel $n!
+startvict: $n begins to chant holy words and dispels $N!
+dammsg: Dispel $B$7Good$A$7
+function: spell_generic
+dice: 4d150+100
+#end
+
+; then all defensive spells
+
+#skill
+type: spell
+name: Aura of Enlightment
+rounds: 13
+minlevel: 50
+mana: 50
+target: 3
+function: spell_generic
+affects: I 2 6 0
+hitchar: You feel smart.
+hitroom: $N looks very smart.
+wearoff: You feel less bright.
+#end
+
+#skill
+type: spell
+name: Aqua Breath
+rounds: 9
+minlevel: 28
+mana: 32
+target: 3
+function: spell_generic
+affects: - 0 12 512
+wearoff: You can no longer breath under water.
+hitvict: You now have the ability to breath under water.
+hitroom: $n's face glows a watery blue.
+#end
+
+#skill
+type: spell
+name: Barrier
+rounds: 8
+minlevel: 12
+mana: 16
+target: 4
+function: spell_generic
+affects: A -2 12 0
+hitvict: You are surrounded by a strange $3barrier$6.
+hitroom: A strange $3barrier$6 surrounds $N.
+wearoff: The barrier dissolves.
+#end
+
+#skill
+type: spell
+name: Blindness
+rounds: 9
+minlevel: 16
+mana: 18
+target: 1
+function: spell_generic
+affects: - 0 12 1
+hitchar: You have succesfully blinded $N!
+hitvict: You are blinded!
+hitroom: $N tears at $S eyes, blinded!
+wearoff: You can see again!
+#end
+
+#skill
+type: spell
+name: Cure Blindness
+rounds: 11
+minlevel: 22
+mana: 20
+target: 4
+function: spell_generic
+affects: U 0 0 1
+#end
+
+#skill
+type: spell
+name: Detect Invisible
+rounds: 10
+minlevel: 30
+mana: 28
+target: 3
+function: spell_generic
+wearoff: You can no longer spot invisible things.
+hitchar: Your vision extends beyond the normal.
+hitroom: $N's eyes glow an eerie color.
+affects: - 0 16 4
+#end
+
+#skill
+type: spell
+name: Enchantment
+rounds: 12
+minlevel: 40
+mana: 45
+target: 3
+function: spell_generic
+wearoff: You no longer feel enchanted.
+hitchar: You feel enchanted by a strange power.
+hitroom: $N looks as if $E is enchanted.
+affects: - 0 12 8192
+#end
+
+#skill
+type: spell
+name: Healing
+rounds: 10
+minlevel: 34
+mana: 40
+target: 4
+function: spell_generic
+hitvict: You look a lot better.
+hitroom: $N looks a lot better.
+affects: h 100 0 0
+#end
+
+#skill
+type: spell
+name: Heal Light
+rounds: 5
+minlevel: 5
+mana: 8
+target: 4
+function: spell_generic
+hitroom: $N looks a bit better.
+hitvict: You look a bit better.
+hitroom: $N looks a bit better.
+affects: h 12 0 0
+#end
+
+#skill
+type: spell
+name: Identify
+rounds: 14
+minlevel: 37
+mana: 50
+target: 7
+function: spell_identify
+#end
+
+#skill
+type: spell
+name: Invisibility
+rounds: 11
+minlevel: 35
+mana: 45
+target: 3
+function: spell_generic
+hitchar: You slowly fade away into invisibility.
+hitroom: $N waves $S hands and fades away.
+wearoff: Your invisibility slowly ebbs away.
+affects: - 0 12 2
+#end
+
+#skill
+type: spell
+name: Levitation
+rounds: 11
+minlevel: 20
+mana: 20
+target: 3
+function: spell_generic
+affects: f 1 10 128
+hitchar: You are lifted off the ground by the wind.
+hitroom: A gust of wind lifts $N off the ground.
+wearoff: You gently float down to the ground.
+#end
+
+#skill
+type: spell
+name: Mass Funk
+rounds: 15
+minlevel: 50
+mana: 50
+target: 5
+affects: U 1 10 0
+wearoff: You feel less funky.
+function: spell_generic
+hitvict: You feel funky!
+hitroom: $N looks funky!
+#end
+
+#skill
+type: spell
+name: Poison
+rounds: 10
+minlevel: 16
+mana: 23
+target: 1
+wearoff: You feel better.
+function: spell_poison
+#end
+
+#skill
+type: spell
+name: Protection
+rounds: 6
+minlevel: 5
+mana: 10
+target: 4
+function: spell_generic
+affects: A -1 12 0
+hitvict: You feel protected.
+hitroom: $N looks protected.
+wearoff: You no longer feel protected.
+#end
+
+#skill
+type: spell
+name: Refresh
+rounds: 9
+minlevel: 18
+mana: 30
+target: 4
+function: spell_refresh
+#end
+
+#skill
+Type: Spell
+name: Summon
+Rounds: 18
+Minlevel: 80
+Mana: 80
+Target: 6
+Function: spell_summon
+#end
+
+#skill
+type: spell
+name: Word of Recall
+rounds: 16
+minlevel: 16
+mana: 60
+target: 3
+function: spell_recall
+#end
+
+; then the skills
+
+#skill
+Type: Skill
+Name: Bash
+Minlevel: 6
+#end
+
+#skill
+Type: Skill
+Name: Kick
+Minlevel: 5
+dammsg: kick
+#end
+
+#skill
+type: Skill
+name: Enhanced Damage
+minlevel: 28
+#end
+
+#skill
+type: Skill
+name: Slashing Weapons
+minlevel: 2
+#end
+
+#skill
+type: Skill
+name: Piercing Weapons
+minlevel: 4
+#end
+
+#skill
+type: skill
+name: Whipping Weapons
+minlevel: 5
+#end
+
+#skill
+type: skill
+name: Concussion Weapons
+minlevel: 6
+#end
+
+#skill
+type: skill
+name: Sneaking
+minlevel: 9
+#end
+
+#skill
+type: skill
+name: Swim
+minlevel: 13
+#end
+
+#skill
+type: skill
+name: Searching
+minlevel: 10
+#end
+
+#skill
+type: skill
+name: Dual Wield
+minlevel: 18
+#end
+
+#skill
+type: skill
+name: Backstab
+minlevel: 16
+dammsg: backstab
+#end
+
+#skill
+type: skill
+name: Circle
+minlevel: 18
+#end
+
+#skill
+type: skill
+name: Rescue
+minlevel: 15
+#end
+
+#skill
+type: skill
+name: Dodge
+minlevel: 10
+#end
+
+#skill
+type: skill
+name: Track
+minlevel: 20
+#end
+
+#skill
+type: Skill
+name: Second Attack
+prereq: Slashing Weapons
+minlevel: 12
+#end
+
+#skill
+type: Skill
+name: Third Attack
+minlevel: 24
+#end
+
+#skill
+type: Skill
+name: Fourth Attack
+minlevel: 32
+#end
+
+#skill
+type: Skill
+name: Fifth Attack
+minlevel: 42
+#end
+
+#skill
+type: Skill
+name: Peek
+minlevel: 20
+#end
+
+#skill
+type: Skill
+name: Hide
+minlevel: 20
+#end
+
+
