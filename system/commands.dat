@@ -97,7 +97,7 @@ function: do_armor
 #command
 name: assist
 function: do_assist
-allowed_states: fighting
+allowed_states: idle
 #end
 
 #command
@@ -109,7 +109,7 @@ allowed_states: idle,resting,meditating
 #command
 name: backstab
 alias: bs
-allowed_states: fighting
+allowed_states: idle,fighting
 function: do_backstab
 #end
 
@@ -121,7 +121,7 @@ function: do_balance
 #command
 name: bash
 function: do_bash
-allowed_states: fighting
+allowed_states: idle,fighting
 #end
 
 #command
@@ -145,7 +145,7 @@ allowed_states: idle,resting,meditating
 #command
 name: brag
 function: do_brag
-allowed_states: idle,fighting
+allowed_states: idle,resting,fighting
 #end
 
 #command
@@ -248,7 +248,7 @@ function: do_eat
 name: emote
 alias: :
 function: do_emote
-allowed_states: idle,fighting
+allowed_states: idle,resting,fighting
 #end
 
 #command
@@ -330,7 +330,7 @@ name: kill
 ;alias: ki
 alias: k
 function: do_kill
-allowed_states: fighting
+allowed_states: idle,fighting
 #end
 
 #command
@@ -342,7 +342,7 @@ allowed_states: idle,resting,meditating,sleeping
 #command
 name: kick
 function: do_kick
-allowed_states: fighting
+allowed_states: idle,fighting
 #end
 
 #command
