@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.17 2004/03/19 15:40:07 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.18 2004/03/20 19:44:23 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -377,6 +377,24 @@ var
 	tm : TDateTime;
 	cons : GConsole;
 	
+	{$IFDEF LINUX}
+	sSet : TSigSet;
+	aOld, aTerm, aHup : PSigAction;  
+	{$ENDIF}
+	
+
+{$IFDEF LINUX}
+procedure handleSignal(signal : longint); cdecl;
+begin
+	case signal of
+		SIGTERM: 	begin
+				writeConsole('Received SIGTERM, halting');
+				serverInstance.shutdown(SHUTDOWNTYPE_HALT, 0);
+				end;
+	end;
+end;
+{$ENDIF}
+
 
 begin
 	if (FileExists('grendel.run')) then
@@ -406,6 +424,47 @@ begin
 	{$ENDIF}
 	
 	cons.Free();
+	
+	{$IFDEF LINUX}
+	{ block all signals except for SIGTERM/SIGHUP }
+	sigfillset(sSet);
+	sigdelset(sSet, SIGTERM);
+	sigdelset(sSet, SIGHUP);
+	sigprocmask(SIG_BLOCK, @sSet, nil);
+	
+	{ setup the signal handlers }
+	new(aOld);
+        new(aHup);
+        new(aTerm);
+        
+        aTerm^.__sigaction_handler := @handleSignal;
+        aTerm^.sa_flags := 0;
+        aTerm^.sa_restorer := nil;
+        
+        aHup^.__sigaction_handler:= @handleSignal;
+        aHup^.sa_flags := 0;
+        aHup^.sa_restorer := nil;
+        
+        SigAction(SIGTERM,aTerm,aOld);
+        SigAction(SIGHUP,aHup,aOld);
+        
+        case fork() of
+		0:	begin
+			Close(input);  { close standard in }
+                        AssignFile(output,'/dev/null');
+                        ReWrite(output);
+                        AssignFile(ErrOutPut,'/dev/null');
+                        ReWrite(ErrOutPut);
+                        end;
+		-1: 	begin
+			writeln('fork() failed, continuing on foreground');
+			end;
+	else
+		begin
+		Halt(0);
+		end;
+	end;
+	{$ENDIF}
 	
 	initDebug();
 
