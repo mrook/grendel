@@ -31,8 +31,10 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! online search through helpfiles (so like 'apropos sect' to find all
   helppages with the word sect in them)
 ! add copyright etc. notice for LibXmlParser to text\Credits.txt?
+! mobprog compiling to some sort of pseudo stack machine code
 
 
+* add named affects
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
   ROOM_NODROP etc.
 * implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
@@ -67,7 +69,6 @@ l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
 l mud police!
 l online suggest (pray) history
-l mobprog compiling to some sort of pseudo stack machine code
 l fully customizable mud - experience formulas, experience per level, 
 	damage formulas, number of stats, stat maximums, health/mana/movement maximums
 l bodypart damage/armor ?
