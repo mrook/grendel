@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.18 2004/03/06 20:18:40 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.19 2004/03/08 23:30:07 hemko Exp $
 }
 
 unit area;
@@ -3110,12 +3110,12 @@ end;
 
 procedure initAreas();
 begin
-  area_list := GDLinkedList.Create;
+  area_list := GDLinkedList.Create();
   room_list := GHashTable.Create(32768);
-  shop_list := GDLinkedList.Create;
-  teleport_list := GDLinkedList.Create;
+  shop_list := GDLinkedList.Create();
+  teleport_list := GDLinkedList.Create();
 
-  npc_list := GDLinkedList.Create;
+  npc_list := GDLinkedList.Create();
   
   objectList := GDLinkedList.Create();
   objectIndices := GHashTable.Create(32768);

@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.4 2004/03/06 20:18:40 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.5 2004/03/08 23:30:07 hemko Exp $
 }
 
 unit update;
@@ -573,7 +573,7 @@ begin
 
       GPlayer(ch).bg_room := ch.room;
 
-      ch.fromRoom;
+      ch.fromRoom();
       ch.toRoom(findRoom(vnum));
 
       GPlayer(ch).bg_status := BG_PARTICIPATE;
@@ -591,10 +591,10 @@ var
 	iterator : GIterator;
 begin
   { battleground is running, check to see if we have a winner }
-  if (bg_info.count=0) then
+  if (bg_info.count = 0) then
     begin
-    last:=nil;
-    s:=0;
+    last := nil;
+    s := 0;
 
 		iterator := char_list.iterator();
 		
@@ -612,36 +612,36 @@ begin
         end;
       end;
 
-    if s=0 then
+    if (s = 0) then
       begin
       to_channel(nil,'[$B$7Battleground stopped without a winner.$A$7]',CHANNEL_ALL,AT_REPORT);
-      bg_info.count:=-1;
+      bg_info.count := -1;
       end
     else
-    if s=1 then
+    if (s = 1) then
       begin
       to_channel(nil,'[$B$3'+last.name+'$B$7 has won the battleground!$A$7]',CHANNEL_ALL,AT_REPORT);
       act(AT_REPORT,'Congratulations! You have won the battleground!',false,last,nil,nil,TO_CHAR);
 
       inc(GPlayer(last).bg_points,3);
 
-      last.fromRoom;
+      last.fromRoom();
       last.toRoom(GPlayer(last).bg_room);
 
-      if (bg_info.prize<>nil) then
+      if (bg_info.prize <> nil) then
         begin
-        act(AT_REPORT,'You have won $p.',false,last,bg_info.prize,nil,TO_CHAR);
+        act(AT_REPORT,'You have won $p.', false, last, bg_info.prize, nil, TO_CHAR);
 
         GObject(bg_info.prize).toChar(last);
         end;
 
       interpret(last, 'look');
-      GPlayer(last).bg_status:=BG_NOJOIN;
+      GPlayer(last).bg_status := BG_NOJOIN;
       last.hp := last.max_hp;
 
-      bg_info.winner:=last;
-      bg_info.count:=-1;
-      bg_info.prize:=nil;
+      bg_info.winner := last;
+      bg_info.count := -1;
+      bg_info.prize := nil;
       end;
     end;
 end;

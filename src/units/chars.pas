@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.9 2004/03/06 20:18:40 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.10 2004/03/08 23:30:07 hemko Exp $
 }
 
 unit chars;
@@ -1329,7 +1329,7 @@ begin
       if (count = number) then
         begin
         findCharWorld := vict;
-        exit;
+        break;
         end;
       end;
     end;
@@ -1353,8 +1353,8 @@ end;
 
 procedure initChars();
 begin
-  char_list := GDLinkedList.Create;
-  extracted_chars := GDLinkedList.Create;
+  char_list := GDLinkedList.Create();
+  extracted_chars := GDLinkedList.Create();
 end;
 
 procedure cleanupChars();

@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
+  ## $Id: timers.pas,v 1.6 2004/03/08 23:30:07 hemko Exp $
 }
 
 unit timers;
@@ -501,7 +501,7 @@ end;
 
 procedure initTimers();
 begin
-  timer_list := GDLinkedList.Create;
+  timer_list := GDLinkedList.Create();
 
   registerTimer('main', update_main, 1, true);
   registerTimer('auction', update_auction, 1, true);

@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.8 2004/03/06 20:18:40 ***REMOVED*** Exp $
+	## $Id: mudsystem.pas,v 1.9 2004/03/08 23:30:07 hemko Exp $
 }
 
 unit mudsystem;
@@ -754,8 +754,7 @@ begin
 
           GObject(item).toChar(buyer);
 
-          act(AT_REPORT,'You have won the auction! '+cap(GObject(item).name)+' at '+
-              inttostr(bid)+' coins.',false,buyer,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You have won the auction! ' + cap(GObject(item).name) + ' at '+ inttostr(bid) + ' coins.', false, buyer, nil, nil, TO_CHAR);
 
           dec(GPlayer(buyer).bankgold, bid);
           inc(GPlayer(seller).bankgold, bid);
