@@ -222,6 +222,7 @@ var
 begin
   mud_booted := false;
 
+  timer_thread.Terminate;
   clean_thread.Terminate;
 
   write_console('Releasing allocated memory...');
@@ -352,7 +353,7 @@ var
    SI: TStartupInfo;
    PI: TProcessInformation;
    pipe : THandle;
-   node : GListNode;
+   node, node_next : GListNode;
    conn : GConnection;
    w, len : cardinal;
    prot : TWSAProtocol_Info;
@@ -365,6 +366,7 @@ begin
   while (node <> nil) do
     begin
     conn := node.element;
+    node_next := node.next;
 
     if (conn.state = CON_PLAYING) then
       begin
@@ -378,7 +380,7 @@ begin
       conn.thread.terminate;
       end;
 
-    node := node.next;
+    node := node_next;
     end;
 
   FillChar(SI, SizeOf(SI), 0);
@@ -411,6 +413,7 @@ begin
   while (node <> nil) do
     begin
     conn := node.element;
+    node_next := node.next;
 
     if (WSADuplicateSocket(conn.socket, PI.dwProcessId, @prot) = -1) then
       begin
@@ -440,10 +443,12 @@ begin
       end;
 
     conn.ch.save(conn.ch.name^);
-    closesocket(conn.socket);
+    conn.thread.terminate;
 
-    node := node.next;
+    node := node_next;
     end;
+
+  Sleep(500);
 
   CloseHandle(pipe);
 
