@@ -10,6 +10,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! Area casting on yourself bugs
 ! add 'D' (door) reset
 ! ability to change password
+! ban code update (with masks/wildcards)
 
 
 * rework input routine, make sure tintin/jmc work again
@@ -28,7 +29,6 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - race specifics
 - spell/skill trees
 - bugtrack/report system 
-- ban code update (with masks/wildcards)
 - online suggest (pray) history
 - unlearn
 - add extra descriptions to rooms, exits, objects
@@ -40,4 +40,4 @@ l clan competition for wps/pkillnum
 l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
 l 'drink' without params should drink from first fountain in room
-
+l mud police!
