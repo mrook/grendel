@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.12 2003/10/29 12:59:15 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.13 2003/10/29 13:33:15 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -35,14 +35,6 @@ type
   	procedure unregisterModule();
   end;
   
-  GInterMudFlag = class(GPlayerField)
-  public
-  	function default() : TObject; override;
-  	function fromString(s : string) : TObject; override;
-  	function toString(x : TObject) : string; override;
-  end;
-  
-
 
 var
  	i3: GInterMud;
@@ -276,12 +268,14 @@ begin
 	
 	registerCommand('do_i3', do_i3);
 	
-	registerField(GInterMudFlag.Create('i3flag'));
+	registerField(GPlayerFieldFlag.Create('i3flag'));
+	registerField(GPlayerFieldString.Create('i3replyname'));
 end;
 
 procedure GInterMudModule.unregisterModule();
 begin
 	unregisterField('i3flag');
+	unregisterField('i3replyname');
 	
   unregisterCommand('do_i3');
   
@@ -289,22 +283,6 @@ begin
 
 	{ Give thread a chance to terminate and free }
 	Sleep(250);
-end;
-
-
-function GInterMudFlag.default() : TObject;
-begin
-	Result := GBitVector.Create(0);
-end;
-
-function GInterMudFlag.fromString(s : string) : TObject;
-begin
-	Result := GBitVector.Create(StrToIntDef(s, 0));
-end;
-
-function GInterMudFlag.toString(x : TObject) : string;
-begin
-	Result := IntToStr((x as GBitVector).value);
 end;
 
 

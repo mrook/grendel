@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.10 2003/10/29 12:56:56 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.11 2003/10/29 13:33:15 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -58,20 +58,6 @@ type
 		property pagepoint : cardinal read _pagepoint write _pagepoint;
 
 		property ch: GPlayer read _ch write _ch;
-	end;
-	
-	GPlayerField = class
-	protected
-  	_name : string;
-  	
-  public		
-  	constructor Create(name : string);
-  	
-		function default() : TObject; virtual; abstract;
-		function fromString(s : string) : TObject; virtual; abstract;
-		function toString(x : TObject) : string; virtual; abstract;
-		
-		property name : string read _name;
 	end;
 	
 	GPlayer = class(GCharacter)   	
@@ -177,6 +163,41 @@ type
 
 		property keylock : boolean read _keylock write _keylock;
 		property afk : boolean read _afk write _afk;	
+	end;
+
+	GPlayerField = class
+	protected
+  	_name : string;
+  	
+  public		
+  	constructor Create(name : string);
+  	
+		function default() : TObject; virtual; abstract;
+		function fromString(s : string) : TObject; virtual; abstract;
+		function toString(x : TObject) : string; virtual; abstract;
+		
+		property name : string read _name;
+	end;
+	
+	GPlayerFieldFlag = class(GPlayerField)
+	public
+  	function default() : TObject; override;
+  	function fromString(s : string) : TObject; override;
+  	function toString(x : TObject) : string; override;	
+	end;
+
+	GPlayerFieldInteger = class(GPlayerField)
+	public
+  	function default() : TObject; override;
+  	function fromString(s : string) : TObject; override;
+  	function toString(x : TObject) : string; override;	
+	end;
+	
+	GPlayerFieldString = class(GPlayerField)
+	public
+  	function default() : TObject; override;
+  	function fromString(s : string) : TObject; override;
+  	function toString(x : TObject) : string; override;	
 	end;
 
 
@@ -2622,12 +2643,62 @@ begin
 end;
 
 
+// GPlayerField
 constructor GPlayerField.Create(name : string);
 begin
 	inherited Create();
 	
 	_name := prep(name);
 end;
+
+// GPlayerFieldFlag
+function GPlayerFieldFlag.default() : TObject;
+begin
+	Result := GBitVector.Create(0);
+end;
+
+function GPlayerFieldFlag.fromString(s : string) : TObject;
+begin
+	Result := GBitVector.Create(StrToIntDef(s, 0));
+end;
+
+function GPlayerFieldFlag.toString(x : TObject) : string;
+begin
+	Result := IntToStr((x as GBitVector).value);
+end;
+
+// GPlayerFieldInteger
+function GPlayerFieldInteger.default() : TObject;
+begin
+	Result := GInteger.Create(0);
+end;
+
+function GPlayerFieldInteger.fromString(s : string) : TObject;
+begin
+	Result := GInteger.Create(StrToIntDef(s, 0));
+end;
+
+function GPlayerFieldInteger.toString(x : TObject) : string;
+begin
+	Result := IntToStr((x as GInteger).value);
+end;
+
+// GPlayerFieldString
+function GPlayerFieldString.default() : TObject;
+begin
+	Result := GString.Create('');
+end;
+
+function GPlayerFieldString.fromString(s : string) : TObject;
+begin
+	Result := GString.Create(s);
+end;
+
+function GPlayerFieldString.toString(x : TObject) : string;
+begin
+	Result := (x as GString).value;
+end;
+
 
 procedure registerField(field : GPlayerField);
 begin
