@@ -1,3 +1,5 @@
+// $Id: cmd_build.inc,v 1.24 2001/04/26 21:06:26 xenon Exp $
+
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
                                         'nocast','tunnel','private',
@@ -161,6 +163,7 @@ begin
 end;
 
 {Jago 10/Jan/2001 - utility function}
+{ // this is now obsolete
 function affectBitName(vector : integer) : String;
 begin
   Result := '';
@@ -183,6 +186,7 @@ begin
   if Result = '' then
 	  Result := 'none';
 end;
+}
 
 {Jago 10/Jan/2001 - utility function}
 function affectLocName(location : integer) : string;
@@ -195,9 +199,14 @@ MSTAT : return data about a mobile - can also be used on players}
 { Xenon 20/Feb/2001: renamed do_mstat() to do_pstat() }
 procedure do_pstat(ch : GCharacter; param : string);
 var
-	buf, buf1, arg, gender, exp, vnum, room_vnum, wimpy : string;
+  buf, buf1, arg, gender, exp, vnum, room_vnum, wimpy : string;
   master, leader : string;
   victim : GCharacter;
+  node : GListNode;
+  g : GLearned;
+  sk : GSkill;
+  str : string;
+  aff : GAffect;
 begin
 
   one_argument( param, arg );
@@ -333,12 +342,12 @@ begin
   	master := '(none)';
 
   if victim.leader <> nil then
-  	master := victim.leader.name^
+  	leader := victim.leader.name^
   else
-  	master := '(none)';
+  	leader := '(none)';
 
-  buf := Format('Master: %s.  Leader: %s.  Affected by: %s.' + #13#10,
-                [master, leader, affectBitName(victim.aff_flags)]);
+  buf := Format('Master: %s.  Leader: %s.' + #13#10,
+                [master, leader]);
 
   buf1 := buf1 + buf;
 
@@ -347,12 +356,51 @@ begin
 
   buf1 := buf1 + buf;
 
-
   if victim.IS_NPC then
      if victim.npc_index <> nil then
      	if (victim.npc_index.programs.getSize > 0) then
        	buf1 := buf1 + 'Mobile has mobprogs.' + #13#10;
 
+  if (victim.affects.getSize() > 0) then
+  begin
+    buf := 'Affected by:'#13#10;
+    node := victim.affects.head;
+    while (node <> nil) do
+    begin
+      aff := node.element;
+
+      if (aff.skill <> nil) then
+      begin
+      buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.skill.name, aff.duration]);
+      end;
+      
+      node := node.next;
+    end;
+    buf1 := buf1 + buf + #13#10;
+  end;
+
+  if (victim.skills_learned.getSize() > 0) then
+    with victim do
+    begin
+      buf1 := buf1 + #13#10;
+      
+      node := skills_learned.head;
+      while (node <> nil) do
+      begin
+        g := node.element;
+        sk := g.skill;
+        
+        if (sk.skill_type = SKILL_SPELL) then
+          buf := '  Spell: '
+        else
+          buf := '  Skill: ';
+
+        buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name, g.perc]);
+        
+        node := node.next;
+      end;
+    end;
+  
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
 end;
 
@@ -566,9 +614,9 @@ begin
     position:=POS_STANDING;
     npc.npc_index := npcindex;
 
-    name := npcindex.name;
-    short := npcindex.short;
-    long := npcindex.long;
+    name := hash_string(npcindex.name);
+    short := hash_string(npcindex.short);
+    long := hash_string(npcindex.long);
 
     sex:=npcindex.sex;
     race:=npcindex.race;
@@ -626,7 +674,7 @@ begin
 
   victim.toRoom(ch.room);
   act(AT_WHITE, '$n has created $N!', false, ch, nil, victim, TO_ROOM);
-  ch.sendBuffer('Ok.');
+  ch.sendBuffer('Ok.'#13#10);
 end;
 
 {Jago 18/Jan/2001 - OFIND - find an object}
@@ -730,7 +778,7 @@ begin
     ch.sendBuffer('Usage:  PSET <victim> <type> <value>'#13#10#13#10);
     ch.sendBuffer('Types for both NPC and PC: hp, mana, moves, strength,'#13#10);
     ch.sendBuffer('wisdom, intelligence, dexterity, constitution, ac, apb,'#13#10);
-    ch.sendBuffer('hitroll, alignment, gold, sex.'#13#10#13#10);
+    ch.sendBuffer('hitroll, alignment, gold, sex, level.'#13#10#13#10);
     ch.sendBuffer('Types for PC only: bank, xptnl, maxskills, maxspells, pracs.'#13#10);
     exit;
     end;
@@ -967,7 +1015,7 @@ begin
     
     if (value <= 0) then
     begin
-      ch.sendBuffer('Value must be > 0.'#13#10);
+      ch.sendBuffer('Value must be >= 0.'#13#10);
       exit;
     end;
     
@@ -985,7 +1033,7 @@ begin
     
     if (value <= 0) then
     begin
-      ch.sendBuffer('Value must be > 0.'#13#10);
+      ch.sendBuffer('Value must be >= 0.'#13#10);
       exit;
     end;
     
@@ -1004,6 +1052,27 @@ begin
     vict.sex := value;
     buf := 'SEX';
     end
+  else
+  if (uppercase(arg2) = 'LEVEL') then
+  begin
+    if (vict.IS_NPC) then // if mob
+    begin
+      if (value < 0) or (value >= LEVEL_IMMORTAL) then
+      begin
+        ch.sendBuffer(Format('For NPCs value must be > 0 and < %d.'#13#10, [LEVEL_IMMORTAL]));
+        exit;
+      end;
+    end
+    else // if player
+      if (value < 0) or (value > LEVEL_MAX) then
+      begin
+        ch.sendBuffer(Format('For players value must be > 0 and <= %d.'#13#10, [LEVEL_MAX]));
+        exit;
+      end;
+    
+    vict.level := value;
+    buf := 'LEVEL';
+  end
   else
     begin
     ch.sendBuffer('Wrong <type>, use PSET to see available types.'#13#10);
