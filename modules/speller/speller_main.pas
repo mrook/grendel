@@ -25,10 +25,10 @@ type
   
 procedure do_spellcheck(ch : GCharacter; param : string);
 var
-   room : GRoom;
-   area : GArea;
-   node : GListNode;
-   h : integer;
+	room : GRoom;
+	area : GArea;
+	iterator : GIterator;
+	h : integer;
 begin
   if (GPlayer(ch).area_fname='') then
     begin
@@ -45,23 +45,20 @@ begin
 
   ch.sendBuffer('Spellchecking area '+area.fname+'...'#13#10#13#10);
 
-  for h := 0 to room_list.hashsize - 1 do
-    begin
-    node := room_list.bucketList[h].head;
+	iterator := room_list.iterator();
 
-    while (node <> nil) do
-      begin
-      room := GRoom(GHashValue(node.element).value);
+	while (iterator.hasNext()) do
+		begin
+		room := GRoom(iterator.next());
 
-      if (room.area = area) then
-        begin
-        if (not checkWords(room.description)) then
-          ch.sendBuffer('('+inttostr(room.vnum)+') possibly misspelled word(s), [' + trim(misspelled_words) + ']'#13#10);
-        end;
+		if (room.area = area) then
+			begin
+			if (not checkWords(room.description)) then
+				ch.sendBuffer('('+inttostr(room.vnum)+') possibly misspelled word(s), [' + trim(misspelled_words) + ']'#13#10);
+			end;
+		end;
 
-      node := node.next;
-      end;
-    end;
+	iterator.Free();
 end;
 
 procedure do_addcustom(ch : GCharacter; param : string);

@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.81 2003/10/18 11:09:32 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.82 2003/10/22 13:13:18 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -268,7 +268,7 @@ begin
 
   while (node <> nil) do
     begin
-    conn := node.element;
+    conn := GPlayerConnection(node.element);
     node_next := node.next;
 
     if (conn.state = CON_PLAYING) then
@@ -314,7 +314,7 @@ begin
 
   while (node <> nil) do
     begin
-    conn := node.element;
+    conn := GPlayerConnection(node.element);
     node_next := node.next;
 
     if (WSADuplicateSocket(conn.socket.getDescriptor, PI.dwProcessId, @prot) = -1) then
@@ -376,19 +376,19 @@ end;
 
 procedure sendtoall(s : string);
 var
-   node : GListNode;
-   conn : GConnection;
+	iterator : GIterator;
+	conn : GPlayerConnection;
 begin
-  node := connection_list.head;
+  iterator := connection_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    conn := node.element;
+    conn := GPlayerConnection(iterator.next());
 
     conn.send(s);
+		end;
 
-    node := node.next;
-    end;
+	iterator.Free();
 end;
 
 { our exit procedure, catches the server when unstable }
@@ -430,7 +430,7 @@ begin
   { copyover }
   if (boot_type = BOOTTYPE_COPYOVER) then
     begin
-    if (connection_list.getSize > 0) then
+    if (connection_list.size() > 0) then
       copyover_mud
     else
       reboot_mud;
