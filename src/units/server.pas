@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.6 2004/03/19 15:38:18 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.7 2004/03/19 20:55:53 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -156,7 +156,7 @@ begin
 	writeConsole('Initializing memory pool...');
 	
 	try
-		init_progs();
+		initProgs();
 		initClans();
 		initCommands();
 		initConns();
