@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.15 2004/04/12 20:49:02 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.16 2004/04/14 19:35:12 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -241,10 +241,13 @@ begin
 	inherited Create();
 
 	{ open a standard log file, filename is given by current system time }
-	AssignFile(logFile, translateFileName('logs\' + moduleName + '-' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
+	AssignFile(logFile, translateFileName('logs\' + moduleName + '.log'));
 
 	{$I-}
-	rewrite(logFile);
+	Append(logFile);
+
+	if (IOResult <> 0) then
+		Rewrite(logFile);
 	{$I+}
 
 	if (IOResult <> 0) then
