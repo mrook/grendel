@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.4 2001/10/19 19:35:57 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.5 2001/10/19 19:44:56 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -1314,7 +1314,7 @@ begin
   { make sure builders don't overwrite other areas }
   if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
     begin
-    ch.sendBuffer('This vnum is not in your range.'#13#10);
+    ch.sendBuffer('You can''t edit rooms outside of your assigned area!'#13#10);
     exit;
     end;
 
@@ -1414,6 +1414,7 @@ begin
     ch.sendBuffer('Creates a double linked exit to the designated vnum.'#13#10);
     exit;
     end;
+
   if (ch.getTrust < LEVEL_GOD) and (GPlayer(ch).area_fname = '') then
     begin
     ch.sendBuffer('You have not yet been assigned an area.'#13#10);
@@ -1423,6 +1424,12 @@ begin
   if (ch.getTrust < LEVEL_GOD) and (GPlayer(ch).area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
+    begin
+    ch.sendBuffer('You can''t create exits in rooms outside of your assigned area!'#13#10);
     exit;
     end;
 
@@ -1531,6 +1538,12 @@ begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
     exit;
     end;
+    
+  if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
+    begin
+    ch.sendBuffer('You can''t create rooms outside of your assigned area!'#13#10);
+    exit;
+    end;
 
   dir := findHeading(param);
 
@@ -1596,6 +1609,12 @@ begin
     ch.sendBuffer('Deletes room with given vnum.'#13#10);
     exit;
   end;
+
+  if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
+    begin
+    ch.sendBuffer('You can''t delete rooms outside of your assigned area!'#13#10);
+    exit;
+    end;
 
   try
     room := findRoom(StrToInt(param));
@@ -1665,6 +1684,12 @@ begin
   if (ch.getTrust() < LEVEL_GOD) and (GPlayer(ch).area = nil) then
     begin
     ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
+    begin
+    ch.sendBuffer('You can''t create rooms outside of your assigned area!'#13#10);
     exit;
     end;
 
