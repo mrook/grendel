@@ -191,6 +191,7 @@ begin
     end;
 end;
 
+{ Revised - Nemesis }
 procedure do_delete(ch: GCharacter; param : string);
 var f:file;
     h:integer;
@@ -201,9 +202,9 @@ begin
     exit;
     end;
 
-  if (uppercase(param) <> 'CHARACTER FOREVER YES NOW') then
+  if (not MD5Match(ch.player^.md5_password, MD5String(param))) then
     begin
-    ch.sendBuffer('Type DELETE CHARACTER FOREVER YES NOW to delete. WARNING: This is irreversible!'#13#10);
+    ch.sendBuffer('Type DELETE <password> to delete. WARNING: This is irreversible!'#13#10);
     exit;
     end;
 
