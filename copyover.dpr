@@ -64,12 +64,22 @@ begin
 
   repeat
     suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
+     
+    if (not suc) or (w < sizeof(prot)) then
+      break;
 
     if (suc) then
   		sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
 
     suc := ReadFile(pipe, len, 4, w, nil);
+
+    if (not suc) or (w < 4) then
+      break;
+
     suc := ReadFile(pipe, g, len, w, nil);
+
+    if (not suc) or (w < len) then
+      break;
 
 		if (suc) and (sock <> -1) then
       begin
