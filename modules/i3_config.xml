@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- InterMud 3 XML Configuration -->
+<!-- $Id: i3_config.xml,v 1.1 2003/10/03 21:00:44 ***REMOVED*** Exp $ -->
+<mud>
+	<!-- Set autoconnect to 1 to automatically connect at bootup. -->
+	<info autoconnect="0" minlevel="1" immlevel="990" adminlevel="995" implevel="1000">
+		<name>Grendel Test</name>
+		<telnet>4444</telnet>
+		<web>www.grendelproject.nl</web>
+		<adminemail>michiel@grendelproject.nl</adminemail>
+		<openstatus>testing</openstatus>
+		<mudtype>Grendel</mudtype>
+		<basemudlib>Grendel</basemudlib>
+		<mudlib>Grendel 1.0.0a1</mudlib>
+		<driver>Grendel I3 Driver 0.2</driver>
+	</info>
+	
+	<!-- The router information. -->
+	<router host="i3.arthmoor.com" port="9900">*arthmoor</router>
+	<router host="us-1.i3.intermud.org" port="9000" preferred="1">*gjs</router>
+	<router host="yoda.solar.local" port="9000" >*solar</router>
+	
+	<!-- The services provided by your mud. -->
+	<!-- Do not turn things on unless you KNOW your mud properly supports them! -->
+	<!-- Refer to http://www.intermud.org for public packet specifications. -->
+	<!-- Uncomment lines to turn services on. -->
+	<services>
+		<!-- <tell/> -->
+		<!-- <beep/> -->
+		<!-- <emoteto/> -->
+		<!-- <who/> -->
+		<!-- <finger/> -->
+		<!-- <locate/> -->
+		<channel/>
+		<!-- <news/> -->
+		<!-- <mail/> -->
+		<!-- <file/> -->
+		<!-- <auth/> -->
+		<!-- <ucache/> -->
+	</services>
+	
+	<!-- Port numbers for OOB services. Leave as 0 if your mud does not support these. -->
+	<ports>
+		<smtp port="0"/>
+		<ftp port="0"/>
+		<nntp port="0"/>
+		<http port="0"/>
+		<pop3 port="0"/>
+		<rcp port="0"/>
+		<amrcp port="0"/>
+	</ports>
+</mud>
