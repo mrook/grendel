@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.11 2004/03/13 16:16:17 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.12 2004/03/14 13:16:16 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -279,12 +279,27 @@ type
       function next() : TObject; override;
     end;
     
-    {
+    		{
+    			Singleton info class
+    		}
+    		GSingletonInfo = class
+    		private
+    			_instanceType : TClass;
+    			_instance : TObject;
+    			_refcount : integer;
+    			
+    		published
+    			property instanceType : TClass read _instanceType write _instanceType;
+    			property instance : TObject read _instance write _instance;
+    			property refcount : integer read _refcount write _refcount;	
+    		end;
+    		
+		{
 			Singleton manager class
 		}
 		GSingletonManager = class
 		private
-			classList, instanceList : TList;
+			infoList : TList;
 			
 		public
 			constructor Create();
@@ -293,7 +308,9 @@ type
 		published
 			procedure addInstance(instance : TObject);
 			function findInstance(classType : TClass) : TObject;
+			function removeInstance(classType : TClass) : boolean;
 		end;
+				
 
 
 {
@@ -1244,8 +1261,7 @@ constructor GSingletonManager.Create();
 begin
 	inherited Create();
 	
-	classList := TList.Create();
-	instanceList := TList.Create();
+	infoList := TList.Create();
 end;
 
 { 
@@ -1254,8 +1270,7 @@ end;
 }
 destructor GSingletonManager.Destroy();
 begin
-	FreeAndNil(classList);
-	FreeAndNil(instanceList);
+	FreeAndNil(infoList);
 	
 	inherited Destroy();
 end;
@@ -1265,9 +1280,16 @@ end;
 		Adds instance to manager
 }
 procedure GSingletonManager.addInstance(instance : TObject);
+var
+	info : GSingletonInfo;
 begin
-	classList.add(instance.ClassType);
-	instanceList.add(instance);
+	info := GSingletonInfo.Create();
+	
+	info.instance := instance;
+	info.instanceType := instance.ClassType;
+	info.refcount := 1;
+
+	infoList.add(info);
 end;
 
 {
@@ -1277,13 +1299,48 @@ end;
 function GSingletonManager.findInstance(classType : TClass) : TObject;
 var
 	index : integer;
+	info : GSingletonInfo;
 begin
 	Result := nil;
 
-	index := classList.IndexOf(classType);
-	
-	if (index <> - 1) then
-		Result := instanceList[index];
+	for index := 0 to infoList.Count - 1 do
+		begin
+		info := GSingletonInfo(infoList[index]);
+		
+		if (info.instanceType = classType) then
+			begin
+			Result := info.instance;
+			info.refcount := info.refcount + 1;
+			exit;
+			end;
+		end;
+end;
+
+{
+	Summary:
+		Lowers refcount of classtype, removes if 0
+}
+function GSingletonManager.removeInstance(classType : TClass) : boolean;
+var
+	index : integer;
+	info : GSingletonInfo;
+begin
+	Result := false;
+
+	for index := 0 to infoList.Count - 1 do
+		begin
+		info := GSingletonInfo(infoList[index]);
+		
+		if (info.instanceType = classType) and (info.refcount > 0) then
+			begin
+			info.refcount := info.refcount - 1;
+			
+			if (info.refcount = 0) then
+				Result := true;
+
+			exit;
+			end;
+		end;
 end;
 
 {
@@ -1299,7 +1356,7 @@ begin
 		Result := inherited NewInstance;
 		GSingleton(Result).actualCreate();
 		singletonManager.addInstance(Result);
-		end;		
+		end;
 end;
 
 {
@@ -1308,15 +1365,18 @@ end;
 }
 procedure GSingleton.FreeInstance;
 begin
-	GSingleton(Self).actualDestroy();
+	if (singletonManager.removeInstance(Self.ClassType)) then
+		begin
+		GSingleton(Self).actualDestroy();
 
-	inherited FreeInstance;
+		inherited FreeInstance;
+		end;	
 end;
 
 
 initialization
-  str_hash := GHashTable.Create(STR_HASH_SIZE);
-  singletonManager := GSingletonManager.Create();
+	str_hash := GHashTable.Create(STR_HASH_SIZE);
+	singletonManager := GSingletonManager.Create();
 
 finalization
 	FreeAndNil(singletonManager);
