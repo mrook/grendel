@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.18 2004/03/20 19:44:23 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.19 2004/03/21 10:52:24 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -377,11 +377,6 @@ var
 	tm : TDateTime;
 	cons : GConsole;
 	
-	{$IFDEF LINUX}
-	sSet : TSigSet;
-	aOld, aTerm, aHup : PSigAction;  
-	{$ENDIF}
-	
 
 {$IFDEF LINUX}
 procedure handleSignal(signal : longint); cdecl;
@@ -393,39 +388,12 @@ begin
 				end;
 	end;
 end;
-{$ENDIF}
 
-
+procedure daemonize();
+var
+	sSet : TSigSet;
+	aOld, aTerm, aHup : PSigAction;  
 begin
-	if (FileExists('grendel.run')) then
-		begin
-		{$IFDEF CONSOLEBUILD}
-		writeln('Server is already running? (delete grendel.run if this is not the case)');
-		{$ELSE}
-		{$IFDEF WIN32}
-		MessageBox(0, 'Server is already running? (delete grendel.run if this is not the case)', 'Server is already running', 0);
-		{$ENDIF}
-		{$ENDIF}
-		exit;
-		end;
-
-	oldExitProc := ExitProc;
-	ExitProc := @serverExitProc;
-		
-	AssignFile(f, 'grendel.run');
-	Rewrite(f);
-	CloseFile(f);
-
-	cons := GConsole.Create();
-	cons.attachWriter(GConsoleLogWriter.Create('grendel'));
-	
-	{$IFDEF CONSOLEBUILD}
-	cons.attachWriter(GConsoleGrendel.Create());
-	{$ENDIF}
-	
-	cons.Free();
-	
-	{$IFDEF LINUX}
 	{ block all signals except for SIGTERM/SIGHUP }
 	sigfillset(sSet);
 	sigdelset(sSet, SIGTERM);
@@ -464,6 +432,42 @@ begin
 		Halt(0);
 		end;
 	end;
+end;
+{$ENDIF}
+
+
+begin
+	if (FileExists('grendel.run')) then
+		begin
+		{$IFDEF CONSOLEBUILD}
+		writeln('Server is already running? (delete grendel.run if this is not the case)');
+		{$ELSE}
+		{$IFDEF WIN32}
+		MessageBox(0, 'Server is already running? (delete grendel.run if this is not the case)', 'Server is already running', 0);
+		{$ENDIF}
+		{$ENDIF}
+		exit;
+		end;
+
+	oldExitProc := ExitProc;
+	ExitProc := @serverExitProc;
+		
+	AssignFile(f, 'grendel.run');
+	Rewrite(f);
+	CloseFile(f);
+
+	cons := GConsole.Create();
+	cons.attachWriter(GConsoleLogWriter.Create('grendel'));
+	
+	{$IFDEF CONSOLEBUILD}
+	cons.attachWriter(GConsoleGrendel.Create());
+	{$ENDIF}
+	
+	cons.Free();
+	
+	{$IFDEF LINUX}
+	if (not FindCmdLineSwitch('f')) then
+		daemonize();
 	{$ENDIF}
 	
 	initDebug();
