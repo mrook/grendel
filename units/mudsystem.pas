@@ -2,7 +2,7 @@ unit mudsystem;
 
 interface
 uses
-    Winsock,
+    Winsock2,
     SysUtils,
     Classes,
     constants,
