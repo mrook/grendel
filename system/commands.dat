@@ -373,6 +373,11 @@ function: do_pray
 #end
 
 #command
+name: prompt
+function: do_prompt
+#end
+
+#command
 name: peek
 function: do_peek
 position: 5
