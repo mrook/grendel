@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.5 2001/08/14 09:35:30 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.6 2001/08/14 19:26:47 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -2134,8 +2134,8 @@ begin
     ch.sendBuffer('%x - xp to level'#13#10);
     ch.sendBuffer('%X - total xp'#13#10);
     ch.sendBuffer('%f - status of opponent (when fighting)'#13#10);
-    ch.sendBuffer('%k - status of tank (when fighting)'#13#10);
-    ch.sendBuffer(#13#10'Default prompt is %hhp %mmv %ama (%l)'#13#10#13#10);
+    ch.sendBuffer('%t - status of tank (when fighting)'#13#10);
+    ch.sendBuffer(#13#10'Default prompt is %hhp %mmv %ama (%l)%t%f'#13#10#13#10);
     ch.sendBuffer('Your prompt is: ' + GPlayer(ch).prompt + #13#10);
     exit;
     end;

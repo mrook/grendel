@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.55 2001/08/14 09:40:02 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.56 2001/08/14 19:26:48 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -2141,7 +2141,7 @@ begin
     end;
 
   if (prompt = '') then
-    pr := '%hhp %mmv %ama (%l)> '
+    pr := '%hhp %mmv %ama (%l)%t%f> '
   else
     pr := prompt;
 
