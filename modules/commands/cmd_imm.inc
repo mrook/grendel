@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.16 2002/08/18 19:35:15 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.17 2002/09/16 21:01:46 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -701,12 +701,6 @@ begin
 
   vict := findCharWorld(ch, param);
   
-  if (vict.IS_IMMORT()) and (vict.level >= ch.level) then
-    begin
-    ch.sendBuffer('Cannot snoop a same or higher level immortal.'#13#10);
-    exit;
-    end
-  else
   if (vict = nil) then
     begin
     ch.sendBuffer('That character does not exist.'#13#10);
@@ -719,9 +713,17 @@ begin
       begin
       GPlayer(ch).snooping.snooped_by := nil;
       GPlayer(ch).snooping := nil;
-      end;
+      ch.sendBuffer('No longer snooping.'#13#10);
+      end
+    else
+      ch.sendBuffer('You aren''t snooping anyone.'#13#10);
       
-    ch.sendBuffer('No longer snooping.'#13#10);
+    exit;
+    end
+  else
+  if (vict.IS_IMMORT()) and (vict.level >= ch.level) then
+    begin
+    ch.sendBuffer('Cannot snoop a same or higher level immortal.'#13#10);
     exit;
     end;
 
