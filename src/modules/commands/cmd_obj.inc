@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.10 2004/06/10 18:10:56 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.11 2004/06/10 18:28:09 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -289,8 +289,6 @@ begin
     ch.sendBuffer('That is not a sacrificable object.'#13#10)
   else
     begin
-    obj.separate();
-
     act(AT_REPORT,'You nobly sacrifice $p$7 to the gods.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n nobly sacrifices $p$7 to the gods.',true,ch,obj,nil,TO_ROOM);
 
@@ -631,8 +629,6 @@ begin
     ch.sendBuffer('You cannot find that.'#13#10);
     exit;
     end;
-
-  obj.separate();
 
   if not (obj.item_type in [ITEM_DRINK,ITEM_FOUNTAIN]) then
     ch.sendBuffer('You cannot drink that.'#13#10)

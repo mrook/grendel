@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-	## $Id: area.pas,v 1.33 2004/06/10 18:10:56 ***REMOVED*** Exp $
+	## $Id: area.pas,v 1.34 2004/06/10 18:28:09 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -120,10 +120,6 @@ type
       function getWeight() : integer;
 
       function clone() : GObject;
-      function group(obj : GObject) : boolean;
-      procedure split(num : integer);
-      procedure seperate(); deprecated;
-      procedure separate();
 
       constructor Create();
       destructor Destroy(); override;
@@ -2502,25 +2498,7 @@ end;
 
 // Object to object
 procedure GObject.toObject(obj : GObject);
-var 
-	iterator : GIterator;
-	otmp : GObject;
 begin
-  iterator := obj.contents.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    otmp := GObject(iterator.next());
-
-    if (otmp.group(Self)) then
-    	begin
-		  iterator.Free();
-      exit;
-      end;
-    end;
-    
-  iterator.Free();
-
   node_in := obj.contents.insertLast(Self);
   in_obj := obj;
 end;
@@ -2879,93 +2857,6 @@ begin
   objectList.add(obj);
 
   Result := obj;
-end;
-
-function GObject.group(obj : GObject) : boolean;
-begin
-  Result := false;
-
-{  if (obj = nil) or (obj = Self) then
-    exit;
-
-  if (Self.name = obj.name) and
-   (Self.short = obj.short) and
-   (Self.long = obj.long) and
-   (Self.item_type = obj.item_type) and
-   (Self.wear1 = obj.wear1) and
-   (Self.wear2 = obj.wear2) and
-   (Self.flags = obj.flags) and
-   (Self.cost = obj.cost) and
-   (Self.weight = obj.weight) and
-   (Self.value[1] = obj.value[1]) and
-   (Self.value[2] = obj.value[2]) and
-   (Self.value[3] = obj.value[3]) and
-   (Self.value[4] = obj.value[4]) and
-   (Self.wear_location = obj.wear_location) and
-   (Self.contents.getSize() = 0) and (obj.contents.getSize() = 0) then
-    begin
-    inc(count, obj.count);
-
-    if (obj_index <> nil) then
-      inc(obj_index.obj_count, obj.count);
-
-    obj.extract();
-
-    Result := true;
-    exit;
-    end; }
-end;
-
-procedure GObject.split(num : integer);
-{ var
-   rest : GObject; }
-begin
-{  if (count <= num) or (num = 0) then
-    exit;
-
-  rest := clone();
-
-  if (obj_index <> nil) then
-    dec(obj_index.obj_count);
-
-  rest.count := count - num;
-  count := num;
-
-  if (carried_by <> nil) then
-    begin
-    rest.node_carry := GCharacter(carried_by).objects.insertLast(rest);
-    rest.carried_by := carried_by;
-    rest.room := nil;
-    rest.in_obj := nil;
-    end
-  else
-  if (room <> nil) then
-    begin
-    rest.node_room := room.objects.insertLast(rest);
-    rest.carried_by := nil;
-    rest.room := room;
-    rest.in_obj := nil;
-    end
-  else
-  if (in_obj <> nil) then
-    begin
-    rest.toObject(in_obj);
-    rest.in_obj := in_obj;
-    rest.room := nil;
-    rest.carried_by := nil;
-    end; }
-end;
-
-// Separate a grouped object
-procedure GObject.separate();
-begin
-  split(1);
-end;
-
-// Separate a grouped object (left for legacy reasons, typo!)
-procedure GObject.seperate();
-begin
-  split(1);
 end;
 
 {Jago 10/Jan/2001 - utility function }
