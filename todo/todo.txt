@@ -22,13 +22,13 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! generic timer implementation
 ! holywalk (walk thru anything)
 ! reimplement editing
+! rework affects system
 
 
-* rework affects system
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
   ROOM_NODROP etc.
 * implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
-		ROOM_NOFLOOR, SECT_UNDERGROUND (no-light), EX_NOBREAK, EX_SWIM etc.
+		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
 * better damage/xp system (more balanced)
 * Better online construction (autocreate exit+room when moving),
   mobile create/edit, reset edit etc.
