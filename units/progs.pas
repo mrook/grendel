@@ -76,7 +76,7 @@ var
   prop : PPropInfo;
   v : variant;
 begin
-  Result := Null;
+  Result := 0;
 
   if (varType(obj) = varString) then
     begin
@@ -93,7 +93,7 @@ begin
       case (prop.PropType^.Kind) of
         tkInteger: Result := GetOrdProp(s, prop);
         tkFloat:   Result := GetFloatProp(s, prop);
-        tkString:  Result := GetStrProp(s, prop);
+        tkLString:  Result := GetStrProp(s, prop);
         tkVariant: Result := GetVariantProp(s, prop);
       end;
     end;
