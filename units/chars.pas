@@ -46,7 +46,7 @@ type
       title : string;                     { Title of PC }
       hometown : integer;                { Hometown (vnum of portal) }
       age : longint;                     { Age in hours (irl) }
-      cfg_flags, flags:integer;    { config flags and misc. flags }
+      cfg_flags, flags : cardinal;    { config flags and misc. flags }
       deaths : integer;
       bankgold : longint;           { Gold in bank }
       xptot, xptogo : longint;       { Experience earned total and needed to level }
@@ -130,7 +130,7 @@ type
       weight, height : integer;       { weight/height of (N)PC }
       last_cmd : pointer;
       affects : GDLinkedList;
-      act_flags,aff_flags : integer;
+      act_flags, aff_flags : cardinal;
       clan : GClan;                 { joined a clan? }
       tracking : string;
 
@@ -1113,7 +1113,7 @@ var
    obj : GObject;
    al : GAlias;
    aff : GAffect;
-   fl : integer;
+   fl : cardinal;
 begin
   if (IS_NPC) then
     exit;
@@ -1836,13 +1836,16 @@ begin
     end;
 end;
 
+{ Added 2.<char> - Nemesis }
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
 var
    node : GListNode;
    vict : GCharacter;
+   number,count : integer;
 begin
   findCharWorld := nil;
-  name := uppercase(name);
+
+  number := findNumber(name); // eg 2.char
 
   if (comparestr(name, 'SELF') = 0) then
     begin
@@ -1850,18 +1853,23 @@ begin
     exit;
     end;
 
+  count := 0;
+
   node := char_list.head;
 
   while (node <> nil) do
     begin
     vict := node.element;
 
-    if (pos(name, uppercase(vict.name)) <> 0) or
-      (pos(name, uppercase(vict.short))<>0)
-       and (ch.CAN_SEE(vict)) then
+    if isName(vict.name,name) or isName(vict.short,name) and (ch.CAN_SEE(vict)) then
       begin
-      findCharWorld := vict;
-      exit;
+      inc(count);
+
+      if (count = number) then
+        begin
+        findCharWorld := vict;
+        exit;
+        end;
       end;
 
     node := node.next;
