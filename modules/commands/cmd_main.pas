@@ -312,7 +312,7 @@ begin
   writeConsole(ch.name^ + ' has deleted');
   GPlayer(ch).quit;
 
-  assignfile(f, 'players\' + ch.name^ + '.usr');
+  assignfile(f, 'players\' + ch.name^ + '_' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.usr');
   rename(f, 'backup\' + ch.name^ + '.usr');
 end;
 
