@@ -45,9 +45,9 @@ uses
 
 const
   JclVersionMajor   = 1;    // 0=pre-release|beta/1, 2, ...=final
-  JclVersionMinor   = 21;   // Forth minor release JCL 1.21
+  JclVersionMinor   = 22;   // Forth minor release JCL 1.22
   JclVersionRelease = 1;    // 0=pre-release|beta/1=release
-  JclVersionBuild   = 870;  // build number, days since march 1, 2000
+  JclVersionBuild   = 965;  // build number, days since march 1, 2000
   JclVersion = (JclVersionMajor shl 24) or (JclVersionMinor shl 16) or
                (JclVersionRelease shl 15) or (JclVersionBuild shl 0);
 

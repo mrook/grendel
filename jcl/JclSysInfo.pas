@@ -22,7 +22,7 @@
 { details and the Windows version.                                                                 }
 {                                                                                                  }
 { Unit owner: Eric S. Fisher                                                                       }
-{ Last modified: May 26, 2002                                                                      }
+{ Last modified: October 13, 2002                                                                  }
 {                                                                                                  }
 {**************************************************************************************************}
 
@@ -566,7 +566,7 @@ uses
   {$IFNDEF DELPHI5_UP}
   JclSysUtils,
   {$ENDIF DELPHI5_UP}
-  JclBase, JclFileUtils, JclRegistry, JclShell, JclStrings, JclWin32;
+  JclBase, JclFileUtils, JclIniFiles, JclRegistry, JclShell, JclStrings, JclWin32;
 
 //==================================================================================================
 // Environment
@@ -1169,13 +1169,14 @@ end;
 
 function GetBIOSName: string;
 const
-  ADR_BIOSNAME = $FE061;
+  Win9xBIOSInfoKey = 'Enum\Root\*PNP0C01\0000';
+// Reference: How to Obtain BIOS Information from the Registry
+// http://support.microsoft.com/default.aspx?scid=kb;en-us;q195268
 begin
-  try
-    Result := string(PChar(Ptr(ADR_BIOSNAME)));
-  except
-    Result := '';
-  end;
+  if IsWinNT then
+    Result := ''
+  else
+    Result := RegReadStringDef(HKEY_LOCAL_MACHINE, Win9xBIOSInfoKey, 'BIOSName', '');
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1184,8 +1185,10 @@ function GetBIOSCopyright: string;
 const
   ADR_BIOSCOPYRIGHT = $FE091;
 begin
+  Result := '';
+  if not IsWinNT and not IsBadReadPtr(Pointer(ADR_BIOSCOPYRIGHT), 2) then
   try
-    Result := string(PChar(Ptr(ADR_BIOSCOPYRIGHT)));
+    Result := PChar(ADR_BIOSCOPYRIGHT);
   except
     Result := '';
   end;
@@ -1197,8 +1200,10 @@ function GetBIOSExtendedInfo: string;
 const
   ADR_BIOSEXTENDEDINFO = $FEC71;
 begin
+  Result := '';
+  if not IsWinNT and not IsBadReadPtr(Pointer(ADR_BIOSEXTENDEDINFO), 2) then
   try
-    Result := string(PChar(Ptr(ADR_BIOSEXTENDEDINFO)));
+    Result := PChar(ADR_BIOSEXTENDEDINFO);
   except
     Result := '';
   end;
@@ -1206,7 +1211,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function GetBIOSDate : TDateTime;
+function GetBIOSDate: TDateTime;
 const
   REGSTR_PATH_SYSTEM = '\HARDWARE\DESCRIPTION\System';
   REGSTR_SYSTEMBIOSDATE = 'SystemBiosDate';
@@ -1293,7 +1298,7 @@ function RunningProcessesList(const List: TStrings; FullPath: Boolean): Boolean;
         end
         else
         begin
-          if IsWin2k then
+          if IsWin2k or IsWinXP then
           begin
             FileName := ProcessFileName(ProcEntry.th32ProcessID);
             if FileName = '' then
@@ -1301,7 +1306,7 @@ function RunningProcessesList(const List: TStrings; FullPath: Boolean): Boolean;
           end
           else
           begin
-            FileName := ProcEntry.szExeFile; 
+            FileName := ProcEntry.szExeFile;
             if not FullPath then
               FileName := ExtractFileName(FileName);
           end;
@@ -1341,7 +1346,7 @@ function RunningProcessesList(const List: TStrings; FullPath: Boolean): Boolean;
           8:
             // On Win2K PID 8 is the "System Process" but this name cannot be
             // retrieved from the system and has to be fabricated.
-            if IsWin2K then
+            if IsWin2k or IsWinXP then
               FileName := RsSystemProcess
             else
               FileName := ProcessFileName(PIDs[I]);
@@ -1765,8 +1770,13 @@ const
   cShellKey = 'Software\Microsoft\Windows NT\CurrentVersion\WinLogon';
   cShellValue = 'Shell';
   cShellDefault = 'explorer.exe';
+  cShellSystemIniFileName = 'system.ini';
+  cShellBootSection = 'boot';
 begin
-  Result := RegReadStringDef(HKEY_LOCAL_MACHINE, cShellKey, cShellValue, '');
+  if IsWinNT then
+    Result := RegReadStringDef(HKEY_LOCAL_MACHINE, cShellKey, cShellValue, '')
+  else
+    Result := IniReadString(PathAddSeparator(GetWindowsFolder) + cShellSystemIniFileName, cShellBootSection, cShellValue);
   if Result = '' then
     Result := cShellDefault;
 end;
@@ -3054,7 +3064,10 @@ begin
   MemoryStatus.dwLength := SizeOf(MemoryStatus);
   GlobalMemoryStatus(MemoryStatus);
   with MemoryStatus do
-    Result := 100 - Trunc(dwAvailPageFile / dwTotalPageFile * 100);
+    if dwTotalPageFile > 0 then
+      Result := 100 - Trunc(dwAvailPageFile / dwTotalPageFile * 100)
+    else
+      Result := 0;  
 end;
 
 //--------------------------------------------------------------------------------------------------

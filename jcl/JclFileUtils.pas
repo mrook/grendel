@@ -25,7 +25,7 @@
 { routines as well but they are specific to the Windows shell.                                     }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: July 16, 2002                                                                     }
+{ Last modified: September 2, 2002                                                                 }
 {                                                                                                  }
 {**************************************************************************************************}
 
@@ -2153,6 +2153,7 @@ function GetDirectorySize(const Path: string): Int64;
   var
     F: TSearchRec;
     R: Integer;
+    TempSize: TULargeInteger;
   begin
     Result := 0;
     R := SysUtils.FindFirst(Path + '*.*', faAnyFile, F);
@@ -2165,7 +2166,11 @@ function GetDirectorySize(const Path: string): Int64;
           if (F.Attr and faDirectory) = faDirectory then
             Inc(Result, RecurseFolder(Path + F.Name + '\'))
           else
-            Result := Result + (F.FindData.nFileSizeHigh shl 32) + F.FindData.nFileSizeLow;
+          begin
+            TempSize.LowPart := F.FindData.nFileSizeLow;
+            TempSize.HighPart := F.FindData.nFileSizeHigh;
+            Inc(Result, TempSize.QuadPart);
+          end;
         end;
         R := SysUtils.FindNext(F);
       end;
@@ -2331,13 +2336,16 @@ function GetSizeOfFile(const FileName: string): Int64;
 var
   Handle: THandle;
   FindData: TWin32FindData;
+  Size: TULargeInteger;
 begin
   Result := 0;
   Handle := FindFirstFile(PChar(FileName), FindData);
   if Handle <> INVALID_HANDLE_VALUE then
   begin
     Windows.FindClose(Handle);
-    Result := (FindData.nFileSizeHigh shl 32) + FindData.nFileSizeLow;
+    Size.LowPart := FindData.nFileSizeLow;
+    Size.HighPart := FindData.nFileSizeHigh;
+    Result := Size.QuadPart;
   end
   else
     RaiseLastOSError;
@@ -2636,29 +2644,26 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-// todoc Author: Jeff
-
 function Win32BackupFile(const FileName: string; Move: Boolean): Boolean;
 begin
   if Move then
-    Result := MoveFile(PChar(FileName), PChar(GetBackupFileName(FileName)))
+    Result := MoveFileEx(PChar(FileName), PChar(GetBackupFileName(FileName)), MOVEFILE_REPLACE_EXISTING)
   else
     Result := CopyFile(PChar(FileName), PChar(GetBackupFileName(FileName)), False)
 end;
 
 //--------------------------------------------------------------------------------------------------
 
-// todoc Author: Jeff
-
 function Win32RestoreFile(const FileName: string): Boolean;
-var
+var 
   TempFileName: string;
 begin
   Result := False;
   TempFileName := FileGetTempName('');
-  if MoveFile(PChar(GetBackupFileName(FileName)), PChar(TempFileName)) then
-    if Win32BackupFile(FileName, False) then
-      Result := MoveFile(PChar(TempFileName), PChar(FileName));
+
+   if MoveFileEx(PChar(GetBackupFileName(FileName)), PChar(TempFileName), MOVEFILE_REPLACE_EXISTING) then
+     if Win32BackupFile(FileName, False) then
+       Result := MoveFileEx(PChar(TempFileName), PChar(FileName), MOVEFILE_REPLACE_EXISTING); 
 end;
 
 //==================================================================================================
