@@ -9,49 +9,49 @@
 name: down
 alias: d
 function: do_down
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: east
 alias: e
 function: do_east
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: north
 alias: n
 function: do_north
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: south
 alias: s
 function: do_south
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: west
 alias: w
 function: do_west
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: up
 alias: u
 function: do_up
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: look
 alias: l
 function: do_look
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 
@@ -60,19 +60,19 @@ position: 5
 #command
 name: affects
 alias: aff
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 function: do_affects
 #end
 
 #command
 name: afk
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 function: do_afk
 #end
 
 #command
 name: alias
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 function: do_alias
 #end
 
@@ -84,32 +84,32 @@ function: do_apropos
 #command
 name: areas
 function: do_areas
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: armor
 alias: arm
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 function: do_armor
 #end
 
 #command
 name: assist
 function: do_assist
-position: 8
+allowed_states: fighting
 #end
 
 #command
 name: auction
 function: do_auction
-position: 7
+allowed_states: idle,resting,meditating
 #end
 
 #command
 name: backstab
 alias: bs
-position: 8
+allowed_states: fighting
 function: do_backstab
 #end
 
@@ -121,31 +121,31 @@ function: do_balance
 #command
 name: bash
 function: do_bash
-position: 8
+allowed_states: fighting
 #end
 
 #command
 name: battle
 function: do_battle
-position: 7
+allowed_states: idle
 #end
 
 #command
 name: bid
 function: do_bid
-position: 7
+allowed_states: idle,resting,meditating
 #end
 
 #command
 name: board
 function: do_board
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
 name: brag
 function: do_brag
-position: 4
+allowed_states: idle,fighting
 #end
 
 #command
@@ -157,7 +157,7 @@ function: do_buy
 name: cast
 alias: c
 function: do_cast
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
@@ -173,19 +173,19 @@ function: do_circle
 #command
 name: clan
 function: do_clan
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: clanadd
 function: do_clanadd
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: clanremove
 function: do_clanremove
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -211,7 +211,7 @@ function: do_consider
 #command
 name: config
 function: do_config
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -248,7 +248,7 @@ function: do_eat
 name: emote
 alias: :
 function: do_emote
-position: 4
+allowed_states: idle,fighting
 #end
 
 #command
@@ -259,27 +259,27 @@ function: do_enter
 #command
 name: equipment
 function: do_equipment
-position: 4
+allowed_states: idle,fighting,resting,meditating,sleeping
 #end
 
 #command
 name: exits
 function: do_exits
-position: 4
+allowed_states: idle,fighting
 #end
 
 #command
 name: flee
 alias: fl
 function: do_flee
-position: 8
+allowed_states: fighting
 #end
 
 #command
 name: flurry
 alias: flu
 function: do_flurry
-position: 8
+allowed_states: fighting
 #end
 
 #command
@@ -316,13 +316,13 @@ function: do_help
 name: inventory
 alias: i
 function: do_inventory
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: i3
 function: do_i3
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -330,19 +330,19 @@ name: kill
 ;alias: ki
 alias: k
 function: do_kill
-position: 8
+allowed_states: fighting
 #end
 
 #command
 name: keylock
 function: do_keylock
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: kick
 function: do_kick
-position: 8
+allowed_states: fighting
 #end
 
 #command
@@ -353,37 +353,37 @@ function: do_last
 #command
 name: learn
 function: do_learn
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: list
 function: do_list
-position: 9
+allowed_states: idle
 #end
 
 #command
 name: lockpick
 function: do_lockpick
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
 name: mana
 function: do_mana
-position: 5
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: meditate
 function: do_meditate
-position: 6
+allowed_states: idle,resting,meditating
 #end
 
 #command
 name: note
 function: do_note
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
@@ -414,7 +414,7 @@ function: do_prompt
 #command
 name: peek
 function: do_peek
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
@@ -425,7 +425,7 @@ function: do_put
 #command
 name: quit
 function: do_quit
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -446,7 +446,7 @@ function: do_reply
 #command
 name: report
 function: do_report
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
@@ -457,7 +457,7 @@ function: do_rescue
 #command
 name: rest
 function: do_rest
-position: 4
+allowed_states: idle,meditating,resting
 #end
 
 #command
@@ -490,7 +490,7 @@ function: do_scalp
 #command
 name: score
 function: do_score
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -516,7 +516,7 @@ function: do_showprompt
 #command
 name: skills
 function: do_skills
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -537,20 +537,20 @@ function: do_socials
 #command
 name: spells
 function: do_spells
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: stand
 alias: wake
 function: do_stand
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: stats
 function: do_stats
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -571,13 +571,13 @@ function: do_taunt
 #command
 name: tell
 function: do_tell
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: track
 function: do_track
-position: 9
+allowed_states: idle
 #end
 
 #command
@@ -588,25 +588,25 @@ function: do_trophy
 #command
 name: time
 function: do_time
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: title
 function: do_title
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: unlearn
 function: do_unlearn
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: unlock
 function: do_unlock
-position: 5
+allowed_states: idle,resting,meditating
 #end
 
 #command
@@ -627,13 +627,13 @@ function: do_weather
 #command
 name: where
 function: do_where
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: who
 function: do_who
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -654,7 +654,7 @@ function: do_withdraw
 #command
 name: world
 function: do_world
-position: 4
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -686,7 +686,7 @@ level: 100
 #command
 name: delete
 function: do_delete
-position: 9
+allowed_states: idle
 #end
 
 ; building commands
@@ -695,210 +695,210 @@ position: 9
 name: aassign
 function: do_aassign
 level: 996
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: acreate
 function: do_acreate
 level: 999
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: addcustom
 function: do_addcustom
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: aranges
 function: do_aranges
 level: 999
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: aset
 function: do_aset
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: astat
 function: do_astat
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: checkarea
 function: do_checkarea
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: goto
 function: do_goto
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: loadarea
 function: do_loadarea
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: mfind
 function: do_mfind
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: mload
 function: do_mload
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: pset
 function: do_pset
 level: 997
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: pstat
 function: do_pstat
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: ocreate
 function: do_ocreate
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: oedit
 function: do_oedit
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: ofind
 function: do_ofind
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: oload
 function: do_oload
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: olist
 function: do_olist
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: ostat
 function: do_ostat
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: ranges
 function: do_ranges
 level: 996
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: rclone
 function: do_rclone
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: rdelete
 function: do_rdelete
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: redit
 function: do_redit
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: rlink
 function: do_rlink
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: rlist
 function: do_rlist
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: rmake
 function: do_rmake
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: rstat
 function: do_rstat
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: savearea
 function: do_savearea
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: spellcheck
 function: do_spellcheck
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: sset
 function: do_sset
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 
@@ -908,91 +908,91 @@ position: 0
 name: advance
 function: do_advance
 level: 999
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: allow
 function: do_allow
 level: 996
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: at
 function: do_at
 level: 991
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: bamfin
 function: do_bamfin
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: bamfout
 function: do_bamfout
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: ban
 function: do_ban
 level: 996
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: bgset
 function: do_bgset
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: cloak
 function: do_cloak
 level: 1000
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: connections
 function: do_connections
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: coordgen
 function: do_coordgen
 level: 1000
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: destroy
 function: do_destroy
 level: 998
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: disconnect
 function: do_disconnect
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: echo
 function: do_echo
 level: 994
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -1005,49 +1005,49 @@ level: 998
 name: force
 function: do_force
 level: 993
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: freeze
 function: do_freeze
 level: 996
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: grace
 function: do_grace
 level: 999
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: hashstats
 function: do_hashstats
 level: 1000
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: holylight
 function: do_holylight
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: holywalk
 function: do_holywalk
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: loadup
 function: do_loadup
 level: 998
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -1060,84 +1060,84 @@ level: 990
 name: modules
 function: do_modules
 level: 1000
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: log
 function: do_log
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: namegen
 function: do_namegen
 level: 991
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: nourish
 function: do_nourish
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: peace
 function: do_peace
 level: 991
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: prename
 function: do_prename
 level: 997
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: purge
 function: do_purge
 level: 997
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: reload
 function: do_reload
 level: 998
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: reset
 function: do_reset
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: restore
 function: do_restore
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: return
 function: do_return
 level: 998
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: sconfig
 function: do_sconfig
 level: 1000
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
@@ -1150,75 +1150,75 @@ level: 999
 name: silence
 function: do_silence
 level: 996
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: sla
 function: do_sla
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: slay
 function: do_slay
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: snoop
 function: do_snoop
 level: 998
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: switch
 function: do_switch
 level: 998
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: take
 function: do_take
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: transfer
 function: do_transfer
 level: 995
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: uptime
 function: do_uptime
 level: 1000
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: vnums
 function: do_vnums
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: wizhelp
 function: do_wizhelp
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end
 
 #command
 name: wizinvis
 function: do_wizinvis
 level: 990
-position: 0
+allowed_states: idle,resting,meditating,sleeping
 #end

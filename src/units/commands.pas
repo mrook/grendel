@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.8 2004/02/28 15:53:24 hemko Exp $
+  ##  $Id: commands.pas,v 1.9 2004/02/29 20:59:40 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -119,7 +119,7 @@ end;
 procedure loadCommands();
 var 
   af : GFileReader;
-  s, g : string;
+  param, s, g : string;
   cmd : GCommand;
   alias : GCommand;
 begin
@@ -139,29 +139,73 @@ begin
 
     alias := nil;
     cmd := GCommand.Create();
-    cmd.allowed_states := [STATE_MEDITATING, STATE_IDLE, STATE_RESTING, STATE_FIGHTING];
+    cmd.allowed_states := [];
 
     with cmd do
       repeat
       s := af.readLine();
       g := uppercase(left(s,':'));
+      
+      param := trim(right(s, ':'));
 
       if (g = 'NAME') then
-        name := uppercase(right(s,' '))
+        name := uppercase(param)
       else
       if (g = 'ALIAS') then
         begin
         // create an alias
         alias := GCommand.Create();
-        alias.name := uppercase(right(s,' '));
+        alias.name := uppercase(param);
         end
       else
       if (g = 'LEVEL') then
-        level := strtoint(right(s,' '))
+        level := strtoint(param)
       else
       if (g = 'POSITION') then
+      	begin
+      	writeConsole('deprecated element position at line ' + IntToStr(af.line));
+      	end
+      else
+      if (g = 'ALLOWED_STATES') then
         begin
-        //position := strtoint(right(s,' '));
+        while (pos(',', param) > 0) do
+        	begin
+        	s := uppercase(left(param, ','));
+        	
+        	if (s = 'IDLE') then
+        		cmd.allowed_states := cmd.allowed_states + [STATE_IDLE]
+        	else
+        	if (s = 'FIGHTING') then
+        		cmd.allowed_states := cmd.allowed_states + [STATE_FIGHTING]
+        	else
+        	if (s = 'RESTING') then
+        		cmd.allowed_states := cmd.allowed_states + [STATE_RESTING]
+        	else
+        	if (s = 'MEDITATING') then
+        		cmd.allowed_states := cmd.allowed_states + [STATE_MEDITATING]
+        	else
+        	if (s = 'SLEEPING') then
+        		cmd.allowed_states := cmd.allowed_states + [STATE_SLEEPING];
+        	
+        	param := right(param, ',');
+        	end;
+        
+				s := uppercase(left(param, ','));
+
+				if (s = 'IDLE') then
+					cmd.allowed_states := cmd.allowed_states + [STATE_IDLE]
+				else
+				if (s = 'FIGHTING') then
+					cmd.allowed_states := cmd.allowed_states + [STATE_FIGHTING]
+				else
+				if (s = 'RESTING') then
+					cmd.allowed_states := cmd.allowed_states + [STATE_RESTING]
+				else
+				if (s = 'MEDITATING') then
+					cmd.allowed_states := cmd.allowed_states + [STATE_MEDITATING]
+				else
+				if (s = 'SLEEPING') then
+					cmd.allowed_states := cmd.allowed_states + [STATE_SLEEPING];
         end
       else
       if (g = 'FUNCTION') then
@@ -175,7 +219,10 @@ begin
           addarg0 := (trim(uppercase(right(s,' '))) = 'TRUE');
         end;
       until (uppercase(s)='#END') or (af.eof());
-
+      
+		if (cmd.allowed_states = []) then
+		 	cmd.allowed_states := [STATE_MEDITATING, STATE_IDLE, STATE_RESTING, STATE_FIGHTING];
+		 	
     if (assigned(cmd.ptr)) then
       begin
       commandList.put(cmd.name, cmd);
