@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.14 2004/03/17 00:19:32 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.15 2004/03/22 14:20:52 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -32,23 +32,8 @@ uses
 	
 
 type
-	GConnection = class;
-		
-	{ Called when GConnection.Execute() starts }
-	GConnectionOpenEvent = procedure() of object;
-		
-	{ Called when GConnection.Execute() terminates }
-	GConnectionCloseEvent = procedure() of object;
-		
-	{ Called for every iteration in GConnection.Execute(), if return = false, rest of iteration is skipped }
-	GConnectionTickEvent = procedure() of object;
-		
-	{ Called when GConnection has one or more lines of input waiting }
-	GConnectionInputEvent = procedure() of object;
-		
-	{ Called when GConnection has sent one or more lines of output }
-	GConnectionOutputEvent = procedure() of object;
-		
+	GConnectionEvent = procedure() of object;
+
 	GConnection = class(TThread)
 	protected
 		node : GListNode;
@@ -66,11 +51,16 @@ type
 
 		_lastupdate : TDateTime;
       
-		FOnOpen : GConnectionOpenEvent;
-		FOnClose : GConnectionCloseEvent;
-		FOnTick : GConnectionTickEvent;
-		FOnInput : GConnectionInputEvent;
-		FOnOutput : GConnectionOutputEvent;
+		{ Called when GConnection.Execute() starts }
+		FOnOpen : GConnectionEvent;
+		{ Called when GConnection.Execute() terminates }
+		FOnClose : GConnectionEvent;
+		{ Called for every iteration in GConnection.Execute() }
+		FOnTick : GConnectionEvent;
+		{ Called when GConnection has one or more lines of input waiting }
+		FOnInput : GConnectionEvent;
+		{ Called when GConnection has sent one or more lines of output }
+		FOnOutput : GConnectionEvent;
       
 	protected
 		procedure Execute(); override;
@@ -102,11 +92,11 @@ type
 		property idle : integer read _idle;
 		property last_update : TDateTime read _lastupdate;
 
-		property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
-		property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
-		property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
-		property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
-		property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
+		property OnOpen : GConnectionEvent read FOnOpen write FOnOpen;
+		property OnClose : GConnectionEvent read FOnClose write FOnClose;
+		property OnTick : GConnectionEvent read FOnTick write FOnTick;
+		property OnInput : GConnectionEvent read FOnInput write FOnInput;
+		property OnOutput : GConnectionEvent read FOnOutput write FOnOutput;
 
 		property useCompress : boolean read compress;
 	end;
