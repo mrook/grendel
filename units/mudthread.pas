@@ -661,8 +661,6 @@ begin
   until eof(f);
 
   closefile(f);
-
-  commands.hashStats;
 end;
 
 procedure clean_cmdline(var line : string);
