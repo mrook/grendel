@@ -2,7 +2,7 @@
 	Summary:
 		Winsock2 interface library by Alex Konshin
 		
-	## $Id: winsock2.pas,v 1.2 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: winsock2.pas,v 1.3 2004/03/26 22:41:07 ***REMOVED*** Exp $
 
 	Winsock2.h -- definitions to be used with the WinSock 2 DLL and WinSock 2 applications.
  	This header file corresponds to version 2.2.x of the WinSock API specification.
@@ -639,7 +639,7 @@ const
 
 type
   PWSAData = ^TWSAData;
-  TWSAData = packed record
+  TWSAData = record
     wVersion: Word;
     wHighVersion: Word;
     szDescription: array[0..WSADESCRIPTION_LEN] of Char;
