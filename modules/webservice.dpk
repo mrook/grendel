@@ -29,6 +29,7 @@ package webservice;
 requires
 {$IFDEF WIN32}
   indy,
+  soaprtl,
   vcl;
 {$ENDIF}
 {$IFDEF LINUX}
@@ -37,6 +38,7 @@ requires
 
 contains
   main,
+  WSDLPubGrendel,
   GrendelWebServiceIntf,
   DataModule,
   WebModule,
