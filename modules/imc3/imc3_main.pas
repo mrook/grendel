@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.3 2003/10/02 15:52:40 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.4 2003/10/03 18:06:25 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -31,8 +31,12 @@ var
 	iterator : GIterator;
 	mud : GMud_I3;
 	channel : GChannel_I3;
+	cmd, arg : string;
 begin
-	if (prep(param) = 'MUDLIST') then
+	param := one_argument(param, cmd);
+	param := one_argument(param, arg);
+	
+	if (prep(cmd) = 'MUDLIST') then
 		begin
 		ch.sendBuffer(pad_string('Name', 30) + pad_string('Type', 10) + pad_string('Mudlib', 20) + pad_string('Address', 15) + #13#10#13#10);
 		
@@ -52,7 +56,7 @@ begin
 		iterator.Free();
 		end
 	else
-	if (prep(param) = 'CHANLIST') then
+	if (prep(cmd) = 'CHANLIST') then
 		begin
 		ch.sendBuffer(pad_string('Name', 20) + pad_string('Hosted by', 30) + #13#10#13#10);
 		
@@ -68,11 +72,53 @@ begin
 		iterator.Free();
 		end
 	else
+	if (prep(cmd) = 'CHAT') then
+		begin
+		channel := GChannel_I3(chanList.get(arg));
+		
+		if (channel <> nil) then
+			begin
+			i3.sendChannelMessage(channel, ch.name, param);
+			end
+		else
+			ch.sendBuffer('Unknown channel, use I3 CHANLIST to view a list of all available channels.'#13#10);
+		end
+	else
+	if (prep(cmd) = 'LISTEN') then
+		begin
+		if (prep(arg) = 'ALL') then
+			begin
+			iterator := chanList.iterator();
+
+			while (iterator.hasNext()) do
+				begin
+				channel := GChannel_I3(iterator.next());
+
+				ch.sendBuffer('Listening to ' + channel.I3_name + #13#10);
+				i3.sendChannelListen(channel, true);
+				end;
+
+			iterator.Free();
+			end
+		else
+			begin
+			channel := GChannel_I3(chanList.get(arg));
+
+			if (channel <> nil) then
+				begin
+				ch.sendBuffer('Listening to ' + channel.I3_name + #13#10);
+				i3.sendChannelListen(channel, true);
+				end
+			else
+				ch.sendBuffer('Unknown channel, use I3 CHANLIST to view a list of all available channels.'#13#10);
+			end;
+		end
+	else
 		ch.sendBuffer('Unimplemented.'#13#10);
 end;
 
 initialization
-  i3 := GInterMud.Create(false);
+  i3 := GInterMud.Create(1);
   registerCommand('do_i3', do_i3);
 
 finalization

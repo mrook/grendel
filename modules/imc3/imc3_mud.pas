@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.2 2003/10/02 08:23:21 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.3 2003/10/03 18:06:25 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -20,9 +20,9 @@ uses
 type
 	GRouter_I3 = class
 	public
-   	routerIP : string;
-   	routerName : string;
-   	routerPort : integer;
+   	ipaddress : string;
+   	name : string;
+   	port : integer;
 	end;
 
 	GMud_I3 = class
@@ -122,6 +122,7 @@ constructor GMud_I3.Create();
 begin
 	inherited Create();
 	
+	status := 0;
 	routers := TList.Create();
 	player_port := 4000;
 	password := 0;
@@ -142,9 +143,6 @@ begin
           	begin
             if (prep(parser.CurAttr.Name(i)) = 'AUTOCONNECT') then
             	autoconnect := (StrToIntDef(parser.CurAttr.Value(i), 0) = 1)
-            else
-            if (prep(parser.CurAttr.Name(i)) = 'STATUS') then
-            	status := StrToIntDef(parser.CurAttr.Value(i), 0)
             else
             if (prep(parser.CurAttr.Name(i)) = 'MINLEVEL') then
             	minlevel := StrToIntDef(parser.CurAttr.Value(i), 0)
@@ -167,10 +165,10 @@ begin
           for i := 0 to parser.CurAttr.Count-1 do
           	begin
             if (prep(parser.CurAttr.Name(i)) = 'HOST') then
-							router.routerIP := parser.CurAttr.Value(i)
+							router.ipaddress := parser.CurAttr.Value(i)
             else
             if (prep(parser.CurAttr.Name(i)) = 'PORT') then
-							router.routerPort := StrToIntDef(parser.CurAttr.Value(i), 0)
+							router.port := StrToIntDef(parser.CurAttr.Value(i), 0)
             else
             if (prep(parser.CurAttr.Name(i)) = 'PREFERRED') then
 							preferredRouter := router;
@@ -245,7 +243,7 @@ begin
 					driver := parser.CurContent
 				else
 				if (prep(parser.CurName) = 'ROUTER') then
-					router.routerName := parser.CurContent
+					router.name := parser.CurContent
 				else
 				if (prep(parser.CurName) = 'SMTP') then
 					smtp := StrToIntDef(parser.CurContent, 0)
@@ -280,7 +278,7 @@ procedure GMud_I3.save(writer : GFileWriter);
 begin
 	writer.writeLine('	<mud>');
 	
-	writer.writeLine('		<info status="' + IntToStr(status) + '">');
+	writer.writeLine('		<info>');
 	writer.writeLine('			<name>' + name + '</name>');
 	writer.writeLine('			<ipaddress>' + ipaddress + '</ipaddress>');
 	writer.writeLine('			<web>' + web + '</web>');

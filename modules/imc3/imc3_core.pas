@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.3 2003/10/02 15:52:40 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.4 2003/10/03 18:06:25 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -29,11 +29,12 @@ type
 	GInterMud = class(TThread)
 	private
 		mud : GMud_I3;
+		router : GRouter_I3;
 		packet : GPacket_I3;
 		sock : GSocket;
 		connected : boolean;
 		
-		showDebug : boolean;
+		debugLevel : integer;
 
 		outputBuffer : string;
 	 	inputBuffer : array[0..MAX_IPS - 1] of char;
@@ -42,22 +43,27 @@ type
 		procedure handleStartupReply(packet : GPacket_I3);
 		procedure handleMudList(packet : GPacket_I3);
 		procedure handleChanList(packet : GPacket_I3);
+		procedure handleChannelMessage(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
 		
-		procedure debug(msg : string);
+		procedure debug(msg : string; level : integer = 1);
 
 		procedure writePacket(msg : string);
 		
 	published
 		procedure sendPacket();
+		
 		procedure writeBuffer(msg : string);
 		procedure writeHeader(identifier, originator_mudname, originator_username, target_mudname, target_username : string);
 		
+		procedure sendChannelListen(channel : GChannel_I3; lconnect : boolean);
+		procedure sendChannelMessage(channel : GChannel_I3; name, msg : string);
+		
 		procedure shutdown();
 		
-		constructor Create(showDebug : boolean = false);
+		constructor Create(debugLevel : integer = 0);
 		
 		procedure Execute(); override;
 	end;
@@ -68,18 +74,20 @@ implementation
 uses
 	WinSock2,
 	SysUtils,
+	Channels,
+	constants,
 	console,
 	mudsystem,
 	util;
 
 
-constructor GInterMud.Create(showDebug : boolean = false);
+constructor GInterMud.Create(debugLevel : integer = 0);
 begin
 	inherited Create(false);
 	
 	connected := false;
 	
-	Self.showDebug := showDebug;
+	Self.debugLevel := debugLevel;
 	
 	mud := GMud_I3.Create();
 	mud.readConfig();
@@ -122,7 +130,7 @@ begin
 	if (x <= 0) then
 		raise Exception.Create('Write error on socket');
 	
-	debug('Sent packet: ' + msg);
+	debug('Sent packet: ' + msg, 1);
 	
 	outputBuffer := '';
 end;
@@ -204,7 +212,7 @@ begin
 
    i3log( "Sending startup_packet to %s", this_mud->routerName ); *)
 
-  writeHeader('startup-req-3', mud.name, '', mud.preferredRouter.routerName, '');
+  writeHeader('startup-req-3', mud.name, '', router.name, '');
 
   writeBuffer(IntToStr(mud.password));
   writeBuffer(',');
@@ -284,7 +292,7 @@ end;
 
 procedure GInterMud.handleStartupReply(packet : GPacket_I3);
 begin
-	debug('Accepted by router, new password is ' + GString(packet.fields[7]).value);
+	debug('Accepted by router, new password is ' + GString(packet.fields[7]).value, 2);
 end;
 
 procedure GInterMud.handleMudList(packet : GPacket_I3);
@@ -295,7 +303,7 @@ var
   name : string;
 begin
   list := TList(packet.fields[7]);
-	debug(IntToStr(list.count div 2) + ' muds in packet');
+	debug(IntToStr(list.count div 2) + ' muds in packet', 2);
 
   i := 0;
 
@@ -307,18 +315,18 @@ begin
 
     if (mud = nil) then
     	begin
-      debug('New mud: ' + name);
+      debug('New mud: ' + name, 2);
 
       mud := GMud_I3.Create();
       mud.name := name;
 	    mudList.put(mud.name, mud);
       end
     else
-      debug('Updating mud: ' + name);
+      debug('Updating mud: ' + name, 2);
 
     if (GString(list[i + 1]).value = '0') then
     	begin
-      debug(name + ' is down');
+      debug(name + ' is down', 2);
       mud.status := 0;
       end
     else
@@ -326,7 +334,7 @@ begin
 	    child := TList(list[i + 1]);
 	    
 	    if (child.count < 13) then
-	    	debug('Illegal mud: ' + name)
+	    	debug('Illegal mud: ' + name, 1)
 	    else
 	    	begin
 				mud.status := StrToIntDef(GString(child[0]).value, 0);
@@ -431,10 +439,10 @@ begin
       chan.I3_name := name;
       chanList.put(chan.I3_name, chan);
 
-      debug('New channel: ' + name);
+      debug('New channel: ' + name, 2);
       end
     else
-    	debug('Updating channel: ' + name);
+    	debug('Updating channel: ' + name, 2);
 
     child := TList(list[i + 1]);
 
@@ -443,6 +451,18 @@ begin
 
     inc(i, 2);
     end;
+end;
+
+procedure GInterMud.handleChannelMessage(packet : GPacket_I3);
+var
+	channel_name, visname, message, text : string;
+begin
+	channel_name := GString(packet.fields[6]).value;
+	visname := GString(packet.fields[7]).value;
+	message := GString(packet.fields[8]).value;
+	text := Format('[%s] %s@%s: %s$7', [channel_name, visname, packet.originator_mudname, message]);
+	
+	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;
 
 procedure GInterMud.handlePacket(packet : GPacket_I3);
@@ -455,6 +475,12 @@ begin
   else
   if (packet.packet_type = 'chanlist-reply') then
   	handleChanList(packet)
+  else
+  if (packet.packet_type = 'channel-m') then
+  	handleChannelMessage(packet)
+  else
+  if (packet.packet_type = 'error') then
+  	writeConsole('I3: Received error "' + GString(packet.fields[7]).value + '"');
 end;
 
 procedure GInterMud.shutdown();
@@ -462,7 +488,7 @@ begin
 	saveMudList();
 	saveChanList();
 	
-  writeHeader('shutdown', mud.name, '', mud.preferredRouter.routerName, '');
+  writeHeader('shutdown', mud.name, '', router.name, '');
   writeBuffer('0');
 	writeBuffer(',})' + #13);  
 
@@ -481,18 +507,20 @@ begin
 
 	if (mud.preferredRouter = nil) then	
 		begin
-		writeConsole('Impossible to connect to non-existing router');
+		writeConsole('I3: Impossible to connect to non-existing router');
 		Terminate();
 		end;
+		
+	router := mud.preferredRouter;
 	
 	while (not Terminated) do
 		begin
 		try
 			if (not connected) then
 				begin
-				if (sock.connect(mud.preferredRouter.routerIP, mud.preferredRouter.routerPort)) then
+				if (sock.connect(router.ipaddress, router.port)) then
 					begin
-					writeConsole('I3: Connected to ' + mud.preferredRouter.routerIP);
+					writeConsole('I3: Connected to ' + router.ipaddress + ' port ' + IntToStr(router.port));
 
 					connected := true;
 
@@ -500,7 +528,7 @@ begin
 					end
 				else
 					begin
-					writeConsole('I3: Could not connect to ' + mud.preferredRouter.routerIP);
+					writeConsole('I3: Could not connect to ' + router.ipaddress + ' port ' + IntToStr(router.port));
 					
 					// Wait 5 minutes
 					Sleep(5 * 60 * 1000);
@@ -515,7 +543,7 @@ begin
 					if (ret > 0) then
 						begin
 						if (inputPointer + ret > MAX_IPS) then
-							debug('Buffer is growing beyond ' + IntToStr(MAX_IPS));
+							debug('Buffer is growing beyond ' + IntToStr(MAX_IPS), 0);
 							
 						//debug('Read ' + IntToStr(ret) + ' bytes');
 
@@ -555,21 +583,21 @@ begin
 
 						packet := parsePacket(msg);
 
-						debug('-------- (size: ' + IntToStr(size + 4) + ')');
-						debug(msg);
-						debug(#13#10);
-						debug(packet.toString());
-						debug(#13#10);
+						debug('-------- (size: ' + IntToStr(size + 4) + ')', 2);
+						debug(msg, 2);
+						debug(#13#10, 2);
+						debug(packet.toString(), 2);
+						debug(#13#10, 2);
 
-						debug('Got packet: ' + packet.packet_type); 
+						debug('Got packet: ' + packet.packet_type, 1); 
 
-						handlePacket(packet);
-
-						debug('Removing head ' + IntToStr(size + 4) + ' bytes from buffer'); 
+						debug('Removing head ' + IntToStr(size + 4) + ' bytes from buffer', 2); 
 					
 						StrMove(@inputBuffer[0], @inputBuffer[size+4], inputPointer - (size + 4));
 						dec(inputPointer, size + 4);
-						debug('Pointer at ' + IntToStr(inputPointer));
+						debug('Pointer at ' + IntToStr(inputPointer), 2);
+
+						handlePacket(packet);
 						end;
 					end;
 				end;
@@ -588,10 +616,40 @@ begin
 	sock.Free();
 end;
 
-procedure GInterMud.debug(msg : string);
+// void I3_send_channel_message( I3_CHANNEL *channel, char *name, char *message ) 
+procedure GInterMud.sendChannelMessage(channel : GChannel_I3; name, msg : string);
 begin
-	if (showDebug) then
-		writeConsole(msg);
+	writeHeader('channel-m', mud.name, name, '', '');
+	writeBuffer('"');
+	writeBuffer(channel.I3_name);
+	writeBuffer('","');
+	writeBuffer(name);
+	writeBuffer('","');
+	writeBuffer(escape(msg));
+	writeBuffer('",})'#13);
+	sendPacket();
+end;
+
+// void I3_send_channel_listen( I3_CHANNEL *channel, bool lconnect ) 
+procedure GInterMud.sendChannelListen(channel : GChannel_I3; lconnect : boolean);
+begin
+	writeHeader('channel-listen', mud.name, '', router.name, '');
+	writeBuffer('"');
+	writeBuffer(channel.I3_name);
+	writeBuffer('",');
+	
+	if (lconnect) then
+		writeBuffer('1,})'#13)
+	else
+		writeBuffer('0,})'#13);
+		
+	sendPacket();
+end;
+
+procedure GInterMud.debug(msg : string; level : integer = 1);
+begin
+	if (level <= debugLevel) then
+		writeConsole('I3: ' + msg);
 end;
 
 
