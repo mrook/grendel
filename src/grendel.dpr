@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.23 2004/03/30 12:23:28 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.24 2004/03/30 12:29:18 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -596,8 +596,8 @@ begin
 	tm := Now();
 
 	serverInstance.init();
-
-	if (paramstr(1) = 'copyover') then
+	
+	if (ParamStr(1) = 'copyover') then
 		from_copyover();
 
 	tm := Now() - tm;

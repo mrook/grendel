@@ -2,7 +2,7 @@
 	Summary:
 		Windows copyover controller
 		
-	## $Id: copyover.dpr,v 1.6 2004/03/27 10:49:20 ***REMOVED*** Exp $
+	## $Id: copyover.dpr,v 1.7 2004/03/30 12:29:18 ***REMOVED*** Exp $
 }
 program copyover;
 {$APPTYPE CONSOLE}
@@ -179,7 +179,7 @@ begin
 	SI.cb := SizeOf(SI);
 	SI.wShowWindow := sw_show;
 
-	if (not CreateProcess('grendel.exe', 'copyover', Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
+	if (not CreateProcess('grendel.exe', 'grendel copyover', Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
 		exit;
 
 	pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 1, 0, 0, 10000, nil);
