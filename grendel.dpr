@@ -537,6 +537,11 @@ begin
 
   BootTime := Now;
 
+  time_info.hour := 1;
+  time_info.day := 1;
+  time_info.month := 1;
+  time_info.year := 1;
+
   boot_type := 0;
   bg_info.count := -1;
   boot_info.timer := -1;
