@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.14 2001/04/29 16:55:41 xenon Exp $
+// $Id: dtypes.pas,v 1.15 2001/04/30 15:51:56 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -468,6 +468,9 @@ begin
 
     node := node.next;
     end;
+
+  if (fnode <> nil) then
+    bucketList[hash].remove(fnode);
 end;
 
 function GHashTable.size() : integer;
