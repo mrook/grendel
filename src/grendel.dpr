@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.20 2004/03/26 16:59:04 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.21 2004/03/26 20:05:10 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -183,7 +183,7 @@ begin
 		bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!');
 		rebootServer();
 		end;
-
+		
 	node := connection_list.head;
 
 	while (node <> nil) do
@@ -221,12 +221,17 @@ begin
 			end;
 
 		conn.Terminate();
-
+		
 		node := node_next;
 		end;
 
-	Sleep(500);
-
+	// Wait for connection_list to clean itself
+	while (connection_list.size() > 0) do
+		begin
+		Application.ProcessMessages();
+		Sleep(25);
+		end;
+		
 	CloseHandle(pipe);
 end;
 {$ELSE}

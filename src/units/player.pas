@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.24 2004/03/26 17:00:15 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.25 2004/03/26 20:05:10 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -390,13 +390,13 @@ begin
 		begin
 		writeConsole('(' + IntToStr(socket.getDescriptor) + ') ' + ch.name + ' has lost the link');
 
+		act(AT_REPORT,'$n has lost $s link.', false, ch, nil, nil, TO_ROOM);
+
 		if (ch.level >= LEVEL_IMMORTAL) then
 			interpret(ch, 'return');
-
+			
 		ch.conn := nil;
-
-		act(AT_REPORT,'$n has lost $s link.', false, ch, nil, nil, TO_ROOM);
-		SET_BIT(ch.flags, PLR_LINKLESS);
+		SET_BIT(ch.flags, PLR_LINKLESS);	
 		end
 	else
 		begin
@@ -535,7 +535,7 @@ end;
 { Execute all lines in the command queue }
 procedure GPlayerConnection.emptyCommandQueue();
 begin
-	while (commandQueue.Count > 0) do
+	while (commandQueue.Count > 0) and (not Terminated) do
 		begin
 		if (ch.wait > 0) then
 			break;
@@ -3122,6 +3122,8 @@ begin
     ac.send(system_info.mud_name + #13#10#13#10);
     ac.send('Your site has been banned from this server.'#13#10);
     ac.send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
+    
+    ac.Free();
     end
   else
   if (not serverBooted) then

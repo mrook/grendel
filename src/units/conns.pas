@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.18 2004/03/26 17:00:15 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.19 2004/03/26 20:05:10 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -175,9 +175,9 @@ begin
 		while (not Terminated) do
 			begin
 			_lastupdate := Now();
-  	
-			sleep(50);
 			
+			sleep(50);
+
 			if (Assigned(FOnTick)) then
   				FOnTick();
 
@@ -186,7 +186,7 @@ begin
 
 			if (not Terminated) then
 				readBuffer();
-			
+
 			if (Assigned(FOnInput)) and (length(comm_buf) > 0) then
 				FOnInput(); 
 		end;
@@ -257,7 +257,7 @@ begin
 		exit;
 		
 	try
-		while (not _socket.canWrite()) do;
+		while (not Terminated) and (not _socket.canWrite()) do;
 		
 		if (compress) then
 			begin
@@ -303,43 +303,44 @@ begin
 			end;
 	end;
   
-  _idle := 0;
+	_idle := 0;
 
-  repeat
-	if (not _socket.canRead()) then
-		break;
+	while (not Terminated) do
+		begin
+		if (not _socket.canRead()) then
+			break;
 
-    read := recv(_socket.getDescriptor, buf, MAX_RECEIVE - 10, 0);
+		read := recv(_socket.getDescriptor, buf, MAX_RECEIVE - 10, 0);
 
-    if (read > 0) then
-      begin
-      buf[read] := #0;
-      input_buf := input_buf + buf;
+		if (read > 0) then
+			begin
+			buf[read] := #0;
+			input_buf := input_buf + buf;
 
 			processIAC();
-      end
-    else
-    if (read = 0) then
-      begin
-        Terminate();
-      exit;
-      end
-    else
-    if (read = SOCKET_ERROR) then
-      begin
-{$IFDEF WIN32}
-      if (WSAGetLastError() = WSAEWOULDBLOCK) then
-        break
-      else
-        begin
+			end
+		else
+		if (read = 0) then
+			begin
+			Terminate();
+			break;
+			end
+		else
+		if (read = SOCKET_ERROR) then
+			begin
+			{$IFDEF WIN32}
+			if (WSAGetLastError() = WSAEWOULDBLOCK) then
+				break
+			else
+				begin
 				Terminate();
-				exit;
-        end;
-{$ELSE}
-      break;
-{$ENDIF}      
-      end;
-  until false;
+				break;
+				end;
+			{$ELSE}
+			break;
+			{$ENDIF}      
+			end;
+		end;
 end;
 
 procedure GConnection.sendIAC(option : byte; const params : array of byte);
@@ -514,6 +515,7 @@ end;
 procedure initConns();
 begin
   connection_list := GDLinkedList.Create();
+  connection_list.ownsObjects := false;
 end;
 
 procedure cleanupConns();
