@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.68 2001/09/02 21:53:02 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.69 2001/09/10 21:20:03 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -428,6 +428,32 @@ begin
   end;
 end;
 
+//jago : new func for finding if a new connection is from an already connected player
+function findDualConnection(conn: GConnection; const name: string): GPlayer;
+var
+  node: GListNode;
+  dual: GConnection;
+begin
+  Result := nil;
+  node := connection_list.head;
+
+  while node <> nil do
+  begin
+    dual := GConnection(node.element);
+
+    // is there another conn with exactly the same name?
+    if  (dual <> conn)  and Assigned(dual)
+    and Assigned(dual.ch) and Assigned(dual.ch.name)
+    and (lowercase(dual.ch.name^) = lowercase(name)) then
+    begin
+      Result := dual.ch;
+      exit;
+    end;
+
+    node := node.next;
+  end;
+end;
+
 procedure nanny(conn : GConnection; argument : string);
 var ch, vict : GPlayer;
     tmp : GCharacter;
@@ -456,7 +482,7 @@ begin
                     exit;
                     end;
 
-                  vict := findPlayerWorld(nil, argument);
+                  vict := findDualConnection(conn, argument); // returns nil if player is 
 
                   if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) and (cap(vict.name^) = cap(argument)) then
                     begin
@@ -506,7 +532,10 @@ begin
                     exit;
                     end;
 
-                  vict := findPlayerWorld(nil, ch.name^);
+                  vict := findDualConnection(conn, ch.name^); // returns nil if player is not dual connected
+
+                  if not Assigned(vict) then
+                    vict := findPlayerWorld(nil, ch.name^);
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin
