@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.19 2002/08/03 19:13:52 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.20 2002/11/14 16:26:40 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -132,7 +132,7 @@ begin
           conn.Free;
 
           {$IFDEF LINUX}
-        	pthread_kill(conn.thread.handle, 9);
+          pthread_kill(THandle(conn.thread.handle), 9);
           {$ENDIF}
           {$IFDEF WIN32}
           TerminateThread(conn.thread.handle, 1);
@@ -151,7 +151,7 @@ begin
         bugreport('GCleanThread.Execute', 'clean.pas', 'Timer thread probably died');
 
         {$IFDEF LINUX}
-        pthread_kill(timer_thread.handle, 9);
+        pthread_kill(THandle(conn.thread.handle), 9);
         {$ENDIF}
         {$IFDEF WIN32}
         TerminateThread(timer_thread.handle, 1);
