@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.9 2003/10/21 09:31:52 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.10 2003/10/22 19:06:39 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -49,7 +49,7 @@ begin
 	
 	if (length(cmd) = 0) then
 		begin
-		ch.sendBuffer('I3 what?'#13#10);
+		ch.sendBuffer('Usage: I3 <mudlist/chanlist/chat/listen/tell>'#13#10);
 		exit;
 		end;
 		

@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.11 2003/10/21 09:31:51 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.12 2003/10/22 19:06:39 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -559,7 +559,22 @@ begin
 end;
 
 procedure GInterMud.handleTell(packet : GPacket_I3);
+var
+	visname, msg : string;
+	pl : GPlayer;
 begin
+	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+	
+	visname := GString(packet.fields[6]).value;
+	msg := GString(packet.fields[7]).value;
+	
+	if (pl <> nil) then
+		pl.sendBuffer(Format('%s@%s tells you: %s' + #13#10, [visname, packet.originator_mudname, msg]))
+	else
+		begin
+		debug('Could not find player "' + packet.target_username + '" referenced in tell packet.', 1);
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+		end;
 end;
 
 procedure GInterMud.handlePacket(packet : GPacket_I3);
