@@ -22,7 +22,8 @@ type
       procedure seek(pos : integer);
 
       function readLine : string;
-      function readNumber : integer;
+      function readInteger : integer;
+      function readCardinal : cardinal;
       function readWord : string;
       function readQuoted : string;
 
@@ -94,30 +95,24 @@ begin
 end;
 
 function GFileReader.readLine : string;
-var buf : array[0..255] of char;
+var buf : string;
     c : char;
-    s : integer;
 begin
-  s := 0;
   c := ' ';
+  buf := '';
 
   while (c <> #13) do
     begin
     c := readChar;
 
     if (c <> #13) then
-      begin
-      buf[s] := c;
-      inc(s);
-      end;
+      buf := buf + c;
     end;
 
-  buf[s] := #0;
-
-  readLine := strpas(buf);
+  readLine := buf;
 end;
 
-function GFileReader.readNumber : integer;
+function GFileReader.readInteger : integer;
 var c : char;
     number : integer;
     sign : boolean;
@@ -128,7 +123,7 @@ begin
     begin
     if (eof) then
       begin
-      readNumber := 0;
+      Result := 0;
       exit;
       end;
 
@@ -149,7 +144,7 @@ begin
 
   if not (c in ['0'..'9']) then
     begin
-    readNumber := 0;
+    Result := 0;
     exit;
     end;
 
@@ -157,7 +152,7 @@ begin
     begin
     if (eof) then
       begin
-      readNumber := number;
+      Result := number;
       exit;
       end;
 
@@ -169,9 +164,66 @@ begin
     number := 0 - number;
 
   if (c = '|') then
-    inc(number, readNumber);
+    inc(number, readInteger);
 
-  readNumber := number;
+  Result := number;
+end;
+
+function GFileReader.readCardinal : cardinal;
+var c : char;
+    number : cardinal;
+    sign : boolean;
+begin
+  c := ' ';
+
+  while (c in [' ', #13]) do
+    begin
+    if (eof) then
+      begin
+      Result := 0;
+      exit;
+      end;
+
+    c := readChar;
+    end;
+
+  number := 0;
+  sign := false;
+
+  if (c = '+') then
+    c := readChar
+  else
+  if (c = '-') then
+    begin
+    sign := true;
+    c := readChar;
+    end;
+
+  if not (c in ['0'..'9']) then
+    begin
+    Result := 0;
+    exit;
+    end;
+
+  while (c in ['0'..'9']) do
+    begin
+    if (eof) then
+      begin
+      Result := number;
+      exit;
+      end;
+
+    number := number * 10 + byte(c) - byte('0');
+    c := readChar;
+    end;
+
+  if (sign) then
+    number := 0 - number;
+
+  if (c = '|') then
+    inc(number, readCardinal);
+
+  Result := number;
 end;
 
 function GFileReader.readWord : string;
