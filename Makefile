@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.18 2004/03/22 14:55:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.19 2004/04/21 21:27:49 ***REMOVED*** Exp $
 #
 
 
@@ -27,15 +27,17 @@ endif
 all:	
 	$(MAKE) -C src
 ifdef WIN32
+	makejcldbg -J 'src\*.map'
+	makejcldbg -J 'src\modules\*.map'
 	$(CP) 'src\grendel.exe'
 	$(CP) 'src\grendelservice.exe'
 	$(CP) 'src\core.bpl'
-	$(CP) 'src\*.map'
+	$(CP) 'src\*.jdbg'
 	$(CP) 'src\copyover.exe'
 	$(CP) 'src\gmc\gmcc.exe'
 	$(CP) 'src\gmc\gasm.exe'
 	$(CP) 'src\modules\*.bpl' modules
-	$(CP) 'src\modules\*.map' modules
+	$(CP) 'src\modules\*.jdbg' modules
 endif
 ifdef LINUX
 	$(CP) src/grendel .
@@ -44,7 +46,6 @@ ifdef LINUX
 	$(CP) src/gmc/gmcc .
 	$(CP) src/gmc/gasm .
 	$(CP) src/modules/bpl*.so modules
-	$(CP) src/modules/*.map modules
 endif
 	
 
@@ -56,18 +57,16 @@ ifdef WIN32
 	$(RM) copyover.exe
 	$(RM) gmcc.exe
 	$(RM) gasm.exe
-	$(RM) *.map
+	$(RM) *.jdbg
 	$(RM) 'modules\*.bpl'
-	$(RM) 'modules\*.map'
+	$(RM) 'modules\*.jdbg'
 endif
 ifdef LINUX
 	$(RM) -f bpl*.so
 	$(RM) -f grendel
 	$(RM) -f gmcc
 	$(RM) -f gasm
-	$(RM) -f *.map
 	$(RM) -f modules/bpl*.so
-	$(RM) -f modules/*.map
 endif
 
 test:

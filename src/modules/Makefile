@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.10 2004/04/04 22:10:03 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.11 2004/04/21 21:27:49 ***REMOVED*** Exp $
 #
 
 
@@ -25,7 +25,7 @@ STATUS=status.bpl
 IMC3=imc3.bpl
 WEBSERVICE=webservice.bpl
 
-MODULES=$(COMMANDS) $(SPELLER) $(STATUS) $(IMC3) $(WEBSERVICE)
+MODULES=$(COMMANDS) $(SPELLER) $(STATUS) $(IMC3)
 
 CORE_SYM=..\\core
 CORE_FILE=..\\core.bpl
@@ -77,6 +77,7 @@ clean:
 	$(RM) $(IMC3)
 	$(RM) $(WEBSERVICE)
 	$(RM) *.map
+	$(RM) *.jdbg
 	$(RM) *.dcp
 	$(RM) *.dcu
 	$(RM) *.dpu

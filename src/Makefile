@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.9 2004/04/14 21:56:46 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.10 2004/04/21 21:27:49 ***REMOVED*** Exp $
 #
 
 
@@ -71,6 +71,7 @@ clean:
 	$(RM) $(COPYOVER) 
 	$(RM) $(CORE)
 	$(RM) *.map
+	$(RM) *.jdbg
 	$(RM) *.dcu
 	$(RM) *.dpu
 	$(RM) *.drc
