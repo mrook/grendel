@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.6 2004/02/18 23:10:57 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.7 2004/02/19 14:40:22 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -240,7 +240,7 @@ end;
 
 procedure GConnection.send(s : PChar; len : integer);
 var
-	t, compress_size : integer;
+	compress_size : integer;
 	compress_buf : array[0..4095] of char;
 begin
 	try
