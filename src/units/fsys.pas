@@ -2,7 +2,7 @@
   Summary:
   	Buffered filereader & writer
   
-  ## $Id: fsys.pas,v 1.5 2004/03/22 22:25:23 ***REMOVED*** Exp $
+  ## $Id: fsys.pas,v 1.6 2004/04/14 19:34:36 ***REMOVED*** Exp $
 }
 
 unit fsys;
@@ -327,7 +327,7 @@ var
 begin
   c := readChar;
 
-  while (c in [' ', #13, #10]) do
+  while (c in [' ', #9, #13, #10]) do
     begin
     if (eof) then
       begin
@@ -367,7 +367,7 @@ begin
       exit;
       end
     else
-    if (not quoted) and (pword^ in [' ', #10]) then
+    if (not quoted) and (pword^ in [' ', #9, #10]) then
       begin
       pword^ := #0;
       Result := word;
