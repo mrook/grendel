@@ -310,6 +310,12 @@ position: 4
 #end
 
 #command
+name: i3
+function: do_i3
+position: 4
+#end
+
+#command
 name: kill
 ;alias: ki
 alias: k

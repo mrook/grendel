@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.2 2003/10/02 08:23:20 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.3 2003/10/02 15:52:40 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -69,6 +69,7 @@ uses
 	WinSock2,
 	SysUtils,
 	console,
+	mudsystem,
 	util;
 
 
@@ -475,6 +476,7 @@ var
 	msg : string;
  	buf : array[0..MAX_READ - 1] of char;
 begin
+	Sleep(1000);
 	inputPointer := 0;
 
 	if (mud.preferredRouter = nil) then	
@@ -490,7 +492,7 @@ begin
 				begin
 				if (sock.connect(mud.preferredRouter.routerIP, mud.preferredRouter.routerPort)) then
 					begin
-					debug('Connected to ' + mud.preferredRouter.routerIP);
+					writeConsole('I3: Connected to ' + mud.preferredRouter.routerIP);
 
 					connected := true;
 
@@ -498,7 +500,7 @@ begin
 					end
 				else
 					begin
-					debug('Could not connect to ' + mud.preferredRouter.routerIP);
+					writeConsole('I3: Could not connect to ' + mud.preferredRouter.routerIP);
 					
 					// Wait 5 minutes
 					Sleep(5 * 60 * 1000);
@@ -530,16 +532,16 @@ begin
 
 					size := ntohl(size);
 
-					debug('Need ' + IntToStr(size + 4) + ' bytes, currently ' + IntToStr(inputPointer) + ' in buffer');
+					//debug('Need ' + IntToStr(size + 4) + ' bytes, currently ' + IntToStr(inputPointer) + ' in buffer');
 				
-					SetLength(msg, inputPointer);
+					{ SetLength(msg, inputPointer);
 					StrMove(@msg[1], @inputBuffer[4], inputPointer);
 					
 					for ret := 1 to inputPointer do
 						if (msg[ret] = #0) then
 							msg[ret] := ' ';
 					
-					//debug('Packet received so far: ' + msg);
+					//debug('Packet received so far: ' + msg); }
 						
 					if (inputPointer >= size + 4) then
 						begin
