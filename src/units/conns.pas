@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.3 2004/02/11 20:04:02 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -182,7 +182,7 @@ begin
   if (Assigned(FOnOpen)) then
   	FOnOpen();
 
-  writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.host_string + ')');
+  writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
    
   while (not Terminated) do
   	begin
