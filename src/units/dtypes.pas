@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.8 2004/03/13 13:19:35 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.9 2004/03/13 15:32:09 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -207,6 +207,12 @@ type
 	public
 		class function NewInstance : TObject; override;
 		procedure FreeInstance; override;
+		
+		{ Actual constructor, override this one instead of TObject.Create() }
+		constructor actualCreate(); virtual; abstract;
+		
+		{	Actual destructor, override this one instead of TObject.Destroy() }
+		destructor actualDestroy(); virtual; abstract;
 	end;
 {$M-}    
 
@@ -1299,12 +1305,20 @@ begin
 	if (not Assigned(Result)) then
 		begin
 		Result := inherited NewInstance;
+		GSingleton(Result).actualCreate();
 		singletonManager.addInstance(Result);
 		end;		
 end;
 
+{
+	Summary:
+		Frees the instance
+}
 procedure GSingleton.FreeInstance;
 begin
+	inherited FreeInstance;
+	
+	GSingleton(Self).actualDestroy();
 end;
 
 
@@ -1313,7 +1327,8 @@ initialization
   singletonManager := GSingletonManager.Create();
 
 finalization
-	str_hash.Free();
+	FreeAndNil(singletonManager);
+	FreeAndNil(str_hash);
 
 end.
 
