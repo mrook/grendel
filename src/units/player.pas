@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.6 2004/02/15 18:51:05 hemko Exp $
+	## $Id: player.pas,v 1.7 2004/02/16 23:05:51 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -285,7 +285,7 @@ begin
   else
   	begin
     state := CON_MOTD;
-
+    
     ch.setName(copyover_name);
     ch.load(copyover_name);
     send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
@@ -2600,9 +2600,9 @@ begin
     end; }
 
   if (IS_SET(cfg_flags, CFG_BLANK)) then
-    conn.send(#13#10);
-
-  conn.send(buf);
+		conn.send(#13#10 + buf)
+	else  
+	  conn.send(buf);
 end;
 
 // Player dies
