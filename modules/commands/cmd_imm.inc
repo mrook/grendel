@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.14 2001/11/24 15:16:07 xenon Exp $
+// $Id: cmd_imm.inc,v 1.15 2002/07/06 18:54:43 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -700,7 +700,14 @@ begin
     end;
 
   vict := findCharWorld(ch, param);
-  if (vict=nil) then
+  
+  if (vict.IS_IMMORT()) and (vict.level >= ch.level) then
+    begin
+    ch.sendBuffer('Cannot snoop a same or higher level immortal.'#13#10);
+    exit;
+    end
+  else
+  if (vict = nil) then
     begin
     ch.sendBuffer('That character does not exist.'#13#10);
     exit;
