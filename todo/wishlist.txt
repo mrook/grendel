@@ -2,6 +2,9 @@ Wishlist for the 1.0.x tree
 (! = closed, * = normal, l = lower priority)
 
 
+* we really need another way of registering commands to the server, pluggable interfaces?
+  maybe a rewrite of the damn thing
+
 * use XML extensively, use dynamic storage of properties in objects
 
   - player & area files: dynamic storage of "modifcation" specific data
