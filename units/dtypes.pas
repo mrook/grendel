@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.29 2003/09/16 16:26:04 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.30 2003/10/10 10:30:03 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -84,7 +84,6 @@ type
     GDLinkedList = class
    	private
       size : integer;						
-      lock : TCriticalSection;
       serial : integer;
 
 		published
@@ -441,7 +440,6 @@ begin
   tail := nil;
   size := 0;
   serial := 1;
-  lock := TCriticalSection.Create;
 end;
 
 {
@@ -450,8 +448,6 @@ end;
 }
 destructor GDLinkedList.Destroy;
 begin
-  lock.Free;
-
   inherited Destroy;
 end;
 
@@ -463,25 +459,19 @@ function GDLinkedList.insertLast(element : pointer) : GListNode;
 var
    node : GListNode;
 begin
-  try
-    lock.Acquire;
+	node := GListNode.Create(element, tail, nil);
 
-    node := GListNode.Create(element, tail, nil);
+	if (head = nil) then
+		head := node
+	else
+		tail.next := node;
 
-    if (head = nil) then
-      head := node
-    else
-      tail.next := node;
+	tail := node;
 
-    tail := node;
+	insertLast := node;
 
-    insertLast := node;
-
-    inc(size);
-    inc(serial);
-  finally
-    lock.Release;
-  end;
+	inc(size);
+	inc(serial);
 end;
 
 {
@@ -492,26 +482,20 @@ function GDLinkedList.insertAfter(tn : GListNode; element : pointer) : GListNode
 var
    node : GListNode;
 begin
-  try
-    lock.Acquire;
+	node := GListNode.Create(element, tn, tn.next);
 
-    node := GListNode.Create(element, tn, tn.next);
+	if (tn.next <> nil) then
+		tn.next.prev := node;
 
-    if (tn.next <> nil) then
-      tn.next.prev := node;
+	tn.next := node;
 
-    tn.next := node;
+	if (tail = tn) then
+		tail := node;
 
-    if (tail = tn) then
-      tail := node;
+	insertAfter := node;
 
-    insertAfter := node;
-
-    inc(serial);
-    inc(size);
-  finally
-    lock.Release;
-  end;
+	inc(serial);
+	inc(size);
 end;
 
 {
@@ -522,26 +506,20 @@ function GDLinkedList.insertBefore(tn : GListNode; element : pointer) : GListNod
 var
    node : GListNode;
 begin
-  try
-    lock.Acquire;
+	node := GListNode.Create(element, tn.prev, tn);
 
-    node := GListNode.Create(element, tn.prev, tn);
+	if (tn.prev <> nil) then
+		tn.prev.next := node;
 
-    if (tn.prev <> nil) then
-      tn.prev.next := node;
-      
-    tn.prev := node;
+	tn.prev := node;
 
-    if (head = tn) then
-      head := node;
+	if (head = tn) then
+		head := node;
 
-    insertBefore := node;
+	insertBefore := node;
 
-    inc(serial);
-    inc(size);
-  finally
-    lock.Release;
-  end;
+	inc(serial);
+	inc(size);
 end;
 
 {
@@ -550,25 +528,19 @@ end;
 }
 procedure GDLinkedList.remove(node : GListNode);
 begin
-  try
-    lock.Acquire;
+	if (node.prev = nil) then
+		head := node.next
+	else
+		node.prev.next := node.next;
 
-    if (node.prev = nil) then
-      head := node.next
-    else
-      node.prev.next := node.next;
+	if (node.next = nil) then
+		tail := node.prev
+	else
+		node.next.prev := node.prev;
 
-    if (node.next = nil) then
-      tail := node.prev
-    else
-      node.next.prev := node.prev;
-
-    dec(size);
-    inc(serial);
-    node.Free;
-  finally
-    lock.Release;
-  end;
+	dec(size);
+	inc(serial);
+	node.Free();
 end;
 
 {
@@ -973,7 +945,7 @@ end;
 }
 destructor GHashTable.Destroy;
 var
-   n : integer;
+	n : integer;
 begin
   for n := 0 to hashsize - 1 do
     begin
