@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.78 2003/11/04 16:40:50 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.79 2003/12/09 22:38:05 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -322,6 +322,7 @@ begin
 
   inventory := GDLinkedList.Create();
   equipment := GHashTable.Create(32);
+  equipment.setHashFunc(sortedHash);
   affects := GDLinkedList.Create();
 
   master := nil;
@@ -928,14 +929,14 @@ var
 begin
   getWield := nil;
 
-  obj := getEQ('rwield');
+  obj := getEQ('rightwield');
   if (obj <> nil) and (obj.item_type = item_type) then
     begin
     getWield := obj;
     exit;
     end;
 
-  obj := getEQ('lwield');
+  obj := getEQ('leftwield');
   if (obj <> nil) and (obj.item_type = item_type) then
     begin
     getWield:=obj;
@@ -943,7 +944,7 @@ begin
     end;
 end;
 
-function GCharacter.getDualWield : GObject;
+function GCharacter.getDualWield() : GObject;
 begin
   getDualWield := nil;
 
@@ -951,8 +952,8 @@ begin
   if (LEARNED(gsn_dual_wield) = 0) then
     exit;
 
-  if (getEQ('rwield') <> nil) and (getEQ('lwield') <> nil) then
-    getDualWield := getEQ('lwield');
+  if (getEQ('rightwield') <> nil) and (getEQ('leftwield') <> nil) then
+    getDualWield := getEQ('leftwield');
 end;
 
 procedure GCharacter.affectObject(obj : GObject; remove : boolean);

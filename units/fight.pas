@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.32 2003/11/03 13:23:22 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.33 2003/12/09 22:38:06 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -630,7 +630,7 @@ begin
     if (not dual_flip) then
       begin
       dual_flip := true;
-      wield := ch.getEQ('rwield');
+      wield := ch.getEQ('rightwield');
       end
     else
       dual_flip := false;
