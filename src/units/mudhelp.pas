@@ -2,7 +2,7 @@
 	Summary:
 		Online help interface
 
-	## $Id: mudhelp.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
+	## $Id: mudhelp.pas,v 1.6 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit mudhelp;
@@ -309,7 +309,7 @@ end;
 
 procedure cleanupHelp();
 begin
-  helpFiles.clean();
+  helpFiles.clear();
   helpFiles.Free();
 end;
 

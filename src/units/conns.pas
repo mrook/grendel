@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.12 2004/03/11 17:18:47 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.13 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -492,7 +492,7 @@ end;
 
 procedure cleanupConns();
 begin
-  connection_list.clean();
+  connection_list.clear();
   connection_list.Free();
 end;
 

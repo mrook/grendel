@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.17 2004/03/11 17:18:47 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.18 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -1329,7 +1329,7 @@ var
 	node, node_next : GListNode;
 	tc : GUserChannel;
 begin
-  aliases.clean();
+  aliases.clear();
   aliases.Free();
 
   node := channels.head;
@@ -1343,10 +1343,10 @@ begin
     node := node_next;
     end;
  
-  channels.clean();
+  channels.clear();
   channels.Free();
 
-  skills_learned.clean();
+  skills_learned.clear();
   skills_learned.Free();
   
   _fields.clear();

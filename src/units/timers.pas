@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.7 2004/03/11 17:18:47 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.8 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -494,7 +494,7 @@ end;
 
 procedure cleanupTimers();
 begin
-  timer_list.clean();
+  timer_list.clear();
   timer_list.Free();
 end;
 

@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.10 2004/03/08 23:30:07 hemko Exp $
+  ## $Id: chars.pas,v 1.11 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -319,7 +319,7 @@ end;
 
 destructor GUserChannel.Destroy();
 begin	
-  history.clean();
+  history.clear();
   history.Free();
   
   inherited Destroy();
@@ -344,10 +344,10 @@ end;
 // GCharacter destructor
 destructor GCharacter.Destroy();
 begin
-  affects.clean();
+  affects.clear();
   affects.Free();
 
-  inventory.clean();
+  inventory.clear();
   inventory.Free();
   
   equipment.clear();
@@ -1348,21 +1348,22 @@ end;
 
 procedure cleanExtractedChars();
 begin
-  extracted_chars.clean();
+  extracted_chars.clear();
 end;
 
 procedure initChars();
 begin
   char_list := GDLinkedList.Create();
   extracted_chars := GDLinkedList.Create();
+  extracted_chars.ownsObjects := false;
 end;
 
 procedure cleanupChars();
 begin
-  char_list.clean();
+  char_list.clear();
   char_list.Free();
 
-//  extracted_chars.clean();
+  extracted_chars.clear();
   extracted_chars.Free();
 end;
 

@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.6 2004/02/28 15:53:24 hemko Exp $
+	## $Id: race.pas,v 1.7 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -325,7 +325,7 @@ end;
 
 procedure cleanupRaces();
 begin
-  raceList.clean();
+  raceList.clear();
   raceList.Free();
 end;
 

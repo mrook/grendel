@@ -2,7 +2,7 @@
   Summary:
     System events
   
-  ##  $Id: events.pas,v 1.2 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ##  $Id: events.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit events;
@@ -65,7 +65,7 @@ begin
 	
 	if (list <> nil) then
 		begin
-		list.clean();
+		list.clear();
 		list.Free();
 		eventList.remove(name);
 		end;

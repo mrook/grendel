@@ -2,7 +2,7 @@
   Summary:
   	Clan routines
   
-  ##	$Id: clan.pas,v 1.2 2004/02/27 22:24:20 ***REMOVED*** Exp $
+  ##	$Id: clan.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit clan;
@@ -202,7 +202,7 @@ end;
 
 procedure cleanupClans();
 begin
-  clan_list.clean();
+  clan_list.clear();
   clan_list.Free();
 end;
 

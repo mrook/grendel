@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.9 2004/03/08 23:30:07 hemko Exp $
+	## $Id: mudsystem.pas,v 1.10 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -791,7 +791,7 @@ begin
   socials.clear();
   socials.Free();
 
-  dm_msg.clean();
+  dm_msg.clear();
   dm_msg.Free();
   
   auction_good.Free();

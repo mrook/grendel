@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.7 2004/02/28 15:53:24 hemko Exp $
+  ##	$Id: skills.pas,v 1.8 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit skills;
@@ -761,15 +761,17 @@ begin
   inherited Create();
 
   affects := GDLinkedList.Create();
+  
   prereqs := GDLinkedList.Create();
+  prereqs.ownsObjects := false;
 end;
 
 destructor GSkill.Destroy;
 begin
-  affects.clean();
+  affects.clear();
   affects.Free();
 
-  prereqs.smallClean();
+  prereqs.clear();
   prereqs.Free();
   
   inherited Destroy();
@@ -798,7 +800,7 @@ end;
 
 procedure cleanupSkills();
 begin
-  skill_table.clean();
+  skill_table.clear();
   skill_table.Free();
 end;
 

@@ -2,7 +2,7 @@
 	Summary:
 		System tray icon routines
 		
-	## $Id: systray.pas,v 1.2 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: systray.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit systray;
@@ -302,7 +302,7 @@ procedure cleanupSysTray();
 begin
   DestroyMenu(menu);
   
-  menuitems.clean();
+  menuitems.clear();
   menuitems.Free();
 end;
   

@@ -2,7 +2,7 @@
   Summary:
   	Abstract(Bulletinboard (noteboard) interface
   	
-	## $Id: bulletinboard.pas,v 1.4 2004/02/28 15:53:24 hemko Exp $
+	## $Id: bulletinboard.pas,v 1.5 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit bulletinboard;
@@ -228,7 +228,7 @@ end;
 
 procedure cleanupNotes();
 begin
-  notes.clean();
+  notes.clear();
   notes.Free();
 end;
 

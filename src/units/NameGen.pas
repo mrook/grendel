@@ -2,7 +2,7 @@
 	Summary:
 		Phonetic namegenerator
 
-	## $Id: NameGen.pas,v 1.2 2004/02/27 22:24:20 ***REMOVED*** Exp $
+	## $Id: NameGen.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
 }
 
 unit NameGen;
@@ -87,7 +87,7 @@ end;
 
 destructor TPhoneme.Destroy();
 begin
-  phoneme_parts.Clean();
+  phoneme_parts.Clear();
   phoneme_parts.Free();
   
   inherited Destroy;
@@ -131,7 +131,7 @@ end;
 
 destructor TNameTemplate.Destroy();
 begin
-  template_parts.Clean();
+  template_parts.Clear();
   template_parts.Free();
   
   inherited Destroy;
@@ -324,9 +324,9 @@ end;
 
 procedure reloadNameTables();
 begin
-  PhonemeList.Clean();
+  PhonemeList.Clear();
   PhonemeList.Free();
-  NameTemplateList.Clean();
+  NameTemplateList.Clear();
   NameTemplateList.Free();
   namegenerator_enabled := false;
   writeConsole('Reloading ' + NameTablesDataFile + '.');
