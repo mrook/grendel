@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.7 2004/02/16 23:06:59 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.8 2004/02/18 20:49:21 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -142,11 +142,7 @@ end;
 procedure cleanupServer();
 var
 	node : GListNode;
-	f : file;
 begin
-	AssignFile(f, 'grendel.run');
-	Erase(f);
-
 	writeConsole('Terminating threads...');
 	
 	mud_booted := false;
@@ -422,7 +418,12 @@ end;
   and their data is saved properly. Also, this routine makes sure the
   server reboots automatically, no script needed! - Grimlord }
 procedure reboot_exitproc;far;
+var
+	f : TextFile;
 begin
+	AssignFile(f, 'grendel.run');
+	Erase(f);
+
   { okay, so we crashed :) }
   if (not grace_exit) then
     begin
