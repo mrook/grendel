@@ -953,6 +953,7 @@ var
    prog : GProgram;
    shop : GShop;
    obj : GObjectIndex;
+   a : integer;
 begin
   assign(f, 'areas\' + fn);
   {$I-}
@@ -987,7 +988,7 @@ begin
 
     writeln(f, '#', room.vnum);
     writeln(f, room.name^);
-    writeln(f, room.description);
+    write(f, room.description);
     writeln(f, '~');
 
     write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
@@ -1004,7 +1005,7 @@ begin
 
       write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
 
-      if (length(ex.keywords^) > 0) then
+      if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
         writeln(f, ' ', ex.keywords^)
       else
         writeln(f);
@@ -1017,7 +1018,7 @@ begin
       begin
       extra := node_ex.element;
 
-      writeln(f, 'D ', extra.keywords);
+      writeln(f, 'E ', extra.keywords);
       write(f, extra.description);
       writeln(f, '~');
 
@@ -1085,6 +1086,10 @@ begin
 
       node_ex := node_ex.next;
       end;
+
+    for a := 0 to MAX_SKILLS - 1 do
+      if (npcindex.learned[a] > 0) then
+        writeln(f, 'skill: ', skill_table[a].name);
 
     node := node.next;
     end;
