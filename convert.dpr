@@ -408,6 +408,15 @@ begin
           end;
       until (s = '#0')
     else
+    if (s = '#RANGES') then
+      begin
+      are.r_lo := af.readInteger();
+      are.r_hi := af.readInteger();
+      are.m_lo := af.readInteger();
+      are.m_hi := af.readInteger();
+      s := af.readLine;
+      end
+    else   
     if (s = '#RESETS') then
       repeat
         s := af.readLine;
