@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.27 2004/04/03 16:06:19 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.28 2004/04/03 19:08:13 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -326,6 +326,7 @@ var
 	client_addr : TSockAddr_Storage;
 	cl : PSockaddr;
 	sk : GSocket;
+	conn : GPlayerConnection;
 	
 	{$IFDEF WIN32}
 	pipe : THandle;
@@ -396,7 +397,8 @@ begin
 			sk.socketAddress := client_addr;
 			sk.resolve(system_info.lookup_hosts);
 
-			GPlayerConnection.Create(sk, true, g);
+			conn := GPlayerConnection.Create(sk, true, g);
+			conn.Resume();
 			end;
 	until (not suc);
 
@@ -421,7 +423,8 @@ begin
 			sk.socketAddress := client_addr;
 			sk.resolve(system_info.lookup_hosts);
 
-			GPlayerConnection.Create(sk, true, name);
+			conn := GPlayerConnection.Create(sk, true, name);
+			conn.Resume();
 			end;
 
 		CloseFile(input);
