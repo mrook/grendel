@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.35 2001/04/21 18:31:20 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.36 2001/04/22 15:10:05 xenon Exp $
 
 unit chars;
 
@@ -853,8 +853,17 @@ begin
 
     aliases := GDLinkedList.Create;
     skills_learned := GDLinkedList.Create;
-    max_skills := 0;
-    max_spells := 0;
+    if (race <> nil) then
+    begin
+      max_skills := race.max_skills;
+      max_spells := race.max_spells;
+    end
+    else
+    begin
+      max_skills := 0;
+      max_spells := 0;
+    end;
+    pracs := 10; // default for new players(?)
 
     active_board := 1;
     boards[BOARD1] := 0;
