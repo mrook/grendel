@@ -19,7 +19,7 @@ Grendel's TODO list with probable release date/version
 ! rework input routine, make sure tintin/jmc work again
 ! change all use of string to PString where strings are shared
 ! add extra descriptions to rooms, exits, objects
-! 'drink' without params should drink from first fountain in room
+! 'drink' without params should drink fro4m first fountain in room
 ! generic timer implementation
 ! holywalk (walk thru anything)
 ! reimplement editing
@@ -54,9 +54,9 @@ Grendel's TODO list with probable release date/version
 ! (0.4.4) (silently) prolonging spells
 ! (0.4.4) save channelignores in pfile
 ! (0.4.4) Variable usage in aliases - '%' will now expand to everything typed after the alias
+! (0.4.4) re-implement "Switch" and "Snoop"
 
 
-- (0.4.4) re-implement "Switch" and "Snoop"
 - (0.4.4) command to switch tank in a group
 - (0.4.4) command to switch leadership of a group
 - (0.4.4) trying to wear an object on a position that's already occupied results in a switch
@@ -69,7 +69,6 @@ Grendel's TODO list with probable release date/version
           mobile create/edit, reset edit etc.
 - (long)  expand tracking system
 - (long)  reloadarea command
-- (long)  waitstates for commands
 - (long)  use race defined size of characters (base movement costs on size, room size?)
 
 	

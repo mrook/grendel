@@ -33,6 +33,11 @@ Wishlist for the new 0.5.x tree
     
   - possibly rewrite/rename the fighting & magic code, this will break
     compatibility but improve code re-usage and stability
+
+  - remove special timer states, unify as action timer
+
+  - generally clean up code according to new coding standard,
+    remove obsolete stuff like GObjectIndex etc.
   
 * generalize races & clans to configurable character "modifications",
   with some form of plugin architecture to add specific behaviours to
@@ -40,6 +45,9 @@ Wishlist for the new 0.5.x tree
   
   - modifications possible for areas as well, enables "dynamic" areas,
     such as randomizing mazes etc.
+    
+  - give races unique 'wear' locations; dragons should wear armor on their wings
+    instead of their arms
 
 * use coordinates and mpfindpath code to make NPCs more intelligent
 
