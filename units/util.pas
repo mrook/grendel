@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.24 2003/11/07 16:31:52 hemko Exp $)
+  @lastmod($Id: util.pas,v 1.25 2003/11/26 19:53:08 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -381,10 +381,10 @@ begin
     inc(x);
     end;
 
-  if (s[1] = '"') then
+  if ((s[1] = '"') or (s[1] = '''')) then
     s[1] := ' ';
   
-  if (s[length(s)] = '"') then
+  if ((s[length(s)] = '"') or (s[length(s)] = '''')) then
     s[length(s)] := ' ';
     
   Result := Trim(s);
