@@ -603,7 +603,7 @@ begin
   begin
   	 conn := GConnection(conn_node.element);
 
-    if (conn.ch<>nil) then
+    if (conn.ch <> nil) and (conn.ch.name <> nil) then
       s := conn.ch.name^
     else
       s := '-';
