@@ -19,4 +19,9 @@ void onReset(external ch)
 void onGive(external ch, external target, external obj)
  - is called when 'target' gives 'obj' to 'ch'
  
-
+void onEmoteTarget(external victim, external actor, string arg)
+ - is called when (e.g.) mob is target of an emote (e.g. 'slap <mobname>');
+   'victim' is the target, e.g. the mob; 'actor' the person executing the emote
+   (you, when you slap a mob); 'arg' will contain the emotename (Name:-field from
+   system\socials.dat) (e.g. 'SLAP' when entry point action the default emote
+   handling (as defined in checkSocial() in mudsystem.pas) will not be executed.
