@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.37 2001/07/18 14:15:57 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.38 2001/07/30 13:00:19 ***REMOVED*** Exp $
 
 unit constants;
 
@@ -191,8 +191,9 @@ const PLR_NPC=BV00;
       PLR_DENY=BV06;            { denied? }
       PLR_FROZEN=BV07;          { frozen }
       PLR_SILENCED=BV08;        { silenced }
-      PLR_HOLYWALK = BV09;          { walk thru anything }
-      PLR_HOLYLIGHT = BV10;         { see anything }
+      PLR_HOLYWALK = BV09;      { walk thru anything }
+      PLR_HOLYLIGHT = BV10;     { see anything }
+      PLR_CLOAK = BV11;	{ immortals don't get logged }
 
 { Config flags }
 const CFG_ASSIST=BV01;

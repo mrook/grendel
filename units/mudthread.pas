@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.57 2001/07/28 20:53:27 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.58 2001/07/30 13:00:20 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -359,7 +359,7 @@ begin
           if (system_info.log_all) or (ch.logging) then
             write_log(ch.name^ + ': ' + line);
 
-          if (cmd.level >= LEVEL_IMMORTAL) then
+          if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
             write_console('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
           try

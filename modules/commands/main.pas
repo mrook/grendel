@@ -849,4 +849,5 @@ begin
   registerCommand('do_findpath', do_findpath);
   registerCommand('do_reload', do_reload);
   registerCommand('do_modules', do_modules);
+  registerCommand('do_cloak', do_cloak);
 end.

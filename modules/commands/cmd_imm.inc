@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.3 2001/07/30 11:11:45 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.4 2001/07/30 13:00:16 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -2399,3 +2399,19 @@ begin
   talk_channel(ch,param,CHANNEL_THUNDER,'thunder',AT_THUNDER);
 end;}
 
+procedure do_cloak(ch : GCharacter; param : string);
+begin
+  if (ch.IS_NPC) then
+    exit;
+
+  if (IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
+    begin
+    ch.sendBuffer('Cloak off.'#13#10);
+    REMOVE_BIT(GPlayer(ch).flags, PLR_CLOAK);
+    end
+  else
+    begin
+    ch.sendBuffer('Cloak on.'#13#10);
+    SET_BIT(GPlayer(ch).flags, PLR_CLOAK);
+    end;
+end;

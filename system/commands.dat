@@ -911,6 +911,13 @@ position: 0
 #end
 
 #command
+name: cloak
+function: do_cloak
+level: 1000
+position: 0
+#end
+
+#command
 name: connections
 function: do_connections
 level: 995

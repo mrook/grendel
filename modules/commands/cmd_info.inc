@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.1 2001/07/28 20:53:26 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.2 2001/07/30 13:00:17 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1280,6 +1280,9 @@ begin
 
   if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).flags, PLR_HOLYLIGHT)) then
     ch.sendBuffer('Holy light is on.'#13#10);
+
+  if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
+    ch.sendBuffer('You are cloaked.'#13#10);
 
   h:=0;
   act(AT_REPORT, #13#10'$B$1[$B$7Current affects:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);
