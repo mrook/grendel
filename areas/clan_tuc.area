@@ -1,0 +1,74 @@
+#RANGES
+30000 30100 30000 30100 30000 30100
+
+#AREA
+The TUC Clanbase
+Grimlord
+A brilliant flash of light nearly blinds you.
+6
+7 17 0
+
+#ROOMS
+#30000
+Entrance to The Underground
+The gates to the base of TUC, The Underground Clan, loom over you
+as you approach the entrance. The sheer number of guards and loyal
+men ready to defend this base make you gasp in astonishment.
+~
+0 0 0 2
+D 30001 1 0 0
+D 100 5 1|2|16 0 'the Rift'
+S
+#30001
+Inside the gates
+Welcome, TUC Member. You have entered the clanbase. The paved way
+continues to the north. To the west and east you see small alleys
+lining the walls.
+~
+0 0 0 1
+D 30002 1 0 0
+D 30000 3 0 0
+S
+#30002
+A paved road
+This little paved road leads to the central square, where the clan
+armourer, the bank and other shops can be found.
+~
+0 0 0 2
+D 30001 3 0 0
+S
+#END
+
+#MOBILES
+#30000
+a guard
+a loyal guard of TUC is here
+a loyal guard of TUC stands here, waiting for danger
+400 0 'The Underground Clan'
+0 8 0 0 0
+#END
+
+#OBJECTS
+#30000
+a TUC ring
+a shining ring of TUC
+a beautiful clan-ring lies here, dropped by its owner
+2 1 2
+0 3 -2 0
+1 354 0
+#END
+
+#RESETS
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+M: 30000 30000 10
+#END
+
+$

@@ -1,0 +1,155 @@
+#AREA
+The Old Iron Mine
+Grimlord
+A piece of rock slides from the hill and falls down.
+5
+5 17 0
+
+#ROOMS
+#500
+A steep slope up the hill
+A small steep passage leads up through the hills, nearing the abandoned
+mines of Neyrat. The smells of destruction and massacres are very clear
+here, leftovers from the last great war. To the west you see Gailen Road,
+leading to the great city of Gailen.
+~
+0 0 0 4
+D 706 4 0 0
+D 501 2 0 0
+S
+#501
+A steep slope up the hill
+A small steep passage leads up through the hills, nearing the abandoned
+mines of Neyrat. The smells of destruction and massacres are very clear
+here, leftovers from the last great war.
+~
+0 0 0 4
+D 500 4 0 0
+D 502 2 0 0
+S
+#502
+A steep slope up the hill
+A small steep passage leads up through the hills, nearing the abandoned
+mines of Neyrat. The smells of destruction and massacres are very clear
+here, leftovers from the last great war.
+~
+0 0 0 4
+D 501 4 0 0
+D 503 2 0 0
+S
+#503
+A turn in the passage
+The passage turns north, bringing you higher and higher. The road
+gets less easy to traverse. You find yourself clinging to the sides
+and trying to keep your balance.
+~
+0 0 0 4
+D 502 4 0 0
+D 504 1 0 0
+S
+#504
+The road gets smaller
+As the road continues north, up into the mountains, you have trouble
+keeping your balance and trying to stay upright. The rocks on this
+road aren't much help either.
+~
+0 0 0 4
+D 503 3 0 0
+D 505 1 0 0
+S
+#505
+The road climbs
+The first major altitude problem rises in front of you. Without
+the proper gear, you will not be able to travel any further.
+You wonder how the miners traversed this road long ago.
+~
+0 0 0 4
+D 504 3 0 0
+D 506 6 0 0
+S
+#506
+The road climbs
+The first major altitude problem rises in front of you. Without
+the proper gear, you will not be able to travel any further.
+You wonder how the miners traversed this road long ago.
+~
+0 0 0 4
+D 505 5 0 0
+D 507 6 0 0
+S
+#507
+The road turns
+The passage turns west here. You still have trouble keeping your
+balance. You make a mental note to tell this to the local mayor!
+~
+0 0 0 4
+D 506 5 0 0
+D 508 4 0 0
+S
+#508
+Nearing the mines
+You are nearing the mines, abandoned long ago during the last great
+war. Lying here and there are various objects and tools that used
+to be in the posession of the miners.
+~
+0 0 0 4
+D 507 2 0 0
+D 509 4 0 0
+S
+#509
+Getting closer to the entrance
+The litter increases steadily as you approach the entrance of
+the mines of Neyrat. In front of you, you see a railway track
+heading into the hill. The entrance, a hole in the mountain,
+supported by wooden bars is decaying.
+~
+0 0 0 4
+D 508 2 0 0
+D 510 4 0 0
+S
+#510
+The entrance to the mines
+The wood cracks and groans under the weight of the rocks. You don't
+know how long it will last. A small cart blocks part of the entrance.
+~
+0 0 0 4
+D 509 2 0 0
+D 511 4 0 0
+S
+#511
+Inside the mine
+This close to the entrance, there still is enough light. But farther
+ahead, you will not be able to see a thing without a torch.
+~
+0 0 0 1
+D 510 2 0 0
+S
+#END
+
+#MOBILES
+#500
+a dwarven miner
+a dwarven miner is here
+a dwarven miner, obviously confused, stands here
+25 0
+5 0 0 0 0
+#501
+a dwarven guide
+a dwarven guide
+a dwarven guide wanders here, looking for miners
+28 0
+4 0 0 0 0
+#END
+
+#OBJECTS
+#END
+
+#RESETS
+M: 500 511 3
+M: 500 508 3
+M: 500 509 3
+M: 501 504 2
+M: 501 506 2
+#END
+
+$

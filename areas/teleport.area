@@ -1,0 +1,82 @@
+#area
+The Teleport Testsite
+Grimlord
+You are being... haha, just kidding.
+6
+0 0 0
+
+#rooms
+#6000
+A teleport test room
+This is a test room... Bye!
+~
+32768 0 0 2 6001 12
+S
+#6001
+A teleport test room
+This is a test room... Bye!
+~
+32768 0 0 2 6002 12
+S
+#6002
+A teleport test room
+This is a test room... Bye!
+~
+32768 0 0 2 6003 12
+S
+#6003
+A teleport test room
+This is a test room... Bye!
+~
+32768 0 0 2 6004 12
+S
+#6004
+A teleport test room
+This is the end!
+~
+0 0 0 2
+D 6005 6 0 0
+S
+#6005
+A teleport test room
+Another room!
+~
+0 0 0 2
+S
+#6006
+At the top of the stairs
+You are standing at the top of the stairs.
+~
+0 0 0 2
+D 6007 5 0 0
+S
+#6007
+Falling down the stairs
+Obviously no longer the top of the stairs.
+~
+65536 0 0 2
+D 6008 5 0 0
+S
+#6008
+Falling down the stairs
+Obviously no longer the top of the stairs.
+~
+65536 0 0 2
+D 6009 5 0 0
+S
+#6009
+Falling down the stairs
+Obviously no longer the top of the stairs.
+~
+65536 0 0 2
+D 6010 5 0 0
+S
+#6010
+Landing at the base of the stairs
+Ouch.
+~
+0 0 0 2
+S
+#end
+
+$

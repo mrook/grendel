@@ -1,0 +1,151 @@
+#AREA
+Gailen Road
+Grimlord
+A bird, high up in the trees, starts a song.
+7
+7 18 0
+
+#ROOMS
+#700
+Gailen Road
+This is the road to the city of Gailen. To the south you see the
+great junction of roads. To the east, you see the path leading
+to the Cuckoo's Nest.
+~
+0 0 0 3
+D 100 3 0 0
+D 701 4 0 0
+D 423 2 0 0
+S
+#701
+Gailen Road
+This is the road to the city of Gailen. You see peasants
+working on the fields. To the southeast, you still see
+the great junction of roads.
+~
+0 0 0 3
+D 700 2 0 0
+D 702 1 0 0
+S
+#702
+Gailen Road
+This is the road to the city of Gailen. You see peasants
+working on the fields. To the north, you see a great castle
+protecting the region. The road continues south.
+~
+0 0 0 3
+D 701 3 0 0
+D 703 1 0 0
+S
+#703
+Gailen Road
+This is the road to the city of Gailen. To the north, you see the
+big castle of Lord Pakthan, one of the great knights of the War.
+The road continues to the south and the west.
+~
+0 0 0 3
+D 702 3 0 0
+D 704 4 0 0
+D 600 1 0 0
+S
+#704
+Gailen Road
+This is the road to the city of Gailen. You see peasants
+working on the fields. To the east you can see the walls
+of Lord Pakthan's castle.
+~
+0 0 0 3
+D 703 2 0 0
+D 705 4 0 0
+S
+#705
+Gailen Road
+This is the road to the city of Gailen. You see peasants
+working on the fields. Northwards, you can see a small junction.
+~
+0 0 0 3
+D 704 2 0 0
+D 706 1 0 0
+S
+#706
+Junction in Gailen Road
+You stand at a small junction in the road to Gailen. The road continues
+to the north and south, to the east you see a road leading to the
+abandoned mines of Neyrat.
+~
+0 0 0 3
+D 705 3 0 0
+D 500 2 0 0
+D 707 1 0 0
+S
+#707
+Gailen Road
+The Gailen road continues north. To the south you
+see a small junction. Peasants, working on the fields
+beside you, greet you as you pass.
+~
+0 0 0 3
+D 706 3 0 0
+D 708 1 0 0
+S
+#708
+Nearing a forest
+To the north you can see a forest becoming increasingly
+bigger, growing dense with large trees. The Gailen Road
+continues to the south.
+~
+0 0 0 3
+D 707 3 0 0
+D 709 1 0 0
+S
+#709
+Walking through a forest
+The Gailen Road is more like a forest road at this
+point. Large trees loom over you, taking away most of the
+sunlight. The road continues east and south.
+~
+0 0 0 4
+D 708 3 0 0
+D 710 2 0 0
+S
+#710
+A forest road
+You are amazed at the sight of all those trees forming
+a roof over the forest, taking away all the sunlight. The 
+surface is covered with rotten leaves.
+~
+0 0 0 4
+D 709 4 0 0
+D 711 1 0 0
+S
+#711
+A forest road
+You are amazed at the sight of all those trees forming
+a roof over the forest, taking away all the sunlight. The 
+surface is covered with rotten leaves.
+~
+0 0 0 4
+D 710 3 0 0
+D 712 4 0 0
+S
+#712
+A forest road
+You are amazed at the sight of all those trees forming
+a roof over the forest, taking away all the sunlight. The 
+surface is covered with rotten leaves.
+~
+0 0 0 4
+D 711 2 0 0
+S
+#END
+
+#MOBILES
+#END
+
+#OBJECTS
+#END
+
+#RESETS
+#END
+
+$

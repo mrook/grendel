@@ -1,0 +1,157 @@
+#RANGES
+800 808 800 800 2147483647 -1
+
+#AREA
+Intergalactic Newbie Zone
+Grimlord
+A chilling deathcry freezes your bones.
+6
+6 16 0
+
+#ROOMS
+#800
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 803 2 0 0
+D 801 3 0 0
+D 809 1 0 0
+S
+#802
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 801 1 0 0
+D 805 2 0 0
+S
+#804
+Water
+You are not supposed to be here.
+~
+0 0 500 9
+D 803 1 0 0
+D 807 2 0 0
+D 805 3 0 0
+D 801 4 0 0
+S
+#806
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 807 3 0 0
+D 803 4 0 0
+S
+#808
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 807 1 0 0
+D 805 4 0 0
+S
+#810
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 809 3 0 0
+S
+#801
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 800 1 0 0
+D 804 2 0 0
+D 802 3 0 0
+S
+#803
+Water
+You are not supposed to be here.
+~
+0 0 500 9
+D 806 2 0 0
+D 804 3 0 0
+D 800 4 0 0
+S
+#805
+Water
+You are not supposed to be here.
+~
+0 0 500 9
+D 804 1 0 0
+D 808 2 0 0
+D 802 4 0 0
+S
+#807
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 806 1 0 0
+D 808 3 0 0
+D 804 4 0 0
+S
+#809
+A border in the zone
+You stand at the border of the newbie zone.
+A sign planted here reads: 'Thou shalt not cross
+this line!'
+~
+0 0 500 6
+D 800 3 0 0
+D 810 1 0 0
+S
+#END
+
+#MOBILES
+#800
+some punk
+some punk is here
+some punk, waving a sharp pole, stands here defiantly
+400 0
+5 0 0 0 0
+#END
+
+#OBJECTS
+#END
+
+#RESETS
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+M 800 800 15
+#END
+
+#SHOPS
+#END
+
+$

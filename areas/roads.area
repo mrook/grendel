@@ -1,0 +1,571 @@
+#RANGES
+100 199 100 199 100 199
+
+#AREA
+Central Ruia
+Grimlord
+A fresh wind blows through your hair.
+35
+8 18 0
+
+#ROOMS
+#100
+The Great Junction
+The wind blows through your hair as you arrive at the great junction
+of roads, the central point in Ruia. Here, 3 roads come together.
+To the south, the road to Southaven. To the north, the road to Gailen and
+Castle Pakthan. To the east, you see the Warriors School.
+~
+0 0 500 3
+D 700 1 0 0
+D 200 2 0 0
+D 101 3 0 0
+E sign
+The sign says 'Southaven south'.
+~
+S
+#101
+Southaven Road
+This road is one of the main roads leading through Ruia. It takes you
+from the junction to Southaven or back. The road is paved well and
+walking on this road is pleasant.
+~
+0 0 500 3
+D 100 1 0 0
+D 102 3 0 0
+S
+#102
+Southaven Road
+The fields on either side of the road are richly filled with crops,
+ready to be harvested by the local peasants. The road continues to
+the north and south.
+~
+0 0 500 3
+D 101 1 0 0
+D 103 3 0 0
+S
+#103
+A bend in Southaven Road
+The fields on either side of the road are richly filled with crops,
+ready to be harvested by the local peasants. The road makes a
+little bend to the east right here.
+~
+0 0 500 3
+D 102 1 0 0
+D 104 2 0 0
+S
+#104
+A bend in Southaven Road
+You deeply inhale the clear and fresh air as you walk down the road.
+Birds are chirping and singing in the woods to the west.
+~
+0 0 500 3
+D 105 3 0 0
+D 103 4 0 0
+S
+#105
+Southaven Road
+You deeply inhale the clear and fresh air as you walk down the road.
+Birds are chirping and singing in the woods to the west.
+The road continues south and north.
+~
+0 0 500 3
+D 104 1 0 0
+D 106 3 0 0
+S
+#106
+Southaven Road
+The peasants, working the land on either side of the road, greet you
+as you pass them. Well-equipped, they are harvesting the crops in
+the fields. The harvest is good this year.
+~
+0 0 500 3
+D 105 1 0 0
+D 107 3 0 0
+S
+#107
+A slight turn in the road
+The peasants, working the land on either side of the road, greet you
+as you pass them. Well-equipped, they are harvesting the crops in
+the fields. The harvest is good this year. The road bends to the west.
+~
+0 0 500 3
+D 106 1 0 0
+D 108 4 0 0
+S
+#108
+Southaven Road
+Ahead, you see a big forest, richly filled with trees of all sorts and
+sizes. You hear the birds singing their songs, the crickets making their
+noises in the fields, the sounds of peasants harvesting.
+~
+0 0 500 3
+D 107 2 0 0
+D 109 4 0 0
+S
+#109
+A turn in the road
+The road turns south again, leading you away from the forest.
+On the west you see some fields. To the east, more and more
+rocks are grouped together, slowly forming a hill.
+~
+0 0 500 3
+D 108 2 0 0
+D 110 3 0 0
+S
+#110
+Southaven Road
+The hill grows larger and closer to the read as you continue your
+way south. To the west, you can still see the fields clearly, with
+the peasants harvesting.
+~
+0 0 500 3
+D 109 1 0 0
+D 111 3 0 0
+S
+#111
+Southaven Road
+More and more flanked by a strange, steep hill of rocks, the road
+continues to the south.
+~
+0 0 500 3
+D 110 1 0 0
+D 112 3 0 0
+S
+#112
+A steep turn in the road
+Forced by the rocks, the road makes a turn west here.
+You can see the rocks clearly now. It is almost a solid wall of
+black, granite rocks.
+~
+0 0 500 3
+D 111 1 0 0
+D 113 4 0 0
+S
+#113
+Southaven Road
+The road continues west, obviously finding a way around the rocks.
+As you advance, the fields slowly become grasslands.
+~
+0 0 500 3
+D 112 2 0 0
+D 114 4 0 0
+S
+#114
+The road turns
+You can see that the local constructors have found a way to get over
+the hill. Here, the hill won't be too steep to climb.
+~
+0 0 500 3
+D 113 2 0 0
+D 115 3 0 0
+S
+#115
+The road climbs
+The road slowly climbs up, going over the hill. You wonder what you
+will see when you've reached the top.
+~
+0 0 500 3
+D 114 1 0 0
+D 116 6 0 0
+S
+#116
+The road climbs
+The road slowly climbs up, going over the hill. You wonder what you
+will see when you've reached the top.
+~
+0 0 500 3
+D 115 5 0 0
+D 117 6 0 0
+S
+#117
+The road climbs
+The road slowly climbs up, going over the hill. You wonder what you
+will see when you've reached the top.
+~
+0 0 500 3
+D 118 3 0 0
+D 116 5 0 0
+S
+#118
+A rocky path
+The road is merely a rocky path here, however it is not difficult to
+traverse the path. You are on the top of the hill now, and you can
+see Southaven lying not far away south.
+~
+0 0 500 3
+D 117 1 0 0
+D 119 3 0 0
+S
+#119
+A rocky path
+The road is merely a rocky path here, however it is not difficult to
+traverse the path. You are on the top of the hill now, and you can
+see Southaven lying not far away south.
+~
+0 0 500 3
+D 118 1 0 0
+D 120 3 0 0
+S
+#120
+Near a ravine
+You walk alongside a ravine, which is not that deep. You are amazed
+at the sight. You can see the lands far away around you. To the north
+you see the Neyrat Mountains and the Great Junction, the the west
+the Dead Lands, to the east the forests, and to the south, Southaven
+and surrounding lands.
+~
+0 0 500 3
+D 119 1 0 0
+D 121 2 0 0
+S
+#121
+Near a ravine
+You walk alongside a ravine, which is not that deep. You are amazed
+at the sight. You can see the lands far away around you. To the north
+you see the Neyrat Mountains and the Great Junction, the the west
+the Dead Lands, to the east the forests, and to the south, Southaven
+and surrounding lands.
+~
+0 0 500 3
+D 122 3 0 0
+D 120 4 0 0
+S
+#122
+The road winds down
+As you pass over the top of the hill, the road slowly descends into
+the fields surrounding Southaven. The fields are a beautiful green.
+~
+0 0 500 3
+D 121 1 0 0
+D 123 5 0 0
+S
+#123
+The road winds down
+As you pass over the top of the hill, the road slowly descends into
+the fields surrounding Southaven. The fields are a beautiful green.
+~
+0 0 500 3
+D 124 5 0 0
+D 122 6 0 0
+S
+#124
+The road winds down
+As you pass over the top of the hill, the road slowly descends into
+the fields surrounding Southaven. The fields are a beautiful green.
+~
+0 0 500 3
+D 125 3 0 0
+D 123 6 0 0
+S
+#125
+The road levels
+The road has almost reached the end of the hill and is now almost
+level. Ahead, you see peasants working the land and people riding
+or walking on the road towards Southaven.
+~
+0 0 500 3
+D 124 1 0 0
+D 126 3 0 0
+S
+#126
+Southaven Road
+The fields surrounding the road belong to Southaven, and are one of
+the reasons that Southaven has fared very well over the years.
+This year, the harvest will be very good again.
+~
+0 0 500 3
+D 125 1 0 0
+D 127 4 0 0
+S
+#127
+Southaven Road
+The fields surrounding the road belong to Southaven, and are one of
+the reasons that Southaven has fared very well over the years.
+This year, the harvest will be very good again.
+~
+0 0 500 3
+D 126 2 0 0
+D 128 4 0 0
+S
+#128
+Southaven Road
+The fields surrounding the road belong to Southaven, and are one of
+the reasons that Southaven has fared very well over the years.
+This year, the harvest will be very good again.
+~
+0 0 500 3
+D 127 2 0 0
+D 129 3 0 0
+S
+#129
+Nearing Southaven
+Not far away, you see the gates of Southaven. They are a welcome sight
+to every traveller that traverses this road.
+~
+0 0 500 3
+D 128 1 0 0
+D 130 3 0 0
+S
+#130
+Nearing Southaven
+Not far away, you see the gates of Southaven. They are a welcome sight
+to every traveller that traverses this road.
+~
+0 0 500 3
+D 129 1 0 0
+D 131 3 0 0
+S
+#131
+The gates of Southaven
+You have reached the gates of Southaven. The two doors are made of
+armored wood, packed together in 6 solid layers. Breaking these will
+be impossible.
+~
+0 0 500 3
+D 130 1 0 0
+D 132 3 0 0
+S
+#132
+Southaven Main Street
+The streets of Southaven are always bursting with activity, as they are
+now. Salesmen try to sell their wares to locals, peasants and travellers.
+Shops are lining the streets. Farther south you see the fountain and
+the town hall, the big congregation place in Southaven.
+~
+0 0 500 2
+D 131 1 0 0
+D 133 2 0 0
+D 135 3 0 0
+D 134 4 0 0
+S
+#133
+Southaven Armor Smith
+This shop is the home of the armor smith, the producer of heavy armor,
+platings and coatings, and all sorts of tools. Judging by the tools
+and armor displayed on the wall, he must be a very fine blacksmith.
+~
+0 0 500 1
+D 132 4 0 0
+S
+#134
+Southaven General Store
+In this shop, one can buy everything one needs. The General Store
+can provide you with all supplies needed for a quest, adventure or
+exploration. The finest materials available.
+~
+0 0 500 1
+D 132 2 0 0
+S
+#135
+Southaven Main Street
+The streets of Southaven are always bursting with activity, as they are
+now. Salesmen try to sell their wares to locals, peasants and travellers.
+Shops are lining the streets. A bit farther south you see the fountain and
+the town hall, the big congregation place in Southaven.
+~
+0 0 500 2
+D 132 1 0 0
+D 136 2 0 0
+D 138 3 0 0
+D 137 4 0 0
+S
+#136
+Southaven Weapon Smith
+The weaponsmith is doing his best to supply each explorer, adventurer
+or warrior with the best blades, swords, pikes and lances.
+The quality of his work shows him to be very skilled.
+~
+0 0 500 1
+D 135 4 0 0
+S
+#137
+Southaven House of Magic
+In the House of Magic, one can find all magic related items. Scrolls,
+spellbooks, gems and general wisdom are for sale here.
+~
+0 0 500 1
+D 135 2 0 0
+S
+#138
+Southaven Central Square
+The beautiful fountain built on the square shows the welfare of the city.
+Numerous little drops burst out of the fountain, falling down till they
+hit the little pool of water. Many people come here to sit and eat or talk.
+To the north, you see some shops. To the east, you see the bank. To the
+west you see the town hall. To the south, you can continue to the docks.
+~
+0 0 500 2
+D 135 1 0 0
+D 140 2 0 0
+D 141 3 0 0
+D 139 4 0 0
+S
+#139
+Southaven Town Hall
+The town hall is the main spot of interest in the city. Built by a
+renowned architect, this is the congregation place in Southaven. Many
+people sit on benches, talking about their daily life in Southaven.
+~
+0 0 500 1
+D 138 2 0 0
+S
+#140
+Southaven Bank
+At the bank, you can put your life savings away safely, or you can
+draw money to pay supplies.
+~
+0 0 500 1
+D 138 4 0 0
+S
+#141
+Southaven Main Street
+The streets of Southaven are always bursting with activity, as they are
+now. Salesmen try to sell their wares to locals, peasants and travellers.
+Shops are lining the streets. Not far to the north you see the central
+square, to the south you see the docks.
+~
+0 0 500 1
+D 138 1 0 0
+S
+#END
+
+#MOBILES
+#100
+Yundahr
+Yundahr is here
+Yundahr is arranging his goods here
+600 0
+10 8201 0 0 0
+skill: Enhanced Damage
+skill: Second Attack
+#101
+Syra
+Syra is here
+Syra, protectress of Southaven, patrols for danger
+800 1
+15 521 0 0 0
+skill: Burning Hands
+skill: Magic Missile
+skill: Slashing Weapons
+skill: Second Attack
+> give.cod
+#102
+Epir
+Epir is here
+Epir, the banker of Southaven, awaits your money
+600 0
+10 1033 0 0 0
+skill: Second Attack
+#103
+a cute, furry squirrel
+a cute, furry squirrel is here
+a cute, furry squirrel is here, looking for something to eat
+20 2
+15 33 0 0 0
+#104
+a sandworm
+a sandworm is here
+a sandworm crawls in the dust before you
+4 2
+13 33 0 0 0
+#105
+an elven warrior
+an elven warrior is here
+an elven warrior strides along, patrolling the road
+700 0
+-6 33 0 0 0
+skill: Enhanced Damage
+skill: Second Attack
+skill: Third Attack
+#106
+a janitor
+a janitor is here
+a janitor is cleaning the streets here
+50 2
+10 49 0 0 0
+#107
+a quasit guardian
+a quasit guardian stands here
+a quasit guardian stands here, guarding the homelands against peril
+100 0
+15 521 0 0 0
+skill: Slashing Weapons
+skill: Second Attack
+#END
+
+#OBJECTS
+#100
+a fountain
+a sparkling fountain
+a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
+12 0 0
+0 0 12 0
+0 4097 0
+#101
+a loaf of bread
+a loaf of bread
+a loaf of white bread has been thrown away here
+3 0 0
+0 0 24 0
+1 0 10
+#102
+a waterskin
+a waterskin
+a leather skin filled with fresh water lies here
+4 0 0
+3 3 1 0
+10 0 30
+#103
+a torch
+a torch
+a torch lies here on the ground
+5 0 0
+0 0 24 0
+1 0 90
+#104
+a robe
+a stained robe
+a robe, cluttered with dirty stains, lies here
+1 5 0
+0 2 2 0
+0 0 0
+A "" 0 { apply_max_hp 20 }
+#END
+
+#RESETS
+M 100 134 1
+G 101 100 0
+G 102 100 0
+G 103 100 0
+M 101 138 1
+E 1002 25 0
+M 102 140 1
+M 103 101 5
+M 103 105 5
+M 103 109 5
+M 103 111 5
+M 103 114 5
+M 104 103 3
+M 104 117 3
+M 104 123 3
+M 105 100 1
+M 106 138 2
+M 106 135 2
+O 100 138 1
+O 104 138 1
+O 1000 138 1
+M 107 131 2
+E 1005 100 0
+M 107 131 2
+E 1005 100 0
+#END
+
+#SHOPS
+100
+3 4 5 0 0
+0 23
+~
+#END
+
+$

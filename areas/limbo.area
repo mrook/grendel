@@ -1,0 +1,217 @@
+#AREA
+The Limbo
+Grimlord
+A chill crawls up your spine as distant voices sing.
+5
+5 22 0
+
+#ROOMS
+#0
+The Portal
+You do not quite understand your surroundings. Hovering amidst the
+clouds, a great shining portal, looms over you. The slight mist
+beneath you prevents you from looking down.
+~
+8768 0 0 2
+D 100 7 272 0 'portal'
+S
+#1
+The Portal
+Dark fumes almost bring you to the point of suffocation in this
+forbidden place. A big red portal looms over you. The clouds of
+strange gasses prevent you from looking down.
+~
+8768 0 0 2
+D 100 7 272 0 'portal'
+S
+#2
+A strange waiting place
+While you are waiting, you look around and see a beautiful multitude
+of colors, swirling around you in a weird vortex. You are sure the gods
+have created this place solely for the comfort of the mortals that spend
+some time here, waiting for things to come...
+~
+8768 0 0 2
+S
+#30
+Entrance to the Bereavement
+You stand before the field of the Arena, called 'The Bereavement'.
+As you hear the exhilerated cries of the spectators present, you freeze
+in terror, awaiting your destiny.
+~
+6156 0 0 2
+D 31 1 0 0
+S
+#31
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 30 3 0 0
+D 32 4 0 0
+D 33 2 0 0
+D 34 1 0 0
+S
+#32
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 31 2 0 0
+D 35 4 0 0
+S
+#33
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 31 4 0 0
+D 43 2 0 0
+S
+#34
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 31 3 0 0
+D 39 1 0 0
+S
+#35
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 32 2 0 0
+D 36 1 0 0
+S
+#36
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 35 3 0 0
+D 37 1 0 0
+S
+#37
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+0 0 0 2
+D 36 3 0 0
+D 38 2 0 0
+S
+#38
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 37 4 0 0
+D 39 2 0 0
+D 45 1 0 0
+S
+#39
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 38 4 0 0
+D 40 2 0 0
+D 34 3 0 0
+D 44 1 0 0
+S
+#40
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 39 4 0 0
+D 41 2 0 0
+D 46 1 0 0
+S
+#41
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 40 4 0 0
+D 42 3 0 0
+S
+#42
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 41 1 0 0
+D 43 3 0 0
+S
+#43
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 42 1 0 0
+D 33 4 0 0
+S
+#44
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 39 3 0 0
+D 45 4 0 0
+D 46 2 0 0
+S
+#45
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 44 2 0 0
+D 38 3 0 0
+S
+#46
+The Bereavement
+The cheers and cries of the crowd are deafening.
+~
+6156 0 0 2
+D 44 4 0 0
+D 40 3 0 0
+S
+#END
+
+#MOBILES
+#END
+
+#OBJECTS
+#0
+a portal
+a shining blue portal
+a $B$7shining $3blue$A$3 portal is here
+14 0 0
+0 0 0 0
+0 4097 0
+#1
+a portal
+a dark blue portal
+a $8dark $B$4red$A$3 portal is here
+14 0 0
+0 0 0 0
+0 4097 0
+#10
+a corpse
+the corpse of
+the corpse of is lying here
+11 0 0
+0 0 0 0
+0 0 0
+#END
+
+#RESETS
+O: 0 0 1
+O: 1 1 1
+#END
+
+#SHOPS
+#END
+
+$

@@ -1,0 +1,112 @@
+#AREA
+The Caves of Jezhri
+Grimlord
+You shiver as you hear a terrifying shreek from somewhere.
+8
+2 13 2
+
+#ROOMS
+#900
+Entrance to the caves
+As you stand at the entrance to the mysterious and evil caves of
+Jezhri, an eerie feeling creeps into your body. You are well aware of the
+evil that houses these parts. The entryway is dark, misty and damp.
+~
+0 0 0 1
+D 901 2 0 0
+S
+#901
+A dark tunnel
+As you roam through the dark and evil tunnels of Jezhri, you feel
+a cold dread surrounding you. This place is not be dealt with lightly.
+Far away you see the occasional flickering of small torches, whereas
+you stand in near complete darkness.
+~
+0 0 0 1
+D 900 4 0 0
+D 902 2 0 0
+D 903 3 0 0
+D 904 1 0 0
+S
+#902
+A dark tunnel
+As you roam through the dark and evil tunnels of Jezhri, you feel
+a cold dread surrounding you. This place is not be dealt with lightly.
+Far away you see the occasional flickering of small torches, whereas
+you stand in near complete darkness.
+~
+0 0 0 1
+D 901 4 0 0
+D 905 3 0 0
+D 906 1 0 0
+D 907 2 0 0
+S
+#903
+A dark tunnel
+As you roam through the dark and evil tunnels of Jezhri, you feel
+a cold dread surrounding you. This place is not be dealt with lightly.
+Far away you see the occasional flickering of small torches, whereas
+you stand in near complete darkness.
+~
+0 0 0 1
+D 901 1 0 0
+D 905 2 0 0
+S
+#904
+A dark tunnel
+As you roam through the dark and evil tunnels of Jezhri, you feel
+a cold dread surrounding you. This place is not be dealt with lightly.
+Far away you see the occasional flickering of small torches, whereas
+you stand in near complete darkness.
+~
+0 0 0 1
+D 901 3 0 0
+D 906 2 0 0
+S
+#905
+A dark tunnel
+~
+0 0 0 1
+D 903 4 0 0
+D 902 1 0 0
+S
+#906
+A dark tunnel
+You step into a dark tunnel.
+~
+0 0 0 1
+D 904 4 0 0
+D 902 3 0 0
+S
+#907
+A dark tunnel
+As you roam through the dark and evil tunnels of Jezhri, you feel
+a cold dread surrounding you. This place is not be dealt with lightly.
+Far away you see the occasional flickering of small torches, whereas
+you stand in near complete darkness.
+~
+0 0 0 1
+D 902 4 0 0
+D 908 2 0 0
+S
+#908
+A dark tunnel
+~
+0 0 0 1
+D 907 4 0 0
+S
+#END
+
+#MOBILES
+#END
+
+#OBJECTS
+#END
+
+#RESETS
+#END
+
+#SHOPS
+#END
+
+$

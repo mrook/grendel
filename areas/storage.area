@@ -1,0 +1,221 @@
+#AREA
+The Storage Cellars
+Grimlord
+An eerie sound runs through the caverns.
+5
+5 12 0
+
+#ROOMS
+#300
+Entrance to the cellars
+A barely lit room serves as the access to the storage cellars. You can't
+see a thing here!
+~
+0 0 0 1
+D 201 1 3 0
+D 301 3 0 0
+S
+#301
+The stairway down
+As you walk the stairway down towards the storage rooms, a very nasty
+smell approaches you. You feel an urge to turn around and take a breath
+of fresh air, but you continue your journey down.
+~
+0 0 0 1
+D 300 1 0 0
+D 302 5 0 0
+S
+#302
+The stairway down
+As you walk the stairway down towards the storage rooms, a very nasty
+smell approaches you. You feel an urge to turn around and take a breath
+of fresh air, but you continue your journey down.
+~
+0 0 0 1
+D 301 6 0 0
+D 303 5 0 0
+S
+#303
+The stairway bends
+The smell grows thicker and less bearable as you walk the stairway,
+which bends to the west here. It is difficult to see where you are,
+everything is clad in a thick layer of dust and darkness.
+~
+0 0 0 1
+D 302 6 0 0
+D 304 4 0 0
+S
+#304
+The stairway bends
+The smell grows thicker and less bearable as you walk the stairway,
+which bends to the north here. It is difficult to see where you are,
+everything is clad in a thick layer of dust and darkness.
+~
+0 0 0 1
+D 303 2 0 0
+D 305 1 0 0
+S
+#305
+The stairway down
+The stairs get slippery as you walk the stairway down again.
+You wonder wether this stairway will come to an end, and if so,
+to what end... the darkness isn't very reassuring.
+~
+0 0 0 1
+D 304 3 0 0
+D 306 5 0 0
+S
+#306
+The stairway ends
+Finally, the winding stairway stops. What you see ahead isn't much
+better. You can barely make out your surroundings, but you see a
+dark hallway north.
+~
+0 0 0 1
+D 305 6 0 0
+D 307 1 0 0
+S
+#307
+A dark hallway
+You can barely see the walls that make this hallway. No candles or torches
+are lit and you wonder what hideous beasts hide within the shadows.
+~
+0 0 0 1
+D 306 3 0 0
+D 308 1 0 0
+S
+#308
+A dark hallway
+You can barely see the walls that make this hallway. No candles or torches
+are lit and you wonder what hideous beasts hide within the shadows.
+You hear water dripping all around you.
+~
+0 0 0 1
+D 307 3 0 0
+D 309 4 0 0
+D 310 1 0 0
+S
+#309
+A small niche
+This small niche could have been occupied by a little creature long ago,
+but now it has been abandoned and is in a state of decay.
+~
+0 0 0 1
+D 308 2 0 0
+D 312 1 19 0 'a crack'
+S
+#310
+A dark hallway
+You don't feel entirely comfortable as the hallway continues to the north.
+You hear noices all around you, but you cannot say where they come from,
+what they are and especially... if they are truly there.
+~
+0 0 0 1
+D 308 3 0 0
+D 311 1 0 0
+S
+#311
+Intersection of hallways
+You can dimly make out an intersection of hallways here. There is no
+way to tell how long the hallway continues to the north, nor how long
+the intersecting hallway might be.
+~
+0 0 0 1
+D 310 3 0 0
+D 313 1 0 0
+S
+#312
+A secret chamber
+You can almost smell the age of this old crevace beneath the soil. At
+your feet, little fragments of a decaying book lay scattered. Rats screech
+in terror and run away to the dark corners of the room.
+~
+0 0 0 1
+D 309 3 19 0 'a crack'
+S
+#313
+A dark hallway
+To the north you can see some light. It is not much light, but
+enough to be disturbing... who would roam around in these
+rotten tunnels?
+~
+0 0 0 1
+D 311 3 0 0
+D 314 1 0 0
+S
+#314
+A dark hallway
+The light becomes more clear. It is probably a torch of some
+sort, mounted to a wall. You are worried about the inhabitant
+that place the torch there.
+~
+0 0 0 1
+D 313 3 0 0
+D 315 1 0 0
+S
+#315
+Nearing a door
+You can see where the light is mounted. The north you can see 
+a large oaken door, attached to the wall by massive steel hinges.
+~
+0 0 0 1
+D 314 3 0 0
+D 316 1 0 0
+S
+#316
+At the door
+As you stand before the massive oaken door, an eerie feeling creates
+a deep shiver along your spine. You do not know what lies beyond the
+door... maybe you don't even want to know. 
+~
+0 0 0 1
+D 315 3 0 0
+D 317 1 3 0 'oaken-door'
+S
+#317
+The home of Theras
+As you walk into the home of Theras, you feel less tense. The
+room is warmly lit, creating a comforting feeling for all the
+visitors Theras receives. To the west you see a bedroom, to the
+north the livingroom and to the east the kitchen.
+~
+0 0 0 1
+D 316 3 3 0 'oaken-door'
+S
+#END
+
+#MOBILES
+#300
+a bat
+a bat is here
+a bat flaps his wings, searching for its nest
+2 2
+7 0 0 0 0
+#301
+a rat
+a rat is here
+a rat runs around, looking for food
+3 2
+7 0 0 0 0
+#302
+Theras
+Theras is here
+Theras stands here smiling, preparing some food
+60 0
+3 0 0 0 0
+#END
+
+#OBJECTS
+#END
+
+#RESETS
+M: 300 304 3
+M: 300 307 3
+M: 300 311 3
+M: 301 312 3
+M: 301 315 3
+M: 301 303 3
+M: 302 317 1
+#END
+
+$

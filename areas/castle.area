@@ -1,0 +1,282 @@
+#area
+Castle Pakthan
+Stimpy & Grimlord
+A slight breeze plays with the dust.
+6
+8 17 0
+
+#rooms
+#600
+Entrance to Castle Pakthan
+The beautifully crafted doors in the walls of this castle loom
+over you as you stand near the entrance of Lord Pakthan's castle.
+The doors are open, inviting you to a walk in the courtyard.
+~
+0 0 0 3
+D 703 3 0 0
+D 601 1 0 0
+S
+#601
+Inside the gates of Castle Pakthan
+Above you, the gatehouse looms. Guards walk around, directing you
+to the courtyard.
+~
+0 0 0 1
+D 600 3 0 0
+D 602 1 0 0
+S
+#602
+The courtyard of Castle Pakthan
+This is the courtyard of the castle. You are amazed at the sight.
+Numerous people wander in the courtyard, it's full of activity.
+Merchants selling their wares, peasents bringing food and knights
+discussing their tactics. To the north you see the entrance to the
+living quarters of Sir Pakthan. To the west are the barracks, to
+the east the stables.
+~
+0 0 0 2
+D 601 3 0 0
+D 603 1 0 0
+D 604 2 0 0
+D 605 4 0 0
+S
+#603
+The courtyard of Castle Pakthan
+Merchants try to sell you their wares. The smells of fresh bread
+and fried chicken almost pull you towards them.
+To the north you see the entrance to the living quarters.
+~
+0 0 0 2
+D 602 3 0 0
+D 606 1 0 0
+D 607 4 0 0
+D 608 2 0 0
+S
+#604
+Before the stables
+Before you, you see the stables, the famous breeding stables of
+Lord Pakthan.
+~
+0 0 0 2
+D 602 4 0 0
+D 608 1 0 0
+D 609 2 0 0
+S
+#605
+Before the barracks
+Before you, you see the barracks, where Lord Pakthan's soldiers
+are being trained.
+~
+0 0 0 2
+D 602 2 0 0
+D 607 1 0 0
+D 611 4 0 0
+S
+#606
+The living quarters of Lord Pakthan
+You have entered Lord Pakthan's living quarters. The walls are decorated
+with paintings of long dead knights. Above you, majestic lighters hang.
+The floor is covered with a beautiful red carpet.
+~
+0 0 0 1
+D 603 3 0 0
+D 610 1 0 0
+S
+#607
+The courtyard of Castle Pakthan
+Merchants try to sell you their wares. The smells of fresh bread
+and fried chicken almost pull you towards them.
+~
+0 0 0 2
+D 603 2 0 0
+D 605 3 0 0
+S
+#608
+The courtyard of Castle Pakthan
+Merchants try to sell you their wares. The smells of fresh bread
+and fried chicken almost pull you towards them.
+~
+0 0 0 2
+D 603 4 0 0
+D 604 3 0 0
+S
+#609
+The stables
+Here, the noble horses of the knights of Pakthan are bred, raised and
+kept. Stablemen make sure all horses get their food, baths and combing.
+~
+0 0 0 1
+D 604 4 0 0
+S
+#610
+The dinner room of Lord Pakthan
+You have arrived at the dinner room of Lord Pakthan. Here, Lord Pakthan
+eats and drinks with his family, knights and guests. Servants wander
+around to serve the lord and his fellow knights.
+~
+0 0 0 1
+D 606 3 0 0
+S
+#611
+The barracks
+In these barracks, his loyal soldiers are being trained. Lord Pakthan
+himself oversees these trainings, to make sure his warriors are well
+trained to defend the homelands.
+~
+0 0 0 1
+D 605 2 0 0
+D 612 1 0 0
+D 613 3 0 0
+D 614 4 0 0
+S
+#612
+A room in the barracks
+This is the room of a soldier. Here he sleeps, eats and studies.
+Be sure not to disturb these loyal soldiers, for their task is
+a heavy and honorable one.
+~
+0 0 0 1
+D 611 3 0 0
+S
+#613
+A room in the barracks
+This is the room of a soldier. Here he sleeps, eats and studies.
+Be sure not to disturb these loyal soldiers, for their task is
+a heavy and honorable one.
+~
+0 0 0 1
+D 611 1 0 0
+S
+#614
+The barracks
+In these barracks, his loyal soldiers are being trained. Lord Pakthan
+himself oversees these trainings, to make sure his warriors are well
+trained to defend the homelands.
+~
+0 0 0 1
+D 611 2 0 0
+D 615 1 0 0
+D 616 3 0 0
+D 617 4 0 0
+S
+#615
+A room in the barracks
+This is the room of a soldier. Here he sleeps, eats and studies.
+Be sure not to disturb these loyal soldiers, for their task is
+a heavy and honorable one.
+~
+0 0 0 1
+D 614 3 0 0
+S
+#616
+A room in the barracks
+This is the room of a soldier. Here he sleeps, eats and studies.
+Be sure not to disturb these loyal soldiers, for their task is
+a heavy and honorable one.
+~
+0 0 0 1
+D 614 1 0 0
+S
+#617
+The barracks
+In these barracks, his loyal soldiers are being trained. Lord Pakthan
+himself oversees these trainings, to make sure his warriors are well
+trained to defend the homelands.
+~
+0 0 0 1
+D 614 2 0 0
+D 618 1 0 0
+D 619 3 0 0
+S
+#618
+A room in the barracks
+This is the room of a soldier. Here he sleeps, eats and studies.
+Be sure not to disturb these loyal soldiers, for their task is
+a heavy and honorable one.
+~
+0 0 0 1
+D 617 3 0 0
+S
+#619
+A room in the barracks
+This is the room of a soldier. Here he sleeps, eats and studies.
+Be sure not to disturb these loyal soldiers, for their task is
+a heavy and honorable one.
+~
+0 0 0 1
+D 617 1 0 0
+S
+#end
+
+#mobiles
+#600
+Lord Pakthan
+Lord Pakthan sits here
+Lord Pakthan sits here, eating his food
+80 0
+4 8 0 0 0
+#601
+a servant
+a servant is here
+a servant is here waiting for Pakthan's commands
+6 0
+6 0 0 0 0
+#602
+a soldier
+a soldier is here
+a soldier is here, sharpening his blade
+10 0
+5 0 0 0 0
+#603
+a horse
+a horse is here
+a horse is here, wondering where his mount went
+8 0
+8 8 0 0 0 
+#604
+a Knight of Pakthan
+a Knight of Pakthan is here
+a Knight of Pakthan is here, patrolling for danger
+80 0
+-2 0 0 0 0
+#end
+
+#objects
+#600
+the barons toupet
+the barons toupet
+some hair lies here on the ground
+2 6 0
+0 0 0 0
+1 0 0
+#601
+a soldiers sword
+a soldiers sword
+a sword lies here, shining brightly
+1 17 18
+0 1 10 2
+4 0 0
+#end
+
+#resets
+M: 600 610 1
+E: 600 50 0
+M: 601 610 2
+M: 601 606 2
+M: 602 612 6
+E: 601 15 0
+M: 602 613 6
+E: 601 15 0
+M: 602 615 6
+E: 601 15 0
+M: 602 616 6
+E: 601 15 0
+M: 602 618 6
+E: 601 15 0
+M: 602 619 6
+E: 601 15 0
+M: 603 609 1
+M: 604 602 1
+#end
+
+$

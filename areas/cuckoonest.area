@@ -1,0 +1,317 @@
+#AREA
+The Cuckoo's Nest
+Brasshat
+You hear a bird screaming.
+7
+6 15 0
+
+#ROOMS
+#400
+Entrance to the Cuckoo's Nest
+You see the entrance to the Cuckoo's nest, once a pigeon-coop,
+until Bohr Cook, King of the Cuckoo's attacked and captured it. Now
+the pigeons have been enslaved.
+~
+0 0 20 1
+D 401 1 0 0
+D 422 5 0 0
+S
+#401
+Entrance to the Cuckoo's Nest
+Closer to the Cuckoo's nes, you see the remains of the battle that
+swept through the former pigeon-coop. It's a big mess.
+~
+0 0 0 1
+D 400 3 0 0
+D 402 1 0 0
+S
+#402
+Inside the Cuckoo's Nest
+Inside the Cuckoo's Nest you see the remains of the once mighty court
+of the Pigeon King smashed to the walls. It's clear the Cuckoos are now
+settling here, considering the mess.
+~
+0 0 0 1
+D 401 3 0 0
+D 403 1 0 0
+D 407 4 0 0
+D 408 2 0 0
+S
+#403
+Before Bohr Cook's Throne
+You're standing before the throne of Bohr Cook, king of the Cuckoo's. This
+is the Center of the Nest.
+~
+0 0 0 1
+D 402 3 0 0
+D 404 1 0 0
+D 406 4 0 0
+D 409 2 0 0
+S
+#404
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+still lying on the ground. It's clear the battle is still fresh in the
+memory of these pigeons.
+~
+0 0 0 1
+D 403 3 0 0
+D 405 4 0 0
+D 410 2 0 0
+D 412 1 0 0
+S
+#405
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+lying on the ground here. It's clear that the Cuckoo's attacked the pigeons
+not so long ago.
+~
+0 0 0 1
+D 404 2 0 0
+D 406 3 0 0
+D 411 1 0 0
+D 421 4 0 0
+S
+#406
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+lying on the ground here. It's clear not much time has passed since
+the attack of the Cuckoos.
+~
+0 0 0 1
+D 403 2 0 0
+D 405 1 0 0
+D 407 3 0 0
+D 420 4 0 0
+S
+#407
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+lying on the ground here. It's clear it hasn't been long since the
+attack of the Cuckoos took place.
+~
+0 0 0 1
+D 402 2 0 0
+D 406 1 0 0
+D 418 3 0 0
+D 419 4 0 0
+S
+#408
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+lying on the ground here. It's clear that the Cuckoo's attacked the pigeons
+not so long ago.
+~
+0 0 0 1
+D 402 4 0 0
+D 409 1 0 0
+D 416 2 0 0
+D 417 3 0 0
+S
+#409
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+still lying on the ground. It's clear the battle is still fresh in the
+memory of these pigeons.
+~
+0 0 0 1
+D 403 4 0 0
+D 408 3 0 0
+D 410 1 0 0
+D 415 2 0 0
+S
+#410
+Inside the Cuckoo's Nest
+You see the remains of a great battle everywhere. Some pigeon feathers are 
+lying on the ground here. It's clear not much time has passed since
+the attack of the Cuckoos.
+~
+0 0 0 1
+D 404 4 0 0
+D 409 3 0 0
+D 413 1 0 0
+D 414 2 0 0
+S
+#411
+A northern room of the Cuckoo's Nest
+From here you can see far into the world. You can see Lord Pakthan's Castle
+lying not far up to the north. Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 405 3 0 0
+S
+#412
+A northern room of the Cuckoo's Nest
+From here you can see far into the world. You can see Lord Pakthan's Castle
+lying not far up to the north. Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 404 3 0 0
+S
+#413
+A northern room of the Cuckoo's Nest
+From here you can see far into the world. You can see Lord Pakthan's Castle
+lying not far up to the north. Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 410 3 0 0
+S
+#414
+An eastern room of the Cuckoo's nest
+From here you can see far into the world. The things you see are things
+not to speak about. Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 410 4 0 0
+S
+#415
+An eastern room of the Cuckoo's Nest
+From here you can see far into the world. The things you see are things
+not to speak about. Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 409 4 0 0
+S
+#416
+An eastern room of the Cuckoo's Nest
+From here you can see far into the world. The things you see are things
+not to speak about. Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 408 4 0 0
+S
+#417
+A southern room of the Cuckoo's Nest
+From here you can see far into the world. You can see the town of
+Southaven lying in the sun.Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 408 1 0 0
+S
+#418
+A southern room of the Cuckoo's Nest
+From here you can see far into the world. You can see the town of
+Southaven lying in the sun.Inside the room you see a mess that definitely 
+forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 407 1 0 0
+S
+#419
+A western room of the Cuckoo's Nest
+From here you can see far into the world. You can see the Road to Southaven
+stretching out towards the horizon. Inside the room you see a mess that
+definitely forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 407 2 0 0
+S
+#420
+A western room of the Cuckoo's Nest
+From here you can see far into the world. You can see the Road to Southaven
+stretching out towards the horizon. Inside the room you see a mess that
+definitely forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 406 2 0 0
+S
+#421
+A western room of the Cuckoo's Nest
+From here you can see far into the world. You can see the Road to Southaven
+stretching out towards the horizon. Inside the room you see a mess that
+definitely forms the sleeping place of a Cuckoo warrior.
+~
+0 0 0 1
+D 405 2 0 0
+S
+#422
+Stairs to the Cuckoo's Nest
+When you go up you enter the Cuckoo's Nest.
+~
+0 0 0 1
+D 400 6 0 0
+D 423 4 0 0
+S
+#423
+A path to the Cuckoo's Nest
+From here you see the Tower with the Cuckoo's nest in the top. It's not a 
+very beautiful sight. The Tower is surrounded by an air of destruction.
+~
+0 0 0 1
+D 700 4 0 0
+D 422 2 0 0
+S
+#END
+
+#MOBILES
+#400
+Bohr Cook
+Bohr Cook, King of the Cuckoos, is here
+Bohr Cook, King of the Cuckoos, is sitting on his throne here
+26 0
+4 8 0 0 0
+#401
+a Cuckoo Guardian
+a Cuckoo Guardian is here
+a Cuckoo Guardian is guarding the place
+18 0
+5 8 0 0 0
+#402
+a Cuckoo Warrior
+a Cuckoo Warrior is here
+a Cuckoo Warrior is here, preparing for battle
+10 0
+6 8 0 0 0
+#403
+a Pigeon
+an enslaved Pigeon is here
+an enslaved Pigeon is wandering around here, lost
+5 2
+8 34 0 0 0
+#END
+
+#OBJECTS
+#END
+
+#RESETS
+M: 400 403 1
+M: 401 401 6
+E: 1003 50 0
+M: 401 405 6
+E: 1003 50 0
+M: 401 407 6
+E: 1003 50 0
+M: 401 408 6
+E: 1003 50 0
+M: 401 410 6
+E: 1003 50 0
+M: 401 401 6
+E: 1003 50 0
+M: 402 411 11
+M: 402 412 11
+M: 402 413 11
+M: 402 414 11
+M: 402 415 11
+M: 402 415 11
+M: 402 417 11
+M: 402 418 11
+M: 402 419 11
+M: 402 420 11
+M: 402 421 11
+M: 403 420 7
+M: 403 406 7
+M: 403 403 7
+M: 403 409 7
+M: 403 415 7
+M: 403 402 7
+M: 403 404 7
+#END
+
+$
