@@ -1,0 +1,13 @@
+DCC=/usr/local/kylix/bin/dcc
+DCC_FLAGS=-Q -D+ -V- -W+ -O+ -GD
+
+MODULES=core_commands.bpl
+
+all:	$(MODULES)
+
+clean:
+      del $(MODULES)
+
+core_commands.bpl:	core_commands.dpk commands/*
+	$(DCC) core_commands.dpk $(DCC_FLAGS)
+
