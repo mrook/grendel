@@ -96,7 +96,6 @@ end;
 
 function findCommand(s : string) : COMMAND_FUNC;
 var
-   g : COMMAND_FUNC;
    node : GListNode;
    f : GCommandFunc;
 begin
@@ -222,7 +221,7 @@ end;
 
 procedure interpret(ch : GCharacter; line : string);
 var
-    a, g : longint;
+    a : longint;
     cmd : GCommand;
     node : GListNode;
     cmdline, param : string;
@@ -441,7 +440,7 @@ begin
 
                   vict := findCharWorld(nil, argument);
 
-                  if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) then
+                  if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) and (cap(vict.name^) = cap(argument)) then
                     begin
                     if (not MD5Match(MD5String(pwd), vict.player^.md5_password)) then
                       begin
