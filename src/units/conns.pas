@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.21 2004/04/10 22:24:03 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.22 2004/04/15 17:47:22 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -30,7 +30,6 @@ type
 
 	GConnection = class(TThread)
 	protected
-		node : GListNode;
 		_socket : GSocket;
 		_idle : integer;
 		input_buf : string;
@@ -101,9 +100,7 @@ var
 
 
 procedure flushConnections();
-
-procedure initConns();
-procedure cleanupConns();
+procedure terminateAndWaitConnections();
 
 
 implementation
@@ -136,6 +133,8 @@ begin
 	
 	FreeOnTerminate := true;
 
+	connection_list.add(Self);
+
 	_socket := socket;
 
 	_idle := 0;
@@ -151,6 +150,7 @@ end;
 { GConnection destructor }
 destructor GConnection.Destroy();
 begin
+	connection_list.remove(Self);
 	_socket.Free();
 
 	inherited Destroy();
@@ -506,16 +506,35 @@ begin
   iterator.Free();
 end;
 
-procedure initConns();
+procedure terminateAndWaitConnections();
+var
+	conn : GPlayerConnection;
+	iterator : GIterator;
 begin
-  connection_list := GDLinkedList.Create();
-  connection_list.ownsObjects := false;
+	iterator := connection_list.iterator();
+
+	while (iterator.hasNext()) do
+		begin
+		conn := GPlayerConnection(iterator.next());
+
+		conn.Terminate();
+		end;
+
+	iterator.Free();
+
+	// Wait for connection_list to clean itself
+	while (connection_list.size() > 0) do
+		begin
+		Sleep(25);
+		end;
 end;
 
-procedure cleanupConns();
-begin
-  connection_list.clear();
-  connection_list.Free();
-end;
+initialization
+	connection_list := GDLinkedList.Create();
+	connection_list.ownsObjects := false;
+
+finalization
+	connection_list.clear();
+	connection_list.Free();
 
 end.

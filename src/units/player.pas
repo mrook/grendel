@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.30 2004/04/10 22:24:03 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.31 2004/04/15 17:47:22 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -306,8 +306,6 @@ begin
 
 	ch := GPlayer.Create(Self);
 
-	node := connection_list.insertLast(Self);
-
 	copyover := from_copyover;
 	Self.copyover_name := copyover_name;
 
@@ -400,10 +398,7 @@ begin
 	else
 		begin
 		ch.Free();
-		end;
-		
-	connection_list.remove(node);
-	node := nil;
+		end;	
 end;
 
 { Event handler for OnTick }

@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.15 2004/04/14 21:33:02 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.16 2004/04/15 17:47:22 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -165,7 +165,6 @@ begin
 		initProgs();
 		initClans();
 		initCommands();
-		initConns();
 		initHelp();
 		initChannels();
 		initChars();
@@ -299,9 +298,6 @@ begin
 
 		writeConsole('Cleaning commands...');
 		cleanupCommands();
-
-		writeConsole('Cleaning connections...');
-		cleanupConns();
 
 		writeConsole('Cleaning help...');
 		cleanupHelp();
