@@ -325,7 +325,7 @@ begin
   else
     last_line := comm_buf;
 
-  delete(input_buf, 1, i);
+  delete(input_buf, 1, i - 1);
 end;
 
 function GConnection.send(s : string) : integer;
