@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.9 2003/10/09 20:47:38 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.10 2003/10/20 16:01:07 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -14,6 +14,7 @@ interface
 uses
 	Classes,
   dtypes,
+  player,
 	socket,
 	imc3_chan,
 	imc3_mud,
@@ -41,7 +42,8 @@ type
 		procedure handleChanList(packet : GPacket_I3);
 		procedure handleChannelMessage(packet : GPacket_I3);
 		procedure handleChannelEmote(packet : GPacket_I3);
-		procedure handleLocate(packet : GPacket_I3);
+		procedure handleLocateReply(packet : GPacket_I3);
+		procedure handleLocateRequest(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -60,6 +62,7 @@ type
 		procedure sendChannelMessage(channel : GChannel_I3; name, msg : string);
 		procedure sendChannelEmote(channel : GChannel_I3; name, msg : string);
 		procedure sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
+		procedure sendLocateRequest(originator, user : string);
 		
 		procedure shutdown();
 		
@@ -493,10 +496,10 @@ begin
 	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;
 
-procedure GInterMud.handleLocate(packet : GPacket_I3);
+procedure GInterMud.handleLocateRequest(packet : GPacket_I3);
 var
 	username : string;
-	pl : GPlayer;
+	pl : GCharacter;
 begin
 	username := GString(packet.fields[6]).value;
 	
@@ -512,6 +515,25 @@ begin
 		writeBuffer('",0,"",})'#13);
 		sendPacket();
 		end;
+end;
+
+procedure GInterMud.handleLocateReply(packet : GPacket_I3);
+var
+	mudname, visname : string;
+	pl : GPlayer;
+begin
+	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+	
+	mudname := GString(packet.fields[6]).value;
+	visname := GString(packet.fields[7]).value;
+	
+	if (pl <> nil) then
+		begin
+		debug('Found player ' + packet.target_username + ' => ' + pl.name, 2);
+		pl.sendBuffer('Player "' + visname + '" was located on "' + mudname + '".'#13#10);
+		end
+	else
+		debug('Could not find player "' + packet.target_username + '" referenced in locate-reply packet.', 1);
 end;
 
 procedure GInterMud.handlePacket(packet : GPacket_I3);
@@ -532,7 +554,10 @@ begin
   	handleChannelEmote(packet)
   else
   if (packet.packet_type = 'locate-req') then
-  	handleLocate(packet)
+  	handleLocateRequest(packet)
+  else
+  if (packet.packet_type = 'locate-reply') then
+  	handleLocateReply(packet)
   else
   if (packet.packet_type = 'error') then
   	writeConsole('I3: Received error "' + GString(packet.fields[7]).value + '"')
@@ -640,11 +665,8 @@ begin
 
 						packet := parsePacket(msg);
 
-						debug('-------- (size: ' + IntToStr(size + 4) + ')', 2);
 						debug(msg, 2);
-						debug(#13#10, 2);
 						debug(packet.toString(), 2);
-						debug(#13#10, 2);
 
 						debug('Got packet: ' + packet.packet_type, 1); 
 
@@ -739,6 +761,16 @@ begin
 	else
 		writeBuffer('0,})'#13);
 		
+	sendPacket();
+end;
+
+// void I3_send_locate( CHAR_DATA *ch, char *user )
+procedure GInterMud.sendLocateRequest(originator, user : string);
+begin
+	writeHeader('locate-req', mud.name, originator, '', '');
+	writeBuffer('"');
+	writeBuffer(user);
+	writeBuffer('",})'#13);
 	sendPacket();
 end;
 

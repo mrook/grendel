@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.7 2003/10/09 20:47:38 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.8 2003/10/20 16:01:08 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -16,7 +16,7 @@ implementation
 uses
 	SysUtils,
 	chars,
-	mudthread,
+	commands,
 	dtypes,
 	util,
 	modules,
@@ -46,6 +46,12 @@ begin
 	param := one_argument(param, cmd);
 	param := one_argument(param, arg);
 	
+	if (length(cmd) = 0) then
+		begin
+		ch.sendBuffer('I3 what?'#13#10);
+		exit;
+		end;
+		
 	if (prep(cmd) = 'MUDLIST') then
 		begin
 		ch.sendPager(pad_string('Name', 30) + pad_string('Type', 10) + pad_string('Mudlib', 20) + pad_string('Address', 15) + #13#10#13#10);
@@ -68,7 +74,7 @@ begin
 	else
 	if (prep(cmd) = 'CHANLIST') then
 		begin
-		ch.sendBuffer(pad_string('Name', 20) + pad_string('Hosted by', 30) + #13#10#13#10);
+		ch.sendPager(pad_string('Name', 20) + pad_string('Hosted by', 30) + #13#10#13#10);
 		
 		iterator := chanList.iterator();
 		
@@ -76,7 +82,7 @@ begin
 			begin
 			channel := GChannel_I3(iterator.next());
 			
-			ch.sendBuffer(pad_string(channel.I3_name, 20) + pad_string(channel.host_mud, 30) + #13#10);
+			ch.sendPager(pad_string(channel.I3_name, 20) + pad_string(channel.host_mud, 30) + #13#10);
 			end;
 			
 		iterator.Free();
@@ -121,6 +127,19 @@ begin
 				end
 			else
 				ch.sendBuffer('Unknown channel, use I3 CHANLIST to view a list of all available channels.'#13#10);
+			end;
+		end
+	else
+	if (prep(cmd) = 'LOCATE') then
+		begin
+		if (length(arg) = 0) then
+			ch.sendBuffer('Locate whom?'#13#10)
+		else
+			begin
+			ch.sendBuffer('Trying to locate "' + arg + '". If you do not got any results within the next minute,'#13#10);
+			ch.sendBuffer('you can safely assume this player is not online.'#13#10);
+			
+			i3.sendLocateRequest(ch.name, arg);
 			end;
 		end
 	else
