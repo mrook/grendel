@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.12 2004/03/22 14:18:21 ***REMOVED*** Exp $
+	## $Id: mudsystem.pas,v 1.13 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -734,7 +734,7 @@ begin
 
           to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
 
-          GObject(item).toChar(buyer);
+		  GCharacter(buyer).addInventory(GObject(item));
 
           act(AT_REPORT,'You have won the auction! ' + cap(GObject(item).name) + ' at '+ inttostr(bid) + ' coins.', false, buyer, nil, nil, TO_CHAR);
 
@@ -747,7 +747,7 @@ begin
 
           to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
 
-          GObject(item).toChar(seller);
+		  GCharacter(seller).addInventory(GObject(item));
           end;
 
         seller := nil;

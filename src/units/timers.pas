@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.14 2004/05/12 20:58:01 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.15 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -422,8 +422,8 @@ begin
 
       if (GPlayer(ch).ld_timer > IDLE_LINKDEAD) then
         begin
-        GPlayer(ch).quit;
-        continue;
+        GPlayer(ch).quit();
+        iterator.remove();
         end;
       end;
     end;

@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.4 2004/04/21 21:42:47 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.5 2004/06/10 18:10:56 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -551,7 +551,7 @@ begin
   obj := newobj.clone();
 
   // give obj to ch
-  obj.toChar(ch);
+  ch.addInventory(obj);
 
   act(AT_WHITE, '$n has created $p!', false, ch, obj, nil, TO_ROOM);
   ch.sendBuffer('Ok.');
@@ -1059,7 +1059,7 @@ begin
   objectIndices[vnum] := oindex;
 
   obj := oindex.clone();
-  obj.toChar(ch);
+  ch.addInventory(obj);
 
   act(AT_REPORT,'You utter a few words and you create $p!',false,ch,obj,nil,TO_CHAR);
   act(AT_REPORT,'$n utters a few words and creates $p!',false,ch,obj,nil,TO_ROOM);

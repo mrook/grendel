@@ -1,11 +1,10 @@
-// $Id: cmd_obj.inc,v 1.9 2004/05/18 09:23:21 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.10 2004/06/10 18:10:56 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
 	obj, obj_in :GObject;
 	arg,arg2:string;
 	d : integer;
-	node : GListNode;
 	iterator : GIterator;
 begin
   param:=one_argument(param,arg);
@@ -55,10 +54,11 @@ begin
         end
       else
         begin
-        obj.fromRoom;
-        obj.toChar(ch);
+        iterator.remove();
+        ch.addInventory(obj);
         end;
       end;
+      
     iterator.Free();
     exit;
     end;
@@ -78,16 +78,17 @@ begin
       act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR);
       exit;
       end;
-
-    repeat
-      node := obj.contents.tail;
-
-      obj_in := GObject(node.element);
+      
+    iterator := obj.contents.iterator();
+    
+    while (iterator.hasNext()) do
+    	begin
+      obj_in := GObject(iterator.next());
 
       act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
       act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
-
-      obj.separate();
+      
+      iterator.remove();
 
       if (obj_in.item_type=ITEM_MONEY) then
         begin
@@ -96,10 +97,11 @@ begin
         end
       else
         begin
-        obj_in.fromObject;
-        obj_in.toChar(ch);
+        ch.addInventory(obj_in);
         end;
-    until (obj.contents.tail = nil);
+       end;
+       
+    iterator.Free();
     exit;
     end;
 
@@ -130,7 +132,8 @@ begin
         begin
         act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
         act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
-        obj_in.separate();
+        
+        iterator.remove();
 
         if (obj_in.item_type = ITEM_MONEY) then
           begin
@@ -139,8 +142,7 @@ begin
           end
         else
           begin
-          obj_in.fromObject;
-          obj_in.toChar(ch);
+          ch.addInventory(obj_in);
           end;
 
         iterator.Free();
@@ -172,8 +174,6 @@ begin
     act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
 
-    obj.separate();
-
     if (obj.item_type=ITEM_MONEY) then
       begin
       ch.gold := ch.gold + obj.value[1];
@@ -181,9 +181,10 @@ begin
       end
     else
       begin
-      obj.fromRoom;
-      obj.toChar(ch);
+      //ch.room.objects.remove(obj);
+      ch.addInventory(obj);
       end;
+      
     exit;
     end;
 
@@ -238,10 +239,13 @@ begin
 					act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
 					end;
 
-				obj.fromChar;
-				obj.toRoom(ch.room);
-        end;
+				
+				iterator.remove();
+				ch.room.objects.add(obj);
+        		end;
       end;
+      
+    iterator.Free();
     end
   else
     begin
@@ -257,9 +261,8 @@ begin
       act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
       act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
 
-      obj.separate();
-      obj.fromChar;
-      obj.toRoom(ch.room);
+	  ch.inventory.remove(obj);
+	  ch.room.objects.add(obj);
       end;
     end;
 end;
@@ -337,14 +340,12 @@ begin
 
 		while (iterator.hasNext()) do
 			begin
-      obj := GObject(iterator.getCurrent());
-
-      iterator.next();
-      
+      obj := GObject(iterator.next());
+     
 	    if (obj.wear_location1 <> '') or (obj.wear_location2 <> '') then
-        if (ch.equip(obj)) then
+        if (ch.equip(obj, false)) then
           begin
-          obj.separate();
+          iterator.remove();
           inc(cnt);
           end;
       end;
@@ -369,9 +370,10 @@ begin
       act(AT_REPORT, '$p cannot be worn.', false, ch, obj, nil, TO_CHAR);
       exit;
       end;
+      
+    ch.inventory.remove(obj);
 
-    if (ch.equip(obj)) then
-      obj.separate();
+    ch.equip(obj, true);
     end;
 end;
 
@@ -394,34 +396,7 @@ begin
 			begin
 			obj := GObject(iterator.next());
 
-			if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
-				act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
-			else
-				begin
-				inner_iterator := obj.contents.iterator();
-
-				while (inner_iterator.hasNext()) do
-					begin
-					obj_in := GObject(inner_iterator.next());
-
-					act(AT_REPORT,'$p falls out of $P.',false,ch,obj_in,obj,TO_CHAR);
-
-					obj_in.fromObject();
-					obj_in.worn := '';
-					obj_in.toChar(ch);
-					end;
-
-				inner_iterator.Free();
-				
-				act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
-				act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
-
-				obj.fromChar();
-				obj.worn := '';			
-				obj.toChar(ch);
-
-				ch.affectObject(obj, true);
-				end;
+			ch.unequip(obj);
 			end;
 			
 		iterator.Free();
@@ -433,59 +408,8 @@ begin
 		if (obj = nil) then
 			ch.sendBuffer('You are not wearing this object.'#13#10)
 		else
-		if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
-			act(AT_REPORT,'You cannot remove $p.',false,ch,obj,nil,TO_CHAR)
-		else
-			begin		
-			inner_iterator := obj.contents.iterator();
-			
-			while (inner_iterator.hasNext()) do
-				begin
-				obj_in := GObject(inner_iterator.next());
-
-				act(AT_REPORT,'$p falls out of $P.',false,ch,obj_in,obj,TO_CHAR);
-				
-				obj_in.fromObject();
-				obj_in.worn := '';
-				obj_in.toChar(ch);
-				end;
-				
-			inner_iterator.Free();
-
-			act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
-			act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
-
-			obj.fromChar();
-			obj.worn := '';			
-			obj.toChar(ch);
-
-			ch.affectObject(obj, true);
-			end;
+			ch.unequip(obj);
 	end;
-
-	{  // fix the grouping
-	node := ch.objects.head;
-	while (node <> nil) do
-	begin
-	node_next := node.next;
-	obj := node.element;
-	found := false;
-
-	// matches tend to be on the right side, so scan from the back
-	node_back := ch.objects.tail;
-	while (node_back <> nil) and (node_back <> node) do
-	begin
-	if (GObject(node_back.element).group(obj)) then
-	begin
-	found := true;
-	break;
-	end;
-
-	node_back := node_back.prev;
-	end;
-
-	node := node_next;
-	end; }
 end;
 
 procedure do_swap(ch:GCharacter;param:string);
@@ -582,13 +506,12 @@ begin
         act(AT_REPORT,'You throw $p '+headings[dir]+'.',false,ch,obj,nil,TO_CHAR);
         act(AT_REPORT,'$n throws something '+headings[dir]+'.',false,ch,nil,nil,TO_ROOM);
 
-        obj.fromChar();
-
         dest := findRoom(pexit.vnum);
+        
+        ch.inventory.remove(obj);
+        dest.objects.add(obj);
 
         vict := dest.findRandomChar();
-
-        obj.toRoom(dest);
 
         if vict=nil then
           act(AT_REPORT,'It doesn''t seem to have hit anything.',false,ch,nil,nil,TO_CHAR)
@@ -771,8 +694,6 @@ begin
     act(AT_REPORT,'Your stomach would not respond nicely when eating this!',false,ch,nil,nil,TO_CHAR)
   else
     begin
-    obj.separate();
-
     act(AT_REPORT,'You eat $p.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n eats $p.',false,ch,obj,nil,TO_ROOM);
 
@@ -785,7 +706,7 @@ begin
         ch.sendBuffer('You are full.'#13#10);
       end;
 
-    obj.fromChar();
+	ch.removeInventory(obj);
     obj.Free();
     end;
 end;
@@ -849,18 +770,19 @@ begin
     item_type := ITEM_TRASH;
     end;
 
-  scalp.toChar(ch);
+  ch.addInventory(scalp);
   act(AT_REPORT,'You draw your weapon and rip off $p.',false,ch,scalp,nil,TO_CHAR);
 end;
 
 { Added give ALL and give <amount> COINS <char> - Nemesis }
 { Revised 13/Feb/2001 - Nemesis }
 procedure do_give(ch:GCharacter;param:string);
-var arg, arg2, arg3 : string;
-    obj : GObject;
-    vict : GCharacter;
-    value, counter : integer;
-    node : GListNode;
+var 
+	arg, arg2, arg3 : string;
+	obj : GObject;
+	vict : GCharacter;
+	value, counter : integer;
+	iterator : GIterator;
 begin
   param := one_argument(param,arg);
   param := one_argument(param,arg2);
@@ -930,24 +852,24 @@ begin
       ch.sendBuffer('They are not here.'#13#10);
       exit;
       end;
-
-    node := ch.inventory.tail;
-    
-    while (node <> nil) do
+      
+    iterator := ch.inventory.iterator();
+   
+    while (iterator.hasNext()) do
       begin
-      obj := GObject(node.element);
+      obj := GObject(iterator.next());
 
 			act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
 			act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
 
 			inc(counter);
 
-			obj.separate();
-			obj.fromChar;
-			obj.toChar(vict);
-
-      node := node.next;
+			iterator.remove();
+			dec(ch.carried_weight, obj.weight);
+			vict.addInventory(obj);
       end;
+      
+    iterator.Free();
 
     if (counter = 0) then
       begin
@@ -972,10 +894,9 @@ begin
     ch.sendBuffer('They are not here.'#13#10);
     exit;
     end;
-
-  obj.separate();
-  obj.fromChar;
-  obj.toChar(vict);
+    
+  ch.removeInventory(obj);
+  vict.addInventory(obj);
 
   act(AT_REPORT,'You give $N $p.',false, ch, obj, vict, TO_CHAR);
   act(AT_REPORT,'$n gives $N $p.',false, ch, obj, vict, TO_ROOM);
@@ -1034,8 +955,7 @@ begin
 
         inc(counter);
 
-        obj.separate();
-        obj.fromChar;
+        ch.removeInventory(obj);
         obj.toObject(obj_in);
         end;
 
@@ -1083,8 +1003,7 @@ begin
       act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
       act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
 
-      obj.separate();
-      obj.fromChar;
+	  ch.removeInventory(obj);
       obj.toObject(obj_in);
       end;
     end;
@@ -1370,8 +1289,7 @@ begin
 	act(AT_REPORT, 'You load $p with $P.', false, ch, bow, arrow, TO_CHAR);
 	act(AT_REPORT, '$n loads $p with $P.', false, ch, bow, arrow, TO_ROOM);
 	
-	arrow.separate();
-	arrow.fromChar();
+	ch.removeInventory(arrow);
 	arrow.Free();
 end;
 
@@ -1430,8 +1348,8 @@ begin
 	act(AT_REPORT, '$n draws $p.', false, ch, bow, nil, TO_ROOM);
 
 	bow.fromObject();
-	bow.toChar(ch);
-	ch.equip(bow, true);
+	ch.addInventory(bow);
+	ch.equip(bow, false, true);
 end;
 
 procedure do_sheath(ch : GCharacter; param : string);
@@ -1484,6 +1402,6 @@ begin
 	act(AT_REPORT, 'You sheath $p through $P.', false, ch, weapon, belt, TO_CHAR);
 	act(AT_REPORT, '$n sheaths $p through $P.', false, ch, weapon, belt, TO_ROOM);
 	
-	weapon.fromChar();
+	ch.removeInventory(weapon);
 	weapon.toObject(belt);
 end;

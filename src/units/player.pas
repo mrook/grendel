@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.32 2004/05/12 22:39:27 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.33 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -381,7 +381,10 @@ end;
 procedure GPlayerConnection.OnCloseEvent();
 begin
 	if (state = CON_STATE_LOGGED_OUT) then
-		dec(system_info.user_cur)
+		begin
+		char_list.remove(ch);
+		dec(system_info.user_cur);
+		end
 	else
 	if (not ch.CHAR_DIED) and ((state = CON_STATE_PLAYING) or (state = CON_STATE_EDITING)) then
 		begin
@@ -397,6 +400,7 @@ begin
 		end
 	else
 		begin
+		char_list.remove(ch);
 		ch.Free();
 		end;	
 end;
@@ -2004,8 +2008,12 @@ begin
 			
 			if (obj.worn = 'none') then
 				obj.worn := '';
-				
-			obj.toChar(Self);
+			
+			if (obj.worn <> '') then
+				equipment.put(obj.worn, obj)
+			else
+				inventory.add(obj);
+			
 			lastobj := obj;
 			end;
 
@@ -2040,6 +2048,8 @@ begin
             cost := StrToInt(left(a,' '));
             a := right(a, ' ');
             count := strtointdef(left(a, ' '), 1);
+            
+            inc(carried_weight, weight);
             
             if (count = 0) then
               count := 1;

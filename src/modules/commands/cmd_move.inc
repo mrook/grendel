@@ -1,4 +1,4 @@
-// $Id: cmd_move.inc,v 1.8 2004/03/13 17:41:44 ***REMOVED*** Exp $
+// $Id: cmd_move.inc,v 1.9 2004/06/10 18:10:56 ***REMOVED*** Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
@@ -39,7 +39,7 @@ begin
 
   objectList.add(obj);
 
-  obj.toRoom(ch.room);
+  ch.room.objects.add(obj);
 end;
 
 procedure maketrack(ch : GCharacter; pexit : GExit);

@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.8 2004/03/26 21:14:27 hemko Exp $
+	## $Id: update.pas,v 1.9 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -43,6 +43,7 @@ uses
 	fight,
 	conns,
 	player,
+	console,
 	Channels;
 
 
@@ -638,7 +639,7 @@ begin
         begin
         act(AT_REPORT,'You have won $p.', false, last, bg_info.prize, nil, TO_CHAR);
 
-        GObject(bg_info.prize).toChar(last);
+		last.addInventory(GObject(bg_info.prize));
         end;
 
       interpret(last, 'look');
@@ -649,6 +650,8 @@ begin
       bg_info.count := -1;
       bg_info.prize := nil;
       end;
+      
+      iterator.Free();
     end;
 end;
 
@@ -697,8 +700,12 @@ begin
          end;
     end;
 
+
+	// TODO
     if (obj.carried_by <> nil) then
-      act(at_temp, msg, false, obj.carried_by, obj, nil, TO_CHAR)
+      begin
+      act(at_temp, msg, false, obj.carried_by, obj, nil, TO_CHAR);
+      end
     else
     if (obj.room <> nil) then
       begin
@@ -716,6 +723,8 @@ begin
 
     obj.Free();
   end;
+  
+  iterator.Free();
 end;
 
 end.

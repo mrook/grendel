@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.6 2004/06/10 18:08:08 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.7 2004/06/10 18:10:56 ***REMOVED*** Exp $
 
 procedure do_say(ch : GCharacter; param : string);
 begin
@@ -252,7 +252,7 @@ begin
 			if (index <> nil) then
         begin
         obj := index.clone();
-        obj.toChar(vict);
+        vict.addInventory(obj);
         act(AT_REPORT,'You have received $p.',false,vict,obj,nil,TO_CHAR);
 				end;
       end;
@@ -333,7 +333,7 @@ begin
       ch.sendBuffer('But that is not your auction!'#13#10)
     else
       begin
-      GObject(auc.item).toChar(ch);
+      ch.addInventory(GObject(auc.item));
 
       buf := '$B$2<Auction> $1[$7' + ch.name + '$1] Auction of $7' + GObject(auc.item).name + '$1 has been halted.';
       to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
@@ -381,8 +381,7 @@ begin
 
   act(AT_REPORT,'Auctioned $p at the price of '+inttostr(price)+'.',false,ch,obj,nil,TO_CHAR);
 
-  obj.separate();
-  obj.fromChar();
+  ch.removeInventory(obj);
 
   auc.pulse := CPULSE_AUCTION;
   auc.item:=obj;

@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.14 2004/04/10 22:24:03 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.15 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -172,7 +172,11 @@ type
       function getWield(item_type : integer) : GObject;
       function getDualWield() : GObject;
       procedure affectObject(obj : GObject; remove: boolean);
-      function equip(obj : GObject; silent : boolean = false) : boolean;
+      function unequip(obj : GObject; silent : boolean = false) : boolean;
+      function equip(obj : GObject; replace : boolean; silent : boolean = false) : boolean;
+      
+      procedure addInventory(obj : GObject);
+      procedure removeInventory(obj : GObject);
 
       procedure die(); virtual;
 
@@ -377,7 +381,6 @@ begin
     if (conn <> nil) then
       GConnection(conn).ch := nil; }
 
-    char_list.remove(node_world);
     node_world := extracted_chars.insertLast(Self);
     end;
 end;
@@ -902,6 +905,7 @@ procedure GNPC.die();
 begin
   inherited die();
 
+  char_list.remove(Self);
   dec(npc_index.count);
   extract(true);
   dec(mobs_loaded);
@@ -1005,85 +1009,173 @@ begin
 		end;
 end;
 
-// Equip object
-function GCharacter.equip(obj : GObject; silent : boolean = false) : boolean;
+// Unequip object
+function GCharacter.unequip(obj : GObject; silent : boolean = false) : boolean;
 var
-  bodypart : GBodyPart;
+	inner_iterator : GIterator;
+	obj_in : GObject;
 begin
-  Result := true;
-
-  if IS_SET(obj.flags,OBJ_ANTI_GOOD) and IS_GOOD then
-    begin
-    act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
-    act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
-
-    obj.fromChar;
-    obj.toRoom(room);
-    exit;
-    end;
-
-  if IS_SET(obj.flags,OBJ_ANTI_EVIL) and IS_EVIL then
-    begin
-    act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
-    act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
-
-    obj.fromChar;
-    obj.toRoom(room);
-    exit;
-    end;
-
-  if (obj.wear_location1 <> '') and (getEQ(obj.wear_location1) = nil) then      { Wear on spot #1}
-    begin
-    bodypart := GBodyPart(race.bodyparts[obj.wear_location1]);
-    
-    if (bodypart = nil) then
-      begin
-      act(AT_REPORT, 'You do not have the right anatomy to wear $p.', false, Self, obj, nil, TO_CHAR);
-      Result := false;
-      exit;
-      end;
-
-	if (not silent) then
+	Result := true;
+	
+	if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
 		begin
-		act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
-		act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+		if (not silent) then
+			act(AT_REPORT, 'You cannot remove $p$7.' , false, Self, obj, nil, TO_CHAR);
+			
+		Result := false;
+		exit;
 		end;
 
-    obj.fromChar();
-    obj.worn := obj.wear_location1;
-    obj.toChar(Self);
+	inner_iterator := obj.contents.iterator();
 
-    affectObject(obj, false);
-    end
-  else
-  if (obj.wear_location2 <> '') and (getEQ(obj.wear_location2) = nil) then      { Wear on spot #2}
-    begin
-    bodypart := GBodyPart(race.bodyparts[obj.wear_location2]);
-    
-    if (bodypart = nil) then
-      begin
-      act(AT_REPORT, 'You do not have the right anatomy to wear $p.', false, Self, obj, nil, TO_CHAR);
-      Result := false;
-      exit;
-      end;
-      
+	while (inner_iterator.hasNext()) do
+		begin
+		obj_in := GObject(inner_iterator.next());
+
+		if (not silent) then
+			act(AT_REPORT,'$p falls out of $P.', false, Self, obj_in, obj, TO_CHAR);
+
+		inner_iterator.remove();
+		
+		addInventory(obj_in);
+		end;
+
+	inner_iterator.Free();
+
 	if (not silent) then
 		begin
-		act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
-		act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+		act(AT_REPORT, 'You remove $p.', false, Self, obj, nil, TO_CHAR);
+		act(AT_REPORT, '$n removes $p.', false, Self, obj, nil, TO_ROOM);
 		end;
 		
-    obj.fromChar();
-    obj.worn := obj.wear_location2;
-    obj.toChar(Self);
+	equipment.remove(obj.worn);
 
-    affectObject(obj, false);
-    end
-  else                                              { No spots left }
-    begin
-    sendBuffer('You are already wearing something there!'#13#10);
-    Result := false;
-    end; 
+	obj.worn := '';			
+	inventory.add(obj);
+
+	affectObject(obj, true);
+end;
+
+// Add object to inventory
+procedure GCharacter.addInventory(obj : GObject);
+begin
+	inc(carried_weight, obj.weight);
+	inventory.add(obj);
+end;
+
+// Remove object from inventory
+procedure GCharacter.removeInventory(obj : GObject);
+begin
+	dec(carried_weight, obj.weight);
+	inventory.remove(obj);
+end;
+
+// Equip object
+function GCharacter.equip(obj : GObject; replace : boolean; silent : boolean = false) : boolean;
+var
+	bodypart : GBodyPart;
+	eq1, eq2 : GObject;
+begin
+	Result := true;
+
+	if IS_SET(obj.flags,OBJ_ANTI_GOOD) and IS_GOOD then
+		begin
+		act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
+		act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
+
+		room.objects.add(obj);
+		exit;
+		end;
+
+	if IS_SET(obj.flags,OBJ_ANTI_EVIL) and IS_EVIL then
+		begin
+		act(AT_REPORT,'You are zapped by $p!',false,Self,obj,nil,TO_CHAR);
+		act(AT_REPORT,'$n is zapped by $p and burns $s hands.',false,Self,obj,nil,TO_ROOM);
+
+		room.objects.add(obj);
+		exit;
+		end;
+		
+	eq1 := getEQ(obj.wear_location1);
+	eq2 := getEQ(obj.wear_location2);
+
+	if ((obj.wear_location1 <> '') and (eq1 <> nil) and (obj.wear_location2 = '')) or
+	  ((obj.wear_location2 <> '') and (eq2 <> nil) and (obj.wear_location1 = '')) or
+	  ((obj.wear_location1 <> '') and (eq1 <> nil) and (obj.wear_location2 <> '') and (eq2 <> nil)) then
+		begin
+		if (not replace) then
+			begin
+			sendBuffer('You are already wearing something there!'#13#10);
+			Result := false;
+			exit;
+			end
+		else
+			begin
+			if (eq1 <> nil) then
+				begin
+				if (not unequip(eq1, silent)) then
+					exit;
+					
+				eq1 := nil;
+				end
+			else
+			if (eq2 <> nil) then
+				begin
+				if (not unequip(eq2, silent)) then
+					exit;
+					
+				eq2 := nil;
+				end			
+			end;
+		end;
+
+	if (obj.wear_location1 <> '') and (eq1 = nil) then      { Wear on spot #1}
+		begin
+		bodypart := GBodyPart(race.bodyparts[obj.wear_location1]);
+
+		if (bodypart = nil) then
+			begin
+			act(AT_REPORT, 'You do not have the right anatomy to wear $p.', false, Self, obj, nil, TO_CHAR);
+			Result := false;
+			exit;
+			end;
+
+		if (not silent) then
+			begin
+			act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
+			act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+			end;
+		
+		obj.worn := obj.wear_location1;
+		equipment.put(obj.worn, obj);
+
+		affectObject(obj, false);
+		end
+	else
+	if (obj.wear_location2 <> '') and (eq2 = nil) then      { Wear on spot #2}
+		begin
+		bodypart := GBodyPart(race.bodyparts[obj.wear_location2]);
+
+		if (bodypart = nil) then
+			begin
+			act(AT_REPORT, 'You do not have the right anatomy to wear $p.', false, Self, obj, nil, TO_CHAR);
+			Result := false;
+			exit;
+			end;
+
+		if (not silent) then
+			begin
+			act(AT_REPORT, bodypart.char_message, false, Self, obj, nil, TO_CHAR);
+			act(AT_REPORT, bodypart.room_message, false, Self, obj, nil, TO_ROOM);
+			end;
+
+		obj.worn := obj.wear_location2;
+		equipment.put(obj.worn, obj);
+
+		affectObject(obj, false);
+		end
+	else
+		sendBuffer('shouldn''t be here'#13#10);
 end;
 
 function GCharacter.calcxp2lvl : cardinal;

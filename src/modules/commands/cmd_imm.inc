@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.17 2004/05/12 20:53:23 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.18 2004/06/10 18:10:56 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -690,8 +690,7 @@ begin
 
   if (obj <> nil) then
     begin
-    obj.separate();
-    obj.fromChar();
+    ch.removeInventory(obj);
     bg_info.prize := obj;
     end
   else
@@ -1762,20 +1761,27 @@ begin
     end;
 
   obj := vict.findEquipment(objstr);
-  if (obj = nil) then
-  obj := vict.findInventory(objstr);
+  
+  if (obj <> nil) then	
+  	begin
+  	vict.unequip(obj);
+  	end
+  else
+  	begin
+  	obj := vict.findInventory(objstr);
 
-  if (obj = nil) then
-    begin
-    ch.sendBuffer('That character does not have that object.'#13#10);
-    exit;
-    end;
-
+	  if (obj = nil) then
+		begin
+		ch.sendBuffer('That character does not have that object.'#13#10);
+		exit;
+		end;
+		
+	ch.removeInventory(obj);
+  	end;
+  
   obj.worn := '';       // put it in inv no matter what
 
-  obj.separate();
-  obj.fromChar();
-  obj.toChar(ch);
+  ch.addInventory(obj);
 
   act(AT_REPORT,'$N takes $p from you.',false, vict, obj, ch, TO_CHAR);
   act(AT_REPORT,'$n takes $p from $N.',false, ch, obj, vict, TO_NOTVICT);
@@ -2566,8 +2572,9 @@ begin
     while (iterator.hasNext()) do
       begin
       obj := GObject(iterator.Next());
+      
+      iterator.remove();
 
-      obj.fromChar();
       obj.Free();
       end;
       
@@ -2580,8 +2587,9 @@ begin
       obj := GObject(iterator.Next());
 
       vict.affectObject(obj, true);
+      
+      iterator.remove();
 
-      obj.fromChar();
       obj.Free();
       end;
       
@@ -2592,19 +2600,24 @@ begin
     exit;
     end;
 
-  obj := vict.findInventory(objstr);
+  obj := vict.findEquipment(objstr);
+  
+  if (obj <> nil) then	
+  	begin
+  	vict.unequip(obj);
+  	end
+  else
+  	begin
+  	obj := vict.findInventory(objstr);
 
-  if (obj = nil) then
-    obj := vict.findEquipment(objstr);
-
-  if (obj = nil) then
-    obj := vict.findInventory(objstr);
-
-  if (obj = nil) then
-    begin
-    ch.sendBuffer('That character does not have that object.'#13#10);
-    exit;
-    end;
+	  if (obj = nil) then
+		begin
+		ch.sendBuffer('That character does not have that object.'#13#10);
+		exit;
+		end;
+		
+	ch.removeInventory(obj);
+  	end;
 
   if (obj.worn <> '') then
     vict.affectObject(obj, true);
@@ -2612,6 +2625,5 @@ begin
   act(AT_REPORT,'$p has been purged by $N.',false, vict, obj, ch, TO_CHAR);
   act(AT_REPORT,'You have purged $p of $N.',false, ch, obj, vict, TO_CHAR);
 
-  obj.fromChar();
   obj.Free();
 end;

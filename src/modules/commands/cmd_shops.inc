@@ -1,4 +1,4 @@
-// $Id: cmd_shops.inc,v 1.2 2004/05/12 20:53:23 ***REMOVED*** Exp $
+// $Id: cmd_shops.inc,v 1.3 2004/06/10 18:10:56 ***REMOVED*** Exp $
 
 procedure do_balance(ch:GCharacter;param:string);
 var
@@ -287,7 +287,7 @@ begin
 
       act(AT_REPORT,'You buy $p for '+inttostr(cost)+' coins.',false,ch,newobj,nil,TO_CHAR);
 
-      newobj.toChar(ch);
+      ch.addInventory(obj);
       ch.gold := ch.gold - cost;
       end;
     end;
@@ -357,11 +357,8 @@ begin
     exit;
     end;
 
-  if (obj.count > 1) then 
-    obj.separate();
-    
-  obj.fromChar();
-  obj.toChar(keeper);
+  ch.removeInventory(obj);
+  keeper.addInventory(obj);
   ch.gold := ch.gold + cost;
   act(AT_REPORT,'You sold $p for ' + inttostr(cost) + ' coins.', false, ch, obj, nil, TO_CHAR);
 end;

@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.32 2004/05/12 20:53:23 ***REMOVED*** Exp $
+	## $Id: area.pas,v 1.33 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -114,12 +114,6 @@ type
       child_count : integer; { how many of me were cloned }
 
   	published
-      procedure toRoom(to_room : GRoom);
-      procedure fromRoom();
-
-      procedure toChar(c : pointer);
-      procedure fromChar();
-
       procedure toObject(obj : GObject);
       procedure fromObject();
 
@@ -1544,6 +1538,7 @@ begin
                 begin
                 bugreport('GArea.reset (M) area: ' + name, 'area.pas', 'room #' + IntToStr(reset.arg2) + ' null');
 
+                char_list.remove(npc);
                 npc.extract(true);
                 end
               else
@@ -1601,8 +1596,8 @@ begin
             if (tempobj <> nil) then
               begin
               obj := tempobj.clone();
-
-	            obj.toChar(npc);
+              
+              	npc.addInventory(obj);
 	            npc.equip(obj, true);
 
 	            lastobj := obj;
@@ -1647,10 +1642,10 @@ begin
 					
 					if (tempobj <> nil) then
 					  begin
-            obj := tempobj.clone();
-            obj.toChar(npc);
-
-            lastobj := obj;
+            			obj := tempobj.clone();
+            			npc.addInventory(obj);
+			            
+            			lastobj := obj;
 					  end
 					else
             bugreport('GArea.reset (G) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null');
@@ -1664,7 +1659,7 @@ begin
           if (tempobj.area.nplayer = 0) and (reset.arg3 > tempobj.child_count) then
             begin
             obj := tempobj.clone();
-            obj.toRoom(findRoom(reset.arg2));
+            findRoom(reset.arg2).objects.add(obj);
 
             lastobj := obj;
             end;
@@ -2482,12 +2477,6 @@ begin
     obj_in.Free();
     end;
 
-  if (room <> nil) then
-    fromRoom();
-
-  if (carried_by <> nil) then
-    fromChar();
-
   if (in_obj <> nil) then
     fromObject();
 
@@ -2509,112 +2498,6 @@ begin
   contents.Free();
   
   inherited Destroy();
-end;
-
-// Object to room
-procedure GObject.toRoom(to_room : GRoom);
-var
-	iterator : GIterator;
-	otmp : GObject;
-begin
-  if (to_room = nil) then
-    begin
-    bugreport('GObject.toRoom', 'area.pas', 'room null');
-    exit;
-    end;
-
-  iterator := to_room.objects.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    otmp := GObject(iterator.next());
-
-    if (otmp.group(Self)) then
-    	begin
-		  iterator.Free();
-      exit;
-      end;
-    end;
-
-	iterator.Free();
-	
-  node_room := to_room.objects.insertFirst(Self);
-
-  room := to_room;
-  in_obj := nil;
-  carried_by := nil;
-end;
-
-// Object from room
-procedure Gobject.fromRoom();
-begin
-  if (room = nil) then
-    begin
-    bugreport('obj_from_room', 'area.pas', 'room null');
-    exit;
-    end;
-
-  room.objects.remove(node_room);
-  node_room := nil;
-  room := nil;
-end;
-
-// Object to char
-procedure GObject.toChar(c : pointer);
-var 
-{	grouped : boolean;
-	node : GListNode;
-	otmp : GObject; }
-	ch : GCharacter;
-	oweight : integer;
-begin
-  oweight := getWeight();
-  ch := GCharacter(c);
-  
-{  
-	
-	*** TODO!!
-	
-	grouped := false;
-
-  node := ch.objects.head;
-
-  while (node <> nil) do
-    begin
-    otmp := node.element;
-
-    if (otmp.group(Self)) then
-      begin
-      grouped := true;
-      break;
-      end;
-
-    node := node.next;
-    end; }
-
-  if (worn <> '') then
-    ch.equipment[worn] := Self
-  else
-    node_carry := ch.inventory.insertFirst(Self);
-  
-  carried_by := c;
-
-  inc(ch.carried_weight, oweight);
-end;
-
-// Object from char
-procedure GObject.fromChar();
-begin
-  if (worn <> '') then
-    GCharacter(carried_by).equipment.remove(worn)
-  else
-    GCharacter(carried_by).inventory.remove(node_carry);
-    
-  dec(GCharacter(carried_by).carried_weight, getWeight);
-
-  worn := '';
-  node_carry := nil;
-  carried_by := nil;
 end;
 
 // Object to object
@@ -2856,7 +2739,7 @@ begin
 
         if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
-          obj_in.fromChar();
+          iterator.remove();
           obj_in.toObject(obj);
           end;
         end;
@@ -2871,7 +2754,7 @@ begin
 
         if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and (not ((obj_in.worn <> '') and (IS_SET(obj_in.flags, OBJ_NOREMOVE)))) then
           begin
-          obj_in.fromChar();
+          iterator.remove();
           obj_in.toObject(obj);
           end;
         end;
@@ -2916,7 +2799,7 @@ begin
     ch.gold := 0;
     end;
 
-  obj.toRoom(ch.room);
+  ch.room.objects.add(obj);
 end;
 
 function findHeading(s : string) : integer;

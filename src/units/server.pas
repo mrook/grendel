@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.16 2004/04/15 17:47:22 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.17 2004/06/10 18:10:56 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -257,7 +257,7 @@ end;
 
 procedure GServer.cleanup();
 var
-	node : GListNode;
+	iterator : GIterator;
 begin
 	try
 		writeConsole('Terminating threads...');
@@ -277,12 +277,15 @@ begin
 
 		writeConsole('Releasing allocated memory...');
 
-		node := char_list.tail;
-		while (node <> nil) do
+		iterator := char_list.iterator();
+		
+		while (iterator.hasNext()) do
 			begin
-			GCharacter(node.element).extract(true);
-			node := char_list.tail;
+			GCharacter(iterator.next()).extract(true);
+			iterator.remove();
 			end;
+			
+		iterator.Free();
 
 		writeConsole('Cleaning channels...');
 		cleanupChannels();
