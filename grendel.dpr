@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.84 2003/10/29 12:57:50 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.85 2003/10/30 19:52:02 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -56,10 +56,10 @@ uses
   {$IFNDEF CONSOLEBUILD}
   systray,
   {$ENDIF}
-  Classes,
   JclHookExcept,
   JclDebug,
 {$ENDIF}
+  Classes,
 {$IFDEF LINUX}
   Libc,
 {$ENDIF}
@@ -455,9 +455,9 @@ var
   s : string;
 begin
 	initConsole();
-	
-  writeConsole(version_info + ', ' + version_number + '.');
-  writeConsole(version_copyright + '.');
+
+	writeConsole(version_info + ', ' + version_number + '.');
+	writeConsole(version_copyright + '.');
 
 	writeConsole('Initializing memory pool...');
 	init_progs();
@@ -484,7 +484,7 @@ begin
 	{ writeConsole('Reading debug info...');
 	readMapFile('grendel.exe', 'grendel.map');
 	readMapfile('core.bpl', 'core.map'); }
-
+ 
 	writeConsole('Booting server...');
 	load_system;
 
@@ -643,7 +643,6 @@ end;
 procedure acceptConnection(list_socket : GSocket);
 var
   ac : GSocket;
-  conn : GConnection;
 begin
   ac := list_socket.acceptConnection(system_info.lookup_hosts);
   
@@ -720,11 +719,12 @@ begin
     end;    
 end;
 
+{$IFDEF WIN32}
 procedure AnyExceptionNotify(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
 var
-  a : integer;
-  e : Exception;
-  strings : TStringList;
+	a : integer;
+	e : Exception;
+	strings : TStringList;
 begin
 	if (ExceptObj <> nil) then
 		begin
@@ -751,16 +751,32 @@ end;
 
 function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; stdcall;
 begin
-  Result := 1;
+	Result := 1;
 end;
+{$ENDIF}
+
+{$IFDEF LINUX}
+procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
+var
+	E : Exception;
+begin
+	E := ExceptObject as Exception;
+
+	writeln('[EX] ' + E.ClassName + ': ' + E.Message);
+
+	if (E is EControlC) then
+		grace_exit := true;
+
+	halt;
+end;
+{$ENDIF}
 
 var
-  tm : TDateTime;
+	tm : TDateTime;
 
 begin
-  old_exitproc := ExitProc;
-
-  tm := Now();
+	old_exitproc := ExitProc;
+	tm := Now();
 
 {$IFDEF WIN32}
   // initialize the debug 'fail-safe device'
@@ -770,29 +786,31 @@ begin
   JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
   SetUnhandledExceptionFilter(@ExceptionFilter);
 
-  JclStartExceptionTracking;
+	JclStartExceptionTracking;
 	JclInitializeLibrariesHookExcept;
-  JclAddExceptNotifier(AnyExceptionNotify);
+	JclAddExceptNotifier(AnyExceptionNotify);
+{$ENDIF}
+{$IFDEF LINUX}
+	ExceptProc := @ExceptHandler;
 {$ENDIF}
 
-  bootServer();  
+	bootServer();  
   
 {$IFDEF WIN32}
-  if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
-    from_copyover;
+	if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
+		from_copyover();
 {$ENDIF}
 
-  tm := Now() - tm;
+	tm := Now() - tm;
 
-  writeConsole('Server boot took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
-
-  writeConsole('Grendel ' + version_number + ' ready...');
+	writeConsole('Server boot took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
+	writeConsole('Grendel ' + version_number + ' ready...');
 
 {$IFDEF WIN32}
-  {$IFDEF CONSOLEBUILD}
-  SetConsoleCtrlHandler(@controlHandler, true);
-  {$ENDIF}
+{$IFDEF CONSOLEBUILD}
+	SetConsoleCtrlHandler(@controlHandler, true);
+{$ENDIF}
 {$ENDIF}
 
-  gameLoop();
+	gameLoop();
 end.
