@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.5 2004/03/18 15:22:06 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.6 2004/03/19 15:38:18 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -154,181 +154,192 @@ begin
 	writeConsole(version_copyright + '.');
 
 	writeConsole('Initializing memory pool...');
-	init_progs();
-	initClans();
-	initCommands();
-	initConns();
-	initHelp();
-	initChannels();
-	initChars();
-	initPlayers();
-	initSkills();
-	initAreas();
-	initTimers();
-	initRaces();
-	initNotes();
-	initSystem();
-	initEvents();
-
-	{$IFDEF WIN32}
-	{$IFNDEF CONSOLEBUILD}
-	initSysTray();
-	{$ENDIF}
-	{$ENDIF}
-
-	writeConsole('Booting server...');
-	loadSystem();
-
-	writeConsole('Booting "' + system_info.mud_name + '" database, ' + FormatDateTime('ddddd', Now()) + '.');
-
-	writeConsole('Loading skills...');
-	load_skills();
 	
-	writeConsole('Loading races...');
-	loadRaces();
-	
-	writeConsole('Loading clans...');
-	load_clans;
-	
-	writeConsole('Loading channels...');
-	load_channels();
-	
-	writeConsole('Loading areas...');
-	loadAreas();
-	
-	writeConsole('Loading help...');
-	loadHelp('help.dat');
-	
-	writeConsole('Loading namegenerator data...');
-	loadNameTables(NameTablesDataFile);
-	
-	writeConsole('Loading noteboards...');
-	load_notes('boards.dat');
-	
-	writeConsole('Loading modules...');
-	loadModules();
-	
-	writeConsole('Loading texts...');
-	loadCommands();
-	loadSocials();
-	loadDamage();
-	
-	writeConsole('Loading mud state...');
-	BootTime := Now;
+	try
+		init_progs();
+		initClans();
+		initCommands();
+		initConns();
+		initHelp();
+		initChannels();
+		initChars();
+		initPlayers();
+		initSkills();
+		initAreas();
+		initTimers();
+		initRaces();
+		initNotes();
+		initSystem();
+		initEvents();
 
-	bg_info.count := -1;
+		writeConsole('Booting server...');
+		
+		{$IFDEF WIN32}
+		{$IFNDEF CONSOLEBUILD}
+		initSysTray();
+		registerSysTray();
+		{$ENDIF}
+		{$ENDIF}
+		
+		loadSystem();
 
-	update_time;
+		writeConsole('Booting "' + system_info.mud_name + '" database, ' + FormatDateTime('ddddd', Now()) + '.');
 
-	time_info.day := 1;
-	time_info.month := 1;
-	time_info.year := 1;
+		writeConsole('Loading skills...');
+		load_skills();
 
-	loadMudState();
+		writeConsole('Loading races...');
+		loadRaces();
 
-	randomize();
-	
-	resetAreas();
+		writeConsole('Loading clans...');
+		load_clans;
 
-	openListenSockets();
+		writeConsole('Loading channels...');
+		load_channels();
 
-	registerTimer('teleports', update_teleports, 1, true);
-	registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
-	registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
-	registerTimer('objects', update_objects, CPULSE_TICK, true);
-	registerTimer('characters', update_chars, CPULSE_TICK, true);
-	registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
+		writeConsole('Loading areas...');
+		loadAreas();
 
-	timer_thread := GTimerThread.Create();
-	clean_thread := GCleanThread.Create();
+		writeConsole('Loading help...');
+		loadHelp('help.dat');
 
-	calculateonline();
+		writeConsole('Loading namegenerator data...');
+		loadNameTables(NameTablesDataFile);
 
-	{$IFDEF WIN32}
-	{$IFNDEF CONSOLEBUILD}
-	registerSysTray();
-	{$ENDIF}  
-	{$ENDIF}
+		writeConsole('Loading noteboards...');
+		load_notes('boards.dat');
+
+		writeConsole('Loading modules...');
+		loadModules();
+
+		writeConsole('Loading texts...');
+		loadCommands();
+		loadSocials();
+		loadDamage();
+
+		writeConsole('Loading mud state...');
+		BootTime := Now;
+
+		bg_info.count := -1;
+
+		update_time;
+
+		time_info.day := 1;
+		time_info.month := 1;
+		time_info.year := 1;
+
+		loadMudState();
+
+		randomize();
+
+		resetAreas();
+
+		openListenSockets();
+
+		registerTimer('teleports', update_teleports, 1, true);
+		registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
+		registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
+		registerTimer('objects', update_objects, CPULSE_TICK, true);
+		registerTimer('characters', update_chars, CPULSE_TICK, true);
+		registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
+
+		timer_thread := GTimerThread.Create();
+		clean_thread := GCleanThread.Create();
+
+		calculateonline();	
+	except
+		on E : Exception do
+			begin
+			reportException(E);
+			writeConsole('Server boot failed, halting!');
+			Halt(1);
+			end;
+	end;
 end;
 
 procedure GServer.cleanup();
 var
 	node : GListNode;
 begin
-	writeConsole('Terminating threads...');
-	
-	timer_thread.Terminate();
-	clean_thread.Terminate();
+	try
+		writeConsole('Terminating threads...');
 
-	Sleep(100);
+		timer_thread.Terminate();
+		clean_thread.Terminate();
 
-	writeConsole('Saving mudstate...');
+		Sleep(100);
 
-	saveMudState();
-	
-	writeConsole('Unloading modules...');
+		writeConsole('Saving mudstate...');
 
-	unloadModules();
+		saveMudState();
 
-	writeConsole('Releasing allocated memory...');
+		writeConsole('Unloading modules...');
 
-	node := char_list.tail;
-	while (node <> nil) do
-		begin
-		GCharacter(node.element).extract(true);
+		unloadModules();
+
+		writeConsole('Releasing allocated memory...');
+
 		node := char_list.tail;
-		end;
+		while (node <> nil) do
+			begin
+			GCharacter(node.element).extract(true);
+			node := char_list.tail;
+			end;
 
-	writeConsole('Cleaning channels...');
-	cleanupChannels();
+		writeConsole('Cleaning channels...');
+		cleanupChannels();
 
-	writeConsole('Cleaning players...');
-	cleanupPlayers();
-		
-	writeConsole('Cleaning chars...');
-	cleanupChars();
-	
-	writeConsole('Cleaning clans...');
-	cleanupClans();
+		writeConsole('Cleaning players...');
+		cleanupPlayers();
 
-	writeConsole('Cleaning commands...');
-	cleanupCommands();
+		writeConsole('Cleaning chars...');
+		cleanupChars();
 
-	writeConsole('Cleaning connections...');
-	cleanupConns();
+		writeConsole('Cleaning clans...');
+		cleanupClans();
 
-	writeConsole('Cleaning help...');
-	cleanupHelp();
+		writeConsole('Cleaning commands...');
+		cleanupCommands();
 
-	writeConsole('Cleaning skills...');
-	cleanupSkills();
+		writeConsole('Cleaning connections...');
+		cleanupConns();
 
-	writeConsole('Cleaning areas...');
-	cleanupAreas();
+		writeConsole('Cleaning help...');
+		cleanupHelp();
 
-	writeConsole('Cleaning timers...');
-	cleanupTimers();
+		writeConsole('Cleaning skills...');
+		cleanupSkills();
 
-	writeConsole('Cleaning races...');
-	cleanupRaces();
+		writeConsole('Cleaning areas...');
+		cleanupAreas();
 
-	writeConsole('Cleaning system...');
-	cleanupSystem();
+		writeConsole('Cleaning timers...');
+		cleanupTimers();
 
-	writeConsole('Cleaning notes...');
-	cleanupNotes();
+		writeConsole('Cleaning races...');
+		cleanupRaces();
 
-	writeConsole('Cleaning events...');
-	cleanupEvents();
+		writeConsole('Cleaning system...');
+		cleanupSystem();
 
-	writeConsole('Cleanup complete.');
+		writeConsole('Cleaning notes...');
+		cleanupNotes();
 
-	{$IFDEF WIN32}      
+		writeConsole('Cleaning events...');
+		cleanupEvents();
+	except
+		on E : Exception do reportException(E);
+	end;
+
+	// make sure there's no dangling icon
+	{$IFDEF WIN32}
 	{$IFNDEF CONSOLEBUILD}
 	unregisterSysTray();
 	cleanupSysTray();
 	{$ENDIF}
 	{$ENDIF}
+	
+	writeConsole('Cleanup complete.');
 end;
 
 { Gameloop, call this from main program or TService.Execute }
