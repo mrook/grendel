@@ -1,0 +1,126 @@
+Wishlist for the 1.0.x tree
+(! = closed, * = normal, l = lower priority)
+
+
+* run as service (NT/2K/XP)
+
+  - raises the need of some sort of "admin console", remote? through the webservice?
+
+* more stability when starting/shutting down, especially on Win98/ME
+
+* we really need another way of registering commands to the server, pluggable interfaces?
+  maybe a rewrite of the damn thing
+
+* use XML extensively, use dynamic storage of properties in objects
+
+  - player & area files: dynamic storage of "modifcation" specific data
+    in an associative array, possibly with callbacks/triggers when
+    new data is stored, see below for description of "modifications"
+   
+  - server configuration: store known server-side variables and
+    introduce new ones, such as experience formulas, experience per level, 
+    damage formulas, number of stats, stat maximums, etc.   
+    
+  - GHL (working title): Grendel Help Language, which is an XML DTD or Schema,
+    use XML to describe help/manual content, use stylesheets to transform
+    GHL to (X)HTML for web viewing or ASCII for online help
+    
+* events
+
+  - raise events when important things happen, e.g.
+  	* server boots/shuts down
+  	* player logs in/off
+  	* player enters/leaves a room
+  	* player looks at object/npc/room
+  	* player performs action on object (wear/wield/whatever)
+  	* timers
+  	* etc. etc.
+  
+  - objects/scripts/modules should be able to register event handlers
+    
+* revise grouping system: generalize GObject to some form of object 'list'
+  (possibly named GItem), which can contain 1 or more GItems or subsets
+  of GItem, something along those lines
+  
+  -> do not group objects solely on basic stats, two objects must be an
+     *exact* match if they are to be grouped
+     
+  -> Bags and containers should be saveable
+    
+* get rid of a lot of obsolete smaug/diku/emlen-inspired code, this
+  only helps in keeping the system unstable and hard to manage. 
+  
+  ! rewrite position code, instead of mutual exclusive POS_XXX identifiers
+    use flags to describe a combination of states
+    
+  - possibly rewrite/rename the fighting & magic code, this will break
+    compatibility but improve code re-usage and stability
+
+  - remove special timer states, unify as action timer
+
+  - generally clean up code according to new coding standard,
+    remove obsolete stuff like GObjectIndex etc.
+  
+* generalize races & clans to configurable character "modifications",
+  with some form of plugin architecture to add specific behaviours to
+  a character (access to commands, properties, etc.)
+  
+  - modifications possible for areas as well, enables "dynamic" areas,
+    such as randomizing mazes etc.
+    
+  ! give races unique 'wear' locations; dragons should wear armor on their wings
+    instead of their arms
+
+* use coordinates and mpfindpath code to make NPCs more intelligent
+
+  - generalize current experimental coordgen code to generate multiple
+    "coordinate spaces", each space allocated for a disjunct, unlinked set
+    of areas (usually, a new space begins when a portal is reached)
+    
+  - move towards 'true' AI by using the findpath code to allow NPCs
+    to find particular targets or locations in the game world
+
+* better damage/experience calculus
+
+  - unusually difficult task, maybe worth the time to investigate 
+    the possibility of auto-balancing tools or algorithms
+    
+  - relies extensively on configurability of server-side variables (see above)
+  
+* gmc specific features/extensions:
+
+  - extracting matching parts from a string (possibly using full regexps instead
+    of the fastmatch used now)
+  
+  - global/mudwide (static) variables
+  
+* area loader
+  
+  - auto linewrap, filter out hard line breaks
+
+* shops
+
+  - opening times
+  
+  - out-of-stock possibility
+  
+  - shopkeepers must be able to carry their own gear
+
+* string matching
+  "Goto orc"; first complete match, then names that *start* with orc, and then
+   a full search on '*orc*'
+
+
+l implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
+  isSpellName() and enforce their use throughout the code
+  
+l IMC (intermud communication): both channels *and* noteboards
+  (perhaps separate server for noteboard, or whatever)
+
+l (optional) "real life" sleep - players need sleep to keep from falling 
+             down after 2 days, some rooms (with beds) have better sleep ratios etc.,
+             possibly as a demonstration of the "modification" system
+             
+l (optional) mud police, implemented as a series of gmc scripts
+
+

@@ -1,0 +1,188 @@
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
+
+
+
+= GMC introductory guide & specification ========================================
+
+
+GMC (or Grendel MUD C if you will) is a language similar to C, devised for
+the sole purpose of powering the scripted parts of the Grendel MUD Server.
+
+It has support for variables, control structures, (nested) functions
+and external variables/traps.
+
+The system consists of a compiler, an assembler and a virtual machine setup
+which can be called from an application, in this case Grendel.
+
+
+1. Syntax
+
+The GMC language is in many respects quite like C, with some
+simplifications and exceptions.
+
+The most important supported language constructs:
+
+  - global and local variables
+  - function definitions
+  - loops (only for currently)
+  - 'include' files
+  - basic flow control (if statements)
+  - valid integer & boolean expression
+
+
+2. The compiler
+
+The GMC compiler works in four distinct passes.
+
+In the first pass, the source files are scanned & parsed,
+and basic syntax checking is performed.
+
+The second pass performs type checking & coercion.
+
+In the third pass an optimizer performs some basic
+optimizations: dead-code elimination, algebraic
+simplication (constant elimination) and some flow-of-
+control optimizations.
+
+The fourth and final pass is the code generator,
+where assembly code for the stack machine is written
+to a file.
+
+
+3. The assembler
+
+The assembler simply converts the "human readable"
+assembly code to a binary format (this includes translating
+the labels for jumps/calls).
+
+Additionally, the assembler performs some simple optimizations
+(in a section commonly known as the 'peephole optimizer'),
+to reduce the number of instructions.
+
+
+4. The virtual machine
+
+The VM of the GMC language is a fully functional stack machine processor
+with some 40+ opcodes in its instruction set.
+
+Internally the machine consists of a stack utilizing the Delphi 'variant'
+type. 
+
+Apart from the stack there are a number of registers - the stack pointer,
+the base pointer, and the program counter (or instruction pointer).
+Only the first two can be accessed directly from the assembler.
+
+Lastly there is a data segment present. Its size is defined through
+the assembler directive '$DATA'.
+
+
+5. Getting out of the VM
+
+The VM has support for a number of mechanisms to help a program 'get out' of the 
+environment and have some interaction with the calling application.
+
+These mechanisms are:
+
+   - System traps
+   - Signals & sleep
+   - External variables
+   - External methods
+
+The system trap (in the form of do <string expression>) can be set to a
+userspecified function by the calling application. The trap can do with
+the string expression as it sees fit.
+
+Signals are used to "suspend" the execution of the program until
+some condition has been met (e.g. a signal has been raised) in another
+part of the server (wether that be native or scripted code).
+The sleep function suspends the program until a certain tickcount has
+been reached.
+
+External variables are a construct to associate external data with names
+or expressions in the GMC language.
+
+External methods are methods within a class, that are registered
+before a script is executed. In a script they are represented
+by a function without a body ('float cos(float x);' for example).
+These 'callbacks' are somewhat dangerous, as there is no mechanism
+to check the validity of the parameters specified in the declaration, nor 
+the values provided at the time of calling.
+
+
+6. Types
+
+GMC only allows basic (primitive) types - thus compound and structured types
+or arrays are not included in the language.
+
+The following basic types are supported:
+
+   int, float, string, void, bool and external
+
+'void' should not be used for basic identifiers, as these have no semantic
+meaning - any operations with these identifiers can be considered unsafe.
+'int', 'float' and 'bool' exhibit the normal behaviour you would expect.
+'string' works the same as the pascal type LongString.
+'external' is a special type - it has no strict semantic meaning in itself, but will evaluate
+to a callback to the shell surrounding (or calling, if you will) the VM.
+This callback will take care of the necessary checks (including or excluding typing)
+and return a value associated with the external.
+
+An example:
+
+  external ch;
+  ch = "Grimlord";
+
+Executing this snippet will have the external callback trying to associate the string
+value "Grimlord" with some enviroment. If this association succeeds, the resulting value
+will be placed in 'ch'.
+
+Another example, following on the previous one:
+
+  x = ch.alignment;
+
+Again, this will have the callback trying to associate the member variable 'alignment'
+with the (already associated) variable 'ch'. Care must be taken that this member variable
+does actually exist, or hell will fall down and chaos will ensue.
+
+
+7. Common entry points
+
+An 'entry point' is a position in your script code that has a common syntax or structure,
+and can be easily identified by the calling process. These entry points can be viewed
+as seperate blocks of code that are called when a particular event is triggered.
+
+Below you will find some common entry points that are used throughout the server code.
+
+
+void onTick(external ch)
+ - is called every second
+
+void onAct(external ch, external target, string arg)
+ - is called whenever 'ch' receives some action 'arg' from 'target'
+ 
+void onFight(external ch, external target)
+ - is called every fight tick
+ 
+void onDeath(external ch, external target)
+ - is called when 'ch' dies at the hands of 'target'
+
+void onReset(external ch)
+ - is called when 'ch' resets
+ 
+void onGive(external ch, external target, external obj)
+ - is called when 'target' gives 'obj' to 'ch'
+ 
+bool onBlock(external ch, external target)
+ - is called when 'target' tries to leave a room with 'ch' blocking
+ 
+void onEmoteTarget(external victim, external actor, string arg)
+ - is called when (e.g.) mob is target of an emote (e.g. 'slap <mobname>');
+   'victim' is the target, e.g. the mob; 'actor' the person executing the emote
+   (you, when you slap a mob); 'arg' will contain the emotename (Name:-field from
+   system\socials.dat, e.g. 'SLAP'). When an entry point onEmoteTarget exists, 
+   the default emote handling (as defined in checkSocial() in mudsystem.pas) 
+   will not be executed.
+   
+void onGreet(external ch, external target)
+ - is called when 'target' enters a room where 'ch' is in
+

@@ -1,0 +1,15 @@
+
+base level:
+	GSocket - pure socket functions
+		connect/send/receive
+		knows nothing about connections, completely stateless
+
+middle level:
+	GConnection - connection state
+		iac/compression/etc.
+		knows nothing about the game, fires events (connect/input/disconnect)
+
+top level:
+	GPlayerConnection - input parser (GConnection derivative)
+		game/player state, nanny
+		responds to events from GConnection

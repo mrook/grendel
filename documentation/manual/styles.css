@@ -1,0 +1,106 @@
+DIV.container {
+    position: absolute;
+    visibility: hidden;
+}    
+HR {
+   color: #000000;
+}
+H1 {
+    font-family: arial; 
+    font-size: 16pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+H2 {
+    font-family: arial; 
+    font-size: 8pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+P {
+    font-family: verdana,helvetica,arial; 
+    font-size: 9pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+TH { 
+    font-family: arial;
+    font-size: 12pt;
+    font-weight: 100;
+    color: #000000;
+}
+TD {
+    font-family: verdana,helvetica,arial;
+    font-size: 9pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+P.desc {
+    font-size: 8pt;
+    color: #FFFFFF;
+}
+S {
+    text-decoration: none;
+    font-family: verdana,helvetica,arial;
+    font-size: 10pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+A {
+    text-decoration: none;
+    color: #cccc33;
+    text-decoration: underline;
+}
+A:hover {
+    text-decoration: none;
+    color: #cccc33;
+}
+B {
+    font-weight: 800;
+}
+I {
+    font-style: italic;
+}
+U {
+    text-decoration: underline;
+}
+UL {
+    font-family: verdana,helvetica,arial;
+    font-size: 9pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+OL {
+    font-family: tahoma,helvetica,arial; 
+    font-size: 9pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+.verdana8 {
+    font-family: tahoma,helvetica,arial;
+    font-size: 8pt;
+    font-weight: 100;
+    color: #000000;
+}
+.verdana7 {
+    font-family: verdana,helvetica,arial;
+    font-size: 7pt;
+    font-weight: 100;
+    color: #000000;
+}
+.arial16 {
+    font-family: arial;
+    font-size: 16pt;
+    font-weight: 100;
+    color: #cccc33;
+}
+table {
+    border-collapse: collapse;
+    border: 1px solid #999999;
+}
+pre {
+    font-size: 8pt; 
+    font-weight: 100;
+    color: #cccc33;
+}
+

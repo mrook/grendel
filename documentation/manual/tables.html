@@ -1,0 +1,1231 @@
+<html>
+<head>
+<meta name="Creator" content="Michiel Rook">
+<title>
+The Grendel Project
+</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body background="images/bg.jpg">
+<p>
+Below you can find a lot of tables that can be used when building
+areas or playing around with mobiles, players or objects.
+There are also a lot of tables not directly used in areas, but that
+can be used when creating new spells, skills, etc. Some are also
+rarely used anywhere else than in the code and are just given for complecity.</p>
+<p><b><cite>Note: </cite></b>It is okay if this information startles
+you at first, because it is a LOT of bogus :). These numbers are to be
+used when building an area. You need to LEARN these numbers, because the
+builder won't help you at all times.</p>
+<p><b><cite>Note: </cite></b>A little note on bitvectors: those of you
+out there that happen to fiddle some code out of their keyboards once in
+while might know what this is: they are numbers representing one bit in
+a double-word (32-bits) turned on. E.g. the number 32 represents the 5th bit
+active and the rest set to 0. When you want to use more than 1 flag, just
+add the values together!</p>
+<p><b><cite>Item types and values</b></cite></p>
+<a name="ITEM_">
+<p><table border=2>
+<caption>Item types and values</caption>
+<tr>
+  <td>Name used in code</td>
+  <td>Assigned value</td>
+  <td>Use of value 1</td>
+  <td>Use of value 2</td>
+  <td>Use of value 3</td>
+  <td>Use of value 4</td>
+</tr>
+<tr>
+  <td>ITEM_WEAPON</td>
+  <td>1</td>
+  <td>condition</td>
+  <td>number of dice</td>
+  <td>size of dice</td>
+  <td>type of weapon (see: <a href="#FG_">FG_xxxx</a>)</td>
+</tr>
+<tr>
+  <td>ITEM_ARMOR</td>
+  <td>2</td>
+  <td>condition</td>
+  <td>type of armor (see: <a href="#ARMOR_">ARMOR_xxxx</a>)</td>
+  <td>modifier</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_FOOD</td>
+  <td>3</td>
+  <td>condition</td>
+  <td>poisoned</td>
+  <td>hours of value</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_DRINK</td>
+  <td>4</td>
+  <td>capacity</td>
+  <td>current quantity</td>
+  <td>liquid type (see: <a href="#LIQ_">LIQ_xxxx</a>)</td>
+  <td>poisoned</td>
+</tr>
+<tr>
+  <td>ITEM_LIGHT</td>
+  <td>5</td>
+  <td>hours of light remaining (0=dead)</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_TRASH</td>
+  <td>6</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_MONEY</td>
+  <td>7</td>
+  <td>amount</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_SPECIAL</td>
+  <td>8</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_GEM</td>
+  <td>9</td>
+  <td>mana type (unused)</td>
+  <td>spell level</td>
+  <td>mana when charged</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_CONTAINER</td>
+  <td>10</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_CORPSE</td>
+  <td>11</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_FOUNTAIN</td>
+  <td>12</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>liquid type (see: <a href="#LIQ_">LIQ_xxxx</a>)</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_BLOOD</td>
+  <td>13</td>
+  <td>direction (see: <a href="#DIR_">DIR_xxxx</a>)</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_PORTAL</td>
+  <td>14</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+<tr>
+  <td>ITEM_KEY</td>
+  <td>15</td>
+  <td>unique key number</td>
+  <td>unused</td>
+  <td>unused</td>
+  <td>unused</td>
+</tr>
+</table></p>
+<p><b><cite>Constants</b></cite></p>
+<a name="WEAR_">
+<p><table border=2>
+<caption>Wearing positions</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>WEAR_RFINGER</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>WEAR_LFINGER</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>WEAR_NECK1</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>WEAR_NECK2</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>WEAR_BODY</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>WEAR_HEAD</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>WEAR_LEGS</td>
+  <td>7</td>
+</tr>
+<tr>
+  <td>WEAR_FEET</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>WEAR_HANDS</td>
+  <td>9</td>
+</tr>
+<tr>
+  <td>WEAR_ARMS</td>
+  <td>10</td>
+</tr>
+<tr>
+  <td>WEAR_SHIELD</td>
+  <td>11</td>
+</tr>
+<tr>
+  <td>WEAR_ABOUT</td>
+  <td>12</td>
+</tr>
+<tr>
+  <td>WEAR_WAIST</td>
+  <td>13</td>
+</tr>
+<tr>
+  <td>WEAR_RWRIST</td>
+  <td>14</td>
+</tr>
+<tr>
+  <td>WEAR_LWRIST</td>
+  <td>15</td>
+</tr>
+<tr>
+  <td>WEAR_FLOAT</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>WEAR_RHAND</td>
+  <td>17</td>
+</tr>
+<tr>
+  <td>WEAR_LHAND</td>
+  <td>18</td>
+</tr>
+<tr>
+  <td>WEAR_RSHOULDER</td>
+  <td>19</td>
+</tr>
+<tr>
+  <td>WEAR_LSHOULDER</td>
+  <td>20</td>
+</tr>
+<tr>
+  <td>WEAR_FACE</td>
+  <td>21</td>
+</tr>
+<tr>
+  <td>WEAR_REAR</td>
+  <td>22</td>
+</tr>
+<tr>
+  <td>WEAR_LEAR</td>
+  <td>23</td>
+</tr>
+<tr>
+  <td>WEAR_RANKLE</td>
+  <td>24</td>
+</tr>
+<tr>
+  <td>WEAR_LANKLE</td>
+  <td>25</td>
+</tr>
+<tr>
+  <td>WEAR_EYES</td>
+  <td>26</td>
+</tr>
+</table></p>
+<a name="FG_">
+<p><table border=2>
+<caption>Weapon types</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>FG_NONE</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>FG_PUNCH</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>FG_SLASH</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>FG_PIERCE</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>FG_CLEAVE</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>FG_BLAST</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>FG_CRUSH</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>FG_BITE</td>
+  <td>7</td>
+</tr>
+<tr>
+  <td>FG_CLAW</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>FG_WHIP</td>
+  <td>9</td>
+</tr>
+<tr>
+  <td>FG_STAB</td>
+  <td>10</td>
+</tr>
+<tr>
+  <td>FG_GAZE</td>
+  <td>11</td>
+</tr>
+<tr>
+  <td>FG_BREATH</td>
+  <td>12</td>
+</tr>
+<tr>
+  <td>FG_STING</td>
+  <td>13</td>
+</tr>
+</table></p>
+<a name="ARMOR_">
+<p><table border=2>
+<caption>Armor types</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>ARMOR_HAC</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>ARMOR_BAC</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>ARMOR_AAC</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>ARMOR_LAC</td>
+  <td>4</td>
+</tr>
+</table></p>
+<a name="DIR_">
+<p><table border=2>
+<caption>Directions</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>DIR_NORTH</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>DIR_EAST</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>DIR_SOUTH</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>DIR_WEST</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>DIR_DOWN</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>DIR_UP</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>DIR_SOMEWHERE</td>
+  <td>7</td>
+</tr>
+</table></p>
+<a name="COND_">
+<p><table border=2>
+<caption>Conditions</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>COND_DRUNK</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>COND_FULL</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>COND_THIRST</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>COND_CAFFEINE</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>COND_HIGH</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>COND_MAX</td>
+  <td>6</td>
+</tr>
+</table></p>
+<a name="LIQ_">
+<p><table border=2>
+<caption>Liquid types</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>LIQ_WATER</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>LIQ_BEER</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>LIQ_ALE</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>LIQ_WHISKEY</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>LIQ_VODKA</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>LIQ_WINE</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>LIQ_JUICE</td>
+  <td>7</td>
+</tr>
+<tr>
+  <td>LIQ_MILK</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>LIQ_TEA</td>
+  <td>9</td>
+</tr>
+<tr>
+  <td>LIQ_COFFEE</td>
+  <td>10</td>
+</tr>
+<tr>
+  <td>LIQ_COLA</td>
+  <td>11</td>
+</tr>
+<tr>
+  <td>LIQ_SPECIAL</td>
+  <td>12</td>
+</tr>
+<tr>
+  <td>LIQ_MAX</td>
+  <td>13</td>
+</tr>
+</table></p>
+<a name="TARGET_">
+<p><table border=2>
+<caption>Target types</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>TARGET_OFF_ATTACK</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>TARGET_OFF_AREA</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>TARGET_DEF_SELF</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>TARGET_DEF_SINGLE</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>TARGET_DEF_AREA</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>TARGET_DEF_WORLD</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>TARGET_OBJECT</td>
+  <td>7</td>
+</tr>
+</table></p>
+<a name="POS_">
+<p><table border=2>
+<caption>Positions</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>POS_DEAD</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>POS_MORTAL</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>POS_INCAP</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>POS_STUNNED</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>POS_SLEEPING</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>POS_MEDITATE</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>POS_RESTING</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>POS_SITTING</td>
+  <td>7</td>
+</tr>
+<tr>
+  <td>POS_FIGHTING</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>POS_STANDING</td>
+  <td>9</td>
+</tr>
+<tr>
+  <td>POS_CASTING</td>
+  <td>10</td>
+</tr>
+<tr>
+  <td>POS_SEARCHING</td>
+  <td>11</td>
+</tr>
+<tr>
+  <td>POS_BACKSTAB</td>
+  <td>12</td>
+</tr>
+<tr>
+  <td>POS_CIRCLE</td>
+  <td>13</td>
+</tr>
+<tr>
+  <td>POS_BASHED</td>
+  <td>14</td>
+</tr>
+</table></p>
+<a name="SECT_">
+<p><table border=2>
+<caption>Sector types</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Assigned value</b></td>
+</tr>
+<tr>
+  <td>SECT_INSIDE</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>SECT_CITY</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>SECT_FIELD</td>
+  <td>3</td>
+</tr>
+<tr>
+  <td>SECT_FOREST</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>SECT_HILLS</td>
+  <td>5</td>
+</tr>
+<tr>
+  <td>SECT_MOUNTAIN</td>
+  <td>6</td>
+</tr>
+<tr>
+  <td>SECT_DESERT</td>
+  <td>7</td>
+</tr>
+<tr>
+  <td>SECT_WATER_SWIM</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>SECT_WATER_NOSWIM</td>
+  <td>9</td>
+</tr>
+<tr>
+  <td>SECT_UNDERWATER</td>
+  <td>10</td>
+</tr>
+<tr>
+  <td>SECT_OCEANFLOOR</td>
+  <td>11</td>
+</tr>
+<tr>
+  <td>SECT_UNDERGROUND</td>
+  <td>12</td>
+</tr>
+<tr>
+  <td>SECT_AIR</td>
+  <td>13</td>
+</tr>
+<tr>
+  <td>SECT_NOPASSAGE</td>
+  <td>14</td>
+</tr>
+<tr>
+  <td>SECT_UNKNOWN</td>
+  <td>15</td>
+</tr>
+<tr>
+  <td>SECT_MAX</td>
+  <td>16</td>
+</tr>
+</table></p>
+<p><b><cite>Bitvector Tables</b></cite></p>
+<a name="ACT_">
+<p><table border=2>
+<caption>NPC flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>ACT_NPC</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>ACT_FLYING</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>ACT_AGGRESSIVE</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>ACT_SENTINEL</td>
+  <td>BV03</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>ACT_SCAVENGER</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>ACT_STAY_AREA</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>ACT_HUNTING</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>ACT_FASTHUNT</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>ACT_MOBINVIS</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+<tr>
+  <td>ACT_TEACHER</td>
+  <td>BV09</td>
+  <td>512</td>
+</tr>
+<tr>
+  <td>ACT_BANKER</td>
+  <td>BV10</td>
+  <td>1024</td>
+</tr>
+<tr>
+  <td>ACT_SPIRIT</td>
+  <td>BV11</td>
+  <td>2048</td>
+</tr>
+<tr>
+  <td>ACT_NOBASH</td>
+  <td>BV12</td>
+  <td>4096</td>
+</tr>
+<tr>
+  <td>ACT_SHOPKEEP</td>
+  <td>BV13</td>
+  <td>8192</td>
+</tr>
+<tr>
+  <td>ACT_IMMORTAL</td>
+  <td>BV14</td>
+  <td>16384</td>
+</tr>
+<tr>
+  <td>ACT_LOG</td>
+  <td>BV15</td>
+  <td>32768</td>
+</tr>
+<tr>
+  <td>ACT_PROTO</td>
+  <td>BV31</td>
+  <td>2147483648</td>
+</tr>
+</table></p>
+<a name="AFF_">
+<p><table border=2>
+<caption>Spell affect flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>AFF_BLIND</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>AFF_INVISIBLE</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>AFF_DETECT_INVIS</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>AFF_DETECT_HIDDEN</td>
+  <td>BV03</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>AFF_SANCTUARY</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>AFF_INFRAVISION</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>AFF_POISON</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>AFF_FLYING</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>AFF_BERSERK</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+<tr>
+  <td>AFF_AQUA_BREATH</td>
+  <td>BV09</td>
+  <td>512</td>
+</tr>
+<tr>
+  <td>AFF_PLAGUE</td>
+  <td>BV10</td>
+  <td>1024</td>
+</tr>
+<tr>
+  <td>AFF_HIDE</td>
+  <td>BV11</td>
+  <td>2048</td>
+</tr>
+<tr>
+  <td>AFF_SNEAK</td>
+  <td>BV12</td>
+  <td>4096</td>
+</tr>
+<tr>
+  <td>AFF_ENCHANT</td>
+  <td>BV13</td>
+  <td>8192</td>
+</tr>
+</table></p>
+<a name="AREA_">
+<p><table border=2>
+<caption>Area flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>AREA_NORESET</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>AREA_NOPC</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>AREA_PROTO</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+</table></p>
+<a name="CFG_">
+<p><table border=2>
+<caption>Player config flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>CFG_ASSIST</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>CFG_AUTOLOOT</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>CFG_AUTOSAC</td>
+  <td>BV03</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>CFG_AUTOSCALP</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>CFG_BLANK</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>CFG_BRIEF</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>CFG_ANSI</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>CFG_PAGER</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+</table></p>
+<a name="EX_">
+<p><table border=2>
+<caption>Exit flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>EX_ISDOOR</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>EX_CLOSED</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>EX_LOCKED</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>EX_PICKPROOF</td>
+  <td>BV03</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>EX_SECRET</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>EX_SWIM</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>EX_FLY</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>EX_CLIMB</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>EX_PORTAL</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+<tr>
+  <td>EX_NOBREAK</td>
+  <td>BV09</td>
+  <td>512</td>
+</tr>
+<tr>
+  <td>EX_NOMOB</td>
+  <td>BV10</td>
+  <td>1024</td>
+</tr>
+<tr>
+  <td>EX_ENTER</td>
+  <td>BV11</td>
+  <td>2048</td>
+</tr>
+<tr>
+  <td>EX_UNDERWATER</td>
+  <td>BV12</td>
+  <td>4096</td>
+</tr>
+</table></p>
+<a name="OBJ_">
+<p><table border=2>
+<caption>Item flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>OBJ_NOPICKUP</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>OBJ_GLOW</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>OBJ_HUM</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>OBJ_ANTI_GOOD</td>
+  <td>BV03</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>OBJ_ANTI_EVIL</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>OBJ_LOYAL</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>OBJ_NOREMOVE</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>OBJ_NODROP</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>OBJ_CLANOBJECT</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+<tr>
+  <td>OBJ_HIDDEN</td>
+  <td>BV09</td>
+  <td>512</td>
+</tr>
+<tr>
+  <td>OBJ_POISON</td>
+  <td>BV10</td>
+  <td>1024</td>
+</tr>
+<tr>
+  <td>OBJ_MISSILE</td>
+  <td>BV11</td>
+  <td>2048</td>
+</tr>
+<tr>
+  <td>OBJ_NOSAC</td>
+  <td>BV12</td>
+  <td>4096</td>
+</tr>
+<tr>
+  <td>OBJ_NODECAY</td>
+  <td>BV13</td>
+  <td>8192</td>
+</tr>
+<tr>
+  <td>OBJ_PROTO</td>
+  <td>BV31</td>
+  <td>2147483648</td>
+</tr>
+</table></p>
+<a name="ROOM_">
+<p><table border=2>
+<caption>Room flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>ROOM_DARK</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>ROOM_DEATH</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>ROOM_NOMOB</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>ROOM_INDOORS</td>
+  <td>BV03</td>
+  <td>8</td>
+</tr>
+<tr>
+  <td>ROOM_GOOD</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>ROOM_EVIL</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>ROOM_NOCAST</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>ROOM_TUNNEL</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>ROOM_PRIVATE</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+<tr>
+  <td>ROOM_SAFE</td>
+  <td>BV09</td>
+  <td>512</td>
+</tr>
+<tr>
+  <td>ROOM_SOLITARY</td>
+  <td>BV10</td>
+  <td>1024</td>
+</tr>
+<tr>
+  <td>ROOM_NORECALL</td>
+  <td>BV11</td>
+  <td>2048</td>
+</tr>
+<tr>
+  <td>ROOM_NODROPALL</td>
+  <td>BV12</td>
+  <td>4096</td>
+</tr>
+<tr>
+  <td>ROOM_NOSUMMON</td>
+  <td>BV13</td>
+  <td>8192</td>
+</tr>
+<tr>
+  <td>ROOM_CLANSTORE</td>
+  <td>BV14</td>
+  <td>16384</td>
+</tr>
+<tr>
+  <td>ROOM_TELEPORT</td>
+  <td>BV15</td>
+  <td>32768</td>
+</tr>
+<tr>
+  <td>ROOM_NOFLOOR</td>
+  <td>BV16</td>
+  <td>65536</td>
+</tr>
+<tr>
+  <td>ROOM_MANAROOM</td>
+  <td>BV17</td>
+  <td>131072</td>
+</tr>
+<tr>
+  <td>ROOM_NOTRADE</td>
+  <td>BV18</td>
+  <td>262144</td>
+</tr>
+<tr>
+  <td>ROOM_PROTO</td>
+  <td>BV31</td>
+  <td>2147483648</td>
+</tr>
+</table></p>
+<a name="PLR_">
+<p><table border=2>
+<caption>Player flags</caption>
+<tr>
+  <td><b>Name used in code</b></td>
+  <td><b>Bitvector</b></td>
+  <td><b>Resulting value</b></td>
+</tr>
+<tr>
+  <td>PLR_NPC</td>
+  <td>BV00</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>PLR_FLYCAP</td>
+  <td>BV01</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>PLR_WIZINVIS</td>
+  <td>BV02</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>PLR_LINKLESS</td>
+  <td>BV04</td>
+  <td>16</td>
+</tr>
+<tr>
+  <td>PLR_LOADED</td>
+  <td>BV05</td>
+  <td>32</td>
+</tr>
+<tr>
+  <td>PLR_DENY</td>
+  <td>BV06</td>
+  <td>64</td>
+</tr>
+<tr>
+  <td>PLR_FROZEN</td>
+  <td>BV07</td>
+  <td>128</td>
+</tr>
+<tr>
+  <td>PLR_SILENCED</td>
+  <td>BV08</td>
+  <td>256</td>
+</tr>
+</table></p>
+<p><form method="get" action="body.html">
+<input type="submit" value="Back"></form></p>
+</body>
+</html>
