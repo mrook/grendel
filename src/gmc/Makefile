@@ -4,7 +4,7 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.4 2004/04/04 22:10:03 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.5 2004/06/25 13:19:55 ***REMOVED*** Exp $
 #
 
 
@@ -19,11 +19,10 @@ endif
 ifdef WIN32
 DCC=dcc32
 
-GMCC=gmcc.exe
-GASM=gasm.exe
+GMCC=..\..\build\gmcc.exe
+GASM=..\..\build\gasm.exe
 
-CORE_SYM=..\\core
-CORE_FILE=..\\core.bpl
+CORE_FILE=..\..\build\core.bpl
 
 ifeq ($(OS), Windows_NT)
 	RM=cmd /c del
@@ -35,11 +34,10 @@ endif
 ifdef LINUX
 DCC=dcc
 
-GMCC=gmcc
-GASM=gasm
+GMCC=../../build/gmcc
+GASM=../../build/gasm
 
-CORE_SYM=../core
-CORE_FILE=../bplcore.so
+CORE_FILE=../../build/bplcore.so
 
 RM=rm -f
 endif
@@ -65,16 +63,14 @@ GASM_SOURCES=gasm.dpr
 all:	$(GMCC) $(GASM)
       
 clean:
-	$(RM) $(GMCC)
-	$(RM) $(GASM)
-	
+
 $(GMCC_SOURCES): $(GMCC_LEXFILES)
 	yacc gmcc gmcc.dpr
 	lex gmclex
 
 $(GMCC):	$(GMCC_SOURCES) $(CORE_FILE)
-	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU$(CORE_SYM)
+	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS)
 	
 $(GASM):	$(GASM_SOURCES) $(CORE_FILE)
-	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU$(CORE_SYM)
+	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS)
 

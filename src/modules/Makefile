@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.11 2004/04/21 21:27:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.12 2004/06/25 13:19:55 ***REMOVED*** Exp $
 #
 
 
@@ -19,16 +19,15 @@ endif
 ifdef WIN32
 DCC=dcc32
 
-COMMANDS=core_commands.bpl
-SPELLER=speller.bpl
-STATUS=status.bpl
-IMC3=imc3.bpl
-WEBSERVICE=webservice.bpl
+COMMANDS=..\..\build\modules\core_commands.bpl
+SPELLER=..\..\build\modules\speller.bpl
+STATUS=..\..\build\modules\status.bpl
+IMC3=..\..\build\modules\imc3.bpl
+WEBSERVICE=..\..\build\modules\webservice.bpl
 
 MODULES=$(COMMANDS) $(SPELLER) $(STATUS) $(IMC3)
 
-CORE_SYM=..\\core
-CORE_FILE=..\\core.bpl
+CORE_FILE=..\..\build\core.bpl
 
 ifeq ($(OS), Windows_NT)
 	RM=cmd /c del
@@ -62,39 +61,28 @@ endif
 
 
 ifdef DEBUG
-DCC_FLAGS=-Q '-$$W+' -GD -V
+DCC_FLAGS=-Q -GD -V
 else
-DCC_FLAGS=-Q '-$$W+' -GD
+DCC_FLAGS=-Q -GD
 endif
 
 
 all:	$(MODULES)
 
 clean:
-	$(RM) $(COMMANDS)
-	$(RM) $(SPELLER)
-	$(RM) $(STATUS)
-	$(RM) $(IMC3)
-	$(RM) $(WEBSERVICE)
-	$(RM) *.map
-	$(RM) *.jdbg
-	$(RM) *.dcp
-	$(RM) *.dcu
-	$(RM) *.dpu
-	$(RM) *.drc
 
-$(COMMANDS):	core_commands.dpk commands/* $(CORE_FILE)
-	$(DCC) core_commands.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ucommands
+$(COMMANDS):	commands/* $(CORE_FILE)
+	cd commands && $(DCC) core_commands.dpk $(DCC_FLAGS) -D$(DCC_DEFS)
 
-$(SPELLER):	speller.dpk speller/* $(CORE_FILE)
-	$(DCC) speller.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uspeller
+$(SPELLER):	speller/* $(CORE_FILE)
+	cd speller && $(DCC) speller.dpk $(DCC_FLAGS) -D$(DCC_DEFS)
 
-$(STATUS):	status.dpk status/* $(CORE_FILE)
-	$(DCC) status.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ustatus
+$(STATUS):	status/* $(CORE_FILE)
+	cd status && $(DCC) status.dpk $(DCC_FLAGS) -D$(DCC_DEFS)
 
-$(WEBSERVICE):	webservice.dpk webservice/* $(CORE_FILE)
-	$(DCC) webservice.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uwebservice
+$(WEBSERVICE):	webservice/* $(CORE_FILE)
+	cd webservice && $(DCC) webservice.dpk $(DCC_FLAGS) -D$(DCC_DEFS)
 
-$(IMC3):	imc3.dpk imc3/* $(CORE_FILE)
-	$(DCC) imc3.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uimc3
+$(IMC3):	imc3/* $(CORE_FILE)
+	cd imc3 && $(DCC) imc3.dpk $(DCC_FLAGS) -D$(DCC_DEFS)
 

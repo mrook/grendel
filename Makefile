@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.23 2004/05/11 14:52:16 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.24 2004/06/25 13:19:55 ***REMOVED*** Exp $
 #
 
 
@@ -12,64 +12,51 @@ ifeq ($(OSTYPE),linux-gnu)
 	LINUX=1
 	CP=cp
 	RM=rm
+	MD=md
 else
 	WIN32=1
 ifeq ($(OS), Windows_NT)
 	RM=cmd /c del
+	RMDIR=cmd /c rmdir
 	CP=cmd /c copy
+	MD=cmd /c mkdir
 else
 	RM=del
+	RMDIR=rmdir
 	CP=copy
+	MD=mkdir
 endif
 endif
 
 
 all:	
-	$(MAKE) -C src
 ifdef WIN32
-	makejcldbg -J 'src\*.map'
-	makejcldbg -J 'src\modules\*.map'
-	$(CP) 'src\grendel.exe'
-	$(CP) 'src\convert.exe'
-	$(CP) 'src\helper.exe'
-	$(CP) 'src\grendelservice.exe'
-	$(CP) 'src\core.bpl'
-	$(CP) 'src\*.jdbg'
-	$(CP) 'src\gmc\gmcc.exe'
-	$(CP) 'src\gmc\gasm.exe'
-	$(CP) 'src\modules\*.bpl' modules
-	$(CP) 'src\modules\*.jdbg' modules
+	$(MD) build
+	$(MD) 'build\modules'
+	$(MD) 'build\units'
 endif
 ifdef LINUX
-	$(CP) src/grendel .
-	$(CP) src/convert .
-	$(CP) src/bplcore.so .
-	$(CP) src/*.map .
-	$(CP) src/gmc/gmcc .
-	$(CP) src/gmc/gasm .
-	$(CP) src/modules/bpl*.so modules
+	$(MD) build
+	$(MD) build/modules
+	$(MD) build/units
+endif
+	$(MAKE) -C src
+ifdef WIN32
+	makejcldbg -J 'build\*.map'
+	makejcldbg -J 'build\modules\*.map'
+	$(CP) 'build\*'
+	$(CP) 'build\modules\*' modules
+	$(RMDIR) /Q /S build
+endif
+ifdef LINUX
+	$(CP) build/*
+	$(CP) build/* modules
+	$(RM) -rf build
 endif
 	
 
 clean:
 	$(MAKE) -C src clean
-ifdef WIN32	
-	$(RM) *.bpl
-	$(RM) grendel.exe
-	$(RM) helper.exe
-	$(RM) gmcc.exe
-	$(RM) gasm.exe
-	$(RM) *.jdbg
-	$(RM) 'modules\*.bpl'
-	$(RM) 'modules\*.jdbg'
-endif
-ifdef LINUX
-	$(RM) -f bpl*.so
-	$(RM) -f grendel
-	$(RM) -f gmcc
-	$(RM) -f gasm
-	$(RM) -f modules/bpl*.so
-endif
 
 test:
 	$(MAKE) -C src/tests test
