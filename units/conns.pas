@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.51 2003/10/18 11:09:34 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.52 2003/10/20 12:34:11 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -75,6 +75,8 @@ type
 
       empty_busy : boolean;
       compress : boolean; { are we using MCCP v2? }
+  
+			strm: TZStreamRec;
 
       _lastupdate : TDateTime;
       
@@ -159,6 +161,12 @@ begin
 
   node := connection_list.insertLast(Self);
   
+  FillChar(strm, sizeof(strm), 0);
+  strm.zalloc := zlibAllocMem;
+  strm.zfree := zlibFreeMem;
+
+	deflateInit_(strm, Z_DEFAULT_COMPRESSION, zlib_version, sizeof(strm));
+
   sendIAC(IAC_WILL, [IAC_COMPRESS2]);
 end;
 
@@ -209,16 +217,23 @@ end;
 procedure GConnection.send(s : PChar; len : integer);
 var
 	compress_size : integer;
-	compress_buf : pointer;
+	compress_buf : array[0..4095] of char;
 begin
 	try
 		while (not socket.canWrite()) do;
 		
 		if (compress) then
 			begin
-			//CompressBuf(s, len, compress_buf, compress_size);
-			socket.send(compress_buf^, compress_size);
-			//socket.send(s^, len);
+			strm.next_in := s;
+			strm.avail_in := len;
+			strm.next_out := compress_buf;
+			strm.avail_out := 4096;
+
+			deflate(strm, Z_SYNC_FLUSH);
+
+			compress_size := 4096 - strm.avail_out;
+			
+			socket.send(compress_buf, compress_size);
   		end
   	else
 			socket.send(s^, len);
