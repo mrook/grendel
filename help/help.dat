@@ -1,0 +1,36 @@
+#Include=texts.dat
+#Include=spells.hlp
+#Include=skills.hlp
+#Include=immortal.hlp
+#Keyword=DAMAGE
+You miss your punch at a bat.
+You tickle a bat with your punch.
+You barely punch a bat.
+You punch a bat.
+You punch a bat hard.
+You punch a bat very hard.
+You punch a bat extremely hard.
+You hit a bat with your punch.
+You injure a bat with your skillful punch.
+A bat winces in pain with your forceful punch.
+A bat cries out in agony with your powerful punch.
+You devastate a bat with your agonizing punch!
+You mangle a bat with your outstanding punch!
+You MUTILATE a bat with your furious punch!
+You DECIMATE a bat with your incredible punch!
+You ObliteratE a bat with your unsurpassed punch!
+You MASSACRE a bat to pieces with your unforgettable punch!
+You --- ANNIHILATE --- a bat with your deadly punch!
+You <<== LIQUIFY ==>> a bat with your terrifying punch!
+You *** SLAUGHTER *** a bat with your masterful punch!
+You {<<< EVISCERATE >>>} a bat with your unsurvivable punch!
+You %% %% %%  VAPORIZE  %% %% %% a bat with your SUPERB punch!!!
+You [[< == ATOMIZE == >]] a bat with your punch!!
+You < - < ILLUMINATE > - > a bat with your TERRIBLE punch!!
+You ___... DESTROY ...___ a bat with your AGONIZING punch!!!
+You -< { { : : : DISINTEGRATE : : : } } >- a bit with your GODLY punch!!!!
+#End=0
+#Keyword=GRENDEL VERSION COPYRIGHT INFO
+%INFO%, %VERSION%. %COPYRIGHT%.
+Additional code by Oscar Martin and Hemko de Visser.
+#End=0

@@ -1,0 +1,76 @@
+#KEYWORD=M_DESCRIPTION_
+                   The Grendel Project - A Win32 MUD Server
+
+                 *  Copyright (c) 1998-2001 by Michiel Rook  *
+                     * Additional code by Oscar Martin *	
+                           * and Hemko de Visser *
+
+
+
+              The Grendel website: http://grendel.mudcenter.com/
+
+
+             - partly based on Smaug by Thoric and Emlen by Orin -
+#END=0
+#KEYWORD=MOTD
+-------------------------------------------------------------------------------
+                                Elven Empire
+                            MESSAGE OF THE DAY
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+#END=0
+#KEYWORD=IMOTD
+-------------------------------------------------------------------------------
+                                Elven Empire
+                       IMMORTALS MESSAGE OF THE DAY
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+#END=0
+#KEYWORD=M_DESTROY_
+Your body stiffens as you hear a horrible sound... from the lurking
+depths of hell, a hideous, vicious demon appears, engulfing you with
+the sickening smell of death and decay!
+
+The beast approaches you, looking at you with eyes of pure evil...
+you fall to your knees, begging for mercy, begging for an escape from
+your destiny...
+
+With a chilling roar, the demon leaps towards you and extends a shredding
+claw in your direction!
+
+Before you collapse to the ground, you feel the blood spilling out of 
+your ruptured organs...
+
+You have been destroyed.
+#END=0
+#KEYWORD=M_IMMORTALIZE_
+As if you feel very tired, your eyelids slowly close...
+
+You feel yourself floating, leaving the body that once belonged to you...
+You rise up into the air, heading for the heavens...
+
+You hear beautiful voices sing, long forgotten words come as clear as
+crystal... more voices join and form an unreal chorus...
+
+You are enveloped by a swirling vortex of colors, moving faster and
+faster... Your soul becomes pure and whole...
+
+You feel yourself losing touch with reality...
+
+Before you drown in the ever increasing stream of new emotions, you
+hear a voice whisper...
+
+'Welcome...'
+#END=0
+#KEYWORD=ME
+
+Sorry, you're on your own.
+
+#END=0
+

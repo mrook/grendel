@@ -1,0 +1,295 @@
+#KEYWORD=GOTO
+
+[ 990] Goto
+Syntax: GOTO <player/mob/vnum>
+
+Moves you around the mud.  Can be a to PC or NPC,  or to a VNUM.
+
+#END=990
+#KEYWORD=TRANSFER
+
+[ 995] Transfer
+Syntax: TRANSFER <player/all> <vnum/player/mob>
+
+Transfers a PC or NPC to yourself, another room, a mob or other players.
+Or transfer all PCs to a specified point in the mud, including yourself.
+
+#END=990
+#KEYWORD=PEACE
+
+[ 991]  Peace
+Syntax: PEACE
+
+Stop all fighting in the room.
+
+#END=990
+#KEYWORD=FORCE
+
+[ 993] Force
+Syntax: FORCE <player/all> <command>
+
+Force the PC or NPC to do <command>.  Or force all PCs and NPCs to do <command>.
+
+#END=990
+#KEYWORD=RESTORE
+
+[ 995] Restore
+Syntax: RESTORE <player/mob/all>
+
+Restore the PC or NPC to full health, mana, moves.  Or restore all PCs.
+
+#END=990
+#KEYWORD=ADVANCE
+
+[ 999] Advance
+Syntax: ADVANCE <player> <level>
+
+Advance a player to <level>.
+
+#END=990
+#KEYWORD=GRACE
+Syntax: GRACE <player> <level>
+
+Make player an immortal at the level specified.  Must be an immortal level.
+
+#END=990
+#KEYWORD=DISCONNECT
+
+[ 995] Disconnect
+Syntax: DISCONNECT <socket number>
+
+Disconnect the player with the given socket number.  Can disconnect yourself ;)
+
+See 'Connections'
+#END=990
+#KEYWORD=CONNECTIONS
+
+[995] Connections
+Syntax: CONNECTIONS
+
+List all current connections, their state, IP, and socket number.
+
+See 'Disconnect'
+#END=990
+#KEYWORD=UPTIME
+
+[1000] Uptime
+Syntax: UPTIME
+
+Show mud's uptime stats.
+
+#END=990
+#KEYWORD=ECHO
+[ 994] Echo
+
+Syntax: ECHO <text>
+
+Sends <text> to all connected players.
+
+#END=990
+#KEYWORD=SHUTDOWN
+[ 999] Shutdown
+
+Syntax: SHUTDOWN <stop/halt/reboot/copyover> [time]
+
+If a time is not specified, a default of 30 seconds is used.
+Using 'Stop' will halt the shutdown process.
+Using 'Now' for the time will enable shutdown immedietly.
+#End=990
+#Keyword=WIZINVIS
+
+[ 990] Wizinvis
+Syntax: WIZINVIS
+
+This allows you to disappear and reappear as desired.  While invisible, you
+will not show up on the who list and cannot be seen by any mortals.
+#End=990
+#Keyword=SLA
+
+[ 995] Sla
+Syntax: SLA
+
+This command is the shortened for of Slay, you must type that extra y.
+#End=990
+#Keyword=SLAY
+
+[ 995] Slay
+Syntax: SLAY <mob/player>
+
+This command causes great damage to it's target, instantly killing the target.
+#End=990
+#Keyword=GRACE
+
+[ 999] Grace
+Syntax: GRACE <player> <level>
+
+This immortalizes a player to the desired level of diety.
+
+See 'Immortal Ranks'
+#End=990
+#Keyword=IMMORTAL RANKS
+The Immortal Titles based on level are:
+Level  Title       Description
+[ 990] Guest       Barely Immortal
+[ 991] Apprentice  Learning to be an Immortal
+[ 992] Avatar      Slightly advanced Apprentice
+[ 993] Knight      Builder
+[ 994] Lord        Advanced Builder
+[ 995] Guardian    Player Manager
+[ 996] Demigod     Advanced Player Manager
+[ 997] Lessergod   System Manager/Coder
+[ 998] God         High Level Manager
+[ 999] Highgod     Top Level Manager
+[1000] Zues        Director of All
+#End=990
+#Keyword=DESTROY
+
+[ 998] Destroy
+Syntax: DESTROY <player>
+
+Destroy logs a player out and moves his player file to a backup directory.
+#End=990
+#Keyword=BGSET
+
+[ 995] Bgset
+Syntax: BGSET <lo level> <hi level> <seconds> [object]
+
+Bgset initiates a battle ground for players whose levels fall between the lo
+and high level parameters.  Players need only type 'Battle' to join.  The
+Battle Ground will start after the number of seconds specified.  If desired
+a prize can be given, however the [object] that is the prize must be in your
+inventory when you initiate the battle ground.
+
+See 'Battle Ground'
+#End=990
+#Keyword=SNOOP
+
+[ 998]
+Syntax: SNOOP <character>
+
+Snoops/sniffs every byte that is sent to this character.
+When using this, your own output will be discarded to prevent
+your screen from overflowing. To stop, type SNOOP SELF.
+#End=990
+#Keyword=LOADUP
+
+[ 998] Loadup
+Syntax: LOADUP <player>
+
+Loadup allows you to load a player who is not already online.  The player will
+remain online linkless until they log again.
+#End=990
+#Keyword=SCONFIG
+
+[1000] Sconfig
+Syntax: SCONFIG <Field> <Value>
+
+This allows you to configure the server.  'Sconfig show' shows all the current
+parameters.  Other valid fields are:
+
+name, e-mail, port, IP, forcepc, log, looup, denyconns, denyplayers, noback
+#End=990
+#Keyword=LOG
+
+[ 995] Log
+Syntax: LOG <player/all>
+
+Log will keep track of what a player or all players are doing.
+#End=990
+#Keyword=UPTIME
+
+[1000] Uptime
+Syntax: UPTIME
+
+This shows some current stats of the server, particularly the ammount of time
+the server has been running.
+#End=990
+#Keyword=SWITCH
+
+[998] Switch
+Syntax: SWITCH <character>
+
+This allows you to switch into a NPC.  This is a great way to have some fun.
+
+See 'Return'
+#End=990
+#Keyword=RETURN
+
+[ 998] Return
+Syntax: RETURN
+
+This allows you to return to yourself after you have switched to a NPC.
+
+See 'Switch'
+#End=990
+#Keyword=FREEZE
+
+[ 996] Freeze
+Syntax: FREEZE <player>
+
+Freezing a player will lock that player so that they cannot do anything.
+If the player is already frozen, this will unfreeze him.
+#End=990
+#Keyword=SILENCE
+
+[ 996] Silence
+Syntax: SILENCE <player>
+
+This will silence a player.  If the player is already silenced, this will
+unsilence them.
+#End=990
+#Keyword=AREAS
+
+[ 993] Areas
+Syntax: AREAS
+
+This displays a current list of all areas in currently loaded, including
+their vnum range and who they were built by.
+#End=990
+#Keyword=BAMFIN
+
+[ 990] Bamfin
+Syntax: BAMFIN <message/NULL>
+
+This sets the text for when you enter a room using the 'Goto' command.
+'Bamfin NULL' will reset the message to the default immortal message.
+'Bamfin' without any arguments will tell you your current message.
+
+Example: 'bamfin Snoopy Arrives on a Flying Doghouse'
+Now when you enter a room using the goto command, everyone in the room
+you are entering will see 'Snoopy Arrives on a Flying Doghouse'
+
+See 'Goto', 'Bamfout'
+#End=990
+#Keyword=BAMFOUT
+
+[ 990] Bamfout
+Syntax: BAMFOUT <message/NULL>
+
+This sets the text for when you leave a room using the 'Goto' command.
+'Bamfout NULL' will reset the message to the default immortal message.
+'Bamfout' without any arguments will tell you your current message.
+
+Example: 'bamfout Snoopy Flies off Chasing the Red Baron'
+Now when you leave a room using the goto command, everyone in the room
+you just left will see 'Snoopy Flies off Chasing the Red Baron'
+
+See 'Goto', 'Bamfin'
+#End=990
+#Keyword=SSET
+
+[ 993] Skill Set
+Syntax: SSET <player> <skill/spell> <percent>
+
+Skill Set will advance a player's skill or spell to the specified percent.
+If the player doesn't know the skill or spell they will automatically
+learn it.
+#End=990
+#Keyword=NOURISH
+
+[ 995] Nourish
+Syntax: NOURISH <player/all>
+
+This will reset the hunger and thirst counters for either a player or everyone.
+It will also remove any affects such as High and Drunk.
+#End=990

@@ -1,0 +1,183 @@
+#Keyword=SKILLS
+[  2]  Slashing Weapons
+[  4]  Piercing Weapons
+[  5]  Kick
+[  5]  Whipping Weapons
+[  6]  Bash
+[  6]  Concussion Weapons
+[  9]  Sneaking
+[ 10]  Searching
+[ 10]  Dodge
+[ 12]  Second Attack
+[ 13]  Swim
+[ 15]  Rescue
+[ 16]  Backstab
+[ 18]  Dual Wield
+[ 18]  Circle
+[ 24]  Third Attack
+[ 28]  Enhanced Damage
+[ 32]  Fourth Attack
+[ 42]  Fifth Attack
+#End=0
+
+#Keyword='SLASHING WEAPONS'
+
+[  2]    Slashing Weapons
+
+This skill aids in the use of Slashing Weapons including Long Swords and Rapiers
+#End=0
+
+#Keyword='PIERCING WEAPONS'
+
+[  4]    Piercing Weapons
+
+This skill aids in the use of Piercing Weapons including Daggers.  These
+weapons are required for Backstab.
+#End=0
+
+#Keyword=KICK
+
+[  5]    Kick
+Syntax: Kick <target> or in combat, simply Kick
+
+This skill aids in Kicking your opponent.  Damage is based on strength.
+#End=0
+
+#Keyword='WHIPPING WEAPONS'
+
+[  5]    Whipping Weapons
+
+This skill aids in the use of Whipping Weapons including Whips.
+#End=0
+
+#Keyword=BASH
+
+[  6]    Bash
+Syntax: Bash <target> or in combat, simply Bash
+
+This skill knocks your opponent to the ground.  While bashed, you cannot cast
+spells or use any skills including weapons skills, therefore you cannot fight.
+#End=0
+
+#Keyword='CONCUSSION WEAPONS'
+
+[  6]    Concussion Weapons
+
+This skill aids in the use of concussion weapons including Hammers.
+#End=0
+
+#Keyword=SNEAKING
+
+[  9]    Sneaking
+Syntax: Sneak
+
+Sneaking will allow you to move less noticed.  After this skill has been
+mastered, you will be able to move around almost completely unnoticed.
+#End=0
+
+#Keyword=SEARCHING
+
+[ 10]    Searching
+Syntax: Search <direction>
+
+Search will allow you to find hidden exits, objects and characters.  Search
+with out a direction will search the room for objects and characters.
+#End=0
+
+#Keyword=DODGE
+
+[ 10]    Dodge
+
+This skill helps you avoid attacks from your opponent.  The use of this
+skill is automatic once you have learned it.
+#End=0
+
+#Keyword='SECOND ATTACK'
+
+[ 12]    Second Attack
+
+Second attack will give you the chance for an extra blow each round of
+attacks.  Once fully learned, each round will give 2 attacks.
+#End=0
+
+#Keyword=SWIM
+
+[ 13]    Swim
+
+Swim will aid in travels over shallow water.  You do not need swim to
+tread water, but you do need it to move around in water.  For deeper
+and more turbulent water, you will need a boat.  You can also fly over
+water.
+
+See: Levitation
+#End=0
+
+#Keyword=RESCUE
+
+[ 15]    Rescue
+Syntax: Rescue <player>
+
+Rescue will let you step infront of the person who is on the front lines,
+and take the damage yourself.
+#End=0
+
+#Keyword=BACKSTAB
+
+[ 16]    Backstab
+Syntax: Backstab <player/mob>
+
+This will allow you to do great damage by inserting your weapon deep into
+your target's back.  This skill requires the use of a piercing weapon.
+#End=0
+
+#Keyword='DUAL WIELD'
+
+[ 18]    Dual Wield
+
+Dual Wield will allow you to use a weapon in your secondary hand along with
+the weapon in your primary hand.  It will only allow one more attack with
+your secondary weapon.
+#End=0
+
+#Keyword=CIRCLE
+
+[ 18]    Circle
+
+This skill alows you to sneak up behind your opponent during combat and drive
+your weapon in your opponent's back.  This skill requires the use of a
+piercing weapon.
+#End=0
+
+#Keyword='THIRD ATTACK'
+
+[ 24]    Third Attack
+
+This skill will add one attack per round.  If you have not learned second attack,
+you will only be allowed to attack twice per round.
+#End=0
+
+#Keyword='ENHANCED DAMAGE'
+
+[ 28]    Enhanced Damage
+
+This skill will increase the ammount of damage you inflict per attack.  Use of
+this skill is automatic once you have learned it.
+#End=0
+
+#Keyword='FOURTH ATTACK'
+
+[ 32]    Fourth Attack
+
+This skill will add one attack per round.  If you have not learned second attack
+and third attack, you will only be allowed to attack twice per round.
+#End=0
+
+#Keyword='FIFTH ATTACK'
+
+[ 42]    Fifth Attack
+
+This skill will add one attack per round.  If you have not learned second, third
+and forth attack, you will only be allowed to attack twice per round.  If you
+have learned those skills, you will have the oppertunity to attack 5 times per
+round.
+#End=0
