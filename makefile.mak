@@ -31,7 +31,7 @@ clean:
 	cd modules
 	make clean
 
-$(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
+$(GRENDEL):	$(GRENDEL_SOURCES) $(CORE) jcl\*.pas
 	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ujcl
 	
 $(COPYOVER):	$(COPYOVER_SOURCES)
