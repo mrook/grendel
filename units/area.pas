@@ -6,7 +6,6 @@ uses
     SysUtils,
     Classes,
     constants,
-    mudsystem,
     dtypes,
     clan,
     race,
@@ -238,6 +237,7 @@ uses
     skills,
     fight,
     progs,
+    mudsystem,
     conns;
 
 
@@ -1099,6 +1099,8 @@ begin
           if (number_percent <= reset.arg2) then
             begin
             obj := instanceObject(findObjectIndex(reset.arg1));
+
+            obj.toChar(npc);
             npc.equip(obj);
 
             lastobj := obj;
@@ -2143,6 +2145,21 @@ begin
           end;
 
         node := node.next;
+
+        end;
+      end
+    else
+      begin
+      while (node <> nil) do
+        begin
+        obj_in := node.element;
+        node := node.next;
+
+        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) and IS_SET(obj_in.flags, OBJ_NOREMOVE) and (obj_in.wear_location > WEAR_NULL) then
+          begin
+          obj_in.fromChar;
+          obj_in.toObject(obj);
+          end;
 
         end;
       end;
