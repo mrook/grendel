@@ -110,6 +110,16 @@ begin
       end;
     end;
 
+  // check for a new core.bpl in dir "bin\"
+  if (FileExists('bin\core.bpl')) then
+    begin
+		if (CopyFile('bin\core.bpl', 'core.bpl', false)) then
+      begin
+  		assign(f, 'bin\core.bpl');
+      erase(f);
+      end;
+    end;
+
 	strpcopy(g, #13#10'In the void of space, you look around... fragments of memory flash by...'#13#10);
 
   for w := 0 to conns.count - 1 do
