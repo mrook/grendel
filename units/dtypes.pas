@@ -1,3 +1,5 @@
+// $Id: dtypes.pas,v 1.9 2001/04/16 17:24:00 xenon Exp $
+
 unit dtypes;
 
 interface
@@ -597,7 +599,6 @@ procedure unhash_string(var src : PString);
 var
    hash : integer;
    node, fnode : GListNode;
-   g : GString;
 begin
   if (src = nil) then
     exit;

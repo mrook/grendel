@@ -1,3 +1,5 @@
+// $Id: cmd_obj.inc,v 1.15 2001/04/16 17:15:35 xenon Exp $
+
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
     arg,arg2:string;
@@ -124,7 +126,7 @@ begin
       node_next := node.next;
       obj_in := node.element;
 
-      if (pos(arg,obj_in.name^) <> 0) then
+      if isName(obj_in.name^, arg) then
         begin
         inc(counter);
 
@@ -313,7 +315,7 @@ begin
 end;
 
 procedure do_wear(ch:GCharacter;param:string);
-var obj, lastobj : GObject;
+var obj : GObject;
     node, node_next : GListNode;
     cnt : integer;
 begin
@@ -376,8 +378,7 @@ begin
 end;
 
 procedure do_remove(ch:GCharacter;param:string);
-var g:longint;
-    node, node_next, node_back : GListNode;
+var node, node_next, node_back : GListNode;
     obj : GObject;
     found : boolean;
 begin
@@ -620,6 +621,7 @@ var obj : GObject;
     liq, counter : integer;
     node, node_next : GListNode;
 begin
+  counter := 0;
   if (length(param) = 0) then
     begin
     node := ch.room.objects.head;
@@ -1071,6 +1073,7 @@ var obj, objsource : GObject;
     counter, liq : integer;
     node : GListNode;
 begin
+  counter := 0;
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Fill what?'#13#10);
@@ -1134,7 +1137,7 @@ procedure do_unlock(ch:GCharacter;param:string);
 var pexit : GExit;
     room_pos : GRoom;
     dir : integer;
-    obj, lastobj : GObject;
+    lastobj : GObject;
     node : GListNode;
 begin
   if (length(param) = 0) then
@@ -1218,7 +1221,7 @@ procedure do_lock(ch:GCharacter;param:string);
 var pexit : GExit;
     room_pos : GRoom;
     dir : integer;
-    obj, lastobj : GObject;
+    lastobj : GObject;
     node : GListNode;
 begin
   if (length(param) = 0) then

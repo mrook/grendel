@@ -1,5 +1,4 @@
-// experimentje
-// $Id: cmd_skill.inc,v 1.11 2001/04/15 21:04:35 xenon Exp $
+// $Id: cmd_skill.inc,v 1.12 2001/04/16 17:16:09 xenon Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -365,6 +364,7 @@ var sn : GSkill;
     g : GLearned;
     vict,learn:GCharacter;
 begin
+  vict := nil;
   learn := nil;
 
   if (ch.IS_NPC()) then
@@ -488,6 +488,7 @@ var sn : GSkill;
     node : GListNode;
     g : GLearned;
 begin
+  vict := nil;
   learn := nil;
   node := ch.room.chars.head;
 

@@ -1,3 +1,5 @@
+// $Id: conns.pas,v 1.19 2001/04/16 17:21:49 xenon Exp $
+
 unit conns;
 
 interface
@@ -125,8 +127,6 @@ var
    l, p : integer;
    v6 : TSockAddr6;
    v4 : TSockAddr;
-   t : PSockAddr;
-   funky : array[0..255] of char;
 begin
   inherited Create;
 
@@ -297,7 +297,7 @@ begin
 end;
 
 procedure GConnection.readBuffer;
-var i, j : integer;
+var i : integer;
 begin
   if (length(comm_buf) <> 0) or (pos(#10, input_buf) = 0) then
     exit;
@@ -681,8 +681,7 @@ begin
     HIDE_VIS := (not ch.CAN_SEE(vict)) and (hideinvis);
 end;
 
-var buf1 : string;
-    txt : string;
+var txt : string;
     vch : GCharacter;
     to_ch : GCharacter;
 

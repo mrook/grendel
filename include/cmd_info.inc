@@ -1,3 +1,5 @@
+// $Id: cmd_info.inc,v 1.31 2001/04/16 17:13:19 xenon Exp $
+
 function info_object(obj : GObject) : string;
 var r : string;
 begin
@@ -611,9 +613,9 @@ begin
 
     if (conn.state = CON_PLAYING) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
     begin
-      if not(specarg) or (pos(arg, uppercase(conn.ch.race.name)) <> 0) or
-        (pos(arg, uppercase(conn.ch.name^)) <> 0) or
-        (pos(arg, uppercase(conn.ch.short^)) <> 0) or
+      if not(specarg) or
+        isName(conn.ch.race.name, arg) or
+        isName(conn.ch.name^, arg) or
         ((arg = 'CLAN') and (ch.clan <> nil) and (ch.clan = conn.ch.clan)) then
       begin
         inc(num);
@@ -1371,6 +1373,7 @@ begin
 end;
 
 begin
+  turn_on := false;
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Current configuration:'#13#10#13#10);
@@ -1794,6 +1797,7 @@ var vict : GCharacter;
     f : textfile;
     level : integer;
 begin
+  level := 0;
   param := one_argument(param, arg);
   one_argument(param, arg2);
 
@@ -1892,7 +1896,7 @@ begin
   begin
     race := node.element;
 
-    if (pos(name, uppercase(race.name)) <> 0) then
+    if (isName(race.name, name)) then
     begin
       get_nearest_racematch := race;
       exit;

@@ -1,3 +1,5 @@
+// $Id: magic.pas,v 1.5 2001/04/16 17:24:28 xenon Exp $
+
 unit magic;
 
 interface
@@ -34,6 +36,7 @@ end;
 procedure spell_acid_arrow(ch, victim : GCharacter; sn : GSkill);
 var af : GAffect;
 begin
+  af := nil;
   if (saving_throw(ch.level,victim.point.save_poison,victim)) then
     begin
     act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
@@ -72,6 +75,7 @@ end;
 procedure spell_poison(ch,victim:GCharacter; sn : GSkill);
 var af:GAffect;
 begin
+  af := nil;
   if saving_throw(ch.level,victim.point.save_poison,victim) then
     begin
     act(AT_REPORT,'Your spell failed!',false,ch,nil,victim,TO_CHAR);

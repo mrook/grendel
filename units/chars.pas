@@ -1,3 +1,5 @@
+// $Id: chars.pas,v 1.33 2001/04/16 17:21:32 xenon Exp $
+
 unit chars;
 
 interface
@@ -689,7 +691,6 @@ end;
 
 function GCharacter.LEARNED(skill : pointer) : integer;
 var
-   a : integer;
    node : GListNode;
    g : GLearned;
 begin
@@ -1837,7 +1838,6 @@ procedure GCharacter.toRoom(to_room : GRoom);
 var
    tele : GTeleport;
    node : GListNode;
-   obj : GObject;
 begin
   if (to_room = nil) then
     begin
@@ -2233,8 +2233,7 @@ begin
   while (node <> nil) do
     begin
     obj := node.element;
-
-    if (obj.wear_location = WEAR_NULL) and ((pos(s, obj.name^) <> 0) or (pos(s, obj.short^) <> 0)) then
+    if (obj.wear_location = WEAR_NULL) and (isObjectName(obj.name^, s) or isObjectName(obj.short^, s)) then
       begin
       findInventory := obj;
       exit;
@@ -2256,7 +2255,7 @@ begin
     begin
     obj := node.element;
 
-    if (obj.wear_location <> WEAR_NULL) and ((pos(s, obj.name^) <> 0) or (pos(s, obj.short^) <> 0)) then
+    if (obj.wear_location <> WEAR_NULL) and (isObjectName(obj.name^, s) or isObjectName(obj.short^, s)) then
       begin
       findEquipment := obj;
       exit;

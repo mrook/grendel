@@ -1,3 +1,5 @@
+// $Id: area.pas,v 1.24 2001/04/16 17:20:48 xenon Exp $
+
 unit area;
 
 interface
@@ -319,9 +321,9 @@ var s : string;
     s_exit : GExit;
     s_extra : GExtraDescription;
     buf : string;
-    node : GListNode;
     fnd : boolean;
 begin
+  vnum := 0;
   repeat
     repeat
       s := af.readLine;
@@ -457,11 +459,12 @@ end;
 
 procedure GArea.loadNPCs;
 var s:string;
-    a,num:integer;
+    num:integer;
     sk : GSkill;
     npc : GNPCIndex;
     prog : GProgram;
 begin
+  npc := nil;
   s := af.readLine;
 
   repeat
@@ -574,13 +577,13 @@ var s:string;
     o_index:GObjectIndex;
     aff : GAffect;
 begin
+  num:=0;
   s := af.readLine;
 
   repeat
     if (uppercase(s) = '#END') then
       exit;
 
-    num:=0;
     try
       num:=StrToInt(right(s,'#'));
     except
@@ -991,7 +994,6 @@ var
    prog : GProgram;
    shop : GShop;
    obj : GObjectIndex;
-   a : integer;
 begin
   assign(f, 'areas\' + fn);
   {$I-}
@@ -1221,6 +1223,7 @@ var reset : GReset;
     node_reset, node_char : GListNode;
     buf : string;
 begin
+  lastobj := nil;
   lastmob := nil;
 
   node_char := connection_list.head;
@@ -1866,11 +1869,10 @@ begin
     vict := node.element;
 
     if ((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
-     ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
-      ((pos(name, uppercase(vict.name^)) <> 0) or
-       (pos(name, uppercase(vict.short^))<>0) or
-        ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and (pos(name, uppercase(vict.race.name)) <> 0)))
-         and (ch.CAN_SEE(vict)) then
+      ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
+      isName(vict.name^, name) or isName(vict.short^, name) or
+      ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
+      (isName(vict.race.name, name))) and (ch.CAN_SEE(vict)) then
       begin
       inc(cnt);
 
@@ -1989,7 +1991,7 @@ begin
     begin
     obj := node.element;
 
-    if (pos(name, obj.name^) > 0) or (pos(name, obj.short^) > 0) or (pos(name, obj.long^) > 0) then
+    if isObjectName(obj.name^, name) or isObjectName(obj.short^, name) or isObjectName(obj.long^, name) then
       begin
       inc(cnt, obj.count);
 
@@ -2454,7 +2456,6 @@ procedure addCorpse(c : pointer);
 var obj,obj_in : GObject;
     node : GListNode;
     ch : GCharacter;
-    h:integer;
 begin
   ch := c;
 

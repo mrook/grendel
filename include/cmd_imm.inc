@@ -1,3 +1,5 @@
+// $Id: cmd_imm.inc,v 1.24 2001/04/16 17:11:08 xenon Exp $
+
 procedure do_shutdown(ch:GCharacter;param:string);
 var
    haltparam : string;
@@ -511,8 +513,7 @@ end;
 procedure do_goto(ch : GCharacter; param: string);
 var
 	location : GRoom;
- victim : GCharacter;
- locn_name : string;
+  locn_name : string;
 begin
 
  param := one_argument(param, locn_name);

@@ -21,7 +21,6 @@ procedure do_rstat(ch : GCharacter; param : string);
 var
   buf, buf1, arg, buf_flags : string;
   location : GRoom;
-  location_node : GListNode;
   obj_data : GObject;
   obj_node : GListNode;
   rch : GCharacter;
@@ -197,10 +196,8 @@ MSTAT : return data about a mobile - can also be used on players}
 procedure do_pstat(ch : GCharacter; param : string);
 var
 	buf, buf1, arg, gender, exp, vnum, room_vnum, wimpy : string;
-{fighting,} master, leader : string;
-{affect_node, victim_node,} paf_node : GListNode;
-paf : GAffect;
-victim : GCharacter;
+  master, leader : string;
+  victim : GCharacter;
 begin
 
   one_argument( param, arg );
@@ -472,7 +469,6 @@ var
   arg1, arg2 : string;
   obj_index : GObjectIndex;
   obj : GObject;
-  node : GListNode;
   level : integer;
 begin
   param := one_argument( param, arg1 );
@@ -641,6 +637,7 @@ var buf : string;
     node : GListNode;
     found, fAll : boolean;
 begin
+  found := false;
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Ofind what?' + #13#10);
@@ -1935,8 +1932,6 @@ end;
 procedure do_checkarea(ch : GCharacter; param : string);
 var
    room : GRoom;
-   obj : GObjectIndex;
-   mob : GNPCIndex;
    area : GArea;
    node : GListNode;
    no_errors : boolean;
@@ -2482,7 +2477,6 @@ end;
 
 var
   buf : string;
-  i : integer;
   gr : TGrid;
   xpos, ypos : integer;
 begin
