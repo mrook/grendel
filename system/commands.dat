@@ -347,6 +347,12 @@ position: 9
 #end
 
 #command
+name: lockpick
+function: do_lockpick
+position: 5
+#end
+
+#command
 name: mana
 function: do_mana
 position: 5

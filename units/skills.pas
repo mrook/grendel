@@ -1,6 +1,6 @@
 {
   @abstract(Various skill related functions)
-  @lastmod($Id: skills.pas,v 1.25 2002/08/03 19:14:03 ***REMOVED*** Exp $)
+  @lastmod($Id: skills.pas,v 1.26 2002/08/14 18:16:21 ***REMOVED*** Exp $)
 }
 
 unit skills;
@@ -95,6 +95,7 @@ var
    gsn_track : GSkill;
    gsn_peek : GSkill;
    gsn_hide : GSkill;
+   gsn_lockpick : GSkill;
 
 
 procedure load_skills;
@@ -358,6 +359,7 @@ begin
   gsn_track := assign_gsn('track');
   gsn_peek := assign_gsn('peek');
   gsn_hide := assign_gsn('hide');
+  gsn_lockpick := assign_gsn('lockpick');
 end;
 
 procedure improve_skill(ch : GCharacter; sn : GSkill);

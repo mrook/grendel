@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.1 2001/07/28 20:53:27 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.2 2002/08/14 18:15:03 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -940,3 +940,57 @@ begin
   registerTimer(TIMER_TRACK, track_timer, 4, ch, vict, gsn_track);
 end;
 
+// Lock Pick - Nemesis
+procedure do_lockpick(ch : GCharacter; param : string);
+var pexit : GExit;
+    dir : integer;
+    room_pos : GRoom;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Lockpick what?'#13#10);
+    exit;
+    end;
+
+  dir := findHeading(param);
+  pexit := ch.room.findExit(dir);
+
+  if (pexit = nil) then
+    begin
+    ch.sendBuffer('That door cannot be found.'#13#10);
+    exit;
+    end;
+
+  if not IS_SET(pexit.flags, EX_ISDOOR) then
+    begin
+    ch.sendBuffer('That is not a door.'#13#10);
+    exit;
+    end;
+
+  if not IS_SET(pexit.flags, EX_LOCKED) then
+    begin
+    ch.sendBuffer('That door isn''t locked.'#13#10);
+    exit;
+    end;
+
+  if not IS_SET(pexit.flags, EX_PICKPROOF) and (number_percent < ch.LEARNED(gsn_lockpick)) then
+    begin
+    REMOVE_BIT(pexit.flags, EX_LOCKED);
+
+    // Get reverse exit
+    room_pos := findRoom(pexit.vnum);
+
+    if (room_pos <> nil) then
+      begin
+      pexit := room_pos.findExit(dir_inv[dir]);
+
+      if (pexit <> nil) then
+        REMOVE_BIT(pexit.flags, EX_LOCKED);
+      end;
+
+    act(AT_BROWN, 'You have succesfully picked the lock.', false, ch, nil, nil, TO_CHAR);
+    act(AT_BROWN, '$n has picked the lock.', false, ch, nil, nil, TO_ROOM);
+    end
+  else
+    ch.sendBuffer('You failed to pick the lock.'#13#10);
+end;

@@ -453,6 +453,12 @@ minlevel: 28
 
 #skill
 type: Skill
+name: Lockpick
+minlevel: 20
+#end
+
+#skill
+type: Skill
 name: Slashing Weapons
 minlevel: 2
 #end

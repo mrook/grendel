@@ -852,6 +852,7 @@ initialization
   registerCommand('do_showprompt', do_showprompt);
   registerCommand('do_exits', do_exits);
   registerCommand('do_purge', do_purge);
+  registerCommand('do_lockpick', do_lockpick);
 
 finalization
   unregisterCommand('do_quit');
@@ -1046,5 +1047,6 @@ finalization
   unregisterCommand('do_showprompt');
   unregisterCommand('do_exits');
   unregisterCommand('do_purge');
+  unregisterCommand('do_lockpick');
 
 end.
