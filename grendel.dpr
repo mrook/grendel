@@ -620,7 +620,6 @@ begin
 
 
   registerTimer('teleports', update_teleports, 1, true);
-  registerTimer('timers', update_timers, 1, true);
   registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
   registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
   registerTimer('objects', update_objects, CPULSE_TICK, true);

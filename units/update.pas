@@ -8,33 +8,17 @@ uses
     area,
     constants,
     util,
+    timers,
     skills;
-
-type
-    GTimer = class
-      ch, victim : GCharacter;
-      rounds : integer;
-      timer_type : integer;
-      sn : integer;
-      spec_func : SPEC_FUNC;
-    end;
-
-var
-   timers : GDLinkedList;
 
 procedure regenerate_chars;
 
 procedure update_chars;
 procedure update_tracks;
 procedure update_teleports;
-procedure update_timers;
 procedure update_time;
 
 procedure gain_condition(ch:GCharacter;iCond,value:integer);
-
-procedure addTimer(ch,victim:GCharacter;timer_type:integer;spec_func:SPEC_FUNC;sn,rounds:integer);
-procedure removeTimer(ch:GCharacter;timer_type:integer);
-function timerSet(ch:GCharacter;timer_type:integer) : GTimer;
 
 procedure battlegroundMessage;
 procedure startBattleground;
@@ -489,67 +473,12 @@ begin
     end;
 end;
 
-procedure addTimer(ch,victim:GCharacter;timer_type:integer;spec_func:SPEC_FUNC;sn,rounds:integer);
-var timer : GTimer;
+{ procedure update_timers;
+var
+   timer : GTimer;
+   node, node_next : GListNode;
 begin
-  timer := GTimer.Create;
-  timer.spec_func := spec_func;
-  timer.sn:=sn;
-  timer.rounds:=rounds;
-  timer.timer_type:=timer_type;
-  timer.ch:=ch;
-  timer.victim:=victim;
-
-  timers.insertLast(timer);
-end;
-
-procedure removeTimer(ch:GCharacter;timer_type:integer);
-var timer : GTimer;
-    node : GListNode;
-begin
-  node := timers.head;
-
-  while (node <> nil) do
-    begin
-    timer := node.element;
-
-    if (timer.ch=ch) and (timer.timer_type = timer_type) then
-      begin
-      timers.remove(node);
-      break;
-      end;
-
-    node := node.next;
-    end;
-end;
-
-function timerSet(ch:GCharacter;timer_type:integer) : GTimer;
-var timer : GTimer;
-    node : GListNode;
-begin
-  timerSet := nil;
-
-  node := timers.head;
-
-  while (node <> nil) do
-    begin
-    timer := node.element;
-
-    if (timer.ch = ch) and (timer.timer_type = timer_type) then
-      begin
-      timerSet := timer;
-      break;
-      end;
-
-    node := node.next;
-    end;
-end;
-
-procedure update_timers;
-var timer : GTimer;
-    node, node_next : GListNode;
-begin
-  node := timers.head;
+  node := timer_list.head;
   while (node <> nil) do
     begin
     timer := node.element;
@@ -569,7 +498,7 @@ begin
 
     node := node_next;
     end;
-end;
+end; }
 
 procedure battlegroundMessage;
 begin
@@ -766,7 +695,4 @@ begin
   end;
 end;
 
-
-begin
-  timers := GDLinkedList.Create;
 end.

@@ -5,19 +5,33 @@ interface
 uses
     Windows,
     Classes,
-    dtypes;
+    dtypes,
+    chars;
 
 
 type
     TIMER_FUNC = procedure;
+    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : integer);
 
     GTimer = class
       name : string;
-      func : TIMER_FUNC;
+      timer_func : TIMER_FUNC;
       counter, timeout : integer;
       looping : boolean;
 
       constructor Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
+    end;
+
+    GSpecTimer = class (GTimer)
+      spec_func : SPEC_FUNC;
+
+      ch, victim : GCharacter;
+
+      timer_type : integer;
+
+      sn : integer;
+
+      constructor Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer);
     end;
 
     GTimerThread = class (TThread)
@@ -29,18 +43,23 @@ type
 var
    timer_list : GDLinkedList;
 
-procedure registerTimer(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
+procedure registerTimer(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean); overload;
+procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer); overload;
+
+procedure unregisterTimer(name_ : string); overload;
+procedure unregisterTimer(ch : GCharacter; timer_type : integer); overload;
+
+function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
 
 implementation
 
 uses
     constants,
     mudsystem,
-    area,
-    update,
     skills,
-    chars,
     util,
+    update,
+    area,
     conns;
 
 
@@ -50,10 +69,22 @@ begin
   inherited Create;
 
   name := name_;
-  func := func_;
+  timer_func := func_;
   timeout := timeout_;
   counter := timeout_;
   looping := looping_;
+end;
+
+// GSpecTimer
+constructor GSpecTimer.Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer);
+begin
+  inherited Create(timer_names[timer_type_], nil, timeout_, false);
+
+  spec_func := func_;
+  timer_type := timer_type_;
+  ch := ch_;
+  victim := victim_;
+  sn := sn_;
 end;
 
 
@@ -67,6 +98,7 @@ procedure GTimerThread.Execute;
 var
    node, node_next : GListNode;
    timer : GTimer;
+   spec : GSpecTimer;
 begin
   while (not Terminated) do
     begin
@@ -82,8 +114,16 @@ begin
 
         if (timer.counter = 0) then
           begin
-          if assigned(timer.func) then
-            timer.func;
+          if (timer is GSpecTimer) then
+            begin
+            spec := GSpecTimer(timer);
+
+            if (assigned(spec.spec_func)) then
+              spec.spec_func(spec.ch, spec.victim, spec.sn);
+            end
+          else
+            if (assigned(timer.timer_func)) then
+              timer.timer_func;
 
           if (not timer.looping) then
             begin
@@ -95,6 +135,12 @@ begin
           end;
       except
         bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
+
+        if (timer is GSpecTimer) then
+          begin
+          timer_list.remove(node);
+          timer.Free;
+          end;
       end;
 
       node := node_next;
@@ -112,6 +158,95 @@ begin
 
   timer_list.insertLast(timer);
 end;
+
+procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer); overload;
+var
+   timer : GSpecTimer;
+begin
+  timer := GSpecTimer.Create(timer_type_, func_, timeout_, ch_, victim_, sn_);
+
+  timer_list.insertLast(timer);
+end;
+
+procedure unregisterTimer(name_ : string);
+var
+   timer : GTimer;
+   node : GListNode;
+begin
+  node := timer_list.head;
+
+  while (node <> nil) do
+    begin
+    timer := node.element;
+
+    if (timer.name = name_) then
+      begin
+      timer_list.remove(node);
+      timer.Free;
+      break;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+procedure unregisterTimer(ch : GCharacter; timer_type : integer);
+var
+   timer : GTimer;
+   spec : GSpecTimer;
+   node : GListNode;
+begin
+  node := timer_list.head;
+
+  while (node <> nil) do
+    begin
+    timer := node.element;
+
+    if (timer is GSpecTimer) then
+      begin
+      spec := GSpecTimer(timer);
+
+      if (spec.ch = ch) and (spec.timer_type = timer_type) then
+        begin
+        timer_list.remove(node);
+        timer.Free;
+        break;
+        end;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
+var
+   timer : GTimer;
+   spec : GSpecTimer;
+   node : GListNode;
+begin
+  Result := nil;
+
+  node := timer_list.head;
+
+  while (node <> nil) do
+    begin
+    timer := node.element;
+
+    if (timer is GSpecTimer) then
+      begin
+      spec := GSpecTimer(timer);
+
+      if (spec.ch = ch) and (spec.timer_type = timer_type) then
+        begin
+        Result := timer;
+        break;
+        end;
+      end;
+
+    node := node.next;
+    end;
+end;
+
 
 
 // main timers
