@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.58 2001/09/02 21:52:59 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.59 2001/09/10 21:32:55 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -526,6 +526,19 @@ begin
     load_socials;
     load_damage;
     writeConsole('Loading mud state...');
+    BootTime := Now;
+
+    boot_type := 0;
+    bg_info.count := -1;
+    boot_info.timer := -1;
+    mud_booted:=true;
+
+    update_time;
+
+    time_info.day := 1;
+    time_info.month := 1;
+    time_info.year := 1;
+    
     loadMudState();
 
     randomize;
@@ -533,19 +546,6 @@ begin
     startup_tcpip;
 
     ExitProc := @reboot_exitproc;
-
-    BootTime := Now;
-
-    update_time;
-
-    time_info.day := 1;
-    time_info.month := 1;
-    time_info.year := 1;
-
-    boot_type := 0;
-    bg_info.count := -1;
-    boot_info.timer := -1;
-    mud_booted:=true;
 
     registerTimer('teleports', update_teleports, 1, true);
     registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
