@@ -10,4 +10,5 @@ LevelLog: 998
 BindIP: 0.0.0.0
 ArenaStart: 30
 ArenaEnd: 46
+ShowClanAbbrev: 1
 $

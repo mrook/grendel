@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.34 2001/10/05 15:48:29 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.35 2001/10/19 17:27:46 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -47,6 +47,7 @@ type
       deny_newconns : boolean;     { deny new connections? }
       deny_newplayers : boolean;   { disable 'CREATE', e.g. no new players }
       max_conns : integer;         { max. concurrent connections on this server }
+      show_clan_abbrev : boolean;  { show clan name abbreviations in who list(s) }
       
       arena_start, 
       arena_end : integer;         { vnum start/end of arena (battleground) }
@@ -269,7 +270,10 @@ begin
       system_info.arena_start := strtoint(right(s, ' '))
     else
     if (g = 'ARENAEND') then
-      system_info.arena_end := strtoint(right(s, ' '));
+      system_info.arena_end := strtoint(right(s, ' '))
+    else
+    if (g = 'SHOWCLANABBREV') then
+      system_info.show_clan_abbrev := strtoint(right(s, ' ')) <> 0;
   until (s = '$') or (af.eof);
 
   af.Free;
@@ -332,6 +336,9 @@ begin
   af.writeLine('LevelLog: ' + IntToStr(system_info.level_log));
   af.writeLine('BindIP: ' + inet_ntoa(t));
   af.writeLine('MaxConns: ' + IntToStr(system_info.max_conns));
+  af.writeLine('ArenaStart: ' + IntToStr(system_info.arena_start));
+  af.writeLine('ArenaEnd: ' + IntToStr(system_info.arena_end));
+  af.writeLine('ShowClanAbbrev: ' + IntToStr(integer(system_info.show_clan_abbrev))); 
   af.writeLine('$');
 
   af.Free();

@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.6 2001/08/14 19:26:47 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.7 2001/10/19 17:27:46 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -705,8 +705,13 @@ begin
           else
             buf_imm := buf_imm + ' ';
           
-          if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
-            buf_imm := buf_imm + '$B$7C $A$7<$B$6'
+          if (conn.ch.clan <> nil) then
+            begin
+            if (conn.ch.clan = ch.clan) then
+              buf_imm := buf_imm + '$B$7C $A$7<$B$6'
+            else
+              buf_imm := buf_imm + '$B$7[' + conn.ch.clan.abbrev + '] $A$7<$B$6';
+            end
           else
             buf_imm := buf_imm + '  $A$7<$B$6';
 

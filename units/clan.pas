@@ -8,8 +8,9 @@ uses
 
 type
     GClan = class
-       name : string;
-       leader : string;
+       name : string;          { clan name }
+       abbrev : string;        { abbreviation of clan name, 3-4 chars }
+       leader : string;        { leader of clan }
        minlevel : integer;     { Minimum level to join }
        clanobj : integer;      { VNum of clan obj (e.g. a ring) }
        clanvnum : integer;     { Clan area starting VNum }
@@ -46,11 +47,14 @@ begin
   clanobj := 0;
   leader := '';
   name := 'Untitled Clan';
+  abbrev := '';
 end;
 
 procedure GClan.load(fname : string);
-var cf : textfile;
-    d,r:string;
+var 
+  cf : textfile;
+  d, r : string;
+  i : integer;
 begin
   assignfile(cf, translateFileName('clans\'+fname));
   {$I-}
@@ -103,8 +107,22 @@ begin
       except
         clanvnum:=0;
         bugreport('load_clan', 'area.pas', 'illegal character in CLANVNUM parameter');
-      end;
+      end
+    else
+    if (r = 'ABBREV') then
+      abbrev := right(d, ' ');
   until uppercase(d)='#END';
+  
+  // simple heuristics to convert a clan name to an abbreviation when none is specified
+  if (abbrev = '') then
+    begin
+    for i := 1 to length(name) do
+      if (name[i] in ['A'..'Z']) then
+        abbrev := abbrev + name[i];
+        
+    if (length(abbrev) > 3) then
+      abbrev := copy(abbrev, 1, 3);
+    end;
 
   close(cf);
 end;
