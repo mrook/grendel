@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.20 2003/11/11 20:52:33 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.21 2003/11/26 19:52:58 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -59,11 +59,25 @@ begin
 		exit;
 		end;
 	
+	if (prep(cmd) = 'DEBUG') then
+		begin
+		if (prep(param) = 'OFF') then
+			begin
+			i3.setDebugLevel(0);
+			ch.sendBuffer('I3 debugging turned off.'#13#10);
+			end
+		else
+			begin
+			i3.setDebugLevel(2);
+			ch.sendBuffer('I3 debugging turned off.'#13#10);
+			end;
+		end
+	else
 	if (prep(cmd) = 'CONNECT') then
 		begin
 		if (i3.isConnected) then
 			begin
-			ch.sendBuffer('Already  connected.'#13#10);
+			ch.sendBuffer('Already connected.'#13#10);
 			exit;
 			end;
 			

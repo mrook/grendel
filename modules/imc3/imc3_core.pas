@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.25 2003/11/11 20:52:33 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.26 2003/11/26 19:52:58 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -82,6 +82,8 @@ type
 		
 		constructor Create(debugLevel : integer = 0);
 		destructor Destroy;
+		
+		procedure setDebugLevel(debugLevel : integer = 0);
 		
 		procedure Execute(); override;
 		
@@ -1160,5 +1162,9 @@ begin
 		writeConsole('I3: ' + msg);
 end;
 
+procedure GInterMud.setDebugLevel(debugLevel : integer = 0);
+begin
+  Self.debugLevel := debugLevel;
+end;
 
 end.
