@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.47 2001/07/31 21:48:16 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.48 2001/08/02 20:16:01 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -32,18 +32,6 @@ program grendel;
 {$DEFINE Grendel}
 
 {$W+}
-
-{%File 'include\command.inc'}
-{%File 'include\cmd_comm.inc'}
-{%File 'include\cmd_fight.inc'}
-{%File 'include\cmd_imm.inc'}
-{%File 'include\cmd_info.inc'}
-{%File 'include\cmd_magic.inc'}
-{%File 'include\cmd_move.inc'}
-{%File 'include\cmd_obj.inc'}
-{%File 'include\cmd_shops.inc'}
-{%File 'include\cmd_skill.inc'}
-{%File 'include\cmd_build.inc'}
 
 uses
   SysUtils,
@@ -147,18 +135,19 @@ end;
 
 procedure flushConnections;
 var
-   ch : GCharacter;
-   node : GListNode;
+   conn : GConnection;
+   iterator : GIterator;
 begin
-  node := char_list.head;
+  iterator := connection_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    ch := node.element;
-    node := node.next;
-
-    if (not ch.IS_NPC) then
-      GPlayer(ch).quit;
+    conn := GConnection(iterator.next());
+    
+    if (conn.state = CON_PLAYING) and (not conn.ch.IS_NPC) then
+      GPlayer(conn.ch).quit
+    else
+      conn.sock.disconnect();
     end;
 end;
 
