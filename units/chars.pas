@@ -2343,3 +2343,4 @@ char_list := GDLinkedList.Create;
 extracted_chars := GDLinkedList.Create;
 
 end.
+
