@@ -1,6 +1,6 @@
 {
   @abstract(Collection of common datastructures)
-  @lastmod($Id: dtypes.pas,v 1.27 2003/06/24 21:41:33 ***REMOVED*** Exp $)
+  @lastmod($Id: dtypes.pas,v 1.28 2003/09/16 15:10:43 ***REMOVED*** Exp $)
 }
 
 unit dtypes;
@@ -48,6 +48,7 @@ type
 		end;
 
     GIterator = class
+    	function getCurrent() : TObject; virtual; abstract;
       function hasNext() : boolean; virtual; abstract;
       function next() : TObject; virtual; abstract;
     end;
@@ -156,6 +157,7 @@ type
     published
       constructor Create(list : GDLinkedList);
 
+			function getCurrent() : TObject; override;
       function hasNext() : boolean; override;
       function next() : TObject; override;
     end;
@@ -169,6 +171,7 @@ type
     published
       constructor Create(table : GHashTable);
 
+			function getCurrent() : TObject; override;
       function hasNext() : boolean; override;
       function next() : TObject; override;
     end;
@@ -235,6 +238,11 @@ begin
   current := list.head;
 end;
 
+function GDLinkedListIterator.getCurrent() : TObject;
+begin
+	Result := current;
+end;
+
 function GDLinkedListIterator.hasNext() : boolean;
 begin
   Result := (current <> nil);
@@ -272,6 +280,11 @@ begin
       
     inc(cursor);
     end;
+end;
+
+function GHashTableIterator.getCurrent() : TObject;
+begin
+	Result := current;
 end;
 
 function GHashTableIterator.hasNext() : boolean;
