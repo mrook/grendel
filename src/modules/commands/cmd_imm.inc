@@ -1,10 +1,10 @@
-// $Id: cmd_imm.inc,v 1.4 2004/01/30 18:31:54 hemko Exp $
+// $Id: cmd_imm.inc,v 1.5 2004/02/09 20:18:36 hemko Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
    haltparam : string;
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage: SHUTDOWN <stop/halt/reboot/copyover> [time]'#13#10#13#10);
     ch.sendBuffer('If time is not given, a default of 30 seconds is assumed.'#13#10);
@@ -13,7 +13,42 @@ begin
     exit;
     end;
 
-  param:=one_argument(param, haltparam);
+  param := one_argument(param, haltparam);
+
+  if (haltparam = 'stop') then
+    begin
+    act(AT_REPORT, 'Timer stopped.',false,ch,nil,nil,TO_CHAR);
+    boot_info.boot_type := 0;
+    boot_info.started_by := nil;
+    boot_info.timer := -1;
+    exit;
+    end
+  else
+  if (haltparam = 'reboot') then
+    begin
+    act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
+
+    boot_info.boot_type := BOOTTYPE_REBOOT;
+    end
+  else
+  if (haltparam = 'halt') then
+    begin
+    act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
+
+    boot_info.boot_type := BOOTTYPE_SHUTDOWN;
+    end
+  else
+  if (haltparam = 'copyover') then
+    begin
+    act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
+
+    boot_info.boot_type := BOOTTYPE_COPYOVER;
+    end
+  else
+    begin
+    ch.sendBuffer('Illegal parameter: use "stop", "halt", "reboot" or "copyover".'#13#10);
+    exit;
+    end;
 
   if (length(param) > 0) then
     begin
@@ -31,40 +66,6 @@ begin
     boot_info.timer := 31;
 
   boot_info.started_by := ch;
-
-  if (haltparam = 'stop') then
-    begin
-    act(AT_REPORT, 'Timer stopped.',false,ch,nil,nil,TO_CHAR);
-    boot_info.boot_type := 0;
-    boot_info.started_by := nil;
-    boot_info.timer := -1;
-    end
-  else
-  if (haltparam = 'reboot') then
-    begin
-    act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
-
-    boot_info.boot_type := BOOTTYPE_REBOOT;
-    end
-  else
-  if (haltparam = 'halt') then
-    begin
-    act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
-
-    boot_info.boot_type:=BOOTTYPE_SHUTDOWN;
-    end
-  else
-  if (haltparam = 'copyover') then
-    begin
-    act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
-
-    boot_info.boot_type := BOOTTYPE_COPYOVER;
-    end
-  else
-    begin
-    ch.sendBuffer('Illegal parameter: use "stop", "halt", "reboot" or "copyover".'#13#10);
-    exit;
-    end;
 end;
 
 procedure do_echo(ch:GCharacter;param:string);
