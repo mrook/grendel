@@ -1177,9 +1177,12 @@ begin
     end;
 end;
 
+{ Xenon 21/Feb/2001 : modified do_config() to also work with commands like 'config +blank' etc. }
 procedure do_config(ch:GCharacter;param:string);
 var s:string;
     d:integer;
+    not_switch : boolean;
+    turn_on : boolean;
     
 procedure hi_type(s,a:string);
 var g:integer;
@@ -1239,6 +1242,18 @@ begin
     end
   else
     begin
+    if (param[1] in ['+','-']) then
+    begin
+      not_switch := true;
+      if (param[1] = '+') then
+        turn_on := true
+      else
+        turn_on := false;
+      delete(param,1,1);
+    end
+    else
+      not_switch := false;
+      
     s:=uppercase(param);
     if s='ASSIST' then
       d:=CFG_ASSIST
@@ -1269,13 +1284,29 @@ begin
       exit;
       end;
     with ch.player^ do
+    begin
+      if not_switch then
       begin
-      if IS_SET(cfg_flags,d) then
-        REMOVE_BIT(cfg_flags,d)
+        if turn_on then
+        begin
+          SET_BIT(cfg_flags,d);
+          act(AT_REPORT,'Option toggled $B$7ON$A$7.',false,ch,nil,nil,TO_CHAR);
+        end
+        else
+        begin
+          REMOVE_BIT(cfg_flags,d);
+          act(AT_REPORT,'Option toggled $B$7OFF$A$7.',false,ch,nil,nil,TO_CHAR);
+        end;
+      end
       else
-        SET_BIT(cfg_flags,d);
+      begin
+        if IS_SET(cfg_flags,d) then
+          REMOVE_BIT(cfg_flags,d)
+        else
+          SET_BIT(cfg_flags,d);
+        ch.sendBuffer('Option toggled.'#13#10);
       end;
-    ch.sendBuffer('Option toggled.'#13#10);
+    end;
     end;
 end;
 
