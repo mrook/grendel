@@ -16,6 +16,8 @@ begin
     SUN_RISE:sun:='The sun is rising';
     SUN_LIGHT:sun:='The sun is shining';
     SUN_SET:sun:='The sun is setting';
+    else
+      sun := 'You can''t see the sun';
   end;
 
   act(AT_REPORT,sun+', it is '+sky_types[ch.room.area.weather.sky]+
