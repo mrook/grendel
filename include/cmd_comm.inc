@@ -1,41 +1,4 @@
-procedure do_chat(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Chat what?'#13#10);
-    exit;
-    end;
-
-  if (ch.IS_DRUNK) then
-    param := makedrunk(param);
-
-  talk_channel(ch,param,CHANNEL_CHAT,'chat',AT_CHAT);
-end;
-
-procedure do_raid(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Raid what?'#13#10);
-    exit;
-    end;
-
-  act(AT_RAID,'You [!] '+param,false,ch,nil,nil,TO_CHAR);
-
-  to_channel(ch,string('$N [!] '+param),CHANNEL_RAID,AT_RAID);
-end;
-
-procedure do_immtalk(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Immtalk what?'#13#10);
-    exit;
-    end;
-
-  act(AT_IMMTALK,'You <IMMTALK> '+param,false,ch,nil,nil,TO_CHAR);
-  to_channel(ch, ch.name^+' <IMMTALK> '+param,CHANNEL_IMMTALK,AT_IMMTALK);
-end;
+// $Id: cmd_comm.inc,v 1.6 2001/04/26 21:10:02 xenon Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -140,17 +103,6 @@ begin
   act(AT_TELL,'>> $n tells you, ''' + param + '''',false,ch,nil,ch.reply,TO_VICT);
 end;
 
-procedure do_yell(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Yell what?'#13#10);
-    exit;
-    end;
-
-  talk_channel(ch,param,CHANNEL_YELL,'yell',AT_YELL);
-end;
-
 procedure do_suggest(ch:GCharacter;param:string);
 var f:textfile;
 begin
@@ -251,33 +203,27 @@ begin
     end;
 end;
 
-procedure do_clantalk(ch:GCharacter;param:string);
-begin
-  if (ch.clan=nil)then
-    begin
-    ch.sendBuffer('But you aren''t in a clan!'#13#10);
-    exit;
-    end;
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Clantalk what?'#13#10);
-    exit;
-    end;
-
-  to_channel(ch, '$N [Clantalk]: '+param,CHANNEL_CLAN,2);
-end;
-
 procedure do_clan(ch:GCharacter;param:string);
+var
+  str : string;
+  gobj : GObjectIndex;
 begin
   if (ch.clan=nil) then
     ch.sendBuffer('But you aren''t in a clan!'#13#10)
   else
     with ch.clan do
       begin
+      gobj := findObjectIndex(clanobj);
+      if (gobj = nil) then
+        str := 'none'
+      else
+        str := gobj.short^;
+
       act(AT_REPORT,#13#10'$B$3'+name,false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,#13#10'$B$1[$7Leader$1]$A$7:        $B$2'+leader,false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,'$B$1[$7Clanbase VNum$1]$A$7: $B$2' + inttostr(clanvnum),false,ch,nil,nil,TO_CHAR);
-      act(AT_REPORT,'$B$1[$7Clan object$1]$A$7:   $B$2' + findObjectIndex(clanobj).short^,false,ch,nil,nil,TO_CHAR);      act(AT_REPORT,'$B$1[$7Minimum level$1]$A$7: $B$2' + inttostr(minlevel),false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,'$B$1[$7Clan object$1]$A$7:   $B$2' + str,false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,'$B$1[$7Minimum level$1]$A$7: $B$2' + inttostr(minlevel),false,ch,nil,nil,TO_CHAR);
       end;
 end;
 
@@ -294,17 +240,6 @@ begin
 
   act(AT_REPORT,ch.name^+' '+param,false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT,ch.name^+' '+param,false,ch,nil,nil,TO_ROOM);
-end;
-
-procedure do_auctalk(ch:GCharacter;param:string);
-begin
-  if (length(param)=0) then
-    begin
-    ch.sendBuffer('Auctalk what?'#13#10);
-    exit;
-    end;
-
- talk_channel(ch,param,CHANNEL_AUCTION,'auction',AT_AUCTION);
 end;
 
 procedure do_auction(ch:GCharacter;param:string);
@@ -504,6 +439,10 @@ begin
     end;
 end;
 
+{
+// These are all obsolete now due to restructured channelsystem (Channels.pas).
+// Remove soon.
+
 procedure do_babbel(ch:GCharacter;param:string);
 begin
   if (length(param)=0) then
@@ -513,4 +452,82 @@ begin
     end;
   talk_channel(ch,param,CHANNEL_BABBEL,'babbel',AT_BABBEL);
 end;
+
+procedure do_clantalk(ch:GCharacter;param:string);
+begin
+  if (ch.clan=nil)then
+    begin
+    ch.sendBuffer('But you aren''t in a clan!'#13#10);
+    exit;
+    end;
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Clantalk what?'#13#10);
+    exit;
+    end;
+
+  to_channel(ch, '$N [Clantalk]: '+param,CHANNEL_CLAN,2);
+end;
+
+procedure do_auctalk(ch:GCharacter;param:string);
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Auctalk what?'#13#10);
+    exit;
+    end;
+
+ talk_channel(ch,param,CHANNEL_AUCTION,'auction',AT_AUCTION);
+end;
+
+procedure do_chat(ch:GCharacter;param:string);
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Chat what?'#13#10);
+    exit;
+    end;
+
+  if (ch.IS_DRUNK) then
+    param := makedrunk(param);
+
+  talk_channel(ch,param,CHANNEL_CHAT,'chat',AT_CHAT);
+end;
+
+procedure do_raid(ch:GCharacter;param:string);
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Raid what?'#13#10);
+    exit;
+    end;
+
+  act(AT_RAID,'You [!] '+param,false,ch,nil,nil,TO_CHAR);
+
+  to_channel(ch,string('$N [!] '+param),CHANNEL_RAID,AT_RAID);
+end;
+
+procedure do_immtalk(ch:GCharacter;param:string);
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Immtalk what?'#13#10);
+    exit;
+    end;
+
+  act(AT_IMMTALK,'You <IMMTALK> '+param,false,ch,nil,nil,TO_CHAR);
+  to_channel(ch, ch.name^+' <IMMTALK> '+param,CHANNEL_IMMTALK,AT_IMMTALK);
+end;
+
+procedure do_yell(ch:GCharacter;param:string);
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Yell what?'#13#10);
+    exit;
+    end;
+
+  talk_channel(ch,param,CHANNEL_YELL,'yell',AT_YELL);
+end;
+}
 
