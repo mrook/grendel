@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.3 2003/12/13 00:02:20 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.4 2004/02/02 15:35:42 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -96,6 +96,7 @@ type
 
 		published
       function insertLast(element : pointer) : GListNode;
+      function insertFirst(element : pointer) : GListNode;
       function insertAfter(tn : GListNode; element : pointer) : GListNode;
       function insertBefore(tn : GListNode; element : pointer) : GListNode;
       
@@ -481,16 +482,37 @@ function GDLinkedList.insertLast(element : pointer) : GListNode;
 var
 	node : GListNode;
 begin
-	node := GListNode.Create(element, tail, nil);
+	node := GListNode.Create(element, _tail, nil);
 
-	if (head = nil) then
+	if (_head = nil) then
 		_head := node
 	else
 		_tail.next := node;
 
 	_tail := node;
 
-	insertLast := node;
+	Result := node;
+
+	inc(_size);
+	inc(_serial);
+end;
+
+{
+	Summary:
+		Add element to tail of list
+}
+function GDLinkedList.insertFirst(element : pointer) : GListNode;
+var
+	node : GListNode;
+begin
+	node := GListNode.Create(element, nil, _head);
+	
+	if (_head <> nil) then
+		_head.prev := node;
+
+	_head := node;
+
+	Result := node;
 
 	inc(_size);
 	inc(_serial);
@@ -523,7 +545,7 @@ begin
 	if (_tail = tn) then
 		_tail := node;
 
-	insertAfter := node;
+	Result := node;
 
 	inc(_size);
 	inc(_serial);
@@ -544,10 +566,10 @@ begin
 
 	tn.prev := node;
 
-	if (head = tn) then
+	if (_head = tn) then
 		_head := node;
 
-	insertBefore := node;
+	Result := node;
 
 	inc(_size);
 	inc(_serial);
@@ -668,7 +690,7 @@ begin
   for i := 1 to length(key) do
     val := val * prime + byte(key[i]);
 
-  defaultHash := abs(val) mod size;
+  Result := abs(val) mod size;
 end;
 
 { 
@@ -754,7 +776,7 @@ begin
       end;
     end;
 
-  findPrimes := numbers;
+  Result := numbers;
 end;
 
 {
@@ -1075,7 +1097,7 @@ begin
 
   if (hv <> nil) then
     begin
-    hash_string := @GString(hv.value).value;
+    Result := @GString(hv.value).value;
     hv.addRef();
     end
   else
@@ -1084,7 +1106,7 @@ begin
 
     str_hash.put(src, g);
 
-    hash_string := @g.value;
+    Result := @g.value;
     end;
 end;
 
@@ -1101,7 +1123,7 @@ begin
 
   if (hv <> nil) then
     begin
-    hash_string := @GString(hv.value).value;
+    Result := @GString(hv.value).value;
     hv.addRef();
     end
   else
@@ -1110,7 +1132,7 @@ begin
 
     str_hash.put(src^, g);
 
-    hash_string := @g.value;
+    Result := @g.value;
     end;
 end;
 
