@@ -1,6 +1,6 @@
 {
-  The Grendel Project - A Windows MUD Server
-  Copyright (c) 2000-2002 by Michiel Rook (Grimlord)
+  The Grendel Project - A Windows/Linux MUD Server
+  Copyright (c) 2000-2003 by Michiel Rook (Grimlord)
 
   Contact information:
   Webpage:            http://www.grendelproject.nl/
@@ -32,20 +32,16 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.76 2003/10/10 10:29:38 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.77 2003/10/15 13:49:40 ***REMOVED*** Exp $
 }
 
 program grendel;
 
-{$DESCRIPTION 'The Grendel Project - A Windows MUD Server. Copyright (c) 2000-2002 by Michiel Rook.'}
+{$DESCRIPTION 'The Grendel Project - A Windows/Linux MUD Server. Copyright (c) 2000-2003 by Michiel Rook.'}
 
 {$R grendel_icon.res}
 
 {$DEFINE Grendel}
-
-{$IFDEF LINUX}
-{$DEFINE CONSOLEBUILD}
-{$ENDIF}
 
 {$IFDEF CONSOLEBUILD}
 {$APPTYPE CONSOLE}
