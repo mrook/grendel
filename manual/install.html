@@ -17,9 +17,10 @@ will either complain or not run at all.
 <p><b>2. Compiling</b><br>
 The full distributions come with a prebuilt executable, so if this is the case,
 skip to part 3.
-Within the Grendel root directory there is a file called compile.bat,
+Within the Grendel root directory there is a makefile called 'makefile.w32'.
+You can compile the sources by typing 'make -f makefile.w32',
 which starts the Delphi command-line compiler (dcc32.exe) and compiles all executables.
-This *should* work, if it doesn't, mail me!</p>
+</p>
 <p><b>3. Running</b><br>
 Switch to the directory where Grendel is located and start 'grendel.exe'. The server
 starts, loads and if all goes well, enters the game loop and listens for connections
