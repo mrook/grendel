@@ -1,3 +1,5 @@
+// $Id: fsys.pas,v 1.5 2001/04/29 16:56:59 xenon Exp $
+
 unit fsys;
 
 interface
@@ -38,7 +40,8 @@ type
 implementation
 
 uses
-  mudsystem;
+  mudsystem,
+  dtypes;
 
 constructor GFileReader.Create(fn : string);
 begin
@@ -48,6 +51,8 @@ begin
   fname := fn;
 
   fsize := fp.Read(buffer, BUFSIZE);
+  if (fsize = 0) then
+    raise GException.Create('fsys.pas:GFileReader.Create', '0 length file');
 
   fpos := 0;
   line := 1;
@@ -109,7 +114,7 @@ begin
   c := ' ';
   pos := 0;
 
-  while (true) do
+  while (not eof()) do
     begin
     c := readChar;
 
