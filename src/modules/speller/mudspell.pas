@@ -582,12 +582,11 @@ begin
 end;
 
 begin
-  spell := TNZCSSpellCheck.Create;
+  spell := TNZCSSpellCheck.Create();
+  spell.SetCustomDictionary('custom.dic');
   enabled := spell.OpenFile;
 
   if (not enabled) then
-    writeConsole('Could not open dictionary, spell checking is disabled.')
-  else
-    spell.CustomDictionary := 'custom.dic';
+    writeConsole('Could not open dictionary, spell checking is disabled.');
 end.
 
