@@ -178,7 +178,7 @@
 		</bodypart>
 		<bodypart>
 			<name>hands</name>
-			<description>feet</description>
+			<description>hands</description>
 			<char_message>You wear $p on your hands.</char_message>
 			<room_message>$n wears $p on $s hands.</room_message>
 		</bodypart>
