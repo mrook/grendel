@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.36 2001/04/22 15:10:05 xenon Exp $
+// $Id: chars.pas,v 1.37 2001/04/26 21:17:46 xenon Exp $
 
 unit chars;
 
@@ -35,6 +35,23 @@ type
 
       node : GListNode;
     end;
+
+    THistoryElement = // channelhistory stuff
+      class
+        time : TDateTime;
+        contents : PString;
+        constructor Create(txt : string);
+        destructor Destroy(); override;
+      end;
+      
+    TChannel =
+      class
+        channelname : string;
+        history : GDLinkedList;
+        ignored : boolean;
+        constructor Create(txt : string);
+        destructor Destroy(); override;
+      end;
 
     GPlayer = record
       pagerlen : integer;
@@ -73,6 +90,7 @@ type
       max_skills, max_spells : integer;
       bamfin, bamfout : string;
       taunt : string;
+      channels : GDLinkedList;
       // profession:PROF_DATA;
 
       ld_timer : integer;
@@ -248,7 +266,47 @@ uses
     conns,
     skills,
     mudsystem,
-    mudthread;
+    mudthread,
+    Channels;
+
+constructor THistoryElement.Create(txt : string);
+begin
+  inherited Create();
+  time := Now();
+  contents := hash_string(txt);
+end;
+
+destructor THistoryElement.Destroy();
+begin
+  unhash_string(contents);
+  inherited Destroy();
+end;
+
+constructor TChannel.Create(txt : string);
+begin
+  inherited Create();
+  channelname := txt;
+  history := GDLinkedList.Create();
+  ignored := false;
+end;
+
+destructor TChannel.Destroy();
+var
+  node : GListNode;
+  he : THistoryElement;
+begin
+  node := history.head;
+  while (node <> nil) do
+  begin
+    he := node.element;
+    history.remove(node);
+    he.Free();
+    node := node.next;
+  end;
+  history.clean();
+  history.Free();
+  inherited Destroy();
+end;
 
 constructor GCharacter.Create;
 begin
@@ -272,11 +330,23 @@ end;
 destructor GCharacter.Destroy;
 var
    obj : GObject;
+   node : GListNode;
+   tc : TChannel;
 begin
   if (player <> nil) then
     begin
     player^.aliases.clean;
     player^.aliases.Free;
+    node := player^.channels.head;
+    while (node <> nil) do
+    begin
+      tc := node.element;
+      player^.channels.remove(node);
+      tc.Free();
+      node := node.next;
+    end;
+    player^.channels.clean();
+    player^.channels.Free();
     dispose(player);
     end;
 
@@ -397,7 +467,8 @@ begin
 
   if (leader <> Self) then
     begin
-    to_group(leader, '$B$7[Group]: ' + name^ + ' has left the group.');
+//    to_group(leader, '$B$7[Group]: ' + name^ + ' has left the group.');
+    to_channel(leader, '$B$7[Group]: ' + name^ + ' has left the group.', CHANNEL_GROUP, AT_WHITE);
     leader := nil;
     end
   else
@@ -486,7 +557,6 @@ begin
     node := node.next;
     end;
 end;
-
 
 function GCharacter.IS_IMMORT : boolean;
 begin
@@ -731,7 +801,6 @@ begin
 end;
 
 // Xenon 10/Apr/2001: Modified SET_LEARNED() to remove skill from linked list when perc = 0
-
 procedure GCharacter.SET_LEARNED(perc : integer; skill : pointer);
 var
    g : GLearned;
@@ -804,6 +873,9 @@ var d, x : longint;
     s: string;
     sk : GSkill;
     al : GAlias;
+    node : GListNode;
+    chan : GChannel;
+    tc : TChannel;
 begin
   inner := 0;
 
@@ -864,6 +936,16 @@ begin
       max_spells := 0;
     end;
     pracs := 10; // default for new players(?)
+
+    channels := GDLinkedList.Create();
+    node := channellist.head;
+    while (node <> nil) do
+    begin
+      chan := node.element;
+      tc := TChannel.Create(chan.channelname);
+      channels.insertLast(tc);
+      node := node.next;
+    end;
 
     active_board := 1;
     boards[BOARD1] := 0;
