@@ -25,12 +25,18 @@ type
 		lbl : string;
 	  addr : integer;
 	end;
+	
+	Symbol = class
+	  id : string;
+	  lbl : string;
+	  addr : integer;
+	end;
 
 var 
   lineNum, codeSize, dataSize : integer;
   input : textfile;
 	output : file;
-  statements : GDLinkedList;
+  statements, symbols : GDLinkedList;
   errors : boolean;
 
 procedure asmError(lineNum : integer; msg : string);
@@ -55,6 +61,7 @@ function readLine : Asm_Statement;
 var
    statement, keyword, rhs : string;
    a, opcode : integer;
+   sym : Symbol;
 begin
   Result := nil;
   statement := getLine();
@@ -69,6 +76,15 @@ begin
   if (keyword = '$DATA') then
     begin
 		dataSize := StrToIntDef(rhs, 0);
+		exit;
+		end;
+
+  if (keyword = '$SYMBOL') then
+    begin
+    sym := Symbol.Create;
+    sym.id := left(rhs, ' ');
+    sym.lbl := right(rhs, ' ');
+    symbols.insertLast(sym);
 		exit;
 		end;
 
@@ -147,6 +163,7 @@ var
   jump : Asm_Jump;
   lbl : Asm_Label;
 	node, node_in : GListNode;
+	sym : Symbol;
 begin
   displ := 0;
 
@@ -252,8 +269,11 @@ begin
         lbl := Asm_Label(node_in.element);
 
         if (lbl.lbl = jump.lbl) then
+          begin
           jump.addr := lbl.addr;
-
+          break;
+          end;
+          
 				node_in := node_in.next;
         end;
 
@@ -265,20 +285,50 @@ begin
     end;
  
   codeSize := displ;
+  
+  node := symbols.head;
+  
+  while (node <> nil) do
+    begin
+    sym := node.element;
+    
+		node_in := statements.head;
+		while (node_in <> nil) do
+      begin
+      if (not (Asm_Statement(node_in.element) is Asm_Label)) then
+				begin
+				node_in := node_in.next;
+        continue;
+				end;
+
+      lbl := Asm_Label(node_in.element);
+
+      if (lbl.lbl = sym.lbl) then
+        begin
+        sym.addr := lbl.addr;
+        break;
+        end;
+
+			node_in := node_in.next;
+      end;
+
+    node := node.next;
+    end;
 end;
 
 procedure writeCode;
 var
   stat : Asm_Statement;
+  sym : Symbol;
   line : Asm_Line;
   jump : Asm_Jump;
   node : GListNode;
+  t : byte;
 begin
-  node := statements.head;
-
 	blockwrite(output, codeSize, 4);
 	blockwrite(output, dataSize, 4);
 
+  node := statements.head;
   while (node <> nil) do
     begin
     stat := node.element;
@@ -301,6 +351,19 @@ begin
 
 		node := node.next;
 		end;
+		
+	node := symbols.head;
+	while (node <> nil) do
+	  begin
+	  sym := node.element;
+
+    t := length(sym.id);
+    blockwrite(output, t, 1);
+    blockwrite(output, sym.id[1], length(sym.id));
+  	blockwrite(output, sym.addr, 4);
+
+		node := node.next;
+	  end;
 end;
 
 var
@@ -333,6 +396,7 @@ begin
     end;
 
   statements := GDLinkedList.Create;
+  symbols := GDLinkedList.Create;
 
   while (not eof(input)) do 
     begin

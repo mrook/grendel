@@ -88,7 +88,7 @@ type 	Root = class
 			Expr_Func = class(Expr)
 				id : string;
 				init, body : Expr;
-				lStart, lAfter : integer;
+				lStart : integer;
       end;
 
 			Expr_Call = class(Expr)
@@ -158,7 +158,7 @@ type 	Root = class
 var
 	  curDispl : integer;
     labelNum : integer;
-    tmp, varName : string;
+    tmp, varName, varGlob : string;
 		curFunction : string;
     varType : integer;
     environment : TList;
@@ -182,6 +182,8 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %type <Expr> stop_statement
 %type <Expr> function_definition
 %type <Expr> function_body
+%type <Expr> basic
+%type <Expr> basic_list
 %type <Expr> statement
 %type <Expr> statement_list
 %type <Expr> parameter_specifiers
@@ -221,14 +223,19 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 
 input	: /* empty */
   | input '\n' { yyaccept; }
-	| input statement_list	 { startCompiler($2); }
+	| input basic_list	 { startCompiler($2); }
 	| error '\n'       { yyerrok; }
 	;
 
+basic_list	: { $$ := nil; }
+						| basic								{ $$ := $1; }
+						| basic_list basic		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
+						;
+
 statement_list	: { $$ := nil; }
-								| statement										{ $$ := $1; }
-								| statement_list statement		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
-								;
+	    					| statement					        	{ $$ := $1; }
+			    			| statement_list statement		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
+					    	;
 
 stop_statement  : { $$ := nil; }
 								| _BREAK ';'	{ $$ := nil; }
@@ -237,16 +244,19 @@ stop_statement  : { $$ := nil; }
 								|	_RETURN expr ';'		{ $$ := $2; }
 								| _RETURN '(' expr ')' ';'	{ $$ := $3; }
                 ;
-
-function_definition : type_specifier IDENTIFIER { curFunction := varName;	 $$ := Expr_Func.Create; Expr_Func($$).id := curFunction;
-																				Expr_Func($$).lStart := labelNum; inc(labelNum);
-																				Expr_Func($$).lAfter := labelNum; inc(labelNum);
-																				addEnvironment(yylineno, varName, varType, Expr_Func($$).lStart); }
-										;
+									
+basic : { $$ := nil; }
+      | declaration_list { $$ := $1; }
+      | _REQUIRE '"' LINE '"'														{ $$ := nil;
+																											 		if (not FileExists(varName)) then
+																													  compilerError(yylineno, 'could not open include file ' + varName)
+																													else
+																													  begin																													
+																													  yyopen(varName);
+																														end;	}
+      ;
 
 statement	: { $$ := nil; }
-					| function_definition '(' parameter_specifiers ')' function_body	{ $$ := $1; Expr_Func($$).init := $3; Expr_Func($$).body := $5; curFunction := ''; 
-																																							if ($5 = nil) then updateLabel(Expr_Func($$).id, -1); }
 					| compound_statement															{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
 					| expr ';'																				{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
   				| _IF '(' boolexpr ')' statement _ELSE statement 	{ $$ := Expr_If.Create; Expr_If($$).ce := $3;	$$.lineNum := yylineno;
@@ -268,31 +278,20 @@ statement	: { $$ := nil; }
 					| _SIGNAL expr ';'																{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_SIGNAL; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
           | _ASM '{' asm_list '}'														{ $$ := $3; }
           | stop_statement																	{ $$ := $1; }
-          | _REQUIRE '"' LINE '"'														{ $$ := nil;
-																													 		if (not FileExists(varName)) then
-																															  compilerError(yylineno, 'could not open include file ' + varName)
-																															else
-																															  begin																													
-																															  yyopen(varName);
-  																															end;	}
           | ';'
 					;
-
-function_body : ';'		{ $$ := nil; }
-							| compound_statement		{ $$ := $1; }
-							;
 
 parameter_specifiers 	: { $$ := nil; }
 											| parameter_specifier	{ $$ := $1; }
 											| parameter_specifiers ',' parameter_specifier { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $3; Expr_Seq($$).ex := $1; }
 										 	;
-
+ 
 parameter_specifier  	:	type_specifier IDENTIFIER { $$ := Expr_Store.Create; Expr_Store($$).id := curFunction + ':' + varName; addEnvironment(yylineno, curFunction + ':' + varName, varType, -1); }
 										 	;
 
 parameter_list 	: { $$ := nil; }
 								| expr												{ $$ := $1; }
-								| parameter_list ',' expr		{ $$ := Expr_Seq.Create; Expr_Seq($$).seq := $3; Expr_Seq($$).ex := $1; }
+								| parameter_list ',' expr		  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $3; Expr_Seq($$).ex := $1; }
 								;
 
 asm_list : asm_statement    					{ $$ := $1; }
@@ -302,30 +301,31 @@ asm_list : asm_statement    					{ $$ := $1; }
 asm_statement : '\"' LINE '\"'        { $$ := Expr_Asm.Create; Expr_Asm($$).line := varName; }
 							;
 
-compound_statement	: '{' '}'									{ $$ := nil; }
+compound_statement	: '{' '}'									{  $$ := Expr_Seq.Create; Expr_Seq($$).seq := nil; Expr_Seq($$).ex := nil; }
 										| '{' declaration_list statement_list '}' {  $$ := $3;  }
 										;
 
 declaration_list		: { $$ := nil; }
-										| declaration  { $$ := nil; }
-										| declaration_list declaration  { $$ := nil; }
+										| declaration { $$ := $1; }
+										| declaration_list declaration  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $2; Expr_Seq($$).ex := $1; }
 										;
 
-declaration	: declaration_specifiers ';' { $$ := nil; }
-						| declaration_specifiers init_declarator_list ';' { $$ := nil; }
+function_definition : type_specifier IDENTIFIER { curFunction := varName;	 $$ := Expr_Func.Create; Expr_Func($$).id := curFunction;
+																				Expr_Func($$).lStart := labelNum; inc(labelNum);
+																				addEnvironment(yylineno, varName, varType, Expr_Func($$).lStart); }
+										;
+
+function_body : ';'		{ $$ := nil; }
+							| compound_statement		{ $$ := $1; }
+							;
+
+declaration	: type_specifier init_declarator_list ';' { $$ := nil; }
+            | function_definition '(' parameter_specifiers ')' function_body { $$ := $1; Expr_Func($$).init := $3; Expr_Func($$).body := $5; curFunction := ''; }
 						;
 
-declaration_specifiers	: type_specifier { $$ := nil; }
-												| type_specifier declaration_specifiers { $$ := nil; }
-												;
-
-init_declarator_list	: init_declarator
-											| init_declarator_list ',' init_declarator
+init_declarator_list	: declarator
+											| init_declarator_list ',' declarator
 											;
-
-init_declarator	: declarator
-								| declarator '=' initializer
-								;
 
 declarator			: IDENTIFIER		{ varName := curFunction + ':' + varName; $$ := varName; addEnvironment(yylineno, varName, varType, -1); }
 								;
@@ -395,8 +395,8 @@ boolexpr : _TRUE				 { $$ := BoolExpr_Const.Create; $$.lineNum := yylineno; Bool
 funcname 	: IDENTIFIER		{ $$ := varName; }
 					;
 
-varname  : idlist    	{ tmp := curFunction + ':' + $1;
-
+varname  : idlist    	{ varGlob := ':' + $1;
+                        tmp := curFunction + varGlob;
 												varName := left(tmp, '.');
 														
 												if (varName = ':str0') then
@@ -405,11 +405,18 @@ varname  : idlist    	{ tmp := curFunction + ':' + $1;
 													$$.lineNum := yylineno; 
 													end
 												else
-												if (lookupEnv(varName) = -1) then 
+												if (lookupEnv(varName) <> -1) then 
 													begin
-													compilerError(yylineno, 'undeclared identifier ' + varName);
-													$$ := nil;
-													yyabort;
+													$$ := Expr_Id.Create;
+													$$.lineNum := yylineno; 
+													Expr_Id($$).id := varName;
+													end
+												else
+												if (lookupEnv(varGlob) <> -1) then 
+													begin
+													$$ := Expr_Id.Create;
+													$$.lineNum := yylineno; 
+													Expr_Id($$).id := varGlob;
 													end
 												else
 												if (varName <> tmp) then
@@ -421,9 +428,9 @@ varname  : idlist    	{ tmp := curFunction + ':' + $1;
 													end
 												else
 													begin
-													$$ := Expr_Id.Create;
-													$$.lineNum := yylineno; 
-													Expr_Id($$).id := varName;
+													compilerError(yylineno, 'undeclared identifier ' + varName);
+													$$ := nil;
+													yyabort;
 													end; }
          ;
 
@@ -489,7 +496,7 @@ begin
     compilerError(lineNum, 'identifier redeclared');
     exit;
     end;
-
+    
   e := Env_Entry.Create;
   e.id := id;
   e.typ := typ;
@@ -1183,14 +1190,12 @@ begin
     begin
     if (Expr_Func(expr).body <> nil) then
       begin
-			emit('JMP L' + IntToStr(Expr_Func(expr).lAfter));
 	    emit('L' + IntToStr(Expr_Func(expr).lStart) + ':');
 
 			showExpr(Expr_Func(expr).init);
 			showExpr(Expr_Func(expr).body);
 
 			emit('RET');
-	    emit('L' + IntToStr(Expr_Func(expr).lAfter) + ':');
 	    end;
     end
   else
@@ -1293,6 +1298,9 @@ begin
 end;
 
 procedure startCompiler(root : Expr);
+var
+  a : integer;
+  e : Env_Entry;
 begin
   root := typeExpr(root);
 
@@ -1302,8 +1310,21 @@ begin
   if (not yyerrors) then
     begin
 	  emit('$DATA ' + IntToStr(curDispl) + #13#10);
+
+    for a := 0 to environment.count - 1 do
+      begin
+      e := environment[a];
+   
+      if (e.lbl > 0) then
+        begin
+        emit('$SYMBOL ' + e.id + ' L' + IntToStr(e.lbl));
+        end;
+      end;
+      
     showExpr(root); 
+    
 		emit('HALT');
+		
 	  writeln('Output file written, data size is ', curDispl, ' elements.');
 		end;
 end;

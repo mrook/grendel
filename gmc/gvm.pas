@@ -22,11 +22,19 @@ type
     classAddr, methodAddr : pointer;
     signature : GSignature;
   end;
+  
+  GSymbol = class
+    id : string;
+    addr : integer;
+  end;
 
 	GCodeBlock = class
 	  owner : TObject;
 		code : array of char;
 		codeSize, dataSize : integer;
+		symbols : GHashTable;
+		
+		function findSymbol(id : string) : integer;
 	end;
 
 	GContext = class	
@@ -100,6 +108,8 @@ function loadCode(fname : string) : GCodeBlock;
 var
 	cb : GCodeBlock;
   input : file;
+  sym : GSymbol;
+  t : byte;
 begin
   cb := GCodeBlock(codeCache.get(fname));
 
@@ -121,12 +131,38 @@ begin
 	  setLength(cb.code, cb.codeSize);
   
 	  blockread(input, cb.code[0], cb.codeSize);
+	  
+	  cb.symbols := GHashTable.Create(128);
+	  
+	  while (not eof(input)) do
+	    begin
+	    sym := GSymbol.Create;
+	    
+	    blockread(input, t, 1);
+	    setLength(sym.id, t);
+	    blockread(input, sym.id[1], t);
+	    blockread(input, sym.addr, 4);
+	    
+	    cb.symbols.put(sym.id, sym);
+	    end;
 
 	  closefile(input);
 	  codeCache.put(fname, cb);
     end;
 
 	Result := cb;
+end;
+
+// GCodeBlock
+function GCodeBlock.findSymbol(id : string) : integer;
+var
+  sym : GSymbol;
+begin
+  Result := -1;
+  sym := GSymbol(symbols.get(id));
+  
+  if (sym <> nil) then
+    Result := sym.addr;
 end;
 
 // GContext
@@ -480,6 +516,16 @@ procedure GContext.Execute;
 var
 	i : integer;
 begin
+  i := block.findSymbol('main');
+  
+  if (i = -1) then
+    begin
+    writeln('Unable to find entrypoint for "main".');
+    exit;
+    end
+  else
+    pc := i;    
+  
 	writeln('Starting execution, codesize is ', block.codeSize, ' byte(s), datasize is ', block.dataSize, ' element(s).');
 
   try
