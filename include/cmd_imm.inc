@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.24 2001/04/16 17:11:08 xenon Exp $
+// $Id: cmd_imm.inc,v 1.25 2001/04/22 20:03:37 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -184,6 +184,7 @@ begin
 end;
 
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
+{ Xenon 22/Apr/2001: added (vict = nil) check }
 procedure do_grace(ch:GCharacter;param:string);
 var vict:GCharacter;
     obj_node : GListnode;
@@ -202,6 +203,12 @@ begin
   param:=one_argument(param, vict_nm);
   vict:=findcharworld(ch, vict_nm);
 
+  if (vict = nil) then
+  begin
+    ch.sendBuffer('Couldn''t find that player online.');
+    exit;
+  end;
+  
   lev:=strtointdef(param, 0);
 
   if (vict.IS_NPC) then
