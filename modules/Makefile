@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.7 2003/11/03 20:56:36 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.8 2003/12/09 20:05:48 ***REMOVED*** Exp $
 #
 
 
@@ -65,6 +65,7 @@ clean:
 	$(RM) $(STATUS)
 	$(RM) $(IMC3)
 	$(RM) $(WEBSERVICE)
+	$(RM) *.map
 
 $(COMMANDS):	core_commands.dpk commands/* $(CORE_FILE)
 	$(DCC) core_commands.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ucommands
