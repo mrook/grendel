@@ -293,3 +293,10 @@ Syntax: NOURISH <player/all>
 This will reset the hunger and thirst counters for either a player or everyone.
 It will also remove any affects such as High and Drunk.
 #End=990
+#Keyword=AT
+
+[ 991] Nourish
+Syntax: AT <player> <command>
+
+This will execute given command at the players location.
+#End=991

@@ -1293,6 +1293,7 @@ begin
   registerCommand('do_map', do_map);
   registerCommand('do_holylight', do_holylight);
   registerCommand('do_prompt', do_prompt);
+  registerCommand('do_at', do_at);
 end;
 
 begin

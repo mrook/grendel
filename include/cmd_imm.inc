@@ -1635,3 +1635,40 @@ begin
   act(AT_REPORT,buf,false,vict,nil,nil,TO_NOTVICT);
 end;
 
+{ Xenon 12/Apr/2001: execute a command at a players location }
+procedure do_at(ch : GCharacter; param : string);
+var
+   target : string;
+   vict : GCharacter;
+   saveroom : GRoom;
+begin
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage:  AT <player> <command>'#13#10);
+    exit;
+  end;
+
+  param := one_argument(param, target);
+
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage:  AT <player> <command>'#13#10);
+    exit;
+  end;
+
+  vict := findCharWorld(ch, target);
+
+  if (vict = nil) then
+  begin
+    ch.sendBuffer('That character doesn''t exist.'#13#10);
+    exit;
+  end;
+
+  saveroom := ch.room;
+  ch.fromRoom();
+  ch.toRoom(vict.room);
+  interpret(ch, param);
+  ch.fromRoom();
+  ch.toRoom(saveroom);
+end;
+
