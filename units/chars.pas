@@ -663,7 +663,7 @@ begin
     title := 'the Newbie Adventurer';
     snooping := nil;
 
-    cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI;
+    cfg_flags := CFG_ASSIST or CFG_BLANK or CFG_ANSI or CFG_AUTOPEEK;
     bankgold := 500;
     clan := nil;
     clanleader := false;

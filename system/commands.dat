@@ -361,6 +361,12 @@ function: do_pray
 #end
 
 #command
+name: peek
+function: do_peek
+position: 5
+#end
+
+#command
 name: put
 function: do_put
 #end

@@ -37,6 +37,64 @@ begin
       ' and it''s around '+inttostr(ch.room.area.weather.temp)+' C.',false,ch,nil,nil,TO_CHAR);
 end;
 
+{ Xenon 22/Feb/2001: - peek is a command on it's own now (with it's own config-flag)
+                     - you also see [x] now when someone has more than 1 instance of the same object }
+procedure do_peek(ch : GCharacter; param : string);
+var
+   cnt : integer;
+   node : GListNode;
+   vict : GCharacter;
+   obj,obj_in : GObject;
+begin
+  if (ch.learned[gsn_peek] = 0) then
+  begin
+    ch.sendBuffer('You don''t know how to peek!'#13#10);
+    exit;
+  end;
+
+  if IS_SET(ch.aff_flags,AFF_BLIND) then
+  begin
+    ch.sendBuffer('You can''t see a thing!'#13#10);
+    exit;
+  end;
+  
+  vict := ch.room.findChar(ch, param);
+
+  if (vict = nil) then
+  begin
+    act(AT_REPORT,'You do not see that here.',false,ch,nil,nil,TO_CHAR);
+    exit;
+  end;
+  
+  if (number_percent <= ch.learned[gsn_peek]) then
+  begin
+    act(AT_REPORT, 'You peek at the inventory and see:'#13#10, false, ch, nil, nil, TO_CHAR);
+
+    cnt := 0;
+    node := vict.objects.head;
+
+    while (node <> nil) do
+    begin
+      obj := node.element;
+
+      if (obj.wear_location = WEAR_NULL) then
+      begin
+        if (obj.count > 1) then
+          act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+        else
+          act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+        inc(cnt);
+      end;
+
+      node := node.next;
+    end;
+
+    if (cnt = 0) then
+      ch.sendBuffer('  nothing.'#13#10);
+  end;
+end;
+
+{ Xenon 22/Feb/2001: seperated peek from look (it's a command on its own now) }
 procedure do_look(ch : GCharacter; param:string);
 var a:integer;
     vict:GCharacter;
@@ -108,29 +166,11 @@ begin
       if (cnt = 0) then
         ch.sendBuffer('  nothing.'#13#10);
 
-      if (number_percent <= ch.learned[gsn_peek]) then
-        begin
-        act(AT_REPORT, #13#10'You peek at the inventory and see:', false, ch, nil, nil, TO_CHAR);
-
-        cnt := 0;
-        node := vict.objects.head;
-
-        while (node <> nil) do
-          begin
-          obj := node.element;
-
-          if (obj.wear_location = WEAR_NULL) then
-            begin
-            act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-            inc(cnt);
-            end;
-
-          node := node.next;
-          end;
-
-        if (cnt = 0) then
-          ch.sendBuffer('  nothing.'#13#10);
-        end;
+      if IS_SET(ch.player^.cfg_flags, CFG_AUTOPEEK) then
+      begin
+        ch.sendBuffer(#13#10);
+        interpret(ch, 'peek ' + vict.name^);
+      end;
       end
     else
     if obj<>nil then
@@ -1238,6 +1278,10 @@ begin
         hi_type('pager','You view paged output when necessary.')
       else
         lo_type('pager','You don''t view paged output.');
+      if IS_SET(cfg_flags,CFG_AUTOPEEK) then
+        hi_type('autopeek','You automatically peek someone when looking at him.')
+      else
+        lo_type('autopeek','You don''t automatically peek someone when looking at him.');
       end;
     end
   else
@@ -1278,6 +1322,9 @@ begin
     else
     if s='PAGER' then
       d:=CFG_PAGER
+    else
+    if s='AUTOPEEK' then
+      d:=CFG_AUTOPEEK
     else
       begin
       ch.sendBuffer('Unknown option.'#13#10);

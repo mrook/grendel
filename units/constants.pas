@@ -192,6 +192,7 @@ const CFG_ASSIST=BV01;
       CFG_BRIEF=BV06;           { brief descriptions }
       CFG_ANSI=BV07;            { receive ansi }
       CFG_PAGER=BV08;           { see pager }
+      CFG_AUTOPEEK = BV09;      { peek automatically on look }
 
 { NPC/PC flags }
 const ACT_NPC=BV00;             { doh... never set with PC's! }

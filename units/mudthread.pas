@@ -1258,6 +1258,8 @@ begin
   registerCommand('do_take', do_take);
   registerCommand('do_holywalk', do_holywalk);
   registerCommand('do_prename', do_prename);
+
+  registerCommand('do_peek', do_peek);
 end;
 
 begin
