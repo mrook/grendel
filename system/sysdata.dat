@@ -3,7 +3,7 @@ EMail: ***REMOVED***@takeover.nl
 Port: 4444
 DenyNewConns: 0
 DenyNewPlayers: 0
-HostLookup: 0
+HostLookup: 1
 LevelForcePC: 999
 LevelLog: 998
 BindIP: 0.0.0.0
