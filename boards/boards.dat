@@ -1,2 +1,7 @@
-#INCLUDE=general.brd
+#INCLUDE=General.brd
+#INCLUDE=Bugs.brd
+#INCLUDE=News.brd
+#INCLUDE=Quests.brd
+#INCLUDE=Immortal.brd
+
 

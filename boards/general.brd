@@ -1,123 +1,13 @@
 #BOARD=1
 #NUMBER=1
-#DATE=14-4-2001 4:01:17
-#AUTHOR=Nemesis
-#SUBJECT=Eerste note
+#DATE=21-4-2001 16:28:40
+#AUTHOR=Grimlord
+#SUBJECT=Welcome
 #TEXT
-Dit is mijn eerste note...
+You've succesfully installed your copy of the Grendel Win32 MUD Server!
 
-Hemko.
-
-
-
-
-
-
-
-
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=4
-#DATE=14-4-2001 19:19:28
-#AUTHOR=Nemesis
-#SUBJECT=testing
-#TEXT
-Again testing
-
-
-
-
-
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=5
-#DATE=14-4-2001 19:25:46
-#AUTHOR=Nemesis
-#SUBJECT=Testje
-#TEXT
-klaar is kees
-
-
-
-
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=6
-#DATE=15-4-2001 0:09:49
-#AUTHOR=Nemesis
-#SUBJECT=testje
-#TEXT
-testste
-
-
-
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=7
-#DATE=16-4-2001 4:09:20
-#AUTHOR=Nemesis
-#SUBJECT=testje
-#TEXT
-testje
-tralala
-tralalala
-
-
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=8
-#DATE=18-4-2001 12:45:19
-#AUTHOR=Nemesis
-#SUBJECT=Tester
-#TEXT
-Tralalalaalalalaalalalala
-Tralaalalalaalalaalawlaa
-
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=9
-#DATE=18-4-2001 12:55:51
-#AUTHOR=Hemko
-#SUBJECT=Best wel testje
-#TEXT
-Dit is best wel een testje enzo
-Ech wel
-
-
-~
-#END
-
-#BOARD=1
-#NUMBER=10
-#DATE=18-4-2001 13:08:03
-#AUTHOR=Nemesis
-#SUBJECT=Tester de test test test
-#TEXT
-Testerdetest
+Cheers,
+Grimlord
 
 ~
 #END
