@@ -1,10 +1,11 @@
-// $Id: util.pas,v 1.12 2001/04/16 17:35:38 xenon Exp $
+// $Id: util.pas,v 1.13 2001/07/28 20:53:28 ***REMOVED*** Exp $
 
 unit util;
 
 interface
 
 uses
+    Strip,
     SysUtils,
     ansiio;
 
@@ -47,8 +48,7 @@ function makedrunk(param : string) : string;
 implementation
 
 uses
-    constants,
-    strip;
+    constants;
 
 // returns value if min <= value <= max, or min when value < min
 // or max when value > max

@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.56 2001/07/18 10:11:20 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.57 2001/07/28 20:53:27 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -73,7 +73,6 @@ procedure load_commands;
 procedure interpret(ch : GCharacter; line : string);
 
 procedure registerCommand(name : string; func : COMMAND_FUNC);
-procedure registerCommands;
 
 implementation
 
@@ -98,12 +97,6 @@ begin
 
   inherited Create(False);
 end;
-
-{$IFDEF LINUX}
-{$I include/command.inc}
-{$ELSE}
-{$I include\command.inc}
-{$ENDIF}
 
 procedure do_dummy(ch : GCharacter; param : string);
 begin
@@ -150,9 +143,6 @@ begin
     bugreport('load_commands', 'mudthread.pas', 'could not open system\commands.dat');
     exit;
     end;
-
-  commands := GHashTable.Create(128);
-  commands.setHashFunc(firstHash);
 
   repeat
     repeat
@@ -575,7 +565,7 @@ begin
                   ch.logon_now := Now;
 
                   if (ch.level = LEVEL_RULER) then
-                    do_uptime(ch, '')
+                    interpret(ch, 'uptime')
                   else
                     ch.sendPrompt;
 
@@ -1144,199 +1134,9 @@ begin
   func_list.insertLast(g);
 end;
 
-procedure registerCommands;
-begin
-  registerCommand('do_quit', do_quit);
-  registerCommand('do_save', do_save);
-  registerCommand('do_afk', do_afk);
-  registerCommand('do_help', do_help);
-  registerCommand('do_remort', do_remort);
-  registerCommand('do_delete', do_delete);
-  registerCommand('do_wimpy', do_wimpy);
-  registerCommand('do_time', do_time);
-  registerCommand('do_weather', do_weather);
-  registerCommand('do_look', do_look);
-  registerCommand('do_inventory', do_inventory);
-  registerCommand('do_equipment', do_equipment);
-  registerCommand('do_score', do_score);
-  registerCommand('do_stats', do_stats);
-  registerCommand('do_who', do_who);
-  registerCommand('do_title', do_title);
-  registerCommand('do_group', do_group);
-  registerCommand('do_follow', do_follow);
-  registerCommand('do_armor', do_armor);
-  registerCommand('do_config', do_config);
-  registerCommand('do_visible', do_visible);
-  registerCommand('do_trophy', do_trophy);
-  registerCommand('do_ditch', do_ditch);
-  registerCommand('do_world', do_world);
-  registerCommand('do_where', do_where);
-  registerCommand('do_kill', do_kill);
-  registerCommand('do_north', do_north);
-  registerCommand('do_south', do_south);
-  registerCommand('do_east', do_east);
-  registerCommand('do_west', do_west);
-  registerCommand('do_up', do_up);
-  registerCommand('do_down', do_down);
-  registerCommand('do_sleep', do_sleep);
-  registerCommand('do_wake', do_wake);
-  registerCommand('do_meditate', do_meditate);
-  registerCommand('do_rest', do_rest);
-  registerCommand('do_sit', do_sit);
-  registerCommand('do_stand', do_stand);
-  registerCommand('do_flee', do_flee);
-  registerCommand('do_flurry', do_flurry);
-  registerCommand('do_assist', do_assist);
-  registerCommand('do_disengage', do_disengage);
-  registerCommand('do_cast', do_cast);
-  registerCommand('do_bash', do_bash);
-  registerCommand('do_kick', do_kick);
-  registerCommand('do_fly', do_fly);
-  registerCommand('do_sneak', do_sneak);
-  registerCommand('do_spells', do_spells);
-  registerCommand('do_skills', do_skills);
-  registerCommand('do_learn', do_learn);
-  registerCommand('do_practice', do_practice);
-  registerCommand('do_enter', do_enter);
-  registerCommand('do_search', do_search);
-  registerCommand('do_backstab', do_backstab);
-  registerCommand('do_circle', do_circle);
-  registerCommand('do_tell', do_tell);
-  registerCommand('do_reply', do_reply);
-  registerCommand('do_suggest', do_suggest);
-  registerCommand('do_pray', do_pray);
-  registerCommand('do_emote', do_emote);
-  registerCommand('do_shutdown', do_shutdown);
-  registerCommand('do_echo', do_echo);
-  registerCommand('do_wizinvis', do_wizinvis);
-  registerCommand('do_sla', do_sla);
-  registerCommand('do_slay', do_slay);
-  registerCommand('do_affects', do_affects);
-  registerCommand('do_socials', do_socials);
-  registerCommand('do_advance', do_advance);
-  registerCommand('do_get', do_get);
-  registerCommand('do_wear', do_wear);
-  registerCommand('do_remove', do_remove);
-  registerCommand('do_drop', do_drop);
-  registerCommand('do_swap', do_swap);
-  registerCommand('do_drink', do_drink);
-  registerCommand('do_eat', do_eat);
-  registerCommand('do_scalp', do_scalp);
-  registerCommand('do_give', do_give);
-  registerCommand('do_throw', do_throw);
-  registerCommand('do_alias', do_alias);
-  registerCommand('do_clanadd', do_clanadd);
-  registerCommand('do_clanremove', do_clanremove);
-  registerCommand('do_clan', do_clan);
-  registerCommand('do_brag', do_brag);
-  registerCommand('do_force', do_force);
-  registerCommand('do_restore', do_restore);
-  registerCommand('do_goto', do_goto);
-  registerCommand('do_transfer', do_transfer);
-  registerCommand('do_peace', do_peace);
-  registerCommand('do_areas', do_areas);
-  registerCommand('do_connections', do_connections);
-  registerCommand('do_uptime', do_uptime);
-  registerCommand('do_grace', do_grace);
-  registerCommand('do_open', do_open);
-  registerCommand('do_close', do_close);
-  registerCommand('do_consider', do_consider);
-  registerCommand('do_scan',  do_scan);
-  registerCommand('do_sacrifice', do_sacrifice);
-  registerCommand('do_bgset', do_bgset);
-  registerCommand('do_battle', do_battle);
-  registerCommand('do_auction', do_auction);
-  registerCommand('do_bid', do_bid);
-  registerCommand('do_balance', do_balance);
-  registerCommand('do_withdraw', do_withdraw);
-  registerCommand('do_deposit', do_deposit);
-  registerCommand('do_list', do_list);
-  registerCommand('do_buy', do_buy);
-  registerCommand('do_sell', do_sell);
-  registerCommand('do_rescue', do_rescue);
-  registerCommand('do_disconnect', do_disconnect);
-  registerCommand('do_wizhelp', do_wizhelp);
-  registerCommand('do_rstat', do_rstat);
-  registerCommand('do_pstat', do_pstat);
-  registerCommand('do_ostat', do_ostat);
-  registerCommand('do_report', do_report);
-  registerCommand('do_destroy', do_destroy);
-  registerCommand('do_loadup', do_loadup);
-  registerCommand('do_freeze', do_freeze);
-  registerCommand('do_silence', do_silence);
-  registerCommand('do_log', do_log);
-  registerCommand('do_snoop', do_snoop);
-  registerCommand('do_switch', do_switch);
-  registerCommand('do_return', do_return);
-  registerCommand('do_sconfig', do_sconfig);
-  registerCommand('do_track', do_track);
-  registerCommand('do_bamfin', do_bamfin);
-  registerCommand('do_bamfout', do_bamfout);
-  registerCommand('do_mload', do_mload);
-  registerCommand('do_oload', do_oload);
-  registerCommand('do_mfind', do_mfind);
-  registerCommand('do_ofind', do_ofind);
-  registerCommand('do_put', do_put);
-  registerCommand('do_sset', do_sset);
-  registerCommand('do_taunt', do_taunt);
-  registerCommand('do_nourish', do_nourish);
-  registerCommand('do_mana', do_mana);
-  registerCommand('do_fill', do_fill);
-  registerCommand('do_unlock', do_unlock);
-  registerCommand('do_lock', do_lock);
-  registerCommand('do_pset', do_pset);
-  registerCommand('do_revive', do_revive);
-  registerCommand('do_setpager', do_setpager);
-  registerCommand('do_autoloot', do_autoloot);
-  registerCommand('do_autosac', do_autosac);
-  registerCommand('do_password', do_password);
-  registerCommand('do_ban', do_ban);
-  registerCommand('do_allow', do_allow);
-  registerCommand('do_last', do_last);
-  registerCommand('do_unlearn', do_unlearn);
-  registerCommand('do_hashstats', do_hashstats);
-  registerCommand('do_keylock', do_keylock);
-  registerCommand('do_take', do_take);
-  registerCommand('do_holywalk', do_holywalk);
-  registerCommand('do_prename', do_prename);
-  registerCommand('do_peek', do_peek);
-  registerCommand('do_ocreate', do_ocreate);
-  registerCommand('do_oedit', do_oedit);
-  registerCommand('do_olist', do_olist);
-  registerCommand('do_redit', do_redit);
-  registerCommand('do_rlink', do_rlink);
-  registerCommand('do_rmake', do_rmake);
-  registerCommand('do_rclone', do_rclone);
-  registerCommand('do_aassign', do_aassign);
-  registerCommand('do_ranges', do_ranges);
-  registerCommand('do_acreate', do_acreate);
-  registerCommand('do_aset', do_aset);
-  registerCommand('do_astat', do_astat);
-  registerCommand('do_raceinfo', do_raceinfo);
-  registerCommand('do_checkarea', do_checkarea);
-  registerCommand('do_savearea', do_savearea);
-  registerCommand('do_loadarea', do_loadarea);
-  registerCommand('do_reset', do_reset);
-  registerCommand('do_map', do_map);
-  registerCommand('do_holylight', do_holylight);
-  registerCommand('do_prompt', do_prompt);
-  registerCommand('do_at', do_at);
-  registerCommand('do_namegen', do_namegen);
-  registerCommand('do_note', do_note);
-  registerCommand('do_board', do_board);
-  registerCommand('do_apropos', do_apropos);
-  registerCommand('do_say', do_say);
-  registerCommand('do_channel', do_channel);
-  registerCommand('do_vnums', do_vnums);
-  registerCommand('do_aranges', do_aranges);
-  registerCommand('do_rlist', do_rlist);
-  registerCommand('do_rdelete', do_rdelete);
-  registerCommand('do_coordgen', do_coordgen);
-  registerCommand('do_findpath', do_findpath);
-  registerCommand('do_reload', do_reload);
-end;
-
 begin
   func_list := GDLinkedList.Create;
+  commands := GHashTable.Create(128);
+  commands.setHashFunc(firstHash);
 end.
 

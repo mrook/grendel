@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.40 2001/07/23 16:08:46 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.41 2001/07/28 20:53:24 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -633,6 +633,24 @@ begin
     shutdown_mud;
 end;
 
+procedure load_modules();
+var 
+  t : TSearchRec;
+  hndl : HMODULE;
+begin
+   if (FindFirst('modules' + PathDelimiter + '*.bpl', faAnyFile, t) = 0) then
+    repeat
+      write_console('Loading module ' + t.name);
+      
+      try
+        hndl := LoadPackage('modules' + PathDelimiter + t.name);
+      except
+        bugreport('load_modules()', 'grendel.dpr', 'Unable to load module ' + t.name);
+      end;
+    until (FindNext(t) <> 0);
+
+//  FindClose(t);
+end;
 
 procedure bootServer();
 var
@@ -671,11 +689,6 @@ begin
     load_races;
     write_console('Loading clans...');
     load_clans;
-    write_console('Loading texts...');
-    registerCommands;
-    load_commands;
-    load_socials;
-    load_damage;
     write_console('Loading channels...');
     load_channels();
     write_console('Loading areas...');
@@ -686,6 +699,12 @@ begin
     loadNameTables(NameTablesDataFile);
     write_console('Loading noteboards...');
     load_notes('boards.dat');
+    write_console('Loading modules...');
+    load_modules();
+    write_console('Loading texts...');
+    load_commands;
+    load_socials;
+    load_damage;
     write_console('Loading mud state...');
     loadMudState();
 

@@ -1,0 +1,66 @@
+package core;
+
+{$R *.RES}
+{$ALIGN ON}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'Grendel Core'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  vcl50;
+
+contains
+  ansiio in 'units\ansiio.pas',
+  area in 'units\area.pas',
+  bulletinboard in 'units\bulletinboard.pas',
+  Channels in 'units\Channels.pas',
+  chars in 'units\chars.pas',
+  clan in 'units\clan.pas',
+  clean in 'units\clean.pas',
+  conns in 'units\conns.pas',
+  constants in 'units\constants.pas',
+  debug in 'units\debug.pas',
+  dtypes in 'units\dtypes.pas',
+  fight in 'units\fight.pas',
+  fsys in 'units\fsys.pas',
+  gasmdef in 'gmc\gasmdef.pas',
+  gvm in 'gmc\gvm.pas',
+  LibXmlParser in 'units\LibXmlParser.pas',
+  magic in 'units\magic.pas',
+  md5 in 'units\md5.pas',
+  MemCheck in 'units\MemCheck.pas',
+  mudhelp in 'units\mudhelp.pas',
+  mudspell in 'units\mudspell.pas',
+  mudsystem in 'units\mudsystem.pas',
+  mudthread in 'units\mudthread.pas',
+  NameGen in 'units\NameGen.pas',
+  progs in 'units\progs.pas',
+  race in 'units\race.pas',
+  skills in 'units\skills.pas',
+  strip in 'units\strip.pas',
+  timers in 'units\timers.pas',
+  update in 'units\update.pas',
+  util in 'units\util.pas',
+  Winsock2 in 'units\winsock2.pas';
+
+end.

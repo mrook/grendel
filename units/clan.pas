@@ -30,7 +30,7 @@ implementation
 
 uses
     SysUtils,
-    strip,
+    Strip,
     mudsystem;
 
 constructor GClan.Create;
