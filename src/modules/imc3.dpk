@@ -26,9 +26,6 @@ package imc3;
 {$IMPLICITBUILD OFF}
 {$DESCRIPTION 'InterMud 3 Client'}
 
-requires
-	vcl;
-
 contains
 	imc3_chan,
 	imc3_const,

@@ -26,9 +26,6 @@ package core_commands;
 {$IMPLICITBUILD OFF}
 {$DESCRIPTION 'Grendel Core Commands'}
 
-requires
-  vcl;
-
 contains
   cmd_main;
 

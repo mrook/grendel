@@ -26,9 +26,6 @@ package speller;
 {$IMPLICITBUILD OFF}
 {$DESCRIPTION 'Spellchecker'}
 
-requires
-  vcl;
-
 contains
   speller_main,
   mudspell;

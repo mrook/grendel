@@ -27,9 +27,8 @@ package webservice;
 {$DESCRIPTION 'SOAP WebService'}
 
 requires
-  indy,
   soaprtl,
-  vcl;
+  indy;
 
 contains
   main,
