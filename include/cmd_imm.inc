@@ -314,10 +314,10 @@ begin
       vict.quit;
 
       ch.sendBuffer('Ok.'#13#10);
-      write_console(vict.name + ' has been destroyed.');
+      write_console(vict.name^ + ' has been destroyed.');
 
-      assignfile(f, 'players\' + vict.name + '.usr');
-      rename(f, 'backup\' + vict.name + '.usr');
+      assignfile(f, 'players\' + vict.name^ + '.usr');
+      rename(f, 'backup\' + vict.name^ + '.usr');
       exit;
       end;
     end;
@@ -604,7 +604,7 @@ begin
   	 conn := GConnection(conn_node.element);
 
     if (conn.ch<>nil) then
-      s := conn.ch.name
+      s := conn.ch.name^
     else
       s := '-';
 
@@ -725,7 +725,7 @@ begin
 
   vict.toRoom(vict.room);
   act(AT_REPORT,'$N loaded.',false,ch,nil,vict,TO_CHAR);
-  interpret(ch, 'goto '+vict.name);
+  interpret(ch, 'goto '+vict.name^);
 end;
 
 function yes_no(v:boolean):string;
@@ -1416,14 +1416,14 @@ begin
 
       conn := GConnection(conn_node.element);
 
-      obj := findObjectWorld('the corpse of ' + conn.ch.name);
+      obj := findObjectWorld('the corpse of ' + conn.ch.name^);
 
       if (obj <> nil) then
         begin
         inc(count);
 
         buf := buf + ' (' + ansiColor(7,0) + pad_integer_front(obj.timer,2) +
-               ansiColor(2,0) + ') ' + obj.name + ' in room: ' + ansiColor(6,0) +
+               ansiColor(2,0) + ') ' + obj.name^ + ' in room: ' + ansiColor(6,0) +
                inttostr(obj.room.vnum) + ansiColor(2,0) + '.' + #13#10;
         end;
 
@@ -1473,4 +1473,29 @@ begin
   act(AT_REPORT,'$N has revived you!',false,victim,nil,ch,TO_CHAR);
   act(AT_REPORT,'You have revived ' + uppercase(param) + '.',true,ch,nil,nil,TO_CHAR);
   interpret(victim, 'look _AUTO');
+end;
+
+procedure do_hashstats(ch : GCharacter; param : string);
+var
+   node : GListNode;
+   n, c : integer;
+   g : GString;
+begin
+  ch.sendPager('Allocated hash entries: '#13#10#13#10);
+  c := 0;
+
+  for n := 0 to str_hash.hashsize - 1 do
+    begin
+    node := str_hash.bucketList[n].head;
+    while (node <> nil) do
+      begin
+      g := node.element;
+
+      ch.sendPager('(' + pad_integer_front(c, 3) + ') ' + g.value + ' [' + inttostr(node.refcount) + ']'#13#10);
+
+      inc(c);
+
+      node := node.next;
+      end;
+    end;
 end;

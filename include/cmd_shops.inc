@@ -197,7 +197,7 @@ begin
 
   if (keeper.objects.getSize = 0) then
     begin
-    interpret(keeper, 'say I am not selling anything today, '+ch.name+'.');
+    interpret(keeper, 'say I am not selling anything today, '+ch.name^+'.');
     exit;
     end;
 
@@ -252,7 +252,7 @@ begin
 
   if (keeper.objects.getSize = 0) then
     begin
-    interpret(keeper, 'say I am not selling anything today, '+ch.name+'.');
+    interpret(keeper, 'say I am not selling anything today, '+ch.name^+'.');
     exit;
     end;
 

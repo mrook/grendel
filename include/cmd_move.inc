@@ -55,7 +55,7 @@ begin
     begin
     track := node.element;
 
-    if (track.who = ch.name) and (track.direction = pexit.direction) then
+    if (track.who = ch.name^) and (track.direction = pexit.direction) then
       begin
       track.life := 150;
       exit;
@@ -66,7 +66,7 @@ begin
 
   track := GTrack.Create;
 
-  track.who := ch.name;
+  track.who := ch.name^;
   track.direction := pexit.direction;
   track.life := 150;
 
@@ -566,7 +566,7 @@ begin
     lexit := node.element;
 
     if (IS_SET(lexit.flags, EX_PORTAL) or IS_SET(lexit.flags, EX_ENTER))
-     and (pos(param, lexit.keyword) <> 0) then
+     and (pos(param, lexit.keywords^) <> 0) then
       begin
       pexit:=lexit;
       break;

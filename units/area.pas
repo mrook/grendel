@@ -57,7 +57,7 @@ type
     GObjectValues = array[1..4] of integer;
 
     GObjectIndex = class
-      name, short, long : string;
+      name, short, long : PString;
       area : GArea;
       flags : cardinal;
       item_type,wear1,wear2:integer;
@@ -79,7 +79,7 @@ type
       value : GObjectValues;
       obj_index : GObjectIndex;
 
-      name, short, long : string;
+      name, short, long : PString;
 
       wear_location : integer;
 
@@ -116,7 +116,7 @@ type
       vnum : integer;
       direction : integer;
       to_room : GRoom;
-      keyword : string;
+      keywords : PString;
       flags : cardinal;
       key : integer;
     end;
@@ -128,7 +128,7 @@ type
       damnumdie,damsizedie:integer;
       vnum:integer;
       count:longint;
-      name,short,long : string;
+      name,short,long : PString;
       sex:integer;
       race : GRace;
       alignment:integer;
@@ -161,16 +161,23 @@ type
       direction : integer;
     end;
 
+    GExtraDescription = class
+      keywords : string;
+      description : string;
+    end;
+
     GRoom = class
       node : GListNode;
 
       vnum : integer;
-      name, description : string;
+      name : PString;
+      description : string;
       area : GArea;
       flags, sector : integer;
       televnum, teledelay : integer;
       max_level, min_level : integer;
 
+      extra : GDLinkedList;
       exits : GDLinkedList;
       chars : GDLinkedList;
       objects : GDLinkedList;
@@ -182,6 +189,7 @@ type
       function findRandomEvil : pointer;
       function findObject(name : string) : pointer;
 
+      function findDescription(keyword : string) : GExtraDescription;
       function findExit(dir : integer) : GExit;
       function findExitKeyword(s : string) : GExit;
 
@@ -296,6 +304,7 @@ var s : string;
     vnum : integer;
     room : GRoom;
     s_exit : GExit;
+    s_extra : GExtraDescription;
     buf : string;
     node : GListNode;
     fnd : boolean;
@@ -364,44 +373,62 @@ begin
       if (max_level = 0) then
         max_level := LEVEL_MAX;
 
-      s := af.readWord;
-
-      while (s <> 'S') do
+      while (true) do
         begin
-        s_exit := GExit.Create;
-        s_exit.vnum := af.readCardinal;
-        s_exit.direction := af.readCardinal;
-        s_exit.flags := af.readCardinal;
-        s_exit.key := af.readInteger;
-
-        if not (af.feol) then
-          s_exit.keyword := hash_string(af.readLine);
-
-        if (exits.head = nil) then
-          exits.insertLast(s_exit)
-        else
-          begin
-          fnd := false;
-          node := exits.head;
-
-          while (node <> nil) do
-            begin
-            if (s_exit.direction < GExit(node.element).direction) then
-              begin
-              fnd := true;
-              break;
-              end;
-
-            node := node.next;
-            end;
-
-          if (fnd) and (node <> nil) then
-            exits.insertBefore(node, s_exit)
-          else
-            exits.insertLast(s_exit);
-          end;
-
         s := af.readWord;
+
+        case s[1] of
+          'S' : break;
+          'D' : begin
+                s_exit := GExit.Create;
+                s_exit.vnum := af.readCardinal;
+                s_exit.direction := af.readCardinal;
+                s_exit.flags := af.readCardinal;
+                s_exit.key := af.readInteger;
+
+                if not (af.feol) then
+                  s_exit.keywords := hash_string(af.readLine);
+
+                if (exits.head = nil) then
+                  exits.insertLast(s_exit)
+                else
+                  begin
+                  fnd := false;
+                  node := exits.head;
+
+                  while (node <> nil) do
+                    begin
+                    if (s_exit.direction < GExit(node.element).direction) then
+                      begin
+                      fnd := true;
+                      break;
+                      end;
+
+                    node := node.next;
+                    end;
+
+                  if (fnd) and (node <> nil) then
+                    exits.insertBefore(node, s_exit)
+                  else
+                    exits.insertLast(s_exit);
+                  end;
+                end;
+          'E' : begin
+                s_extra := GExtraDescription.Create;
+
+                s_extra.keywords := af.readLine;
+                s_extra.description := '';
+
+                repeat
+                  s := trim(af.readLine);
+
+                  if (s <> '~') then
+                    s_extra.description := s_extra.description + s + #13#10;
+                until (s = '~');
+
+                extra.insertLast(s_extra);
+                end;
+          end;
         end;
       end;
   until (uppercase(s) = '#END');
@@ -753,7 +780,7 @@ begin
     if (s = '#AREA') then
       begin
       name := af.readLine;
-      author := hash_string(af.readLine);
+      author := af.readLine;
       reset_msg := af.readLine;
 
       max_age := af.readInteger;
@@ -1457,6 +1484,7 @@ begin
   vnum := vn;
   area := ar;
 
+  extra := GDLinkedList.Create;
   exits := GDLinkedList.Create;
   chars := GDLinkedList.Create;
   objects := GDLinkedList.Create;
@@ -1468,16 +1496,20 @@ end;
 
 destructor GRoom.Destroy;
 begin
+  unhash_string(name);
+
+  extra.clean;
   exits.clean;
   chars.clean;
   objects.clean;
   tracks.clean;
 
+  extra.Free;
   exits.Free;
   chars.Free;
   objects.Free;
   tracks.Free;
-  
+
   inherited Destroy;
 end;
 
@@ -1509,8 +1541,8 @@ begin
 
     if ((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
      ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
-      ((pos(name, uppercase(vict.name)) <> 0) or
-       (pos(name, uppercase(vict.short))<>0) or
+      ((pos(name, uppercase(vict.name^)) <> 0) or
+       (pos(name, uppercase(vict.short^))<>0) or
         ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and (pos(name, uppercase(vict.race.name)) <> 0)))
          and (ch.CAN_SEE(vict)) then
       begin
@@ -1631,7 +1663,7 @@ begin
     begin
     obj := node.element;
 
-    if (pos(name, obj.name) > 0) or (pos(name, obj.short) > 0) or (pos(name, obj.long) > 0) then
+    if (pos(name, obj.name^) > 0) or (pos(name, obj.short^) > 0) or (pos(name, obj.long^) > 0) then
       begin
       inc(cnt, obj.count);
 
@@ -1639,6 +1671,38 @@ begin
         begin
         findObject := obj;
         exit;
+        end;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+function GRoom.findDescription(keyword : string) : GExtraDescription;
+var
+   node : GListNode;
+   s_extra : GExtraDescription;
+   s, p : integer;
+   sub, key : string;
+begin
+  Result := nil;
+  p := high(integer);
+
+  node := extra.head;
+  while (node <> nil) do
+    begin
+    s_extra := node.element;
+    key := s_extra.keywords;
+
+    while (length(key) > 0) do
+      begin
+      key := one_argument(key, sub);
+      
+      s := pos(keyword, sub);
+      if (s > 0) and (s < p) then
+        begin
+        p := s;
+        Result := s_extra;
         end;
       end;
 
@@ -1681,7 +1745,7 @@ begin
     begin
     pexit := node.element;
 
-    if (pos(s, uppercase(pexit.keyword)) <> 0) then
+    if (pos(s, uppercase(pexit.keywords^)) <> 0) then
       begin
       Result := pexit;
       exit;
@@ -1705,6 +1769,10 @@ end;
 
 destructor GObject.Destroy;
 begin
+  unhash_string(name);
+  unhash_string(short);
+  unhash_string(long);
+
   contents.clean;
   contents.Free;
   
@@ -2038,8 +2106,8 @@ begin
   with obj do
     begin
     name := hash_string('a corpse');
-    short := hash_string('$4the corpse of ' + ch.name + '$7');
-    long := hash_string('$4The corpse of ' + ch.name + ' is lying here$7');
+    short := hash_string('$4the corpse of ' + ch.name^ + '$7');
+    long := hash_string('$4The corpse of ' + ch.name^ + ' is lying here$7');
 
     if (not ch.IS_NPC) then
       SET_BIT(flags, OBJ_NOSAC);
@@ -2246,7 +2314,7 @@ begin
 
     obj := GObject(obj_node.element);
 
-    if isName(obj.name,s) then
+    if isName(obj.name^,s) then
       begin
 
       inc(count);

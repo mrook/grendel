@@ -78,8 +78,7 @@ begin
   begin
     rch := GCharacter(rch_node.element);
 
-//    one_argument( rch.name, buf ); // first name only
-		 buf := rch.name;
+    buf := rch.name^;
     buf1 := buf1 + buf;
     buf1 := buf1 + ', ';
 
@@ -94,8 +93,7 @@ begin
   begin
     obj_data := GObject(obj_node.element);
 
-//    one_argument( obj_data.name, buf ); // first name only
-	   buf := obj_data.name;
+    buf := obj_data.name^;
     buf1 := buf1 + buf;
     buf1 := buf1 + ', ';
 
@@ -127,7 +125,7 @@ begin
                   exit_data.to_room.vnum,
                   exit_data.key,
                   buf,
-                  exit_data.keyword]);
+                  exit_data.keywords^]);
 
     buf1 := buf1 + buf;
     buf1 := buf1 + #13#10;
@@ -210,7 +208,7 @@ begin
   end;
 
   buf1 := '';
-  buf := 'Name: ' + victim.name + '.' + #13#10;
+  buf := 'Name: ' + victim.name^ + '.' + #13#10;
   buf1 := buf1 + buf;
 
   if victim.IS_NPC then
@@ -287,7 +285,7 @@ begin
 #13#10;
 
   if victim.fighting <> nil then
-    buf1 := buf1 + 'Fighting: ' + victim.fighting.name + '.' + #13#10
+    buf1 := buf1 + 'Fighting: ' + victim.fighting.name^ + '.' + #13#10
   else
     buf1 := buf1 + 'Fighting: (none).' + #13#10;
 
@@ -316,12 +314,12 @@ begin
   end;
 
   if victim.master <> nil then
-  	master := victim.master.name
+  	master := victim.master.name^
   else
   	master := '(none)';
 
   if victim.leader <> nil then
-  	master := victim.leader.name
+  	master := victim.leader.name^
   else
   	master := '(none)';
 
@@ -397,7 +395,7 @@ begin
     exit;
     end;
 
-  buf1 := 'Name: ' + obj.name + '.' + #13#10;
+  buf1 := 'Name: ' + obj.name^ + '.' + #13#10;
 
   buf := Format('Vnum: %d.  Type: %s.' + #13#10 +
                 'Short description: %s.' + #13#10 +
@@ -430,7 +428,7 @@ begin
   if obj.in_obj = nil then
   	in_obj := '(none)'
   else
-   in_obj := obj.in_obj.name;
+   in_obj := obj.in_obj.name^;
 
   {if obj.carried_by = nil then
   	carried_by := ''
@@ -574,9 +572,9 @@ begin
     position:=POS_STANDING;
     npc.npc_index := npcindex;
 
-    name := hash_string(npcindex.name);
-    short := hash_string(npcindex.short);
-    long := hash_string(npcindex.long);
+    name := npcindex.name;
+    short := npcindex.short;
+    long := npcindex.long;
 
     sex:=npcindex.sex;
     race:=npcindex.race;
@@ -670,7 +668,7 @@ begin
   while obj_node <> nil do
   begin
     obj_index := GObjectIndex(obj_node.element);
-    if (fAll) or (isName(obj_index.name, arg)) then
+    if (fAll) or (isName(obj_index.name^, arg)) then
     begin
       found := True;
       buf := Format('[%5d] %s' + #13#10, [obj_index.vnum, obj_index.short]);
@@ -726,7 +724,7 @@ begin
   while npc_node <> nil do
   begin
     npc_index := GNPCIndex(npc_node.element);
-    if (fAll) or (isName(npc_index.name, arg)) then
+    if (fAll) or (isName(npc_index.name^, arg)) then
     begin
       found := True;
       buf := Format('[%5d] %s' + #13#10, [npc_index.vnum, npc_index.short]);

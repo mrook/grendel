@@ -439,7 +439,7 @@ begin
 
       if (IS_SET(pexit.flags, EX_SECRET)) and (IS_SET(pexit.flags, EX_ISDOOR)) then
         begin
-        if (length(pexit.keyword) > 0) then
+        if (length(pexit.keywords^) > 0) then
           act(AT_REPORT,'You uncover a $d!',false,ch,nil,pexit,TO_CHAR)
         else
           act(AT_REPORT,'You uncover a secret passage '+headings[pexit.direction]+'!',false,ch,nil,nil,TO_CHAR);
@@ -782,7 +782,7 @@ begin
   act(AT_REPORT,'You begin to look for tracks...',false,ch,nil,nil,TO_CHAR);
 
   if (vict <> nil) then
-    ch.tracking := vict.name;
+    ch.tracking := vict.name^;
 
   addTimer(ch, vict, TIMER_TRACK, track_timer, gsn_track, 4);
 end;

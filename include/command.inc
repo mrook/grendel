@@ -41,7 +41,7 @@ end;
 
 procedure do_save(ch : GCharacter; param : string);
 begin
-  ch.save(ch.name);
+  ch.save(ch.name^);
   ch.sendBuffer('Ok.'#13#10);
 end;
 
@@ -208,11 +208,11 @@ begin
 
   GConnection(ch.conn).send('You feel yourself dissolving, atom by atom...'#13#10);
 
-  write_console(ch.name + ' has deleted');
+  write_console(ch.name^ + ' has deleted');
   ch.quit;
 
-  assignfile(f, 'players\' + ch.name + '.usr');
-  rename(f, 'backup\' + ch.name + '.usr');
+  assignfile(f, 'players\' + ch.name^ + '.usr');
+  rename(f, 'backup\' + ch.name^ + '.usr');
 end;
 
 procedure do_wimpy(ch : GCharacter; param : string);

@@ -31,7 +31,7 @@ begin
     end;
 
   act(AT_IMMTALK,'You <IMMTALK> '+param,false,ch,nil,nil,TO_CHAR);
-  to_channel(ch,string(ch.name+' <IMMTALK> '+param),CHANNEL_IMMTALK,AT_IMMTALK);
+  to_channel(ch, ch.name^+' <IMMTALK> '+param,CHANNEL_IMMTALK,AT_IMMTALK);
 end;
 
 procedure do_say(ch:GCharacter;param:string);
@@ -157,10 +157,10 @@ begin
     exit;
     end;
   act(AT_SUGGEST,'You suggest, '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  write_console(ch.name+' suggested '''+param+'''');
+  write_console(ch.name^+' suggested '''+param+'''');
   assignfile(f,'system\suggest.dat');
   append(f);
-  writeln(f,DateTimeToStr(Now),'> ','Suggestion by ',ch.name,': ',param);
+  writeln(f,DateTimeToStr(Now),'> ','Suggestion by ',ch.name^,': ',param);
   closefile(f);
 end;
 
@@ -172,7 +172,7 @@ begin
     exit;
     end;
   act(AT_PRAY,'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  write_console(ch.name+' prays '''+param+'''');
+  write_console(ch.name^+' prays '''+param+'''');
 end;
 
 procedure do_clanadd(ch:GCharacter;param:string);
@@ -205,7 +205,7 @@ begin
       vict.clan := ch.clan;
       vict.player^.clanleader := false;
 
-      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
+      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name^+' is now a member of the clan!',CHANNEL_CLAN,AT_WHITE);
 
 			index := findObjectIndex(ch.clan.clanobj);
 
@@ -241,7 +241,7 @@ begin
       ch.sendBuffer('That character is not a member of this clan!'#13#10)
     else
       begin
-      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name+' is no longer a member of the clan!',CHANNEL_CLAN,AT_WHITE);
+      to_channel(ch, '*CLAN NOTIFY*: ' + vict.name^+' is no longer a member of the clan!',CHANNEL_CLAN,AT_WHITE);
       vict.clan:=nil;
       vict.player^.clanleader:=false;
       end;
@@ -274,7 +274,7 @@ begin
       act(AT_REPORT,#13#10'$B$3'+name,false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,#13#10'$B$1[$7Leader$1]$A$7:        $B$2'+leader,false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,'$B$1[$7Clanbase VNum$1]$A$7: $B$2' + inttostr(clanvnum),false,ch,nil,nil,TO_CHAR);
-      act(AT_REPORT,'$B$1[$7Clan object$1]$A$7:   $B$2' + findObjectIndex(clanobj).short,false,ch,nil,nil,TO_CHAR);      act(AT_REPORT,'$B$1[$7Minimum level$1]$A$7: $B$2' + inttostr(minlevel),false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,'$B$1[$7Clan object$1]$A$7:   $B$2' + findObjectIndex(clanobj).short^,false,ch,nil,nil,TO_CHAR);      act(AT_REPORT,'$B$1[$7Minimum level$1]$A$7: $B$2' + inttostr(minlevel),false,ch,nil,nil,TO_CHAR);
       end;
 end;
 
@@ -289,8 +289,8 @@ begin
   if not (param[length(param)] in ['.','!','?']) then
     param := param + '.';
 
-  act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_CHAR);
-  act(AT_REPORT,ch.name+' '+param,false,ch,nil,nil,TO_ROOM);
+  act(AT_REPORT,ch.name^+' '+param,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT,ch.name^+' '+param,false,ch,nil,nil,TO_ROOM);
 end;
 
 procedure do_auctalk(ch:GCharacter;param:string);
@@ -326,7 +326,7 @@ begin
       begin
       GObject(auc.item).toChar(ch);
 
-      buf := '$B$2<Auction> $1[$7' + ch.name + '$1] Auction of $7' + GObject(auc.item).name + '$1 has been halted.';
+      buf := '$B$2<Auction> $1[$7' + ch.name^ + '$1] Auction of $7' + GObject(auc.item).name^ + '$1 has been halted.';
       to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
       auc.item:=nil;
       auc.seller:=nil;
@@ -381,7 +381,7 @@ begin
   auc.seller:=ch;
   auc.going:=0;
 
-  buf := '$B$2<Auction> $1[$7' + ch.name + '$1] $7' + cap(GObject(auc.item).name) + '$1, minimum bid ' + inttostr(auc.start) + ' coins.';
+  buf := '$B$2<Auction> $1[$7' + ch.name^ + '$1] $7' + cap(GObject(auc.item).name^) + '$1, minimum bid ' + inttostr(auc.start) + ' coins.';
 
   to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
 end;
@@ -410,7 +410,7 @@ begin
 
   if (length(param)=0) then
     begin
-    buf := 'Currently up for auction: ' + cap(GObject(auc.item).name) + ' by ' + GCharacter(auc.seller).name + '.'#13#10;
+    buf := 'Currently up for auction: ' + cap(GObject(auc.item).name^) + ' by ' + GCharacter(auc.seller).name^ + '.'#13#10;
     ch.sendBuffer(buf);
 
     buf := 'Startprice: ' + inttostr(auc.start);
@@ -418,7 +418,7 @@ begin
     if (auc.bid=0) then
       buf := buf + '   No bids made yet.'#13#10
     else
-      buf := buf + '  Current bid: ' + inttostr(auc.bid) + ' (' + GCharacter(auc.buyer).name + ')'#13#10;
+      buf := buf + '  Current bid: ' + inttostr(auc.bid) + ' (' + GCharacter(auc.buyer).name^ + ')'#13#10;
 
     ch.sendBuffer(buf);
     exit;
@@ -466,7 +466,7 @@ begin
   auc.bid:=bid;
   auc.going:=0;
 
-  buf := '$B$2<Auction> $1[$7' + GCharacter(auc.seller).name + '$1] $7' + GCharacter(auc.buyer).name + '$1 bids ' + inttostr(auc.bid) + ' coins.';
+  buf := '$B$2<Auction> $1[$7' + GCharacter(auc.seller).name^ + '$1] $7' + GCharacter(auc.buyer).name^ + '$1 bids ' + inttostr(auc.bid) + ' coins.';
 
   to_channel(ch,buf,CHANNEL_AUCTION,AT_REPORT);
 end;

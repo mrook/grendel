@@ -124,7 +124,7 @@ begin
       node_next := node.next;
       obj_in := node.element;
 
-      if (pos(arg,obj_in.name) <> 0) then
+      if (pos(arg,obj_in.name^) <> 0) then
         begin
         inc(counter);
 
@@ -420,7 +420,7 @@ begin
       begin
       obj := node.element;
 
-      if (obj.wear_location > WEAR_NULL) and (pos(param, obj.short) > 0) then
+      if (obj.wear_location > WEAR_NULL) and (pos(param, obj.short^) > 0) then
         begin
         found := true;
         break;
@@ -666,7 +666,7 @@ begin
     liq:=value[3];
     if (liq < LIQ_WATER) or (liq>=LIQ_MAX) then
       begin
-      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name,
+      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name^,
                 'This liquid type does not exist. Please check this object.');
       exit;
       end;
@@ -759,31 +759,31 @@ begin
     exit;
     end;
 
-  h:=pos('of',corpse.short);
+  h:=pos('of',corpse.short^);
   if (h=0) then
     begin
     ch.sendBuffer('You cannot scalp that corpse.'#13#10);
     exit;
     end;
 
-  s_name := copy(corpse.short,h,length(corpse.short)-cardinal(h)+1);
+  s_name := copy(corpse.short^,h,length(corpse.short^)-cardinal(h)+1);
   s_name := stripl(s_name,'$');
 
   scalp := GObject.Create;
 
   with scalp do
     begin
-    name := 'the head ' + s_name;
-    short := 'the head ' + s_name;
-    long := 'the head of a once famous warrior lays here';
+    name := hash_string('the head ' + s_name);
+    short := hash_string('the head ' + s_name);
+    long := hash_string('the head of a once famous warrior lays here');
     item_type := ITEM_TRASH;
     node_world := object_list.insertLast(scalp);
     end;
 
   with corpse do
     begin
-    short := '$4the mutilated corpse ' + s_name + '$7';
-    long := '$4the mutilated corpse ' + s_name + ' is lying here$7';
+    short := hash_string('$4the mutilated corpse ' + s_name + '$7');
+    long := hash_string('$4the mutilated corpse ' + s_name + ' is lying here$7');
     end;
 
   scalp.toChar(ch);
@@ -1129,8 +1129,8 @@ begin
 
       if (lastobj.item_type = ITEM_KEY) and (pexit.key = lastobj.value[1]) then
         begin
-        act(AT_REPORT,'You unlock ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
-        act(AT_REPORT,'$n unlocks ' + pexit.keyword + '.',false,ch,nil,nil,TO_ROOM);
+        act(AT_REPORT,'You unlock $t.',false,ch,pexit.keywords,nil,TO_CHAR);
+        act(AT_REPORT,'$n unlocks $t.',false,ch,pexit.keywords,nil,TO_ROOM);
 
         REMOVE_BIT(pexit.flags, EX_LOCKED);
 
@@ -1221,8 +1221,8 @@ begin
 
         if (lastobj.item_type = ITEM_KEY) and (pexit.key = lastobj.value[1]) then
           begin
-          act(AT_REPORT,'You lock ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
-          act(AT_REPORT,'$n locks ' + pexit.keyword + '.',false,ch,nil,nil,TO_ROOM);
+          act(AT_REPORT,'You lock $t.',false,ch,pexit.keywords,nil,TO_CHAR);
+          act(AT_REPORT,'$n locks $t.',false,ch,pexit.keywords,nil,TO_ROOM);
 
           SET_BIT(pexit.flags, EX_LOCKED);
 

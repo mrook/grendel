@@ -42,6 +42,7 @@ var a:integer;
     vict:GCharacter;
     node : GListNode;
     obj,obj_in: GObject;
+    s_extra : GExtraDescription;
     pexit:GExit;
     w1,w2:byte;
     inside:string[20];
@@ -67,19 +68,20 @@ begin
     { Check if it is a user }
     vict := ch.room.findChar(ch, param);
     obj := ch.room.findObject(param);
+    s_extra := ch.room.findDescription(param);
 
     if (vict <> nil) then
       begin
       if (not vict.IS_NPC) then
-        act(AT_REPORT,vict.name+'$7 is known as $B$6'+vict.player^.rank+'$A$7 amongst'+
+        act(AT_REPORT,vict.name^+'$7 is known as $B$6'+vict.player^.rank+'$A$7 amongst'+
         ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR);
 
       w1 := UMin(round((vict.point.hp/vict.point.max_hp)*5),0);
       w2 := UMin(round((vict.point.mv/vict.point.max_mv)*5),0);
 
-      act(AT_REPORT,vict.name+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
+      act(AT_REPORT,vict.name^+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
 
-      ch.sendBuffer(#13#10 + vict.name + ' is using: '#13#10#13#10);
+      ch.sendBuffer(#13#10 + vict.name^ + ' is using: '#13#10#13#10);
 
       cnt := 0;
       node := vict.objects.head;
@@ -137,6 +139,9 @@ begin
         act(AT_REPORT,'There is nothing special about $p.',false,ch,obj,nil,TO_CHAR);
       end
     else
+    if (s_extra <> nil) then
+      ch.sendBuffer(s_extra.description)
+    else
       act(AT_REPORT,'You look around, but find nothing.',false,ch,nil,nil,TO_CHAR);
     end
   else
@@ -147,7 +152,7 @@ begin
     else
       inside := 'Indoors';
 
-    act(AT_DGREEN,name+' [$B$5'+inside+'$A$2]$7',false,ch,nil,nil,TO_CHAR);
+    act(AT_DGREEN,name^ + ' [$B$5'+inside+'$A$2]$7',false,ch,nil,nil,TO_CHAR);
 
     if (not brief) then
       ch.sendBuffer(description);
@@ -201,7 +206,7 @@ begin
 
       if not IS_SET(obj.flags,OBJ_HIDDEN) then
         begin
-        act_str:=obj.long+'.';
+        act_str := obj.long^ + '.';
         if (obj.count>1) then
           act_str:=act_str+' [$4'+inttostr(obj.count)+'$7x]';
         act(AT_OBJ,act_str,false,ch,nil,nil,TO_CHAR);
@@ -224,7 +229,7 @@ begin
            POS_SITTING: act_str := '$N is sitting here.';
           POS_STANDING,
           POS_BACKSTAB: if (vict.IS_NPC) then
-                          act_str := vict.long + '.'
+                          act_str := vict.long^ + '.'
                         else
                           act_str := '$N is here.';
            POS_CASTING: act_str := '$N is here, casting a spell.';
@@ -246,7 +251,7 @@ begin
           act_str := act_str + ' (Loaded)';
 
         if (ch.IS_IMMORT) and (not vict.IS_NPC) and (vict.player^.switched <> nil) then
-          act_str := act_str + ' (Switched: '+ vict.player^.switched.name + ')';
+          act_str := act_str + ' (Switched: '+ vict.player^.switched.name^ + ')';
 
         if (not vict.IS_NPC) and (vict.IS_WIZINVIS) then
           act_str := act_str + ' (WizInvis: ' + inttostr(vict.player^.wiz_level) + ')';
@@ -342,14 +347,14 @@ begin
 
   if (not ch.IS_NPC) and (not ch.IS_IMMORT) then
     begin
-    act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art known as $B$6'+ch.player^.rank+'$A$7 amongst'+
+    act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art known as $B$6'+ch.player^.rank+'$A$7 amongst'+
         ' thy $B$4'+ch.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(ch.player^.xptot)+'$A$7 experience points'+
         ' and need $B$3'+inttostr(ch.player^.xptogo)+'$A$7 to level.',false,ch,nil,nil,TO_CHAR);
     end
   else
   if (ch.IS_IMMORT) then
-    act(AT_REPORT,#13#10'   $B$4'+ch.name+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,#13#10'   $B$4'+ch.name^+'$A$7, thou art ranked as a $B$6'+IMM_Types[ch.level]+'$A$7 amongst thy fellow immortals.'#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
     act(AT_REPORT,'   Thou art $B$3'+inttostr(ch.getAge)+'$A$7 years of age ('+inttostr(ch.getPlayed div 60)+' hours).'#13#10,false,ch,nil,nil,TO_CHAR);
@@ -531,7 +536,7 @@ begin
         if (conn.afk) then
           buf2 := buf2 + '$B$7<AFK> $A$7';
 
-        buf2 := buf2 + conn.ch.name + ' ' + conn.ch.player^.title;
+        buf2 := buf2 + conn.ch.name^ + ' ' + conn.ch.player^.title;
 
         buf2 := buf2 + #13#10;
 
@@ -557,7 +562,7 @@ begin
         if (conn.afk) then
           buf1 := buf1 + '$B$7<AFK> $A$7';
 
-        buf1 := buf1 + conn.ch.name + ' ' + conn.ch.player^.title;
+        buf1 := buf1 + conn.ch.name^ + ' ' + conn.ch.player^.title;
 
         buf1 := buf1 + #13#10;
         end;
@@ -602,7 +607,7 @@ var buf1 : string;
 begin
   if (length(param)=0) then
     begin
-    act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name+'$A$7]',false,ch,nil,nil,TO_CHAR);
+    act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name^+'$A$7]',false,ch,nil,nil,TO_CHAR);
     ch.sendBuffer(#13#10'[Power of Char]  [Name]      [Health]  [Stamina]   [Xp2Lvl]'#13#10);
 
     node := char_list.head;
@@ -633,7 +638,7 @@ begin
         else
           buf1 := '[$8----Deity----';
 
-        buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name,12);
+        buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name^,12);
 
         buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMin(round((vict.point.hp / vict.point.max_hp) * 5), 0)], 10);
 
@@ -660,7 +665,7 @@ begin
         begin
         vict.leader := ch;
         act(AT_REPORT,'$N joins $n''s group.',false,ch,nil,vict,TO_ROOM);
-        to_group(ch, '$B$7[Group]: '+vict.name+' has joined the group!');
+        to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
         end;
 
       node := node.next;
@@ -700,13 +705,13 @@ begin
     else
     if (vict.leader = ch) then
       begin
-      to_group(ch, '$B$7[Group]: ' + vict.name + ' has left the group.');
+      to_group(ch, '$B$7[Group]: ' + vict.name^ + ' has left the group.');
       vict.leader := vict;
       end
     else
       begin
       vict.leader := ch;
-      to_group(ch, '$B$7[Group]: '+vict.name+' has joined the group!');
+      to_group(ch, '$B$7[Group]: '+vict.name^+' has joined the group!');
       end;
     end;
 end;
@@ -725,21 +730,21 @@ begin
       ch.sendBuffer('You stop anyone you were following.'#13#10)
     else
       begin
-      ch.sendBuffer('You stop following ' + ch.master.name + '.'#13#10);
+      ch.sendBuffer('You stop following ' + ch.master.name^ + '.'#13#10);
 
       act(AT_REPORT,'$n no longer follows you.',false,ch,nil,ch.master,TO_VICT);
       ch.master := nil;
 
       if (ch.leader <> ch) then
         begin
-        to_group(ch.leader, '$B$7[Group]: ' + ch.name + ' has left the group.');
+        to_group(ch.leader, '$B$7[Group]: ' + ch.name^+ ' has left the group.');
         ch.leader := ch;
         end;
       end;
     end
   else
     begin
-    ch.sendBuffer('You now follow ' + vict.name + '.'#13#10);
+    ch.sendBuffer('You now follow ' + vict.name^ + '.'#13#10);
 
     act(AT_REPORT,'$n now follows you.',false,ch,nil,vict,TO_VICT);
 
@@ -747,7 +752,7 @@ begin
 
     if (ch.leader <> ch) then
       begin
-      to_group(ch.leader, '$B$7[Group]: ' + ch.name + ' has left the group.');
+      to_group(ch.leader, '$B$7[Group]: ' + ch.name^ + ' has left the group.');
       ch.leader := ch;
       end;
     end;
@@ -817,7 +822,7 @@ begin
 
     if (vict <> ch) and (not vict.IS_NPC) and (vict.room.area = ch.room.area) then
       begin
-      buf := pad_string(vict.name,20) + '   ' + vict.room.name + #13#10;
+      buf := pad_string(vict.name^,20) + '   ' + vict.room.name^ + #13#10;
       ch.sendBuffer(buf);
       inc(d);
       end;
@@ -1520,7 +1525,7 @@ begin
   else
     begin
     ch.player^.md5_password := MD5String(arg2);
-    ch.save(ch.name);
+    ch.save(ch.name^);
     ch.sendBuffer('Ok, password changed.'#13#10);
     end;
 end;
@@ -1548,7 +1553,7 @@ begin
     if (not vict.IS_SAME_ALIGN(ch)) then
       ch.sendBuffer('That player is not found on your side.'#13#10)
     else
-      act(AT_REPORT,vict.name + ' is currently online.',false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,vict.name^ + ' is currently online.',false,ch,nil,nil,TO_CHAR);
 
     exit;
     end
