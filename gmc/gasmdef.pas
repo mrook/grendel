@@ -15,6 +15,7 @@ const
 	_GETC = $73;
 	_SLEEP = $74;
 	_WAIT = $75;
+	_SIGNAL = $76;
 
 	_ADD = $80;
 	_SUB = $81;
@@ -51,7 +52,7 @@ const
 	_BTOS = $D3;
 	_FTOS = $D4;
 
-  opcodeNum = 35;
+  opcodeNum = 36;
 	
 	opcodes : array[1..opcodeNum] of opcode_trans = (
                                                 (keyword:'NOP'; opcode:_NOP),
@@ -60,6 +61,7 @@ const
                                                 (keyword:'GETC'; opcode:_GETC),
                                                 (keyword:'SLEEP'; opcode:_SLEEP),
                                                 (keyword:'WAIT'; opcode:_WAIT),
+                                                (keyword:'SIGNAL'; opcode:_SIGNAL),
 
                                                 (keyword:'ADD'; opcode:_ADD),
                                                 (keyword:'SUB'; opcode:_SUB),

@@ -9,6 +9,8 @@ const
 type
 	GSystemTrap = procedure(msg : string);
 	GExternalTrap = function(obj : variant; member : string) : variant;
+	GSignalTrap = procedure(owner : TObject; signal : string);
+	GWaitTrap = function(owner : TObject; signal : string) : boolean;
 
   GSignature = record
     resultType : integer;
@@ -22,6 +24,7 @@ type
   end;
 
 	GCodeBlock = class
+	  owner : TObject;
 		code : array of char;
 		codeSize, dataSize : integer;
 	end;
@@ -41,6 +44,7 @@ type
 		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 
     procedure Load(blck : GCodeBlock);
+    procedure SingleStep;
 		procedure Execute;
 	end;
 
@@ -49,6 +53,8 @@ var
   input : file;
   systemTrap : GSystemTrap;
   externalTrap : GExternalTrap;
+  signalTrap : GSignalTrap;
+  waitTrap : GWaitTrap;
   externalMethods : GHashTable;
 	codeCache : GHashTable;
 
@@ -56,6 +62,8 @@ function loadCode(fname : string) : GCodeBlock;
 
 procedure setSystemTrap(method : GSystemTrap);
 procedure setExternalTrap(method : GExternalTrap);
+procedure setSignalTrap(method : GSignalTrap);
+procedure setWaitTrap(method : GWaitTrap);
 
 procedure registerExternalMethod(name : string; classAddr, methodAddr : pointer; signature : GSignature);
 
@@ -77,6 +85,15 @@ end;
 function dummyExternalTrap(obj : variant; member : string) : variant;
 begin
   Result := Null;
+end;
+
+procedure dummySignalTrap(owner : TObject; signal : string);
+begin
+end;
+
+function dummyWaitTrap(owner : TObject; signal : string) : boolean;
+begin
+  Result := True;
 end;
 
 function loadCode(fname : string) : GCodeBlock;
@@ -240,7 +257,7 @@ begin
     push(vd);
 end;
 
-procedure GContext.Execute;
+procedure GContext.SingleStep;
 var
 	i : integer;
   f : single;
@@ -249,212 +266,225 @@ var
 	v1, v2 : variant;
   meth : GExternalMethod;
 begin
+  case ord(block.code[pc]) of
+		_GETC		: begin
+							push(cmdline);
+							inc(pc);
+							end;
+    _ITOF   : begin
+              VarCast(v1, pop(), varSingle);
+              push(v1);
+							inc(pc);
+              end;
+    _FTOI   : begin
+              VarCast(v1, pop(), varInteger);
+              push(v1);
+							inc(pc);
+              end;
+    _ITOS		: begin
+              push(IntToStr(pop()));
+              inc(pc);
+              end;
+    _BTOS		: begin
+              push(IntToStr(pop()));
+              inc(pc);
+              end;
+    _FTOS   : begin
+              VarCast(v1, pop(), varString);
+              push(v1);
+							inc(pc);
+              end;
+    _PUSHI 	: begin
+              move(block.code[pc + 1], i, 4);
+              inc(pc, 5);
+              push(i);
+              end;
+    _PUSHF  : begin
+              move(block.code[pc + 1], f, 4);
+              inc(pc, 5);
+              push(f);
+              end;
+    _PUSHS  : begin
+              p := @block.code[pc + 1];
+              inc(pc, strlen(p) + 2);
+
+              push(string(p));
+              end;
+    _PUSHR  : begin
+              move(block.code[pc + 1], r, 1);
+              inc(pc, 2);
+              push(data[r]);
+              end;
+    _POPR   : begin
+              move(block.code[pc + 1], r, 1);
+              inc(pc, 2);
+              data[r] := pop();
+              end;
+    _ADD		: begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 + v2);
+              inc(pc);
+              end;
+    _SUB		: begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 - v2);
+              inc(pc);
+              end;
+    _MUL		: begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 * v2);
+              inc(pc);
+              end;
+    _DIV		: begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 / v2);
+              inc(pc);
+              end;
+    _AND    : begin
+              push(pop() and pop());
+              inc(pc);
+              end;
+    _OR     : begin
+              push(pop() or pop());
+              inc(pc);
+              end;
+    _LT     : begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 < v2);
+              inc(pc);
+              end;
+    _GT     : begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 > v2);
+              inc(pc);
+              end;
+    _LTE    : begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 <= v2);
+              inc(pc);
+              end;
+    _GTE    : begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 >= v2);
+              inc(pc);
+              end;
+    _EQ     : begin
+              v2 := pop();
+              v1 := pop();
+              push(v1 = v2);
+              inc(pc);
+              end;
+    _GET		: begin
+              v2 := pop();
+              v1 := pop();
+              push(externalTrap(v1, v2));
+              inc(pc);
+              end;
+    _GETR		: begin
+              move(block.code[pc + 1], r, 1);
+              inc(pc, 2);
+              pop();
+              end;
+    _TRAP		: begin
+              systemTrap(pop());
+              inc(pc);
+              end;
+    _SLEEP  : begin
+              Sleep(pop() * 1000);
+							inc(pc);
+              end;
+    _WAIT   : begin
+              v1 := pop();
+  
+              if (not waitTrap(block.owner, v1)) then
+                push(v1)
+              else
+  							inc(pc);
+              end;
+    _SIGNAL : begin
+              v1 := pop();
+              inc(pc);
+              signalTrap(block.owner, v1);
+              end;
+    _RET		: begin
+              i := popr();
+              pc := i;
+              end;
+    _CALL 	: begin
+              move(block.code[pc + 1], i, 4);
+
+              if (i < 0) or (i > block.codeSize) then
+                vmError('procedure call outside of boundary');
+
+              pushr(pc + 5);					// save return address
+              pc := i;
+              end;
+    _CALLE  : begin
+              p := @block.code[pc + 1];
+              inc(pc, strlen(p) + 2);
+
+              meth := GExternalMethod(externalMethods.get(string(p)));
+
+              if (meth <> nil) then
+								callMethod(meth.classAddr, meth.methodAddr, meth.signature)
+              else
+                vmError('unregistered external method "' + p + '"');
+              end;
+    _JMP    : begin
+              move(block.code[pc + 1], i, 4);
+
+              if (i < 0) or (i > block.codeSize) then
+                vmError('jump outside of boundary');
+
+              pc := i;
+              end;
+    _JZ     : begin
+              move(block.code[pc + 1], i, 4);
+              v1 := pop();
+
+              if (i < 0) or (i > block.codeSize) then
+                vmError('jump outside of boundary');
+
+              if (integer(v1) = 0) then
+                pc := i
+              else
+                inc(pc, 5);
+              end;
+    _JNZ    : begin
+              move(block.code[pc + 1], i, 4);
+              v1 := pop();
+
+              if (i < 0) or (i > block.codeSize) then
+                vmError('jump outside of boundary');
+
+              if (integer(v1) <> 0) then
+                pc := i
+              else
+                inc(pc, 5);
+              end;
+    _HALT : pc := block.codeSize;
+  else
+    inc(pc);
+  end;
+end;
+
+procedure GContext.Execute;
+var
+	i : integer;
+begin
 	writeln('Starting execution, codesize is ', block.codeSize, ' byte(s), datasize is ', block.dataSize, ' element(s).');
 
   try
-
     while (pc < block.codeSize) do
-      begin
-      case ord(block.code[pc]) of
-				_GETC		: begin
-									push(cmdline);
-									inc(pc);
-									end;
-        _ITOF   : begin
-                  VarCast(v1, pop(), varSingle);
-                  push(v1);
-									inc(pc);
-                  end;
-        _FTOI   : begin
-                  VarCast(v1, pop(), varInteger);
-                  push(v1);
-									inc(pc);
-                  end;
-        _ITOS		: begin
-                  push(IntToStr(pop()));
-                  inc(pc);
-                  end;
-        _BTOS		: begin
-                  push(IntToStr(pop()));
-                  inc(pc);
-                  end;
-        _FTOS   : begin
-                  VarCast(v1, pop(), varString);
-                  push(v1);
-									inc(pc);
-                  end;
-        _PUSHI 	: begin
-                  move(block.code[pc + 1], i, 4);
-                  inc(pc, 5);
-                  push(i);
-                  end;
-        _PUSHF  : begin
-                  move(block.code[pc + 1], f, 4);
-                  inc(pc, 5);
-                  push(f);
-                  end;
-        _PUSHS  : begin
-                  p := @block.code[pc + 1];
-                  inc(pc, strlen(p) + 2);
-
-                  push(string(p));
-                  end;
-        _PUSHR  : begin
-                  move(block.code[pc + 1], r, 1);
-                  inc(pc, 2);
-                  push(data[r]);
-                  end;
-        _POPR   : begin
-                  move(block.code[pc + 1], r, 1);
-                  inc(pc, 2);
-                  data[r] := pop();
-                  end;
-        _ADD		: begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 + v2);
-                  inc(pc);
-                  end;
-        _SUB		: begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 - v2);
-                  inc(pc);
-                  end;
-        _MUL		: begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 * v2);
-                  inc(pc);
-                  end;
-        _DIV		: begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 / v2);
-                  inc(pc);
-                  end;
-        _AND    : begin
-                  push(pop() and pop());
-                  inc(pc);
-                  end;
-        _OR     : begin
-                  push(pop() or pop());
-                  inc(pc);
-                  end;
-        _LT     : begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 < v2);
-                  inc(pc);
-                  end;
-        _GT     : begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 > v2);
-                  inc(pc);
-                  end;
-        _LTE    : begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 <= v2);
-                  inc(pc);
-                  end;
-        _GTE    : begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 >= v2);
-                  inc(pc);
-                  end;
-        _EQ     : begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(v1 = v2);
-                  inc(pc);
-                  end;
-        _GET		: begin
-                  v2 := pop();
-                  v1 := pop();
-                  push(externalTrap(v1, v2));
-                  inc(pc);
-                  end;
-        _GETR		: begin
-                  move(block.code[pc + 1], r, 1);
-                  inc(pc, 2);
-                  pop();
-                  end;
-        _TRAP		: begin
-                  systemTrap(pop());
-                  inc(pc);
-                  end;
-        _SLEEP  : begin
-                  Sleep(pop() * 1000);
-									inc(pc);
-                  end;
-        _WAIT   : begin
-                  v1 := pop();
-									inc(pc);
-                  end;
-        _RET		: begin
-                  i := popr();
-                  pc := i;
-                  end;
-        _CALL 	: begin
-                  move(block.code[pc + 1], i, 4);
-	
-                  if (i < 0) or (i > block.codeSize) then
-                    vmError('procedure call outside of boundary');
-
-                  pushr(pc + 5);					// save return address
-                  pc := i;
-                  end;
-        _CALLE  : begin
-                  p := @block.code[pc + 1];
-                  inc(pc, strlen(p) + 2);
-
-                  meth := GExternalMethod(externalMethods.get(string(p)));
-
-                  if (meth <> nil) then
-										callMethod(meth.classAddr, meth.methodAddr, meth.signature)
-                  else
-                    vmError('unregistered external method "' + p + '"');
-                  end;
-        _JMP    : begin
-                  move(block.code[pc + 1], i, 4);
-
-                  if (i < 0) or (i > block.codeSize) then
-                    vmError('jump outside of boundary');
-
-                  pc := i;
-                  end;
-        _JZ     : begin
-                  move(block.code[pc + 1], i, 4);
-                  v1 := pop();
-
-                  if (i < 0) or (i > block.codeSize) then
-                    vmError('jump outside of boundary');
-
-                  if (integer(v1) = 0) then
-                    pc := i
-                  else
-                    inc(pc, 5);
-                  end;
-        _JNZ    : begin
-                  move(block.code[pc + 1], i, 4);
-                  v1 := pop();
-
-                  if (i < 0) or (i > block.codeSize) then
-                    vmError('jump outside of boundary');
-
-                  if (integer(v1) <> 0) then
-                    pc := i
-                  else
-                    inc(pc, 5);
-                  end;
-        _HALT : break;
-      else
-        inc(pc);
-      end;
-      end;
+      SingleStep;
 
   except
     on E : EVariantError do
@@ -494,6 +524,18 @@ begin
     externalTrap := method;
 end;
 
+procedure setSignalTrap(method : GSignalTrap);
+begin
+  if (Assigned(method)) then
+    signalTrap := method;
+end;
+
+procedure setWaitTrap(method : GWaitTrap);
+begin
+  if (Assigned(method)) then
+    waitTrap := method;
+end;
+
 procedure registerExternalMethod(name : string; classAddr, methodAddr : pointer; signature : GSignature);
 var
 	meth : GExternalMethod;
@@ -513,6 +555,8 @@ begin
 
   setSystemTrap(dummySystemTrap);
   setExternalTrap(dummyExternalTrap);
+  setSignalTrap(dummySignalTrap);
+  setWaitTrap(dummyWaitTrap);
 
   codeCache := GHashTable.Create(1024);
   externalMethods := GHashTable.Create(256);

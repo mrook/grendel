@@ -19,6 +19,7 @@ const
 	SPECIAL_TRAP = 1;
 	SPECIAL_SLEEP = 2;
 	SPECIAL_WAIT = 3;
+	SPECIAL_SIGNAL = 4;
 
 
 type 	Root = class
@@ -115,6 +116,14 @@ type 	Root = class
 				spec : integer;
 				ex : Expr;
 			end;
+			
+			Expr_Loop = class(Expr)
+			  lStart : integer;
+			  init : Expr;
+			  ce : BoolExpr;
+			  step : Expr;
+			  body : Expr;
+			end;
 
 	
 			BoolExpr_Const = class(BoolExpr)
@@ -205,7 +214,7 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %token _AND _OR
 %token _RELGT _RELLT _RELGTE _RELLTE _RELEQ
 %token _RETURN _BREAK _CONTINUE
-%token _DO _SLEEP _WAIT _WHILE _FOR _REQUIRE
+%token _DO _SLEEP _WAIT _SIGNAL _WHILE _FOR _REQUIRE
 %token _VOID _BOOL _INT _FLOAT _STRING _EXTERNAL
 
 %%
@@ -249,9 +258,14 @@ statement	: { $$ := nil; }
 																														Expr_If($$).le := $5; Expr_If($$).re := nil; 
 																														Expr_If($$).lThen := labelNum; inc(labelNum); 
 																														Expr_If($$).lAfter := labelNum; inc(labelNum); }
-					| _DO expr ';'																		{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_TRAP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
-					| _SLEEP expr ';'																	{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_SLEEP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
-					| _WAIT expr ';'																	{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_WAIT; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
+  				| _FOR '('expr ';' boolexpr ';' expr ')' statement { $$ := Expr_Loop.Create; Expr_Loop($$).init := $3;
+  				                                                    $$.lineNum := yylineno; Expr_Loop($$).ce := $5;
+  				                                                    Expr_Loop($$).lStart := labelNum; inc(labelNum);
+  				                                                    Expr_Loop($$).step := $7; Expr_Loop($$).body := $9; }
+					| _DO expr ';'																		{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_TRAP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
+					| _SLEEP expr ';'																	{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_SLEEP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
+					| _WAIT expr ';'																	{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_WAIT; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
+					| _SIGNAL expr ';'																{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_SIGNAL; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
           | _ASM '{' asm_list '}'														{ $$ := $3; }
           | stop_statement																	{ $$ := $1; }
           | _REQUIRE '"' LINE '"'														{ $$ := nil;
@@ -799,6 +813,14 @@ begin
     Expr_Special(expr).ex := typeExpr(Expr_Special(expr).ex);
 
 		expr.typ := Expr_Special(expr).ex.typ;
+    end
+  else
+  if (expr is Expr_Loop) then
+    begin
+    Expr_Loop(expr).init := typeExpr(Expr_Loop(expr).init);
+    Expr_Loop(expr).ce := typeBoolExpr(Expr_Loop(expr).ce);
+    Expr_Loop(expr).step := typeExpr(Expr_Loop(expr).step);
+    Expr_Loop(expr).body := typeExpr(Expr_Loop(expr).body);
     end;
 end;
 
@@ -1038,6 +1060,14 @@ begin
         Result := Expr_If(expr).re;
       end;
     end
+  else
+  if (expr is Expr_Loop) then
+    begin
+    Expr_Loop(expr).init := optimizeExpr(Expr_Loop(expr).init);
+    Expr_Loop(expr).ce := optimizeBoolExpr(Expr_Loop(expr).ce);
+    Expr_Loop(expr).step := optimizeExpr(Expr_Loop(expr).step);
+    Expr_Loop(expr).body := optimizeExpr(Expr_Loop(expr).body);
+    end;
 end;
 
 procedure showBoolExpr(expr : BoolExpr);
@@ -1232,6 +1262,7 @@ begin
       SPECIAL_TRAP:   emit('TRAP');
       SPECIAL_SLEEP:	emit('SLEEP');
       SPECIAL_WAIT:		emit('WAIT');
+      SPECIAL_SIGNAL:	emit('SIGNAL');
     end;
     end
 	else
@@ -1246,6 +1277,18 @@ begin
 			CONV_BOOL_STRING : emit('BTOS');
 			CONV_FLOAT_STRING : emit('FTOS');
     end;
+    end
+  else
+  if (expr is Expr_Loop) then
+    begin
+    showExpr(Expr_Loop(Expr).init);
+
+    emit('L' + IntToStr(Expr_Loop(expr).lStart) + ':');
+
+    showExpr(Expr_Loop(Expr).body);
+    showExpr(Expr_Loop(Expr).step);
+    showBoolExpr(Expr_Loop(Expr).ce);
+    emit('JNZ L' + IntToStr(Expr_Loop(expr).lStart));
     end;
 end;
 
