@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.32 2001/08/11 22:02:04 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.33 2001/08/14 14:17:58 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -8,6 +8,9 @@ uses
 {$IFDEF WIN32}
     Winsock2,
     Windows,
+    {$IFNDEF CONSOLEBUILD}
+    Forms,
+    {$ENDIF}
 {$ENDIF}
 {$IFDEF LINUX}
     Libc,
@@ -59,7 +62,10 @@ type
     end;
 
 var
-   connection_list : GDLinkedList;
+  connection_list : GDLinkedList;
+  listenv4 : GSocket = nil;
+  listenv6 : GSocket = nil;
+
 
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
 function act_color(to_ch : GCharacter; acts, sep : string) : string;
@@ -69,48 +75,13 @@ procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharact
 
 function playername(from_ch, to_ch : GCharacter) : string;
 
+procedure gameLoop();
+
 implementation
 
-(* procedure parse_line(p : string);
-var a : word;
-    s1, s2 : string;
-begin
-  if (length(p) = 0) then
-    exit;
+uses
+  mudthread;
 
-  a := 1;
-
-  repeat
-    case p[a] of
-     #10: begin
-          if (p[a + 1] = #0) then
-            p[a] := #0
-          else
-            delete(p, a, 1);
-
-          dec(a);
-          end;
- #127,#8: begin
-          { if (a + 1 > (length(p) - 1)) then
-            s1 := ' '
-          else
-            s1 := @p[a + 1]; }
-
-          if (integer(a) - 1 >= 1) then
-            delete(p, a - 1, 1);
-
-          dec(a, 2);
-          end;
-    #255: begin { Telnet control character }
-          delete(p, a, 3);
-
-          dec(a);
-          end;
-    end;
-
-    inc(a);
-  until (a > length(p));
-end; *)
 
 // GConnection
 constructor GConnection.Create(sk : GSocket; thr : TThread);
@@ -664,6 +635,79 @@ wind:
      if (typ = TO_ROOM) or (typ = TO_NOTVICT) or (typ = TO_ALL) then
        node := node.next;
      end;
+end;
+
+procedure acceptConnection(list_sock : GSocket);
+var
+  ac : GSocket;
+begin
+  ac := list_sock.acceptConnection();
+  
+  ac.setNonBlocking();
+
+  if (boot_info.timer >= 0) then
+    begin
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is in the process of a reboot.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+    ac.Free();
+    end
+  else
+  if system_info.deny_newconns then
+    begin
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is refusing new connections.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+    ac.Free();
+    end
+  else
+  if (connection_list.getSize >= system_info.max_conns) then
+    begin
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is too busy to accept new connections.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+    ac.Free();
+    end
+  else
+    GGameThread.Create(ac, false, '');
+end;
+
+procedure gameLoop();
+begin
+{$IFDEF WIN32}
+  {$IFNDEF CONSOLEBUILD}
+  while (not Application.Terminated) do
+  {$ELSE}
+  while (true) do
+  {$ENDIF}
+{$ELSE}
+  while (true) do
+{$ENDIF}
+    begin
+    if (listenv4 <> nil) then
+      begin
+      if (listenv4.canRead()) then
+        acceptConnection(listenv4);
+      end;
+
+    if (listenv6 <> nil) then
+      begin
+      if (listenv6.canRead()) then
+        acceptConnection(listenv6);
+      end;
+
+    {$IFNDEF CONSOLEBUILD}
+    Application.ProcessMessages();
+    {$ENDIF}
+    
+    sleep(5);
+    end;
 end;
 
 begin

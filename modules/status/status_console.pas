@@ -39,6 +39,8 @@ begin
 end;
 
 initialization 
+  Application.Title := 'Grendel ' + version_number;
+
   consoleForm := TForm.Create(nil);
   consoleForm.Caption := version_info + ': Server console';
   consoleForm.Position := poScreenCenter;

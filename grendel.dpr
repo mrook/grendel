@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.54 2001/08/14 09:40:32 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.55 2001/08/14 14:17:57 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -48,7 +48,6 @@ uses
   Windows,
   Winsock2,
   {$IFNDEF CONSOLEBUILD}
-  Forms,
   systray,
   {$ENDIF}
 {$ENDIF}
@@ -84,9 +83,6 @@ const pipeName : pchar = '\\.\pipe\grendel';
 
 
 var
-  listenv4 : GSocket = nil;
-  listenv6 : GSocket = nil;
-
   old_exitproc : pointer;
 
 
@@ -572,79 +568,6 @@ begin
   end;
 end;
 
-procedure accept_connection(list_sock : GSocket);
-var
-  ac : GSocket;
-begin
-  ac := list_sock.acceptConnection();
-  
-  ac.setNonBlocking();
-
-  if (boot_info.timer >= 0) then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is in the process of a reboot.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  if system_info.deny_newconns then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is refusing new connections.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  if (connection_list.getSize >= system_info.max_conns) then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is too busy to accept new connections.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-    GGameThread.Create(ac, false, '');
-end;
-
-procedure game_loop;
-begin
-{$IFDEF WIN32}
-  {$IFNDEF CONSOLEBUILD}
-  while (not Application.Terminated) do
-  {$ELSE}
-  while (true) do
-  {$ENDIF}
-{$ELSE}
-  while (true) do
-{$ENDIF}
-    begin
-    if (listenv4 <> nil) then
-      begin
-      if (listenv4.canRead()) then
-        accept_connection(listenv4);
-      end;
-
-    if (listenv6 <> nil) then
-      begin
-      if (listenv6.canRead()) then
-        accept_connection(listenv6);
-      end;
-
-    {$IFNDEF CONSOLEBUILD}
-    Application.ProcessMessages();
-    {$ENDIF}
-    
-    sleep(5);
-    end;
-end;
-
 procedure from_copyover;
 {$IFDEF WIN32}
 var
@@ -751,13 +674,12 @@ begin
   {$IFDEF CONSOLEBUILD}
   SetConsoleCtrlHandler(@controlHandler, true);
   {$ELSE}
-  Application.Title := 'Grendel ' + version_number;
   registerSysTray();
   {$ENDIF}  
 {$ENDIF}
 
   try
-    game_loop();
+    gameLoop();
   except
     on E: EControlC do begin
                     grace_exit := true;
