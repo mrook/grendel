@@ -1,0 +1,930 @@
+procedure do_get(ch:GCharacter;param:string);
+var obj, obj_in :GObject;
+    arg,arg2:string;
+    node : GListNode;
+    counter : integer;
+begin
+  param:=one_argument(param,arg);
+  one_argument(param,arg2);
+
+  if (length(arg)=0) and (length(arg2) = 0) then
+    begin
+    ch.sendBuffer('Get what?'#13#10);
+    exit;
+    end;
+
+  if (arg = 'all') and (length(arg2) = 0) then
+    begin
+    if (ch.room.objects.getSize = 0) then
+      begin
+      ch.sendBuffer('There is nothing here.'#13#10);
+      exit;
+      end;
+
+    node := ch.room.objects.head;
+    while (node <> nil) do
+      begin
+      obj := node.element;
+
+      if (IS_SET(obj.flags,OBJ_NOPICKUP)) then
+        begin
+        ch.sendBuffer('You cannot pick that up.'#13#10);
+        node := node.next;
+        continue;
+        end;
+
+      act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
+      act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
+
+      if (obj.count > 1) then
+        obj.seperate;
+
+      if (obj.item_type=ITEM_MONEY) then
+        begin
+        inc(ch.gold, obj.value[1]);
+        obj.extract;
+        end
+      else
+        begin
+        obj.fromRoom;
+        obj.toChar(ch);
+        end;
+
+      node := node.next;
+      end;
+    exit;
+    end;
+
+  if (arg = 'all') and (length(arg2)<>0) then
+    begin
+    obj := ch.room.findObject(arg2);
+
+    if (obj = nil) then
+      begin
+      ch.sendBuffer('That is not here.'#13#10);
+      exit;
+      end;
+
+    if (obj.contents.getSize = 0) then
+      begin
+      act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR);
+      exit;
+      end;
+
+    repeat
+      node := obj.contents.tail;
+
+      obj_in := node.element;
+
+      act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
+      act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
+
+      obj.seperate;
+
+      if (obj_in.item_type=ITEM_MONEY) then
+        begin
+        inc(ch.gold,obj_in.value[1]);
+        obj_in.extract;
+        end
+      else
+        begin
+        obj_in.fromObject;
+        obj_in.toChar(ch);
+        end;
+    until (obj.contents.tail = nil);
+    exit;
+    end;
+
+  { Get <item> <container> - Nemesis }
+  if (length(arg) <> 0) and (length(arg2) <> 0) then
+    begin
+
+    obj := ch.room.findObject(arg2);
+
+    if (obj = nil) then
+      begin
+      ch.sendBuffer('That is not here.'#13#10);
+      exit;
+      end;
+
+    if (obj.contents.getSize = 0) then
+      begin
+      act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR);
+      exit;
+      end;
+
+    node := obj.contents.head;
+
+    counter := 0;
+
+    while (node <> nil) do
+      begin
+      obj_in := node.element;
+
+      if (pos(arg,obj_in.name) <> 0) then
+        begin
+        inc(counter);
+
+        act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
+        act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
+        obj_in.seperate;
+
+        if (obj_in.item_type = ITEM_MONEY) then
+          begin
+          inc(ch.gold,obj_in.value[1]);
+          obj_in.extract;
+          end
+        else
+          begin
+          obj_in.fromObject;
+          obj_in.toChar(ch);
+          end;
+        exit;
+        end;
+
+      node := node.next;
+      end;
+
+    if (counter = 0) then
+      begin
+      ch.sendBuffer( 'That is not in there.'#13#10);
+      exit;
+      end;
+    end;
+
+  if (length(arg2)=0) then
+    begin
+    obj:= ch.room.findObject(arg);
+    if (obj=nil) then
+      begin
+      ch.sendBuffer('That is not here.'#13#10);
+      exit;
+      end;
+
+    if IS_SET(obj.flags,OBJ_NOPICKUP) then
+      begin
+      ch.sendBuffer('You cannot pick that up.'#13#10);
+      exit;
+      end;
+
+    act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
+    act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
+
+    obj.seperate;
+
+    if (obj.item_type=ITEM_MONEY) then
+      begin
+      inc(ch.gold,obj.value[1]);
+      obj.extract;
+      end
+    else
+      begin
+      obj.fromRoom;
+      obj.toChar(ch);
+      end;
+    exit;
+    end;
+
+  ch.sendBuffer('Get what?'#13#10);
+end;
+
+procedure do_drop(ch:GCharacter;param:string);
+var obj:GObject;
+    node : GListNode;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer( 'Drop what?'#13#10);
+    end;
+
+  if (ch.objects.getSize = 0) then
+    begin
+    ch.sendBuffer( 'You move your arms around wildly, but nothing happens.'#13#10);
+    exit;
+    end;
+
+  // prevent trading in battlegrounds
+  if (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+    begin
+    ch.sendBuffer( 'That is not allowed here.'#13#10);
+    exit;
+    end;
+
+  if (param = 'all') then
+    begin
+    repeat
+      node := ch.objects.tail;
+
+      obj := node.element;
+
+      if IS_SET(obj.flags,OBJ_NODROP) then
+        ch.sendBuffer('You cannot drop that.'#13#10)
+      else
+        begin
+        act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
+
+        obj.seperate;
+        obj.fromChar;
+        obj.toRoom(ch.room);
+        end;
+    until (ch.objects.tail = nil);
+    end
+  else
+    begin
+    obj := ch.findInventory(param);
+
+    if obj=nil then
+      ch.sendBuffer('You move your arms around wildly, but nothing happens.'#13#10)
+    else
+    if IS_SET(obj.flags,OBJ_NODROP) then
+      ch.sendBuffer('You cannot drop that.'#13#10)
+    else
+      begin
+      act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
+      act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
+
+      obj.seperate;
+      obj.fromChar;
+      obj.toRoom(ch.room);
+      end;
+    end;
+end;
+
+procedure do_sacrifice(ch:GCharacter;param:string);
+var obj:GObject;
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Sacrifice what?'#13#10);
+    exit;
+    end;
+
+  one_argument(param, param);
+   
+  obj := ch.room.findObject(param);
+
+  if obj=nil then
+    ch.sendBuffer('That is not here.'#13#10)
+  else
+  if (IS_SET(obj.flags,OBJ_NOSAC)) and (not ch.IS_IMMORT) then
+    ch.sendBuffer('That is not a sacrificable object.'#13#10)
+  else
+    begin
+    obj.seperate;
+
+    act(AT_REPORT,'You nobly sacrifice $p$7 to the gods.',false,ch,obj,nil,TO_CHAR);
+    act(AT_REPORT,'$n nobly sacrifices $p$7 to the gods.',true,ch,obj,nil,TO_ROOM);
+
+    if (ch.level < 50) and (not ch.IS_NPC) then
+      begin
+      act(AT_REPORT,'You get 1 $6copper$7 coin on your bank for your donation.',false,ch,nil,nil,TO_CHAR);
+      inc(ch.player^.bankgold);
+      end;
+
+    obj.extract;
+    end;
+end;
+
+procedure do_wear(ch:GCharacter;param:string);
+var obj, lastobj : GObject;
+    node : GListNode;
+    weared : integer;
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Wear what?'#13#10);
+    exit;
+    end;
+
+  if (param = 'all') then
+    begin
+    if (ch.objects.getSize = 0) then
+      begin
+      ch.sendBuffer('You are not carrying anything!'#13#10);
+      exit;
+      end;
+
+    node := ch.objects.head;
+    weared := 0;
+
+    while (node <> nil) do
+      begin
+      obj := node.element;
+
+      if (obj.wear1>0) or (obj.wear2>0) then
+        begin
+        if (ch.equip(obj)) then
+          begin
+          inc(weared);
+          obj.fromChar;
+          end;
+        end;
+
+      node := node.next;
+      end;
+
+    if (weared = 0) then
+      ch.sendBuffer( 'You aren''t carrying anything that can be worn.'#13#10);
+    end
+  else
+    begin
+    obj := ch.findInventory(param);
+
+    if (obj = nil) then
+      begin
+      ch.sendBuffer('You are not carrying this object.'#13#10);
+      exit;
+      end;
+
+    if (obj.wear1=0) and (obj.wear2=0) then
+      begin
+      ch.sendBuffer('You cannot wear this object.'#13#10);
+      exit;
+      end;
+
+    if (ch.equip(obj)) then
+      obj.fromChar;
+    end;
+end;
+
+procedure do_remove(ch:GCharacter;param:string);
+var g:longint;
+    obj:GObject;
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Remove what?'#13#10);
+    exit;
+    end;
+
+  if (param = 'all') then
+    begin
+    for g:=1 to MAX_WEAR do
+     if ch.wear[g]<>nil then
+      begin
+      obj:=ch.wear[g];
+      if IS_SET(obj.flags,OBJ_NOREMOVE) then
+        act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
+      else
+        begin
+        act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
+
+        obj.toChar(ch);
+        ch.wear[g]:=nil;
+
+        ch.affectObject(obj, true);
+        end;
+      end;
+    end
+  else
+    begin
+    obj:=nil;
+    for g:=1 to MAX_WEAR do
+     if ch.wear[g]<>nil then
+      if pos(param,GObject(ch.wear[g]).short)<>0 then
+       begin
+       obj:=ch.wear[g];
+       break;
+       end;
+
+    if obj=nil then
+      ch.sendBuffer('You are not wearing this object.'#13#10)
+    else
+    if IS_SET(obj.flags,OBJ_NOREMOVE) then
+      act(AT_REPORT,'You cannot remove $p.',false,ch,obj,nil,TO_CHAR)
+    else
+      begin
+      act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
+      act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
+      obj.toChar(ch);
+      ch.wear[g]:=nil;
+
+      ch.affectObject(obj, true);
+      end;
+    end;
+end;
+
+procedure do_swap(ch:GCharacter;param:string);
+var x,y:GObject;
+begin
+  with ch do
+    begin
+    x:=wear[WEAR_LHAND];
+    y:=wear[WEAR_RHAND];
+    wear[WEAR_LHAND]:=y;
+    wear[WEAR_RHAND]:=x;
+    if (x=nil) and (y=nil) then
+      act(AT_REPORT,'Left hand, right hand, all hands!',false,ch,nil,nil,TO_CHAR)
+    else
+      begin
+      if y<>nil then
+        act(AT_REPORT,'You now hold $p in your left hand.',false,ch,y,nil,TO_CHAR);
+      if x<>nil then
+        act(AT_REPORT,'You now hold $p in your right hand.',false,ch,x,nil,TO_CHAR);
+      end;
+    end;
+end;
+
+procedure do_throw(ch:GCharacter;param:string);
+var obj:GObject;
+    vict:GCharacter;
+    dest:GRoom;
+    pexit:GExit;
+    dir,range:integer;
+    dam:integer;
+    sub:string;
+begin
+  if (length(param)=0) then
+    ch.sendBuffer('Throw <object> <direction> <range>'#13#10)
+  else
+  if ch.position=POS_BASHED then
+    ch.sendBuffer('You are bashed!'#13#10)
+  else
+    begin
+    param:=one_argument(param,sub);
+    obj := ch.findInventory(sub);
+    param:=one_argument(param,sub);
+    dir := findHeading(sub);
+
+    one_argument(param,sub);
+
+    try
+      range:=strtoint(sub);
+    except
+      ch.sendBuffer('You must type a valid number for the range.'#13#10);
+      exit;
+    end;
+
+    if obj=nil then
+      ch.sendBuffer('You are not carrying that!'#13#10)
+    else
+    if not IS_SET(obj.flags,OBJ_MISSILE) then
+      ch.sendBuffer('You cannot throw that!'#13#10)
+    else
+    if dir=-1 then
+      ch.sendBuffer('This direction does not exist.'#13#10)
+    else
+    if range>3 then
+      ch.sendBuffer('You cannot possibly throw that far!'#13#10)
+    else
+      begin
+      pexit := ch.room.findExit(dir);
+      if (pexit=nil) or (IS_SET(pexit.exit_FLAG,EX_SECRET)) then
+        begin
+        act(AT_REPORT,'You throw $p '+headings[dir]+
+            ', but notice the wall too late!'#13#10'OUCH! That hurts!',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n attempts to throw something, but notices the wall too late.',false,ch,nil,nil,TO_ROOM);
+        damage(ch,ch,25,TYPE_SILENT);
+        end
+      else
+      if (IS_SET(pexit.exit_flag,EX_CLOSED)) then
+        begin
+        act(AT_REPORT,'You throw $p '+headings[dir]+
+            ', but it rebounds off the door!'#13#10'OUCH! That hurts!',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n attempts to throw something, but it rebounds off the door.',false,ch,nil,nil,TO_ROOM);
+        damage(ch,ch,15,TYPE_SILENT);
+        end
+      else
+        begin
+        act(AT_REPORT,'You throw $p '+headings[dir]+'.',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n throws something '+headings[dir]+'.',false,ch,nil,nil,TO_ROOM);
+
+        obj.fromChar;
+
+        dest := findRoom(pexit.vnum);
+
+        vict := dest.findRandomChar;
+
+        obj.toRoom(dest);
+
+        if vict=nil then
+          act(AT_REPORT,'It doesn''t seem to have hit anything.',false,ch,nil,nil,TO_CHAR)
+        else
+          begin
+          dam:=rolldice(4,obj.weight div 10);
+          dam:=dam*UMin((range+1) div 3,1);
+          if (dam<10) then
+            begin
+            act(AT_REPORT,'$p hits $N right in $S face.',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'$p hits you right in your face!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'$p hits $n right in $s face.',false,vict,obj,ch,TO_ROOM);
+            end
+          else
+          if (dam<30) then
+            begin
+            act(AT_REPORT,'$N grimaces in pain as $p cuts $M open.',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'You grimace in pain as $p cuts you open!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'$n grimaces in pain as $p cuts $m open.',false,vict,obj,ch,TO_ROOM);
+            end
+          else
+          if (dam<50) then
+            begin
+            act(AT_REPORT,'$N cries out in agony as $p rips $S head apart!',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'You cry out in agony as $p rips your head apart!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'$n cries out in agony as $p rips $s head apart!',false,vict,obj,ch,TO_ROOM);
+            end
+          else
+          if (dam<70) then
+            begin
+            act(AT_REPORT,'As $p hits $M, $N is knocked to the floor!',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'As $p hits you, you are knocked to the floor!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'As $p hits $m, $n is knocked to the floor!',false,vict,obj,ch,TO_ROOM);
+            end
+          else
+          if (dam<90) then
+            begin
+            act(AT_REPORT,'$p inflicts heavy wounds and $N screams in pain!',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'$p inflicts heavy wounds and you scream in pain!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'$p inflicts heavy wounds and $n screams in pain!',false,vict,obj,ch,TO_ROOM);
+            end
+          else
+          if (dam<110) then
+            begin
+            act(AT_REPORT,'$p trashes $N''s body and pools of blood form on the ground!',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'$p trashes your body and pools of blood form on the ground!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'$p trashes $n''s body and pools of blood form on the ground!',false,vict,obj,ch,TO_ROOM);
+            end
+          else
+            begin
+            act(AT_REPORT,'$p smashes $N''s skull to little fragments!!',false,ch,obj,vict,TO_CHAR);
+            act(AT_REPORT,'$p smashes your skull to little fragments!!',false,vict,obj,ch,TO_CHAR);
+            act(AT_REPORT,'$p smashes $n''s skull to little fragments!',false,vict,obj,ch,TO_ROOM);
+            end;
+          damage(ch,vict,dam,TYPE_SILENT);
+          end;
+        end;
+      end;
+    end;
+end;
+
+procedure do_drink(ch:GCharacter;param:string);
+var obj:GObject;
+    liq:integer;
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Drink what?'#13#10);
+    exit;
+    end;
+
+  obj := ch.findInventory(param);
+
+  if (obj = nil) then
+    obj := ch.room.findObject(param);
+
+  if (obj = nil) then
+    begin
+    ch.sendBuffer('You cannot find that.'#13#10);
+    exit;
+    end;
+
+  obj.seperate;
+
+  if not (obj.item_type in [ITEM_DRINK,ITEM_FOUNTAIN]) then
+    ch.sendBuffer('You cannot drink that.'#13#10)
+  else
+  if (obj.item_type=ITEM_DRINK) and (obj.value[2]=0) then
+    act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR)
+  else
+  if (not ch.IS_NPC) and (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+    act(AT_REPORT,'Ow yeah? And spill your ruptured bladder all over the clean floor?',false,ch,nil,nil,TO_CHAR)
+  else
+   with obj do
+    begin
+    if item_type=ITEM_DRINK then
+      dec(value[2]);
+    liq:=value[3];
+    if (liq < LIQ_WATER) or (liq>=LIQ_MAX) then
+      begin
+      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name,
+                'This liquid type does not exist. Please check this object.');
+      exit;
+      end;
+
+    act(AT_REPORT,'You drink ' + liq_types[liq].name + ' from $p.',false,ch,obj,nil,TO_CHAR);
+    act(AT_REPORT,'$n drinks ' + liq_types[liq].name + ' from $p.',false,ch,obj,nil,TO_ROOM);
+
+    gain_condition(ch,COND_DRUNK,liq_types[liq].affect[COND_DRUNK]);
+    gain_condition(ch,COND_FULL,liq_types[liq].affect[COND_FULL]);
+    gain_condition(ch,COND_THIRST,liq_types[liq].affect[COND_THIRST]);
+    gain_condition(ch,COND_CAFFEINE,liq_types[liq].affect[COND_CAFFEINE]);
+
+    if (not ch.IS_NPC) then
+     if (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+      ch.sendBuffer('You are no longer thirsty.'#13#10);
+    end;
+end;
+
+procedure do_eat(ch:GCharacter;param:string);
+var obj:GObject;
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Eat what?'#13#10);
+    exit;
+    end;
+
+  obj := ch.findInventory(param);
+
+  if obj=nil then
+    ch.sendBuffer('You aren''t carrying that.'#13#10)
+  else
+  if (obj.item_type<>ITEM_FOOD) and (not ch.IS_IMMORT) then
+    ch.sendBuffer('You cannot eat that.'#13#10)
+  else
+  if (obj.item_type=ITEM_FOOD) and (obj.value[3]=0) then
+    act(AT_REPORT,'$p is no longer edible.',false,ch,obj,nil,TO_CHAR)
+  else
+  if (not ch.IS_NPC) and (ch.player^.condition[COND_FULL] > (MAX_COND - 15)) then
+    act(AT_REPORT,'Your stomach would not respond nicely when eating this!',false,ch,nil,nil,TO_CHAR)
+  else
+    begin
+    obj.seperate;
+
+    act(AT_REPORT,'You eat $p.',false,ch,obj,nil,TO_CHAR);
+    act(AT_REPORT,'$n eats $p.',false,ch,obj,nil,TO_ROOM);
+
+    if (obj.item_type=ITEM_FOOD) then
+      begin
+      gain_condition(ch,COND_FULL,25);
+
+      if (not ch.IS_NPC) then
+       if (ch.player^.condition[COND_FULL] > (MAX_COND - 15)) then
+        ch.sendBuffer('You are full.'#13#10);
+      end;
+
+    obj.fromChar;
+    obj.extract;
+    end;
+end;
+
+procedure do_scalp(ch:GCharacter;param:string);
+var corpse,scalp:GObject;
+    s_name:string;
+    h:integer;
+begin
+  if (length(param)=0) then
+    begin
+    ch.sendBuffer('Scalp what?'#13#10);
+    exit;
+    end;
+
+  if (ch.getWield(ITEM_WEAPON) = nil) then
+    begin
+    ch.sendBuffer('You cannot scalp without wielding a weapon.'#13#10);
+    exit;
+    end;
+
+  corpse := ch.room.findObject(param);
+
+  if (corpse=nil) then
+    begin
+    ch.sendBuffer('That is not here.'#13#10);
+    exit;
+    end;
+
+  if (corpse.item_type<>ITEM_CORPSE) then
+    begin
+    ch.sendBuffer('That is not a corpse.'#13#10);
+    exit;
+    end;
+
+  h:=pos('of',corpse.short);
+  if (h=0) then
+    begin
+    ch.sendBuffer('You cannot scalp that corpse.'#13#10);
+    exit;
+    end;
+
+  s_name := copy(corpse.short,h,length(corpse.short)-cardinal(h)+1);
+  s_name := stripl(s_name,'$');
+
+  scalp := GObject.Create;
+
+  with scalp do
+    begin
+    name := 'the head ' + s_name;
+    short := 'the head ' + s_name;
+    long := 'the head of a once famous warrior lays here';
+    item_type := ITEM_TRASH;
+    node_world := object_list.insertLast(scalp);
+    end;
+
+  with corpse do
+    begin
+    short := '$4the mutilated corpse ' + s_name + '$7';
+    long := '$4the mutilated corpse ' + s_name + ' is lying here$7';
+    end;
+
+  scalp.toChar(ch);
+  act(AT_REPORT,'You draw your weapon and rip off $p.',false,ch,scalp,nil,TO_CHAR);
+end;
+
+procedure do_give(ch:GCharacter;param:string);
+var arg,arg2:string;
+    obj:GObject;
+    vict:GCharacter;
+begin
+  param:=one_argument(param,arg);
+  one_argument(param,arg2);
+
+  if (length(arg)=0) or (length(arg2)=0) then
+    begin
+    ch.sendBuffer('Give what to whom?'#13#10);
+    exit;
+    end;
+
+  obj := ch.findInventory(arg);
+  vict := ch.room.findChar(ch,arg2);
+
+  if (obj=nil) then
+    begin
+    ch.sendBuffer('You are not carrying that.'#13#10);
+    exit;
+    end;
+
+  if (vict=nil) then
+    begin
+    ch.sendBuffer('They are not here.'#13#10);
+    exit;
+    end;
+
+  // prevent trading in battlegrounds
+  if (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+    begin
+    ch.sendBuffer( 'That is not allowed here.'#13#10);
+    exit;
+    end;
+
+  obj.seperate;
+  obj.fromChar;
+  obj.toChar(vict);
+
+  act(AT_REPORT,'You give $N $p.',false, ch, obj, vict, TO_CHAR);
+  act(AT_REPORT,'$n gives $N $p.',false, ch, obj, vict, TO_ROOM);
+end;
+
+{ Put objects into container - Nemesis }
+procedure do_put(ch:GCharacter;param:string);
+var obj, obj_in :GObject;
+    arg,arg2:string;
+    node : GListNode;
+    counter : integer;
+begin
+  param:=one_argument(param,arg);
+  one_argument(param,arg2);
+
+  if (length(arg) = 0) and (length(arg2) = 0) then
+    begin
+    ch.sendBuffer('Put what where?'#13#10);
+    exit;
+    end;
+
+  if (arg = 'all') and (length(arg2) <> 0) then
+    begin
+    obj_in := ch.room.findObject(arg2);
+
+    if (obj_in = nil) then
+      begin
+      ch.sendBuffer('That is not here.'#13#10);
+      exit;
+      end;
+
+    if (obj_in.item_type <> ITEM_CONTAINER) then
+      begin
+      ch.sendBuffer('That is not a container.'#13#10);
+      exit;
+      end;
+
+    if (ch.objects.tail <> nil) then
+      begin
+      repeat
+        node := ch.objects.tail;
+
+        obj := node.element;
+
+        inc(counter);
+
+        if IS_SET(obj.flags,OBJ_NODROP) then
+          ch.sendBuffer('You can''t put that anywhere.'#13#10)
+        else
+          begin
+          act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
+          act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
+
+          obj.seperate;
+          obj.fromChar;
+          obj.toObject(obj_in);
+          end;
+
+      until (ch.objects.tail = nil);
+      exit;
+      end
+    else
+      begin
+      ch.sendBuffer('You are not carrying anything.'#13#10);
+      exit;
+      end;
+    end
+  else
+    begin
+    obj_in := ch.room.findObject(arg2);
+    obj := ch.findInventory(arg);
+
+    if (obj = nil) then
+      begin
+      ch.sendBuffer('You don''t have that.'#13#10);
+      exit;
+      end;
+
+    if (obj_in = nil) then
+      begin
+      ch.sendBuffer('That is not here.'#13#10);
+      exit;
+      end;
+
+    if (obj_in.item_type <> ITEM_CONTAINER) then
+      begin
+      ch.sendBuffer('That is not a container.'#13#10);
+      exit;
+      end;
+
+    if IS_SET(obj.flags,OBJ_NODROP) then
+      ch.sendBuffer('You can''t put that anywhere.'#13#10)
+    else
+      begin
+      act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
+      act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
+
+      obj.seperate;
+      obj.fromChar;
+      obj.toObject(obj_in);
+      end;
+    end;
+end;
+
+{ Refill ITEM_DRINK with liquid type of fountain - Nemesis }
+procedure do_fill(ch:GCharacter;param:string);
+var obj, objsource : GObject;
+    counter, liq : integer;
+    node : GListNode;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Fill what?'#13#10);
+    exit;
+    end;
+
+  obj := ch.FindInventory(param);
+
+  if (obj = nil) then
+    begin
+    ch.sendBuffer('You don''t have that.'#13#10);
+    exit;
+    end;
+
+  if (obj.item_type <> ITEM_DRINK) then
+    begin
+    ch.sendBuffer('You cannot fill that.');
+    exit;
+    end;
+
+  if (ch.room.objects.getSize = 0) then
+    begin
+    ch.sendBuffer('You cannot fill that here.'#13#10);
+    exit;
+    end;
+
+  node := ch.room.objects.head;
+
+  while (node <> nil) do
+    begin
+
+    objsource := node.element;
+
+    if (objsource.item_type = ITEM_FOUNTAIN) then
+      begin
+      inc(counter);
+
+      liq := objsource.value[3];
+
+      obj.value[2] := obj.value[1];
+      obj.value[3] := objsource.value[3];
+
+      act(AT_REPORT,'You fill $p with ' + liq_types[liq].name + '.',false,ch,obj,nil,TO_CHAR);
+      act(AT_REPORT,'$n fills $p with ' + liq_types[liq].name + '.',false,ch,obj,nil,TO_ROOM);
+
+      exit;
+      end;
+
+    node := node.next;
+    end;
+
+  if (counter = 0) then
+    begin
+    ch.sendBuffer('You cannot fill that here.');
+    exit;
+    end;
+end;
