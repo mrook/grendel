@@ -936,13 +936,7 @@ begin
   obj := ch.findInventory(arg);
   vict := ch.room.findChar(ch,arg2);
 
-  if (obj = nil) then
-    begin
-    ch.sendBuffer('You are not carrying that.'#13#10);
-    exit;
-    end;
-
-  if (obj.wear_location = WEAR_NULL) then
+  if (obj = nil) or (obj.wear_location > WEAR_NULL) then
     begin
     ch.sendBuffer('You are not carrying that.'#13#10);
     exit;
