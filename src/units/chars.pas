@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.11 2004/03/13 15:45:21 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.12 2004/03/14 19:53:05 hemko Exp $
 }
 
 unit chars;
@@ -829,7 +829,10 @@ begin
       tele := GTeleport(iterator.next());
       
       if (tele.t_room = to_room) then
+        begin
+        iterator.Free();
         exit;
+        end;
       end;
       
     iterator.Free();
