@@ -1929,7 +1929,10 @@ begin
   with obj do
     case obj.item_type of
       ITEM_ARMOR: calcAC;
-      ITEM_LIGHT: ;
+      ITEM_LIGHT: if (remove) then
+                    dec(Self.room.light)
+                  else
+                    inc(Self.room.light);
       ITEM_GEM: if (remove) then
                   dec(point.max_mana, obj.value[3])
                 else
