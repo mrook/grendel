@@ -2,7 +2,7 @@
 	Summary:
 		NT Service main unit
 	
-	## $Id: servicemain.pas,v 1.3 2004/03/22 22:52:17 ***REMOVED*** Exp $
+	## $Id: servicemain.pas,v 1.4 2004/05/06 20:28:39 ***REMOVED*** Exp $
 }
 
 unit servicemain;
@@ -64,6 +64,8 @@ var
 begin
 	writeConsole('Grendel ' + version_number + ' ready...');
 
+	serverInstance.OnTick := serverTick;
+
 	shutdownType := serverInstance.gameLoop();
 
 	flushConnections();	
@@ -100,8 +102,6 @@ begin
 	cons.Free();
 
 	serverInstance := GServer.Create();
-	serverInstance.OnTick := serverTick;
-
 	serverInstance.init();
 
  	writeConsole('Running as NT service...');
