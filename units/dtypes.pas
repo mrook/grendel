@@ -1,6 +1,6 @@
 {
   @abstract(Collection of common datastructures)
-  @lastmod($Id: dtypes.pas,v 1.25 2002/08/03 19:13:56 ***REMOVED*** Exp $)
+  @lastmod($Id: dtypes.pas,v 1.26 2002/08/21 19:50:28 ***REMOVED*** Exp $)
 }
 
 unit dtypes;
@@ -97,6 +97,8 @@ type
 
       constructor Create(size : integer);
       destructor Destroy; override;
+
+      property item[key : variant] : TObject read get write put; default;
     end;
 
 const STR_HASH_SIZE = 1024;
