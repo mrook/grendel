@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.1 2001/07/28 20:53:27 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.2 2001/08/15 13:26:38 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -814,6 +814,7 @@ begin
     begin
     short := hash_string('$4the mutilated corpse ' + s_name + '$7');
     long := hash_string('$4the mutilated corpse ' + s_name + ' is lying here$7');
+    item_type := ITEM_TRASH;
     end;
 
   scalp.toChar(ch);
