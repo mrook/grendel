@@ -991,7 +991,7 @@ begin
         begin
         vch := ch.room.findRandomChar;
 
-        if (vch <> nil) then
+        if (vch <> nil) and (not vch.IS_NPC) then
           interpret(ch, 'kill ' + vch.name^);
         end;
       end;
