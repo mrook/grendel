@@ -1,102 +1,108 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.3 2004/02/11 20:03:25 ***REMOVED*** Exp $)
 }
 
 unit socket;
 
 interface
 
+
 uses
 {$IFDEF WIN32}
-  Winsock2;
+	Winsock2;
 {$ENDIF}
 {$IFDEF LINUX}
-  KernelIoctl,
-  Libc;
+	KernelIoctl,
+	Libc;
 {$ENDIF}
 
 type
 {$IFDEF LINUX}
-    TSockAddr = sockaddr;
-    TSockAddr6 = sockaddr_in6;
-    TSockAddr_Storage = sockaddr_storage;
+	TSockAddr = sockaddr;
+	TSockAddr6 = sockaddr_in6;
+	TSockAddr_Storage = sockaddr_storage;
 {$ENDIF}
+	
+	GSocket = class
+	private
+		af : integer;
+		fd : TSocket;
+		addr : TSockAddr_Storage;
+		rw_set, ex_set : TFDSet;
+		time : TTimeVal;
+		ip_string : string;
+		host_string : string;
 
-  GSocket = class
-  private
-    af : integer;
-    fd : TSocket;
-    addr : TSockAddr_Storage;
-    rw_set, ex_set : TFDSet;
-    time : TTimeVal;
-    
-  public
-    ip_string : string;
-    host_string : string;
-    
-    procedure resolve(lookup_hosts : boolean); 
-    procedure disconnect();
+	public
+		procedure resolve(lookup_hosts : boolean); 
+		procedure disconnect();
   
-    procedure openPort(port : integer); virtual;
+		procedure openPort(port : integer); virtual;
     
-    procedure setNonBlocking();
-    
-    function canRead() : boolean;
-    function canWrite() : boolean;
-    function read(var Buf; len : integer) : integer;
-    function send(s : string) : integer; overload;
-    function send(var s; len : integer) : integer; overload;
-    
-    function acceptConnection(lookup_hosts : boolean) : GSocket;
-    
-    function connect(remoteName : string; port : integer) : boolean;
-    
-    constructor Create(_af : integer; _fd : TSocket = -1);
-    destructor Destroy; override;
-    
-    property getDescriptor : TSocket read fd;
-    property socketAddress : TSockAddr_Storage read addr write addr;
-  end;
-  
-  GSocket4 = class(GSocket)
-  private
-    addrv4 : TSockAddrIn;
-    
-  public
-    constructor Create(); overload;
-    constructor Create(fd : TSocket); overload;
+		procedure setNonBlocking();
 
-    procedure openPort(port : integer); override;
-  end;
-  
-  GSocket6 = class(GSocket)
-  private
-    addrv6 : TSockAddr6;
-    ssv6 : TSockAddr_Storage;
-    addrv6p : PSockAddr;
-    
-  public
-    constructor Create(); overload;
-    constructor Create(fd : TSocket); overload;
+		function isValid() : boolean;
 
-    procedure openPort(port : integer); override;
-  end;
+		function canRead() : boolean;
+		function canWrite() : boolean;
+		function read(var Buf; len : integer) : integer;
+		function send(s : string) : integer; overload;
+		function send(var s; len : integer) : integer; overload;
+    
+		function acceptConnection(lookup_hosts : boolean) : GSocket;
+    
+		function connect(remoteName : string; port : integer) : boolean;
+    
+		constructor Create(_af : integer; _fd : TSocket = -1);
+		destructor Destroy; override;
+    
+		property getDescriptor : TSocket read fd;
+		property socketAddress : TSockAddr_Storage read addr write addr;
+		property hostString : string read host_string;
+		property ipString : string read ip_string;
+	end;
+  
+	GSocket4 = class(GSocket)
+	private
+		addrv4 : TSockAddrIn;
+    
+	public
+		constructor Create(); overload;
+		constructor Create(fd : TSocket); overload;
+
+		procedure openPort(port : integer); override;
+	end;
+  
+	GSocket6 = class(GSocket)
+	private
+		addrv6 : TSockAddr6;
+		ssv6 : TSockAddr_Storage;
+		addrv6p : PSockAddr;
+    
+	public
+		constructor Create(); overload;
+		constructor Create(fd : TSocket); overload;
+
+		procedure openPort(port : integer); override;
+	end;
 
 
 function isSupported(af : integer) : boolean;
-
 function createSocket(af : integer; fd : TSocket) : GSocket;
+
 
 implementation
 
+
 uses
-  SysUtils;
+	SysUtils;
+
 
 {$IFDEF WIN32}
 var
-   hWSAData : TWSAData;
-   ver : integer;
+	hWSAData : TWSAData;
+	ver : integer;
 {$ENDIF}
 
 
@@ -266,42 +272,53 @@ begin
     end;
 end;
 
+function GSocket.isValid() : boolean;
+begin
+	Result := (fd <> INVALID_SOCKET);
+end;
+
 function GSocket.canRead() : boolean;
 begin
-  Result := false;
+	Result := false;
   
-  FD_ZERO(rw_set);
-  FD_SET(fd, rw_set);
-  FD_ZERO(ex_set);
-  FD_SET(fd, ex_set);
+	FD_ZERO(rw_set);
+	FD_SET(fd, rw_set);
+	FD_ZERO(ex_set);
+	FD_SET(fd, ex_set);
 
-  time.tv_sec := 0;
-  time.tv_usec := 0;
+	time.tv_sec := 0;
+	time.tv_usec := 0;
 
-  if (select(fd + 1, @rw_set, nil, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
-    raise Exception.Create('Connection reset by peer');
+	if (select(fd + 1, @rw_set, nil, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
+		begin
+		fd := INVALID_SOCKET;
+		raise Exception.Create('Connection reset by peer');
+		end;
 
-  if (FD_ISSET(fd, rw_set)) then
-    Result := true;
+	if (FD_ISSET(fd, rw_set)) then
+		Result := true;
 end;
 
 function GSocket.canWrite() : boolean;
 begin
-  Result := false;
+	Result := false;
   
-  FD_ZERO(rw_set);
-  FD_SET(fd, rw_set);
-  FD_ZERO(ex_set);
-  FD_SET(fd, ex_set);
+	FD_ZERO(rw_set);
+	FD_SET(fd, rw_set);
+	FD_ZERO(ex_set);
+	FD_SET(fd, ex_set);
 
-  time.tv_sec := 0;
-  time.tv_usec := 0;
+	time.tv_sec := 0;
+	time.tv_usec := 0;
 
-  if (select(fd + 1, nil, @rw_set, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
-    raise Exception.Create('Connection reset by peer');
+	if (select(fd + 1, nil, @rw_set, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
+		begin
+		fd := INVALID_SOCKET;
+		raise Exception.Create('Connection reset by peer');
+		end;
 
-  if (FD_ISSET(fd, rw_set)) then
-    Result := true;
+	if (FD_ISSET(fd, rw_set)) then
+		Result := true;
 end;
 
 function GSocket.send(s : string) : integer;
@@ -311,39 +328,45 @@ end;
 
 function GSocket.send(var s; len : integer) : integer;
 var
-   res : integer;
+	res : integer;
 begin
-  res := 0;
+	res := 0;
   
-  if (len > 0) then
+	if (len > 0) then	
 {$IFDEF WIN32}
-    res := Winsock2.send(fd, s, len, 0);
+		res := Winsock2.send(fd, s, len, 0);
 {$ENDIF}
 {$IFDEF LINUX}
-    res := Libc.send(fd, s, len, 0);
+		res := Libc.send(fd, s, len, 0);
 {$ENDIF}
 
-  if (res = SOCKET_ERROR) then
-    raise Exception.Create('Connection reset by peer');
+	if (res = SOCKET_ERROR) then
+		begin
+		fd := INVALID_SOCKET;
+		raise Exception.Create('Connection reset by peer');
+		end;
     
-  Result := res;
+	Result := res;
 end;
 
 function GSocket.read(var buf; len : integer) : integer;
 var
 	res : integer;
 begin
-  res := recv(fd, buf, len, 0);
+	res := recv(fd, buf, len, 0);
   
-  if (res = SOCKET_ERROR) then
-    raise Exception.Create('Connection reset by peer');
+	if (res = SOCKET_ERROR) then
+		begin
+		fd := INVALID_SOCKET;
+		raise Exception.Create('Connection reset by peer');
+		end;
     
-  Result := res;
+	Result := res;
 end;
 
 procedure GSocket.setNonBlocking();
 var
-  x : integer;
+	x : integer;
 begin
 {$IFDEF WIN32}
 	x := 1;
