@@ -304,6 +304,7 @@ function: do_help
 
 #command
 name: inventory
+alias: i
 function: do_inventory
 position: 4
 #end
