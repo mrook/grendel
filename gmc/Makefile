@@ -4,7 +4,7 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.3 2003/10/30 17:19:00 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.4 2003/10/30 19:44:09 ***REMOVED*** Exp $
 #
 
 
@@ -27,6 +27,7 @@ endif
 
 ifdef LINUX
 DCC=dcc
+DCC_DEFS=CONSOLEBUILD
 
 GMCC=gmcc
 GASM=gasm

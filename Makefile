@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.6 2003/10/30 17:19:00 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.7 2003/10/30 19:44:08 ***REMOVED*** Exp $
 #
 
 
@@ -29,6 +29,7 @@ endif
 
 ifdef LINUX
 DCC=dcc
+DCC_DEFS=CONSOLEBUILD
 
 GRENDEL=grendel
 COPYOVER=copyover
