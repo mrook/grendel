@@ -3,9 +3,11 @@ unit mainform;
 interface
 
 uses
+	WSDLIGrendelWebService,
+	WSDLISOAPAuthenticator,
   SysUtils, Types, Classes, Variants, QTypes, QGraphics, QControls, QForms,
   QDialogs, QStdCtrls, QGrids, QComCtrls, QMenus,
-  area;
+  area, InvokeRegistry, Rio, SOAPHTTPClient, QExtCtrls;
 
 type
   TForm1 = class(TForm)
@@ -32,7 +34,6 @@ type
     Edit7: TEdit;
     GroupBox3: TGroupBox;
     Edit8: TEdit;
-    Label8: TLabel;
     Button2: TButton;
     MainMenu1: TMainMenu;
     File1: TMenuItem;
@@ -48,6 +49,21 @@ type
     Edit9: TEdit;
     Label11: TLabel;
     Memo1: TMemo;
+    GroupBox6: TGroupBox;
+    DebugMemo: TMemo;
+    Label8: TLabel;
+    Label12: TLabel;
+    Edit10: TEdit;
+    Edit11: TEdit;
+    Label13: TLabel;
+    Label14: TLabel;
+    Edit12: TEdit;
+    Timer1: TTimer;
+    GroupBox7: TGroupBox;
+    Button5: TButton;
+    TrackBar1: TTrackBar;
+    Label15: TLabel;
+    CheckBox1: TCheckBox;
     procedure Exit1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -56,9 +72,20 @@ type
       Rect: TRect; State: TGridDrawState);
     procedure DrawGrid1MouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
+    procedure Button2Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+    procedure CheckBox1Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private declarations }
+    
+    procedure connect();
+    procedure disconnect();
 
+    function getSOAPAuthenticator() : ISOAPAuthenticator;
+    function getGrendelWebService() : IGrendelWebService;
+
+    procedure updateConsole();
     procedure updateFromArea(area : GArea);
   public
     { Public declarations }
@@ -272,6 +299,113 @@ begin
   	begin
     GroupBox5.Visible := false;
     end;
+end;
+
+var
+  connected : boolean = false;
+  sessionHandle : WideString;
+  timestamp : integer;
+
+function TForm1.getSOAPAuthenticator() : ISOAPAuthenticator;
+begin
+  Result := getISOAPAuthenticator(False, 'http://' + Edit8.Text + ':' + Edit12.Text + '/soap/ISOAPAuthenticator')
+end;
+
+function TForm1.getGrendelWebService() : IGrendelWebService;
+begin
+  Result := getIGrendelWebService(False, 'http://' + Edit8.Text + ':' + Edit12.Text + '/soap/IGrendelWebService')
+end;
+
+procedure TForm1.connect();
+var
+	svc : ISOAPAuthenticator;
+begin
+	try
+		if (not connected) then
+			begin
+			svc := getSOAPAuthenticator();;
+
+   		connected := svc.login(Edit10.Text, Edit11.Text, sessionHandle);
+
+			if (connected) then
+				begin
+				Button2.Caption := 'Disconnect';
+				DebugMemo.Lines.Add('Login succesful (' + sessionHandle + '), connected');
+				end
+			else
+				DebugMemo.Lines.Add('Login unsuccesful');
+			end;
+	except
+		on E : Exception do
+			DebugMemo.Lines.Add(E.Message);
+	end;
+end;
+
+procedure TForm1.disconnect();
+var
+	svc : ISOAPAuthenticator;
+begin
+	try
+		svc := getSOAPAuthenticator();
+		
+		if (connected) then
+    	begin
+			svc.logout(sessionHandle);
+	    connected := false;
+      end;
+			
+		Button2.Caption := 'Connect';
+	except
+		on E : Exception do
+			DebugMemo.Lines.Add(E.Message);
+	end;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+	if (connected) then
+		disconnect()
+	else
+		connect();
+end;
+
+procedure TForm1.updateConsole();
+var
+	svc : IGrendelWebService;
+  strings : TStringArray;
+  idx : integer;
+begin
+	try
+		svc := getGrendelWebService();
+
+		strings := svc.getConsoleHistory(sessionHandle, timestamp);
+
+		for idx := Low(strings) to High(strings) do
+		DebugMemo.Lines.Add(strings[idx]);
+	except
+  		on E : Exception do
+  			begin
+  			disconnect();
+		  	DebugMemo.Lines.Add(E.Message);
+		  	end;
+	end;
+end;
+
+procedure TForm1.Button5Click(Sender: TObject);
+begin
+	if (connected) then
+		updateConsole();
+end;
+
+procedure TForm1.CheckBox1Click(Sender: TObject);
+begin
+  Timer1.Enabled := CheckBox1.Checked;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+	if (connected) then
+		updateConsole();
 end;
 
 end.

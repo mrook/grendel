@@ -2,7 +2,9 @@ program gman;
 
 uses
   QForms,
-  mainform in 'mainform.pas' {Form1};
+  mainform in 'mainform.pas' {Form1},
+  WSDLIGrendelWebService in 'WSDLIGrendelWebService.pas',
+  WSDLISOAPAuthenticator in 'WSDLISOAPAuthenticator.pas';
 
 {$R *.res}
 
