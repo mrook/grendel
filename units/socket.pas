@@ -84,8 +84,8 @@ uses
   dtypes,
   mudsystem;
 
-var
 {$IFDEF WIN32}
+var
    hWSAData : TWSAData;
    ver : integer;
 {$ENDIF}
@@ -123,8 +123,15 @@ begin
   freemem(prot, t);
 end;
 {$ELSE}
+var
+  fd : TSocket;
 begin
-  Result := true;
+  fd := Libc.socket(af, SOCK_STREAM, IPPROTO_TCP);
+
+  if (fd = INVALID_SOCKET) then
+    Result := false
+  else
+    Result := true;
 end;
 {$ENDIF}
 
