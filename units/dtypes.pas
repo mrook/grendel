@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.9 2001/04/16 17:24:00 xenon Exp $
+// $Id: dtypes.pas,v 1.10 2001/04/26 21:27:22 xenon Exp $
 
 unit dtypes;
 
@@ -100,15 +100,15 @@ function hash_string(src : PString) : PString; overload;
 
 procedure unhash_string(var src : PString);
 
-
 function defaultHash(size, prime : cardinal; key : string) : integer;
 function firstHash(size, prime : cardinal; key : string) : integer;
 
 implementation
 
+{$IFDEF Grendel}
 uses
     mudsystem;
-
+{$ENDIF}
 
 // GString
 constructor GString.Create(s : string);
@@ -641,7 +641,11 @@ end;
 
 procedure GException.show;
 begin
+{$IFDEF Grendel}
   write_console('Exception ' + Message + ' @ ' + e_location);
+{$ELSE}
+  writeln('Exception ' + Message + ' @ ' + e_location);
+{$ENDIF}
 end;
 
 begin

@@ -1,3 +1,5 @@
+// $Id: mudsystem.pas,v 1.18 2001/04/26 21:33:57 xenon Exp $
+
 unit mudsystem;
 
 interface
@@ -135,7 +137,8 @@ uses
     chars,
     area,
     fsys,
-    conns;
+    conns,
+    Channels;
 
 procedure write_direct(s : string);
 begin
@@ -151,7 +154,7 @@ begin
 
   writeln(s);
 
-  if (mud_booted) then
+  if (mud_booted and channels_loaded) then
     to_channel(nil, s + '$7',CHANNEL_LOG,AT_LOG);
 end;
 
@@ -599,12 +602,12 @@ begin
             buf := buf + ' $1is going TWICE to ';
 
           buf := buf + GCharacter(buyer).name^ + ' for ' + inttostr(bid) + ' coins.';
-          to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
+          to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
           end
         else
           begin
           buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] Anyone?$7 ' + cap(GObject(item).name^) + '$1 for ' + inttostr(start) + ' coins?';
-          to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
+          to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
           end;
         end;
       3:begin
@@ -614,7 +617,7 @@ begin
 
           buf := buf + ' $1has been SOLD to ' + GCharacter(buyer).name^ + ' for ' + inttostr(bid) + ' coins.';
 
-          to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
+          to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
 
           GObject(item).toChar(buyer);
 
@@ -628,7 +631,7 @@ begin
           begin
           buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] Due to lack of bidders, auction has been halted.';
 
-          to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
+          to_channel(GCharacter(seller),buf,CHANNEL_AUCTION,AT_REPORT);
 
           GObject(item).toChar(seller);
           end;

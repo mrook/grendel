@@ -75,7 +75,8 @@ implementation
 uses
     progs,
     timers,
-    update;
+    update,
+    Channels;
 
 procedure stopfighting(ch : GCharacter);
 var vict : GCharacter;
