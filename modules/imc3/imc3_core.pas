@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.20 2003/11/02 20:22:05 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.21 2003/11/02 20:41:27 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -695,6 +695,44 @@ begin
 	
 	if (pl <> nil) then
 		begin
+		if (pl.IS_INVIS) then
+			begin
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+			exit;
+			end;
+		
+		if ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_DENYFINGER)) or ((pl.fields['i3flag'] as GBitVector).isBitSet(I3_PRIVACY)) then
+			begin
+			sendError(packet.originator_mudname, packet.originator_username, 'unk-user', pl.name + ' is not accepting fingers.');
+			exit;
+			end;
+		
+		writeHeader('finger-reply', this_mud.name, '', packet.originator_mudname, packet.originator_username);
+		writeBuffer('"');
+		writeBuffer(escape(pl.name));
+		writeBuffer('","');
+		writeBuffer(escape(pl.name + ' ' + pl.title));
+		writeBuffer('","","');	
+		
+		// No email info in Grendel (yet)
+		writeBuffer('Not supported');
+		
+		writeBuffer('","');
+		writeBuffer('-1');
+		writeBuffer('",');
+		writeBuffer('-1');
+		writeBuffer(',"');
+		writeBuffer('[PRIVATE]');
+		writeBuffer('","');
+		
+		if (pl.IS_IMMORT) then
+			writeBuffer(imm_types[pl.level])
+		else
+			writeBuffer(pl.rank);
+			
+		writeBuffer('","Not supported",})'#13);
+		
+		sendPacket();
 		end
 	else
 		begin
