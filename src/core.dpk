@@ -1,7 +1,7 @@
 package core;
 
 {$R *.res}
-{$ALIGN ON}
+{$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
 {$DEBUGINFO ON}
@@ -23,53 +23,51 @@ package core;
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
 {$DESCRIPTION 'Grendel Core'}
-{$RUNONLY ON}
+{$RUNONLY}
 {$IMPLICITBUILD OFF}
 
 requires
-	vcl;
+  vcl;
 
 contains
-{$IFDEF WIN32}
-	WinSock2,
-	systray,
-{$ENDIF}
-	ansiio,
-	LibXmlParser,
-	RegExpr,
-	md5,
-	FastStrings,
-	FastStringFuncs,
-	area,
-	bulletinboard,
-	Channels,
-	chars,
-	commands,
-	clan,
-	clean,
-	conns,
-	constants,
-	dtypes,
-	fight,
-	fsys,
-	gasmdef,
-	gvm,
-	magic,
-	mudhelp,
-	mudsystem,
-	NameGen,
-	player,
-	progs,
-	race,
-	skills,
-	strip,
-	timers,
-	update,
-	util,
-	modules,
-	socket,
-	console,
-	events,
-	debug;
+  WinSock2,
+  systray,
+  ansiio,
+  LibXmlParser,
+  RegExpr,
+  md5,
+  FastStrings,
+  FastStringFuncs,
+  area,
+  bulletinboard,
+  Channels,
+  chars,
+  commands,
+  clan,
+  clean,
+  conns,
+  constants,
+  dtypes,
+  fight,
+  fsys,
+  gasmdef,
+  gvm,
+  magic,
+  mudhelp,
+  mudsystem,
+  NameGen,
+  player,
+  progs,
+  race,
+  skills,
+  strip,
+  timers,
+  update,
+  util,
+  modules,
+  socket,
+  console,
+  events,
+  debug;
 
 end.

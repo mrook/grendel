@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.9 2004/02/29 20:59:40 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.10 2004/03/04 19:13:01 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -419,27 +419,13 @@ begin
           if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
             writeConsole(ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
-//            time := GetTickCount;
-
           if (cmd.addarg0) then
             cmd.ptr(ch, cmdline + ' ' + param)
           else
             cmd.ptr(ch, param);
 
           ch.last_cmd := @cmd.ptr;
-
         except
-{            on E : EExternal do
-            begin
-            bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - External exception');
-            outputError(E);
-            end;
-
-          on E : Exception do
-            bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - ' + E.Message);
-
-          else
-            bugreport('interpret', 'mudthread.pas', ch.name + ':' + cmd.func_name + ' - Unknown exception'); }
         end;
         end;
       end
