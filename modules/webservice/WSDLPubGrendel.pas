@@ -8,7 +8,7 @@
 unit WSDLPubGrendel;
 
 // Modified ServiceName declaration for Grendel WebService
-// $Id: WSDLPubGrendel.pas,v 1.1 2003/09/25 17:52:47 ***REMOVED*** Exp $
+// $Id: WSDLPubGrendel.pas,v 1.2 2003/09/26 22:45:17 ***REMOVED*** Exp $
 
 interface
 
@@ -981,6 +981,7 @@ var
   Name: IXMLNameType;
   Description: IXMLDescriptionType;
   ServiceName: WideString;
+  
 begin
   CoInitialize(nil);
   try
@@ -1016,7 +1017,9 @@ begin
     Response.ContentType := sTextXML;
     Handled := True;
   finally
-    CoUninitialize;
+		// ** Ugly fix to workaround CoUnitialize bug
+		// ** This will probably destabilize things somewhere, but this is experimental anyway
+    // CoUninitialize;
   end;
 end;
 
