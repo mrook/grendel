@@ -61,6 +61,7 @@ contains
   timers in 'units\timers.pas',
   update in 'units\update.pas',
   util in 'units\util.pas',
+  modules in 'units\modules.pas',
   Winsock2 in 'units\winsock2.pas';
 
 end.

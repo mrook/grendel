@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.1 2001/07/28 20:53:26 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.2 2001/07/28 22:18:19 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -941,24 +941,25 @@ begin
   status:=GetHeapStatus;
   act(AT_REPORT,'Heap allocated:    ' + inttostr(status.totalallocated)+' byte(s)',false,ch,nil,nil,TO_CHAR);
 {$ENDIF}
+end;
 
-{$IFDEF LINUX}
-  assignfile(f,'grendel');
-{$ELSE}
-  assignfile(f,'grendel.exe');
-{$ENDIF}
-
-  {$I-}
-  filemode:=0;
-  reset(f,1);
-  {$I+}
-  if IOResult<>0 then
+procedure do_modules(ch : GCharacter; param : string);
+var
+  node : GListNode;
+  module : GModule;
+begin
+  node := module_list.head;
+  
+  ch.sendBuffer('Registered modules:'#13#10#13#10);
+  
+  while (node <> nil) do
     begin
-    act(AT_REPORT,'Could not find grendel.exe in active directory!',false,ch,nil,nil,TO_CHAR);
-    exit;
+    module := GModule(node.element);
+    
+    ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
+    
+    node := node.next;
     end;
-  act(AT_REPORT, 'Executable size:   '+inttostr(filesize(f)),false,ch,nil,nil,TO_CHAR);
-  close(f);
 end;
 
 procedure do_switch(ch:GCharacter;param:string);

@@ -37,6 +37,7 @@ uses
   md5,
   fight,
   bulletinboard,
+  modules,
   mudthread;
 
 { The complete quit procedure, which even logs off NPCs! - Grimlord }
@@ -847,4 +848,5 @@ begin
   registerCommand('do_coordgen', do_coordgen);
   registerCommand('do_findpath', do_findpath);
   registerCommand('do_reload', do_reload);
+  registerCommand('do_modules', do_modules);
 end.

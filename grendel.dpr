@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.41 2001/07/28 20:53:24 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.42 2001/07/28 22:18:18 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -80,7 +80,8 @@ uses
   Channels in 'units\Channels.pas',
   progs in 'units\progs.pas',
   gasmdef in 'gmc\gasmdef.pas',
-  gvm in 'gmc\gvm.pas';
+  gvm in 'gmc\gvm.pas',
+  modules in 'units\modules.pas';
 {$ENDIF}
 {$IFDEF LINUX}
   Libc,
@@ -113,7 +114,8 @@ uses
   Channels in 'units/Channels.pas',
   progs in 'units/progs.pas',
   gasmdef in 'gmc/gasmdef.pas',
-  gvm in 'gmc/gvm.pas';
+  gvm in 'gmc/gvm.pas',
+  modules in 'units/modules.pas';
 {$ENDIF}
 
 const pipeName : pchar = '\\.\pipe\grendel';
@@ -633,25 +635,6 @@ begin
     shutdown_mud;
 end;
 
-procedure load_modules();
-var 
-  t : TSearchRec;
-  hndl : HMODULE;
-begin
-   if (FindFirst('modules' + PathDelimiter + '*.bpl', faAnyFile, t) = 0) then
-    repeat
-      write_console('Loading module ' + t.name);
-      
-      try
-        hndl := LoadPackage('modules' + PathDelimiter + t.name);
-      except
-        bugreport('load_modules()', 'grendel.dpr', 'Unable to load module ' + t.name);
-      end;
-    until (FindNext(t) <> 0);
-
-//  FindClose(t);
-end;
-
 procedure bootServer();
 var
   s : string;
@@ -700,7 +683,7 @@ begin
     write_console('Loading noteboards...');
     load_notes('boards.dat');
     write_console('Loading modules...');
-    load_modules();
+    loadModules();
     write_console('Loading texts...');
     load_commands;
     load_socials;

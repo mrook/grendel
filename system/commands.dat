@@ -1007,6 +1007,13 @@ level: 990
 #end
 
 #command
+name: modules
+function: do_modules
+level: 1000
+position: 0
+#end
+
+#command
 name: log
 function: do_log
 level: 995
