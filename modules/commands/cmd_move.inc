@@ -434,7 +434,9 @@ var
 begin
   pexit := ch.room.findExit(direction);
 
-  if (pexit = nil) and ((ch.room.vnum >= GPlayer(ch).r_lo) and (ch.room.vnum <= GPlayer(ch).r_hi) and (ch.getTrust() > LEVEL_GOD) and (GPlayer(ch).area_fname <> '') and (GPlayer(ch).area <> nil)) then
+  if (pexit = nil) and ((ch.room.vnum >= GPlayer(ch).r_lo) and (ch.room.vnum <= GPlayer(ch).r_hi)
+        and (ch.getTrust() > LEVEL_GOD) and (GPlayer(ch).area_fname <> '') and (GPlayer(ch).area <> nil))
+        and (IS_SET(GPlayer(ch).cfg_flags, CFG_AUTOCREATE)) then
     begin
     interpret(ch, 'rclone ' + headings[direction]);
     

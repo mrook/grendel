@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.7 2001/10/19 17:27:46 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.8 2001/11/24 14:52:41 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1498,6 +1498,12 @@ begin
         hi_type('autopeek','You automatically peek someone when looking at him.')
       else
         lo_type('autopeek','You don''t automatically peek someone when looking at him.');
+
+      ch.sendBuffer(#13#10 + 'Immortal options:' + #13#10#13#10);
+      if IS_SET(cfg_flags,CFG_AUTOCREATE) then
+        hi_type('autocreate','You automatically create new rooms upon walking.')
+      else
+        lo_type('autocreate','You don''t automatically create new rooms upon walking.');
       end;
     end
   else
@@ -1541,6 +1547,9 @@ begin
     else
     if s='AUTOPEEK' then
       d:=CFG_AUTOPEEK
+    else
+    if s='AUTOCREATE' then
+      d:=CFG_AUTOCREATE
     else
       begin
       ch.sendBuffer('Unknown option.'#13#10);

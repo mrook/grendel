@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.42 2001/10/27 15:16:15 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.43 2001/11/24 14:52:42 xenon Exp $
 
 unit constants;
 
@@ -180,7 +180,7 @@ const AFF_BLIND = BV00;
       AFF_HIDE = BV11;
       AFF_SNEAK = BV12;
       AFF_ENCHANT = BV13;             { magical attacks }
-      AFF_FLYING = BV14;              
+      AFF_FLYING = BV14;
 
 { PC status flags}
 const PLR_NPC=BV00;
@@ -205,6 +205,7 @@ const CFG_ASSIST=BV01;
       CFG_ANSI=BV07;            { receive ansi }
       CFG_PAGER=BV08;           { see pager }
       CFG_AUTOPEEK = BV09;      { peek automatically on look }
+      CFG_AUTOCREATE = BV10;    { immflag: autocreate rooms when walking? }
 
 { NPC/PC flags }
 const ACT_AGGRESSIVE=BV02;      { aggressive NPC? }

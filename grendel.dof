@@ -40,13 +40,13 @@ ImageBase=4194304
 ExeDescription=
 [Directories]
 OutputDir=
-UnitOutputDir=G:\Development\Grendel\units
+UnitOutputDir=i:\Grendel\Grendel\units
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=gmc\
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;vclado50
 Conditionals=
-DebugSourceDirs=include\;G:\Development\Grendel\gmc\
+DebugSourceDirs=include\;i:\Grendel\Grendel\gmc\
 UsePackages=0
 [Parameters]
 RunParams=
