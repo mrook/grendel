@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.28 2004/04/03 19:08:13 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.29 2004/04/04 22:06:27 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -436,18 +436,6 @@ begin
 	{$ENDIF}
 end;
 
-{$IFDEF WIN32}
-{$IFDEF CONSOLEBUILD}
-function controlHandler(event : DWORD) : boolean;
-begin
-	Result := true;
-	SetConsoleCtrlHandler(@controlHandler, false);
-	
-	serverInstance.shutdown(SHUTDOWNTYPE_HALT, 0);
-end;
-{$ENDIF}
-{$ENDIF}
-
 { Our last hope, the ExitProc handler }
 procedure serverExitProc; far;
 var
@@ -501,6 +489,18 @@ var
 	tm : TDateTime;
 	cons : GConsole;
 	
+
+{$IFDEF WIN32}
+{$IFDEF CONSOLEBUILD}
+function controlHandler(event : DWORD) : boolean;
+begin
+	Result := true;
+	SetConsoleCtrlHandler(@controlHandler, false);
+	
+	serverInstance.shutdown(SHUTDOWNTYPE_HALT, 0);
+end;
+{$ENDIF}
+{$ENDIF}
 
 {$IFDEF LINUX}
 procedure handleSignal(signal : longint); cdecl;
