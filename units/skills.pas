@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.18 2001/07/28 21:35:37 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.19 2001/08/03 21:35:40 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -283,12 +283,14 @@ begin
 
         aff.duration := af.readInteger();
         num := 1;
-
-        while (not af.eol) and (af.readToken() = '{') do
+              
+        while (not af.eol) and (af.readToken = '{') do
           begin
           setLength(aff.modifiers, num);
+          
+          s := af.readToken();
 
-          aff.modifiers[num - 1].apply_type := findApply(af.readToken);
+          aff.modifiers[num - 1].apply_type := findApply(s);
 
           s := af.readToken();
 
@@ -304,7 +306,7 @@ begin
           aff.modifiers[num - 1].modifier := modif;
 
           s := af.readToken();
-
+          
           inc(num);
           end;
 
@@ -391,30 +393,30 @@ begin
       case (modifiers[a].apply_type) of
         APPLY_AFFECT: begin
                       REMOVE_BIT(ch.aff_flags, modif);
-                      exit;
+                      continue;
                       end;
         APPLY_REMOVE: begin
                       SET_BIT(ch.aff_flags, modif);
-                      exit;
+                      continue;
                       end;
-        APPLY_STRIPNAME: exit;
+        APPLY_STRIPNAME: continue;
       end;
 
       modif := -modif;
       end;
 
     case (modifiers[a].apply_type) of
-      APPLY_STR: ch.str := UMin(ch.str + modif, 100);
-      APPLY_DEX: ch.dex := UMin(ch.dex + modif, 100);
-      APPLY_INT: ch.int := UMin(ch.int + modif, 100);
-      APPLY_WIS: ch.wis := UMin(ch.wis + modif, 100);
-      APPLY_CON: ch.con := UMin(ch.con + modif, 100);
-      APPLY_HP: ch.hp := UMin(ch.hp + modif, ch.max_hp);
-      APPLY_MAX_HP: ch.max_hp := UMin(ch.max_hp + modif, 15000);
-      APPLY_MV: ch.mv := UMin(ch.mv + modif, ch.max_mv);
-      APPLY_MAX_MV: ch.max_mv := UMin(ch.max_mv + modif, 15000);
-      APPLY_MANA: ch.mana := UMin(ch.mana + modif, ch.max_mana);
-      APPLY_MAX_MANA: ch.max_mana := UMin(ch.max_mana + modif, 15000);
+      APPLY_STR: ch.str := ch.str + modif;
+      APPLY_DEX: ch.dex := ch.dex + modif;
+      APPLY_INT: ch.int := ch.int + modif;
+      APPLY_WIS: ch.wis := ch.wis + modif;
+      APPLY_CON: ch.con := ch.con + modif;
+      APPLY_HP: ch.hp := ch.hp + modif;
+      APPLY_MAX_HP: ch.max_hp := ch.max_hp + modif;
+      APPLY_MV: ch.mv := ch.mv + modif;
+      APPLY_MAX_MV: ch.max_mv := ch.max_mv + modif;
+      APPLY_MANA: ch.mana := ch.mana + modif;
+      APPLY_MAX_MANA: ch.max_mana := ch.max_mana + modif;
       APPLY_AC: begin
                 inc(ch.ac, modif);
                 ch.calcAC;

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.51 2001/08/01 15:38:27 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.52 2001/08/03 21:35:40 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1439,11 +1439,11 @@ begin
             a := right(a, '''');
             wear_msg := left(a, '''');
 
-            a := right(a, '''');
+            a := trim(right(a, ''''));
 
             duration := strtointdef(left(a, ' '), 0);
             len := 1;
-
+            
             while (pos('{', a) > 0) do
               begin
               a := trim(right(a, '{'));
@@ -1660,6 +1660,18 @@ begin
     exit;
   end;
 
+  // reset the character to a basic state (without affects) before writing
+  node := affects.head;
+
+  while (node <> nil) do
+    begin
+    aff := node.element;
+
+    aff.modify(Self, false);
+
+    node := node.next;
+    end;
+
   af.writeLine('#PLAYER');
   af.writeLine('User: ' + name^);
   af.writeLine('MD5-Password: ' + MD5Print(md5_password));
@@ -1758,13 +1770,13 @@ begin
 
     with aff do
       begin
-      af.writeString(name^ + ' ''' + wear_msg + ''' ');
+      af.writeString('''' + name^ + ''' ''' + wear_msg + ''' ');
       af.writeInteger(duration);
-
-      af.writeString(' {');
 
       for h := 0 to length(modifiers) - 1 do
         begin
+        af.writeString(' { ');
+        
         af.writeString(printApply(modifiers[h].apply_type) + ' ');
 
         case modifiers[h].apply_type of
@@ -1772,6 +1784,8 @@ begin
           else
             af.writeInteger(modifiers[h].modifier);
         end;
+        
+        af.writeString(' } ');
         end;
 
       af.writeLine('');
@@ -1830,6 +1844,18 @@ begin
   af.writeLine('#END');
 
   af.Free;
+
+  // re-apply affects to character
+  node := affects.head;
+
+  while (node <> nil) do
+    begin
+    aff := node.element;
+
+    aff.modify(Self, true);
+    
+    node := node.next;
+    end;
 
   save := true;
 end;
