@@ -17,12 +17,15 @@ type
       func : SPEC_FUNC;
       affect : GAffect;
 
+      prereqs : GDLinkedList;
+
       name : string;
       skill_type:integer;
       min_mana:integer;
       min_lvl:integer;
       beats:integer;
       target:integer;
+      sn : integer;
 
       dicenum,dicesize,diceadd:integer;
 
@@ -177,11 +180,16 @@ begin
   repeat
     repeat
       readln(f,s);
-    until (uppercase(s) = '#SKILL');
+    until (uppercase(s) = '#SKILL') or (eof(f));
+
+    if (eof(f)) then
+      break;
 
     skill := GSkill.Create;
 
     skill.affect := nil;
+    skill.prereqs := GDLinkedList.Create;
+    skill.sn := num_skills;
 
     with skill do
       repeat
@@ -265,7 +273,19 @@ begin
         end
       else
       if g='AFFECTS' then
-        process_affect(skill, num_skills, striprbeg(s,' '));
+        process_affect(skill, num_skills, striprbeg(s,' '))
+      else
+      if g='PREREQ' then
+        begin
+        a := striprbeg(s, ' ');
+        h := findSkill(a);
+
+        if (h >= 0) then
+          prereqs.insertLast(skill_table[h])
+        else
+          bugreport('load_skills', 'skills.pas', 'Could not find prereq skill ' + a,
+                    'The specified skill could not be found.');
+        end;
       until uppercase(s)='#END';
 
     skill_table[num_skills] := skill;
