@@ -79,9 +79,6 @@ type 	Root = class
         id : string;
       end;
 		
-			Expr_Commandline = class(Expr)
-			end;
-
       Expr_Assign = class(Expr)
         id, ex : Expr;
       end;
@@ -95,6 +92,11 @@ type 	Root = class
 				displ : integer;
 				body : Expr;
 				lStart : integer;
+      end;
+      
+      Expr_Return = class(Expr)
+				id : string;
+        ret : Expr;
       end;
 
 			Expr_Call = class(Expr)
@@ -243,9 +245,9 @@ statement_list	: { $$ := nil; }
 stop_statement  : { $$ := nil; }
 								| _BREAK ';'	{ $$ := nil; }
 								| _CONTINUE ';'	{ $$ := nil; }
-								| _RETURN ';'	{ $$ := nil; }
-								|	_RETURN expr ';'		{ $$ := $2; }
-								| _RETURN '(' expr ')' ';'	{ $$ := $3; }
+								| _RETURN ';'	{ $$ := Expr_Return.Create; Expr_Return($$).ret := nil; Expr_Return($$).lineNum := yylineno; Expr_Return($$).id := curFunction; }
+								|	_RETURN expr ';'		{ $$ := Expr_Return.Create; Expr_Return($$).ret := $2; Expr_Return($$).lineNum := yylineno; Expr_Return($$).id := curFunction; }
+								| _RETURN '(' expr ')' ';'	{ $$ := Expr_Return.Create; Expr_Return($$).ret := $3; Expr_Return($$).lineNum := yylineno; Expr_Return($$).id := curFunction; }
                 ;
 									
 basic : { $$ := nil; }
@@ -286,7 +288,7 @@ statement	: { $$ := nil; }
 
 parameter_specifiers 	: { $$ := nil; }
 											| parameter_specifier	{ $$ := $1; }
-											| parameter_specifiers ',' parameter_specifier { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $3; Expr_Seq($$).ex := $1; }
+											| parameter_specifiers ',' parameter_specifier { $$ := nil; }
 										 	;
  
 parameter_specifier  	:	type_specifier IDENTIFIER { $$ := nil; addEnvironment(yylineno, curFunction + ':' + varName, varType, -1, VARTYPE_PARAM); }
@@ -361,13 +363,6 @@ expr 	:  { $$ := nil; }
       |  '\"' LINE '\"'		{ $$ := Expr_String.Create; $$.lineNum := yylineno; Expr_String($$).value := varName; }
 		  |  varname '=' expr { if ($1 <> nil) then
 															begin
-															if ($1 is Expr_Commandline) then
-																begin
-																compilerError(yylineno, 'command line cannot be assigned to');
-																$$ := nil;
-																yyabort;
-																end;
-
 															$$ := Expr_Assign.Create; 
 															Expr_Assign($$).id := $1; 
 															Expr_Assign($$).ex := $3; 
@@ -405,13 +400,7 @@ funcname 	: IDENTIFIER		{ $$ := varName; }
 varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
 												varName := left(tmp, '.');
-														
-												if (varName = ':str0') then
-													begin
-													$$ := Expr_Commandline.Create;
-													$$.lineNum := yylineno; 
-													end
-												else
+
 												if (lookupEnv(varName) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
@@ -700,13 +689,28 @@ begin
     begin
     Expr_Func(expr).body := typeExpr(Expr_Func(expr).body);
 
-		t1 := lookupEnv(Expr_Func(expr).id).typ;
-   
-    if (t1 <> -1) then
-	    expr.typ := t1
-    else
-	    expr.typ := _VOID;
+		expr.typ := lookupEnv(Expr_Func(expr).id).typ;
 		end
+  else
+  if (expr is Expr_Return) then
+    begin
+		t1 := lookupEnv(Expr_Func(expr).id).typ;
+		
+		if (t1 = _VOID) then
+		  begin
+		  if (Expr_Return(expr).ret <> nil) then
+		    compilerError(expr.lineNum, 'can not assign return value to void function');
+		    
+		  end
+		else
+		  begin
+			Expr_Return(expr).ret := typeExpr(Expr_Return(expr).ret);
+  		t2 := Expr_Return(expr).ret.typ;
+		
+  		if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
+  		  Expr_Return(expr).ret := coerce(Expr_Return(expr).ret, t2, t1);
+      end;
+    end
   else
   if (expr is Expr_Call) then
     begin
@@ -726,9 +730,6 @@ begin
   else
   if (expr is Expr_External) then
     expr.typ := _EXTERNAL
-  else
-  if (expr is Expr_Commandline) then
-    expr.typ := _STRING
   else
   if (expr is Expr_String) then
     expr.typ := _STRING
@@ -982,6 +983,11 @@ begin
     Expr_Func(expr).body := optimizeExpr(Expr_Func(expr).body);
     end
   else
+  if (expr is Expr_Return) then
+    begin
+    Expr_Return(expr).ret := optimizeExpr(Expr_Return(expr).ret);
+    end
+  else
   if (expr is Expr_Assign) then
     begin
     Expr_Assign(expr).ex := optimizeExpr(Expr_Assign(expr).ex);
@@ -1125,9 +1131,6 @@ begin
   if (expr is Expr_ConstFloat) then
     emit('PUSHF ' + FloatToStr(Expr_ConstFloat(expr).value))
   else
-  if (expr is Expr_Commandline) then
-    emit('GETC')
-  else
   if (expr is Expr_String) then
     emit('PUSHS ' + Expr_String(expr).value)
   else
@@ -1212,6 +1215,11 @@ begin
   			
 			emit('RET');
 	    end;
+    end
+  else
+  if (expr is Expr_Return) then
+    begin
+    showExpr(Expr_Return(expr).ret);
     end
   else
   if (expr is Expr_Call) then
@@ -1362,7 +1370,7 @@ var
 
 begin
   DecimalSeparator := '.';
-  writeln('GMCC - Grendel MudC compiler v0.2'#13#10);
+  writeln('GMCC - GMC ''Elise'' compiler v0.3'#13#10);
 
   if (paramcount < 1) then
     begin

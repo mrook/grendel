@@ -312,10 +312,6 @@ begin
   try
     while (pc >= 0) and (pc < block.codeSize) do
     case ord(block.code[pc]) of
-      _GETC		: begin
-                push(cmdline);
-                inc(pc);
-                end;
       _ITOF   : begin
                 VarCast(v1, pop(), varSingle);
                 push(v1);

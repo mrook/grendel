@@ -405,7 +405,7 @@ var
   ofname : string;
 
 begin
-  writeln('GASM - Grendel Assembler v0.2'#13#10);
+  writeln('GASM - GMC ''Elise'' v0.3'#13#10);
   errors := false;
 
   if (paramcount < 1) then
