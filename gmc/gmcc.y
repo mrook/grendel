@@ -400,7 +400,7 @@ funcname 	: IDENTIFIER		{ $$ := varName; }
 varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
 												varName := left(tmp, '.');
-
+												
 												if (lookupEnv(varName) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
@@ -424,7 +424,7 @@ varname  : idlist    	{ varGlob := ':' + $1;
 													end
 												else
 													begin
-													compilerError(yylineno, 'undeclared identifier ' + right(varGlob, ':'));
+													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');
 													$$ := nil;
 													yyabort;
 													end; }
@@ -1173,9 +1173,9 @@ begin
         
         if (pos(Expr_Func(expr).id + ':', e.id) > 0) then
           begin
-          inc(num);
           if (e.varTyp = VARTYPE_PARAM) then
             begin
+            inc(num);
             e.displ := pdispl;
             dec(pdispl);
             end
