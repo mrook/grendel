@@ -1459,7 +1459,7 @@ begin
   Parse;
   SetLength(FLineNumbers, FLineNumbersCnt);
   SetLength(FProcNames, FProcNamesCnt);
-  FreeAndNil(FStream);
+//  FreeAndNil(FStream);
 end;
 
 //--------------------------------------------------------------------------------------------------
