@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.5 2003/10/17 16:34:41 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.6 2003/10/17 20:34:25 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -25,8 +25,14 @@ type
     	_state : integer;
       _ch : GPlayer;
       
+      _pagepoint : cardinal;
+      pagebuf : string;
+      pagecmd : char;
+      fcommand : boolean;
+      
       procedure OnOpenEvent();
       procedure OnInputEvent();
+      function OnTickEvent() : boolean;
       procedure OnOutputEvent();
       procedure OnCloseEvent();
 
@@ -37,8 +43,13 @@ type
       procedure setPagerInput(argument : string);
       procedure outputPager;
       
+      function findDualConnection(const name: string) : GPlayer;
+      procedure nanny(argument : string);
+      
     published
     	property state : integer read _state write _state;
+    	
+    	property pagepoint : cardinal read _pagepoint write _pagepoint;
     	
     	property ch: GPlayer read _ch write _ch;
 		end;
@@ -159,6 +170,7 @@ uses
 	fsys,
 	race,
 	mudsystem,
+	mudhelp,
 	clan,
 	bulletinboard,
 	Channels;
@@ -171,18 +183,46 @@ begin
 	
 	FOnOpen := OnOpenEvent;
 	FOnClose := OnCloseEvent;
+	FOnTick := OnTickEvent;
 	FOnInput := OnInputEvent;
 	FOnOutput := OnOutputEvent;
 	
 	state := CON_NAME;
+	
+	ch := GPlayer.Create(Self);
 end;
 
 procedure GPlayerConnection.OnOpenEvent();
+var
+  temp_buf : string;
 begin
-end;
+  //if (not copyover) then
+    begin
+    state := CON_NAME;
 
-procedure GPlayerConnection.OnInputEvent();
-begin
+    send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
+
+    temp_buf := AnsiColor(6,0) + #13#10;
+
+    temp_buf := temp_buf + version_info + ', ' + version_number + '.'#13#10;
+    temp_buf := temp_buf + version_copyright + '.';
+    temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
+
+    send(temp_buf);
+
+    send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
+    end
+{  else
+  	begin
+    conn.state := CON_MOTD;
+
+    conn.ch.setName(copyover_name);
+    conn.ch.load(copyover_name);
+    conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
+    conn.send('Copyover complete!'#13#10);
+
+    nanny(conn, '');
+    end; }
 end;
 
 procedure GPlayerConnection.OnCloseEvent();
@@ -209,16 +249,633 @@ begin
 		end;
 end;
 
+function GPlayerConnection.OnTickEvent() : boolean;
+begin
+	if (fcommand) then
+		begin
+		if (pagepoint <> 0) then
+			outputPager()
+		else
+			ch.emptyBuffer();
+		end;
+		
+	if (ch.wait > 0) then
+		Result := false
+	else
+		Result := true;
+end;
+
+procedure GPlayerConnection.OnInputEvent();
+var
+	cmdline : string;
+	i : integer;
+begin
+	cmdline := trim(comm_buf);
+
+	i := pos(#13, cmdline);
+	if (i <> 0) then
+		delete(cmdline, i, 1);
+
+	i := pos(#10, cmdline);
+	if (i <> 0) then
+		delete(cmdline, i, 1);
+
+	comm_buf := '';
+	fcommand := true;
+
+	if (pagepoint <> 0) then
+		setPagerInput(cmdline)
+	else
+		case state of
+			CON_PLAYING: begin
+									 if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
+										 begin
+										 ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
+										 ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
+										 exit;
+										 end;
+
+									 ch.in_command:=true;
+									 
+									 interpret(ch, cmdline);
+
+									 if (not ch.CHAR_DIED) then
+										 ch.in_command := false;
+									 end;
+			CON_EDIT_HANDLE: ch.editBuffer(cmdline);
+			CON_EDITING: ch.editBuffer(cmdline);
+			else
+				nanny(cmdline);
+		end;
+end;
+
 procedure GPlayerConnection.OnOutputEvent();
 begin
 	ch.sendPrompt();
 end;
 
+//jago : new func for finding if a new connection is from an already connected player
+function GPlayerConnection.findDualConnection(const name: string): GPlayer;
+var
+  iterator : GIterator;
+  dual: GPlayerConnection;
+begin
+  Result := nil;
+  iterator := connection_list.iterator();
+
+  while (iterator.hasNext()) do
+  	begin
+    dual := GPlayerConnection(iterator.next());
+
+    // is there another conn with exactly the same name?
+    if  (dual <> Self)  and (Assigned(dual)) and Assigned(dual.ch) and (lowercase(dual.ch.name) = lowercase(name)) then
+    	begin
+      Result := dual.ch;
+      exit;
+	    end;
+	  end;
+	  
+	iterator.Free();
+end;
+
+procedure GPlayerConnection.nanny(argument : string);
+var 
+	vict : GPlayer;
+	tmp : GCharacter;
+	iterator : GIterator;
+	race : GRace;
+	digest : MD5Digest;
+	h,top,x,temp:integer;
+	buf, pwd : string;
+begin
+  case state of
+        CON_NAME: begin
+                  pwd := one_argument(argument, argument);
+                  
+                  if (length(argument) = 0) then
+                    begin
+                    socket.send('Please enter your name: ');
+                    exit;
+                    end;
+
+                  if (uppercase(argument) = 'CREATE') then
+                    begin
+                    if (system_info.deny_newplayers) then
+                    begin
+                      socket.send(#13#10'Currently we do not accept new players. Please come back some other time.'#13#10#13#10);
+                      socket.send('Name: '); 
+                      exit;
+                    end
+                    else
+                    begin
+                      socket.send(#13#10'By what name do you wish to be known? ');
+                      state := CON_NEW_NAME;
+                      exit;
+                    end;
+                    end;
+                    
+                  if (isNameBanned(argument)) then
+                    begin;
+                    socket.send('Illegal name.'#13#10);
+                    socket.send('Please enter your name: ');
+                    exit;
+                    end;
+
+                  vict := findDualConnection(argument); // returns nil if player is not yet connected
+
+                  if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) and (cap(vict.name) = cap(argument)) then
+                    begin
+                    if (not MD5Match(MD5String(pwd), GPlayer(vict).md5_password)) then
+                      begin
+                      socket.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
+                      Terminate();
+                      end
+                    else
+                      begin
+                      GConnection(vict.conn).Terminate();
+
+                      while (not IS_SET(vict.flags, PLR_LINKLESS)) do;
+
+                      vict.conn := Self;
+                      ch := vict;
+                      REMOVE_BIT(ch.flags,PLR_LINKLESS);
+                      state := CON_PLAYING;
+                      ch.sendPrompt();
+                      end;
+
+                    exit;
+                    end;
+
+                  if (not ch.load(argument)) then
+                    begin
+                    socket.send(#13#10'Are you sure about that name?'#13#10'Name: ');
+                    exit;
+                    end;
+
+                  state:=CON_PASSWORD;
+                  socket.send('Password: ');
+                  end;
+    CON_PASSWORD: begin
+                  if (length(argument) = 0) then
+                    begin
+                    socket.send('Password: ');
+                    exit;
+                    end;
+
+                  if (not MD5Match(MD5String(argument), ch.md5_password)) then
+                    begin
+                    writeConsole('(' + inttostr(socket.getDescriptor) + ') Failed password');
+                    socket.send('Wrong password.'#13#10);
+                    socket.send('Password: ');
+                    exit;
+                    end;
+
+                  vict := findDualConnection( ch.name); // returns nil if player is not dual connected
+
+                  if (not Assigned(vict)) then
+                    vict := GPlayer(findPlayerWorldEx(nil, ch.name));
+
+                  if (vict <> nil) and (vict.conn = nil) then
+                    begin
+                    ch.Free;
+
+                    ch := vict;
+                    ch := vict;
+                    vict.conn := Self;
+
+                    ch.ld_timer := 0;
+
+                    socket.send('You have reconnected.'#13#10);
+                    act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
+                    REMOVE_BIT(ch.flags, PLR_LINKLESS);
+                    writeConsole('(' + inttostr(socket.getDescriptor) + ') ' + ch.name + ' has reconnected');
+
+                    ch.sendPrompt();
+                    state := CON_PLAYING;
+                    exit;
+                    end;
+
+                  if (ch.IS_IMMORT) then
+                    socket.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
+                  else
+                    socket.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
+
+                  socket.send('Press Enter.'#13#10);
+                  state := CON_MOTD;
+                  end;
+        CON_MOTD: begin
+                  socket.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name + ', to this MUD. May your stay be pleasant.'#13#10);
+
+                  with system_info do
+                    begin
+                    user_cur := connection_list.getSize;
+                    if (user_cur > user_high) then
+                      user_high := user_cur;
+                    end;
+
+                  ch.toRoom(ch.room);
+
+                  act(AT_WHITE, '$n enters through a magic portal.', true, ch, nil, nil, TO_ROOM);
+                  writeConsole('(' + inttostr(socket.getDescriptor) + ') '+ ch.name +' has logged in');
+
+                  ch.node_world := char_list.insertLast(ch);
+                  ch.logon_now := Now;
+
+                  if (ch.level = LEVEL_RULER) then
+                    interpret(ch, 'uptime')
+                  else
+                    ch.sendPrompt;
+
+                  state := CON_PLAYING;
+                  fcommand := true;
+                  end;
+    CON_NEW_NAME: begin
+                  if (length(argument) = 0) then
+                    begin
+                    socket.send('By what name do you wish to be known? ');
+                    exit;
+                    end;
+
+                  if (FileExists('players\' + argument + '.usr')) or (findDualConnection(argument) <> nil) then
+                    begin
+                    socket.send('That name is already used.'#13#10);
+                    socket.send('By what name do you wish to be known? ');
+                    exit;
+                    end;
+
+                  tmp := findPlayerWorldEx(nil, argument);
+                  
+                  if (isNameBanned(argument)) or (tmp <> nil) then
+                    begin
+                    send('That name cannot be used.'#13#10);
+                    send('By what name do you wish to be known? ');
+                    exit;
+                    end;
+
+                  if (length(argument) < 3) or (length(argument) > 15) then
+                    begin
+                    socket.send('Your name must be between 3 and 15 characters long.'#13#10);
+                    socket.send('By what name do you wish to be known? ');
+                    exit;
+                    end;
+
+                  ch.setName(cap(argument));
+                  state := CON_NEW_PASSWORD;
+                  socket.send(#13#10'Allright, '+ch.name+', choose a password: ');
+                  end;
+CON_NEW_PASSWORD: begin
+                  if (length(argument)=0) then
+                    begin
+                    socket.send('Choose a password: ');
+                    exit;
+                    end;
+
+                  ch.md5_password := MD5String(argument);
+                  state := CON_CHECK_PASSWORD;
+                  socket.send(#13#10'Please retype your password: ');
+                  end;
+CON_CHECK_PASSWORD: begin
+                    if (length(argument) = 0) then
+                      begin
+                      socket.send('Please retype your password: ');
+                      exit;
+                      end;
+
+                    if (not MD5Match(MD5String(argument), ch.md5_password)) then
+                      begin
+                      socket.send(#13#10'Password did not match!'#13#10'Choose a password: ');
+                      state := CON_NEW_PASSWORD;
+                      exit;
+                      end
+                    else
+                      begin
+                      state := CON_NEW_SEX;
+                      socket.send(#13#10'What sex do you wish to be (M/F/N): ');
+                      exit;
+                      end;
+                    end;
+     CON_NEW_SEX: begin
+                  if (length(argument) = 0) then
+                    begin
+                    socket.send('Choose a sex (M/F/N): ');
+                    exit;
+                    end;
+
+                  case upcase(argument[1]) of
+                    'M':ch.sex:=0;
+                    'F':ch.sex:=1;
+                    'N':ch.sex:=2;
+                  else
+                    begin
+                    socket.send('That is not a valid sex.'#13#10);
+                    socket.send('Choose a sex (M/F/N): ');
+                    exit;
+                    end;
+                  end;
+
+                  state:=CON_NEW_RACE;
+                  socket.send(#13#10'Available races: '#13#10#13#10);
+
+                  h:=1;
+                  iterator := raceList.iterator();
+
+                  while (iterator.hasNext()) do
+                    begin
+                    race := GRace(iterator.next());
+
+                    buf := '  ['+inttostr(h)+']  '+pad_string(race.name,15);
+
+                    if (race.def_alignment < 0) then
+                      buf := buf + ANSIColor(12,0) + '<- EVIL'+ANSIColor(7,0);
+
+                    buf := buf + #13#10;
+
+                    socket.send(buf);
+
+                    inc(h);
+                    end;
+                    
+                  iterator.Free();
+
+                  socket.send(#13#10'Choose a race: ');
+                  end;
+    CON_NEW_RACE: begin
+                  if (length(argument)=0) then
+                    begin
+                    socket.send(#13#10'Choose a race: ');
+                    exit;
+                    end;
+
+                  try
+                    x:=strtoint(argument);
+                  except
+                    x:=-1;
+                  end;
+
+                  race := nil;
+                  iterator := raceList.iterator();
+                  h := 1;
+
+                  while (iterator.hasNext()) do
+                    begin
+                    if (h = x) then
+                      begin
+                      race := GRace(iterator.next());
+                      break;
+                      end
+                    else
+                      iterator.next();
+
+                    inc(h);
+                    end;
+                    
+                  iterator.Free();
+
+                  if (race = nil) then
+                    begin
+                    socket.send('Not a valid race.'#13#10);
+
+                    h:=1;
+										iterator := raceList.iterator();
+
+										while (iterator.hasNext()) do
+											begin
+											race := GRace(iterator.next());
+
+                      buf := '  ['+inttostr(h)+']  '+pad_string(race.name,15);
+
+                      if (race.def_alignment < 0) then
+                        buf := buf + ANSIColor(12,0) + '<- EVIL'+ANSIColor(7,0);
+
+                      buf := buf + #13#10;
+
+                      socket.send(buf);
+
+                      inc(h);
+                      end;
+
+										iterator.Free();
+										
+                    socket.send(#13#10'Choose a race: ');
+                    exit;
+                    end;
+
+                  ch.race:=race;
+                  socket.send(race.description);
+                  socket.send('250 stat points will be randomly distributed over your five attributes.'#13#10);
+                  socket.send('It is impossible to get a lower or a higher total of stat points.'#13#10);
+
+                  with ch do
+                    begin
+                    top:=250;
+
+                    str:=URange(25,random(UMax(top,75))+ch.race.str_bonus,75);
+                    dec(top,str);
+
+                    con:=URange(25,random(UMax(top,75))+ch.race.con_bonus,75);
+                    dec(top,con);
+
+                    dex:=URange(25,random(UMax(top,75))+ch.race.dex_bonus,75);
+                    dec(top,dex);
+
+                    int:=URange(25,random(UMax(top,75))+ch.race.int_bonus,75);
+                    dec(top,int);
+
+                    wis:=URange(25,random(UMax(top,75))+ch.race.wis_bonus,75);
+                    dec(top,wis);
+
+                    while (top>0) do
+                      begin
+                      x:=random(5);
+
+                      case x of
+                        0:begin
+                          temp:=UMax(75-str,top);
+                          if (temp>0) then
+                            begin
+                            dec(top,temp);
+                            str := str + temp;
+                            end;
+                          end;
+                        1:begin
+                          temp:=UMax(75-con,top);
+                          if (temp>0) then
+                            begin
+                            dec(top,temp);
+                            con := con + temp;
+                            end;
+                          end;
+                        2:begin
+                          temp:=UMax(75-dex,top);
+                          if (temp>0) then
+                            begin
+                            dec(top,temp);
+                            dex := dex + temp;
+                            end;
+                          end;
+                        3:begin
+                          temp:=UMax(75-int,top);
+                          if (temp>0) then
+                            begin
+                            dec(top,temp);
+                            int := int + temp;
+                            end;
+                          end;
+                        4:begin
+                          temp:=UMax(75-wis,top);
+                          if (temp>0) then
+                            begin
+                            dec(top,temp);
+                            wis := wis + temp;
+                            end;
+                          end;
+                      end;
+                      end;
+
+                    top:=str+con+dex+int+wis;
+                    end;
+
+                  socket.send(#13#10'Your character statistics are: '#13#10#13#10);
+
+                  buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
+                         'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
+                         'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
+                         'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
+                         'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
+                  socket.send(buf);
+
+                  socket.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                  state:=CON_NEW_STATS;
+                  end;
+   CON_NEW_STATS: begin
+                  if (length(argument) =0) then
+                    begin
+                    socket.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                    exit;
+                    end;
+
+                  case (upcase(argument[1])) of
+                    'C':begin
+                        digest := ch.md5_password;
+
+                        ch.load(ch.name);
+                        ch.md5_password := digest;
+                        ch.save(ch.name);
+
+                        socket.send(#13#10'Thank you. You have completed your entry.'#13#10);
+
+                        socket.send(ch.ansiColor(2) + #13#10);
+
+                        if (ch.IS_IMMORT) then
+                          socket.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
+                        else
+                          socket.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
+
+                        socket.send('Press Enter.'#13#10);
+                        state:=CON_MOTD;
+                        end;
+                    'R':begin
+                        with ch do
+                          begin
+                          top:=250;
+
+                          str:=URange(25,random(UMax(top,75))+ch.race.str_bonus,75);
+                          dec(top,str);
+
+                          con:=URange(25,random(UMax(top,75))+ch.race.con_bonus,75);
+                          dec(top,con);
+
+                          dex:=URange(25,random(UMax(top,75))+ch.race.dex_bonus,75);
+                          dec(top,dex);
+
+                          int:=URange(25,random(UMax(top,75))+ch.race.int_bonus,75);
+                          dec(top,int);
+
+                          wis:=URange(25,random(UMax(top,75))+ch.race.wis_bonus,75);
+                          dec(top,wis);
+
+                          while (top>0) do
+                            begin
+                            x:=random(5);
+
+                            case x of
+                              0:begin
+                                temp:=UMax(75-str,top);
+                                if (temp>0) then
+                                  begin
+                                  dec(top,temp);
+                                  str := str + temp;
+                                  end;
+                                end;
+                              1:begin
+                                temp:=UMax(75-con,top);
+                                if (temp>0) then
+                                  begin
+                                  dec(top,temp);
+                                  con := con + temp;
+                                  end;
+                                end;
+                              2:begin
+                                temp:=UMax(75-dex,top);
+                                if (temp>0) then
+                                  begin
+                                  dec(top,temp);
+                                  dex := dex + temp;
+                                  end;
+                                end;
+                              3:begin
+                                temp:=UMax(75-int,top);
+                                if (temp>0) then
+                                  begin
+                                  dec(top,temp);
+                                  int := int + temp;
+                                  end;
+                                end;
+                              4:begin
+                                temp:=UMax(75-wis,top);
+                                if (temp>0) then
+                                  begin
+                                  dec(top,temp);
+                                  wis := wis + temp;
+                                  end;
+                                end;
+                            end;
+                            end;
+
+                          top:=str+con+dex+int+wis;
+                          end;
+
+                        socket.send(#13#10'Your character statistics are: '#13#10#13#10);
+
+                        buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
+                               'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
+                               'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
+                               'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
+                               'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
+                        socket.send(buf);
+
+                        socket.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                        end;
+                    'S':begin
+                        socket.send(#13#10'Very well, restarting.'#13#10);
+                        socket.send('By what name do you wish to be known?');
+                        state:=CON_NEW_NAME;
+                        end;
+                  else
+                    socket.send('Do you wish to (C)ontinue, (R)eroll or (S)art over? ');
+                    exit;
+                 end;
+                 end;
+    else
+      bugreport('nanny', 'mudthread.pas', 'illegal state ' + inttostr(state));
+  end;
+end;
+
 procedure GPlayerConnection.writePager(txt : string);
 begin
-  if (_pagepoint = 0) then
+  if (pagepoint = 0) then
     begin
-    _pagepoint := 1;
+    pagepoint := 1;
     pagecmd:=#0;
     end;
 
@@ -260,7 +917,7 @@ begin
     'r':lines:=-1-pclines;
     'q':begin
         c.sendPrompt;
-        _pagepoint := 0;
+        pagepoint := 0;
         pagebuf := '';
         exit;
         end;
@@ -268,19 +925,19 @@ begin
     lines:=0;
   end;
 
-  while (lines<0) and (_pagepoint >= 1) do
+  while (lines<0) and (pagepoint >= 1) do
     begin
-    if (pagebuf[_pagepoint] = #13) then
+    if (pagebuf[pagepoint] = #13) then
       inc(lines);
 
-    dec(_pagepoint);
+    pagepoint := pagepoint - 1;
     end;
 
-  if (_pagepoint < 1) then
-    _pagepoint := 1;
+  if (pagepoint < 1) then
+    pagepoint := 1;
 
   lines := 0;
-  last := _pagepoint;
+  last := pagepoint;
 
   while (lines < pclines) and (last <= length(pagebuf)) do
     begin
@@ -300,7 +957,7 @@ begin
     begin
     buf := copy(pagebuf, pagepoint, last - pagepoint);
     send(buf);
-    _pagepoint := last;
+    pagepoint := last;
     end;
 
   while (last <= length(pagebuf)) and (pagebuf[last] = ' ') do
@@ -308,7 +965,7 @@ begin
 
   if (last >= length(pagebuf)) then
     begin
-    _pagepoint := 0;
+    pagepoint := 0;
     c.sendPrompt;
     pagebuf := '';
     exit;
@@ -386,6 +1043,7 @@ begin
   hitroll := 50;
 
   position := POS_STANDING;
+  state := STATE_IDLE;
   bash_timer := -2;
   cast_timer := 0;
   bashing := -2;
@@ -396,8 +1054,6 @@ begin
   afk := false;
 
 	Self.conn := conn;
-  conn.state := STATE_IDLE;
-  conn.ch := Self;
 
   if (IS_GOOD) then
     room := findRoom(ROOM_VNUM_GOOD_PORTAL)
@@ -1665,22 +2321,20 @@ begin
     ansiColor := ansiio.ANSIColor(color, 0);
 end;
 
-procedure GPlayer.sendPrompt;
+procedure GPlayer.sendPrompt();
 var
    s, pr, buf : string;
-   c : GConnection;
    t : integer;
 begin
-  c := conn;
   if (not IS_NPC) then
     begin
     if (state = CON_EDITING) then
       begin
-      c.send('> ');
+      conn.send('> ');
       exit;
       end;
 
-    if (c.pagepoint > 0) then
+    if (conn.pagepoint > 0) then
      exit;
     end;
 
@@ -1704,23 +2358,23 @@ begin
     begin
     if (substate = SUB_SUBJECT) then
       begin
-      c.send(' ');
+      conn.send(' ');
       exit;
       end;
 
     if (state = CON_EDITING) then
       begin
-      c.send('> ');
+      conn.send('> ');
       exit;
       end;
 
     if (state = CON_EDIT_HANDLE) then
       begin
-      c.send(' ');
+      conn.send(' ');
       exit;
       end;
 
-    if (c.pagepoint > 0) then
+    if (conn.pagepoint > 0) then
       exit;
     end;
 
@@ -1792,10 +2446,10 @@ begin
     GConnection(snooped_by.conn).send(buf);
     end; }
 
-  if IS_SET(cfg_flags,CFG_BLANK) then
-    c.send(#13#10);
+  if (IS_SET(cfg_flags, CFG_BLANK)) then
+    conn.send(#13#10);
 
-  c.send(buf);
+  conn.send(buf);
 end;
 
 procedure GPlayer.die();

@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.72 2003/10/17 16:34:39 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.73 2003/10/17 20:34:24 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -690,21 +690,27 @@ begin
   if (not IS_AWAKE) then
     CAN_SEE := false;
 
-  if (room.IS_DARK) and (not IS_HOLYLIGHT) and (not IS_SET(aff_flags, AFF_INFRAVISION)) then
-    CAN_SEE := false;
+	if (target is GRoom) then
+		begin
+	  if (room.IS_DARK) and (not IS_HOLYLIGHT) and (not IS_SET(aff_flags, AFF_INFRAVISION)) then
+	    CAN_SEE := false;
+	  end;
 
-	vict := GCharacter(target);
+	if (target is GCharacter) then
+		begin
+		vict := GCharacter(target);
 
-	if (vict.IS_INVIS) and (not (IS_SET(aff_flags, AFF_DETECT_INVIS)
-	 or IS_IMMORT)) then
-		CAN_SEE:=false;
+		if (vict.IS_INVIS) and (not (IS_SET(aff_flags, AFF_DETECT_INVIS)
+		 or IS_IMMORT)) then
+			CAN_SEE:=false;
 
-	if (vict.IS_HIDDEN) and (not (IS_SET(aff_flags, AFF_DETECT_HIDDEN)
-	 or IS_IMMORT)) then
-		CAN_SEE := false;
+		if (vict.IS_HIDDEN) and (not (IS_SET(aff_flags, AFF_DETECT_HIDDEN)
+		 or IS_IMMORT)) then
+			CAN_SEE := false;
 
-{ TODO:	if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
-		CAN_SEE := false; }
+	{ TODO:	if (vict.IS_WIZINVIS) and (level < GPlayer(vict).wiz_level) then
+			CAN_SEE := false; }
+		end;
 
   if (IS_SET(aff_flags, AFF_BLIND)) then
     CAN_SEE := false;

@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.49 2003/10/17 12:39:56 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.50 2003/10/17 20:34:25 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -47,6 +47,9 @@ type
 		{ Called when GConnection.Execute() terminates }
 		GConnectionCloseEvent = procedure() of object;
 		
+		{ Called for every iteration in GConnection.Execute(), if return = false, rest of iteration is skipped }
+		GConnectionTickEvent = function() : boolean of object;
+		
 		{ Called when GConnection has one or more lines of input waiting }
 		GConnectionInputEvent = procedure() of object;
 		
@@ -61,8 +64,6 @@ type
 
       _idle : integer;
       
-      _fcommand : boolean;
-
       input_buf : string;
       _comm_buf : string;
       last_line : string;
@@ -70,15 +71,11 @@ type
 
       empty_busy : boolean;
 
-      pagebuf : string;
-      pagecmd : char;
-
-      _pagepoint : cardinal;
-
       _lastupdate : TDateTime;
       
       FOnOpen : GConnectionOpenEvent;
       FOnClose : GConnectionCloseEvent;
+      FOnTick : GConnectionTickEvent;
       FOnInput : GConnectionInputEvent;
       FOnOutput : GConnectionOutputEvent;
       
@@ -103,16 +100,14 @@ type
     	property socket : GSocket read _socket;
 
     	property idle : integer read _idle write _idle;
-    	property fcommand : boolean read _fcommand write _fcommand;
 
 			property comm_buf : string read _comm_buf write _comm_buf;
-    	
-    	property pagepoint : cardinal read _pagepoint;
-    	
+    	    	
     	property last_update : TDateTime read _lastupdate;
     	
     	property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
     	property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
+    	property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
     	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
     	property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
     end;
@@ -170,6 +165,9 @@ end;
 procedure GConnection.Execute();
 begin
   FreeOnTerminate := true;
+  
+  if (Assigned(FOnOpen)) then
+  	FOnOpen();
 
   writeConsole('(' + IntToStr(socket.getDescriptor) + ') New connection (' + socket.host_string + ')');
 
@@ -187,17 +185,23 @@ begin
   while (not Terminated) do
   	begin
   	_lastupdate := Now();
+  	
+		sleep(100);
+
+  	if (Assigned(FOnTick)) then
+  		if (not FOnTick()) then 
+  			continue; 
 
 		if (not Terminated) then
 			read();
 
-{		if (not Terminated) and (wait > 0) then
-			continue; }
-
 		if (not Terminated) then
 			readBuffer();
+			
+		if (Assigned(FOnInput)) and (length(comm_buf) > 0) then
+			FOnInput();
   	end;
-
+  	
 	if (Assigned(FOnClose)) then
 		FOnClose();
 end;
