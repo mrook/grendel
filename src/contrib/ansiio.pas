@@ -4,7 +4,7 @@
 		
 		Author:	Gayle Davis
 			
-	## $Id: ansiio.pas,v 1.2 2004/03/31 20:23:56 ***REMOVED*** Exp $
+	## $Id: ansiio.pas,v 1.3 2004/05/20 09:03:56 ***REMOVED*** Exp $
 }
 
 UNIT ansiio;
@@ -145,7 +145,7 @@ IMPLEMENTATION
          if Fg > 7 then
             Temp := Temp+'1;'
          else
-            Temp := Temp+'2;';
+            Temp := Temp+'0;';
          ANSIColor := Temp+FgStr+';'+BgStr+'m';
       END;
 
