@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.13 2004/06/25 14:53:09 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.14 2004/06/25 15:10:21 ***REMOVED*** Exp $
 #
 
 
@@ -27,7 +27,7 @@ WEBSERVICE=..\..\build\modules\webservice.bpl
 
 MODULES=$(COMMANDS) $(SPELLER) $(STATUS) $(IMC3)
 
-CORE_FILE=..\..\build\core.bpl
+CORE_FILE=..\..\build\bin\core.bpl
 
 ifeq ($(OS), Windows_NT)
 	RM=cmd /c del
@@ -48,8 +48,7 @@ WEBSERVICE=../../build/modules/bplwebservice.so
 
 MODULES=$(COMMANDS) $(SPELLER) $(IMC3)
 
-CORE_SYM=../core
-CORE_FILE=../bplcore.so
+CORE_FILE=../../build/bin/bplcore.so
 
 RM=rm -f
 endif

@@ -92,8 +92,8 @@ ExeDescription=Grendel Core
 [Directories]
 OutputDir=
 UnitOutputDir=..\build\units
-PackageDLLOutputDir=..\build
-PackageDCPOutputDir=..\build
+PackageDLLOutputDir=..\build\bin
+PackageDCPOutputDir=..\build\bin
 SearchPath=contrib;contrib\jcl;gmc;units
 Packages=
 Conditionals=

@@ -90,11 +90,11 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=..\build
+OutputDir=..\build\bin
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\build
+SearchPath=..\build\bin
 Packages=core
 Conditionals=
 DebugSourceDirs=

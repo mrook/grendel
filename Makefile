@@ -4,41 +4,36 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.25 2004/06/25 14:53:09 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.26 2004/06/25 15:10:21 ***REMOVED*** Exp $
 #
 
 
 ifeq ($(OSTYPE),linux-gnu)
 	LINUX=1
-	CP=cp
-	RM=rm
-	MD=mkdir
 else
 	WIN32=1
 ifeq ($(OS), Windows_NT)
-	RM=cmd /c del
 	RMDIR=cmd /c rmdir
 	CP=cmd /c copy
-	MD=cmd /c mkdir
+	IF=cmd /c if
 else
-	RM=del
 	RMDIR=rmdir
 	CP=copy
-	MD=mkdir
+	IF=if
 endif
 endif
 
 
 all:	
 ifdef WIN32
-	$(MD) 'build\bin'
-	$(MD) 'build\modules'
-	$(MD) 'build\units'
+	$(IF) not exist 'build\bin' mkdir 'build\bin'
+	$(IF) not exist 'build\modules' mkdir 'build\modules'
+	$(IF) not exist 'build\units' mkdir 'build\units'
 endif
 ifdef LINUX
-	$(MD) -p build/bin
-	$(MD) -p build/modules
-	$(MD) -p build/units
+	mkdir -p build/bin
+	mkdir -p build/modules
+	mkdir -p build/units
 endif
 	$(MAKE) -C src
 ifdef WIN32
@@ -48,13 +43,19 @@ ifdef WIN32
 	$(CP) 'build\modules\*' modules
 endif
 ifdef LINUX
-	$(CP) -r build/bin/* .
-	$(CP) -r build/modules/* modules
+	cp -r build/bin/* .
+	cp -r build/modules/* modules
 endif
 	
 
 clean:
 	$(MAKE) -C src clean
+ifdef WIN32
+	$(IF) exist build rmdir /Q /S build
+endif
+ifdef LINUX
+	rm -rf build
+endif
 
 test:
 	$(MAKE) -C src/tests test
