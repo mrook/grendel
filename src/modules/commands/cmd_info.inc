@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.4 2004/03/11 17:18:47 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.5 2004/03/21 21:16:33 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -913,6 +913,7 @@ begin
   if (comparestr('all',param) = 0) then
     begin
     iterator := char_list.iterator();
+
     while (iterator.hasNext()) do
       begin
       vict := GCharacter(iterator.next());
@@ -920,13 +921,13 @@ begin
       if (vict.master = ch) and (vict.leader <> ch) then
         begin
         vict.leader := ch;
-        act(AT_REPORT,'$N joins $n''s group.',false,ch,nil,vict,TO_ROOM);
+        act(AT_REPORT,'$N joins $n''s group.', false, ch, nil, vict, TO_NOTVICT);
         to_channel(ch, '$B$7[Group]: '+vict.name+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
         end;
       end;
+
     iterator.Free();
-    
-    ch.sendBuffer('Ok.'#13#10);
+    act(AT_REPORT, 'Ok.', false, ch, nil, nil, TO_CHAR);
     end
   else
     begin
@@ -968,6 +969,66 @@ begin
       to_channel(ch, '$B$7[Group]: '+vict.name+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
       end;
     end;
+end;
+
+procedure do_grouphand(ch : GCharacter; param : string);
+var
+	iterator : GIterator;
+	vict, leader : GCharacter;
+begin
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Hand the group to whom?'#13#10);
+		exit;
+		end;
+
+    if (ch.leader <> ch) then
+    	begin
+    	ch.sendBuffer('You''re not the groupleader!'#13#10);
+    	exit;
+    	end;
+    	
+    leader := findCharWorld(ch, param);
+    
+    if (leader = nil) then
+    	begin
+    	ch.sendBuffer('Can''t find that player.'#13#10);
+    	exit;
+    	end;
+    
+    if (leader = ch) then
+    	begin
+    	ch.sendBuffer('You already are the groupleader!'#13#10);
+    	exit;
+    	end;
+
+    if (leader.leader <> ch) then
+    	begin
+    	ch.sendBuffer('That player is not part of the group!'#13#10);
+    	exit;
+    	end;
+    		
+	iterator := char_list.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		vict := GCharacter(iterator.next());
+
+		if (vict.master = ch) and (vict.leader = ch) then
+			begin
+			vict.master := leader;
+			vict.leader := leader;
+			end;
+		end;
+		
+	ch.master := leader;
+	ch.leader := leader;
+		
+	iterator.Free();
+	
+	act(AT_REPORT, 'You hand your group to $N.', false, ch, nil, leader, TO_CHAR);
+	act(AT_REPORT, '$n hands $s group to $N.', false, ch, nil, leader, TO_ROOM);
+	to_channel(ch, '$B$7[Group]: '+leader.name+' is now the groupleader!', CHANNEL_GROUP, AT_WHITE);
 end;
 
 procedure do_follow(ch:GCharacter;param:string);

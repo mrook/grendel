@@ -2,7 +2,7 @@
 	Summary:
 		Main interface for commands module
 		
-	## $Id: cmd_main.pas,v 1.7 2004/03/17 00:19:32 ***REMOVED*** Exp $
+	## $Id: cmd_main.pas,v 1.8 2004/03/21 21:16:33 ***REMOVED*** Exp $
 }
 
 unit cmd_main;
@@ -888,6 +888,7 @@ begin
   registerCommand('do_lockpick', do_lockpick);
   registerCommand('do_commands', do_commands);
   registerCommand('do_compress', do_compress);
+  registerCommand('do_grouphand', do_grouphand);
 end;
 
 procedure GCommandsModule.unregisterModule();
@@ -1085,6 +1086,7 @@ begin
   unregisterCommand('do_lockpick');
   unregisterCommand('do_commands');
   unregisterCommand('do_compress');
+  unregisterCommand('do_grouphand');
 end;
 
 
