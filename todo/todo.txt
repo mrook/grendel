@@ -45,15 +45,14 @@ Grendel's TODO list with probable release date/version
           ROOM_NODROPALL, ROOM_NOTRADE etc.
 ! (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
       		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
+! (0.4.2) online suggest/pray history
 
 
 * (0.4.2) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 * (0.4.2) Better online construction (autocreate exit+room when moving),
           mobile create/edit, reset edit etc.
 * (0.4.2) expand tracking system
-- (0.4.2) better damage/xp system (more balanced)
 - (0.4.2) reloadarea command
-- (0.4.2) online suggest (pray) history
 - (0.4.2) abbreviation of clanname (3-4 chars) in who list (with toggle on/off)
 - (0.4.2) (optional) schools
 - (0.4.2) (optional) "real life" sleep - players need sleep to keep from falling 
@@ -74,11 +73,11 @@ Grendel's TODO list with probable release date/version
           associative array, possibly with trigger/callback
 - (0.5.0) IMC (intermud communication): both channels *and* noteboards
           (perhaps separate server for noteboard, or whatever)
+- (0.5.0) better damage/xp system (more balanced)
 
 
 l implementation of the mud sound protocol
 l clan competition for wps/pkillnum
-l online suggest (pray) history
 l more documentation!
 l general format for docs (docwrite-HOWTO something), both
   for HTML and plaintext docs
