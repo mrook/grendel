@@ -2,72 +2,56 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.6 2004/03/17 00:19:32 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.7 2004/03/18 09:56:22 ***REMOVED*** Exp $
 }
 
 unit console;
 
 interface
 
+
 uses
-  SysUtils,
-  Contnrs,
-  dtypes;
+	SysUtils,
+	Contnrs,
+	dtypes;
   
 
 type
-  GConsoleWriter = class
-  public
-    procedure write(timestamp : TDateTime; const text : string); virtual; abstract;
-  end;
+	GConsoleWriter = class
+	public
+		procedure write(timestamp : TDateTime; const text : string); virtual; abstract;
+	end;
   
-  GConsoleDefault = class(GConsoleWriter)
-  public
-    procedure write(timestamp : TDateTime; const text : string); override;
-  end;
+	GConsoleLogWriter = class(GConsoleWriter)
+	private
+		logFile : textfile;
 
-  GConsoleLogWriter = class(GConsoleWriter)
-  private
-	  logFile : textfile;
-  
-  public
-  	constructor Create();
-  	destructor Destroy(); override;
-  	
-    procedure write(timestamp : TDateTime; const text : string); override;
-  end;
-  
-  GConsoleHistoryElement = class
-  private
-  	_timestamp : TDateTime;
-  	_text : string;
-  	
-  public
-    property timestamp : TDateTime read _timestamp write _timestamp;
-    property text : string read _text write _text;
-  end;
-  
-  GConsole = class(GSingleton)
-  private
-  	writers : GDLinkedList;
-  	history : GDLinkedList;
-  	queue : GDLinkedList;
- 	
-  public
-  	constructor actualCreate(); override;
-  	destructor actualDestroy(); override;
-  	
-  published
-  	procedure write(const text : string);
-  	procedure poll();
-			
-  	procedure attachWriter(writer : GConsoleWriter);
-  	procedure detachWriter(writer : GConsoleWriter);
-  	
-  	procedure fetchHistory(callback : GConsoleWriter; max : integer = 0);
-  end;
+	public
+		constructor Create(moduleName : string);
+		destructor Destroy(); override;
+	
+		procedure write(timestamp : TDateTime; const text : string); override;
+	end;
 
+	GConsole = class(GSingleton)
+	private
+		writers : GDLinkedList;
+		history : GDLinkedList;
+		queue : GDLinkedList;
 
+	public
+		constructor actualCreate(); override;
+		destructor actualDestroy(); override;
+
+	published
+		procedure write(const text : string);
+		procedure poll();
+
+		procedure attachWriter(writer : GConsoleWriter);
+		procedure detachWriter(writer : GConsoleWriter);
+
+		procedure fetchHistory(callback : GConsoleWriter; max : integer = 0);
+	end;
 
   
 procedure writeConsole(const text : string);
@@ -82,6 +66,18 @@ uses
 	fsys,
 	server;
 
+
+type
+	GConsoleHistoryElement = class
+	private
+		_timestamp : TDateTime;
+		_text : string;
+
+	public
+		property timestamp : TDateTime read _timestamp write _timestamp;
+		property text : string read _text write _text;
+	end;
+  
 
 const
 	{ Maximum number of items in the console history }
@@ -216,55 +212,44 @@ begin
 end;
 
 
-{ Writes to stdout (if available) }
-procedure GConsoleDefault.write(timestamp : TDateTime; const text : string);
-begin
-{$IFDEF CONSOLEBUILD}
-  writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
-{$ENDIF}
-end;
-
 { GConsoleLogWriter constructor }
-constructor GConsoleLogWriter.Create();
+constructor GConsoleLogWriter.Create(moduleName : string);
 begin
 	inherited Create();
 
-  { open a standard log file, filename is given by current system time }
-  AssignFile(logFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
+	{ open a standard log file, filename is given by current system time }
+	AssignFile(logFile, translateFileName('logs\' + moduleName + '-' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
 
-  {$I-}
-  rewrite(logFile);
-  {$I+}
+	{$I-}
+	rewrite(logFile);
+	{$I+}
 
-  if (IOResult <> 0) then
-    writeConsole('Could not open logfile');
+	if (IOResult <> 0) then
+		writeConsole('Could not open logfile');
 end;
 
 { GConsoleLogWriter destructor }
 destructor GConsoleLogWriter.Destroy();
 begin
-  if (TTextRec(logfile).mode = fmOutput) then
-    CloseFile(LogFile);
-    
+	if (TTextRec(logfile).mode = fmOutput) then
+		CloseFile(LogFile);
+
 	inherited Destroy();
 end;
 
 { Writes to logfile }
 procedure GConsoleLogWriter.write(timestamp : TDateTime; const text : string);
 begin
-  if (TTextRec(logfile).mode = fmOutput) then
-    begin
-    system.writeln(logfile, '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] ' + text);
-    system.flush(logfile);
-    end;
+	if (TTextRec(logfile).mode = fmOutput) then
+		begin
+		system.writeln(logfile, '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] ' + text);
+		system.flush(logfile);
+		end;
 end;
 
 
 initialization
 	cons := GConsole.Create();
-	
-	cons.attachWriter(GConsoleDefault.Create());
-	cons.attachWriter(GConsoleLogWriter.Create());
 	
 finalization
 	FreeAndNil(cons);
