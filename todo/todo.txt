@@ -43,6 +43,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - practice sessions
 - modularized mud, pluggable objects (like timers, sets of commands, etc.)
 - spells: Mistform (walk thru doors, ethereal bla)
+- "real life" sleep - players need sleep to keep from falling down after 2 days,
+  some rooms (with beds) have better sleep ratios etc.
 
 
 l implementation of the mud sound protocol
@@ -54,3 +56,9 @@ l abbreviation of clanname (3-4 chars) in who list
 l mud police!
 l online suggest (pray) history
 
+
+
+-- not really code specific, but still open issues: --
+
+* general format for docs (docwrite-HOWTO something), both
+  for HTML and plaintext docs
