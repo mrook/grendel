@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.8 2001/08/01 15:37:08 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.9 2001/08/02 20:13:57 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -208,10 +208,10 @@ begin
   vict:=findcharworld(ch, vict_nm);
 
   if (vict = nil) then
-  begin
-    ch.sendBuffer('Couldn''t find that player online.');
+    begin
+    ch.sendBuffer('Couldn''t find that player online.'#13#10);
     exit;
-  end;
+    end;
   
   lev:=strtointdef(param, 0);
 
