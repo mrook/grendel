@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.69 2001/09/10 21:20:03 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.70 2001/10/04 16:00:59 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -322,6 +322,7 @@ begin
     while (node <> nil) do
       begin
       gc := GCommand(GHashValue(node.element).value);
+           
       if (cmdline = gc.name) or
          ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
          ((copy(cmdline, 1, length(gc.name)) = gc.name) and (length(cmdline) = 1))
@@ -535,7 +536,7 @@ begin
                   vict := findDualConnection(conn, ch.name^); // returns nil if player is not dual connected
 
                   if not Assigned(vict) then
-                    vict := findPlayerWorld(nil, ch.name^);
+                    vict := findPlayerWorldEx(nil, ch.name^);
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.60 2001/09/28 21:30:11 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.61 2001/10/04 16:00:58 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -319,6 +319,7 @@ var
 
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
 function findPlayerWorld(ch : GCharacter; name : string) : GPlayer;
+function findPlayerWorldEx(ch : GCharacter; name : string) : GPlayer;
 
 procedure cleanExtractedChars();
 
@@ -2773,6 +2774,48 @@ begin
     vict := GCharacter(iterator.next());
 
     if ((isName(vict.name^,name)) or (isName(vict.short^,name))) and (not vict.IS_NPC) then
+      begin    
+      if (ch <> nil) and (not ch.CAN_SEE(vict)) then
+        continue;
+
+      inc(count);
+
+      if (count = number) then
+        begin
+        Result := GPlayer(vict);
+        exit;
+        end;
+      end;
+    end;
+    
+  iterator.Free();
+end;
+
+function findPlayerWorldEx(ch : GCharacter; name : string) : GPlayer;
+var
+   iterator : GIterator;
+   vict : GCharacter;
+   number,count : integer;
+begin
+  Result := nil;
+
+  number := findNumber(name); // eg 2.char
+
+  if (uppercase(name) = 'SELF') and (not ch.IS_NPC) then
+    begin
+    Result := GPlayer(ch);
+    exit;
+    end;
+
+  count := 0;
+
+  iterator := char_list.iterator();
+
+  while (iterator.hasNext()) do
+    begin
+    vict := GCharacter(iterator.next());
+
+    if (lowercase(vict.name^) = lowercase(name)) and (not vict.IS_NPC) then
       begin    
       if (ch <> nil) and (not ch.CAN_SEE(vict)) then
         continue;
