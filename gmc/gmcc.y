@@ -10,11 +10,9 @@ uses YaccLib, LexLib, SysUtils, Classes, Strip, Windows;
 
 
 const
-  CONV_INT_FLOAT = 1;
-  CONV_FLOAT_INT = 2;
-	CONV_INT_STRING = 3;
-	CONV_BOOL_STRING = 4;
-	CONV_FLOAT_STRING = 5;
+  CONV_TO_INT = 1;
+  CONV_TO_FLOAT = 2;
+	CONV_TO_STRING = 3;
 	
 	SPECIAL_TRAP = 1;
 	SPECIAL_SLEEP = 2;
@@ -116,6 +114,11 @@ type 	Root = class
 				originaltyp : integer;	
 			end;
 			
+			Expr_Cast = class(expr)
+			  ex : Expr;
+			  desttype : integer;
+			end;
+			
 			Expr_Special = class(Expr)
 				spec : integer;
 				ex : Expr;
@@ -183,6 +186,7 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %token LINE
 %token <Integer> INT       /* constants */
 %token <Single> FLOAT      /* constants */
+%type <Integer> type_specifier
 %type <Expr> expr
 %type <Expr> stop_statement
 %type <Expr> function_definition
@@ -339,12 +343,12 @@ declarator			: IDENTIFIER		{ varName := curFunction + ':' + varName;
                                   else
                                     addEnvironment(yylineno, varName, varType, -1, VARTYPE_LOCAL); }
 
-type_specifier	: _VOID					{ varType := _VOID; }
-								| _INT					{ varType := _INT; }
-								| _BOOL					{ varType := _BOOL; }
-								| _FLOAT				{ varType := _FLOAT; }
-								| _STRING				{ varType := _STRING; }
-								| _EXTERNAL 		{ varType := _EXTERNAL; }
+type_specifier	: _VOID					{ varType := _VOID; $$ := _VOID; }
+								| _INT					{ varType := _INT; $$ := _INT; }
+								| _BOOL					{ varType := _BOOL; $$ := _BOOL; }
+								| _FLOAT				{ varType := _FLOAT; $$ := _FLOAT; }
+								| _STRING				{ varType := _STRING; $$ := _STRING; }
+								| _EXTERNAL 		{ varType := _EXTERNAL; $$ := _EXTERNAL; }
 								;
 
 expr 	:  { $$ := nil; }
@@ -361,6 +365,7 @@ expr 	:  { $$ := nil; }
 			|  INT             	{ $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := $1; }
 			|  FLOAT           	{ $$ := Expr_ConstFloat.Create; $$.lineNum := yylineno; Expr_ConstFloat($$).value := $1; }
       |  '\"' LINE '\"'		{ $$ := Expr_String.Create; $$.lineNum := yylineno; Expr_String($$).value := varName; }
+      | '(' type_specifier ')' expr { $$ := Expr_Cast.Create; $$.lineNum := yylineno; Expr_Cast($$).ex := $4; Expr_Cast($$).desttype := $2; }
 		  |  varname '=' expr { if ($1 <> nil) then
 															begin
 															$$ := Expr_Assign.Create; 
@@ -400,7 +405,15 @@ funcname 	: IDENTIFIER		{ $$ := varName; }
 varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
 												varName := left(tmp, '.');
-												
+																							
+												if (varName <> tmp) then
+                          begin
+													$$ := Expr_External.Create;
+													$$.lineNum := yylineno; 
+													Expr_External($$).id := varName;
+													Expr_External($$).assoc := right(tmp, '.');
+													end
+												else
 												if (lookupEnv(varName) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
@@ -413,14 +426,6 @@ varname  : idlist    	{ varGlob := ':' + $1;
 													$$ := Expr_Id.Create;
 													$$.lineNum := yylineno; 
 													Expr_Id($$).id := varGlob;
-													end
-												else
-												if (varName <> tmp) then
-                          begin
-													$$ := Expr_External.Create;
-													$$.lineNum := yylineno; 
-													Expr_External($$).id := varName;
-													Expr_External($$).assoc := right(tmp, '.');
 													end
 												else
 													begin
@@ -539,7 +544,7 @@ begin
     _VOID		: Result := 'void';
     _EXTERNAL : Result := 'external';
    
-    else Result := 'unknown';
+    else Result := 'unknown (' + IntToStr(typ) + ')';
   end;
 end;
 
@@ -547,52 +552,35 @@ function coerce(expr : Expr; src, dest: integer) : Expr;
 var
 	cn : Expr_Conv;
 begin
-  if (src = _INT) and (dest = _FLOAT) then
+  if ((src = _INT) or (src = _EXTERNAL)) and (dest = _FLOAT) then
     begin
     cn := Expr_Conv.Create;
 		cn.ex := expr;
-		cn.cnv := CONV_INT_FLOAT;
+		cn.cnv := CONV_TO_FLOAT;
 		cn.originaltyp := src;
+		cn.typ := _FLOAT;
 
 		Result := cn;
     end
   else
-  if (src = _FLOAT) and (dest = _INT) then
+  if ((src = _FLOAT) or (src = _EXTERNAL) or (src = _BOOL)) and (dest = _INT) then
     begin
     cn := Expr_Conv.Create;
 		cn.ex := expr;
-		cn.cnv := CONV_FLOAT_INT;
+		cn.cnv := CONV_TO_INT;
 		cn.originaltyp := src;
+		cn.typ := _INT;
 
 		Result := cn;
     end
   else
-  if (src = _INT) and (dest = _STRING) then
+  if ((src = _INT) or (src = _FLOAT) or (src = _EXTERNAL) or (src = _BOOL)) and (dest = _STRING) then
     begin
     cn := Expr_Conv.Create;
 		cn.ex := expr;
-		cn.cnv := CONV_INT_STRING;
+		cn.cnv := CONV_TO_STRING;
 		cn.originaltyp := src;
-
-		Result := cn;
-    end
-  else
-  if (src = _BOOL) and (dest = _STRING) then
-    begin
-    cn := Expr_Conv.Create;
-		cn.ex := expr;
-		cn.cnv := CONV_BOOL_STRING;
-		cn.originaltyp := src;
-
-		Result := cn;
-    end
-  else
-  if (src = _FLOAT) and (dest = _STRING) then
-    begin
-    cn := Expr_Conv.Create;
-		cn.ex := expr;
-		cn.cnv := CONV_FLOAT_STRING;
-		cn.originaltyp := src;
+		cn.typ := _STRING;
 
 		Result := cn;
     end
@@ -654,7 +642,7 @@ begin
 		t2 := BoolExpr_Rel(expr).re.typ;
 
     if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
-    compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(t1) + ''' to ''' + typeToString(t2) + '''');
+      compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(t1) + ''' to ''' + typeToString(t2) + '''');
 
     expr.typ := _BOOL;
     end;
@@ -678,7 +666,7 @@ begin
 
 		t1 := Expr_Op(expr).le.typ;
 		t2 := Expr_Op(expr).re.typ;
-
+		
     if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
       Expr_Op(expr).re := coerce(Expr_Op(expr).re, t2, t1);
 
@@ -798,6 +786,17 @@ begin
     Expr_Loop(expr).ce := typeBoolExpr(Expr_Loop(expr).ce);
     Expr_Loop(expr).step := typeExpr(Expr_Loop(expr).step);
     Expr_Loop(expr).body := typeExpr(Expr_Loop(expr).body);
+    end
+  else
+  if (expr is Expr_Cast) then
+    begin
+    Expr_Cast(expr).ex := typeExpr(Expr_Cast(expr).ex);
+    
+    t1 := Expr_Cast(expr).ex.typ;
+
+    Result := coerce(Expr_Cast(expr).ex, t1, Expr_Cast(expr).desttype);
+    
+    Expr_Cast(expr).Free;
     end;
 end;
 
@@ -1003,7 +1002,7 @@ begin
     Expr_Conv(expr).ex := optimizeExpr(Expr_Conv(expr).ex);
 
 		case Expr_Conv(expr).cnv of
-			CONV_INT_FLOAT : if (Expr_Conv(expr).ex is Expr_ConstInt) then
+ 			 CONV_TO_FLOAT : if (Expr_Conv(expr).ex is Expr_ConstInt) then
                          begin
                          Result := Expr_ConstFloat.Create;
                          Expr_ConstFloat(Result).value := Expr_ConstInt(Expr_Conv(expr).ex).value;
@@ -1011,7 +1010,7 @@ begin
         								 Expr_Conv(expr).ex.Free;
         								 expr.Free;
                          end;
-			CONV_FLOAT_INT : if (Expr_Conv(expr).ex is Expr_ConstFloat) then
+  			 CONV_TO_INT : if (Expr_Conv(expr).ex is Expr_ConstFloat) then
                          begin
                          Result := Expr_ConstInt.Create;
                          Expr_ConstInt(Result).value := trunc(Expr_ConstFloat(Expr_Conv(expr).ex).value);
@@ -1310,11 +1309,9 @@ begin
     showExpr(Expr_Conv(expr).ex);
 
 		case Expr_Conv(expr).cnv of
-			CONV_INT_FLOAT : emit('ITOF');
-			CONV_FLOAT_INT : emit('FTOI');
-			CONV_INT_STRING : emit('ITOS');
-			CONV_BOOL_STRING : emit('BTOS');
-			CONV_FLOAT_STRING : emit('FTOS');
+			CONV_TO_INT : emit('TOI');
+			CONV_TO_FLOAT : emit('TOF');
+			CONV_TO_STRING : emit('TOS');
     end;
     end
   else

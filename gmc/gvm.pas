@@ -312,25 +312,17 @@ begin
   try
     while (pc >= 0) and (pc < block.codeSize) do
     case ord(block.code[pc]) of
-      _ITOF   : begin
+      _TOF    : begin
                 VarCast(v1, pop(), varSingle);
                 push(v1);
                 inc(pc);
                 end;
-      _FTOI   : begin
+      _TOI    : begin
                 VarCast(v1, pop(), varInteger);
                 push(v1);
                 inc(pc);
                 end;
-      _ITOS		: begin
-                push(IntToStr(pop()));
-                inc(pc);
-                end;
-      _BTOS		: begin
-                push(IntToStr(pop()));
-                inc(pc);
-                end;
-      _FTOS   : begin
+      _TOS    : begin
                 VarCast(v1, pop(), varString);
                 push(v1);
                 inc(pc);

@@ -45,11 +45,9 @@ const
 	_POPR = $B6;
   _GET = $B7;
 
-  _ITOF = $D0;
-  _FTOI = $D1;
-	_ITOS = $D2;
-	_BTOS = $D3;
-	_FTOS = $D4;
+  _TOF = $D0;
+  _TOI = $D1;
+	_TOS = $D2;
 	
 	_PUSHBP = $E0;
 	_POPBP = $E1;
@@ -59,7 +57,7 @@ const
 	_SUBSP = $E5;
 	_MTSD = $E6;
 
-  opcodeNum = 43;
+  opcodeNum = 41;
 	
 	opcodes : array[1..opcodeNum] of opcode_trans = (
                                                 (keyword:'NOP'; opcode:_NOP),
@@ -98,11 +96,9 @@ const
 																								(keyword:'POPR'; opcode:_POPR),
                                                 (keyword:'GET'; opcode:_GET),
 
-																								(keyword:'ITOF'; opcode:_ITOF),
-																								(keyword:'FTOI'; opcode:_FTOI),
-																								(keyword:'ITOS'; opcode:_ITOS),
-																								(keyword:'BTOS'; opcode:_BTOS),
-																								(keyword:'FTOS'; opcode:_FTOS),
+																								(keyword:'TOF'; opcode:_TOF),
+																								(keyword:'TOI'; opcode:_TOI),
+																								(keyword:'TOS'; opcode:_TOS),
 
 																								(keyword:'PUSHBP'; opcode:_PUSHBP),
 																								(keyword:'POPBP'; opcode:_POPBP),
