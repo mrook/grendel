@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.28 2004/03/30 19:54:04 hemko Exp $
+	## $Id: player.pas,v 1.29 2004/03/31 22:05:50 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -266,6 +266,7 @@ uses
 	timers,
 	console,
 	util,
+	debug,
 	strip,
 	commands,
 	skills,
@@ -300,19 +301,17 @@ begin
 	FOnTick := OnTickEvent;
 	FOnInput := OnInputEvent;
 	FOnOutput := OnOutputEvent;
-	
+
 	state := CON_STATE_NAME;
-	
+
 	ch := GPlayer.Create(Self);
 
 	node := connection_list.insertLast(Self);
-  
+
 	copyover := from_copyover;
 	Self.copyover_name := copyover_name;
-  
+
 	commandQueue := TStringList.Create();
-	
-	Resume();
 end;
 
 { GPlayerConnection destructor }
@@ -3073,6 +3072,7 @@ end;
 procedure acceptConnection(list_socket : GSocket);
 var
   ac : GSocket;
+  conn : GPlayerConnection;
 begin
   ac := list_socket.acceptConnection(system_info.lookup_hosts);
   
@@ -3119,7 +3119,10 @@ begin
     ac.Free();
     end
   else
-  	GPlayerConnection.Create(ac, false, '');
+  	begin
+  	conn := GPlayerConnection.Create(ac, false, '');
+  	conn.Resume();
+  	end;
 end;
 
 procedure initPlayers();
