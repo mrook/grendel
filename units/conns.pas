@@ -290,7 +290,7 @@ end;
 procedure GConnection.readBuffer;
 var i, j : integer;
 begin
-  if (length(comm_buf) <> 0) or (pos(#13#10, input_buf) = 0) then
+  if (length(comm_buf) <> 0) or (pos(#10, input_buf) = 0) then
     exit;
 
   i := 1;
