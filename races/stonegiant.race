@@ -11,8 +11,8 @@ Save_cold:      12
 Save_para:      14
 Save_breath:    15
 Save_spell:     16
-Skillslots:     10
-Spellslots:     10
+Skillslots:     25
+Spellslots:     35
 Description:
 Stone-Giants were always known for their incredible strength and stamina.
 They were also one of the first races to join the High-Elves in the War
