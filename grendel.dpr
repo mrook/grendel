@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.72 2003/10/02 08:22:45 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.73 2003/10/02 15:53:23 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -206,12 +206,9 @@ begin
 	listenv6.Free();
 	listenv6 := nil;
 
+	writeConsole('Cleanup complete.');
+
 	cleanupConsole();
-
-	writeDirect('Cleanup complete.');
-
-  if (TTextRec(logfile).mode = fmOutput) then
-    CloseFile(LogFile);
 end;
 
 procedure reboot_mud;
@@ -442,26 +439,17 @@ procedure bootServer();
 var
   s : string;
 begin
-  { open a standard log file, filename is given by current system time }
-  AssignFile(LogFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
+	initConsole();
+	
+  writeConsole(version_info + ', ' + version_number + '.');
+  writeConsole(version_copyright + '.');
 
-  {$I-}
-  rewrite(LogFile);
-  {$I+}
-
-  if (IOResult <> 0) then
-    writeDirect('NOTE: Could not open logfile. Messages are not being logged.');
-
-  writeDirect(version_info + ', ' + version_number + '.');
-  writeDirect(version_copyright + '.');
-
-	writeDirect('Initializing memory pool...');
+	writeConsole('Initializing memory pool...');
 	init_progs();
 	initClans();
 	initCommands();
 	initConns();
 	initHelp();
-	initConsole();
 	initChannels();
 	initChars();
 	initSkills();

@@ -9,6 +9,7 @@ implementation
 uses
   Windows,
   StdCtrls,
+  SysUtils,
   Graphics,
   Forms,
   console,
@@ -29,7 +30,7 @@ var
   
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; text : string);
 begin
-  consoleMemo.Lines.add(text);
+  consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
   Application.ProcessMessages();
 end;
   
@@ -74,6 +75,7 @@ initialization
 finalization  
   unregisterConsoleDriver(consoleDriver);
   unregisterMenuItem('Show console');
+  consoleDriver.Free();
   
   
 {$ENDIF}

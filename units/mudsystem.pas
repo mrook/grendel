@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.41 2003/09/12 14:21:33 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.42 2003/10/02 15:53:23 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -112,7 +112,6 @@ var
 
 var
   OldExit : pointer;
-  LogFile : textfile;
 
   { system data }
   BootTime : TDateTime;
@@ -124,8 +123,6 @@ var
   boot_type : integer = BOOTTYPE_SHUTDOWN;
 
 
-procedure writeDirect(text : string);
-procedure writeLog(text : string);
 procedure bugreport(func, pasfile, bug : string);
 procedure calculateonline;
 
@@ -159,28 +156,6 @@ uses
     Channels,
     RegExpr;
 
-procedure writeDirect(text : string);
-begin
-  writeLog(text);
-
-{$IFDEF CONSOLEBUILD}
-  writeln(text);
-{$ENDIF}
-{$IFDEF LINUX}
-  writeln(text);
-{$ENDIF}
-end;
-
-procedure writeLog(text : string);
-begin
-  text := '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] [LOG] ' + text;
-
-  if (TTextRec(logfile).mode = fmOutput) then
-    begin
-    system.writeln(logfile, text);
-    system.flush(logfile);
-    end;
-end;
 
 procedure bugreport(func, pasfile, bug : string);
 begin

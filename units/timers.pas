@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.20 2003/09/22 21:30:54 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.21 2003/10/02 15:53:23 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -72,6 +72,7 @@ uses
     Winsock2,
 {$ENDIF}
     constants,
+    console,
     mudsystem,
     util,
     mudthread,
@@ -426,15 +427,15 @@ begin
       60,30,10,5 :  begin
                     case boot_info.boot_type of
                       BOOTTYPE_SHUTDOWN:begin
-                                        writeLog(inttostr(boot_info.timer)+' seconds till shutdown');
+                                        writeConsole(inttostr(boot_info.timer)+' seconds till shutdown');
                                         to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                         BOOTTYPE_REBOOT:begin
-                                        writeLog(inttostr(boot_info.timer)+' seconds till reboot');
+                                        writeConsole(inttostr(boot_info.timer)+' seconds till reboot');
                                         to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                       BOOTTYPE_COPYOVER:begin
-                                        writeLog(inttostr(boot_info.timer)+' seconds till reboot');
+                                        writeConsole(inttostr(boot_info.timer)+' seconds till reboot');
                                         to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                     end;
@@ -443,15 +444,15 @@ begin
       0 :           begin
                     case boot_info.boot_type of
                       BOOTTYPE_SHUTDOWN:begin
-                                        writeLog('Timer reached zero, starting shutdown now');
+                                        writeConsole('Timer reached zero, starting shutdown now');
                                         to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                         BOOTTYPE_REBOOT:begin
-                                        writeLog('Timer reached zero, starting reboot now');
+                                        writeConsole('Timer reached zero, starting reboot now');
                                         to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                       BOOTTYPE_COPYOVER:begin
-                                        writeLog('Timer reached zero, starting copyover now');
+                                        writeConsole('Timer reached zero, starting copyover now');
                                         to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                     end;

@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.6 2002/08/03 19:17:47 ***REMOVED*** Exp $)
+  @lastmod($Id: console.pas,v 1.7 2003/10/02 15:53:23 ***REMOVED*** Exp $)
 }
 
 unit console;
@@ -15,10 +15,15 @@ uses
 type
   GConsoleWriter = class
   public
-    procedure write(timestamp : TDateTime; text : string); virtual;
+    procedure write(timestamp : TDateTime; text : string); virtual; abstract;
   end;
   
   GConsoleDefault = class(GConsoleWriter)
+  public
+    procedure write(timestamp : TDateTime; text : string); override;
+  end;
+
+  GConsoleLogWriter = class(GConsoleWriter)
   public
     procedure write(timestamp : TDateTime; text : string); override;
   end;
@@ -37,6 +42,7 @@ const
 var
   writers : GDLinkedList;
   history : GDLinkedList;
+  LogFile : textfile;
 
   
 procedure registerConsoleDriver(writer : GConsoleWriter);
@@ -50,7 +56,7 @@ procedure cleanupConsole();
 implementation
 
 uses
-  mudsystem;
+	fsys;
 
 
 procedure registerConsoleDriver(writer : GConsoleWriter);
@@ -130,34 +136,46 @@ begin
 end;
 
 
-// GConsoleWriter
-procedure GConsoleWriter.write(timestamp : TDateTime; text : string);
-begin
-end;
-
 // GConsoleDefault
 procedure GConsoleDefault.write(timestamp : TDateTime; text : string);
 begin
-  writeLog(text);
-  
-{$IFDEF CONSOLEBUILD}
-  writeln(FormatDateTime('[tt] ', timestamp) + text);
+{$IFDEF CONSOLEBUILD OR LINUX}
+  writeln(text);
 {$ENDIF}
-{$IFDEF LINUX}
-  writeln(FormatDateTime('[tt] ', timestamp) + text);
-{$ENDIF}
+end;
+
+procedure GConsoleLogWriter.write(timestamp : TDateTime; text : string);
+begin
+  if (TTextRec(logfile).mode = fmOutput) then
+    begin
+    system.writeln(logfile, '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] ' + text);
+    system.flush(logfile);
+    end;
 end;
 
 procedure initConsole();
 begin
   writers := GDLinkedList.Create();
   history := GDLinkedlist.Create();
-  
   registerConsoleDriver(GConsoleDefault.Create());
+  registerConsoleDriver(GConsoleLogWriter.Create());
+  
+  { open a standard log file, filename is given by current system time }
+  AssignFile(LogFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
+
+  {$I-}
+  rewrite(LogFile);
+  {$I+}
+
+  if (IOResult <> 0) then
+    writeConsole('NOTE: Could not open logfile. Messages are not being logged.');
 end;
 
 procedure cleanupConsole();
 begin
+  if (TTextRec(logfile).mode = fmOutput) then
+    CloseFile(LogFile);
+
   writers.clean();
   writers.Free();
   
