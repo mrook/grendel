@@ -6,7 +6,8 @@ uses dtypes;
 const version_number = 'v0.3.5';
       version_info = 'The Grendel Project - A Win32 MUD Server';
       version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
-
+      build_version = '$Build 0$';
+      
 { misc. bitvectors }
 const BV00=1 shl 0;
       BV01=1 shl 1;
