@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.2 2001/07/28 22:18:19 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.3 2001/07/30 11:11:45 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -945,20 +945,42 @@ end;
 
 procedure do_modules(ch : GCharacter; param : string);
 var
-  node : GListNode;
+  iterator : GIterator;
   module : GModule;
+  arg : string;
 begin
-  node := module_list.head;
-  
-  ch.sendBuffer('Registered modules:'#13#10#13#10);
-  
-  while (node <> nil) do
+  if (length(param) = 0) then
     begin
-    module := GModule(node.element);
+    iterator := module_list.iterator();
+      
+    ch.sendBuffer('Registered modules:'#13#10#13#10);
+  
+    while (iterator.hasNext()) do
+      begin
+      module := GModule(iterator.next());
     
-    ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
+      ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
+      end;
+    end
+  else
+    begin
+    param := one_argument(param, arg);
     
-    node := node.next;
+    if (arg = 'load') then
+      try
+        addModule(param);
+      except
+        on E : GException do
+          ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
+      end
+    else
+    if (arg = 'unload') then
+      try
+        removeModule(param);
+      except
+        on E : GException do
+          ch.sendBuffer('Could not load module ' + param + ': ' + E.Message + #13#10);
+      end;
     end;
 end;
 
