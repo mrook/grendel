@@ -50,8 +50,8 @@ uses
   clan in 'units\clan.pas',
   clean in 'units\clean.pas',
   Winsock2 in 'units\winsock2.pas',
-  progs in 'units\progs.pas';
-
+  progs in 'units\progs.pas',
+  md5 in 'units\md5.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -693,35 +693,6 @@ begin
 
     if (pulse_violence = 0) then
       begin
-      node := char_list.head;
-
-      while (node <> nil) do
-        begin
-        ch := node.element;
-
-        if (ch.bash_timer > -2) then
-          dec(ch.bash_timer);
-
-        if (ch.bashing > -2) then
-          dec(ch.bashing);
-
-        if (ch.cast_timer > 0) then
-          dec(ch.cast_timer);
-
-        if (ch.bash_timer = 1) and (ch.position = POS_BASHED) then
-          begin
-          if (ch.fighting <> nil) then
-            ch.position := POS_FIGHTING
-          else
-            ch.position := POS_STANDING;
-
-          act(AT_REPORT,'You recover from the bash and stand quickly.',false,ch,nil,nil,TO_CHAR);
-          act(AT_REPORT,'$n recovers and stands quickly.',false,ch,nil,nil,TO_ROOM);
-          end;
-
-        node := node.next;
-        end;
-
       update_fighting;
       update_battleground;
 
@@ -754,84 +725,121 @@ begin
 
         node := node.next;
         end;
+
+      node := char_list.head;
+
+      while (node <> nil) do
+        begin
+        ch := node.element;
+
+        if (not ch.IS_NPC) and (IS_SET(ch.player^.flags, PLR_LINKLESS)) then
+          begin
+          inc(ch.player^.ld_timer);
+
+          if (ch.player^.ld_timer > IDLE_LINKDEAD) then
+            begin
+            node := node_next;
+            ch.quit;
+            continue;
+            end;
+          end;
+
+        node := node.next;
+        end;
       end;
 
     if (pulse_gametime = 0) then
       begin
       pulse_gametime := CPULSE_GAMETIME;
-      
+
       update_time;
       end;
 
-    if (auction_good.pulse > 0) then
-      dec(auction_good.pulse)
-    else
-    if (auction_good.item <> nil) then
-      begin
-      auction_good.update;
-      auction_good.pulse := CPULSE_AUCTION;
-      end;
+    try
+      if (auction_good.pulse > 0) then
+        dec(auction_good.pulse)
+      else
+      if (auction_good.item <> nil) then
+        begin
+        auction_good.update;
+        auction_good.pulse := CPULSE_AUCTION;
+        end;
 
-    if (auction_evil.pulse > 0) then
-      dec(auction_evil.pulse)
-    else
-    if (auction_evil.item <> nil) then
-      begin
-      auction_evil.update;
-      auction_evil.pulse := CPULSE_AUCTION;
-      end;
+      if (auction_evil.pulse > 0) then
+        dec(auction_evil.pulse)
+      else
+      if (auction_evil.item <> nil) then
+        begin
+        auction_evil.update;
+        auction_evil.pulse := CPULSE_AUCTION;
+        end;
+    except
+      raise GException.Create('Auction update', '');
+    end;
 
     if (pulse_autosave = 0) then
       begin
       status := GetHeapStatus;
-
-      // char_list.checkLinks;
 
       clean_thread.SetMessage(CLEAN_AUTOSAVE);
 
       pulse_autosave := CPULSE_AUTOSAVE;
       end;
 
-    update_teleports;
-    update_timers;
+    try
+      update_teleports;
+      update_timers;
 
-    node := connection_list.head;
+      node := connection_list.head;
 
-    while (node <> nil) do
-      begin
-      node_next := node.next;
-      conn := node.element;
+      while (node <> nil) do
+        begin
+        node_next := node.next;
+        conn := node.element;
 
-      inc(conn.idle);
+        inc(conn.idle);
 
-      if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
-       ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
-        (conn.idle > IDLE_PLAYING)) and (not conn.ch.IS_IMMORT) then
-         begin
-         conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
-         conn.thread.terminate;
+        if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
+         ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
+          (conn.idle > IDLE_PLAYING)) and (not conn.ch.IS_IMMORT) then
+           begin
+           conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
+           conn.thread.terminate;
 
-         node := node_next;
-         continue;
-         end;
+           node := node_next;
+           continue;
+           end;
 
-      if (conn.state=CON_PLAYING) and (not conn.ch.in_command) then
-        conn.ch.emptyBuffer;
+        if (conn.state=CON_PLAYING) and (not conn.ch.in_command) then
+          conn.ch.emptyBuffer;
 
-      if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
-        dec(conn.ch.wait);
+        if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
+          dec(conn.ch.wait);
 
-      node := node_next;
-      end;
+        node := node_next;
+        end;
 
-    cleanChars;
-    { clean_extracted_objs; }
-
+      cleanChars;
+      cleanObjects;
+    except
+      raise GException.Create('timerMain', '');
+    end;
   except
-    bugreport('game_timer', 'grendel.dpr', 'something went wrong in the timer',
-              'An error occured in the main timer.');
+    on E: GException do
+      begin
+      E.show;
+      end
+    else
+      begin
+      if (stable_system) then
+        begin
+        stable_system := false;
+        bugreport('game_timer', 'grendel.dpr', 'Timer crash',
+                  'An error occured in the main timer.');
 
-    write_console('System is unstable - prepare for a rough ride');
+        write_console('System is unstable - prepare for a rough ride');
+        end;
+      end;
 
     // reset all the timers
     pulse_violence := CPULSE_VIOLENCE;
