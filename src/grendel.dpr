@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.2 2003/12/12 23:01:23 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.3 2004/02/02 15:27:22 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -144,7 +144,11 @@ end;
 procedure cleanupServer();
 var
 	node : GListNode;
+	f : file;
 begin
+	AssignFile(f, 'grendel.run');
+	Erase(f);
+
 	writeConsole('Terminating threads...');
 	
 	mud_booted := false;
@@ -246,7 +250,7 @@ begin
     { wait for users to logout }
     Sleep(1000);
   except
-    writeConsole('Exception caught while cleaning up memory');
+    writeConsole('Exception caught while cleaning up connections');
   end;
 
   cleanupServer();
@@ -782,8 +786,25 @@ end;
 
 var
 	tm : TDateTime;
+	f : file;
 
 begin
+	if (FileExists('grendel.run')) then
+		begin
+		{$IFDEF CONSOLEBUILD}
+		writeln('Server is already running? (delete grendel.run if this is not the case)');
+		{$ELSE}
+			{$IFDEF WIN32}
+			MessageBox(0, 'Server is already running? (delete grendel.run if this is not the case)', 'Server is already running', 0);
+			{$ENDIF}
+		{$ENDIF}
+		exit;
+		end;
+		
+	AssignFile(f, 'grendel.run');
+	Rewrite(f);
+	CloseFile(f);
+	
 	old_exitproc := ExitProc;
 	tm := Now();
 
