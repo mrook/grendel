@@ -56,9 +56,7 @@ Grendel's TODO list with probable release date/version
 ! (0.4.4) Variable usage in aliases - '%' will now expand to everything typed after the alias
 ! (0.4.4) re-implement "Switch" and "Snoop"
 
-
-- (0.4.4) command to switch tank in a group
-- (0.4.4) command to switch leadership of a group
+! (1.0.0a7) command to switch leadership of a group
 - (0.4.4) trying to wear an object on a position that's already occupied results in a switch
 - (0.4.4) additional reset command to reset containers
 - (0.4.4) sheath/draw for weapons

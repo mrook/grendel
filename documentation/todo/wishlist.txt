@@ -1,12 +1,12 @@
 Wishlist for the 1.0.x tree
-(! = closed, * = normal, l = lower priority)
+(! = closed, * = normal, l = lower priority, . = ongoing)
 
 
-* run as service (NT/2K/XP)
+! run as service (NT/2K/XP)
 
-  - raises the need of some sort of "admin console", remote? through the webservice?
+  * raises the need of some sort of "admin console", remote? through the webservice?
 
-* more stability when starting/shutting down, especially on Win98/ME
+. more stability when starting/shutting down, especially on Win98/ME
 
 * we really need another way of registering commands to the server, pluggable interfaces?
   maybe a rewrite of the damn thing
@@ -24,8 +24,8 @@ Wishlist for the 1.0.x tree
   - GHL (working title): Grendel Help Language, which is an XML DTD or Schema,
     use XML to describe help/manual content, use stylesheets to transform
     GHL to (X)HTML for web viewing or ASCII for online help
-    
-* events
+
+! events
 
   - raise events when important things happen, e.g.
   	* server boots/shuts down
@@ -56,9 +56,9 @@ Wishlist for the 1.0.x tree
   - possibly rewrite/rename the fighting & magic code, this will break
     compatibility but improve code re-usage and stability
 
-  - remove special timer states, unify as action timer
+  ! remove special timer states, unify as action timer
 
-  - generally clean up code according to new coding standard,
+  . generally clean up code according to new coding standard,
     remove obsolete stuff like GObjectIndex etc.
   
 * generalize races & clans to configurable character "modifications",
@@ -106,17 +106,17 @@ Wishlist for the 1.0.x tree
   
   - shopkeepers must be able to carry their own gear
 
-* string matching
+! string matching
   "Goto orc"; first complete match, then names that *start* with orc, and then
    a full search on '*orc*'
 
 
+! IMC (intermud communication): both channels *and* noteboards
+  (perhaps separate server for noteboard, or whatever)
+
 l implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
   
-l IMC (intermud communication): both channels *and* noteboards
-  (perhaps separate server for noteboard, or whatever)
-
 l (optional) "real life" sleep - players need sleep to keep from falling 
              down after 2 days, some rooms (with beds) have better sleep ratios etc.,
              possibly as a demonstration of the "modification" system
