@@ -48,6 +48,7 @@ begin
   SyncWritelog('Started cleanup thread.');
   t_message:=0;
   SetThreadPriority(Handle,THREAD_PRIORITY_IDLE);
+  freeonterminate := true;
 end;
 
 procedure GCleanThread.SyncProc;
