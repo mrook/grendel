@@ -773,6 +773,10 @@ begin
 end;
 
 
-begin
-  connection_list := GDLinkedList.Create;
+initialization
+connection_list := GDLinkedList.Create;
+
+finalization
+connection_list.Free;
+
 end.
