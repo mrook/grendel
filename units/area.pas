@@ -350,7 +350,7 @@ begin
         s_exit.key := af.readInteger;
 
         if not (af.feol) then
-          s_exit.keyword := hash_string(af.readQuoted);
+          s_exit.keyword := hash_string(af.readLine);
 
         if (exits.head = nil) then
           exits.insertLast(s_exit)
