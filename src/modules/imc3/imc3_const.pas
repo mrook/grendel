@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_const.pas,v 1.1 2003/12/12 13:19:54 ***REMOVED*** Exp $
+	$Id: imc3_const.pas,v 1.2 2004/06/25 12:39:22 ***REMOVED*** Exp $
 }
 unit imc3_const;
 
@@ -30,9 +30,9 @@ const
 	I3_COLOR			= BV08;
 
 const
-	I3_CHANLIST_FILE = ModulesDir + 'i3_chanlist.xml';
-	I3_MUDLIST_FILE = ModulesDir + 'i3_mudlist.xml';
-	I3_CONFIG_FILE = ModulesDir + 'i3_config.xml';
+	I3_CHANLIST_FILE = SystemDir + 'i3_chanlist.xml';
+	I3_MUDLIST_FILE = SystemDir + 'i3_mudlist.xml';
+	I3_CONFIG_FILE = SystemDir + 'i3_config.xml';
 	
 type
 	I3_PERMISSIONS = (I3PERM_NOTSET, I3PERM_NONE, I3PERM_MORT, I3PERM_IMM, I3PERM_ADMIN, I3PERM_IMP);
