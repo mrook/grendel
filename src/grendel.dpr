@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.19 2004/03/21 10:52:24 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.20 2004/03/26 16:59:04 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -466,6 +466,8 @@ begin
 	cons.Free();
 	
 	{$IFDEF LINUX}
+	sigignore(SIGPIPE);
+	
 	if (not FindCmdLineSwitch('f')) then
 		daemonize();
 	{$ENDIF}
