@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.13 2003/10/18 11:09:35 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.14 2003/10/30 19:50:04 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -12,6 +12,7 @@ uses
   Winsock2;
 {$ENDIF}
 {$IFDEF LINUX}
+  KernelIoctl,
   Libc;
 {$ENDIF}
 
@@ -278,7 +279,7 @@ begin
 
   time.tv_sec := 0;
   time.tv_usec := 0;
-  
+
   if (select(fd + 1, @rw_set, nil, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
     raise Exception.Create('Connection reset by peer');
 
@@ -297,7 +298,7 @@ begin
 
   time.tv_sec := 0;
   time.tv_usec := 0;
-  
+
   if (select(fd + 1, nil, @rw_set, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
     raise Exception.Create('Connection reset by peer');
 
@@ -344,16 +345,15 @@ end;
 
 procedure GSocket.setNonBlocking();
 var
-  len : integer;
+  x, ret : integer;
 begin
 {$IFDEF WIN32}
-  len := ioctlsocket(fd, FIONBIO, len);
+	x := 1;
+	ret := ioctlsocket(fd, FIONBIO, x);
 {$ENDIF}
 {$IFDEF LINUX}
-  len := fcntl(fd, F_GETFL, 0);
-
-  if (len <> -1) then
-    fcntl(fd, F_SETFL, len or O_NONBLOCK);
+ 	x := fcntl(fd, F_GETFL);
+	ret := fcntl(fd, F_SETFL, x or O_NONBLOCK);
 {$ENDIF}
 end;
 
@@ -365,8 +365,12 @@ var
   sk : GSocket;
 begin
   len := 128;
-  
-  ac_fd := accept(fd, PSockAddr(@client_addr)^, len);
+
+{$IFDEF LINUX}  
+	ac_fd := accept(fd, PSockAddr(@client_addr), @len);
+{$ELSE}
+	ac_fd := accept(fd, PSockAddr(@client_addr)^, len);
+{$ENDIF}
 
   sk := createSocket(af, ac_fd);
   sk.addr := client_addr;
@@ -391,13 +395,19 @@ begin
 		raise Exception.Create('Could not resolve hostname ' + remoteName);
 
 	addrLength := hostent^.h_length;
-  addrPointer := hostent^.h_addr_list^;
+	addrPointer := hostent^.h_addr_list^;
 
-  sockAddr.sin_family := af;
-  sockAddr.sin_port := htons(port);
-  StrMove (PChar(@sockAddr.sin_addr.s_addr), addrPointer, addrLength);
+	sockAddr.sin_family := af;
+	sockAddr.sin_port := htons(port);
+	StrMove (PChar(@sockAddr.sin_addr.s_addr), addrPointer, addrLength);
         
+	{$IFDEF WIN32}
 	Result := WinSock2.connect(fd, sockAddr, sizeof(sockAddr)) = 0;
+	{$ENDIF}
+
+	{$IFDEF LINUX}
+	Result := Libc.connect(fd, sockAddr, sizeof(sockAddr)) = 0;
+	{$ENDIF}
 end;
 
 procedure GSocket.openPort(port : integer);
