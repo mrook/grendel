@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.12 2001/09/02 21:53:00 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.13 2001/10/18 16:26:19 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -73,6 +73,10 @@ type
 var
   channellist : GDLinkedList;
   channels_loaded : boolean;
+  
+  // special channel history
+  suggestHistory, prayHistory : GDLinkedList;
+  
 
 procedure load_channels();
 procedure channelCommunicate(ch : GCharacter; param : string);
@@ -812,6 +816,7 @@ var
 begin
   param := one_argument(param, arg1);
   param := one_argument(param, arg2);
+
   if (length(arg1) = 0) then
   begin
     ch.sendBuffer('Usage: CHANNEL <list>|[<channelname> <on/off>] '#13#10);
@@ -916,12 +921,22 @@ begin
   channellist := GDLinkedList.Create();
   channels_loaded := false;
   
+  suggestHistory := GDLinkedList.Create();
+  prayHistory := GDLinkedList.Create();
+  
   registerConsoleDriver(GConsoleChannel.Create());
 end;
 
 procedure cleanupChannels();
 begin
   channels_loaded := false;
+
+  suggestHistory.clean();
+  suggestHistory.Free();
+
+  prayHistory.clean();
+  prayHistory.Free();
+
   channellist.clean();
   channellist.Free();
 end;

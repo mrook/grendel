@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.2 2001/08/11 22:02:55 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.3 2001/10/18 16:26:18 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -104,30 +104,81 @@ begin
 end;
 
 procedure do_suggest(ch:GCharacter;param:string);
-var f:textfile;
+var 
+  f : textfile;
+  he : THistoryElement;
+  iterator : GIterator; 
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
-    ch.sendBuffer('Suggest what?'#13#10);
-    exit;
+    if (ch.IS_IMMORT()) then
+      begin
+      iterator := suggestHistory.iterator();
+      
+      while (iterator.hasNext()) do
+        begin
+        he := THistoryElement(iterator.next());
+       
+        ch.sendBuffer(he.contents^ + #13#10);
+        end;
+      end
+    else
+      begin
+      ch.sendBuffer('Suggest what?'#13#10);
+      exit;
+      end;
     end;
+    
   act(AT_SUGGEST,'You suggest, '''+param+'''.',false,ch,nil,nil,TO_CHAR);
   writeConsole(ch.name^+' suggested '''+param+'''');
-  assignfile(f,'system\suggest.dat');
+
+  assignfile(f, 'system\suggest.dat');
   append(f);
-  writeln(f,DateTimeToStr(Now),'> ','Suggestion by ',ch.name^,': ',param);
+  writeln(f, DateTimeToStr(Now),'> ', 'Suggestion by ',ch.name^,': ',param);
   closefile(f);
+
+  he := THistoryElement.Create(ch.name^+' suggested '''+param+'''');
+  
+  suggestHistory.insertLast(he);
+
+  if (suggestHistory.getSize() > CHANNEL_HISTORY_MAX) then
+    suggestHistory.remove(suggestHistory.head);
 end;
 
 procedure do_pray(ch:GCharacter;param:string);
+var
+  he : THistoryElement;
+  iterator : GIterator;
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
-    ch.sendBuffer('Pray what?'#13#10);
-    exit;
+    if (ch.IS_IMMORT()) then
+      begin
+      iterator := prayHistory.iterator();
+      
+      while (iterator.hasNext()) do
+        begin
+        he := THistoryElement(iterator.next());
+       
+        ch.sendBuffer(he.contents^ + #13#10);
+        end;
+      end
+    else
+      begin
+      ch.sendBuffer('Pray what?'#13#10);
+      exit;
+      end;
     end;
-  act(AT_PRAY,'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  writeConsole(ch.name^+' prays '''+param+'''');
+    
+  act(AT_PRAY, 'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
+  writeConsole(ch.name^ + ' prays ''' + param + '''');
+  
+  he := THistoryElement.Create(ch.name^ + ' prays ''' + param + '''');
+  
+  prayHistory.insertLast(he);
+
+  if (prayHistory.getSize() > CHANNEL_HISTORY_MAX) then
+    prayHistory.remove(prayHistory.head);
 end;
 
 procedure do_clanadd(ch:GCharacter;param:string);
