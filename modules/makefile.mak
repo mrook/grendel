@@ -20,3 +20,6 @@ status.bpl:	status.dpk status/*
 webservice.bpl:	webservice.dpk webservice/*
 	$(DCC) webservice.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU..\core -Uwebservice
 
+imc3.bpl:	imc3.dpk imc3/*
+	$(DCC) imc3.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU..\core -Uimc3
+
