@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.21 2001/08/16 10:53:57 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.22 2001/08/16 19:29:44 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -56,7 +56,7 @@ type
 
     GPrimes = array of integer;
 
-    GHASH_FUNC = function(size, prime : cardinal; key : string) : integer;
+    GHASH_FUNC = function(size, prime : cardinal; key : string) : cardinal;
 
     GHashValue = class
       key : variant;
@@ -106,15 +106,17 @@ function hash_string(src : PString) : PString; overload;
 
 procedure unhash_string(var src : PString);
 
-function defaultHash(size, prime : cardinal; key : string) : integer;
-function firstHash(size, prime : cardinal; key : string) : integer;
+function md5Hash(size, prime : cardinal; key : string) : cardinal;
+function defaultHash(size, prime : cardinal; key : string) : cardinal;
+function firstHash(size, prime : cardinal; key : string) : cardinal;
 
 implementation
 
-{$IFDEF LINUX}
 uses
-    Variants;
+{$IFDEF LINUX}
+    Variants,
 {$ENDIF}
+    md5;
 
 
 // GDLinkedListIterator
@@ -408,7 +410,23 @@ end;
 
 
 // GHashTable
-function defaultHash(size, prime : cardinal; key : string) : integer;
+function md5Hash(size, prime : cardinal; key : string) : cardinal;
+var
+  md : MD5Digest;
+  val : cardinal;
+  i : integer;
+begin
+  md := MD5String(key);
+  
+  val := 0;
+  
+  for i := 0 to 7 do
+    val := val + (md[i] shl i);
+  
+  Result := val mod size;
+end;
+
+function defaultHash(size, prime : cardinal; key : string) : cardinal;
 var
    i : integer;
    val : cardinal;
@@ -422,7 +440,7 @@ begin
   defaultHash := val mod size;
 end;
 
-function firstHash(size, prime : cardinal; key : string) : integer;
+function firstHash(size, prime : cardinal; key : string) : cardinal;
 begin
   if (length(key) >= 1) then
     Result := (byte(key[1]) * prime) mod size
@@ -505,7 +523,7 @@ end;
 
 function GHashTable._get(key : variant) : GHashValue;
 var
-  hash : integer;
+  hash : cardinal;
   node : GListNode;
 begin
   Result := nil;
@@ -539,7 +557,7 @@ end;
 
 procedure GHashTable.put(key : variant; value : TObject);
 var
-   hash : integer;
+   hash : cardinal;
    hv : GHashValue;
 begin
   hv := _get(key);
@@ -563,7 +581,7 @@ end;
 
 procedure GHashTable.remove(key : variant);
 var
-  hash : integer;
+  hash : cardinal;
   fnode, node : GListNode;
 begin
   fnode := nil;
