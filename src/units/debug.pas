@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.14 2004/04/10 22:24:03 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.15 2004/05/11 14:55:37 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -42,20 +42,27 @@ var
 	list : TJclExceptFrameList;
 begin
 	list := JclLastExceptFrameList;
-	
+
 	// (definately a) handled exception, quit
 	if (list.items[0].FrameKind = efkAnyException) then
 		exit;
-
+		
 	if (ExceptObj = nil) then
 		reportException(nil, 'debug.pas:AnyExceptionNotify')
 	else
+		begin
+		// drop common exceptions
+		if (ExceptObj is EConvertError) then
+			exit;
+		if (ExceptObj is EFOpenError) then
+			exit;
+
 		reportException(ExceptObj as Exception, 'debug.pas:AnyExceptionNotify');
+		end;
 end;
 
 function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): longint; stdcall;
 begin
-	//MessageBox(0, 'filter', 'filter', 0);
 	Result := 1;
 end;
 
@@ -63,11 +70,17 @@ procedure reportException(E : Exception; const sourceFile : string = '');
 var
 	a : integer;
 	strings : TStringList;
+	msg : string;
 begin
 	if (E = nil) then
-		writeConsole('[EX ' + sourceFile + '] EUnknown', 1)
+		msg := 'NULL exception'
 	else
-		writeConsole('[EX ' + sourceFile + '] ' + E.ClassName + ': ' + E.Message, 1);
+		msg := E.ClassName + ': ' + E.Message;
+		
+	if (sourceFile <> '') then
+		writeConsole('[' + sourceFile + '] ' + msg, 1)
+	else
+		writeConsole(msg, 1);
 		
 	strings := TStringList.Create();
 
@@ -86,6 +99,16 @@ begin
 	strings.Free();
 end;
 
+type
+	GThreadDebugger = class
+	public
+		procedure DoThreadSyncException(Thread: TJclDebugThread);
+	end;
+
+procedure GThreadDebugger.DoThreadSyncException(Thread: TJclDebugThread);
+begin
+	reportException(Thread.SyncException, 'Thread ' + Thread.ThreadInfo);
+end;
 {$ENDIF}
 
 {$IFDEF LINUX}
@@ -112,11 +135,21 @@ begin
 end;
 
 procedure reportException(E : Exception; const sourceFile : string = '');
+var
+	msg : string;
 begin
 	E := ExceptObject as Exception;
 
-	writeConsole('[EX ' + sourceFile + '] ' + E.ClassName + ': ' + E.Message, 1);
+	if (E = nil) then
+		msg := 'NULL exception'
+	else
+		msg := E.ClassName + ': ' + E.Message;
 		
+	if (sourceFile <> '') then
+		writeConsole('[' + sourceFile + '] ' + msg, 1)
+	else
+		writeConsole(msg, 1);
+
 	listBackTrace();
 end;
 {$ENDIF}
@@ -128,23 +161,28 @@ procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
 begin
 	ExceptProc := oldExceptProc;
 	
-	{$IFDEF LINUX}	
 	reportException(ExceptObject as Exception, 'debug.pas:ExceptHandler');
-	{$ENDIF}
 	
 	Halt(1);
 end;
 
 procedure initDebug();
+{$IFDEF WIN32}
+var
+	deb : GThreadDebugger;
+{$ENDIF}
 begin
 {$IFDEF WIN32}
 	// initialize the debug 'fail-safe device'
 	JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
 	SetUnhandledExceptionFilter(@ExceptionFilter);
+	
+	deb := GThreadDebugger.Create();
+	JclDebugThreadList.OnSyncException := deb.DoThreadSyncException;
 
 	JclStartExceptionTracking();
-	JclInitializeLibrariesHookExcept();
-	JclAddExceptNotifier(AnyExceptionNotify);
+	//JclInitializeLibrariesHookExcept();
+	//JclAddExceptNotifier(AnyExceptionNotify);
 {$ENDIF}
 
 	oldExceptProc := exceptProc;

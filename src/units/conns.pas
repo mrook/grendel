@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.22 2004/04/15 17:47:22 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.23 2004/05/11 14:55:37 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -15,6 +15,7 @@ uses
 {$IFDEF WIN32}
 	Winsock2,
 	Windows,
+	JclDebug,
 {$ENDIF}
 {$IFDEF LINUX}
 	Libc,
@@ -28,7 +29,11 @@ uses
 type
 	GConnectionEvent = procedure() of object;
 
+	{$IFDEF WIN32}
+	GConnection = class(TJclDebugThread)
+	{$ELSE}
 	GConnection = class(TThread)
+	{$ENDIF}
 	protected
 		_socket : GSocket;
 		_idle : integer;
@@ -187,11 +192,16 @@ begin
 				FOnInput(); 
 		end;
   	except
-  		on E : Exception do 
-  			begin
-  			Terminate();
-  			reportException(E, 'GConnection.Execute');
-  			end;
+		on E : Exception do
+			begin
+			Terminate();
+		
+			{$IFDEF WIN32}
+			HandleException();
+			{$ELSE}
+			reportException(E, 'conns.pas:GConnection.Execute()');
+			{$ENDIF}
+			end;
 	end;
 	
 	if (Assigned(FOnClose)) then
