@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.5 2004/03/19 15:40:07 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.6 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -13,7 +13,6 @@ uses
   SysUtils,
   dtypes,
   chars,
-  console,
   constants;
 
 const
@@ -95,7 +94,7 @@ uses
   commands,
   LibXmlParser,
   util,
-  conns,
+  console,
   player;
 
 var

@@ -2,7 +2,7 @@
 	Summary:
 		Cleaning (system janitor) thread
 	
-	## $Id: clean.pas,v 1.8 2004/03/26 16:08:03 ***REMOVED*** Exp $
+	## $Id: clean.pas,v 1.9 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit clean;
@@ -34,25 +34,20 @@ type
 implementation
 
 uses
-	SysUtils,
-	chars,
-	player,
-	conns,
-	constants,
-	console,
-	dtypes,
-	debug,
-	area,
-	util,
-	timers,
-{$IFDEF WIN32}
-	Winsock2,
-{$ENDIF}
 {$IFDEF LINUX}
 	Libc,
 {$ENDIF}
-	commands,
-	mudsystem;
+	SysUtils,
+	chars,
+	player,
+	console,
+	mudsystem,
+	constants,
+	timers,
+	util,
+	conns,
+	dtypes,
+	debug;
 	
 
 constructor GCleanThread.Create();

@@ -2,7 +2,7 @@
   Summary:
     System events
   
-  ##  $Id: events.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
+  ##  $Id: events.pas,v 1.4 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit events;
@@ -10,8 +10,7 @@ unit events;
 interface
 
 uses
-	dtypes,
-	console;
+	dtypes;
 
 
 type

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.29 2004/03/31 22:05:50 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.30 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -57,7 +57,7 @@ type
 		procedure OnCloseEvent();
 		
 		procedure clearCommandQueue();
-		procedure addCommandQueue(line : string);
+		procedure addCommandQueue(const line : string);
 		procedure emptyCommandQueue();
 		function checkAliases(line : string) : boolean;
 
@@ -519,7 +519,7 @@ begin
 end;
 
 { Add a line to the command queue}
-procedure GPlayerConnection.addCommandQueue(line : string);
+procedure GPlayerConnection.addCommandQueue(const line : string);
 begin
 	if (commandQueue.Count < PLAYER_MAX_QUEUESIZE) then
 		begin

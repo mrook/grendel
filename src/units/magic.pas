@@ -2,7 +2,7 @@
 	Summary:
 		Various spell related functions
 		
-	## $Id: magic.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: magic.pas,v 1.7 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit magic;
@@ -29,8 +29,6 @@ uses
 	dtypes,
 	commands,
 	mudsystem,
-	console,
-	conns,
 	player,
 	util,
 	fight;

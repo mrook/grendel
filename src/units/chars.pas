@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.13 2004/03/21 09:49:21 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.14 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -12,24 +12,14 @@ interface
 uses
     SysUtils,
     Math,
-{$IFDEF WIN32}
-    Winsock2,
-{$ENDIF}
 {$IFDEF LINUX}
     Libc,
 {$ENDIF}
-    constants,
-    strip,
     area,
     race,
-    md5,
-    ansiio,
-    fsys,
-    util,
-    clan,
+	clan,
     dtypes,
-    gvm,
-    bulletinboard;
+    gvm;
 
 
 {$M+}
@@ -284,14 +274,13 @@ implementation
 
 
 uses
+	constants,
+    util,
 	player,
 	conns,
-	timers,
 	skills,
 	console,
-	mudsystem,
-	commands,
-	Channels;
+	mudsystem;
 
 
 constructor GHistoryElement.Create(const txt : string);

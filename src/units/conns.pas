@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.20 2004/03/31 22:08:19 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.21 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -21,14 +21,8 @@ uses
 {$ENDIF}
 	Classes,
 	SysUtils,
-	constants,
-	chars,
 	dtypes,
-	util,
-	area,
-	socket,
-	console,
-	mudsystem;
+	socket;
 	
 
 type
@@ -116,9 +110,11 @@ implementation
 
 
 uses
+	chars,
+	constants,
+	console,
 	player,
-	debug,
-	commands;
+	debug;
 
 
 const

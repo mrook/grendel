@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.13 2004/03/10 21:49:42 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.14 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -13,31 +13,16 @@ uses
     Classes,
 {$IFDEF WIN32}
     Windows,
-    Winsock2,
 {$ENDIF}
 {$IFDEF LINUX}
     Libc,
 {$ENDIF}
     SysUtils,
     Math,
-    ansiio,
     constants,
-    console,
-    conns,
     chars,
-    race,
-    clan,
-    area,
-    dtypes,
-    skills,
-    strip,
-    util,
-    bulletinboard,
-    mudhelp,
-    socket,
-    mudsystem,
-    fsys,
-    gvm;
+    dtypes;
+    
 
 type
   COMMAND_FUNC = procedure(ch : GCharacter; param : string);
@@ -82,15 +67,16 @@ procedure cleanupCommands();
 implementation
 
 uses
-    magic,
+    conns,
+    fsys,
+    strip,
+    util,
+    mudsystem,
+    console,
     md5,
-    update,
     timers,
-    fight,
-    player,
-    NameGen,
-    Channels;
-
+    player;
+    
 
 procedure do_dummy(ch : GCharacter; param : string);
 begin

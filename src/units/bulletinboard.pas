@@ -2,7 +2,7 @@
   Summary:
   	Abstract(Bulletinboard (noteboard) interface
   	
-	## $Id: bulletinboard.pas,v 1.5 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: bulletinboard.pas,v 1.6 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit bulletinboard;
@@ -10,7 +10,6 @@ unit bulletinboard;
 interface
 
 uses
-    fsys,
     dtypes;
 
 type
@@ -40,8 +39,8 @@ uses
     constants,
     strip,
     chars,
-    player,
-    mudsystem;
+    fsys,
+    player;
 
 procedure load_notes(const fname : string);
 var

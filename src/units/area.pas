@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.29 2004/03/26 21:14:26 hemko Exp $
+  ## $Id: area.pas,v 1.30 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -17,9 +17,7 @@ uses
 	clan,
 	race,
 	fsys,
-	gvm,
-	strip,
-	util;
+	gvm;
 
 {$M+}
 type
@@ -328,6 +326,8 @@ procedure cleanupAreas();
 implementation
 
 uses
+	strip,
+	util,
 	chars,
 	player,
 	skills,

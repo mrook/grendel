@@ -2,7 +2,7 @@
 	Summary:
 		Loadable module system
 
-	## $Id: modules.pas,v 1.4 2004/03/19 15:37:44 ***REMOVED*** Exp $
+	## $Id: modules.pas,v 1.5 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
   
 unit modules;
@@ -17,7 +17,6 @@ uses
   Libc,
 {$ENDIF}
   SysUtils,
-  constants,
   dtypes;
 
 
@@ -65,14 +64,12 @@ implementation
 
 
 uses
-  strip,
+  constants,
   chars,
   debug,
   util,
   commands,
-  console,
-  mudsystem;
-
+  console;
 
 
 constructor GModuleInfo.Create(handle_ : HMODULE; const filename_, description_ : string; intf_ : IModuleInterface);
@@ -155,7 +152,7 @@ begin
         addModule(t.name);
       except
         on E : Exception do
-          bugreport('loadModules()', 'modules.pas', 'Unable to load module ' + t.name + ': ' + E.Message);
+          writeConsole('Unable to load module ' + t.name + ': ' + E.Message);
       end;
     until (FindNext(t) <> 0);
 

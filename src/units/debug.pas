@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.13 2004/03/30 12:22:55 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.14 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -11,14 +11,13 @@ interface
 
 
 uses
-	SysUtils,
-	dtypes;
+	SysUtils;
 	
  
 procedure initDebug();
 procedure cleanupDebug();
 
-procedure reportException(E : Exception; sourceFile : string = '');
+procedure reportException(E : Exception; const sourceFile : string = '');
 
 
 implementation
@@ -34,8 +33,7 @@ uses
 	Libc,
 {$ENDIF}
 	Classes,
-	console,
-	mudsystem;
+	console;
 
 
 {$IFDEF WIN32}
@@ -61,7 +59,7 @@ begin
 	Result := 1;
 end;
 
-procedure reportException(E : Exception; sourceFile : string = '');
+procedure reportException(E : Exception; const sourceFile : string = '');
 var
 	a : integer;
 	strings : TStringList;
@@ -113,7 +111,7 @@ begin
 		findSymbol(x[l]);
 end;
 
-procedure reportException(E : Exception; sourceFile : string = '');
+procedure reportException(E : Exception; const sourceFile : string = '');
 begin
 	E := ExceptObject as Exception;
 

@@ -2,7 +2,7 @@
 	Summary:
 		Online help interface
 
-	## $Id: mudhelp.pas,v 1.6 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: mudhelp.pas,v 1.7 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit mudhelp;
@@ -10,7 +10,6 @@ unit mudhelp;
 interface
 
 uses
-    fsys,
     dtypes;
 
 type
@@ -34,12 +33,12 @@ implementation
 
 uses
     SysUtils,
+    fsys,
     constants,
     strip,
     util,
     mudsystem,
-    skills,
-    AnsiIO;
+    skills;
 
 
 type

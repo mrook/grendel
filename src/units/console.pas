@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.12 2004/04/04 14:25:29 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.13 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -27,7 +27,7 @@ type
 		logFile : textfile;
 
 	public
-		constructor Create(moduleName : string);
+		constructor Create(const moduleName : string);
 		destructor Destroy(); override;
 	
 		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
@@ -200,7 +200,7 @@ end;
 
 
 { GConsoleLogWriter constructor }
-constructor GConsoleLogWriter.Create(moduleName : string);
+constructor GConsoleLogWriter.Create(const moduleName : string);
 begin
 	inherited Create();
 

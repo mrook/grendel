@@ -2,7 +2,7 @@
   Summary:
   	Clan routines
   
-  ##	$Id: clan.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
+  ##	$Id: clan.pas,v 1.4 2004/04/10 22:24:03 ***REMOVED*** Exp $
 }
 
 unit clan;
@@ -10,7 +10,6 @@ unit clan;
 interface
 
 uses
-	fsys,
 	dtypes;
 
 type
@@ -50,6 +49,7 @@ implementation
 
 uses
     SysUtils,
+	fsys,
     strip,
     console,
     mudsystem;
