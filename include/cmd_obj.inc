@@ -414,20 +414,7 @@ begin
     end
   else
     begin
-    found := false;
-    node := ch.objects.head;
-    while (node <> nil) do
-      begin
-      obj := node.element;
-
-      if (obj.wear_location > WEAR_NULL) and (pos(param, obj.short^) > 0) then
-        begin
-        found := true;
-        break;
-        end;
-
-      node := node.next;
-      end;
+    obj := ch.findEquipment(param);
 
     if (obj = nil) then
       ch.sendBuffer('You are not wearing this object.'#13#10)
