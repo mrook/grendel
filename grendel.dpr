@@ -1,6 +1,6 @@
 {
-  The Grendel Project - Win32 MUD Server
-  Copyright (c) 2000,2001 by Michiel Rook (Grimlord)
+  The Grendel Project - A Windows MUD Server
+  Copyright (c) 2000-2002 by Michiel Rook (Grimlord)
 
   Contact information:
   Webpage:            http://www.grendelproject.nl/
@@ -32,12 +32,12 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.63 2002/08/01 20:17:05 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.64 2002/08/21 19:51:32 ***REMOVED*** Exp $
 }
 
 program grendel;
 
-{$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000,2001 by Michiel Rook.'}
+{$DESCRIPTION 'The Grendel Project - A Windows MUD Server. Copyright (c) 2000-2002 by Michiel Rook.'}
 
 {$R grendel_icon.res}
 
@@ -672,6 +672,8 @@ end;
 // fail-safe device, will catch unhandled exceptions and reboot server
 procedure handleException(ExceptObject: TObject; ExceptAddr: Pointer); far;
 begin
+  Windows.MessageBox(0, 'help', 'kapot', MB_OK);
+  
   if (ExceptObject is EExternal) then
     begin
     writeLog('Uncaught external exception encountered:');
@@ -689,6 +691,7 @@ begin
   halt(1);
 end;
 
+
 var
   tm : TDateTime;
 
@@ -697,11 +700,11 @@ begin
 
   tm := Now();
 
-  bootServer();
-
   // initialize the 'fail-safe device' after boot
   ExceptProc := @handleException;
-  DebugHook := 1;
+  //DebugHook := 1;
+
+  bootServer();
 
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
