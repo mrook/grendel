@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.2 2004/02/27 22:24:20 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.3 2004/03/04 19:11:03 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -70,7 +70,7 @@ type
 		procedure push(v : variant);
 		function pop : variant;
 
-		procedure callMethod(classAddr, methodAddr : pointer; const signature : GSignature);
+		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 
     procedure load(cb : GCodeBlock);
 		procedure execute;
@@ -262,7 +262,7 @@ begin
     setLength(data, 0);
 end;
 
-procedure GContext.callMethod(classAddr, methodAddr : pointer; const signature : GSignature);
+procedure GContext.callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 var
 	i : integer;
   v, vd : variant;
@@ -270,7 +270,7 @@ var
 begin
   if (methodAddr = nil) then
     exit;
-
+    
   for i := length(signature.ParamTypes) - 1 downto 0 do
     begin
     v := stack[sp - i];
@@ -327,7 +327,7 @@ begin
     je @varInteger
 
     cmp edx, varBoolean
-    je @varInteger
+    je @varBoolean
 
     jmp @end
 
@@ -368,8 +368,6 @@ var
 begin
   if (block = nil) or (pc < 0) or (pc >= block.codeSize) then
     exit;
-
-//  writeln('GMC DEBUG: executing ', integer(owner), ' at ', pc, ' stack ', sp);
 
   try
     while (pc >= 0) and (pc < block.codeSize) do
@@ -615,12 +613,12 @@ begin
                 stack[sp - i] := stack[sp];
                 inc(pc, 5);
                 end;
-      _HALT : pc := block.codeSize;
+      	_HALT : pc := block.codeSize;
     else
       inc(pc);
     end;
   except
-    on E : EVariantError do
+    on E : Exception do
       begin
       vmError(owner, 'stack error: ' + E.Message);
 
