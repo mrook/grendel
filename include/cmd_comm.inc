@@ -372,6 +372,7 @@ begin
 
   act(AT_REPORT,'Auctioned $p at the price of '+inttostr(price)+'.',false,ch,obj,nil,TO_CHAR);
 
+  obj.seperate;
   obj.fromChar;
 
   auc.pulse := CPULSE_AUCTION;
