@@ -2,12 +2,14 @@
   Summary:
   	Interface with GMC virtual machine
   	
-	## $Id: progs.pas,v 1.6 2004/03/13 22:09:16 hemko Exp $
+	## $Id: progs.pas,v 1.7 2004/03/19 20:55:34 ***REMOVED*** Exp $
 }
 
 unit progs;
 
+
 interface
+
 
 {$M+}
 type
@@ -20,6 +22,7 @@ type
     end;
 
     GStringLib = class
+    published
       function left(const src, delim : string) : string; stdcall;
       function right(const src, delim : string) : string; stdcall;
       function match(const src, pattern : string) : boolean; stdcall;
@@ -27,15 +30,19 @@ type
       function StrToInt(const x : string) : integer; stdcall;
       function uppercase(const s : string) : string; stdcall;
     end;
+    
+    GGrendelLib = class
+    published
+    	function is_npc(target : integer) : boolean; stdcall;
+    end;
 {$M-}
 
-var
-   gmlib : GMathLib;
-   gslib : GStringLib;
 
-procedure init_progs;
+procedure initProgs();
+
 
 implementation
+
 
 uses
     Variants,
@@ -52,6 +59,12 @@ uses
     gvm,
     FastStringFuncs;
     
+
+var
+   gmlib : GMathLib;
+   gslib : GStringLib;
+   gglib : GGrendelLib;
+
 
 // GMathLib
 function GMathLib.cos(x : single) : single; stdcall;
@@ -105,6 +118,12 @@ begin
   Result := Sysutils.Uppercase(s);
 end;
 
+// GGrendelLib
+function GGrendelLib.is_npc(target : integer) : boolean; stdcall;
+begin
+	Result := GCharacter(target).IS_NPC;
+end;
+
 procedure grendelVMError(owner : TObject; const msg : string);
 begin
   if (owner <> nil) then
@@ -148,63 +167,34 @@ begin
   interpret(GNPC(owner), msg);
 end;
 
-procedure init_progs;
-var
-  sig : GSignature;
+procedure initProgs();
 begin
   gmlib := GMathLib.Create();
   gslib := GStringLib.Create();
+  gglib := GGrendelLib.Create();
+   
+  registerExternalMethod('cos', gmlib, varSingle, [varSingle]);
+  registerExternalMethod('sin', gmlib, varSingle, [varSingle]);
+  registerExternalMethod('tan', gmlib, varSingle, [varSingle]);
+  registerExternalMethod('random', gmlib, varInteger, [varInteger]);
 
-  sig.resultType := varSingle;
-  setLength(sig.paramTypes, 1);
-  sig.paramTypes[0] := varSingle;
+  registerExternalMethod('StrToInt', gslib, varInteger, [varString]);
 
-  registerExternalMethod('cos', gmlib, gmlib.MethodAddress('cos'), sig);
-  registerExternalMethod('sin', gmlib, gmlib.MethodAddress('sin'), sig);
-  registerExternalMethod('tan', gmlib, gmlib.MethodAddress('tan'), sig);
+  registerExternalMethod('left', gslib, varString, [varString, varString]);
+  registerExternalMethod('right', gslib, varString, [varString, varString]);
 
-  sig.resultType := varInteger;
-  setLength(sig.paramTypes, 1);
-  sig.paramTypes[0] := varInteger;
+  registerExternalMethod('match', gslib, varBoolean, [varString, varString]);
 
-  registerExternalMethod('random', gmlib, gmlib.MethodAddress('random'), sig);
+  registerExternalMethod('IntToStr', gslib, varString, [varInteger]);
 
-  sig.resultType := varInteger;
-  setLength(sig.paramTypes, 1);
-  sig.paramTypes[0] := varString;
+  registerExternalMethod('uppercase', gslib, varString, [varString]);
 
-  registerExternalMethod('StrToInt', gslib, gslib.MethodAddress('StrToInt'), sig);
-
-  sig.resultType := varString;
-  setLength(sig.paramTypes, 2);
-  sig.paramTypes[0] := varString;
-  sig.paramTypes[1] := varString;
-
-  registerExternalMethod('left', gslib, gslib.MethodAddress('left'), sig);
-  registerExternalMethod('right', gslib, gslib.MethodAddress('right'), sig);
-
-  sig.resultType := varBoolean;
-  setLength(sig.paramTypes, 2);
-  sig.paramTypes[0] := varString;
-  sig.paramTypes[1] := varString;
-
-  registerExternalMethod('match', gslib, gslib.MethodAddress('match'), sig);
-
-  sig.resultType := varString;
-  setLength(sig.paramTypes, 1);
-  sig.paramTypes[0] := varInteger;
-  
-  registerExternalMethod('IntToStr', gslib, gslib.MethodAddress('IntToStr'), sig);
-
-  sig.resultType := varString;
-  setLength(sig.paramTypes, 1);
-  sig.paramTypes[0] := varString;
-  
-  registerExternalMethod('uppercase', gslib, gslib.MethodAddress('uppercase'), sig);
+	registerExternalMethod('is_npc', gglib, varBoolean, [varInteger]);
 
   setVMError(grendelVMError);
   setSystemTrap(grendelSystemTrap);
   setExternalTrap(grendelExternalTrap);
 end;
+
 
 end.
