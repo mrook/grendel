@@ -1,34 +1,24 @@
 [Closed Files]
-File_0=SourceModule,'G:\Development\Grendel\include\cmd_move.inc',0,1,616,3,630,0,0
-File_1=SourceModule,'G:\Development\Grendel\include\cmd_imm.inc',0,1,1424,5,1448,0,0
-File_2=SourceModule,'G:\Development\Grendel\include\cmd_build.inc',0,1,448,1,459,0,0
+File_0=SourceModule,'G:\Development\Grendel\include\cmd_build.inc',0,1,713,23,725,0,0
+File_1=SourceModule,'G:\Development\Grendel\include\cmd_move.inc',0,1,616,3,630,0,0
+File_2=SourceModule,'G:\Development\Grendel\include\cmd_imm.inc',0,1,1424,5,1448,0,0
 File_3=SourceModule,'G:\Development\Grendel\units\mudthread.pas',0,1,521,30,536,0,0
 File_4=SourceModule,'G:\Development\Grendel\units\mudsystem.pas',0,1,123,37,132,0,0
 File_5=SourceModule,'G:\Development\Grendel\units\dtypes.pas',0,1,480,22,489,0,0
 File_6=SourceModule,'G:\Development\Grendel\units\update.pas',0,1,415,1,429,0,0
 
 [Modules]
-Module0=G:\Development\Grendel\units\area.pas
-Module1=G:\Development\Grendel\convert.dpr
-Module2=G:\Development\Grendel\units\chars.pas
-Module3=G:\Development\Grendel\units\constants.pas
-Module4=G:\Development\Grendel\units\util.pas
+Module0=G:\Development\Grendel\convert.dpr
+Module1=G:\Development\Grendel\units\constants.pas
+Module2=G:\Development\Grendel\units\util.pas
+Module3=G:\Development\Grendel\units\area.pas
+Module4=G:\Development\Grendel\units\chars.pas
 Module5=G:\Development\Grendel\units\progs.pas
 Module6=G:\Development\Grendel\units\fight.pas
 Count=7
 EditWindowCount=1
 
-[G:\Development\Grendel\units\area.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
 [G:\Development\Grendel\convert.dpr]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[G:\Development\Grendel\units\chars.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -39,6 +29,16 @@ FormState=0
 FormOnTop=0
 
 [G:\Development\Grendel\units\util.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\area.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\chars.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -59,7 +59,7 @@ FormOnTop=0
 
 [EditWindow0]
 ViewCount=7
-CurrentView=3
+CurrentView=0
 View0=0
 View1=1
 View2=2
@@ -73,7 +73,7 @@ Create=1
 Visible=1
 State=0
 Left=200
-Top=113
+Top=126
 Width=804
 Height=579
 MaxLeft=-1
@@ -90,10 +90,10 @@ BottomPanelData=0000040000000000000000000000000000000000000000000001000000000000
 
 [View0]
 Module=G:\Development\Grendel\convert.dpr
-CursorX=49
-CursorY=388
-TopLine=373
-LeftCol=7
+CursorX=39
+CursorY=268
+TopLine=257
+LeftCol=1
 
 [View1]
 Module=G:\Development\Grendel\units\util.pas
@@ -106,14 +106,14 @@ LeftCol=1
 Module=G:\Development\Grendel\units\constants.pas
 CursorX=10
 CursorY=313
-TopLine=301
+TopLine=304
 LeftCol=1
 
 [View3]
 Module=G:\Development\Grendel\units\area.pas
-CursorX=28
-CursorY=18
-TopLine=1
+CursorX=21
+CursorY=952
+TopLine=928
 LeftCol=1
 
 [View4]
@@ -216,22 +216,6 @@ SelectedItem=
 ExpandedItems=
 HiddenCategories=Legacy
 ShowStatusBar=1
-
-[WatchWindow]
-Create=1
-Visible=1
-State=0
-Left=21
-Top=478
-Width=834
-Height=152
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=826
-ClientHeight=128
-TBDockHeight=152
-LRDockWidth=705
-Dockable=1
 
 [CodeExplorer@EditWindow0]
 Create=1

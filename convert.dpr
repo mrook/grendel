@@ -90,6 +90,37 @@ const SMAUG_ACT_NPC = BV00;
       SMAUG_SECT_SWAMP = 15;
       SMAUG_SECT_MAX = 16;
 
+      SMAUG_EX_ISDOOR = BV00;
+      SMAUG_EX_CLOSED = BV01;
+      SMAUG_EX_LOCKED = BV02;
+      SMAUG_EX_SECRET = BV03;
+      SMAUG_EX_SWIM = BV04;
+      SMAUG_EX_PICKPROOF = BV05;
+      SMAUG_EX_FLY = BV06;
+      SMAUG_EX_CLIMB = BV07;
+      SMAUG_EX_DIG = BV08;
+      SMAUG_EX_EATKEY = BV09;
+      SMAUG_EX_NOPASSDOOR = BV10;
+      SMAUG_EX_HIDDEN = BV11;
+      SMAUG_EX_PASSAGE = BV12;
+      SMAUG_EX_PORTAL = BV13;
+      SMAUG_EX_RES1 = BV14;
+      SMAUG_EX_RES2 = BV15;
+      SMAUG_EX_xCLIMB = BV16;
+      SMAUG_EX_xENTER = BV17;
+      SMAUG_EX_xLEAVE = BV18;
+      SMAUG_EX_xAUTO = BV19;
+      SMAUG_EX_NOFLEE = BV20;
+      SMAUG_EX_xSEARCHABLE = BV21;
+      SMAUG_EX_BASHED = BV22;
+      SMAUG_EX_BASHPROOF = BV23;
+      SMAUG_EX_NOMOB = BV24;
+      SMAUG_EX_WINDOW = BV25;
+      SMAUG_EX_xLOOK = BV26;
+      SMAUG_EX_ISBOLT = BV27;
+      SMAUG_EX_BOLTED = BV28;
+
+
 var
    are : GArea;
    af : GFileReader;
@@ -97,7 +128,9 @@ var
    npcindex : GNPCIndex;
    room : GRoom;
    ex : GExit;
-   act_flags : integer;
+   reset : GReset;
+   act_flags : cardinal;
+   tmp, arg1, arg2, arg3 : integer;
    f : textfile;
    node, node_ex : GListNode;
 
@@ -190,7 +223,42 @@ begin
 
               // exit_flags key to_room
               act_flags := af.readCardinal;
-              act_flags := af.readInteger;
+              ex.flags := 0;
+
+              if (IS_SET(act_flags, SMAUG_EX_ISDOOR)) then
+                SET_BIT(ex.flags, EX_ISDOOR);
+
+              if (IS_SET(act_flags, SMAUG_EX_CLOSED)) then
+                SET_BIT(ex.flags, EX_CLOSED);
+
+              if (IS_SET(act_flags, SMAUG_EX_LOCKED)) then
+                SET_BIT(ex.flags, EX_LOCKED);
+
+              if (IS_SET(act_flags, SMAUG_EX_SECRET)) then
+                SET_BIT(ex.flags, EX_SECRET);
+
+              if (IS_SET(act_flags, SMAUG_EX_SWIM)) then
+                SET_BIT(ex.flags, EX_SWIM);
+
+              if (IS_SET(act_flags, SMAUG_EX_PICKPROOF)) then
+                SET_BIT(ex.flags, EX_PICKPROOF);
+
+              if (IS_SET(act_flags, SMAUG_EX_FLY)) then
+                SET_BIT(ex.flags, EX_FLY);
+
+              if (IS_SET(act_flags, SMAUG_EX_CLIMB)) then
+                SET_BIT(ex.flags, EX_CLIMB);
+
+              if (IS_SET(act_flags, SMAUG_EX_PORTAL)) then
+                SET_BIT(ex.flags, EX_PORTAL);
+
+              if (IS_SET(act_flags, SMAUG_EX_BASHPROOF)) then
+                SET_BIT(ex.flags, EX_NOBREAK);
+
+              if (IS_SET(act_flags, SMAUG_EX_NOMOB)) then
+                SET_BIT(ex.flags, EX_NOMOB);
+
+              tmp := af.readInteger;
               ex.vnum := af.readInteger;
               end
             else
@@ -215,18 +283,17 @@ begin
         if (s <> '#0') then
           begin
           npcindex := GNPCIndex.Create;
-          npc_reset.insertLast(npcindex);
+          npc_list.insertLast(npcindex);
 
           // vnum
           npcindex.vnum := strtoint(striprbeg(s, '#'));
 
-          // name
+          // name and short name
           s := af.readLine;
-          npcindex.name := stripl(s, '~');
+          s := af.readLine;
 
-          // short name
-          s := af.readLine;
-          npcindex.short := stripl(s, '~');
+          npcindex.name := stripl(s, '~');
+          npcindex.short := npcindex.name;
 
           // long name
           npcindex.long := '';
@@ -239,6 +306,9 @@ begin
 
           // delete the last #13#10
           npcindex.long := copy(npcindex.long, 1, length(npcindex.long) - 2);
+
+          if (npcindex.long[length(npcindex.long)] = '.') then
+            delete(npcindex.long, length(npcindex.long), 1);
 
           // description
           repeat
@@ -343,7 +413,50 @@ begin
             act_flags := af.readInteger;
             end;
           end;
-      until (s = '#0');
+      until (s = '#0')
+    else
+    if (s = '#RESETS') then
+      repeat
+        s := af.readLine;
+
+        if (s <> 'S') then
+          begin
+          reset := GReset.Create;
+          reset.area := are;
+          are.resets.insertLast(reset);
+
+          reset.reset_type := stripl(s, ' ')[1];
+          s := striprbeg(s, ' ');
+
+          s := striprbeg(s, ' ');
+          arg1 := strtointdef(stripl(s, ' '), 0);
+
+          s := striprbeg(s, ' ');
+          arg2 := strtointdef(stripl(s, ' '), 0);
+
+          s := striprbeg(s, ' ');
+          arg3 := strtointdef(stripl(s, ' '), 0);
+
+          case reset.reset_type of
+            'M' : begin
+                  reset.arg1 := arg1;
+                  reset.arg2 := arg3;
+                  reset.arg3 := arg2;
+                  end;
+            'D' : begin
+                  reset.arg1 := arg1;
+                  reset.arg2 := arg2 + 1;
+                  reset.arg3 := arg3;
+                  end;
+            else
+                  begin
+                  reset.arg1 := arg1;
+                  reset.arg2 := arg2;
+                  reset.arg3 := arg3;
+                  end;
+          end;
+          end;
+      until (s = 'S');
     end;
 
   af.Free;
@@ -390,7 +503,7 @@ begin
       begin
       ex := node_ex.element;
 
-      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.exit_flag, ' ', ex.key);
+      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
 
       if (length(ex.keyword) > 0) then
         writeln(f, ' ', ex.keyword)
@@ -409,7 +522,7 @@ begin
   writeln(f);
   writeln(f, '#MOBILES');
 
-  node := npc_reset.head;
+  node := npc_list.head;
   while (node <> nil) do
     begin
     npcindex := node.element;
@@ -422,6 +535,20 @@ begin
 
     writeln(f, npcindex.level, ' ', npcindex.sex);
     writeln(f, npcindex.natural_ac, ' ', npcindex.act_flags, ' ', npcindex.gold, ' ', npcindex.height, ' ', npcindex.weight);
+
+    node := node.next;
+    end;
+
+  writeln(f, '#END');
+  writeln(f);
+  writeln(f, '#RESETS');
+
+  node := are.resets.head;
+  while (node <> nil) do
+    begin
+    reset := node.element;
+
+    writeln(f, reset.reset_type, ' ', reset.arg1, ' ', reset.arg2, ' ', reset.arg3);
 
     node := node.next;
     end;
