@@ -558,7 +558,10 @@ begin
   if (comparestr(s, 'do_allow') = 0) then
     g := do_allow
   else
-    begin
+  if (comparestr(s, 'do_last') = 0) then
+    g := do_last
+  else
+    begin                                                     
     g := nil;
 
     //bugreport('findCommand', 'mudthread.pas', s + ' unknown',

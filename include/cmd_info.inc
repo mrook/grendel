@@ -1502,3 +1502,69 @@ begin
     ch.sendBuffer('Ok, password changed.'#13#10);
     end;
 end;
+
+{ Last-login of player - Nemesis }
+procedure do_last(ch:GCharacter;param:string);
+var vict : GCharacter;
+    s, g, arg, arg2, race, last_login : string;
+    f : textfile;
+    level : integer;
+begin
+  param := one_argument(param, arg);
+  one_argument(param, arg2);
+
+  if (length(arg) = 0) then
+    begin
+    ch.sendBuffer('Usage: LAST <playername> [info]'#13#10);
+    exit;
+    end;
+
+  vict := FindCharWorld(ch, arg);
+
+  if (vict <> nil) and (not vict.IS_NPC) then
+    begin
+    act(AT_REPORT,vict.name + ' is currently online.',false,ch,nil,nil,TO_CHAR);
+    exit;
+    end
+  else
+    begin
+    last_login := '';
+
+    if (not FileExists('players\' + arg + '.usr')) then
+      begin
+      ch.sendBuffer('That player cannot be found.'#13#10);
+      exit;
+      end
+    else
+      begin
+      assignfile(f,'players\' + arg + '.usr');
+      reset(f);
+
+      repeat
+        readln(f, s);
+
+        g := uppercase(stripl(s, ':'));
+
+        if (g = 'LEVEL') then
+          level := strtoint(striprbeg(s, ' '))
+        else
+        if (g = 'RACE') then
+          race := striprbeg(s, ' ')
+        else
+        if (g = 'LAST-LOGIN') then
+          last_login := striprbeg(s, ' ');
+
+      until eof(f);
+
+      closefile(f);
+
+      if (uppercase(arg2) = 'INFO') then
+        act(AT_REPORT,arg + ' is a level ' + inttostr(level) + ' ' + race + '.',false,ch,nil,nil,TO_CHAR);
+
+      if (length(last_login) = 0) then
+        act(AT_REPORT, arg + ' has been away too long to remember.', false, ch, nil, nil, TO_CHAR)
+      else
+        act(AT_REPORT,arg + ' was last on at: ' + last_login + '.',false,ch,nil,nil,TO_CHAR);
+      end;
+    end;
+end;
