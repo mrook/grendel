@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.9 2004/03/06 20:18:40 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.10 2004/03/08 21:03:45 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -146,7 +146,7 @@ begin
       act(AT_SLAY,'$n slays you in cold blood!', false, ch, nil, t, TO_VICT);
       act(AT_SLAY,'$n slays $N in cold blood!', false, ch, nil, t, TO_NOTVICT);
       
-      dam := UMax(t.max_hp, 800);
+      dam := UMax(t.max_hp, t.hp * 2);
       damage(ch, t, dam, TYPE_SLAY);
       end;
     end;
