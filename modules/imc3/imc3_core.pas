@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.19 2003/10/31 16:18:03 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.20 2003/11/02 20:22:05 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -48,6 +48,8 @@ type
 		procedure handleBeep(packet : GPacket_I3);
 		procedure handleWhoReq(packet : GPacket_I3);
 		procedure handleWhoReply(packet : GPacket_I3);
+		procedure handleFingerReq(packet : GPacket_I3);
+		procedure handleFingerReply(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -70,7 +72,8 @@ type
 		procedure sendLocateRequest(originator, user : string);
 		procedure sendTell(from_user, to_user : string; mud : GMud_I3; msg : string);
 		procedure sendBeep(from_user, to_user : string; mud : GMud_I3);
-		procedure sendWho(from_user : string; mud : GMud_I3);
+		procedure sendWhoReq(from_user : string; mud : GMud_I3);
+		procedure sendFingerReq(from_user, to_user : string; mud : GMud_I3);
 		
 		procedure shutdown();
 		
@@ -78,6 +81,9 @@ type
 		destructor Destroy;
 		
 		procedure Execute(); override;
+		
+		property connectedRouter : GRouter_I3 read router;
+		property isConnected : boolean read connected;
 	end;
 
 
@@ -553,18 +559,19 @@ end;
 
 procedure GInterMud.handleLocateReply(packet : GPacket_I3);
 var
-	mudname, visname : string;
+	mudname, visname, status : string;
 	pl : GPlayer;
 begin
 	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
 	
 	mudname := GString(packet.fields[6]).value;
 	visname := GString(packet.fields[7]).value;
+	status := GString(packet.fields[9]).value;
 	
 	if (pl <> nil) then
 		begin
 		debug('Found player ' + packet.target_username + ' => ' + pl.name, 2);
-		pl.sendBuffer('Player "' + visname + '" was located on "' + mudname + '".'#13#10);
+		pl.sendBuffer('Player "' + visname + '" was located on "' + mudname + '" (' + status + ').'#13#10);
 		end
 	else
 		debug('Could not find player "' + packet.target_username + '" referenced in locate-reply packet.', 1);
@@ -678,6 +685,56 @@ begin
 		end;	
 end;
 
+procedure GInterMud.handleFingerReq(packet : GPacket_I3);
+var
+	username : string;
+	pl : GPlayer;
+begin
+	username := GString(packet.fields[6]).value;
+	pl := GPlayer(findPlayerWorldEx(nil, username));
+	
+	if (pl <> nil) then
+		begin
+		end
+	else
+		begin
+		debug('Could not find player "' + username + '" referenced in finger-req packet.', 1);
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+		end;	
+end;
+
+procedure GInterMud.handleFingerReply(packet : GPacket_I3);
+var
+	pl : GPlayer;
+	visname, title, realname, email, last, level, extra : string;
+begin
+	visname := GString(packet.fields[6]).value;
+	title := GString(packet.fields[7]).value;
+	realname := GString(packet.fields[8]).value;
+	email := GString(packet.fields[9]).value;
+	last := GString(packet.fields[10]).value;
+	level := GString(packet.fields[13]).value;
+	extra := GString(packet.fields[14]).value;
+	
+	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+	
+	if (pl <> nil) then
+		begin
+		sendToPlayer(pl, Format('I3 finger information for %s@%s:'#13#10#13#10, [visname, packet.originator_mudname]));
+		sendToPlayer(pl, 'Title: ' + title + #13#10);
+		sendToPlayer(pl, 'Real name: ' + realname + #13#10);
+		sendToPlayer(pl, 'Level: ' + level + #13#10);
+		sendToPlayer(pl, 'E-mail: ' + email + #13#10);
+		sendToPlayer(pl, 'Extra info: ' + extra + #13#10);
+		sendToPlayer(pl, 'Last on: ' + last + #13#10);
+		end
+	else
+		begin
+		debug('Could not find player "' + packet.target_username + '" referenced in finger-reply packet.', 1);
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+		end;	
+end;
+
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
@@ -713,10 +770,19 @@ begin
   if (packet.packet_type = 'who-reply') then
   	handleWhoReply(packet)
   else
+  if (packet.packet_type = 'finger-req') then
+  	handleFingerReq(packet)
+  else
+  if (packet.packet_type = 'finger-reply') then
+  	handleFingerReply(packet)
+  else
   if (packet.packet_type = 'error') then
   	handleError(packet)
   else
-  	writeConsole('I3: unknown packet "' + packet.packet_type + '"');
+  	begin
+  	debug('unknown packet "' + packet.packet_type + '"', 0);
+		debug(packet.toString(), 0);
+  	end;
 end;
 
 procedure GInterMud.shutdown();
@@ -969,9 +1035,20 @@ begin
 end;
 
 // void I3_send_who( CHAR_DATA *ch, char *mud ) 
-procedure GInterMud.sendWho(from_user : string; mud : GMud_I3);
+procedure GInterMud.sendWhoReq(from_user : string; mud : GMud_I3);
 begin
 	writeHeader('who-req', this_mud.name, from_user, mud.name, '');
+	writeBuffer('})'#13);
+	sendPacket();	
+end;
+
+// void I3_send_finger( CHAR_DATA *ch, char *user, char *mud ) 
+procedure GInterMud.sendFingerReq(from_user, to_user : string; mud : GMud_I3);
+begin
+	writeHeader('finger-req', this_mud.name, from_user, mud.name, '');
+	writeBuffer('"');
+	writeBuffer(escape(to_user));
+	writeBuffer('",');
 	writeBuffer('})'#13);
 	sendPacket();	
 end;

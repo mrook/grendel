@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.16 2003/10/31 16:18:03 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.17 2003/11/02 20:22:05 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -51,12 +51,25 @@ begin
 	
 	if (length(cmd) = 0) then
 		begin
-		ch.sendBuffer('Usage: I3 <mudlist/chanlist/chat/listen/tell/locate/beep/who>'#13#10);
+		ch.sendBuffer('Usage: I3 <status/mudlist/chanlist/chat/listen/tell/locate/beep/who/finger>'#13#10);
 		exit;
 		end;
 		
+	if (prep(cmd) = 'STATUS') then
+		begin
+		if (not i3.isConnected) then
+			ch.sendBuffer('Not connected.'#13#10)
+		else
+			begin
+			ch.sendBuffer('Connected to ' + i3.connectedRouter.name + ' (' + i3.connectedRouter.ipaddress + ' ' + IntToStr(i3.connectedRouter.port) + ')'#13#10);
+			ch.sendBuffer('Known muds: ' + IntToStr(mudList.size()) + #13#10);
+			ch.sendBuffer('Known channels: ' + IntToStr(chanList.size()) + #13#10);
+			end;
+		end
+	else
 	if (prep(cmd) = 'MUDLIST') then
 		begin
+		param := one_argument(param, arg);
 		ch.sendPager(pad_string('Name', 30) + pad_string('Type', 10) + pad_string('Mudlib', 20) + pad_string('Address', 15) + #13#10#13#10);
 		
 		iterator := mudList.iterator();
@@ -295,7 +308,47 @@ begin
 			exit
 			end;
 		
-		i3.sendWho(ch.name, mud);
+		i3.sendWhoReq(ch.name, mud);
+		ch.sendBuffer('Ok.'#13#10);
+		end
+	else
+	if (prep(cmd) = 'FINGER') then
+		begin
+		if (length(param) = 0) then
+			begin
+			ch.sendBuffer('Usage: I3 finger <user@mud>'#13#10);
+			exit;
+			end;
+
+		if (pos('@', param) = 0) then
+			begin
+			ch.sendBuffer('You should specify a person and a mud. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		s := right(param, '@');
+		t := lowercase(left(param, '@'));
+		mud := findMud(s);
+		
+		if (mud = nil) then
+			begin
+			ch.sendBuffer('No such mud known. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		if (mud.status >= 0) then
+			begin
+			ch.sendBuffer('Mud is down.'#13#10);
+			exit;
+			end;
+			
+		if (not mud.finger) then
+			begin
+			ch.sendBuffer('Mud does not support the ''finger'' command.'#13#10);
+			exit
+			end;
+		
+		i3.sendFingerReq(ch.name, t, mud);
 		ch.sendBuffer('Ok.'#13#10);
 		end
 	else
