@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.39 2001/08/18 10:28:31 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.40 2001/10/04 21:07:34 ***REMOVED*** Exp $
 
 unit constants;
 
@@ -6,9 +6,9 @@ interface
 
 const 
 {$IFDEF LINUX}
-  version_number = 'v0.4.0a-linux';
+  version_number = 'v0.4.1-linux';
 {$ELSE}
-  version_number = 'v0.4.0a';
+  version_number = 'v0.4.1';
 {$ENDIF}
   version_info = 'The Grendel Project - A Win32 MUD Server';
   version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
@@ -294,6 +294,7 @@ const ROOM_DARK=BV00;           { can't see without light }
       ROOM_TELEPORT=BV15;       { teleporting room }
       ROOM_NOFLOOR=BV16;        { no floor -> when not flying, ch falls down }
       ROOM_MANAROOM=BV17;       { manaroom, fast magic regeneration }
+      ROOM_NOTRADE=BV18;        { no dropping, no giving, no getting }
       ROOM_PROTO = cardinal(BV31);
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',

@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.3 2001/10/04 20:58:52 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.4 2001/10/04 21:07:34 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -13,6 +13,12 @@ begin
   if (length(arg)=0) and (length(arg2) = 0) then
     begin
     ch.sendBuffer('Get what?'#13#10);
+    exit;
+    end;
+
+  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+    begin
+    ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
     end;
 
@@ -210,7 +216,7 @@ begin
     end;
 
   // prevent trading in battlegrounds
-  if (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
@@ -218,6 +224,12 @@ begin
 
   if (param = 'all') then
     begin
+    if (IS_SET(ch.room.flags, ROOM_NODROPALL)) then
+      begin
+      ch.sendBuffer( 'That is not allowed here.'#13#10);
+      exit;
+      end;
+    
     node := ch.objects.head;
 
     while (node <> nil) do
@@ -849,6 +861,13 @@ begin
     exit;
     end;
 
+  // prevent trading in battlegrounds
+  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+    begin
+    ch.sendBuffer( 'That is not allowed here.'#13#10);
+    exit;
+    end;
+
   if (length(arg) > 0) and (uppercase(arg2) = 'COINS') and (length(arg3) > 0) then
     begin
     vict := ch.room.findChar(ch,arg3);
@@ -935,13 +954,6 @@ begin
   if (vict = nil) then
     begin
     ch.sendBuffer('They are not here.'#13#10);
-    exit;
-    end;
-
-  // prevent trading in battlegrounds
-  if (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
-    begin
-    ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
     end;
 
