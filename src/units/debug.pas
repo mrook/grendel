@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.8 2004/03/13 15:47:51 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.9 2004/03/18 15:13:34 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -11,6 +11,7 @@ interface
 
 
 uses
+	SysUtils,
 	dtypes;
 	
 
@@ -43,9 +44,7 @@ var
 procedure initDebug();
 procedure cleanupDebug();
 
-{$IFDEF LINUX}
-procedure listBackTrace();
-{$ENDIF}
+procedure reportException(E : Exception);
 
 
 implementation
@@ -60,7 +59,6 @@ uses
 {$IFDEF LINUX}
 	Libc,
 {$ENDIF}
-	SysUtils,
 	Classes,
 	console,
 	mudsystem;
@@ -154,6 +152,10 @@ function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; s
 begin
 	Result := 1;
 end;
+
+procedure reportException(E : Exception);
+begin
+end;
 {$ENDIF}
 
 {$IFDEF LINUX}
@@ -176,25 +178,29 @@ begin
 	ret := backtrace(x, 16);
 	
 	for l := 0 to ret - 1 do
-		begin
 		findSymbol(x[l]);
-		//writeln('backtrace: ', IntToHex(integer(x[l]), 8));
-		end;
 end;
 
-procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
-var
-	E : Exception;
+procedure reportException(E : Exception);
 begin
 	E := ExceptObject as Exception;
 
 	writeln('[EX] ' + E.ClassName + ': ' + E.Message);
 	
 	listBackTrace();
+end;
 
-	if (E is EControlC) then
-		grace_exit := true;
+var
+	oldExceptProc :  pointer;
 
+procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
+var
+	E : Exception;
+begin
+	ExceptProc := oldExceptProc;
+	
+	reportException(ExceptObject as Exception);
+	
 	halt;
 end;
 {$ENDIF}
@@ -214,6 +220,7 @@ begin
 	JclAddExceptNotifier(AnyExceptionNotify);
 {$ENDIF}
 {$IFDEF LINUX}
+	oldExceptProc := exceptProc;
 	ExceptProc := @ExceptHandler;
 {$ENDIF}
 end;
