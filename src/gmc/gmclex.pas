@@ -13,7 +13,7 @@ type
 			end;
 
 const 
-			KWSize = 29;
+			KWSize = 30;
 			KWTable : array[1..KWSize] of Keyword = (
 																							(kw:'true'; state:_TRUE), 
 																							(kw:'false'; state:_FALSE),
@@ -43,7 +43,8 @@ const
 																							(kw:'string'; state:_STRING),
 																							(kw:'external'; state:_EXTERNAL),
 																							(kw:'asm'; state:_ASM),
-																							(kw:'require'; state:_REQUIRE)
+																							(kw:'require'; state:_REQUIRE),
+																							(kw:'export'; state:_EXPORT)
 																					 	  );
 
 
