@@ -29,6 +29,9 @@ to (regular) change. Feel free to comment on this by mail.
 - Timers.pas: Threaded timers
 - Strip.pas: Various string handling routines
 - Util.pas: Misc. useful utility routines
+- Systray.pas: (only on Win32 platforms) Hooks into the system tray icon
+  and allows for dynamic registration of menu handlers
+- Console.pas: Provides hooks for console logging of the server. 
 
 The other units are quite specific to the server functionality itself.
 
