@@ -578,7 +578,12 @@ begin
   end;
 end;
 
-function cleanIdentifier(e : Env_Entry) : string;
+function cleanIdentifier(const id : string) : string;
+begin
+	Result := right(id, ':');
+end;
+
+function reportEnvEntry(e : Env_Entry) : string;
 var
 	typ : string;
 begin
@@ -590,7 +595,7 @@ begin
 		VARTYPE_STATIC: typ := 'static variabel';
 	end;
 	
-	Result := typ + ' "' + right(e.id, ':') + '"';
+	Result := typ + ' "' + cleanIdentifier(e.id) + '"';
 end;
 
 function coerce(expr : Expr; src, dest: integer) : Expr;
@@ -887,6 +892,12 @@ begin
   else
   if (expr is Expr_Func) then
     begin
+    if (not lookupEnv(Expr_Func(expr).id).used) then
+    	begin
+    	Result := nil;
+    	exit;
+    	end;
+    	
     Expr_Func(expr).body := optimizeExpr(Expr_Func(expr).body);
     end
   else
@@ -1365,12 +1376,12 @@ begin
 
 		if (e.varTyp in [VARTYPE_LOCAL,VARTYPE_GLOBAL,VARTYPE_STATIC]) and (not e.used) then
 			begin
-			compilerWarning(e.lineNum, e.fname, 'Hint: ' + cleanIdentifier(e) + ' possibly unused');
+			compilerWarning(e.lineNum, e.fname, reportEnvEntry(e) + ' unused');
 			end;
 			
 		if (e.varTyp in [VARTYPE_FUNCTION]) and (e.lbl > -1) and (not e.used) then
 			begin
-			compilerWarning(e.lineNum, e.fname, 'Hint: ' + cleanIdentifier(e) + ' possibly unused');
+			compilerWarning(e.lineNum, e.fname, reportEnvEntry(e) + ' unused, if incorrect add "export ' + cleanIdentifier(e.id) + '" at the end of the file');
 			end;
 		end;
 	
@@ -1397,7 +1408,7 @@ begin
       begin
       e := environment[a];
    
-      if (e.lbl > 0) then
+      if (e.lbl > 0) and (e.used) then
         begin
         emit('$SYMBOL ' + e.id + ' L' + IntToStr(e.lbl));
         end;
