@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.11 2001/08/16 10:53:56 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.12 2001/09/02 21:48:58 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -638,7 +638,9 @@ begin
         pad_string(con_states[conn.state], 16) + '   ' +
         pad_string(conn.sock.ip_string, 32) + '   ' +
         s,false,ch,nil,nil,TO_CHAR);
-  end;
+    end;
+  
+  iterator.Free();
 end;
 
 procedure do_bgset(ch:GCharacter;param:string);
@@ -934,7 +936,13 @@ end;
 
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
 procedure do_uptime(ch:GCharacter;param:string);
-var f:file;
+var 
+  f : file;
+  i, total : integer;
+  hv : GHashValue;
+  room : GRoom;
+  char : GCharacter;
+  iterator : GIterator;
 begin
   calculateonline;
   act(AT_REPORT,'[' + version_info + ', ' + version_number + '] '#13#10 + system_info.mud_name+#13#10,false,ch,nil,nil,TO_CHAR);
@@ -945,6 +953,61 @@ begin
   status:=GetHeapStatus;
   act(AT_REPORT,'Heap allocated:    ' + inttostr(status.totalallocated)+' byte(s)',false,ch,nil,nil,TO_CHAR);
 {$ENDIF}
+
+  total := 0;
+  iterator := room_list.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    room := GRoom(iterator.next());
+    
+    inc(total, room.InstanceSize());
+    inc(total, room.exits.getSize() * GExit.InstanceSize());
+    inc(total, room.tracks.getSize() * GTrack.InstanceSize());
+    inc(total, room.extra.getSize() * GExtraDescription.InstanceSize());
+    end;
+
+  iterator.Free();
+  ch.sendBuffer('Rooms: ' + IntToStr(total) + #13#10);
+  ch.sendBuffer('NPC indices: ' + IntToStr(GNPCIndex.InstanceSize() * npc_list.getSize()) + #13#10);
+  ch.sendBuffer('Object indices: ' + IntToStr(GObjectIndex.InstanceSize() * obj_list.getSize()) + #13#10);
+  ch.sendBuffer('Object instances: ' + IntToStr(GObject.InstanceSize() * object_list.getSize()) + #13#10);
+
+  total := 0;
+  iterator := char_list.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    char := GCharacter(iterator.next());
+    
+    if (char is GPlayer) then
+      inc(total, GPlayer.InstanceSize())
+    else
+    if (char is GNPC) then
+      inc(total, GNPC.InstanceSize());
+    end; 
+  
+  iterator.Free();
+  ch.sendBuffer('Characters: ' + IntToStr(total) + #13#10);
+
+  total := 0;
+
+  for i := 0 to str_hash.hashsize - 1 do
+    begin
+    iterator := str_hash.bucketList[i].iterator();
+
+    while (iterator.hasNext()) do
+      begin
+      hv := GHashValue(iterator.next());
+
+      inc(total, hv.refcount * length(GString(hv.value).value));
+      end;
+
+    iterator.Free();
+    end;
+    
+  ch.sendBuffer('String buffer: ' + IntToStr(total) + #13#10);
+  ch.sendBuffer('Programs: ' + IntToStr(GCodeBlock.InstanceSize() * codeCache.size()) + #13#10);
 end;
 
 procedure do_switch(ch:GCharacter;param:string);
