@@ -38,6 +38,7 @@ Grendel's TODO list with probable release date/version
 ! (0.4.0) have mudstatus save when shutting down (mudstatus defined as: mudtime, weather, etc.)
 ! (0.4.0) bugtrack/report system (webbased)
 ! (0.4.0) racial abilities
+! (0.4.0) modularized mud, pluggable objects (like timers, sets of commands, etc.)
 
 
 * (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
@@ -59,7 +60,6 @@ Grendel's TODO list with probable release date/version
 - (0.4.2) reloadarea command
 
 - (0.4.3) more help text
-- (0.4.3) modularized mud, pluggable objects (like timers, sets of commands, etc.)
 - (0.4.3) "real life" sleep - players need sleep to keep from falling down after 2 days,
           some rooms (with beds) have better sleep ratios etc.
 
