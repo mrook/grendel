@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.46 2001/04/22 23:24:08 xenon Exp $
+// $Id: mudthread.pas,v 1.47 2001/04/26 21:39:03 xenon Exp $
 
 unit mudthread;
 
@@ -54,6 +54,7 @@ type
       ptr : COMMAND_FUNC;
       level : integer;             { minimum level }
       position : integer;          { minimum position }
+      addArg0 : boolean;           { send arg[0] (the command itself) to func? }
     end;
 
 var
@@ -77,7 +78,8 @@ uses
     debug,
     mudspell,
     fight,
-    NameGen;
+    NameGen,
+    Channels;
 
 constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
 begin
@@ -125,7 +127,8 @@ end;
 procedure load_commands;
 var f:textfile;
     s,g:string;
-    cmd, alias : GCommand;
+    cmd : GCommand;
+    alias : GCommand;
 begin
   assignfile(f, 'system\commands.dat');
   {$I-}
@@ -178,6 +181,11 @@ begin
         begin
         func_name := right(s,' ');
         ptr := findCommand(func_name);
+        end
+      else
+      if g='ADDARG0' then
+        begin
+          addarg0 := (trim(uppercase(right(s,' '))) = 'TRUE');
         end;
       until (uppercase(s)='#END') or eof(f);
 
@@ -192,6 +200,7 @@ begin
         alias.ptr := cmd.ptr;
         alias.func_name := cmd.func_name;
         alias.position := cmd.position;
+        alias.addarg0 := cmd.addarg0;
 
         commands.hashObject(alias, alias.name);
         end;
@@ -225,6 +234,7 @@ end;
 procedure interpret(ch : GCharacter; line : string);
 var
     a : longint;
+    gc : GCommand;
     cmd : GCommand;
     node : GListNode;
     cmdline, param : string;
@@ -317,9 +327,13 @@ begin
 
     while (node <> nil) do
       begin
-      if (pos(cmdline, GCommand(node.element).name) = 1) then
+      gc := node.element;
+      if (cmdline = gc.name) or
+         ((pos(cmdline, gc.name) = 1) and (length(cmdline) <= length(gc.name)) and (length(cmdline) > 1)) or
+         ((copy(cmdline, 1, length(gc.name)) = gc.name) and (length(cmdline) = 1))
+         then
         begin
-        cmd := GCommand(node.element);
+        cmd := gc;
         break;
         end;
 
@@ -351,7 +365,10 @@ begin
           try
             time := GetTickCount;
 
-            cmd.ptr(ch, param);
+            if cmd.addarg0 then
+              cmd.ptr(ch, cmdline + ' ' + param)
+            else
+              cmd.ptr(ch, param);
 
             ch.last_cmd := @cmd.ptr;
 
@@ -366,7 +383,6 @@ begin
           except
             on E : EExternal do
             begin
-//              outputError(E.ExceptionRecord.ExceptionAddress);
               outputError(E);
             end;
 
@@ -1175,21 +1191,13 @@ begin
   registerCommand('do_search', do_search);
   registerCommand('do_backstab', do_backstab);
   registerCommand('do_circle', do_circle);
-  registerCommand('do_chat', do_chat);
-  registerCommand('do_raid', do_raid);
-  registerCommand('do_immtalk', do_immtalk);
-  registerCommand('do_say', do_say);
   registerCommand('do_tell', do_tell);
   registerCommand('do_reply', do_reply);
-  registerCommand('do_yell', do_yell);
   registerCommand('do_suggest', do_suggest);
   registerCommand('do_pray', do_pray);
   registerCommand('do_emote', do_emote);
-  registerCommand('do_auctalk', do_auctalk);
-  registerCommand('do_babbel', do_babbel);
   registerCommand('do_shutdown', do_shutdown);
   registerCommand('do_echo', do_echo);
-  registerCommand('do_thunder', do_thunder);
   registerCommand('do_wizinvis', do_wizinvis);
   registerCommand('do_sla', do_sla);
   registerCommand('do_slay', do_slay);
@@ -1209,7 +1217,6 @@ begin
   registerCommand('do_alias', do_alias);
   registerCommand('do_clanadd', do_clanadd);
   registerCommand('do_clanremove', do_clanremove);
-  registerCommand('do_clantalk', do_clantalk);
   registerCommand('do_clan', do_clan);
   registerCommand('do_brag', do_brag);
   registerCommand('do_force', do_force);
@@ -1308,6 +1315,8 @@ begin
   registerCommand('do_note', do_note);
   registerCommand('do_board', do_board);
   registerCommand('do_apropos', do_apropos);
+  registerCommand('do_say', do_say);
+  registerCommand('do_channel', do_channel);
 end;
 
 begin
