@@ -185,22 +185,20 @@ begin
   if vict=nil then
     ch.sendBuffer('That character is not online right now.'#13#10)
   else
-    begin
-    num:=lvl-vict.level;
+  begin
+    num := lvl - vict.level;
     vict.in_command:=true;
     for a:=1 to num do
       gain_xp(vict,vict.player^.xptogo);
     act(AT_REPORT,'You have advanced $N to level '+inttostr(vict.level)+'.',false,ch,nil,vict,TO_CHAR);
     act(AT_REPORT,'$N has advanced you to level '+inttostr(vict.level)+'!',false,vict,nil,ch,TO_CHAR);
     vict.in_command:=false;
-    end;
+  end;
 end;
 
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
 procedure do_grace(ch:GCharacter;param:string);
 var vict:GCharacter;
-    //obj: OBJECT_DATA;
-    obj : GObject;
     obj_node : GListnode;
 
     lev:integer;
@@ -238,7 +236,7 @@ begin
     act(AT_REPORT,'You suddenly feel a pressure on you...',false,vict,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have become more powerful!'#13#10,false,vict,nil,nil,TO_CHAR);
 
-    if (lev = 500) then
+    if ((lev > LEVEL_MAX) and (lev <= LEVEL_MAX_IMMORTAL)) then         // Xenon 20/Feb/2001 : replaced vict.level = 500 with lev = 1000
       begin
       { Set hps etc. to immortal level }
       vict.point.max_hp:=15000;
@@ -1560,4 +1558,69 @@ begin
   act(AT_REPORT,'You take $p from $N.',false, ch, obj, vict, TO_CHAR);
 end;
 
+{ Xenon 21/Feb/2001: rename a player online }
+procedure do_prename(ch : GCharacter; param : string);
+var
+   curr_name, new_name : string;
+   vict : GCharacter;
+   buf : string;
+begin
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage:  PRENAME <current_name> <new_name>'#13#10);
+    exit;
+  end;
+
+  param := one_argument(param, curr_name);
+  param := one_argument(param, new_name);
+
+  curr_name := cap(curr_name);
+  new_name := cap(new_name);
+
+  vict := findCharWorld(ch, curr_name);
+
+  if (vict = nil) then
+  begin
+    ch.sendBuffer('That character doesn''t exist.'#13#10);
+    exit;
+  end;
+  
+  if (length(new_name) < 3) or (length(new_name) > 15) then
+  begin
+    ch.sendBuffer('New name must be between 3 and 15 characters long.'#13#10);
+    exit;
+  end;
+
+  if (vict.IS_NPC) then
+  begin
+    ch.sendBuffer('This command doesn''t work on mobs.'#13#10);
+    exit;
+  end;
+
+  if (FileExists('players\' + new_name + '.usr')) then
+  begin
+    ch.sendBuffer('That name is already in use.'#13#10);
+    exit;
+  end;
+
+  with vict do
+  begin
+    unhash_string(name);
+    unhash_string(short);
+    unhash_string(long);
+    name := hash_string(cap(new_name));
+    short := hash_string(new_name + ' is here');
+    long := hash_string(new_name + ' is standing here');
+    vict.save(vict.name^);
+  end;
+
+  deleteFile('players\' + curr_name + '.usr');
+
+  write_console(ch.name^ + ' has renamed ' + curr_name + ' to ' + new_name);
+
+  buf := Format('$B$5%s$A$7 has renamed you to $B$5%s$A$7.', [ch.name^, new_name]);
+  act(AT_REPORT,buf,false,vict,nil,nil,TO_CHAR);
+  buf := Format('$B$5%s$A$7 has been renamed to $B$5%s$A$7.', [curr_name, new_name]);
+  act(AT_REPORT,buf,false,vict,nil,nil,TO_NOTVICT);
+end;
 
