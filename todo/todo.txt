@@ -49,45 +49,41 @@ Grendel's TODO list with probable release date/version
   mobile create/edit, reset edit etc.
 * (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 
+
+- (0.4.1) purge command (strips char of objects, only for admins)
 - (0.4.1) new area format using XML
 - (0.4.1) implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
 - (0.4.1) add some checks to do_give, do_get, do_drop with respect to inter-align trading,
           ROOM_NODROP etc.
 - (0.4.1) expand tracking system
+- (0.4.1) use coordinates and mpfindpath code to make mobiles more intelligent
+
 
 - (0.4.2) some form of classes/professions/guilds/religions/whatever
         	-> probably Schools	
 - (0.4.2) reloadarea command
+- (0.4.2) online suggest (pray) history
 
-- (0.4.3) more help text
+
 - (0.4.3) "real life" sleep - players need sleep to keep from falling down after 2 days,
           some rooms (with beds) have better sleep ratios etc.
-          
+- (0.4.3) (optional) mud police
+- (0.4.3) IMC (intermud communication): both channels *and* noteboards
+          (perhaps separate server for noteboard, or whatever)
+- (0.4.3) abbreviation of clanname (3-4 chars) in who list
+
+
+- (0.4.4) fully customizable mud - experience formulas, experience per level, 
+        	damage formulas, number of stats, stat maximums, health/mana/movement maximums
 - (0.4.4) arbitrary fields in pfiles/areas, stored in a
           associative array, possibly with trigger/callback
 
 
 l implementation of the mud sound protocol
-l purge command (strips char of objects, only for admins)
 l clan competition for wps/pkillnum
-l abbreviation of clanname (3-4 chars) in who list
-l mud police!
 l online suggest (pray) history
-l fully customizable mud - experience formulas, experience per level, 
-	damage formulas, number of stats, stat maximums, health/mana/movement maximums
-l bodypart damage/armor ?
-
-
--- random ideas --
-
-* IMC (intermud communication): both channels *and* noteboards
-  (perhaps separate server for noteboard, or whatever)
-* slashdot-like moderation system on noteboards
-
--- not really code specific, but still open issues: --
-
-* general format for docs (docwrite-HOWTO something), both
+l more documentation!
+l general format for docs (docwrite-HOWTO something), both
   for HTML and plaintext docs
-* general coding guidelines
 
