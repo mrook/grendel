@@ -991,6 +991,70 @@ begin
   act(AT_REPORT,buf + ' of $N set to ' + inttostr(value) + '.',false,ch,nil,vict,TO_CHAR);
 end;
 
+
+procedure do_ocreate(ch : GCharacter; param : string);
+var
+   oindex : GObjectIndex;
+   obj : GObject;
+   sub : string;
+   vnum : integer;
+begin
+  if (ch.player^.area_fname='') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if (ch.player^.area=nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: OCREATE <objectvnum> <name>'#13#10#13#10);
+    ch.sendBuffer('Creates a new object index.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+
+  try
+    vnum := strtoint(sub);
+  except
+    ch.sendBuffer('Invalid numeric format.'#13#10);
+    exit;
+  end;
+
+  if (vnum < ch.player^.o_lo) or (vnum > ch.player^.o_hi) then
+    begin
+    ch.sendBuffer('That vnum is outside your range.'#13#10);
+    exit;
+    end;
+
+  if (findObjectIndex(vnum) <> nil) then
+    begin
+    ch.sendBuffer('That vnum has been used.'#13#10);
+    exit;
+    end;
+
+  oindex := GObjectIndex.Create;
+  oindex.area := ch.player^.area;
+  oindex.vnum := vnum;
+  oindex.name := hash_string(param);
+  oindex.short := hash_string(param);
+  oindex.long := hash_string(param);
+  oindex.flags := OBJ_PROTO;
+  obj_list.insertLast(oindex);
+
+  obj := instanceObject(oindex);
+  obj.toChar(ch);
+
+  act(AT_REPORT,'You utter a few words and you create $p!',false,ch,obj,nil,TO_CHAR);
+  act(AT_REPORT,'$n utters a few words and creates $p!',false,ch,obj,nil,TO_ROOM);
+end;
+
 const object_flags:array[0..30] of string=('nopickup','glow','hum',
                                           'antigood','antievil',
                                           'loyal','noremove',
@@ -1189,6 +1253,117 @@ begin
 
     node := node.next;
     end;
+end;
+
+procedure do_redit(ch : GCharacter; param : string);
+var
+   location : GRoom;
+   sub : string;
+   a : integer;
+   pexit : GExit;
+begin
+  if (ch.substate = SUB_ROOM_DESC) then
+    begin
+    { location := ch.dest_buf;
+    location.description := ch.editor.buffer;
+    ch.stopEditing; }
+
+    ch.substate := SUB_NONE;
+    exit;
+    end;
+    
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage:  REDIT <field> [value]'#13#10#13#10);
+    ch.sendBuffer('Field can be one of the following:'#13#10);
+    ch.sendBuffer('  name desc flags sector'#13#10);
+    ch.sendBuffer('  televnum teledelay minlevel maxlevel'#13#10);
+    ch.sendBuffer('  exflags'#13#10);
+    exit;
+    end;
+
+  { make sure builders don't overwrite other areas }
+  if (ch.room.vnum < ch.player^.r_lo) or (ch.room.vnum > ch.player^.r_hi) then
+    begin
+    ch.sendBuffer('This vnum is not in your range.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+  if (sub = 'name') then
+    ch.room.name := hash_string(param)
+  else
+  if (sub = 'desc') then
+    begin
+    ch.substate := SUB_ROOM_DESC;
+    // ch.dest_buf := ch.room;
+    // start_editing(ch,ch.room.description);
+    exit;
+    end
+  else
+  if (sub = 'flags') then
+    begin
+    for a:=0 to High(room_flags) do
+     if (pos(room_flags[a], param) > 0) then
+      begin
+      if IS_SET(ch.room.flags, 1 shl a) then
+        REMOVE_BIT(ch.room.flags, 1 shl a)
+      else
+        SET_BIT(ch.room.flags, 1 shl a);
+      end;
+    end
+  else
+  if (sub = 'sector') then
+    begin
+    for a := 0 to High(sector_types) do
+     if (pos(sector_types[a], param ) > 0) then
+      begin
+      ch.room.sector := a;
+      break;
+      end;
+    end
+  else
+  if (sub = 'televnum') then
+    ch.room.televnum := strtointdef(param, 0)
+  else
+  if (sub = 'teledelay') then
+    ch.room.teledelay := strtointdef(param, 0)
+  else
+  if (sub = 'minlevel') then
+    ch.room.min_level := strtointdef(param, 0)
+  else
+  if (sub = 'maxlevel') then
+    ch.room.max_level:=strtoint(param)
+  else
+  if (sub = 'exflags') then
+    begin
+    param := one_argument(param,sub);
+
+    a := findHeading(sub);
+    pexit := ch.room.findExit(a);
+
+    if (pexit=nil) then
+      begin
+      ch.sendBuffer('Can not find that exit.'#13#10);
+      exit;
+      end;
+
+    for a:=0 to High(exit_flags) do
+     if (pos(exit_flags[a], param) > 0) then
+      begin
+      if IS_SET(pexit.flags, 1 shl a) then
+        REMOVE_BIT(pexit.flags, 1 shl a)
+      else
+        SET_BIT(pexit.flags, 1 shl a);
+      end;
+    end
+  else
+    begin
+    ch.sendBuffer('Unknown option.'#13#10);
+    exit;
+    end;
+    
+  ch.sendBuffer('Ok.'#13#10);
 end;
 
 procedure do_rlink(ch : GCharacter; param : string);
@@ -1500,6 +1675,59 @@ begin
     end;
 end;
 
+procedure do_ranges(ch : GCharacter; param : string);
+var
+   vict : GCharacter;
+   sub : string;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: RANGES <player> <roomlo> <roomhi> <moblo> <mobhi> <objlo> <objhi>'#13#10#13#10);
+    ch.sendBuffer('Manually assigns ranges to a player, and overrides those'#13#10);
+    ch.sendBuffer('automatically assigned by AASSIGN.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+  vict := findCharWorld(ch,sub);
+
+  if (vict = nil) or (vict.IS_NPC()) then
+    ch.sendBuffer('Cannot find that character.'#13#10)
+  else
+  if (vict.level < LEVEL_BUILD) then
+    ch.sendBuffer('That character has not attained the proper level.'#13#10)
+  else
+    begin
+    try
+      with vict.player^ do
+        begin
+        param := one_argument(param,sub);
+        r_lo := strtoint(sub);
+
+        param := one_argument(param,sub);
+        r_hi := strtoint(sub);
+
+        param := one_argument(param,sub);
+        m_lo := strtoint(sub);
+
+        param:= one_argument(param,sub);
+        m_hi := strtoint(sub);
+
+        param:= one_argument(param,sub);
+        o_lo := strtoint(sub);
+
+        one_argument(param,sub);
+        o_hi := strtoint(sub);
+        end;
+
+      act(AT_REPORT,'Assigned appropiate ranges to $N.',false,ch,nil,vict,TO_CHAR);
+      act(AT_REPORT,'You have been assigned new ranges by $N.',false,vict,nil,ch,TO_CHAR);
+    except
+      ch.sendBuffer('Invalid numeric format.'#13#10);
+    end;
+    end;
+end;
+
 function createArea(fn : string) : GArea;
 var
    area : GArea;
@@ -1677,6 +1905,139 @@ begin
   act(AT_REPORT,'Nr. of players:   '+inttostr(area.nplayer),false,ch,nil,nil,TO_CHAR);
 end;
 
+procedure do_checkarea(ch : GCharacter; param : string);
+var
+   room : GRoom;
+   obj : GObjectIndex;
+   mob : GNPCIndex;
+   area : GArea;
+   node : GListNode;
+   no_errors : boolean;
+begin
+  if (ch.player^.area_fname='') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+  area:=ch.player^.area;
+  if (area=nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  ch.sendBuffer('Checking area '+area.fname+'...'#13#10#13#10);
+  no_errors := true;
+
+  node := room_list.head;
+
+  while (node <> nil) do
+    begin
+    room := node.element;
+
+    if (room.area = area) then
+      begin
+      if (room.name = nil) or (length(room.name^) = 0) then
+        begin
+        no_errors := false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
+        end;
+      { else
+      if (find_last(room.name) = '.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
+        end; }
+
+      if (length(room.description) = 0) then
+        begin
+        no_errors := false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
+        end;
+      { else
+      if (find_last(room.description)<>'.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
+        end; }
+
+
+      if (not checkWords(room.description)) then
+        begin
+        no_errors:=false;
+        ch.sendBuffer('('+inttostr(room.vnum)+') possibly misspelled word(s), [' + trim(misspelled_words) + ']'#13#10);
+        end;
+      end;
+
+    node := node.next;
+    end;
+
+  { obj := obj_reset_first;
+  while (obj <> nil) do
+    begin
+    if (obj.area=area) then
+      begin
+      if (obj.name[0] in ['A'..'Z']) then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(obj.vnum)+') '+obj.name+': capitals not allowed at start of name'));
+        end;
+      if (obj.short[0] in ['A'..'Z']) then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(obj.vnum)+') '+obj.name+': capitals not allowed at start of short description'));
+        end;
+      if (obj.long[0] in ['A'..'Z']) then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(obj.vnum)+') '+obj.name+': capitals not allowed at start of long description'));
+        end;
+      if (find_last(obj.name)='.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(obj.vnum)+') '+obj.name+': dot not allowed at end of name'));
+        end;
+      if (find_last(obj.short)='.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(obj.vnum)+') '+obj.name+': dot not allowed at end of short description'));
+        end;
+      if (find_last(obj.long)='.') then
+        begin
+        no_errors:=false;
+        ch.sendBuffer(pchar('('+inttostr(obj.vnum)+') '+obj.name+': dot not allowed at end of long description'));
+        end;
+      end;
+    obj:=obj.next;
+    end;
+  mob:=mob_reset_first;
+  while (mob<>nil) do
+    begin
+    if (mob.area=area) then
+      begin
+      if (find_last(mob.name)='.') then
+        begin
+        ch.sendBuffer(pchar('('+inttostr(mob.vnum)+') '+mob.name+': dot not allowed at end of name'));
+        exit;
+        end;
+      if (find_last(mob.short)='.') then
+        begin
+        ch.sendBuffer(pchar('('+inttostr(mob.vnum)+') '+mob.name+': dot not allowed at end of short description'));
+        exit;
+        end;
+      if (find_last(mob.long)='.') then
+        begin
+        ch.sendBuffer(pchar('('+inttostr(mob.vnum)+') '+mob.name+': dot not allowed at end of long description'));
+        exit;
+        end;
+      end;
+    mob:=mob.next;
+    end; }
+
+  if (no_errors) then
+    ch.sendBuffer('Your area is perfectly fine.'#13#10);
+end;
+
 procedure do_savearea(ch : GCharacter; param : string);
 var
    area : GArea;
@@ -1754,5 +2115,64 @@ begin
   area.load(fn);
   ch.player^.area := area;
   act(AT_REPORT,'Area ' + fn + ' loaded.',false,ch,nil,nil,TO_CHAR);
+end;
+
+procedure do_reset(ch: GCharacter; param : string);
+var
+   area : GArea;
+   node : GListNode;
+begin
+  area := nil;
+
+  if (length(param) > 0) and (ch.getTrust() < LEVEL_GOD) then
+    begin
+    ch.sendBuffer('You can only reset your own area.'#13#10);
+    exit;
+    end;
+
+  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname = '') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if ((ch.getTrust() < LEVEL_GOD) or (length(param) = 0)) and (ch.player^.area = nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  if (length(param) = 0) then
+    area := ch.player^.area
+  else
+  if (length(param) > 0) and (param = 'all') then
+    begin
+    act(AT_WHITE,'All areas reset.',false,ch,nil,nil,TO_CHAR);
+
+    { reset the areas }
+    node := area_list.head;
+
+    while (node <> nil) do
+      begin
+      area := node.element;
+      area.reset();
+
+      node := node.next;
+      end;
+
+    exit;
+    end
+  else
+  if (length(param) > 0) then
+    area := findArea(param);
+
+  if (area = nil) then
+    begin
+    ch.sendBuffer('Area not found.'#13#10);
+    exit;
+    end;
+
+  act(AT_WHITE, 'Area '+area.fname+' reset.',false,ch,nil,nil,TO_CHAR);
+  area.reset();
 end;
 

@@ -70,6 +70,7 @@ uses
     progs,
     timers,
     debug,
+    mudspell,
     fight;
 
 constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
@@ -106,11 +107,13 @@ begin
     if (f.name = s) then
       begin
       Result := f.func;
-      break;
+      exit;
       end;
 
     node := node.next;
     end;
+
+  write_console('Could not find command "' + s + '"');
 end;
 
 procedure load_commands;
@@ -1262,18 +1265,23 @@ begin
   registerCommand('do_holywalk', do_holywalk);
   registerCommand('do_prename', do_prename);
   registerCommand('do_peek', do_peek);
+  registerCommand('do_ocreate', do_ocreate);
   registerCommand('do_oedit', do_oedit);
   registerCommand('do_olist', do_olist);
+  registerCommand('do_redit', do_redit);
   registerCommand('do_rlink', do_rlink);
   registerCommand('do_rmake', do_rmake);
   registerCommand('do_rclone', do_rclone);
   registerCommand('do_aassign', do_aassign);
+  registerCommand('do_ranges', do_ranges);
   registerCommand('do_acreate', do_acreate);
   registerCommand('do_aset', do_aset);
   registerCommand('do_astat', do_astat);
   registerCommand('do_raceinfo', do_raceinfo);
+  registerCommand('do_checkarea', do_checkarea);
   registerCommand('do_savearea', do_savearea);
   registerCommand('do_loadarea', do_loadarea);
+  registerCommand('do_reset', do_reset);
 end;
 
 begin
