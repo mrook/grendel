@@ -2,7 +2,7 @@
 	Summary:
 		Copyover / service reboot helper application
 		
-	## $Id: helper.dpr,v 1.1 2004/05/06 20:33:28 ***REMOVED*** Exp $
+	## $Id: helper.dpr,v 1.2 2004/05/06 20:49:07 ***REMOVED*** Exp $
 }
 program helper;
 {$APPTYPE CONSOLE}
@@ -263,8 +263,11 @@ end;
 
 
 begin
+	writeConsole('Reboot/copyover helper application');
+	writeConsole(version_copyright + '.');
+
 	cons := GConsole.Create();
-	cons.attachWriter(GConsoleLogWriter.Create('copyover'));
+	cons.attachWriter(GConsoleLogWriter.Create('helper'));
 	cons.attachWriter(GConsoleCopyover.Create());
 
 	if (ParamStr(1) = 'copyoverservice') then
