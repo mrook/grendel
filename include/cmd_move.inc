@@ -241,60 +241,68 @@ begin
     maketrack(ch, pexit);
     end;
 
-  sneaking := (IS_SET(ch.aff_flags,AFF_SNEAK) and skill_success(ch,gsn_sneak));
+  sneaking := (IS_SET(ch.aff_flags,AFF_SNEAK) and skill_success(ch, gsn_sneak));
 
   if sneaking then
-    improve_skill(ch, gsn_sneak)
+    improve_skill(ch, gsn_sneak);
+
+  if (ch.IS_FLYING) then
+    begin
+    txt_ch := 'fly';
+    txt_room := 'flies';
+    end
+  else
+  if (IS_SET(pexit.flags, EX_SWIM)) then
+    begin
+    txt_ch := 'swim';
+    txt_room := 'swims';
+    end
+  else
+  if IS_SET(pexit.flags, EX_CLIMB) then
+    begin
+    txt_ch := 'climb';
+    txt_room := 'climbs';
+    end
+  else
+  if IS_SET(ch.aff_flags,AFF_SNEAK) then
+    begin
+    txt_ch := 'sneak';
+    txt_room := 'sneaks';
+    end
   else
     begin
-    if (ch.IS_FLYING) then
-      begin
-      txt_ch:='fly';
-      txt_room:='flies';
-      end
-    else
-    if (IS_SET(pexit.flags, EX_SWIM)) then
-      begin
-      txt_ch:='swim';
-      txt_room:='swims';
-      end
-    else
-    if IS_SET(pexit.flags, EX_CLIMB) then
-      begin
-      txt_ch:='climb';
-      txt_room:='climbs';
-      end
-    else
-      begin
-      txt_ch:='walk';
-      txt_room:='walks';
-      end;
+    txt_ch := 'walk';
+    txt_room := 'walks';
+    end;
 
+  if (not sneaking) then
+    begin
     if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
-      act(AT_REPORT,'$n leaves through the $d.',true,ch,nil, pexit,TO_ROOM)
+      act(AT_REPORT, '$n leaves through the $d.',true,ch,nil, pexit,TO_ROOM)
     else
-      act(AT_REPORT,'$n '+txt_room+' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
+      act(AT_REPORT, '$n '+txt_room+' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
     end;
 
   ch.fromRoom;
   ch.toRoom(room_to);
 
   dec(ch.point.mv, mv_cost);
-  if (ch.point.mv < 6) then
+  if (ch.point.mv < 15) then
     act(AT_REPORT,'You start breathing heavily... you are very tired.',false,ch,nil,nil,TO_CHAR);
 
-  if not sneaking then
+  if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
     begin
-    if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
-      begin
+    if (not sneaking) then
       act(AT_REPORT,'$n enters from somewhere.',true,ch,nil,nil,TO_ROOM);
-      act(AT_REPORT,'You enter the $d.',false,ch,nil,pexit,TO_CHAR);
-      end
-    else
-      begin
+
+    act(AT_REPORT,'You enter the $d.',false,ch,nil,pexit,TO_CHAR);
+    end
+  else
+    begin
+    if (not sneaking) then
       act(AT_REPORT,'$n ' + txt_room + ' in from ' + headingsi[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
-      act(AT_REPORT,'You ' + txt_ch + ' ' + headings[pexit.direction] + '.',false,ch,nil,nil,TO_CHAR);
-      end;
+
+    act(AT_REPORT,'You ' + txt_ch + ' ' + headings[pexit.direction] + '.',false,ch,nil,nil,TO_CHAR);
     end;
 
   if (not ch.IS_OUTSIDE) then
