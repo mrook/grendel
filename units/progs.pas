@@ -28,6 +28,7 @@ implementation
 uses
     Math,
     Strip,
+    TypInfo,
     chars,
     dtypes,
     mudthread,
@@ -69,6 +70,35 @@ begin
     write_console('VM error: ' + msg);
 end;
 
+function grendelExternalTrap(obj : variant; member : string) : variant;
+var
+  s : TObject;
+  prop : PPropInfo;
+  v : variant;
+begin
+  Result := Null;
+
+  if (varType(obj) = varString) then
+    begin
+    Result := integer(findCharWorld(nil, obj));
+    end
+  else
+  if (varType(obj) = varInteger) then
+    begin
+    s := TObject(integer(obj));
+
+    prop := GetPropInfo(s.ClassInfo(), member);
+
+    if (prop <> nil) then
+      case (prop.PropType^.Kind) of
+        tkInteger: Result := GetOrdProp(s, prop);
+        tkFloat:   Result := GetFloatProp(s, prop);
+        tkString:  Result := GetStrProp(s, prop);
+        tkVariant: Result := GetVariantProp(s, prop);
+      end;
+    end;
+end;
+
 procedure grendelSystemTrap(owner : TObject; msg : string);
 begin
   interpret(GNPC(owner), msg);
@@ -99,6 +129,7 @@ begin
 
   setVMError(grendelVMError);
   setSystemTrap(grendelSystemTrap);
+  setExternalTrap(grendelExternalTrap);
 end;
 
 end.
