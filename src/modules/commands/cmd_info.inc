@@ -1,16 +1,21 @@
-// $Id: cmd_info.inc,v 1.7 2004/05/12 22:43:19 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.8 2004/05/12 22:47:13 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
-var r : string;
+var 
+	r : string;
 begin
-  r := '$B$7';
+	r := '$B$7';
 
-  if (IS_SET(obj.flags, OBJ_GLOW)) then
-    r := r + '(Glowing) ';
-  if (IS_SET(obj.flags, OBJ_HUM)) then
-    r := r + '(Humming) ';
+	if (IS_SET(obj.flags, OBJ_GLOW)) then
+		r := r + '(Glowing) ';
+		
+	if (IS_SET(obj.flags, OBJ_HUM)) then
+		r := r + '(Humming) ';
 
-  info_object := r;
+	if (obj.item_type = ITEM_BOW) and (obj.value[2] > 0) then
+		r := r + '(Loaded) ';
+
+	Result := r;
 end;
 
 procedure do_time(ch:GCharacter;param:string);
