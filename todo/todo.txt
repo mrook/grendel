@@ -11,9 +11,16 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! add 'D' (door) reset
 ! ability to change password
 ! ban code update (with masks/wildcards)
+! last command (checks last login time for user)
+! 'group self' to disband group
+! spell/skill trees
+! unlearn
+! rework input routine, make sure tintin/jmc work again
+! change all use of string to PString where strings are shared
+! add extra descriptions to rooms, exits, objects
 
 
-* rework input routine, make sure tintin/jmc work again
+* rework affects system
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
   ROOM_NODROP etc.
 * implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
@@ -22,22 +29,21 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 * Better online construction (autocreate exit+room when moving), object
 * edit/instance, mobile create/edit/instance, reset edit etc.
 - some form of classes/professions/guilds/religions/whatever
+	-> probably Schools	
 - more help text
 - skills: Disarm, Steal, Lockpick, Hide
 - reloadarea command
-- 'group self' to disband group
 - race specifics
-- spell/skill trees
 - bugtrack/report system 
-- online suggest (pray) history
-- unlearn
-- add extra descriptions to rooms, exits, objects
+- skill/spellslots
+- practice sessions
 
 
-l last command (checks last login time for user, only for admins)
 l purge command (strips char of objects, only for admins)
 l clan competition for wps/pkillnum
 l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
 l 'drink' without params should drink from first fountain in room
 l mud police!
+l online suggest (pray) history
+
