@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.8 2003/06/24 21:41:35 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.9 2003/09/18 22:09:19 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -34,7 +34,7 @@ type
     ip_string : string;
     host_string : string;
     
-    procedure resolve(); 
+    procedure resolve(lookup_hosts : boolean); 
     procedure disconnect();
   
     procedure openPort(port : integer); virtual;
@@ -43,9 +43,13 @@ type
     
     function canRead() : boolean;
     function canWrite() : boolean;
-    function send(s : string) : integer;
+    function read(var Buf; len : integer) : integer;
+    function send(s : string) : integer; overload;
+    function send(s : PChar; len : integer) : integer; overload;
     
-    function acceptConnection() : GSocket;
+    function acceptConnection(lookup_hosts : boolean) : GSocket;
+    
+    procedure connect(remoteName : string; port : integer);
     
     constructor Create(_af : integer; _fd : TSocket = -1);
     destructor Destroy; override;
@@ -86,8 +90,7 @@ function createSocket(af : integer; fd : TSocket) : GSocket;
 implementation
 
 uses
-  SysUtils,
-  mudsystem;
+  SysUtils;
 
 {$IFDEF WIN32}
 var
@@ -142,17 +145,15 @@ end;
 
 function createSocket(af : integer; fd : TSocket) : GSocket;
 begin
+  Result := nil;
+  
   if (af = AF_INET) then
     Result := GSocket4.Create(fd)
   else
   if (af = AF_INET6) then
     Result := GSocket6.Create(fd)
   else
-    begin
-    Result := nil;
-    
     raise Exception.Create('Unsupported address family');
-    end;
 end;
 
 
@@ -196,7 +197,7 @@ begin
 {$ENDIF}
 end;
 
-procedure GSocket.resolve();
+procedure GSocket.resolve(lookup_hosts : boolean);
 var
   h : PHostEnt;
   l, p : integer;
@@ -214,7 +215,7 @@ begin
 
     ip_string := inet_ntoa(v4.sin_addr);
 
-    if (system_info.lookup_hosts) then
+    if (lookup_hosts) then
       begin
       h := gethostbyaddr(@v4.sin_addr.s_addr, 4, AF_INET);
 
@@ -324,12 +325,44 @@ begin
   Result := res;
 end;
 
+
+function GSocket.send(s : PChar; len : integer) : integer;
+var
+   res : integer;
+begin
+  res := 0;
+  
+  if (length(s) > 0) then
+{$IFDEF WIN32}
+    res := Winsock2.send(fd, s, len, 0);
+{$ENDIF}
+{$IFDEF LINUX}
+    res := Libc.send(fd, s, len, 0);
+{$ENDIF}
+
+  if (res = SOCKET_ERROR) then
+    raise Exception.Create('Connection reset by peer');
+    
+  Result := res;
+end;
+
+function GSocket.read(var buf; len : integer) : integer;
+var
+	res : integer;
+begin
+  res := recv(fd, buf, len, 0);
+  
+  if (res = SOCKET_ERROR) then
+    raise Exception.Create('Connection reset by peer');
+    
+  Result := res;
+end;
+
 procedure GSocket.setNonBlocking();
 var
   len : integer;
 begin
 {$IFDEF WIN32}
-  len := 1;
   len := ioctlsocket(fd, FIONBIO, len);
 {$ENDIF}
 {$IFDEF LINUX}
@@ -340,7 +373,7 @@ begin
 {$ENDIF}
 end;
 
-function GSocket.acceptConnection() : GSocket;
+function GSocket.acceptConnection(lookup_hosts : boolean) : GSocket;
 var
   ac_fd : TSocket;
   client_addr : TSockAddr_Storage;
@@ -354,9 +387,32 @@ begin
   sk := createSocket(af, ac_fd);
   sk.addr := client_addr;
   
-  sk.resolve();
+  sk.resolve(lookup_hosts);
   
   Result := sk;
+end;
+
+procedure GSocket.connect(remoteName : string; port : integer);
+var
+	addrLength : integer;
+	addrPointer : PChar;
+	sockAddr : TSockAddr;
+	hostent : PHostEnt;
+begin
+	hostent := gethostbyname(PChar(remoteName));
+	
+	if (hostent = nil) then
+		raise Exception.Create('Could not resolve hostname ' + remoteName);
+
+	addrLength := hostent^.h_length;
+  addrPointer := hostent^.h_addr_list^;
+
+  sockAddr.sin_family := af;
+  sockAddr.sin_port := htons(port);
+  StrMove (PChar(@sockAddr.sin_addr.s_addr), addrPointer, addrLength);
+        
+	if (WinSock2.connect(fd, sockAddr, sizeof(sockAddr)) <> 0) then 
+		raise Exception.Create('Could not connect to ' + remoteName);
 end;
 
 procedure GSocket.openPort(port : integer);
@@ -398,7 +454,7 @@ begin
     closesocket(fd);
 {$ENDIF}
 
-    raise Exception.Create('Could not bind on IPv4 port ' + inttostr(system_info.port));
+    raise Exception.Create('Could not bind on IPv4 port ' + inttostr(port));
     end;
 
   rc := listen(fd, 15);
@@ -427,9 +483,8 @@ begin
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
     raise Exception.Create('Could not set option on IPv6 socket.');
 
-
   addrv6.sin6_family := AF_INET6;
-  addrv6.sin6_port := htons(system_info.port6);
+  addrv6.sin6_port := htons(port);
 
   move(addrv6, ssv6, sizeof(addrv6));
 
@@ -443,7 +498,7 @@ begin
     closesocket(fd);
 {$ENDIF}
 
-    raise Exception.Create('Could not bind on IPv6 port ' + inttostr(system_info.port));
+    raise Exception.Create('Could not bind on IPv6 port ' + inttostr(port));
     end;
 
   rc := listen(fd, 15);
@@ -457,7 +512,7 @@ initialization
   ver := WINSOCK_VERSION;
 
   if (WSAStartup(ver, hWSAData) <> 0) then
-    bugreport('socket.pas', 'initialization', 'Could not perform WSAStartup');
+    raise Exception.Create('Could not perform WSAStartup');
 {$ENDIF}
 
 finalization
