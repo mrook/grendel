@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.32 2001/05/11 14:24:22 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.33 2001/06/06 19:01:14 xenon Exp $
 
 unit constants;
 
@@ -290,6 +290,17 @@ const ROOM_DARK=BV00;           { can't see without light }
       ROOM_MANAROOM=BV17;       { manaroom, fast magic regeneration }
       ROOM_PROTO = cardinal(BV31);
 
+const room_flags:array[0..30] of string = ('dark','death','nomob',
+                                        'indoors','good','evil',
+                                        'nocast','tunnel','private',
+                                        'safe','solitary','norecall',
+                                        'nodropall','nosummon',
+                                        'clanstore','teleport',
+                                        'nofloor','manaroom','bv18',
+                                        'bv19','bv20','bv21','bv22',
+                                        'bv23','bv24','bv25','bv26',
+                                        'bv27','bv28','bv29','proto');
+                                        
 { sector types }
 const SECT_INSIDE=1;
       SECT_CITY=2;
@@ -315,6 +326,9 @@ const sector_types:array[1..15] of string=('inside','city','field',
                                           'underground','air',
                                           'nopassage','unknown');
 
+const movement_loss:array[SECT_INSIDE..SECT_MAX-1] of integer=
+      (1,2,2,3,4,6,5,4,1,6,7,4,10,2,5);
+
 { exit flags }
 const EX_ISDOOR=BV00;
       EX_CLOSED=BV01;
@@ -330,8 +344,11 @@ const EX_ISDOOR=BV00;
       EX_ENTER=BV11;
       EX_UNDERWATER=BV12;
 
-const movement_loss:array[SECT_INSIDE..SECT_MAX-1] of integer=
-      (1,2,2,3,4,6,5,4,1,6,7,4,10,2,5);
+const exit_flags:array[0..12] of string = ('isdoor','closed','locked',
+                                        'pickproof','secret','swim',
+                                        'fly','climb','portal',
+                                        'nobreak','nomob','enter',
+                                        'underwater');
 
 { area flags }
 const AREA_NORESET=BV00;
