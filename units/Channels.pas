@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.13 2001/10/18 16:26:19 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.14 2002/08/01 19:16:31 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -219,8 +219,9 @@ var
   tc : TChannel;
 begin
   Result := false;
-  
+    
   node := ch.channels.head;
+  
   while (node <> nil) do
   begin
     tc := node.element;
@@ -231,6 +232,7 @@ begin
     end;
     node := node.next;
   end;
+  
 end;
 
 procedure channelAddHistory(vict, actor : GPlayer; channel : GChannel; str : string);
@@ -326,7 +328,7 @@ begin
 
     if (vict <> nil) and (not vict.IS_NPC()) then
     begin
-      if (not chan_ignored(GPlayer(vict), channel.channelname)) or (ch.IS_IMMORT()) then
+      if (not chan_ignored(GPlayer(vict), channel.channelname)) or ((ch <> nil) and (ch.IS_IMMORT())) then
         act(color, arg, false, vict, nil, ch, TO_CHAR)
     end
     else
