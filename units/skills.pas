@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.11 2001/04/16 17:34:52 xenon Exp $
+// $Id: skills.pas,v 1.12 2001/04/26 21:42:43 xenon Exp $
 
 unit skills;
 
@@ -120,7 +120,7 @@ var
    node : GListNode;
    sk : GSkill;
 begin
-  s := uppercase(s);
+  s := trim(uppercase(s));
   Result := nil;
   node := skill_table.head;
 
@@ -128,7 +128,7 @@ begin
     begin
     sk := node.element;
 
-    if (s = uppercase(sk.name)) or (pos(s, uppercase(sk.name)) > 0) then
+    if (s = uppercase(sk.name)) or (pos(s, uppercase(sk.name)) = 1) then
       begin
       Result := sk;
       break;
@@ -431,7 +431,8 @@ begin
     aff.duration := Self.duration;
     aff.modifier := Self.modifier;
 
-    aff.node := ch.affects.insertLast(aff);
+    if (findAffect(ch, Self.skill) = nil) then // not yet affected
+      aff.node := ch.affects.insertLast(aff);
 
     aff.modify(ch, true);
     end
