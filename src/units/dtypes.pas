@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.10 2004/03/13 15:43:34 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.11 2004/03/13 16:16:17 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -1308,9 +1308,9 @@ end;
 }
 procedure GSingleton.FreeInstance;
 begin
-	inherited FreeInstance;
-	
 	GSingleton(Self).actualDestroy();
+
+	inherited FreeInstance;
 end;
 
 
