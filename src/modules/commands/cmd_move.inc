@@ -1,4 +1,4 @@
-// $Id: cmd_move.inc,v 1.7 2004/03/07 15:36:50 ***REMOVED*** Exp $
+// $Id: cmd_move.inc,v 1.8 2004/03/13 17:41:44 ***REMOVED*** Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
@@ -37,7 +37,7 @@ begin
     timer := 60;
     end;
 
-  obj.node_world := objectList.insertLast(obj);
+  objectList.add(obj);
 
   obj.toRoom(ch.room);
 end;

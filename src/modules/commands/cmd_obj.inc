@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.4 2004/03/07 15:37:37 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.5 2004/03/13 17:41:44 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -807,7 +807,7 @@ begin
     short := 'the head ' + s_name;
     long := 'the head of a once famous warrior lays here';
     item_type := ITEM_TRASH;
-    node_world := objectList.insertLast(scalp);
+    objectList.add(scalp);
     end;
 
   with corpse do

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.18 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.19 2004/03/13 17:41:44 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -2111,7 +2111,7 @@ begin
         			end;
         		end;
 
-					obj.node_world := objectList.insertLast(obj);
+					objectList.add(obj);
 					            
           obj.toChar(Self);         
           end;

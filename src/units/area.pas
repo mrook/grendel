@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.22 2004/03/13 16:09:10 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.23 2004/03/13 17:41:44 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -93,7 +93,7 @@ type
       _name, _short, _long : PString;
       _vnum : integer;
     public
-      node_world, node_room, node_in, node_carry : GListNode;
+      node_room, node_in, node_carry : GListNode;
 
       area : GArea;
       affects : GDLinkedList;
@@ -2478,9 +2478,6 @@ destructor GObject.Destroy();
 var 
   obj_in : GObject;
 begin
-  objectList.remove(node_world);
-  node_world := nil;
-
   while (contents.tail <> nil) do
     begin
     obj_in := GObject(contents.tail.element);
@@ -2915,7 +2912,7 @@ begin
       timer := 0;
       end;
 
-    obj_in.node_world := objectList.insertLast(obj_in);
+    objectList.add(obj_in);
 
     obj_in.toObject(obj);
     
@@ -2999,7 +2996,7 @@ begin
   if (obj_in <> nil) then
     inc(obj_in.child_count);
 
-  obj.node_world := objectList.insertLast(obj);
+  objectList.add(obj);
 
   Result := obj;
 end;
