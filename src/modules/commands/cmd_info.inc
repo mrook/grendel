@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.6 2004/03/25 19:58:37 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.7 2004/05/12 22:43:19 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -106,7 +106,7 @@ var
   act_str:string;
   where_str : string;
   bodypart : GBodyPart;
-  iterator : GIterator;
+  iterator, inner_iterator : GIterator;
 begin
   if (IS_SET(ch.aff_flags,AFF_BLIND)) then
     begin
@@ -176,6 +176,23 @@ begin
           begin
           act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
           inc(cnt);
+
+		  if (obj.contents.size() > 0) then
+			begin
+			inner_iterator := obj.contents.iterator();
+
+			while (inner_iterator.hasNext()) do
+				begin
+				obj_in := GObject(inner_iterator.next());
+
+				if (obj.item_type = ITEM_BELT) then    		
+					act(AT_REPORT, pad_string('(thrust through)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+				else
+					act(AT_REPORT, pad_string('(stored in)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+				end;
+
+			inner_iterator.Free();
+			end;
           end;
         end;
       
@@ -435,9 +452,9 @@ end;
 
 procedure do_equipment(ch:GCharacter;param:string);
 var
-  iterator : GIterator;
+  iterator, inner_iterator : GIterator;
   bodypart : GBodyPart;
-  obj : GObject;
+  obj, obj_in : GObject;
   cnt : integer;
 begin
   cnt := 0;
@@ -454,6 +471,24 @@ begin
     if (bodypart <> nil) then
       begin
       act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+      
+      if (obj.contents.size() > 0) then
+      	begin
+      	inner_iterator := obj.contents.iterator();
+      	
+      	while (inner_iterator.hasNext()) do
+      		begin
+      		obj_in := GObject(inner_iterator.next());
+      		
+      		if (obj.item_type = ITEM_BELT) then    		
+      			act(AT_REPORT, pad_string('(thrust through)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+      		else
+      			act(AT_REPORT, pad_string('(stored in)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+      		end;
+      	
+      	inner_iterator.Free();
+      	end;
+      	
       inc(cnt);
       end;
     end;
