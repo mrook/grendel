@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.33 2001/08/14 14:17:58 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.34 2001/08/16 20:56:38 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -8,9 +8,7 @@ uses
 {$IFDEF WIN32}
     Winsock2,
     Windows,
-    {$IFNDEF CONSOLEBUILD}
     Forms,
-    {$ENDIF}
 {$ENDIF}
 {$IFDEF LINUX}
     Libc,
@@ -702,8 +700,8 @@ begin
         acceptConnection(listenv6);
       end;
 
-    {$IFNDEF CONSOLEBUILD}
-    Application.ProcessMessages();
+    {$IFDEF WIN32}
+      Application.ProcessMessages();
     {$ENDIF}
     
     sleep(5);
