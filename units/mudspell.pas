@@ -581,6 +581,4 @@ begin
     write_console('Could not open dictionary, spell checking is disabled.')
   else
     spell.CustomDictionary := 'custom.dic';
-
-  spell.CustomDictAdd('Southaven');
 end.
