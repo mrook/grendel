@@ -1,3 +1,5 @@
+// $Id: constants.pas,v 1.27 2001/04/22 15:11:16 xenon Exp $
+
 unit constants;
 
 interface

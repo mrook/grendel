@@ -1,3 +1,5 @@
+// $Id: mudthread.pas,v 1.45 2001/04/22 15:11:17 xenon Exp $
+
 unit mudthread;
 
 interface
