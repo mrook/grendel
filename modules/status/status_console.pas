@@ -67,14 +67,14 @@ initialization
 
   registerMenuItem('Show console', showConsoleProc);
 
-  fetchConsoleHistory(0, consoleDriver);
+  //fetchConsoleHistory(0, consoleDriver);
   
   registerConsoleDriver(consoleDriver);
   
 
 finalization  
-  unregisterConsoleDriver(consoleDriver);
   unregisterMenuItem('Show console');
+  unregisterConsoleDriver(consoleDriver);
   consoleDriver.Free();
   
   
