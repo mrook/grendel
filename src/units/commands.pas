@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.7 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.8 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit commands;
@@ -115,6 +115,7 @@ begin
     Result := f.func;
 end;
 
+// Load the commands
 procedure loadCommands();
 var 
   af : GFileReader;
@@ -143,33 +144,33 @@ begin
     with cmd do
       repeat
       s := af.readLine();
-      g:=uppercase(left(s,':'));
+      g := uppercase(left(s,':'));
 
-      if g='NAME' then
+      if (g = 'NAME') then
         name := uppercase(right(s,' '))
       else
-      if g='ALIAS' then
+      if (g = 'ALIAS') then
         begin
         // create an alias
         alias := GCommand.Create();
         alias.name := uppercase(right(s,' '));
         end
       else
-      if g='LEVEL' then
-        level:=strtoint(right(s,' '))
+      if (g = 'LEVEL') then
+        level := strtoint(right(s,' '))
       else
-      if g='POSITION' then
+      if (g = 'POSITION') then
         begin
-        //position:=strtoint(right(s,' '));
+        //position := strtoint(right(s,' '));
         end
       else
-      if g='FUNCTION' then
+      if (g = 'FUNCTION') then
         begin
         func_name := right(s,' ');
         ptr := findCommand(func_name);
         end
       else
-      if g='ADDARG0' then
+      if (g = 'ADDARG0') then
         begin
           addarg0 := (trim(uppercase(right(s,' '))) = 'TRUE');
         end;
@@ -203,6 +204,7 @@ begin
   af.Free();
 end;
 
+// Strip '$' from commandline
 procedure clean_cmdline(var line : string);
 var
    d : integer;
@@ -217,6 +219,7 @@ begin
     end;
 end;
 
+// Interpret the command
 procedure interpret(ch : GCharacter; line : string);
 var
   a : longint;
@@ -446,7 +449,7 @@ begin
     exit;
     end;
 
-  g := GCommandFunc.Create;
+  g := GCommandFunc.Create();
 
   g.name := name;
   g.func := func;

@@ -2,7 +2,7 @@
 	Summary:
 		Cleaning (system janitor) thread
 	
-	## $Id: clean.pas,v 1.4 2004/02/27 22:24:20 ***REMOVED*** Exp $
+	## $Id: clean.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit clean;
@@ -54,7 +54,7 @@ uses
 	mudsystem;
 	
 
-constructor GCleanThread.Create;
+constructor GCleanThread.Create();
 begin
   inherited Create(false);
 
@@ -65,7 +65,7 @@ begin
   freeonterminate := true;
 end;
 
-procedure GCleanThread.AutoSave;
+procedure GCleanThread.AutoSave();
 var
 	ch : GCharacter;
 	iterator : GIterator;
@@ -104,7 +104,7 @@ begin
 
       if (a = 15) then
         begin
-        AutoSave;
+        AutoSave();
         a := 0;
         end;
   
@@ -133,7 +133,7 @@ begin
           act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
           SET_BIT(conn.ch.flags,PLR_LINKLESS);
 
-          conn.Free;
+          conn.Free();
 
           {$IFDEF LINUX}
           pthread_kill(conn.ThreadID, 9);

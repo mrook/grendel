@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.9 2004/02/27 22:30:04 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.10 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit conns;
@@ -173,14 +173,14 @@ begin
 	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
    
 	while (not Terminated) do
-  		begin
-  		_lastupdate := Now();
+  	begin
+  	_lastupdate := Now();
   	
 		sleep(50);
 
-	  	if (Assigned(FOnTick)) then
-  			if (not FOnTick()) then 
-  				continue; 
+	  if (Assigned(FOnTick)) then
+  		if (not FOnTick()) then 
+  			continue; 
 
 		if (not Terminated) then
 			read();
@@ -190,7 +190,7 @@ begin
 			
 		if (Assigned(FOnInput)) and (length(comm_buf) > 0) then
 			FOnInput();
-	  	end;
+	  end;
   	
 	if (Assigned(FOnClose)) then
 		FOnClose();
@@ -219,7 +219,7 @@ var
 	compress_buf : array[0..4095] of char;
 begin
 	if (compress) then
-  		begin
+  	begin
 		compress := false;
 		strm.next_in := nil;
 		strm.avail_in := 0;
@@ -233,7 +233,7 @@ begin
 		_socket.send(compress_buf, compress_size);
 
 		deflateEnd(strm);
-	  	end;
+	  end;
 end;
 
 procedure GConnection.negotiateCompression();
@@ -485,7 +485,7 @@ end;
 
 procedure initConns();
 begin
-  connection_list := GDLinkedList.Create;
+  connection_list := GDLinkedList.Create();
 end;
 
 procedure cleanupConns();

@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ##	$Id: skills.pas,v 1.7 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit skills;
@@ -229,7 +229,7 @@ begin
     if (af.eof()) then
       break;
 
-    skill := GSkill.Create;
+    skill := GSkill.Create();
     skill.id := num;
 
     with skill do
@@ -253,62 +253,62 @@ begin
       if (g = 'NAME') then
         name := af.readLine()
       else
-      if g='ROUNDS' then
+      if (g = 'ROUNDS') then
         beats := af.readInteger()
       else
-      if g='MINLEVEL' then
+      if (g = 'MINLEVEL') then
         min_lvl := af.readInteger()
       else
-      if g='MANA' then
+      if (g = 'MANA') then
         min_mana := af.readInteger()
       else
-      if g='TARGET' then
+      if (g = 'TARGET') then
         target := af.readInteger()
       else
-      if g='FUNCTION' then
+      if (g = 'FUNCTION') then
         func := findFunc(af.readToken())
       else
-      if g='STARTCHAR' then
+      if (g = 'STARTCHAR') then
         start_char := af.readLine()
       else
-      if g='STARTVICT' then
+      if (g = 'STARTVICT') then
         start_vict := af.readLine()
       else
-      if g='STARTROOM' then
+      if (g = 'STARTROOM') then
         start_room := af.readLine()
       else
-      if g='HITCHAR' then
+      if (g = 'HITCHAR') then
         hit_char := af.readLine()
       else
-      if g='HITVICT' then
+      if (g = 'HITVICT') then
         hit_vict := af.readLine()
       else
-      if g='HITROOM' then
+      if (g = 'HITROOM') then
         hit_room := af.readLine()
       else
-      if g='MISSCHAR' then
+      if (g = 'MISSCHAR') then
         miss_char := af.readLine()
       else
-      if g='MISSVICT' then
+      if (g = 'MISSVICT') then
         miss_vict := af.readLine()
       else
-      if g='MISSROOM' then
+      if (g = 'MISSROOM') then
         miss_room := af.readLine()
       else
-      if g='DAMMSG' then
+      if (g = 'DAMMSG') then
         dam_msg := af.readLine()
       else
-      if g='DICE' then
+      if (g = 'DICE') then
         begin
-        a:=uppercase(af.readLine());
-        dicenum:=strtoint(left(a,'D'));
-        a:=right(a,'D');
-        dicesize:=strtoint(left(a,'+'));
-        a:=right(a,'+');
-        diceadd:=strtoint(left(a,' '));
+        a := uppercase(af.readLine());
+        dicenum := strtoint(left(a,'D'));
+        a := right(a,'D');
+        dicesize := strtoint(left(a,'+'));
+        a := right(a,'+');
+        diceadd := strtoint(left(a,' '));
         end
       else
-      if g='AFFECTS' then
+      if (g = 'AFFECTS') then
         begin
         aff := GAffect.Create();
 
@@ -343,7 +343,7 @@ begin
         aff.node := affects.insertLast(aff);
         end
       else
-      if g='PREREQ' then
+      if (g = 'PREREQ') then
         begin
         a := af.readToken();
         sk := findSkill(a);
@@ -360,7 +360,7 @@ begin
     inc(num);
   until (af.eof());
 
-  af.Free;
+  af.Free();
 
   gsn_second_attack := assign_gsn('second attack');
   gsn_third_attack := assign_gsn('third attack');
@@ -621,7 +621,7 @@ begin
     if (aff.name = name) then
       begin
       Result := aff;
-      exit;
+      break;
       end;
     end;
     
@@ -635,7 +635,7 @@ begin
 
   ch.affects.remove(aff.node);
 
-  aff.Free;
+  aff.Free();
 end;
 
 // Remove affect by name from char

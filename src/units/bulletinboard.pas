@@ -2,7 +2,7 @@
   Summary:
   	Abstract(Bulletinboard (noteboard) interface
   	
-	## $Id: bulletinboard.pas,v 1.3 2004/02/27 22:24:20 ***REMOVED*** Exp $
+	## $Id: bulletinboard.pas,v 1.4 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit bulletinboard;
@@ -15,6 +15,7 @@ uses
 
 type
     GNote = class
+    public
       board, number : integer;
       date, author, subject : string;
       text : string;
@@ -95,7 +96,7 @@ begin
       else
       if (g = '#END') then
         begin
-        note := GNote.Create;
+        note := GNote.Create();
 
         note.board := board;
         note.number := number;
@@ -201,12 +202,13 @@ begin
 end;
 
 procedure postNote(c : pointer; const text : string);
-var note : GNote;
-    ch : GPlayer;
+var
+	note : GNote;
+  ch : GPlayer;
 begin
   ch := c;
 
-  note := GNote.Create;
+  note := GNote.Create();
 
   note.board := ch.active_board;
   note.number := noteNumber(ch.active_board);
@@ -221,7 +223,7 @@ end;
 
 procedure initNotes();
 begin
-  notes := GDLinkedList.Create;
+  notes := GDLinkedList.Create();
 end;
 
 procedure cleanupNotes();

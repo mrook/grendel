@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit timers;
@@ -268,7 +268,7 @@ begin
       if (spec.ch = ch) and (spec.timer_type = timer_type) then
         begin
         timer_list.remove(node);
-        timer.Free;
+        timer.Free();
         break;
         end;
       end;
@@ -381,10 +381,10 @@ begin
        continue;
        end;
 
-    if (conn.state=CON_PLAYING) and (not conn.ch.in_command) then
+    if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
       conn.ch.emptyBuffer();
 
-    if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
+    if (conn.state = CON_PLAYING) and (conn.ch.wait > 0) then
       dec(conn.ch.wait);
     end;
     
@@ -406,15 +406,18 @@ begin
 
   { update age of areas and reset if hit timer }
   iterator := area_list.iterator();
+  
   while (iterator.hasNext()) do
     begin
     area := GArea(iterator.next());
 
     area.update();
     end;
+  
   iterator.Free();
 
   iterator := char_list.iterator();
+  
   while (iterator.hasNext()) do
     begin
     ch := GCharacter(iterator.next());
@@ -430,6 +433,7 @@ begin
         end;
       end;
     end;
+  
   iterator.Free();
 end;
 

@@ -2,7 +2,7 @@
 	Summary:
 		Online help interface
 
-	## $Id: mudhelp.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: mudhelp.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit mudhelp;
@@ -15,6 +15,7 @@ uses
 
 type
     GHelp = class
+    public
       keywords, helptype, syntax, related : string;
       text : string;
       level : integer;
@@ -134,17 +135,19 @@ var
   a, b : integer;
 begin
   assignfile(f, translateFileName('help\'+fname));
+  
   {$I-}
   reset(f);
   {$I+}
-  if IOResult<>0 then
+  
+  if (IOResult <> 0) then
     begin
     bugreport('load_help', 'mudhelp.pas', 'could not open help\' + fname);
     exit;
     end;
 
   // first, add a default help
-  help := GHelp.Create;
+  help := GHelp.Create();
   help.level := 0;
   help.keywords := 'DEFAULT_';
   help.helptype := '';
@@ -164,7 +167,7 @@ begin
       if (g = '#KEYWORD') then
         begin
         keys := right(s, '=');
-        keyword:=true;
+        keyword := true;
         text:='';
 
         // jago .. clear all variables
@@ -188,10 +191,10 @@ begin
         related := right(s, '=');
         end
       else
-      if g='#END' then
+      if (g = '#END') then
         begin
-        keyword:=false;
-        help := GHelp.Create;
+        keyword := false;
+        help := GHelp.Create();
         help.level := StrToInt(right(s, '='));
 
         help.keywords := keys;
@@ -203,7 +206,7 @@ begin
         helpFiles.insertLast(help);
         end
       else
-      if g='#INCLUDE' then
+      if (g = '#INCLUDE') then
         loadHelp(right(s, '='));
       end
     else
@@ -258,6 +261,7 @@ begin
       text := text + #13#10;
       end;
   until eof(f);
+  
   closefile(f);
 end;
 
@@ -300,7 +304,7 @@ end;
 
 procedure initHelp();
 begin
-  helpFiles := GDLinkedList.Create;
+  helpFiles := GDLinkedList.Create();
 end;
 
 procedure cleanupHelp();

@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: mudsystem.pas,v 1.7 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit mudsystem;
@@ -97,9 +97,9 @@ type
 		pulse : integer;
 		start : integer;
 
-		procedure update;
+		procedure update();
 
-		constructor Create;
+		constructor Create();
 	end;
 
 
@@ -211,38 +211,38 @@ begin
     af := GFileReader.Create(SystemDir + 'sysdata.dat');
 
     repeat
-      s := af.readLine;
+      s := af.readLine();
 
       g := uppercase(left(s,':'));
 
-      if g='PORT' then
+      if (g = 'PORT') then
         system_info.port:=strtoint(right(s,' '))
       else
       if (g = 'PORT6') then
         system_info.port6 := strtoint(right(s, ' '))
       else
-      if g='NAME' then
+      if (g = 'NAME') then
         system_info.mud_name := right(s,' ')
       else
-      if g='EMAIL' then
+      if (g = 'EMAIL') then
         system_info.admin_email := right(s,' ')
       else
-      if g='HOSTLOOKUP' then
+      if (g = 'HOSTLOOKUP') then
         system_info.lookup_hosts:=strtoint(right(s,' '))<>0
       else
-      if g='DENYNEWCONNS' then
+      if (g = 'DENYNEWCONNS') then
         system_info.deny_newconns:=strtoint(right(s,' '))<>0
       else
-      if g='DENYNEWPLAYERS' then
+      if (g = 'DENYNEWPLAYERS') then
         system_info.deny_newplayers:=strtoint(right(s,' '))<>0
       else
-      if g='LEVELFORCEPC' then
+      if (g = 'LEVELFORCEPC') then
         system_info.level_forcepc:=strtoint(right(s,' '))
       else
-      if g='LEVELLOG' then
+      if (g = 'LEVELLOG') then
         system_info.level_log:=strtoint(right(s,' '))
       else
-      if g='BINDIP' then
+      if (g = 'BINDIP') then
         system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
       else
       if (g = 'MAXCONNS') then
@@ -266,7 +266,7 @@ begin
     af := GFileReader.Create(SystemDir + 'bans.dat');
 
     repeat
-      s := af.readLine;
+      s := af.readLine();
 
       if (s <> '$') then
         banned_masks.add(s);
@@ -280,7 +280,7 @@ begin
     af := GFileReader.Create(SystemDir + 'names.dat');
 
     repeat
-      s := af.readLine;
+      s := af.readLine();
 
       if (s <> '$') then
         banned_names.add(lowercase(s));
@@ -328,7 +328,7 @@ begin
     exit;
   end;
 
-  for a := 0 to banned_masks.count-1 do
+  for a := 0 to pred(banned_masks.count) do
     af.writeLine(banned_masks[a]);
 
   af.writeLine('$');
@@ -341,7 +341,7 @@ begin
     exit;
   end;
 
-  for a := 0 to banned_names.count-1 do
+  for a := 0 to pred(banned_names.count) do
     af.writeLine(banned_names[a]);
 
   af.writeLine('$');
@@ -356,7 +356,7 @@ var
 begin
   Result := false;
 
-  for a := 0 to banned_masks.count-1 do
+  for a := 0 to pred(banned_masks.count) do
     if (StringMatches(host, banned_masks[a])) then
       begin
       Result := true;
@@ -380,7 +380,7 @@ begin
       exit;
       end;
 
-  for a := 0 to banned_names.count-1 do
+  for a := 0 to pred(banned_names.count) do
     begin
       if (ExecRegExpr(banned_names[a], name)) then
       begin
@@ -411,7 +411,7 @@ begin
     if (af.eof()) then
       break;
 
-    social := GSocial.Create;
+    social := GSocial.Create();
 
     with social do
       repeat
@@ -421,41 +421,41 @@ begin
 
       g := uppercase(left(s,':'));
 
-      if g = 'NAME' then
+      if (g = 'NAME') then
         name := uppercase(right(s,' '))
       else
-      if g='CHARNOARG' then
+      if (g = 'CHARNOARG') then
         char_no_arg := right(s,' ')
       else
-      if g='OTHERSNOARG' then
+      if (g = 'OTHERSNOARG') then
         others_no_arg := right(s,' ')
       else
-      if g='CHARAUTO' then
+      if (g = 'CHARAUTO') then
         char_auto := right(s,' ')
       else
-      if g='OTHERSAUTO' then
+      if (g = 'OTHERSAUTO') then
         others_auto := right(s,' ')
       else
-      if g='CHARFOUND' then
+      if (g = 'CHARFOUND') then
         char_found := right(s,' ')
       else
-      if g='VICTFOUND' then
+      if (g = 'VICTFOUND') then
         vict_found := right(s,' ')
       else
-      if g='OTHERSFOUND' then
+      if (g = 'OTHERSFOUND') then
         others_found := right(s,' ')
       else
-      if g='CHAROBJECT' then
+      if (g = 'CHAROBJECT') then
         char_object := right(s,' ')
       else
-      if g='OTHERSOBJECT' then
+      if (g = 'OTHERSOBJECT') then
         others_object := right(s,' ');
       until (uppercase(s)='#END') or (af.eof());
 
     if (findSocial(social.name) <> nil) then
       begin
       writeConsole('duplicate social "' + social.name + '" on line ' + inttostr(af.line) + ', discarding');
-      social.Free;
+      social.Free();
       end
     else
       socials.put(social.name, social);
@@ -482,7 +482,7 @@ begin
 
   if (social = nil) then
     begin
-    checkSocial := false;
+    Result := false;
     exit;
     end;
 
@@ -557,7 +557,7 @@ begin
           end
           else
           begin
-            chance:=random(10);
+            chance := random(10);
             case chance of
               1,2,3,4,5,6:begin
                           if (length(vict_found) <> 0) then
@@ -586,7 +586,7 @@ begin
     end;
     end;
 
-  checkSocial := true;
+  Result := true;
 end;
 
 // Load damage messages
@@ -607,7 +607,7 @@ begin
     
     if (length(trim(s)) > 0) then
       begin
-      dam := GDamMessage.Create;
+      dam := GDamMessage.Create();
 
       with dam do
         begin
@@ -675,7 +675,7 @@ begin
         end;
   until (s = '$');
 
-  af.Free;
+  af.Free();
 end;
 
 // Save current mudstate (time, weather)
@@ -713,13 +713,13 @@ begin
   iterator.Free();
 
   af.writeLine('$');
-  af.Free;
+  af.Free();
 end;
 
 // GAuction
-constructor GAuction.Create;
+constructor GAuction.Create();
 begin
-  inherited Create;
+  inherited Create();
 
   pulse := 0;
   item := nil;
@@ -727,7 +727,7 @@ begin
   buyer := nil;
 end;
 
-procedure GAuction.update;
+procedure GAuction.update();
 var
    buf : string;
 begin
@@ -790,11 +790,11 @@ procedure initSystem();
 begin
   socials := GHashTable.Create(512);
   socials.setHashFunc(firstHash);
-  dm_msg := GDLinkedList.Create;
-  auction_good := GAuction.Create;
-  auction_evil := GAuction.Create;
-  banned_masks := TStringList.Create;
-  banned_names := TStringList.Create;
+  dm_msg := GDLinkedList.Create();
+  auction_good := GAuction.Create();
+  auction_evil := GAuction.Create();
+  banned_masks := TStringList.Create();
+  banned_names := TStringList.Create();
 end;
 
 procedure cleanupSystem();

@@ -2,7 +2,7 @@
   Summary:
   	Interface with GMC virtual machine
   	
-	## $Id: progs.pas,v 1.3 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: progs.pas,v 1.4 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit progs;
@@ -150,8 +150,8 @@ procedure init_progs;
 var
   sig : GSignature;
 begin
-  gmlib := GMathLib.Create;
-  gslib := GStringLib.Create;
+  gmlib := GMathLib.Create();
+  gslib := GStringLib.Create();
 
   sig.resultType := varSingle;
   setLength(sig.paramTypes, 1);

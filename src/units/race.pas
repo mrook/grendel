@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.5 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.6 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit race;
@@ -101,7 +101,8 @@ uses
 	console,
 	skills;
 
-  
+
+// GBodypart constructor
 constructor GBodyPart.Create();
 begin
   inherited Create;
@@ -112,6 +113,7 @@ begin
   room_message := '$n wears $p on $s bodypart,';
 end;
 
+// GRace constructor
 constructor GRace.Create();
 begin
   inherited Create;
@@ -136,6 +138,7 @@ begin
   _bodyparts := GHashTable.Create(32);
 end;
 
+// Load the bodyparts
 procedure loadBodyParts(parser : TXmlParser; race : GRace);
 var
   bodypart : GBodyPart;
@@ -198,6 +201,7 @@ begin
     end;
 end;
 
+// Load the saves
 procedure loadSaves(parser : TXmlParser; race : GRace);
 begin
   while (parser.Scan()) do
@@ -316,7 +320,7 @@ end;
 
 procedure initRaces();
 begin
-  raceList := GDLinkedList.Create;
+  raceList := GDLinkedList.Create();
 end;
 
 procedure cleanupRaces();

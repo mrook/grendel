@@ -2,7 +2,7 @@
 	Summary:
 		Various utility functions
 		
-	## $Id: util.pas,v 1.4 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: util.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
 }
 
 unit util;
@@ -108,42 +108,51 @@ begin
 end;
 
 function pad_integer(s, num : integer) : string;
-var g : string;
+var
+	g : string;
 begin
   g := inttostr(s);
 
-  pad_integer := g + StringOfChar(' ', num-length(g));
+  Result := g + StringOfChar(' ', num-length(g));
 end;
 
 function pad_integer_front(s, num : integer) : string;
-var g : string;
+var
+	g : string;
 begin
   g := inttostr(s);
 
-  pad_integer_front := StringOfChar(' ', num - length(g)) + g;
+  Result := StringOfChar(' ', num - length(g)) + g;
 end;
 
 function pad_string(const s : string; num : integer) : string;
 begin
-  pad_string := s + StringOfChar(' ', num - length(s));
+  Result := s + StringOfChar(' ', num - length(s));
 end;
 
 function pad_string_front(const s : string; num : integer) : string;
 begin
-  pad_string_front := StringOfChar(' ', num - length(s)) + s;
+  Result := StringOfChar(' ', num - length(s)) + s;
 end;
 
 function trail_number(s : integer):string;
 var 
   g : string;
 begin
-  g := inttostr(s);
+  g := IntToStr(s);
+  
+  case (s mod 100) of
+	  11 : g := g + 'th';
+	  12 : g := g + 'th';
+		13 : g := g + 'th';
+  else
   case (s mod 10) of
     1 : g := g + 'st';
     2 : g := g + 'nd';
     3 : g := g + 'rd';
   else
     g := g + 'th';
+  end;
   end;
   
   Result := g;
@@ -173,11 +182,11 @@ function add_chars(num:integer; const s : string; c : char) : string;
 begin
   if (length(s)>num) then
     begin
-    add_chars := s;
+    Result := s;
     exit;
     end;
 
-  add_chars := s + StringOfChar(c, num - length(s));
+  Result := s + StringOfChar(c, num - length(s));
 end;
 
 function cap(s : string) : string;
@@ -186,7 +195,7 @@ var
 begin
   if (length(s) = 0) then
     begin
-    cap := '';
+    Result := '';
     exit;
     end;
 
@@ -199,7 +208,7 @@ begin
   until (byte(s[g]) in [33..126]) or (length(s) <= g);
 
   s[g] := upcase(s[g]);
-  cap := s;
+  Result := s;
 end;
 
 function one_argument(argument : string; var arg_first : string) : string;
@@ -218,7 +227,7 @@ begin
 
   if (length(argument) = 0) then
     begin
-    one_argument := '';
+    Result := '';
     exit;
     end;
 
@@ -245,18 +254,18 @@ begin
   while (p <= length(argument)) and ((argument[p] = ' ') or (argument[p] = #13) or (argument[p] = #10)) do
     inc(p);
 
-  one_argument := copy(argument, p, length(argument) - p + 1);
+  Result := copy(argument, p, length(argument) - p + 1);
 end;
 
 function number_range(val_from, val_to : integer) : integer;
 begin
-  number_range := random(val_to - val_from) + val_from;
+  Result := random(val_to - val_from) + val_from;
 end;
 
 // Random number between 1 - 100
-function number_percent : integer;
+function number_percent() : integer;
 begin
-  number_percent := random(100) + 1;
+  Result := random(100) + 1;
 end;
 
 function rolldice(num, size : integer) : integer;
@@ -266,7 +275,7 @@ begin
   s := 0;
   
   for a:=1 to num do
-    inc(s,random(size)+1);
+    inc(s, random(size) + 1);
   
   Result := s;
 end;
@@ -274,9 +283,9 @@ end;
 function mudAnsi(color : integer) : string;
 begin
   if (color > 8) then
-    mudAnsi := '$B$' + inttostr(color - 8)
+    Result := '$B$' + inttostr(color - 8)
   else
-    mudAnsi := '$A$' + inttostr(color);
+    Result := '$A$' + inttostr(color);
 end;
 
 {Jago 10/Jan/2001 - utility function (- move it to util.pas)}
@@ -336,9 +345,10 @@ end;
 
 // Drunken speech - Nemesis
 function makedrunk(param : string) : string;
-var temp : char;
-    i, drunkpos : integer;
-    buf, drunkstring : string;
+var
+	temp : char;
+  i, drunkpos : integer;
+  buf, drunkstring : string;
 begin
   for i:=1 to length(param) do
     begin
