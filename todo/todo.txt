@@ -30,6 +30,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! practice sessions
 ! online search through helpfiles (so like 'apropos sect' to find all
   helppages with the word sect in them)
+! add copyright etc. notice for LibXmlParser to text\Credits.txt?
 
 
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
@@ -56,7 +57,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
 - have mudstatus save when shutting down (mudstatus defined as: mudtime, weather(?), etc.)
-- add copyright etc. notice for LibXmlParser to text\Credits.txt?
+
 
 l implementation of the mud sound protocol
 l new area format using XML
@@ -70,6 +71,7 @@ l mobprog compiling to some sort of pseudo stack machine code
 l fully customizable mud - experience formulas, experience per level, 
 	damage formulas, number of stats, stat maximums, health/mana/movement maximums
 l bodypart damage/armor ?
+
 
 -- random ideas --
 
