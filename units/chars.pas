@@ -172,6 +172,7 @@ type
       function IS_AFFECT(affect : integer) : boolean;
       function CAN_FLY : boolean;
       function CAN_SEE(vict : GCharacter) : boolean;
+      function IS_AFK : boolean;
 
       procedure extract(pull : boolean);
       procedure quit;
@@ -590,6 +591,18 @@ begin
 
   if (IS_SET(aff_flags, AFF_BLIND)) then
     CAN_SEE := false;
+end;
+
+{ Utility function - Nemesis }
+function GCharacter.IS_AFK : boolean;
+begin
+  if (IS_NPC) then
+    IS_AFK := false
+  else
+  if IS_SET(player^.flags, PLR_LINKLESS) then
+    IS_AFK := false
+  else
+    IS_AFK := GConnection(conn).afk = true;
 end;
 
 function GCharacter.load(fn : string) : boolean;
