@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.33 2001/10/04 17:14:02 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.34 2001/10/05 15:48:29 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -38,7 +38,7 @@ type
       admin_email : string;        { email address of the administration }
       mud_name : string;           { name of the MUD Grendel is serving }
       port : integer;              { port on which Grendel runs }
-      port6 : integer;		   { ipv6 port on which Grendel runs }
+      port6 : integer;		         { ipv6 port on which Grendel runs }
       log_all : boolean;           { log all player activity? }
       bind_ip : integer;           { IP the server should bind to (when using multiple interfaces) }
       level_forcepc : integer;     { level to force players }
@@ -47,6 +47,9 @@ type
       deny_newconns : boolean;     { deny new connections? }
       deny_newplayers : boolean;   { disable 'CREATE', e.g. no new players }
       max_conns : integer;         { max. concurrent connections on this server }
+      
+      arena_start, 
+      arena_end : integer;         { vnum start/end of arena (battleground) }
 
       user_high, user_cur : integer;
      end;
@@ -260,7 +263,13 @@ begin
       system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
     else
     if (g = 'MAXCONNS') then
-      system_info.max_conns := strtoint(right(s, ' '));
+      system_info.max_conns := strtoint(right(s, ' '))
+    else
+    if (g = 'ARENASTART') then
+      system_info.arena_start := strtoint(right(s, ' '))
+    else
+    if (g = 'ARENAEND') then
+      system_info.arena_end := strtoint(right(s, ' '));
   until (s = '$') or (af.eof);
 
   af.Free;

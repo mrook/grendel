@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.40 2001/10/04 21:07:34 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.41 2001/10/05 15:48:28 ***REMOVED*** Exp $
 
 unit constants;
 
@@ -272,8 +272,6 @@ const headings :array[DIR_NORTH..DIR_SOMEWHERE] of string=('north','east','south
 const ROOM_VNUM_GOOD_PORTAL=0;
       ROOM_VNUM_EVIL_PORTAL=1;
       ROOM_VNUM_IMMORTAL_PORTAL=10;
-      ROOM_VNUM_ARENA_START=30;       { start of arena (bg zone) }
-      ROOM_VNUM_ARENA_END=46;         { end of arena }
 
 { room flags }
 const ROOM_DARK=BV00;           { can't see without light }

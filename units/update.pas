@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.16 2001/09/02 21:49:56 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.17 2001/10/05 15:48:29 ***REMOVED*** Exp $
 
 unit update;
 
@@ -550,15 +550,15 @@ begin
       act(AT_REPORT,'You are transfered into the arena.',false,conn.ch,nil,nil,TO_CHAR);
       act(AT_GREEN,'Niet mokken, lekker knokken!',false,conn.ch,nil,nil,TO_CHAR);
 
-      s:=random(ROOM_VNUM_ARENA_END-ROOM_VNUM_ARENA_START+1)+ROOM_VNUM_ARENA_START;
-      vnum:=URange(ROOM_VNUM_ARENA_START,s,ROOM_VNUM_ARENA_END);
+      s := random(system_info.arena_end - system_info.arena_start + 1) + system_info.arena_start;
+      vnum := URange(system_info.arena_start, s, system_info.arena_end);
 
       GPlayer(conn.ch).bg_room:=conn.ch.room;
 
       conn.ch.fromRoom;
       conn.ch.toRoom(findRoom(vnum));
 
-      GPlayer(conn.ch).bg_status:=BG_PARTICIPATE;
+      GPlayer(conn.ch).bg_status := BG_PARTICIPATE;
       interpret(conn.ch,'look');
       end;
 

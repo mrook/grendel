@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.4 2001/10/04 21:07:34 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.5 2001/10/05 15:48:28 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -16,7 +16,7 @@ begin
     exit;
     end;
 
-  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
@@ -216,7 +216,7 @@ begin
     end;
 
   // prevent trading in battlegrounds
-  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
@@ -862,7 +862,7 @@ begin
     end;
 
   // prevent trading in battlegrounds
-  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= ROOM_VNUM_ARENA_START) and (ch.room.vnum <= ROOM_VNUM_ARENA_END) then
+  if (IS_SET(ch.room.flags, ROOM_NOTRADE)) or (ch.room.vnum >= system_info.arena_start) and (ch.room.vnum <= system_info.arena_end) then
     begin
     ch.sendBuffer( 'That is not allowed here.'#13#10);
     exit;
