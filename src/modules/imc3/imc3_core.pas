@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.2 2004/02/11 20:02:42 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.3 2004/03/11 23:29:57 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -703,7 +703,7 @@ begin
 		begin
 		conn := GPlayerConnection(iterator.next());
 		
-		if (conn.state = CON_PLAYING) and (not conn.ch.IS_INVIS) then
+		if (conn.isPlaying()) and (not conn.ch.IS_INVIS) then
 			writeBuffer('({"' + escape(conn.ch.name) + '",0,"",}),');
 		end;
 	
