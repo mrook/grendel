@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.47 2001/08/12 18:08:20 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.48 2001/08/15 19:01:37 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1038,7 +1038,7 @@ begin
 
   tm := Now() - tm;
 
-  writeConsole('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
+  writeConsole('Area loading took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
 //  room_list.hashStats();
 end;
 
