@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.5 2003/10/20 16:00:49 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.6 2003/10/29 15:47:20 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -377,8 +377,8 @@ begin
 	parser.Free();
 	
 	// Get some info from running core
-	player_port := system_info.port;
-	name := system_info.mud_name;
+	// player_port := system_info.port;
+	// name := system_info.mud_name;
 end;
 
 procedure loadMudList();

@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.14 2003/10/29 12:59:14 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.15 2003/10/29 15:47:19 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -663,16 +663,22 @@ var
 	msg : string;
  	buf : array[0..MAX_READ - 1] of char;
 begin
-	Sleep(1000);
+	Sleep(2500);
 	inputPointer := 0;
+	
+	if (this_mud.name = 'Your Mud Name Here') then
+		begin
+		writeConsole('I3: Refusing to connect with default values. Please change ' + I3_CONFIG_FILE);
+		Terminate();
+		end;
 
 	if (this_mud.preferredRouter = nil) then	
 		begin
 		writeConsole('I3: Impossible to connect to non-existing router');
 		Terminate();
-		end;
-		
-	router := this_mud.preferredRouter;
+		end
+	else
+		router := this_mud.preferredRouter;
 	
 	while (not Terminated) do
 		begin
