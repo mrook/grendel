@@ -223,18 +223,21 @@ begin
       node_next := node.next;
       obj := node.element;
 
-      if IS_SET(obj.flags,OBJ_NODROP) then
-        ch.sendBuffer('You cannot drop that.'#13#10)
-      else
+      if (obj.wear_location = WEAR_NULL) then
         begin
-        for d := 1 to obj.count do
+        if IS_SET(obj.flags,OBJ_NODROP) then
+          ch.sendBuffer('You cannot drop that.'#13#10)
+        else
           begin
-          act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
-          act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
-          end;
+          for d := 1 to obj.count do
+            begin
+            act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
+            act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
+            end;
 
-        obj.fromChar;
-        obj.toRoom(ch.room);
+          obj.fromChar;
+          obj.toRoom(ch.room);
+          end;
         end;
 
       node := node_next;
@@ -244,7 +247,7 @@ begin
     begin
     obj := ch.findInventory(param);
 
-    if obj=nil then
+    if (obj = nil) or (obj.wear_location > WEAR_NULL) then
       ch.sendBuffer('You move your arms around wildly, but nothing happens.'#13#10)
     else
     if IS_SET(obj.flags,OBJ_NODROP) then
@@ -312,7 +315,7 @@ end;
 procedure do_wear(ch:GCharacter;param:string);
 var obj, lastobj : GObject;
     node, node_next : GListNode;
-    weared : integer;
+    cnt : integer;
 begin
   if (length(param)=0) then
     begin
@@ -329,27 +332,26 @@ begin
       end;
 
     node := ch.objects.head;
-    weared := 0;
+    cnt := 0;
 
     while (node <> nil) do
       begin
       node_next := node.next;
       obj := node.element;
 
-      if (obj.wear1>0) or (obj.wear2>0) then
+      if (obj.wear_location = WEAR_NULL) then
         begin
         if (ch.equip(obj)) then
           begin
-          inc(weared);
           obj.seperate;
-          obj.fromChar;
+          inc(cnt);
           end;
         end;
 
       node := node_next;
       end;
 
-    if (weared = 0) then
+    if (cnt = 0) then
       ch.sendBuffer( 'You aren''t carrying anything that can be worn.'#13#10);
     end
   else
@@ -369,16 +371,15 @@ begin
       end;
 
     if (ch.equip(obj)) then
-      begin
       obj.seperate;
-      obj.fromChar;
-      end;
     end;
 end;
 
 procedure do_remove(ch:GCharacter;param:string);
 var g:longint;
-    obj:GObject;
+    node, node_next, node_back : GListNode;
+    obj : GObject;
+    found : boolean;
 begin
   if (length(param)=0) then
     begin
@@ -388,69 +389,108 @@ begin
 
   if (param = 'all') then
     begin
-    for g:=1 to MAX_WEAR do
-     if ch.wear[g]<>nil then
+    node := ch.objects.head;
+    while (node <> nil) do
       begin
-      obj:=ch.wear[g];
-      if IS_SET(obj.flags,OBJ_NOREMOVE) then
-        act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
-      else
+      obj := node.element;
+
+      if (obj.wear_location > WEAR_NULL) then
         begin
-        act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
-        act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
+        if IS_SET(obj.flags,OBJ_NOREMOVE) then
+          act(AT_REPORT,'You cannot remove $p$7.',false,ch,obj,nil,TO_CHAR)
+        else
+          begin
+          act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
+          act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
 
-        obj.toChar(ch);
-        ch.wear[g]:=nil;
+          obj.wear_location := WEAR_NULL;
 
-        ch.affectObject(obj, true);
+          ch.affectObject(obj, true);
+          end;
         end;
+
+      node := node.next;
       end;
     end
   else
     begin
-    obj:=nil;
-    for g:=1 to MAX_WEAR do
-     if ch.wear[g]<>nil then
-      if pos(param,GObject(ch.wear[g]).short)<>0 then
-       begin
-       obj:=ch.wear[g];
-       break;
-       end;
+    found := false;
+    node := ch.objects.head;
+    while (node <> nil) do
+      begin
+      obj := node.element;
 
-    if obj=nil then
+      if (obj.wear_location > WEAR_NULL) and (pos(param, obj.short) > 0) then
+        begin
+        found := true;
+        break;
+        end;
+
+      node := node.next;
+      end;
+
+    if (obj = nil) then
       ch.sendBuffer('You are not wearing this object.'#13#10)
     else
-    if IS_SET(obj.flags,OBJ_NOREMOVE) then
+    if (IS_SET(obj.flags, OBJ_NOREMOVE)) then
       act(AT_REPORT,'You cannot remove $p.',false,ch,obj,nil,TO_CHAR)
     else
       begin
       act(AT_REPORT,'You remove $p.',false,ch,obj,nil,TO_CHAR);
       act(AT_REPORT,'$n removes $p.',false,ch,obj,nil,TO_ROOM);
-      obj.toChar(ch);
-      ch.wear[g]:=nil;
+
+      obj.wear_location := WEAR_NULL;
 
       ch.affectObject(obj, true);
       end;
     end;
+
+  // fix the grouping
+  node := ch.objects.head;
+  while (node <> nil) do
+    begin
+    node_next := node.next;
+    obj := node.element;
+    found := false;
+
+    // matches tend to be on the right side, so scan from the back
+    node_back := ch.objects.tail;
+    while (node_back <> nil) and (node_back <> node) do
+      begin
+      if (GObject(node_back.element).group(obj)) then
+        begin
+        found := true;
+        break;
+        end;
+
+      node_back := node_back.prev;
+      end;
+
+    node := node_next;
+    end;
 end;
 
 procedure do_swap(ch:GCharacter;param:string);
-var x,y:GObject;
+var
+   x, y : GObject;
 begin
-  with ch do
+  x := ch.getEQ(WEAR_LHAND);
+  y := ch.getEQ(WEAR_RHAND);
+
+  if (x = nil) and (y = nil) then
+    act(AT_REPORT,'Left hand, right hand, all hands!',false,ch,nil,nil,TO_CHAR)
+  else
     begin
-    x:=wear[WEAR_LHAND];
-    y:=wear[WEAR_RHAND];
-    wear[WEAR_LHAND]:=y;
-    wear[WEAR_RHAND]:=x;
-    if (x=nil) and (y=nil) then
-      act(AT_REPORT,'Left hand, right hand, all hands!',false,ch,nil,nil,TO_CHAR)
-    else
+    if (y <> nil) then
       begin
-      if y<>nil then
-        act(AT_REPORT,'You now hold $p in your left hand.',false,ch,y,nil,TO_CHAR);
-      if x<>nil then
-        act(AT_REPORT,'You now hold $p in your right hand.',false,ch,x,nil,TO_CHAR);
+      y.wear_location := WEAR_LHAND;
+      act(AT_REPORT,'You now hold $p in your left hand.',false,ch,y,nil,TO_CHAR);
+      end;
+
+    if (x <> nil) then
+      begin
+      x.wear_location := WEAR_RHAND;
+      act(AT_REPORT,'You now hold $p in your right hand.',false,ch,x,nil,TO_CHAR);
       end;
     end;
 end;

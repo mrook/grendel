@@ -1,3 +1,16 @@
+function info_object(obj : GObject) : string;
+var r : string;
+begin
+  r := '$B$7';
+
+  if (IS_SET(obj.flags, OBJ_GLOW)) then
+    r := r + '(Glowing) ';
+  if (IS_SET(obj.flags, OBJ_HUM)) then
+    r := r + '(Humming) ';
+
+  info_object := r;
+end;
+
 procedure do_time(ch:GCharacter;param:string);
 begin
   act(AT_REPORT,'It is the ' + trail_number(time_info.hour) +
@@ -66,29 +79,31 @@ begin
 
       act(AT_REPORT,vict.name+' looks '+hp_perc[w1]+' and '+mv_perc[w2]+'.',false,ch,nil,vict,TO_CHAR);
 
-      cnt:=0;
-      for a:=1 to MAX_WEAR do
-       if (vict.wear[a] <> nil) then
-        inc(cnt);
+      ch.sendBuffer(#13#10 + vict.name + ' is using: '#13#10#13#10);
 
-      if cnt<>0 then
+      cnt := 0;
+      node := vict.objects.head;
+      while (node <> nil) do
         begin
-        act(AT_REPORT,#13#10+vict.name+' is using:',false,ch,nil,vict,TO_CHAR);
+        obj := node.element;
 
-        for a:=1 to MAX_WEAR do
-         if (vict.wear[a] <> nil) then
+        if (obj.wear_location <> WEAR_NULL) then
           begin
-          case a of
-              16:r:='(floating ';
-           17,18:r:='(held ';
-            else r:='(worn ';
+          case obj.wear_location of
+              16 : buf1 := '(floating ';
+           17,18 : buf1 := '(held ';
+            else   buf1 := '(worn ';
           end;
 
-          r := add_chars(30, r + eq_string[a] + ')', ' ');
-
-          act(AT_REPORT, r + ' $p',false,ch,vict.wear[a],nil,TO_CHAR);
+          act(AT_REPORT, pad_string(buf1 + eq_string[obj.wear_location] + ')', 30) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+          inc(cnt);
           end;
+
+        node := node.next;
         end;
+
+      if (cnt = 0) then
+        ch.sendBuffer('  nothing.'#13#10);
       end
     else
     if obj<>nil then
@@ -269,52 +284,51 @@ begin
       begin
       obj := node.element;
 
-      if (obj.count > 1) then
-        act(AT_REPORT, '  $p [' + inttostr(obj.count) + ']', false, ch, obj, nil, TO_CHAR)
-      else
-        act(AT_REPORT, '  $p', false, ch, obj, nil, TO_CHAR);
+      if (obj.wear_location = WEAR_NULL) then
+        begin
+        if (obj.count > 1) then
+          act(AT_REPORT, '  $p [' + inttostr(obj.count) + ']', false, ch, obj, nil, TO_CHAR)
+        else
+          act(AT_REPORT, '  $p', false, ch, obj, nil, TO_CHAR);
+        end;
 
       node := node.next;
       end;
     end;
 end;
 
-function info_object(obj : GObject) : string;
-var r : string;
-begin
-  r := '$B$7';
-  
-  if (IS_SET(obj.flags, OBJ_GLOW)) then
-    r := r + '(Glowing) ';
-  if (IS_SET(obj.flags, OBJ_HUM)) then
-    r := r + '(Humming) ';
-
-  info_object := r;
-end;
-
 procedure do_equipment(ch:GCharacter;param:string);
-var a,cnt:word;
-    r:string;
+var
+   buf : string;
+   node : GListNode;
+   obj : GObject;
+   cnt : integer;
 begin
-  with ch do
+  cnt := 0;
+  ch.sendBuffer('You are using:'#13#10#13#10);
+
+  node := ch.objects.head;
+  while (node <> nil) do
     begin
-    cnt:=0;
-    act(AT_REPORT,'You are using:',false,ch,nil,nil,TO_CHAR);
-    for a:=1 to MAX_WEAR do
-      if Wear[a]<>nil then
-        begin
-          case a of
-             16:r:='(floating ';
-         17,18:r:='(held ';
-          else r:='(worn ';
-          end;
-        r:=add_chars(30,r+eq_string[a]+')', ' ');
-        act(AT_REPORT,r+' $p '+info_object(wear[a]),false,ch,wear[a],nil,TO_CHAR);
-        inc(cnt);
-        end;
-    if cnt=0 then
-      act(AT_REPORT,'nothing',false,ch,nil,nil,TO_CHAR);
+    obj := node.element;
+
+    if (obj.wear_location > WEAR_NULL) then
+      begin
+      case obj.wear_location of
+          16 : buf := '(floating ';
+       17,18 : buf := '(held ';
+        else   buf := '(worn ';
+      end;
+
+      act(AT_REPORT, pad_string(buf + eq_string[obj.wear_location] + ')', 30) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+      inc(cnt);
+      end;
+
+    node := node.next;
     end;
+
+  if (cnt = 0) then
+    ch.sendBuffer('  nothing.'#13#10);
 
   ch.sendBuffer(ch.ansiColor(7));
 end;
