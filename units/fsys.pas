@@ -8,10 +8,12 @@ uses
 
 const
     BUFSIZE = 65536 * 16;
+    MAX_LINESIZE = 1024;
 
 type
     GFileReader = class
       fp : TFileStream;
+      fname : string;
       buffer : array[0..BUFSIZE] of char;
       fpos, fsize : integer;
       feol : boolean;
@@ -35,11 +37,15 @@ type
 
 implementation
 
+uses
+  mudsystem;
+
 constructor GFileReader.Create(fn : string);
 begin
   inherited Create;
 
   fp := TFileStream.Create(fn, fmOpenRead);
+  fname := fn;
 
   fsize := fp.Read(buffer, BUFSIZE);
 
@@ -95,21 +101,38 @@ begin
 end;
 
 function GFileReader.readLine : string;
-var buf : string;
-    c : char;
+var
+   chars : array[0..MAX_LINESIZE] of char;
+   pos : integer;
+   c : char;
 begin
   c := ' ';
-  buf := '';
+  pos := 0;
 
-  while (c <> #13) do
+  while (true) do
     begin
     c := readChar;
 
     if (c <> #13) then
-      buf := buf + c;
+      begin
+      chars[pos] := c;
+      inc(pos);
+
+      if (pos >= MAX_LINESIZE) then
+        begin
+        bugreport('GFileReader.readLine', 'fsys.pas', 'max linesize exceeded in ' + fname, 'max linesize exceeded in ' + fname);
+
+        pos := MAX_LINESIZE;
+        break;
+        end;
+      end
+    else
+      break;
     end;
 
-  readLine := buf;
+  chars[pos] := #0;
+
+  readLine := chars;
 end;
 
 function GFileReader.readInteger : integer;
