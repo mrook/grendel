@@ -46,6 +46,7 @@ type
     destructor Destroy; override;
     
     property getDescriptor : TSocket read fd;
+    property socketAddress : TSockAddr_Storage read addr write addr;
   end;
   
   GSocket4 = class(GSocket)
