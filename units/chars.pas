@@ -363,6 +363,13 @@ begin
     player^.snooping := nil;
     end;
 
+  if (snooped_by <> nil) then
+    begin
+    snooped_by.player^.snooping := nil;
+    snooped_by.sendBuffer('No longer snooping.'#13#10);
+    snooped_by := nil;
+    end;
+
   if (leader <> Self) then
     begin
     to_group(leader, '$B$7[Group]: ' + name + ' has left the group.');
