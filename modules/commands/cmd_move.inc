@@ -73,19 +73,19 @@ begin
   ch.room.tracks.insertLast(track);
 end;
 
-function do_move(ch : GCharacter; pexit : GExit) : boolean;
+function do_move(ch : GCharacter; pexit : GExit) : boolean; overload;
 var 
   vict : GCharacter;
-  sneaking:boolean;
-  txt_ch,txt_room:array[0..32] of char;
-  room_pos,room_to : GRoom;
-  mv_cost:integer;
-  drunk:boolean;
+  sneaking : boolean;
+  txt_ch, txt_room : string;
+  room_pos, room_to : GRoom;
+  mv_cost : integer;
+  drunk : boolean;
   node, node_next : GListNode;
   p : integer;
 begin
-  do_move:=false;
-  room_pos:=ch.room;
+  do_move := false;
+  room_pos := ch.room;
 
   if (not ch.IS_NPC) and (ch.IS_DRUNK) then
     drunk := true
@@ -329,7 +329,7 @@ begin
     if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
       act(AT_REPORT, '$n leaves through the $d.',true,ch,nil, pexit,TO_ROOM)
     else
-      act(AT_REPORT, '$n '+txt_room+' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
+      act(AT_REPORT, '$n ' + txt_room + ' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
     end;
 
   ch.fromRoom;
@@ -377,7 +377,7 @@ begin
     node_next := node.next;
     vict := node.element;
 
-    if (vict.master = ch) then
+    if (Assigned(vict)) and (vict.master = ch) then
       begin
       vict.in_command := true;
 
@@ -421,41 +421,57 @@ begin
       ch.sendBuffer(#13#10'Suddenly you discover that the floor underneath you is missing!'#13#10);  
       act(AT_GREY, 'Unable to fly, $n plummets into the depths below.', false, ch, nil, nil, TO_ROOM);
       
-      do_move(ch, pexit);     
+      do_move(ch, pexit);
       end;
     end;
 
   do_move := true;
 end;
 
+function do_move(ch : GCharacter; direction : integer) : boolean; overload;
+var
+  pexit : GExit;
+begin
+  pexit := ch.room.findExit(direction);
+
+  if (pexit = nil) and ((ch.room.vnum >= GPlayer(ch).r_lo) and (ch.room.vnum <= GPlayer(ch).r_hi) and (ch.getTrust() > LEVEL_GOD) and (GPlayer(ch).area_fname <> '') and (GPlayer(ch).area <> nil)) then
+    begin
+    interpret(ch, 'rclone ' + headings[direction]);
+    
+    Result := true;
+    end
+  else
+    Result := do_move(ch, pexit);
+end;
+
 procedure do_north(ch:GCharacter;param:string);
 begin
-  do_move(ch, ch.room.findExit(DIR_NORTH));
+  do_move(ch, DIR_NORTH);
 end;
 
 procedure do_east(ch:GCharacter;param:string);
 begin
-  do_move(ch, ch.room.findExit(DIR_EAST));
+  do_move(ch, DIR_EAST);
 end;
 
 procedure do_south(ch:GCharacter;param:string);
 begin
-  do_move(ch, ch.room.findExit(DIR_SOUTH));
+  do_move(ch, DIR_SOUTH);
 end;
 
 procedure do_west(ch:GCharacter;param:string);
 begin
-  do_move(ch, ch.room.findExit(DIR_WEST));
+  do_move(ch, DIR_WEST);
 end;
 
 procedure do_down(ch:GCharacter;param:string);
 begin
-  do_move(ch, ch.room.findExit(DIR_DOWN));
+  do_move(ch, DIR_DOWN);
 end;
 
 procedure do_up(ch:GCharacter;param:string);
 begin
-  do_move(ch, ch.room.findExit(DIR_UP));
+  do_move(ch, DIR_UP);
 end;
 
 procedure do_sleep(ch:GCharacter;param:string);
@@ -664,7 +680,7 @@ begin
     node := node.next;
     end;
 
-  do_move(ch,pexit);
+  do_move(ch, pexit);
 end;
 
 procedure do_open(ch:GCharacter;param:string);

@@ -70,7 +70,6 @@ end;
 
 procedure do_flee(ch:GCharacter;param:string);
 var a : integer;
-    pexit : GExit;
     timer : GTimer;
     room : GRoom;
     vict : GCharacter;
@@ -95,12 +94,11 @@ begin
     end;
 
   a := random(6)+1;
-  pexit := ch.room.findExit(a);
 
   ch.position := POS_STANDING;
   room := ch.room;
 
-  if (pexit <> nil) and (do_move(ch, pexit)) then
+  if (do_move(ch, a)) then
     begin
     // ch.fought_by.clear;
     ch.sendBuffer('You flee as fast as you can!'#13#10);
