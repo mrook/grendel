@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.68 2003/06/24 21:41:32 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.69 2003/10/14 11:34:15 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -1688,6 +1688,12 @@ begin
       
       node := node.next;
       end;
+    end
+  else
+  	begin
+    bugreport('GCharacter.load', 'chars.pas', 'corrupted playerfile ' + name);
+
+    race := GRace(raceList.head.element);
     end;
 
   if (max_skills = 0) then
