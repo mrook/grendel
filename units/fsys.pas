@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.6 2001/05/11 14:24:22 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.7 2001/07/04 16:24:02 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -22,14 +22,14 @@ type
       line : integer;
 
       function readChar : char;
-      function eof : boolean;
+      function eof() : boolean;
+      function eol() : boolean;
       procedure seek(pos : integer);
 
-      function readLine : string;
-      function readInteger : integer;
-      function readCardinal : cardinal;
-      function readWord : string;
-      function readQuoted : string;
+      function readLine() : string;
+      function readInteger() : integer;
+      function readCardinal() : cardinal;
+      function readToken() : string;
 
       procedure flush;
 
@@ -93,6 +93,11 @@ end;
 function GFileReader.eof : boolean;
 begin
   eof := (fpos >= fsize) or (buffer[fpos] = #0);
+end;
+
+function GFileReader.eol : boolean;
+begin
+  Result := feol;
 end;
 
 procedure GFileReader.seek(pos : integer);
@@ -254,10 +259,12 @@ begin
   Result := number;
 end;
 
-function GFileReader.readWord : string;
-var word : array[0..255] of char;
-    pword : pchar;
-    c : char;
+function GFileReader.readToken() :  string;
+var
+  word : array[0..255] of char;
+  quoted : boolean;
+  pword : pchar;
+  c : char;
 begin
   c := ' ';
 
@@ -265,7 +272,7 @@ begin
     begin
     if (eof) then
       begin
-      readWord := '';
+      Result := '';
       exit;
       end;
 
@@ -273,9 +280,13 @@ begin
     end;
 
   if (c = '''') or (c = '"') then
-    pword := @word[0]
+    begin
+    quoted := true;
+    pword := @word[0];
+    end
   else
     begin
+    quoted := false;
     word[0] := c;
     pword := @word[1];
     end;
@@ -284,75 +295,30 @@ begin
     if (eof) then
       begin
       pword^ := #0;
-      readWord := word;
+      Result := word;
       exit;
       end;
 
     pword^ := readChar;
 
-    if (pword^ in [' ', '''', #13]) then
+    if (quoted) and (pword^ in ['''', '"', #13]) then
       begin
       pword^ := #0;
-      readWord := word;
+      Result := word;
+      exit;
+      end
+    else
+    if (not quoted) and (pword^ in [' ', #13]) then
+      begin
+      pword^ := #0;
+      Result := word;
       exit;
       end;
 
     inc(pword);
   until (pword > word + 255);
 
-  readWord := '';
-end;
-
-function GFileReader.readQuoted : string;
-var word : array[0..255] of char;
-    pword : pchar;
-    c : char;
-begin
-  c := ' ';
-
-  while (c in [' ', #13]) do
-    begin
-    if (eof) then
-      begin
-      readQuoted := '';
-      exit;
-      end;
-
-    if (feol) then
-      exit;
-
-    c := readChar;
-    end;
-
-  if (c = '''') or (c = '"') then
-    pword := @word[0]
-  else
-    begin
-    word[0] := c;
-    pword := @word[1];
-    end;
-
-  repeat
-    if (eof) then
-      begin
-      pword^ := #0;
-      readQuoted := word;
-      exit;
-      end;
-
-    pword^ := readChar;
-
-    if (pword^ in ['''', #13]) then
-      begin
-      pword^ := #0;
-      readQuoted := word;
-      exit;
-      end;
-
-    inc(pword);
-  until (pword > word + 255);
-
-  readQuoted := '';
+  Result := '';
 end;
 
 procedure GFileReader.flush;
