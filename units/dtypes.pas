@@ -1,6 +1,8 @@
 {
-  @abstract(Collection of common datastructures)
-  @lastmod($Id: dtypes.pas,v 1.28 2003/09/16 15:10:43 ***REMOVED*** Exp $)
+	Summary:
+		Collection of common datastructures
+		
+  ##	$Id: dtypes.pas,v 1.29 2003/09/16 16:26:04 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -13,16 +15,22 @@ uses
     SyncObjs;
 
 type
+		{
+			Container class for strings
+		}
     GString = class
-    private
+    private    
       _value : string;
 
     published
       constructor Create(const value : string);
       
-      property value : string read _value write _value;
+      property value : string read _value write _value;		{ The string value }
     end;
 
+		{
+			Container class for integers
+		}
     GInteger = class
     private
       _value : integer;
@@ -30,10 +38,13 @@ type
     published
       constructor Create(const value : integer);
 
-      property value : integer read _value write _value;
+      property value : integer read _value write _value;	{ The integer value }
     end;
     
-    GBit = class
+    {
+			Container class for bitvectors
+		}
+    GBitVector = class
     private
       _value : cardinal;
       
@@ -44,27 +55,41 @@ type
       procedure setBit(const bit : cardinal);
       procedure removeBit(const bit : cardinal);
 
-      property value : cardinal read _value write _value;
+      property value : cardinal read _value write _value;	{ The integer value (bitvector) }
 		end;
 
+		{
+			Abstract base class for iterators
+		}
     GIterator = class
-    	function getCurrent() : TObject; virtual; abstract;
-      function hasNext() : boolean; virtual; abstract;
-      function next() : TObject; virtual; abstract;
+    	function getCurrent() : TObject; virtual; abstract;	{ Abstract getCurrent() }
+      function hasNext() : boolean; virtual; abstract;		{ Abstract hasNext() }
+      function next() : TObject; virtual; abstract;				{ Abstract next() }
     end;
 
+		{
+			Base class for list nodes
+		}
     GListNode = class
-      prev, next : GListNode;
-      element : pointer;
+      prev : GListNode; 				{ Pointer to previous node in list }
+      next : GListNode;					{ Pointer to next node in list }
+      element : pointer;				{ Pointer to element }
 
       constructor Create(e : pointer; p, n : GListNode);
     end;
 
+		{
+			Doubled linked list
+		}
     GDLinkedList = class
-      size : integer;
-      head, tail : GListnode;
+   	private
+      size : integer;						
       lock : TCriticalSection;
       serial : integer;
+
+		published
+      head : GListNode;					{ Pointer to head of list }
+      tail : GListnode;					{ Pointer to tail of list }
 
       function insertLast(element : pointer) : GListNode;
       function insertAfter(tn : GListNode; element : pointer) : GListNode;
@@ -81,25 +106,39 @@ type
       destructor Destroy; override;
     end;
 
+		{
+			Array to store a set of prime numbers
+		}
     GPrimes = array of integer;
 
+		{
+			Definition of hash function
+		}
     GHASH_FUNC = function(size, prime : cardinal; key : string) : cardinal;
 
+		{
+			Container for hash elements
+		}
     GHashValue = class
-      key : variant;
-      value : TObject;
-      refcount : integer;
+      key : variant;				{ Hash key }
+      value : TObject;			{ Element }
+      refcount : integer;		{ Reference count }
     end;
 
-    // loosely based on the Java2 hashing classes
+    {
+			Hash table class, loosely based on the Java2 hashing classes
+		}
     GHashTable = class
-      hashsize : cardinal;
+    private
       hashprime : cardinal;
 
-      bucketList : array of GDLinkedList;
-
       hashFunc : GHASH_FUNC;
+      
+    public
+      hashsize : cardinal;										{ Size of hash table }
+      bucketList : array of GDLinkedList;			{ Array of double linked lists }
 
+		published
       procedure clear();
 
       function isEmpty() : boolean;
@@ -121,14 +160,23 @@ type
 
       constructor Create(size : integer);
       destructor Destroy; override;
-
-      property item[key : variant] : TObject read get write put; default;
+      
+    public
+      property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
     end;
 
+
+{
+	Size of global string hash table
+}
 const STR_HASH_SIZE = 1024;
 
 var
-   str_hash : GHashTable;
+	{
+		Global string hash table
+	}
+  str_hash : GHashTable;
+
 
 function hash_string(src : string) : PString; overload;
 function hash_string(src : PString) : PString; overload;
@@ -148,8 +196,10 @@ uses
     md5;
 
 
-// GDLinkedListIterator
 type
+		{
+			Iterator class for double linked lists
+		}
     GDLinkedListIterator = class(GIterator)
     private
       current : GListNode;
@@ -162,6 +212,9 @@ type
       function next() : TObject; override;
     end;
 
+		{
+			Iterator class for hash tables
+		}
     GHashTableIterator = class(GIterator)
     private
       tbl : GHashTable;
@@ -177,7 +230,10 @@ type
     end;
 
 
-// GString
+{
+	Summary:
+		GString constructor
+}
 constructor GString.Create(const value : string);
 begin
   inherited Create();
@@ -186,7 +242,10 @@ begin
 end;
 
 
-// GInteger
+{
+	Summary:
+		GInteger constructor
+}
 constructor GInteger.Create(const value : integer);
 begin
   inherited Create();
@@ -195,32 +254,50 @@ begin
 end;
 
 
-// GBit
-constructor GBit.Create(const value : cardinal);
+{
+	Summary:
+		GBitVector constructor
+}
+constructor GBitVector.Create(const value : cardinal);
 begin
   inherited Create();
 
   _value := value;
 end;
 
-function GBit.isBitSet(const bit : cardinal) : boolean;
+{
+	Summary:
+		Check wether bit is set
+}
+function GBitVector.isBitSet(const bit : cardinal) : boolean;
 begin
   Result := ((_value and bit) = bit);
 end;
 
-procedure GBit.setBit(const bit : cardinal);
+{
+	Summary:
+		Set bit
+}
+procedure GBitVector.setBit(const bit : cardinal);
 begin
   _value := _value or bit;
 end;
 
-procedure GBit.removeBit(const bit : cardinal);
+{
+	Summary:
+		Un-set (remove) bit
+}
+procedure GBitVector.removeBit(const bit : cardinal);
 begin
   if (isBitSet(bit)) then
     dec(_value, bit);
 end;
 
 
-// GListNode
+{
+	Summary:
+		GListNode constructor
+}
 constructor GListNode.Create(e : pointer; p, n : GListNode);
 begin
   inherited Create;
@@ -230,7 +307,10 @@ begin
   prev := p;
 end;
 
-// GDLinkedListIterator
+{
+	Summary:
+		GDLinkedListIterator constructor
+}
 constructor GDLinkedListIterator.Create(list : GDLinkedList);
 begin
   inherited Create;
@@ -238,16 +318,28 @@ begin
   current := list.head;
 end;
 
+{
+	Summary:
+		Get current element in list
+}
 function GDLinkedListIterator.getCurrent() : TObject;
 begin
-	Result := current;
+	Result := current.element;
 end;
 
+{
+	Summary:
+		Check availability of next element
+}
 function GDLinkedListIterator.hasNext() : boolean;
 begin
   Result := (current <> nil);
 end;
 
+{
+	Summary:
+		Get next element in list (if available)	
+}
 function GDLinkedListIterator.next() : TObject;
 begin
   Result := nil;
@@ -260,7 +352,11 @@ begin
     end;
 end;
 
-// GHashTableIterator
+
+{
+	Summary:
+		GHashTableIterator constructor
+}
 constructor GHashTableIterator.Create(table : GHashTable);
 begin
   inherited Create;
@@ -282,16 +378,28 @@ begin
     end;
 end;
 
+{
+	Summary:
+		Get current element in list
+}
 function GHashTableIterator.getCurrent() : TObject;
 begin
 	Result := current;
 end;
 
+{
+	Summary:
+		Check availability of next element
+}
 function GHashTableIterator.hasNext() : boolean;
 begin
   Result := (current <> nil);
 end;
 
+{
+	Summary:
+		Get next element in list (if available)	
+}
 function GHashTableIterator.next() : TObject;
 begin
   Result := nil;
@@ -320,7 +428,11 @@ begin
     end;
 end;
 
-// GDLinkedList
+
+{
+	Summary:
+		GDLinkedList constructor
+}
 constructor GDLinkedList.Create;
 begin
   inherited Create;
@@ -332,6 +444,10 @@ begin
   lock := TCriticalSection.Create;
 end;
 
+{
+	Summary:
+		GDLinkedList destructor
+}
 destructor GDLinkedList.Destroy;
 begin
   lock.Free;
@@ -339,6 +455,10 @@ begin
   inherited Destroy;
 end;
 
+{
+	Summary:
+		Add element to tail of list
+}
 function GDLinkedList.insertLast(element : pointer) : GListNode;
 var
    node : GListNode;
@@ -364,6 +484,10 @@ begin
   end;
 end;
 
+{
+	Summary:
+		Add element after another element
+}
 function GDLinkedList.insertAfter(tn : GListNode; element : pointer) : GListNode;
 var
    node : GListNode;
@@ -390,6 +514,10 @@ begin
   end;
 end;
 
+{
+	Summary:
+		Add element before another element
+}
 function GDLinkedList.insertBefore(tn : GListNode; element : pointer) : GListNode;
 var
    node : GListNode;
@@ -416,6 +544,10 @@ begin
   end;
 end;
 
+{
+	Summary:
+		Remove node from list
+}
 procedure GDLinkedList.remove(node : GListNode);
 begin
   try
@@ -439,11 +571,19 @@ begin
   end;
 end;
 
+{
+	Summary:
+		Get size of list
+}
 function GDLinkedList.getSize() : integer;
 begin
   Result := size;
 end;
 
+{
+	Summary:
+		Clean up list (remove/free elements, remove nodes)
+}
 procedure GDLinkedList.clean;
 var
    node : GListNode;
@@ -461,7 +601,10 @@ begin
     end;
 end;
 
-// doesn't free elements
+{
+	Summary:
+		Clean up list (remove elements, remove nodes)
+}
 procedure GDLinkedList.smallClean;
 var
    node : GListNode;
@@ -477,13 +620,20 @@ begin
     end;
 end;
 
+{
+	Summary:
+		Get iterator for the list
+}
 function GDLinkedList.iterator() : GIterator;
 begin
   Result := GDLinkedListIterator.Create(Self);
 end;
 
 
-// GHashTable
+{ 
+	Summary:
+		MD5 hashing function
+}
 function md5Hash(size, prime : cardinal; key : string) : cardinal;
 var
   md : MD5Digest;
@@ -500,6 +650,10 @@ begin
   Result := val mod size;
 end;
 
+{ 
+	Summary:
+		Default (string) hashing function
+}
 function defaultHash(size, prime : cardinal; key : string) : cardinal;
 var
    i : integer;
@@ -514,6 +668,10 @@ begin
   defaultHash := val mod size;
 end;
 
+{ 
+	Summary:
+		Alternative string hashing function, only uses first character in string
+}
 function firstHash(size, prime : cardinal; key : string) : cardinal;
 begin
   if (length(key) >= 1) then
@@ -522,6 +680,10 @@ begin
     Result := 0;
 end;
 
+{
+	Summary:
+		Get an array of prime numbers
+}
 function GHashTable.findPrimes(n : integer) : GPrimes;
 var
    i, j : integer;
@@ -580,6 +742,13 @@ begin
   findPrimes := numbers;
 end;
 
+{
+	Summary:
+		Get hash-value for a key
+	
+	Remarks:
+		Uses static hash function for integers
+}
 function GHashTable.getHash(key : variant) : cardinal;
 {$O-}
 begin
@@ -591,11 +760,19 @@ begin
     Result := (cardinal(key) * hashprime) mod hashsize;
 end;
 
+{
+	Summary:
+		Set hash function
+}
 procedure GHashTable.setHashFunc(func : GHASH_FUNC);
 begin
   hashFunc := func;
 end;
 
+{
+	Summary:
+		Get hash object corresponding with key
+}
 function GHashTable._get(key : variant) : GHashValue;
 var
   hash : cardinal;
@@ -618,6 +795,10 @@ begin
     end;
 end;
 
+{
+	Summary:
+		Get element corresponding with key
+}
 function GHashTable.get(key : variant) : TObject;
 var
   hv : GHashValue;
@@ -630,6 +811,10 @@ begin
     Result := hv.value;
 end;
 
+{
+	Summary:
+		Put element in hash table
+}
 procedure GHashTable.put(key : variant; value : TObject);
 var
    hash : cardinal;
@@ -654,6 +839,10 @@ begin
     end;
 end;
 
+{
+	Summary:
+		Remove key from hash table
+}
 procedure GHashTable.remove(key : variant);
 var
   hash : cardinal;
@@ -679,6 +868,10 @@ begin
     bucketList[hash].remove(fnode);
 end;
 
+{
+	Summary:
+		Get size of hash table
+}
 function GHashTable.getSize() : integer;
 var
    i : integer;
@@ -694,12 +887,20 @@ begin
   Result := total;
 end;
 
+{
+	Summary:
+		Check if hash table is empty
+}
 function GHashTable.isEmpty() : boolean;
 begin
   Result := getSize() = 0;
 end;
 
-procedure GHashTable.hashStats;
+{
+	Summary:
+		Display hash table statistics
+}
+procedure GHashTable.hashStats();
 var
    i : integer;
    total : integer;
@@ -727,6 +928,10 @@ begin
   writeln('Load factor : ' + floattostrf(load, ffFixed, 7, 4));
 end;
 
+{
+	Summary:
+		Clear hash table (See GDLinkedList.clean())
+}
 procedure GHashTable.clear();
 var
    i : integer;
@@ -737,6 +942,10 @@ begin
     end;
 end;
 
+{
+	Summary:
+		GHashTable constructor
+}
 constructor GHashTable.Create(size : integer);
 var
    n : integer;
@@ -758,6 +967,10 @@ begin
   hashFunc := defaultHash;
 end;
 
+{
+	Summary:
+		GHashTable destructor
+}
 destructor GHashTable.Destroy;
 var
    n : integer;
@@ -773,12 +986,20 @@ begin
   inherited Destroy;
 end;
 
+{
+	Summary:
+		Get iterator for the hash table
+}		
 function GHashTable.iterator() : GIterator;
 begin
   Result := GHashTableIterator.Create(Self);
 end;
 
 
+{
+	Summary:
+		Add string to global string hash table
+}
 function hash_string(src : string) : PString;
 var
   hv : GHashValue;
@@ -801,6 +1022,10 @@ begin
     end;
 end;
 
+{
+	Summary:
+		Add string to global string hash table
+}
 function hash_string(src : PString) : PString;
 var
   hv : GHashValue;
@@ -823,6 +1048,10 @@ begin
     end;
 end;
 
+{
+	Summary:
+		Remove string from global string hash table
+}
 procedure unhash_string(var src : PString);
 var
   hv : GHashValue;
