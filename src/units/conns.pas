@@ -1,8 +1,8 @@
 {
-  Summary:
-  	Connection manager
+	Summary:
+  		Connection manager
   	
-  ## $Id: conns.pas,v 1.8 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.9 2004/02/27 22:30:04 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -32,101 +32,100 @@ uses
 	
 
 const
-		IAC_COMPRESS = 85;		// MCCP v1
-		IAC_COMPRESS2 = 86;		// MCCP v2
-		IAC_SE = 240;
-		IAC_SB = 250;
-		IAC_WILL = 251;
-		IAC_WONT = 252;
-		IAC_DO = 253;
-		IAC_DONT = 254;
-		IAC_IAC = 255;
+	IAC_COMPRESS = 85;		// MCCP v1
+	IAC_COMPRESS2 = 86;		// MCCP v2
+	IAC_SE = 240;
+	IAC_SB = 250;
+	IAC_WILL = 251;
+	IAC_WONT = 252;
+	IAC_DO = 253;
+	IAC_DONT = 254;
+	IAC_IAC = 255;
 
 
 type
-		GConnection = class;
+	GConnection = class;
 		
-		{ Called when GConnection.Execute() starts }
-		GConnectionOpenEvent = procedure() of object;
+	{ Called when GConnection.Execute() starts }
+	GConnectionOpenEvent = procedure() of object;
 		
-		{ Called when GConnection.Execute() terminates }
-		GConnectionCloseEvent = procedure() of object;
+	{ Called when GConnection.Execute() terminates }
+	GConnectionCloseEvent = procedure() of object;
 		
-		{ Called for every iteration in GConnection.Execute(), if return = false, rest of iteration is skipped }
-		GConnectionTickEvent = function() : boolean of object;
+	{ Called for every iteration in GConnection.Execute(), if return = false, rest of iteration is skipped }
+	GConnectionTickEvent = function() : boolean of object;
 		
-		{ Called when GConnection has one or more lines of input waiting }
-		GConnectionInputEvent = procedure() of object;
+	{ Called when GConnection has one or more lines of input waiting }
+	GConnectionInputEvent = procedure() of object;
 		
-		{ Called when GConnection has sent one or more lines of output }
-		GConnectionOutputEvent = procedure() of object;
+	{ Called when GConnection has sent one or more lines of output }
+	GConnectionOutputEvent = procedure() of object;
 		
-    GConnection = class(TThread)
-    protected
-      node : GListNode;
+	GConnection = class(TThread)
+	protected
+		node : GListNode;
+		_socket : GSocket;
+		_idle : integer;
+		input_buf : string;
+		comm_buf : string;
+		last_line : string;
+		sendbuffer : string;
 
-      _socket : GSocket;
-
-      _idle : integer;
-      
-      input_buf : string;
-      comm_buf : string;
-      last_line : string;
-      sendbuffer : string;
-
-      empty_busy : boolean;
-      compress : boolean; { are we using MCCP v2? }
+		empty_busy : boolean;
+		compress : boolean; { are we using MCCP v2? }
   
-			strm: TZStreamRec;
+		strm: TZStreamRec;
 
-      _lastupdate : TDateTime;
+		_lastupdate : TDateTime;
       
-      FOnOpen : GConnectionOpenEvent;
-      FOnClose : GConnectionCloseEvent;
-      FOnTick : GConnectionTickEvent;
-      FOnInput : GConnectionInputEvent;
-      FOnOutput : GConnectionOutputEvent;
+		FOnOpen : GConnectionOpenEvent;
+		FOnClose : GConnectionCloseEvent;
+		FOnTick : GConnectionTickEvent;
+		FOnInput : GConnectionInputEvent;
+		FOnOutput : GConnectionOutputEvent;
       
-    protected
-    	procedure Execute(); override;
+	protected
+    		procedure Execute(); override;
 
-      procedure sendIAC(option : byte; const params : array of byte);
-      procedure processIAC();
+		procedure sendIAC(option : byte; const params : array of byte);
+		
+		procedure processIAC();
 
-			procedure send(s : PChar; len : integer); overload;
+		procedure send(s : PChar; len : integer); overload;
 
-		public
-      procedure send(const s : string); overload;
-      procedure read();
-      procedure readBuffer();
+	public
+		procedure send(const s : string); overload;
+		procedure read();
+		procedure readBuffer();
 
-			procedure emptyBuffer();
-      procedure writeBuffer(const txt : string; in_command : boolean = false);
+		procedure emptyBuffer();
+		procedure writeBuffer(const txt : string; in_command : boolean = false);
 
-      constructor Create(socket : GSocket);
-      destructor Destroy; override;
+		constructor Create(socket : GSocket);
+		destructor Destroy; override;
       
-      procedure disableCompression();
-      procedure enableCompression();
+		procedure disableCompression();
+		procedure enableCompression();
+		procedure negotiateCompression();
       
-    published
-    	property socket : GSocket read _socket;
+	published
+		property socket : GSocket read _socket;
 
-    	property idle : integer read _idle write _idle;
+    		property idle : integer read _idle write _idle;
 
-    	property last_update : TDateTime read _lastupdate;
+	    	property last_update : TDateTime read _lastupdate;
     	
-    	property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
-    	property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
-    	property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
-    	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
-    	property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
+    		property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
+	    	property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
+	    	property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
+	    	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
+	    	property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
     	
-    	property useCompress : boolean read compress;
-    end;
+	    	property useCompress : boolean read compress;
+	end;
 
 var
-  connection_list : GDLinkedList;
+	connection_list : GDLinkedList;
 
 procedure initConns();
 procedure cleanupConns();
@@ -134,25 +133,25 @@ procedure cleanupConns();
 implementation
 
 uses
-  player,
-  commands;
+	player,
+	commands;
 
 
 // GConnection
 constructor GConnection.Create(socket : GSocket);
 begin
-  inherited Create(true);
+	inherited Create(true);
 
-  _socket := socket;
+	_socket := socket;
 
-  _idle := 0;
+	_idle := 0;
 
 	comm_buf := '';
 	input_buf := '';
 	last_line := '';
 	sendbuffer := '';
   
-  compress := false;
+	compress := false;
 end;
 
 destructor GConnection.Destroy();
@@ -164,24 +163,24 @@ end;
 
 procedure GConnection.Execute();
 begin 
-  sendIAC(IAC_WILL, [IAC_COMPRESS2]);
+	negotiateCompression();
 
-  read();
+	read();
 
-  if (Assigned(FOnOpen)) then
-  	FOnOpen();
+	if (Assigned(FOnOpen)) then
+  		FOnOpen();
 
-  writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
+	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
    
-  while (not Terminated) do
-  	begin
-  	_lastupdate := Now();
+	while (not Terminated) do
+  		begin
+  		_lastupdate := Now();
   	
 		sleep(50);
 
-  	if (Assigned(FOnTick)) then
-  		if (not FOnTick()) then 
-  			continue; 
+	  	if (Assigned(FOnTick)) then
+  			if (not FOnTick()) then 
+  				continue; 
 
 		if (not Terminated) then
 			read();
@@ -191,20 +190,20 @@ begin
 			
 		if (Assigned(FOnInput)) and (length(comm_buf) > 0) then
 			FOnInput();
-  	end;
+	  	end;
   	
 	if (Assigned(FOnClose)) then
 		FOnClose();
 		
-  _socket.disconnect();
-  connection_list.remove(node);  
+	_socket.disconnect();
+	connection_list.remove(node);  
 end;
 
 procedure GConnection.enableCompression();
 begin
-  FillChar(strm, sizeof(strm), 0);
-  strm.zalloc := zlibAllocMem;
-  strm.zfree := zlibFreeMem;
+	FillChar(strm, sizeof(strm), 0);
+	strm.zalloc := zlibAllocMem;
+	strm.zfree := zlibFreeMem;
 
 	deflateInit_(strm, Z_DEFAULT_COMPRESSION, zlib_version, sizeof(strm));
 
@@ -219,8 +218,9 @@ var
 	compress_size : integer;
 	compress_buf : array[0..4095] of char;
 begin
-  if (compress) then
-  	begin
+	if (compress) then
+  		begin
+		compress := false;
 		strm.next_in := nil;
 		strm.avail_in := 0;
 		strm.next_out := compress_buf;
@@ -232,10 +232,13 @@ begin
 
 		_socket.send(compress_buf, compress_size);
 
-	  compress := false;
-
 		deflateEnd(strm);
-  	end;
+	  	end;
+end;
+
+procedure GConnection.negotiateCompression();
+begin
+	sendIAC(IAC_WILL, [IAC_COMPRESS2]);
 end;
 
 procedure GConnection.send(s : PChar; len : integer);
