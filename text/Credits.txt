@@ -13,6 +13,7 @@ Additional documentation and FAQs by Jeremiah Davis.
 
 Uses the LibXmlParser unit (c) Stefan Heymann.
 Uses the MemCheck unit (c) Jean Marc Eber & Vincent Mahon.
+Uses the RegExpr unit (C) Andrey V. Sorokin.
 Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
 Uses a modified version of the AnsiIO unit (c) Gayle Davis.
 Uses parts of the Delphi Implementation of MD5 Algorithm (c) Matthias Fichtner.
