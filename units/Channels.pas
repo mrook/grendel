@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.10 2001/08/12 18:09:49 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.11 2001/08/16 10:53:57 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -11,6 +11,7 @@ unit Channels;
 interface
 
 uses
+  SysUtils,
   dtypes,
   chars,
   console,
@@ -55,7 +56,7 @@ type
       function GROUP() : boolean;
     end;
 
-  EBooleanConvertError = class(GException);
+  EBooleanConvertError = class(Exception);
 
   ChannelFieldEnum = (FieldNone,
                       FieldCommand,
@@ -83,7 +84,6 @@ procedure do_channel(ch : GCharacter; param : string);
 implementation
 
 uses
-  SysUtils,
   mudsystem,
   mudthread,
   LibXmlParser,

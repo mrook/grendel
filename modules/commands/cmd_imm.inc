@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.10 2001/08/11 22:02:55 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.11 2001/08/16 10:53:56 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -541,7 +541,7 @@ begin
    begin
    try
      if (length(GPlayer(ch).area_fname) = 0) then
-       raise GException.Create('cmd_imm.inc:do_goto', 'no area assigned');
+       raise Exception.Create('no area assigned');
 
      vnum := StrToInt(locn_name);
      
@@ -1954,14 +1954,14 @@ begin
   if (currRoom.areacoords = nil) then
   begin
     bugreport('goalDistEstimate', 'cmd_imm.inc', 'currRoom.areacoords = nil');
-    raise GException.Create('cmd_imm.inc:goalDistEstimate', 'currRoom.areacoords = nil');
+    raise Exception.Create('currRoom.areacoords = nil');
     Result := -1;
     exit;
   end;
   if (destRoom.areacoords = nil) then
   begin
     bugreport('goalDistEstimate', 'cmd_imm.inc', 'destRoom.areacoords = nil');
-    raise GException.Create('cmd_imm.inc:goalDistEstimate', 'destRoom.areacoords = nil');
+    raise Exception.Create('destRoom.areacoords = nil');
     Result := -1;
     exit;
   end;

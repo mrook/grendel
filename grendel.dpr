@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.56 2001/08/15 19:25:21 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.57 2001/08/16 10:53:55 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -563,7 +563,7 @@ begin
 
     calculateonline;
   except
-    on E: GException do
+    on E: Exception do
       begin
       writeConsole('Fatal error while booting: ' + E.Message);
       halt;

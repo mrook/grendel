@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.12 2001/08/14 09:37:37 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.13 2001/08/16 10:53:57 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -56,10 +56,6 @@ type
 function translateFileName(fn : string) : string;
 
 implementation
-
-uses
-  mudsystem,
-  dtypes;
 
 
 function translateFileName(fn : string) : string;
@@ -163,7 +159,7 @@ begin
 
       if (pos >= MAX_LINESIZE) then 
         begin
-	raise GException.Create('fsys.pas:GFileReader.Create', 'max linesize exceeded in ' + fname);
+      	raise Exception.Create('max linesize exceeded in ' + fname);
 
         pos := MAX_LINESIZE;
         break;

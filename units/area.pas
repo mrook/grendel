@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.48 2001/08/15 19:01:37 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.49 2001/08/16 10:53:56 ***REMOVED*** Exp $
 
 unit area;
 
@@ -940,7 +940,7 @@ begin
   try
     af := GFileReader.Create('areas\area.list');
   except
-    raise GException.Create('load_areas', 'Could not open areas\area.list');
+    raise Exception.Create('Could not open areas\area.list');
   end;
 
   repeat

@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.13 2001/07/17 15:24:14 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.14 2001/08/16 10:53:58 ***REMOVED*** Exp $
 
 unit update;
 
@@ -638,83 +638,79 @@ var obj : Gobject;
     at_temp : integer;
     node, node_prev : GListNode;
 begin
-  try
-    node := object_list.tail;
+  node := object_list.tail;
 
-    while (node <> nil) do
+  while (node <> nil) do
+    begin
+    node_prev := node.prev;
+
+    if (node_prev <> nil) and (node_prev.next <> node) then
       begin
-      node_prev := node.prev;
-
-      if (node_prev <> nil) and (node_prev.next <> node) then
-        begin
-        bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil');
-        exit;
-        end;
-
-      obj := node.element;
-
-      if (IS_SET(obj.flags, OBJ_NODECAY)) then
-        begin
-        node := node_prev;
-        continue;
-        end;
-
-      if (obj.timer <= 0) then
-        begin
-        node := node_prev;
-        continue;
-        end;
-
-      dec(obj.timer);
-      if (obj.timer > 0) then
-        begin
-        node := node_prev;
-        continue;
-        end;
-
-      case obj.item_type of
-        ITEM_CORPSE : begin
-                      msg := '$p decays into dust and blows away.';
-                      at_temp := AT_CORPSE;
-                      end;
-         ITEM_BLOOD : begin
-                      msg := '$p dries up.';
-                      at_temp := AT_RED;
-                      end;
-          ITEM_FOOD : begin
-                      msg := '$p slowly rots away, leaving a foul stench.';
-                      at_temp := AT_REPORT;
-                      end;
-        else
-           begin
-           msg := '$p vanishes in the wink of an eye.';
-           at_temp := AT_REPORT;
-           end;
+      bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil');
+      exit;
       end;
 
-      if (obj.carried_by <> nil) then
-        act(at_temp, msg, false, obj.carried_by, obj, nil, TO_CHAR)
-      else
-      if (obj.room <> nil) then
-        begin
-        if (obj.room.chars.head <> nil) then
-          rch := obj.room.chars.head.element
-        else
-          rch := nil;
+    obj := node.element;
 
-        if (rch <> nil) and (not IS_SET(obj.flags, OBJ_HIDDEN)) then
-          begin
-          act(at_temp, msg, false, rch, obj, nil, TO_ROOM);
-          act(at_temp, msg, false, rch, obj, nil, TO_CHAR);
-          end;
-        end;
-
-      obj.extract;
-
+    if (IS_SET(obj.flags, OBJ_NODECAY)) then
+      begin
       node := node_prev;
+      continue;
+      end;
+
+    if (obj.timer <= 0) then
+      begin
+      node := node_prev;
+      continue;
+      end;
+
+    dec(obj.timer);
+    if (obj.timer > 0) then
+      begin
+      node := node_prev;
+      continue;
+      end;
+
+    case obj.item_type of
+      ITEM_CORPSE : begin
+                    msg := '$p decays into dust and blows away.';
+                    at_temp := AT_CORPSE;
+                    end;
+       ITEM_BLOOD : begin
+                    msg := '$p dries up.';
+                    at_temp := AT_RED;
+                    end;
+        ITEM_FOOD : begin
+                    msg := '$p slowly rots away, leaving a foul stench.';
+                    at_temp := AT_REPORT;
+                    end;
+      else
+         begin
+         msg := '$p vanishes in the wink of an eye.';
+         at_temp := AT_REPORT;
+         end;
     end;
-  except
-    raise GException.Create('update.pas:update_objects', 'Memory failure');
+
+    if (obj.carried_by <> nil) then
+      act(at_temp, msg, false, obj.carried_by, obj, nil, TO_CHAR)
+    else
+    if (obj.room <> nil) then
+      begin
+      if (obj.room.chars.head <> nil) then
+        rch := obj.room.chars.head.element
+      else
+        rch := nil;
+
+      if (rch <> nil) and (not IS_SET(obj.flags, OBJ_HIDDEN)) then
+        begin
+        act(at_temp, msg, false, rch, obj, nil, TO_ROOM);
+        act(at_temp, msg, false, rch, obj, nil, TO_CHAR);
+        end;
+      end;
+
+    obj.extract;
+
+    node := node_prev;
   end;
 end;
 

@@ -82,7 +82,6 @@ implementation
 
 uses
   SysUtils,
-  dtypes,
   mudsystem;
 
 {$IFDEF WIN32}
@@ -147,7 +146,7 @@ begin
     begin
     Result := nil;
     
-    raise GException.Create('socket.pas:createSocket()', 'Unsupported address family');
+    raise Exception.Create('Unsupported address family');
     end;
 end;
 
@@ -169,7 +168,7 @@ begin
     {$ENDIF}
 
     if (fd = INVALID_SOCKET) then
-      raise GException.Create('socket.pas:GSocket.Create()', 'Could not create socket.');
+      raise Exception.Create('Could not create socket.');
     end
   else
     fd := _fd;
@@ -275,7 +274,7 @@ begin
   time.tv_usec := 0;
   
   if (select(fd + 1, @rw_set, nil, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
-    raise GException.Create('socket.pas:GSocket.canRead()', 'Connection reset by peer');
+    raise Exception.Create('Connection reset by peer');
 
   if (FD_ISSET(fd, rw_set)) then
     Result := true;
@@ -294,7 +293,7 @@ begin
   time.tv_usec := 0;
   
   if (select(fd + 1, nil, @rw_set, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
-    raise GException.Create('socket.pas:GSocket.canWrite()', 'Connection reset by peer');
+    raise Exception.Create('Connection reset by peer');
 
   if (FD_ISSET(fd, rw_set)) then
     Result := true;
@@ -315,7 +314,7 @@ begin
 {$ENDIF}
 
   if (res = SOCKET_ERROR) then
-    raise GException.Create('socket.pas:GSocket.send()', 'Connection reset by peer');
+    raise Exception.Create('Connection reset by peer');
     
   Result := res;
 end;
@@ -361,7 +360,7 @@ end;
 
 procedure GSocket.openPort(port : integer);
 begin
-  raise GException.Create('socket.pas:GSocket.openPort()', 'Operation not supported');
+  raise Exception.Create('Operation not supported');
 end;
 
 
@@ -383,7 +382,7 @@ begin
   rc := 1;
     
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
-    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not set option on IPv4 socket.');
+    raise Exception.Create('Could not set option on IPv4 socket.');
 
   addrv4.sin_family := AF_INET;
   addrv4.sin_port := htons(port);
@@ -398,13 +397,13 @@ begin
     closesocket(fd);
 {$ENDIF}
 
-    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not bind on IPv4 port ' + inttostr(system_info.port));
+    raise Exception.Create('Could not bind on IPv4 port ' + inttostr(system_info.port));
     end;
 
   rc := listen(fd, 15);
 
   if (rc > 0) then
-    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not listen on IPv4 socket');
+    raise Exception.Create('Could not listen on IPv4 socket');
 end;
 
 // GSocket6
@@ -425,7 +424,7 @@ begin
   rc := 1;
     
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
-    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not set option on IPv6 socket.');
+    raise Exception.Create('Could not set option on IPv6 socket.');
 
 
   addrv6.sin6_family := AF_INET6;
@@ -443,13 +442,13 @@ begin
     closesocket(fd);
 {$ENDIF}
 
-    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not bind on IPv6 port ' + inttostr(system_info.port));
+    raise Exception.Create('Could not bind on IPv6 port ' + inttostr(system_info.port));
     end;
 
   rc := listen(fd, 15);
 
   if (rc > 0) then
-    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not listen on IPv6 socket');
+    raise Exception.Create('Could not listen on IPv6 socket');
 end;
 
 initialization

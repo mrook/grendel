@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.20 2001/08/14 09:40:04 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.21 2001/08/16 10:53:57 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -181,7 +181,7 @@ begin
   try
     af := GFileReader.Create('system\skills.dat');
   except
-    GException.Create('load_skills', 'Could not open system\skills.dat');
+    Exception.Create('Could not open system\skills.dat');
     exit;
   end;
 

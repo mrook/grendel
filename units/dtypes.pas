@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.20 2001/07/30 11:13:46 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.21 2001/08/16 10:53:57 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -96,13 +96,6 @@ type
       destructor Destroy; override;
     end;
 
-    GException = class(Exception)
-      e_location : string;
-
-      constructor Create(location, msg : string);
-      procedure show();
-    end;
-
 const STR_HASH_SIZE = 1024;
 
 var
@@ -118,11 +111,10 @@ function firstHash(size, prime : cardinal; key : string) : integer;
 
 implementation
 
-uses
 {$IFDEF LINUX}
-    Variants,
+uses
+    Variants;
 {$ENDIF}
-   mudsystem;
 
 
 // GDLinkedListIterator
@@ -423,6 +415,7 @@ var
 begin
   val := 0;
 
+  {$Q-}
   for i := 1 to length(key) do
     val := val * prime + byte(key[i]);
 
@@ -760,20 +753,6 @@ begin
   src := nil;
 end;
 
-// GException
-constructor GException.Create(location, msg : string);
-begin
-  inherited Create(msg);
-end;
-
-procedure GException.show;
-begin
-{$IFDEF Grendel}
-  write_console('Exception ' + Message + ' @ ' + e_location);
-{$ELSE}
-  writeln('Exception ' + Message + ' @ ' + e_location);
-{$ENDIF}
-end;
 
 begin
   str_hash := GHashTable.Create(STR_HASH_SIZE);
