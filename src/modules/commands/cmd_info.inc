@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.8 2004/05/12 22:47:13 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.9 2004/05/18 09:22:28 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var 
@@ -191,9 +191,9 @@ begin
 				obj_in := GObject(inner_iterator.next());
 
 				if (obj.item_type = ITEM_BELT) then    		
-					act(AT_REPORT, pad_string('(thrust through)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+					act(AT_REPORT, pad_string('  [thrust through]', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
 				else
-					act(AT_REPORT, pad_string('(stored in)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+					act(AT_REPORT, pad_string('  [stored in]', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
 				end;
 
 			inner_iterator.Free();
@@ -486,9 +486,9 @@ begin
       		obj_in := GObject(inner_iterator.next());
       		
       		if (obj.item_type = ITEM_BELT) then    		
-      			act(AT_REPORT, pad_string('(thrust through)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+      			act(AT_REPORT, pad_string('  [thrust through]', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
       		else
-      			act(AT_REPORT, pad_string('(stored in)', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
+      			act(AT_REPORT, pad_string('  [stored in]', 20) + '$p ' + info_object(obj_in), false, ch, obj_in, nil, TO_CHAR)
       		end;
       	
       	inner_iterator.Free();
