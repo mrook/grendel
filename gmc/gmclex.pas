@@ -37,7 +37,7 @@ const
 																							(kw:'while'; state:_WHILE),
 																							(kw:'for'; state:_FOR),
 																							(kw:'void'; state:_VOID),
-																							(kw:'bool'; state:_BOOL),
+																							(kw:'bool'; state:_INT),
 																							(kw:'int'; state:_INT),
 																							(kw:'float'; state:_FLOAT),
 																							(kw:'string'; state:_STRING),
@@ -97,7 +97,7 @@ begin
 								exit;
 								end;
 	            end;
-	
+	            
 						varName := yytext;
 						return(IDENTIFIER);
   	        end;

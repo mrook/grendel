@@ -40,9 +40,6 @@ type 	Root = class
 	
 			Expr = class(Root)
      	end;
-
-			BoolExpr = class(Root)
-			end;
 	
 
 			Expr_ConstInt = class(Expr)
@@ -66,16 +63,12 @@ type 	Root = class
         le, re : Expr;
 			end;
 
-			Expr_Bool = class(Expr)
-        ex : BoolExpr;
-			end;
-
 			Expr_Seq = class(Expr)
 				ex, seq : Expr;
 			end;
 
 			Expr_If = class(Expr)
-        ce : BoolExpr;
+        ce : Expr;
         le, re : Expr;
 
 				lThen, lElse, lAfter : Integer;
@@ -135,38 +128,29 @@ type 	Root = class
 			Expr_Loop = class(Expr)
 			  lStart : integer;
 			  init : Expr;
-			  ce : BoolExpr;
+			  ce : Expr;
 			  step : Expr;
 			  body : Expr;
 			end;
 
-	
-			BoolExpr_Const = class(BoolExpr)
-        value : boolean;
-			end;
-
-			BoolExpr_Id = class(BoolExpr)
-        id : string;
-			end;
-
-			BoolExpr_And = class(BoolExpr)
-        le, re : BoolExpr;
-			end;
-
-			BoolExpr_Or = class(BoolExpr)
-        le, re : BoolExpr;
-			end;
-
-			BoolExpr_Not = class(BoolExpr)
-        ex : BoolExpr;
-			end;
-
-			BoolExpr_Rel = class(BoolExpr)
+			Expr_Rel = class(Expr)
         op : string;
         le, re : Expr;
 			end;
 
+			Expr_And = class(Expr)
+        le, re : Expr;
+			end;
 
+			Expr_Or = class(Expr)
+        le, re : Expr;
+			end;
+
+			Expr_Not = class(Expr)
+        ex : Expr;
+			end;
+
+	
 			Env_Entry = class
         id : string;
         typ : integer;
@@ -221,7 +205,6 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %type <ShortString> declarator
 %type <ShortString> funcname
 %type <ShortString> idlist
-%type <BoolExpr> boolexpr
 
 %left '|'
 %left '&'
@@ -238,7 +221,7 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %token _RELGT _RELLT _RELGTE _RELLTE _RELEQ
 %token _RETURN _BREAK _CONTINUE
 %token _DO _SLEEP _WAIT _SIGNAL _WHILE _FOR _REQUIRE
-%token _VOID _BOOL _INT _FLOAT _STRING _EXTERNAL
+%token _VOID _INT _FLOAT _STRING _EXTERNAL
 
 %%
 
@@ -280,16 +263,16 @@ basic : { $$ := nil; }
 statement	: { $$ := nil; }
 					| compound_statement															{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
 					| expr ';'																				{ $$ := $1; if ($$ <> nil) then $$.lineNum := yylineno; }
-  				| _IF '(' boolexpr ')' statement _ELSE statement 	{ $$ := Expr_If.Create; Expr_If($$).ce := $3;	$$.lineNum := yylineno;
+  				| _IF '(' expr ')' statement _ELSE statement 	{ $$ := Expr_If.Create; Expr_If($$).ce := $3;	$$.lineNum := yylineno;
 																														Expr_If($$).le := $5; Expr_If($$).re := $7; 
 																														Expr_If($$).lThen := labelNum; inc(labelNum); 
 																														Expr_If($$).lElse := labelNum; inc(labelNum); 
 																														Expr_If($$).lAfter := labelNum; inc(labelNum); }
-					| _IF '(' boolexpr ')' statement									{ $$ := Expr_If.Create; Expr_If($$).ce := $3; $$.lineNum := yylineno;	
+					| _IF '(' expr ')' statement									{ $$ := Expr_If.Create; Expr_If($$).ce := $3; $$.lineNum := yylineno;	
 																														Expr_If($$).le := $5; Expr_If($$).re := nil; 
 																														Expr_If($$).lThen := labelNum; inc(labelNum); 
 																														Expr_If($$).lAfter := labelNum; inc(labelNum); }
-  				| _FOR '('expr ';' boolexpr ';' expr ')' statement { $$ := Expr_Loop.Create; Expr_Loop($$).init := $3;
+  				| _FOR '('expr ';' expr ';' expr ')' statement { $$ := Expr_Loop.Create; Expr_Loop($$).init := $3;
   				                                                    $$.lineNum := yylineno; Expr_Loop($$).ce := $5;
   				                                                    Expr_Loop($$).lStart := labelNum; inc(labelNum);
   				                                                    Expr_Loop($$).step := $7; Expr_Loop($$).body := $9; }
@@ -358,7 +341,6 @@ declarator			: IDENTIFIER		{ varName := curFunction + ':' + varName;
 
 type_specifier	: _VOID					{ varType := _VOID; $$ := _VOID; }
 								| _INT					{ varType := _INT; $$ := _INT; }
-								| _BOOL					{ varType := _BOOL; $$ := _BOOL; }
 								| _FLOAT				{ varType := _FLOAT; $$ := _FLOAT; }
 								| _STRING				{ varType := _STRING; $$ := _STRING; }
 								| _EXTERNAL 		{ varType := _EXTERNAL; $$ := _EXTERNAL; }
@@ -397,22 +379,17 @@ expr 	:  { $$ := nil; }
 																											yyabort;
 																											end;
 																										$$ := Expr_Call.Create; Expr_Call($$).id := $1; Expr_Call($$).params := $3; $$.lineNum := yyLineno; }
-			| boolexpr { $$ := Expr_Bool.Create; $$.lineNum := yyLineno; Expr_Bool($$).ex := $1; }
+      | expr _RELGT expr   { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '>';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
+      | expr _RELLT expr   { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '<';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
+      | expr _RELGTE expr  { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '>=';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
+      | expr _RELLTE expr  { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '=<';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
+      | expr _RELEQ expr   { $$ := Expr_Rel.Create; $$.lineNum := yylineno; Expr_Rel($$).le := $1; Expr_Rel($$).op := '==';  Expr_Rel($$).re := $3; $$.lineNum := yylineno;}
+      | expr _AND expr	   { $$ := Expr_And.Create; $$.lineNum := yylineno; Expr_And($$).le := $1; Expr_And($$).re := $3; $$.lineNum := yylineno;}
+      | expr _OR expr	 	   { $$ := Expr_Or.Create; $$.lineNum := yylineno; Expr_Or($$).le := $1; Expr_Or($$).re := $3; $$.lineNum := yylineno;}
+      | _NOT expr          { $$ := Expr_Not.Create; $$.lineNum := yylineno; Expr_Not($$).ex := $2; };
+      | _TRUE			      	 { $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := 1; $$.lineNum := yylineno;}
+			| _FALSE				     { $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := 0; $$.lineNum := yylineno;}
       ;
-
-boolexpr : _TRUE				 { $$ := BoolExpr_Const.Create; $$.lineNum := yylineno; BoolExpr_Const($$).value := True; $$.lineNum := yylineno;}
-				 | _FALSE				 { $$ := BoolExpr_Const.Create; $$.lineNum := yylineno; BoolExpr_Const($$).value := False; $$.lineNum := yylineno;}
-         | _NOT boolexpr      { $$ := BoolExpr_Not.Create; $$.lineNum := yylineno; BoolExpr_Not($$).ex := $2; };
-         | boolexpr _AND boolexpr	 	{ $$ := BoolExpr_And.Create; $$.lineNum := yylineno; BoolExpr_And($$).le := $1; BoolExpr_And($$).re := $3; $$.lineNum := yylineno;}
-         | boolexpr _OR boolexpr	 	{ $$ := BoolExpr_Or.Create; $$.lineNum := yylineno; BoolExpr_Or($$).le := $1; BoolExpr_Or($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELGT expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '>';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELLT expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '<';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELGTE expr  { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '>=';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELLTE expr  { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '=<';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | expr _RELEQ expr   { $$ := BoolExpr_Rel.Create; $$.lineNum := yylineno; BoolExpr_Rel($$).le := $1; BoolExpr_Rel($$).op := '==';  BoolExpr_Rel($$).re := $3; $$.lineNum := yylineno;}
-         | '(' boolexpr ')' 	{ $$ := $2; }
-         ;
-
 
 funcname 	: IDENTIFIER		{ $$ := varName; }
 					;
@@ -472,13 +449,10 @@ var
 	output : textfile;
 
 function typeExpr(expr : Expr) : Expr; forward;
-function typeBoolExpr(expr : BoolExpr) : BoolExpr; forward;
 
-function optimizeBoolExpr(expr : BoolExpr) : BoolExpr; forward;
 function optimizeExpr(expr : Expr) : Expr; forward;
 
 procedure showExpr(expr : Expr); forward;
-procedure showBoolExpr(expr : BoolExpr); forward;
 
 function typeToString(typ : integer) : string; forward;
 
@@ -562,7 +536,6 @@ function typeToString(typ : integer) : string;
 begin
   case typ of 
     _INT 		: Result := 'int';
-    _BOOL 	: Result := 'bool';
     _STRING : Result := 'string';
     _FLOAT  : Result := 'float';
     _VOID		: Result := 'void';
@@ -587,18 +560,7 @@ begin
 		Result := cn;
     end
   else
-  if ((src = _FLOAT) or (src = _EXTERNAL) or (src = _BOOL)) and (dest = _INT) then
-    begin
-    cn := Expr_Conv.Create;
-		cn.ex := expr;
-		cn.cnv := CONV_TO_INT;
-		cn.originaltyp := src;
-		cn.typ := _INT;
-
-		Result := cn;
-    end
-  else
-  if ((src = _INT) or (src = _FLOAT) or (src = _EXTERNAL) or (src = _BOOL)) and (dest = _STRING) then
+  if ((src = _INT) or (src = _FLOAT) or (src = _EXTERNAL)) and (dest = _STRING) then
     begin
     cn := Expr_Conv.Create;
 		cn.ex := expr;
@@ -612,75 +574,6 @@ begin
     begin
     compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(src) + ''' to ''' + typeToString(dest) + '''');
 		Result := expr;
-    end;
-end;
-
-function typeBoolExpr(expr : BoolExpr) : BoolExpr;
-var
-	  t1, t2 : integer;
-begin
-  Result := expr;
-  
-  if (expr = nil) then
-    exit;
-
-	Result.typ := _BOOL;
-
-  if (expr is BoolExpr_Const) then 
-		expr.typ := _BOOL
-  else
-  if (expr is BoolExpr_Not) then 
-    begin
-	  BoolExpr_Not(expr).ex := typeBoolExpr(BoolExpr_Not(expr).ex);
-
-		t1 := BoolExpr_And(expr).le.typ;
-
-    if (t1 <> _BOOL) then
-      compilerError(expr.lineNum, 'expression should be boolean');
-
-    expr.typ := _BOOL;
-    end
-  else
-  if (expr is BoolExpr_And) then 
-    begin
-	  BoolExpr_And(expr).le := typeBoolExpr(BoolExpr_And(expr).le);
-    BoolExpr_And(expr).re := typeBoolExpr(BoolExpr_And(expr).re);
-
-		t1 := BoolExpr_And(expr).le.typ;
-		t2 := BoolExpr_And(expr).re.typ;
-
-    if (t1 <> _BOOL) or (t2 <> _BOOL) then
-      compilerError(expr.lineNum, 'expression should be boolean');
-
-    expr.typ := _BOOL;
-    end
-  else
-  if (expr is BoolExpr_Or) then 
-    begin
-	  BoolExpr_Or(expr).le := typeBoolExpr(BoolExpr_Or(expr).le);
-    BoolExpr_Or(expr).re := typeBoolExpr(BoolExpr_Or(expr).re);
-
-		t1 := BoolExpr_Or(expr).le.typ;
-		t2 := BoolExpr_Or(expr).re.typ;
-
-    if (t1 <> _BOOL) or (t2 <> _BOOL) then
-      compilerError(expr.lineNum, 'expression should be boolean');
-
-    expr.typ := _BOOL;
-    end
-  else
-  if (expr is BoolExpr_Rel) then 
-    begin
-    BoolExpr_Rel(expr).le := typeExpr(BoolExpr_Rel(expr).le);
-    BoolExpr_Rel(expr).re := typeExpr(BoolExpr_Rel(expr).re);
-
-		t1 := BoolExpr_Rel(expr).le.typ;
-		t2 := BoolExpr_Rel(expr).re.typ;
-
-    if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
-      compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(t1) + ''' to ''' + typeToString(t2) + '''');
-
-    expr.typ := _BOOL;
     end;
 end;
 
@@ -758,16 +651,6 @@ begin
   if (expr is Expr_String) then
     expr.typ := _STRING
   else
-  if (expr is Expr_Bool) then
-    begin
-    Expr_Bool(expr).ex := typeBoolExpr(Expr_Bool(expr).ex);
-
-    if (Expr_Bool(expr).ex.typ <> _BOOL) then
-      compilerError(expr.lineNum, 'expected boolean expression');
-
-    expr.typ := _BOOL;
-    end
-  else
   if (expr is Expr_Id) then
     begin
 		t1 := lookupEnv(Expr_Id(expr).id).typ;
@@ -780,7 +663,7 @@ begin
   else
   if (expr is Expr_If) then
     begin
-    Expr_If(expr).ce := typeBoolExpr(Expr_If(expr).ce);
+    Expr_If(expr).ce := typeExpr(Expr_If(expr).ce);
     Expr_If(expr).le := typeExpr(Expr_If(expr).le);
     Expr_If(expr).re := typeExpr(Expr_If(expr).re);
 
@@ -819,7 +702,7 @@ begin
   if (expr is Expr_Loop) then
     begin
     Expr_Loop(expr).init := typeExpr(Expr_Loop(expr).init);
-    Expr_Loop(expr).ce := typeBoolExpr(Expr_Loop(expr).ce);
+    Expr_Loop(expr).ce := typeExpr(Expr_Loop(expr).ce);
     Expr_Loop(expr).step := typeExpr(Expr_Loop(expr).step);
     Expr_Loop(expr).body := typeExpr(Expr_Loop(expr).body);
     end
@@ -833,136 +716,66 @@ begin
     Result := coerce(Expr_Cast(expr).ex, t1, Expr_Cast(expr).desttype);
     
     Expr_Cast(expr).Free;
-    end;
-end;
-
-function optimizeBoolExpr(expr : BoolExpr) : BoolExpr;
-var
-	lval, rval : boolean;
-begin
-  Result := expr;
-
-  if (expr is BoolExpr_And) then 
-    begin
-    BoolExpr_And(expr).le := optimizeBoolExpr(BoolExpr_And(expr).le);
-    BoolExpr_And(expr).re := optimizeBoolExpr(BoolExpr_And(expr).re);
-
-    if (BoolExpr_And(expr).le is BoolExpr_Const) and (BoolExpr_And(expr).re is BoolExpr_Const) then
-      begin
-      lval := BoolExpr_Const(BoolExpr_And(expr).le).value;
-      rval := BoolExpr_Const(BoolExpr_And(expr).re).value;
-
-      Result := BoolExpr_Const.Create;
-      BoolExpr_Const(Result).value := lval and rval;
-
-      BoolExpr_And(expr).le.Free;
-      BoolExpr_And(expr).re.Free;
-      expr.Free;
-      end
-    else
-		if (BoolExpr_And(expr).le is BoolExpr_Const) then
-		  begin
-      lval := BoolExpr_Const(BoolExpr_And(expr).le).value;
-      
-      if (lval) then
-        begin
-        Result := BoolExpr_And(expr).re;
-        BoolExpr_And(expr).le.Free;
-        expr.Free;
-        end
-      else
-        begin
-        Result := BoolExpr_And(expr).le;
-        BoolExpr_And(expr).re.Free;
-        expr.Free;
-        end;
-      end
-    else
-		if (BoolExpr_And(expr).re is BoolExpr_Const) then
-		  begin
-      lval := BoolExpr_Const(BoolExpr_And(expr).re).value;
-      
-      if (lval) then
-        begin
-        Result := BoolExpr_And(expr).le;
-        BoolExpr_And(expr).re.Free;
-        expr.Free;
-        end
-      else
-        begin
-        Result := BoolExpr_And(expr).re;
-        BoolExpr_And(expr).le.Free;
-        expr.Free;
-        end;
-      end; 
     end
   else
-  if (expr is BoolExpr_Or) then 
+  if (expr is Expr_Rel) then 
     begin
-    BoolExpr_Or(expr).le := optimizeBoolExpr(BoolExpr_Or(expr).le);
-    BoolExpr_Or(expr).re := optimizeBoolExpr(BoolExpr_Or(expr).re);
+    Expr_Rel(expr).le := typeExpr(Expr_Rel(expr).le);
+    Expr_Rel(expr).re := typeExpr(Expr_Rel(expr).re);
 
-    if (BoolExpr_Or(expr).le is BoolExpr_Const) and (BoolExpr_Or(expr).re is BoolExpr_Const) then
-      begin
-      lval := BoolExpr_Const(BoolExpr_Or(expr).le).value;
-      rval := BoolExpr_Const(BoolExpr_Or(expr).re).value;
+		t1 := Expr_Rel(expr).le.typ;
+		t2 := Expr_Rel(expr).re.typ;
 
-      Result := BoolExpr_Const.Create;
-      BoolExpr_Const(Result).value := lval and rval;
+    if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
+      compilerError(expr.lineNum, 'no appropriate conversion from ''' + typeToString(t1) + ''' to ''' + typeToString(t2) + '''');
 
-      BoolExpr_Or(expr).le.Free;
-      BoolExpr_Or(expr).re.Free;
-      expr.Free;
-      end
-    else
-		if (BoolExpr_Or(expr).le is BoolExpr_Const) then
-		  begin
-      lval := BoolExpr_Const(BoolExpr_Or(expr).le).value;
-      
-      if (lval) then
-        begin
-        Result := BoolExpr_Or(expr).le;
-        BoolExpr_Or(expr).re.Free;
-        expr.Free;
-        end
-      else
-        begin
-        Result := BoolExpr_Or(expr).re;
-        BoolExpr_Or(expr).le.Free;
-        expr.Free;
-        end;
-      end
-    else
-		if (BoolExpr_Or(expr).re is BoolExpr_Const) then
-		  begin
-      lval := BoolExpr_Const(BoolExpr_Or(expr).re).value;
-      
-      if (lval) then
-        begin
-        Result := BoolExpr_Or(expr).re;
-        BoolExpr_Or(expr).le.Free;
-        expr.Free;
-        end
-      else
-        begin
-        Result := BoolExpr_Or(expr).le;
-        BoolExpr_Or(expr).re.Free;
-        expr.Free;
-        end;
-      end; 
+    expr.typ := _INT;
     end
   else
-  if (expr is BoolExpr_Rel) then 
+  if (expr is Expr_Not) then 
     begin
-    BoolExpr_Rel(expr).le := optimizeExpr(BoolExpr_Rel(expr).le);
-    BoolExpr_Rel(expr).re := optimizeExpr(BoolExpr_Rel(expr).re);
+	  Expr_Not(expr).ex := typeExpr(Expr_Not(expr).ex);
+
+		t1 := Expr_Not(expr).ex.typ;
+
+    if (t1 <> _INT) then
+      compilerError(expr.lineNum, 'impossible to negate non-integer value');
+
+    expr.typ := _INT;
+    end
+  else
+  if (expr is Expr_And) then 
+    begin
+	  Expr_And(expr).le := typeExpr(Expr_And(expr).le);
+    Expr_And(expr).re := typeExpr(Expr_And(expr).re);
+
+		t1 := Expr_And(expr).le.typ;
+		t2 := Expr_And(expr).re.typ;
+
+    if (t1 <> _INT) or (t2 <> _INT) then
+      compilerError(expr.lineNum, 'impossible to and non-integer value');
+
+    expr.typ := _INT;
+    end
+  else
+  if (expr is Expr_Or) then 
+    begin
+	  Expr_Or(expr).le := typeExpr(Expr_Or(expr).le);
+    Expr_Or(expr).re := typeExpr(Expr_Or(expr).re);
+
+		t1 := Expr_Or(expr).le.typ;
+		t2 := Expr_Or(expr).re.typ;
+
+    if (t1 <> _INT) or (t2 <> _INT) then
+      compilerError(expr.lineNum, 'impossible to or non-integer value');
+
+    expr.typ := _INT;
     end;
 end;
 
 function optimizeExpr(expr : Expr) : Expr;
 var
-	lval, rval : integer;
-  bval : boolean;
+	bval, lval, rval : integer;
 begin
   Result := expr;
 
@@ -997,8 +810,14 @@ begin
              Result := Expr_ConstInt.Create;
              Expr_ConstInt(Result).value := lval mod rval;
              end;
-  			'&': emit('BAND');
-  			'|': emit('BOR');
+        '&': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval and rval;
+             end;
+        '|': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval or rval;
+             end;
       end;
    
 			Expr_Op(expr).le.Free;
@@ -1057,20 +876,15 @@ begin
     end;
     end
   else
-  if (expr is Expr_Bool) then
-    begin
-    Expr_Bool(expr).ex := optimizeBoolExpr(Expr_Bool(expr).ex); 
-    end
-  else
   if (expr is Expr_If) then
     begin
-    Expr_If(expr).ce := optimizeBoolExpr(Expr_If(expr).ce); 
+    Expr_If(expr).ce := optimizeExpr(Expr_If(expr).ce); 
 
-    if (Expr_If(expr).ce is BoolExpr_Const) then
+    if (Expr_If(expr).ce is Expr_ConstInt) then
       begin
-      bval := BoolExpr_Const(Expr_If(expr).ce).value;
+      bval := Expr_ConstInt(Expr_If(expr).ce).value;
 
-      if (bval) then
+      if (bval = 1) then
         Result := Expr_If(expr).le
       else
         Result := Expr_If(expr).re;
@@ -1080,64 +894,141 @@ begin
   if (expr is Expr_Loop) then
     begin
     Expr_Loop(expr).init := optimizeExpr(Expr_Loop(expr).init);
-    Expr_Loop(expr).ce := optimizeBoolExpr(Expr_Loop(expr).ce);
+    Expr_Loop(expr).ce := optimizeExpr(Expr_Loop(expr).ce);
     Expr_Loop(expr).step := optimizeExpr(Expr_Loop(expr).step);
     Expr_Loop(expr).body := optimizeExpr(Expr_Loop(expr).body);
-    end;
-end;
+    end  
+  else
+  if (expr is Expr_Rel) then 
+    begin
+    Expr_Rel(expr).le := optimizeExpr(Expr_Rel(expr).le);
+    Expr_Rel(expr).re := optimizeExpr(Expr_Rel(expr).re);
+    end
+  else
+  if (expr is Expr_And) then 
+    begin
+    Expr_And(expr).le := optimizeExpr(Expr_And(expr).le);
+    Expr_And(expr).re := optimizeExpr(Expr_And(expr).re);
 
-procedure showBoolExpr(expr : BoolExpr);
-begin
-  if (expr = nil) then
-    exit;
+    if (Expr_And(expr).le is Expr_ConstInt) and (Expr_And(expr).re is Expr_ConstInt) then
+      begin
+      lval := Expr_ConstInt(Expr_And(expr).le).value;
+      rval := Expr_ConstInt(Expr_And(expr).re).value;
 
-  if (expr is BoolExpr_Const) then 
-    begin
-    if (BoolExpr_Const(expr).value) then
-      emit('PUSHI 1')
-    else
-      emit('PUSHI 0');
-    end
-  else
-  if (expr is BoolExpr_Not) then 
-    begin
-    showBoolExpr(BoolExpr_Not(expr).ex);
-    emit('NOT');
-    end
-  else
-  if (expr is BoolExpr_And) then 
-    begin
-    showBoolExpr(BoolExpr_And(expr).le);
-    showBoolExpr(BoolExpr_And(expr).re);
-    emit('AND');
-    end
-  else
-  if (expr is BoolExpr_Or) then 
-    begin
-    showBoolExpr(BoolExpr_Or(expr).le);
-    showBoolExpr(BoolExpr_Or(expr).re);
-    emit('OR');
-    end
-  else
-  if (expr is BoolExpr_Rel) then 
-    begin
-    showExpr(BoolExpr_Rel(expr).le);
-    showExpr(BoolExpr_Rel(expr).re);
+      Result := Expr_ConstInt.Create;
+      Expr_ConstInt(Result).value := lval and rval;
 
-    if (BoolExpr_Rel(expr).op = '>') then
-      emit('GT')
+      Expr_And(expr).le.Free;
+      Expr_And(expr).re.Free;
+      expr.Free;
+      end
     else
-    if (BoolExpr_Rel(expr).op = '<') then
-      emit('LT')
+		if (Expr_And(expr).le is Expr_ConstInt) then
+		  begin
+      lval := Expr_ConstInt(Expr_And(expr).le).value;
+      
+      if (lval = 1) then
+        begin
+        Result := Expr_And(expr).re;
+        Expr_And(expr).le.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := Expr_And(expr).le;
+        Expr_And(expr).re.Free;
+        expr.Free;
+        end;
+      end
     else
-    if (BoolExpr_Rel(expr).op = '>=') then
-      emit('GTE')
+		if (Expr_And(expr).re is Expr_ConstInt) then
+		  begin
+      lval := Expr_ConstInt(Expr_And(expr).re).value;
+      
+      if (lval = 1) then
+        begin
+        Result := Expr_And(expr).le;
+        Expr_And(expr).re.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := Expr_And(expr).re;
+        Expr_And(expr).le.Free;
+        expr.Free;
+        end;
+      end; 
+    end
+  else
+  if (expr is Expr_Or) then 
+    begin
+    Expr_Or(expr).le := optimizeExpr(Expr_Or(expr).le);
+    Expr_Or(expr).re := optimizeExpr(Expr_Or(expr).re);
+
+    if (Expr_Or(expr).le is Expr_ConstInt) and (Expr_Or(expr).re is Expr_ConstInt) then
+      begin
+      lval := Expr_ConstInt(Expr_Or(expr).le).value;
+      rval := Expr_ConstInt(Expr_Or(expr).re).value;
+
+      Result := Expr_ConstInt.Create;
+      Expr_ConstInt(Result).value := lval and rval;
+
+      Expr_Or(expr).le.Free;
+      Expr_Or(expr).re.Free;
+      expr.Free;
+      end
     else
-    if (BoolExpr_Rel(expr).op = '=<') then
-      emit('LTE')
+		if (Expr_Or(expr).le is Expr_ConstInt) then
+		  begin
+      lval := Expr_ConstInt(Expr_Or(expr).le).value;
+      
+      if (lval = 1) then
+        begin
+        Result := Expr_Or(expr).le;
+        Expr_Or(expr).re.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := Expr_Or(expr).re;
+        Expr_Or(expr).le.Free;
+        expr.Free;
+        end;
+      end
     else
-    if (BoolExpr_Rel(expr).op = '==') then
-      emit('EQ');
+		if (Expr_Or(expr).re is Expr_ConstInt) then
+		  begin
+      lval := Expr_ConstInt(Expr_Or(expr).re).value;
+      
+      if (lval = 1) then
+        begin
+        Result := Expr_Or(expr).re;
+        Expr_Or(expr).le.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := Expr_Or(expr).le;
+        Expr_Or(expr).re.Free;
+        expr.Free;
+        end;
+      end; 
+    end
+  else
+  if (expr is Expr_Not) then 
+    begin
+    Expr_Not(expr).ex := optimizeExpr(Expr_Not(expr).ex);
+
+		if (Expr_Not(expr).ex is Expr_ConstInt) then
+		  begin
+      lval := Expr_ConstInt(Expr_Not(expr).ex).value;
+      
+      Result := Expr_ConstInt.Create;
+      Expr_ConstInt(Result).value := not lval;
+
+      Expr_Not(expr).ex.Free;
+      expr.Free;
+      end;
     end;
 end;
 
@@ -1161,8 +1052,8 @@ begin
       '*': emit('MUL');
       '/': emit('DIV');
 			'%': emit('MOD');
-			'&': emit('BAND');
-			'|': emit('BOR');
+			'&': emit('AND');
+			'|': emit('OR');
     end;
     end
   else
@@ -1177,7 +1068,7 @@ begin
   else
   if (expr is Expr_If) then
     begin
-    showBoolExpr(Expr_If(expr).ce); 
+    showExpr(Expr_If(expr).ce); 
 
     if (Expr_If(expr).re = nil) and (Expr_If(expr).le = nil) then
       begin
@@ -1284,11 +1175,6 @@ begin
 			end;
     end
   else
-  if (expr is Expr_Bool) then
-    begin
-    showBoolExpr(Expr_Bool(expr).ex); 
-    end
-  else
   if (expr is Expr_Seq) then
     begin
     showExpr(Expr_Seq(expr).ex);
@@ -1369,8 +1255,49 @@ begin
 
     showExpr(Expr_Loop(Expr).body);
     showExpr(Expr_Loop(Expr).step);
-    showBoolExpr(Expr_Loop(Expr).ce);
+    showExpr(Expr_Loop(Expr).ce);
     emit('JNZ L' + IntToStr(Expr_Loop(expr).lStart));
+    end
+  else
+  if (expr is Expr_Rel) then 
+    begin
+    showExpr(Expr_Rel(expr).le);
+    showExpr(Expr_Rel(expr).re);
+
+    if (Expr_Rel(expr).op = '>') then
+      emit('GT')
+    else
+    if (Expr_Rel(expr).op = '<') then
+      emit('LT')
+    else
+    if (Expr_Rel(expr).op = '>=') then
+      emit('GTE')
+    else
+    if (Expr_Rel(expr).op = '=<') then
+      emit('LTE')
+    else
+    if (Expr_Rel(expr).op = '==') then
+      emit('EQ');
+    end
+  else
+  if (expr is Expr_Not) then 
+    begin
+    showExpr(Expr_Not(expr).ex);
+    emit('NOT');
+    end
+  else
+  if (expr is Expr_And) then 
+    begin
+    showExpr(Expr_And(expr).le);
+    showExpr(Expr_And(expr).re);
+    emit('AND');
+    end
+  else
+  if (expr is Expr_Or) then 
+    begin
+    showExpr(Expr_Or(expr).le);
+    showExpr(Expr_Or(expr).re);
+    emit('OR');
     end;
 end;
 
