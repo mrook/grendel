@@ -23,7 +23,7 @@
 {                                                                                                  }
 {**************************************************************************************************}
 
-// $Id: JclSvcCtrl.pas,v 1.3 2004/05/06 20:33:28 ***REMOVED*** Exp $
+// $Id: JclSvcCtrl.pas,v 1.4 2004/05/06 21:57:45 ***REMOVED*** Exp $
 
 unit JclSvcCtrl;
 
@@ -681,13 +681,15 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+function AltStartService(hService: SC_HANDLE; dwNumServiceArgs: DWORD; lpServiceArgVectors: PPChar): BOOL; stdcall; external advapi32 name 'StartServiceA';
+
 procedure TJclNtService.Start(const Args: array of string; const Sync: Boolean);
 type
   PStrArray = ^TStrArray;
   TStrArray = array[0..32767] of PChar;
 var
   I: Integer;
-  lpServiceArgVectors: PChar;
+  lpServiceArgVectors: PPChar;
 begin
   Open(SERVICE_START);
   try
@@ -697,10 +699,13 @@ begin
       else
       begin
         GetMem(lpServiceArgVectors, SizeOf(PChar)*Length(Args));
+        
         for I := 0 to Length(Args) - 1 do
+          begin
           PStrArray(lpServiceArgVectors)^[I] := PChar(Args[I]);
+          end;
       end;
-      Win32Check(StartService(FHandle, Length(Args), lpServiceArgVectors));
+      Win32Check(AltStartService(FHandle, Length(Args), lpServiceArgVectors));
     finally
       FreeMem(lpServiceArgVectors);
     end;
