@@ -1,6 +1,5 @@
 // experimentje
-// $Id: cmd_skill.inc,v 1.9 2001/04/10 20:34:05 xenon Exp $
-// $Header: /root/oldcvs/Grendel/include/Attic/cmd_skill.inc,v 1.9 2001/04/10 20:34:05 xenon Exp $
+// $Id: cmd_skill.inc,v 1.10 2001/04/10 20:37:50 xenon Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
