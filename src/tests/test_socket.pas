@@ -2,7 +2,7 @@
   Summary:
   	Tests for socket.pas
   	
-  ## $Id: test_socket.pas,v 1.1 2004/02/21 17:44:05 ***REMOVED*** Exp $
+  ## $Id: test_socket.pas,v 1.2 2004/02/21 17:47:28 ***REMOVED*** Exp $
 }
 
 
@@ -12,7 +12,8 @@ interface
 
 
 uses
-	TestFramework, socket;
+	TestFramework, 
+	socket;
 	
 	
 type 
@@ -33,8 +34,13 @@ implementation
 
 
 uses
-	SysUtils,
-	WinSock2;
+{$IFDEF WIN32}
+	WinSock2,
+{$ENDIF}
+{$IFDEF LINUX}
+	Libc,
+{$ENDIF}
+	SysUtils;
 
 
 procedure TTestSocket.Setup();

@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.15 2004/02/21 17:44:05 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.16 2004/02/21 17:47:28 ***REMOVED*** Exp $
 #
 
 
@@ -71,5 +71,5 @@ ifdef LINUX
 	$(RM) -f modules/*.map
 endif
 
-tests:
-	$(MAKE) -C src/tests tests
+test:
+	$(MAKE) -C src/tests test

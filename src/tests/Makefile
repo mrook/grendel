@@ -4,7 +4,7 @@
 #
 # Tests Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.1 2004/02/21 17:44:05 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.2 2004/02/21 17:47:28 ***REMOVED*** Exp $
 #
 
 
@@ -34,7 +34,7 @@ ifdef LINUX
 DCC=dcc
 DCC_DEFS=CONSOLEBUILD
 
-TESTS=tests
+TESTS=./tests
 RM=rm -f
 endif
 
@@ -54,7 +54,7 @@ clean:
 	$(RM) *.drc
 	$(RM) *.dcp
 
-tests:	$(TESTS)
+test:	$(TESTS)
 	$(TESTS)
 	      
 $(TESTS): $(TESTS_SOURCES)
