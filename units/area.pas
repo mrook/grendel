@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.41 2001/07/17 20:42:16 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.42 2001/07/17 21:28:02 ***REMOVED*** Exp $
 
 unit area;
 
@@ -536,14 +536,17 @@ begin
 
         level := af.readCardinal;
 
-        mv:=500;
-        str:=UMax(65+random(level div 50),100);
-        con:=UMax(65+random(level div 51),100);
-        dex:=UMax(65+random(level div 52),100);
-        int:=UMax(65+random(level div 53),100);
-        wis:=UMax(65+random(level div 54),100);
-        hitroll:=UMax((level div 5)+50,100);
-        hp:=(level+1)*((con div 4)+random(6)-3);
+        mv := 500;
+        
+        str := UMin(65 + random(level div 50), 100);
+        con := UMin(65 + random(level div 51), 100);
+        dex := UMin(65 + random(level div 52), 100);
+        int := UMin(65 + random(level div 53), 100);
+        wis := UMin(65 + random(level div 54), 100);
+
+        hitroll := UMin((level div 5) + 50, 100);
+
+        hp := (level + 1) * ((con div 4) + random(6) - 3);
 
         damsizedie:=round(sqrt(level));
         damnumdie:=round(sqrt(level));
