@@ -14,8 +14,10 @@ Welcome to, at last, a brand new version of Grendel - 0.4.0 final!
 
 Grendel requires Winsock2 to be installed. Windows 98, Me, NT4 and 2000
 all come with this preinstalled, Windows 95 users will have to download
-an update from the Microsoft site.
- 
+this update from the Microsoft site:
+
+  http://www.microsoft.com/windows/downloads/bin/W95ws2setup.exe
+
   - GMC, or Grendel MUD C, is a replacement for the original (limited)
     mobprogs. It's a fully functional languaged based on C, which
     runs in Grendel using virtual machinecode - very speedy & flexible
