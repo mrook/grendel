@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.14 2001/08/14 09:40:03 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.15 2001/10/06 15:11:27 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -128,6 +128,12 @@ end;
 
 procedure spell_recall(ch,victim:GCharacter;sn:GSkill);
 begin
+  if (IS_SET(ch.room.flags, ROOM_NORECALL)) then
+    begin
+    act(AT_SPELL, 'Your recall spell failed.', false, ch, nil, nil, TO_CHAR);
+    exit;
+    end;
+    
   ch.fromRoom;
 
   if (ch.IS_EVIL) then
@@ -151,7 +157,12 @@ begin
     exit;
     end;
 
-  if victim.position<>POS_FIGHTING then
+  if (IS_SET(ch.room.flags, ROOM_NOSUMMON)) then
+    begin
+    act(AT_SPELL, 'Your summon spell failed.', false, ch, nil, nil, TO_CHAR);
+    end
+  else
+  if (victim.position <> POS_FIGHTING) then
     begin
     act(AT_SPELL,'You summon $N into the room.',false,ch,nil,victim,TO_CHAR);
     act(AT_SPELL,'$n is summoned out of here!',false,victim,nil,nil,TO_ROOM);

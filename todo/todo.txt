@@ -43,10 +43,10 @@ Grendel's TODO list with probable release date/version
 ! (0.4.1) purge command (strips char/room of objects)
 ! (0.4.1) add some checks to do_give, do_get, do_drop with respect to inter-align trading,
           ROOM_NODROPALL, ROOM_NOTRADE etc.
-
-
-* (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
+! (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
       		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
+
+
 * (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 
 
