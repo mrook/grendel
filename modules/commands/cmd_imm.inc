@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.21 2003/06/24 21:41:28 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.22 2003/10/15 14:29:38 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -2352,6 +2352,7 @@ begin
       begin
         if (npc.prog <> nil) then
         begin
+        	codeCache.remove(npc.progfile);
           npc.prog.Free();
           npc.prog := nil;
         end;
@@ -2381,7 +2382,7 @@ begin
         GNPC(vict).context.load(GNPC(vict).npc_index.prog);
         GNPC(vict).context.owner := vict;
         if (uppercase(param) <> 'SILENT') then
-          interpret(vict, 'emote twitches violently as he receives new instructions.');
+          interpret(vict, 'emote receives new instructions and twitches violently.');
         inc(count2);
       end;
       node := node.next;
