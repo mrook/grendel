@@ -1,0 +1,22 @@
+* General conventions for using GMC 1.0 with Grendel *
+
+
+void onTick(external ch)
+ - is called every second
+
+void onAct(external ch, external target, string arg)
+ - is called whenever 'ch' receives some action 'arg' from 'target'
+ 
+void onFight(external ch, external target)
+ - is called every fight tick
+ 
+void onDeath(external ch, external target)
+ - is called when 'ch' dies at the hands of 'target'
+
+void onReset(external ch)
+ - is called when 'ch' resets
+ 
+void onGive(external ch, external target, external obj)
+ - is called when 'target' gives 'obj' to 'ch'
+ 
+

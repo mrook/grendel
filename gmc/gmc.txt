@@ -1,3 +1,6 @@
+* GMC 1.0 introductory programmers guide & specification *
+
+
 - Introduction
 
 GMC (or Grendel MUD C if you will) is a language similar to C, devised for
@@ -10,25 +13,62 @@ The system consists of a compiler, an assembler and a virtual machine setup
 which can be called from an application, in this case Grendel.
 
 
+- Syntax
+
+The GMC language is in many respects quite like C, with some
+simplifications and exceptions.
+
+The most important supported language constructs:
+
+  - global and local variables
+  - function definitions
+  - loops (only for currently)
+  - 'include' files
+  - basic flow control (if statements)
+  - valid integer & boolean expression
+
+
 - The compiler
 
-The compiler scans & parses the source files and translates them
-into assembly code.
+The GMC compiler works in four distinct passes.
 
+In the first pass, the source files are scanned & parsed,
+and basic syntax checking is performed.
+
+The second pass performs type checking & coercion.
+
+In the third pass an optimizer performs some basic
+optimizations: dead-code elimination, algebraic
+simplication (constant elimination) and some flow-of-
+control optimizations.
+
+The fourth and final pass is the code generator,
+where assembly code for the stack machine is written
+to a file.
+
+
+- The assembler
+
+The assembler simply converts the "human readable"
+assembly code to a binary format (this includes translating
+the labels for jumps/calls).
+
+Additionally, the assembler performs some simple optimizations
+(in a section commonly known as the 'peephole optimizer'),
+to reduce the number of instructions.
 
 
 - The virtual machine
 
 The VM of the GMC language is a fully functional stack machine processor
-with some 30-odd opcodes in its instruction set.
+with some 40+ opcodes in its instruction set.
 
-Internally the machine consists of two stacks utilizing the Delphi 'variant'
-type. One stack is for data, the other stack holds the return addresses
-for function calls.
+Internally the machine consists of a stack utilizing the Delphi 'variant'
+type. 
 
-Apart from the stacks there are a number of registers - the stack pointer,
-the program counter (or instruction pointer) and the loop counter.
-These cannot be accessed directly from the assembler.
+Apart from the stack there are a number of registers - the stack pointer,
+the base pointer, and the program counter (or instruction pointer).
+Only the first two can be accessed directly from the assembler.
 
 Lastly there is a data segment present. Its size is defined through
 the assembler directive '$DATA'.
@@ -42,7 +82,7 @@ environment and have some interaction with the calling application.
 These mechanisms are:
 
    - System traps
-   - Signals
+   - Signals & sleep
    - External variables
    - External methods
 
@@ -53,6 +93,8 @@ the string expression as it sees fit.
 Signals are used to "suspend" the execution of the program until
 some condition has been met (e.g. a signal has been raised) in another
 part of the server (wether that be native or scripted code).
+The sleep function suspends the program until a certain tickcount has
+been reached.
 
 External variables are a construct to associate external data with names
 or expressions in the GMC language.
