@@ -571,7 +571,7 @@ begin
   if (IS_SET(aff_flags, AFF_FLYING)) then
     CAN_FLY := true;
 
-  if (IS_NPC) and (IS_SET(player^.flags, PLR_FLYCAP)) then
+  if (not IS_NPC) and (IS_SET(player^.flags, PLR_FLYCAP)) then
     CAN_FLY := true;
 end;
 
