@@ -1,4 +1,4 @@
-// $Id: util.pas,v 1.13 2001/07/28 20:53:28 ***REMOVED*** Exp $
+// $Id: util.pas,v 1.14 2001/08/16 15:40:17 ***REMOVED*** Exp $
 
 unit util;
 
@@ -344,30 +344,40 @@ var
   NextPattern   : String;
 begin
   Star1 := FastCharPos(Pattern,'*',1);
+  
   if Star1 = 0 then
     Result := (Value = Pattern)
-  else begin
+  else 
+    begin
     Result := (Copy(Value,1,Star1-1) = Copy(Pattern,1,Star1-1));
-    if Result then begin
-      if Star1 > 1 then Value := Copy(Value,Star1,Length(Value));
+    
+    if Result then 
+      begin
+      if (Star1 > 1) then 
+        Value := Copy(Value,Star1,Length(Value));
+        
       Pattern := Copy(Pattern,Star1+1,Length(Pattern));
-
       NextPattern := Pattern;
       Star2 := FastCharPos(NextPattern, '*',1);
-      if Star2 > 0 then NextPattern := Copy(NextPattern,1,Star2-1);
+  
+      if (Star2 > 0) then 
+        NextPattern := Copy(NextPattern,1,Star2-1);
 
       NextPos := pos(NextPattern,Value);
+  
       if (NextPos = 0) and not (NextPattern = '') then
         Result := False
-      else begin
+      else 
+        begin
         Value := Copy(Value,NextPos,Length(Value));
-        if Pattern = '' then
+        
+        if (Pattern = '') then
           Result := True
         else
           Result := Result and StringMatches(Value,Pattern);
+        end;
       end;
     end;
-  end;
 end;
 
 // Drunken speech - Nemesis
