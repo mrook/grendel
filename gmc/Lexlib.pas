@@ -171,12 +171,12 @@ procedure unget_char ( c : Char );
 
 procedure put_char ( c : Char );
   begin
-    if c=#0 then
+    (* if c=#0 then
       { ignore }
     else if c=nl then
       writeln(yyoutput)
     else
-      write(yyoutput, c)
+      write(yyoutput, c) *)
   end(*put_char*);
 
 procedure yyopen(fname : string);

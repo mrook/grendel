@@ -59,7 +59,7 @@ EXTRA				"_"
 
 ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
 
-%start INITIAL LINEMODE
+%start INITIAL LINEMODE COMMENT
 
 %%
 
@@ -98,6 +98,16 @@ ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
   	        end;
 
 <INITIAL>" "|\t|\r|\n     		;
+
+<INITIAL>"/*"                 begin
+                              start(COMMENT);
+                              end;
+                              
+<COMMENT>"*/"                 begin
+                              start(INITIAL);
+                              end;
+                              
+<COMMENT>.                    ;
 
 <INITIAL>"\""		 	 	  				begin
 															start(LINEMODE);
