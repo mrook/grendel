@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.63 2001/08/11 22:02:06 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.64 2001/08/14 09:39:06 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -1052,7 +1052,8 @@ begin
       begin
       writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+conn.ch.name^+' has lost the link');
 
-      interpret(conn.ch, 'return');
+      if (conn.ch.level >= LEVEL_IMMORTAL) then
+        interpret(conn.ch, 'return');
 
       conn.ch.conn := nil;
 
