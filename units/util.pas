@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.20 2003/10/03 18:03:59 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.21 2003/10/03 20:58:39 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -354,7 +354,19 @@ end;
 
 function removeQuotes(str : string) : string;
 begin
-	Result := Trim(FastReplace(str, '"', ' '));
+	if (length(str) = 0) then
+		begin
+		Result := str;
+		exit;
+		end;
+		
+	if (str[1] = '"') then
+		str[1] := ' ';
+	
+	if (str[length(str)] = '"') then
+		str[length(str)] := ' ';
+		
+	Result := Trim(str);
 end;
 
 function escape(str : string) : string;
