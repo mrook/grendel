@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.20 2001/04/20 12:17:02 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.21 2001/04/22 20:07:22 xenon Exp $
 
 unit conns;
 
@@ -334,20 +334,31 @@ end;
 
 function GConnection.send(s : string) : integer;
 var
-   res : integer;
+   res, i : integer;
+   buf : string;
 begin
-  res := Winsock2.send(socket, s[1], length(s), 0);
+  result := 0;
+  
+  for i := 1 to (length(s) div 2048) + 1 do
+  begin
+    buf := copy(s, 1, 2048);
+    delete(s, 1, 2048);
 
-  Result := res;
+    if (length(buf) > 0) then
+      res := Winsock2.send(socket, buf[1], length(buf), 0);
 
-  if (res = SOCKET_ERROR) then
+    Result := result + res;
+
+    if (res = SOCKET_ERROR) then
     begin
-    try
-      thread.terminate;
-    except
-      write_console('could not terminate thread');
+      try
+        thread.terminate;
+      except
+        write_console('could not terminate thread');
+      end;
+      exit;
     end;
-    end;
+  end;
 end;
 
 procedure GConnection.writePager(txt : string);
