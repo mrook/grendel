@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.14 2003/11/04 16:40:50 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.15 2003/11/07 21:03:39 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -233,6 +233,7 @@ uses
 	mudsystem,
 	mudhelp,
 	clan,
+	events,
 	bulletinboard,
 	Channels;
 	
@@ -553,6 +554,8 @@ begin
 
                   state := CON_PLAYING;
                   fcommand := true;
+                 
+                  raiseEvent('char-login', ch);
                   end;
     CON_NEW_NAME: begin
                   if (length(argument) = 0) then
@@ -1196,6 +1199,8 @@ var
 	vict : GCharacter;
 	iterator : GIterator;
 begin
+  raiseEvent('char-logout', Self);
+
   emptyBuffer();
 
   if (conn = nil) then
