@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.28 2001/08/11 22:02:05 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.29 2001/08/12 18:08:37 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -150,7 +150,7 @@ procedure writeDirect(text : string);
 begin
   writeLog(text);
 
-{$IFDEF LINUX}
+{$IFDEF CONSOLEBUILD}
   writeln(text);
 {$ENDIF}
 end;
