@@ -46,20 +46,17 @@ const BV00=1 shl 0;
       
 { system maxima } 
 const MAX_RECEIVE = 2048;
-      MAX_STR_LENGTH = 8192;
-      MAX_CONNS = 500;
       MAX_ALIAS = 50;
       MAX_WEAR = 25;
-      MAX_SOCIALS = 100;
-      MAX_CMDS = 200;
-      MAX_AFFECTS = 30;
-      MAX_SKILLS = 100;
+      MAX_CONNS = 250;
+      MAX_SKILLS = 500;
       MAX_TRADE = 5;
       MAX_PROGSIZE = 2048;
       MAX_HELP = 1000;
 
 { Wear constants }
-const WEAR_RFINGER=1;
+const WEAR_NULL = 0;
+      WEAR_RFINGER=1;
       WEAR_LFINGER=2;
       WEAR_NECK1=3;
       WEAR_NECK2=4;
