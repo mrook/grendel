@@ -2,7 +2,7 @@
 	Summary:
 		System tray icon routines
 		
-	## $Id: systray.pas,v 1.3 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: systray.pas,v 1.4 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 unit systray;
@@ -22,7 +22,9 @@ procedure unregisterMenuItem(const name : string);
 procedure initSysTray();
 procedure cleanupSysTray();
 
+
 implementation
+
 
 uses
   SysUtils,
@@ -31,6 +33,7 @@ uses
   ShellAPI,
   Forms,
   dtypes,
+  server,
   mudsystem,
   constants;
 
@@ -264,24 +267,30 @@ begin
 end;
 
 procedure copyoverProc(id : integer);
+var
+	serverInstance : GServer;
 begin
-  boot_info.timer := 1;
-  boot_info.started_by := nil;
-  boot_info.boot_type := BOOTTYPE_COPYOVER;
+	serverInstance := GServer.Create();
+	serverInstance.shutdown(SHUTDOWNTYPE_COPYOVER);
+	serverInstance.Free();
 end;
 
 procedure rebootProc(id : integer);
+var
+	serverInstance : GServer;
 begin
-  boot_info.timer := 1;
-  boot_info.started_by := nil;
-  boot_info.boot_type := BOOTTYPE_REBOOT;
+	serverInstance := GServer.Create();
+	serverInstance.shutdown(SHUTDOWNTYPE_REBOOT);
+	serverInstance.Free();
 end;
 
 procedure shutdownProc(id : integer);
+var
+	serverInstance : GServer;
 begin
-  boot_info.timer := 1;
-  boot_info.started_by := nil;
-  boot_info.boot_type := BOOTTYPE_SHUTDOWN;
+	serverInstance := GServer.Create();
+	serverInstance.shutdown(SHUTDOWNTYPE_HALT);
+	serverInstance.Free();
 end;
 
 

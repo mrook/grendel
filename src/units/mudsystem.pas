@@ -2,7 +2,7 @@
 	Summary:
 		Configuration and other mud specific functions
 	
-	## $Id: mudsystem.pas,v 1.10 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: mudsystem.pas,v 1.11 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 unit mudsystem;
@@ -27,22 +27,10 @@ uses
 	util;
 
 
-const 
-	BOOTTYPE_SHUTDOWN = 1;
-	BOOTTYPE_REBOOT   = 2;
-	BOOTTYPE_COPYOVER = 3;
-
-
 type
 	GTime = record
 		hour, day, month, year : integer;
 		sunlight : integer;
-	end;
-
-	GBoot = record
-		timer : integer;
-		boot_type : integer;
-		started_by : pointer;
 	end;
 
 	GSystem = record
@@ -64,8 +52,6 @@ type
 		arena_end : integer;         { vnum start/end of arena (battleground) }
 
 		user_high, user_cur : integer;
-
-		terminated : boolean;
 	end;
 
 	GSocial = class
@@ -106,7 +92,6 @@ type
 var
 	system_info : GSystem;
 	time_info : GTime;
-	boot_info : GBoot;
 	bg_info : GBattleground;
 
 	socials : GHashTable;
@@ -119,16 +104,11 @@ var
 
 	banned_masks, banned_names : TStringList;
 
-  OldExit : pointer;
-
-  { system data }
-  BootTime : TDateTime;
-  mobs_loaded:integer;
-  online_time:string;
-  status : THeapStatus;
-  mud_booted : boolean = false;
-  grace_exit : boolean = false;
-  boot_type : integer = BOOTTYPE_SHUTDOWN;
+	{ system data }
+	BootTime : TDateTime;
+	mobs_loaded : integer;
+	online_time : string;
+	status : THeapStatus;
 
 
 procedure bugreport(const func, pasfile, bug : string);
@@ -204,7 +184,6 @@ begin
   system_info.level_log := LEVEL_GOD;
   system_info.bind_ip := INADDR_ANY;
   system_info.max_conns := 200;
-  system_info.terminated := false;
 
   if (fileExists(SystemDir + 'sysdata.dat')) then
     begin

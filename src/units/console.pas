@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.5 2004/03/13 18:01:35 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.6 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -79,11 +79,13 @@ implementation
 
 uses
 	mudsystem,
-	fsys;
+	fsys,
+	server;
 
 
 const
-  CONSOLE_HISTORY_MAX = 200;
+	{ Maximum number of items in the console history }
+	CONSOLE_HISTORY_MAX = 200;
   
 
 var
@@ -146,8 +148,8 @@ begin
   he.text := text;
   queue.add(he);
   
-  if (not mud_booted) or (system_info.terminated) then
-  	poll();
+	if (not serverBooted) then
+		poll();
 end;
 
 { Poll the console }

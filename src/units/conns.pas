@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.13 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.14 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -115,6 +115,8 @@ type
 var
 	connection_list : GDLinkedList;
 
+
+procedure flushConnections();
 
 procedure initConns();
 procedure cleanupConns();
@@ -483,6 +485,26 @@ begin
     sendbuffer := sendbuffer + #13#10;
 
   sendbuffer := sendbuffer + txt;
+end;
+
+procedure flushConnections();
+var
+   conn : GPlayerConnection;
+   iterator : GIterator;
+begin
+  iterator := connection_list.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    conn := GPlayerConnection(iterator.next());
+    
+    if (conn.isPlaying()) and (not conn.ch.IS_NPC) then
+      GPlayer(conn.ch).quit
+    else
+      conn.Terminate();
+    end;
+    
+  iterator.Free();
 end;
 
 procedure initConns();

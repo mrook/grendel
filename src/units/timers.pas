@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.8 2004/03/13 15:45:21 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.9 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -98,6 +98,7 @@ uses
 	area,
 	conns,
 	player,
+	server,
 	Channels;
 
 
@@ -421,65 +422,49 @@ begin
 end;
 
 procedure update_sec();
+var
+	serverInstance : GServer;
+	delay : integer;
 begin
-  calculateonline();
+	calculateonline();
+	
+	if (serverBooted) then
+		begin
+		serverInstance := GServer.Create();
+		delay := serverInstance.getShutdownDelay();
 
-  if (boot_info.timer >= 0) then
-    begin
-    dec(boot_info.timer);
+		if (delay > 0) then
+			case delay of
+			  60,30,10,5 :  case serverInstance.getShutdownType() of
+							  SHUTDOWNTYPE_HALT:begin
+												writeConsole(inttostr(delay)+' seconds till shutdown');
+												to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + inttostr(delay) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+												end;
+							SHUTDOWNTYPE_REBOOT:begin
+												writeConsole(inttostr(delay)+' seconds till reboot');
+												to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + inttostr(delay) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+												end;
+						  SHUTDOWNTYPE_COPYOVER:begin
+												writeConsole(inttostr(delay)+' seconds till reboot');
+												to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + inttostr(delay) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+												end;
+							end;
+			end;
 
-    case boot_info.timer of
-      60,30,10,5 :  begin
-                    case boot_info.boot_type of
-                      BOOTTYPE_SHUTDOWN:begin
-                                        writeConsole(inttostr(boot_info.timer)+' seconds till shutdown');
-                                        to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
-                                        end;
-                        BOOTTYPE_REBOOT:begin
-                                        writeConsole(inttostr(boot_info.timer)+' seconds till reboot');
-                                        to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
-                                        end;
-                      BOOTTYPE_COPYOVER:begin
-                                        writeConsole(inttostr(boot_info.timer)+' seconds till reboot');
-                                        to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
-                                        end;
-                    end;
-                    end;
+		serverInstance.Free();
 
-      0 :           begin
-                    case boot_info.boot_type of
-                      BOOTTYPE_SHUTDOWN:begin
-                                        writeConsole('Timer reached zero, starting shutdown now');
-                                        to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-                                        end;
-                        BOOTTYPE_REBOOT:begin
-                                        writeConsole('Timer reached zero, starting reboot now');
-                                        to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-                                        end;
-                      BOOTTYPE_COPYOVER:begin
-                                        writeConsole('Timer reached zero, starting copyover now');
-                                        to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
-                                        end;
-                    end;
+		if (bg_info.count > 0) then
+			begin
+			dec(bg_info.count);
 
-                    boot_type := boot_info.boot_type;
-                    grace_exit := true;
-                    system_info.terminated := true;
-                    end;
-    end;
-    end;
+			case bg_info.count of
+				60,30,10,5,2 : battlegroundMessage();
+				0 : startBattleground();
+			end;
+			end;
+		end;
 
-  if (bg_info.count > 0) then
-    begin
-    dec(bg_info.count);
-
-    case bg_info.count of
-      60,30,10,5,2 : battlegroundMessage();
-      0 : startBattleground();
-    end;
-    end;
-
-  regenerate_chars();
+	regenerate_chars();
 end;
 
 procedure initTimers();

@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.13 2004/03/13 15:50:37 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.14 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -48,527 +48,192 @@ program grendel;
 {$ENDIF}
 
 uses
-  SysUtils,
+	SysUtils,
 {$IFDEF WIN32}
-  Windows,
-  Winsock2,
+	Windows,
+	Winsock2,
 	Forms,
-  {$IFNDEF CONSOLEBUILD}
-  systray,
-  {$ENDIF}
+  	{$IFNDEF CONSOLEBUILD}
+	systray,
+  	{$ENDIF}
 {$ENDIF}
-  Classes,
+	Classes,
 {$IFDEF LINUX}
-  Libc,
+	Libc,
 {$ENDIF}
-  constants,
-  clan,
-  debug,
-  mudsystem,
-  timers,
-  update,
-  fight,
-  fsys,
-  modules,
-  commands,
-  NameGen,
-  mudhelp,
-  conns,
-  dtypes,
-  socket,
-  console,
-  skills,
-  clean,
-  chars,
-  player,
-  Channels,
-  Bulletinboard,
-  progs,
-  events,
-  area,
-  race;
+	dtypes,
+	player,
+	mudsystem,
+	debug,
+	socket,
+	server,
+	console,
+	conns,
+	fight,
+	constants;
 
-const pipeName : pchar = '\\.\pipe\grendel';
+
+const 
+	pipeName : pchar = '\\.\pipe\grendel';
+
 
 var
-  old_exitproc : pointer;
-  listenSockets : GDLinkedList;
-
-procedure openListenSockets();
-var
-	socket : GSocket;
-begin
-	listenSockets := GDLinkedList.Create();
+	oldExitProc : pointer;
 	
-  if (isSupported(AF_INET)) then
-    begin
-    socket := GSocket4.Create(); 
-    socket.openPort(system_info.port);
-    
-    listenSockets.add(socket);
-    end;
 
-  if (isSupported(AF_INET6)) then
-    begin
-    socket := GSocket6.Create();
-    socket.openPort(system_info.port6);
-
-    listenSockets.add(socket);
-    end;
-end;
-
-procedure flushConnections();
-var
-   conn : GPlayerConnection;
-   iterator : GIterator;
-begin
-  iterator := connection_list.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    conn := GPlayerConnection(iterator.next());
-    
-    if (conn.isPlaying()) and (not conn.ch.IS_NPC) then
-      GPlayer(conn.ch).quit
-    else
-      conn.Terminate();
-    end;
-    
-  iterator.Free();
-end;
-
-// Server cleanup
-procedure cleanupServer();
-var
-	node : GListNode;
-begin
-	writeConsole('Terminating threads...');
-	
-	mud_booted := false;
-
-	timer_thread.Terminate();
-	clean_thread.Terminate();
-
-	Sleep(100);
-
-	writeConsole('Saving mudstate...');
-
-	saveMudState();
-	
-	writeConsole('Unloading modules...');
-
-	unloadModules();
-
-	writeConsole('Releasing allocated memory...');
-
-	node := char_list.tail;
-	while (node <> nil) do
-		begin
-		GCharacter(node.element).extract(true);
-		node := char_list.tail;
-		end;
-
-	writeConsole('Cleaning channels...');
-	cleanupChannels();
-
-	writeConsole('Cleaning players...');
-	cleanupPlayers();
-		
-	writeConsole('Cleaning chars...');
-	cleanupChars();
-	
-	writeConsole('Cleaning clans...');
-	cleanupClans();
-
-	writeConsole('Cleaning commands...');
-	cleanupCommands();
-
-	writeConsole('Cleaning connections...');
-	cleanupConns();
-
-	writeConsole('Cleaning help...');
-	cleanupHelp();
-
-	writeConsole('Cleaning skills...');
-	cleanupSkills();
-
-	writeConsole('Cleaning areas...');
-	cleanupAreas();
-
-	writeConsole('Cleaning timers...');
-	cleanupTimers();
-
-	writeConsole('Cleaning races...');
-	cleanupRaces();
-
-	writeConsole('Cleaning system...');
-	cleanupSystem();
-
-	writeConsole('Cleaning notes...');
-	cleanupNotes();
-
-	writeConsole('Cleaning events...');
-	cleanupEvents();
-
-	listenSockets.clear();
-	listenSockets.Free();
-
-	writeConsole('Cleanup complete.');
-
-	{$IFDEF WIN32}      
-		{$IFNDEF CONSOLEBUILD}
-		unregisterSysTray();
-		cleanupSysTray();
-		{$ENDIF}
-	{$ENDIF}
-end;
-
-// Reboot procedure
-procedure reboot_mud;
-{$IFDEF WIN32}
-var
-  SI: TStartupInfo;
-  PI: TProcessInformation;
-{$ENDIF}
-begin
-  writeConsole('Server rebooting...');
-
-  try
-    if MUD_Booted then
-      flushConnections();
-
-    { wait for users to logout }
-    Sleep(1000);
-  except
-    writeConsole('Exception caught while cleaning up connections');
-  end;
-
-  cleanupServer();
-
-{$IFDEF WIN32}
-  FillChar(SI, SizeOf(SI), 0);
-  SI.cb := SizeOf(SI);
-  SI.wShowWindow := sw_show;
-
-  if not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI) then
-    bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel.exe, reboot failed!');
-{$ENDIF}
-{$IFDEF LINUX}
-  if (execv('grendel', nil) = -1) then
-    bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel, reboot failed!');
-{$ENDIF}
-end;
-
-// Copyover procedure
-procedure copyover_mud;
-{$IFDEF WIN32}
-var
-   SI: TStartupInfo;
-   PI: TProcessInformation;
-   pipe : THandle;
-   node, node_next : GListNode;
-   conn : GPlayerConnection;
-   w, len : cardinal;
-   prot : TWSAProtocol_Info;
-   name : array[0..1023] of char;
-begin
-  writeConsole('Server starting copyover...');
-
-  node := connection_list.head;
-
-  while (node <> nil) do
-    begin
-    conn := GPlayerConnection(node.element);
-    node_next := node.next;
-    
-    // disable MCCP compression 
-    conn.disableCompression();
-
-    if (conn.isPlaying()) then
-      begin
-      stopfighting(conn.ch);
-  		conn.ch.emptyBuffer;
-      conn.send(#13#10'Slowly, you feel the world as you know it fading away in wisps of steam...'#13#10#13#10);
-      end
-    else
-      begin
-      conn.send(#13#10'This server is rebooting, please continue in a few minutes.'#13#10#13#10);
-      conn.Terminate();
-      end;
-
-    node := node_next;
-    end;
-
-  FillChar(SI, SizeOf(SI), 0);
-  SI.cb := SizeOf(SI);
-  SI.wShowWindow := sw_show;
-
-  if (not CreateProcess('copyover.exe', nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
-    begin
-    bugreport('copyover_mud', 'grendel.dpr', 'Could not execute copyover.exe, copyover failed!');
-    reboot_mud;
-    end;
-
-  pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_WAIT or PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 10, 0, 0, 1000, nil);
-
-  if (pipe = INVALID_HANDLE_VALUE) then
-    begin
-    writeConsole('Could not create pipe: ' + IntToStr(GetLastError()));
-    exit;
-    end;
-
-  if (not ConnectNamedPipe(pipe, nil)) then
-    begin
-    bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!');
-    reboot_mud;
-    end;
-
-  node := connection_list.head;
-
-  while (node <> nil) do
-    begin
-    conn := GPlayerConnection(node.element);
-    node_next := node.next;
-
-    conn.ch.save(conn.ch.name);
-
-    if (WSADuplicateSocket(conn.socket.getDescriptor, PI.dwProcessId, @prot) = -1) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
-      reboot_mud;
-      end;
-
-    if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
-      reboot_mud;
-      end;
-
-    strpcopy(name, conn.ch.name);
-    len := strlen(name);
-
-    if (not WriteFile(pipe, len, 4, w, nil)) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
-      reboot_mud;
-      end;
-
-    if (not WriteFile(pipe, name, len, w, nil)) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
-      reboot_mud;
-      end;
-      
-    conn.Terminate();
-
-    node := node_next;
-    end;
-
-  Sleep(500);
-
-  CloseHandle(pipe);
-
-  cleanupServer();
-end;
-{$ELSE}
-begin
-  writeConsole('Copyover not supported on this platform.');
-end;
-{$ENDIF}
-
-// Shutdown procedure
-procedure shutdown_mud;
-begin
-	writeConsole('Server shutting down...');
-
-	if (mud_booted) then
-		flushConnections();
-
-	Sleep(1000);
-
-  cleanupServer();
-end;
 
 procedure sendtoall(const s : string);
 var
 	iterator : GIterator;
 	conn : GPlayerConnection;
 begin
-  iterator := connection_list.iterator();
+	iterator := connection_list.iterator();
 
-  while (iterator.hasNext()) do
-    begin
-    conn := GPlayerConnection(iterator.next());
-
-    conn.send(s);
+	while (iterator.hasNext()) do
+		begin
+		conn := GPlayerConnection(iterator.next());
+		conn.send(s);
 		end;
 
 	iterator.Free();
 end;
 
-{ our exit procedure, catches the server when unstable }
-{ This is one of the most important pieces of code: the exit handler.
-  These lines make sure that if the server crashes (due to illegal memory
-  access, file operations, overload, etc.) the players are logged out
-  and their data is saved properly. Also, this routine makes sure the
-  server reboots automatically, no script needed! - Grimlord }
-procedure reboot_exitproc;far;
+// Reboot procedure
+procedure rebootServer();
+{$IFDEF WIN32}
 var
-	f : TextFile;
+	SI: TStartupInfo;
+	PI: TProcessInformation;
+{$ENDIF}
 begin
-	AssignFile(f, 'grendel.run');
-	Erase(f);
-
-  { okay, so we crashed :) }
-  if (not grace_exit) then
-    begin
-    sendtoall('------ GAME CRASH DETECTED! ---- Saving all players.'#13#10#13#10);
-    sendtoall('The server should be back online in less than a minute.'#13#10);
-    sendtoall('If the server doesn''t auto-reboot, please notify'#13#10);
-    sendtoall(pchar('the administration, '+system_info.admin_email+'.'#13#10));
-
-    // save all characters and try to unlog before quitting
-    flushConnections();
-
-    Sleep(1000);
-
-    // give operator/logfile a message
-    writeConsole('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
-
-    boot_type := BOOTTYPE_REBOOT;
-    end;
-
-  exitproc := old_exitproc;
-
-  { reboot }
-  if (boot_type = BOOTTYPE_REBOOT) then
-    reboot_mud
-  else
-  { copyover }
-  if (boot_type = BOOTTYPE_COPYOVER) then
-    begin
-    if (connection_list.size() > 0) then
-      copyover_mud
-    else
-      reboot_mud;
-    end
-  else
-    shutdown_mud;
-end;
-
-// Boot the server
-procedure bootServer();
-var
-  s : string;
-begin
-	writeConsole(version_info + ', ' + version_number + '.');
-	writeConsole(version_copyright + '.');
-
-	writeConsole('Initializing memory pool...');
-	init_progs();
-	initClans();
-	initCommands();
-	initConns();
-	initHelp();
-	initChannels();
-	initChars();
-	initPlayers();
-	initSkills();
-	initAreas();
-	initTimers();
-	initRaces();
-	initNotes();
-	initSystem();
-	initEvents();
-
 	{$IFDEF WIN32}
-		{$IFNDEF CONSOLEBUILD}
-		initSysTray();
-		{$ENDIF}
+	FillChar(SI, SizeOf(SI), 0);
+	SI.cb := SizeOf(SI);
+	SI.wShowWindow := sw_show;
+
+	if (not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
+		bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel.exe, reboot failed!');
 	{$ENDIF}
-
-	{ writeConsole('Reading debug info...');
-	readMapFile('grendel.exe', 'grendel.map');
-	readMapfile('core.bpl', 'core.map'); }
- 
-	writeConsole('Booting server...');
-	loadSystem();
-
-	s := FormatDateTime('ddddd', Now);
-	writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
-
-	writeConsole('Loading skills...');
-	load_skills();
-	
-	writeConsole('Loading races...');
-	loadRaces();
-	
-	writeConsole('Loading clans...');
-	load_clans;
-	
-	writeConsole('Loading channels...');
-	load_channels();
-	
-	writeConsole('Loading areas...');
-	loadAreas();
-	
-	writeConsole('Loading help...');
-	loadHelp('help.dat');
-	
-	writeConsole('Loading namegenerator data...');
-	loadNameTables(NameTablesDataFile);
-	
-	writeConsole('Loading noteboards...');
-	load_notes('boards.dat');
-	
-	writeConsole('Loading modules...');
-	loadModules();
-	
-	writeConsole('Loading texts...');
-	loadCommands();
-	loadSocials();
-	loadDamage();
-	
-	writeConsole('Loading mud state...');
-	BootTime := Now;
-
-	boot_type := 0;
-	bg_info.count := -1;
-	boot_info.timer := -1;
-	mud_booted := true;
-
-	update_time;
-
-	time_info.day := 1;
-	time_info.month := 1;
-	time_info.year := 1;
-
-	loadMudState();
-
-	randomize();
-
-	openListenSockets();
-
-	ExitProc := @reboot_exitproc;
-
-	registerTimer('teleports', update_teleports, 1, true);
-	registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
-	registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
-	registerTimer('objects', update_objects, CPULSE_TICK, true);
-	registerTimer('characters', update_chars, CPULSE_TICK, true);
-	registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
-
-	timer_thread := GTimerThread.Create();
-	clean_thread := GCleanThread.Create();
-
-	calculateonline();
-
-	{$IFDEF WIN32}
-		{$IFNDEF CONSOLEBUILD}
-		registerSysTray();
-		{$ENDIF}  
+	{$IFDEF LINUX}
+	if (execv('grendel', nil) = -1) then
+		bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel, reboot failed!');
 	{$ENDIF}
 end;
+
+// Copyover procedure
+procedure copyoverServer();
+{$IFDEF WIN32}
+var
+	SI: TStartupInfo;
+	PI: TProcessInformation;
+	pipe : THandle;
+	node, node_next : GListNode;
+	conn : GPlayerConnection;
+	w, len : cardinal;
+	prot : TWSAProtocol_Info;
+	name : array[0..1023] of char;
+begin
+	writeConsole('Server starting copyover...');
+
+	node := connection_list.head;
+
+	while (node <> nil) do
+		begin
+		conn := GPlayerConnection(node.element);
+		node_next := node.next;
+
+		// disable MCCP compression 
+		conn.disableCompression();
+
+		if (conn.isPlaying()) then
+			begin
+			stopfighting(conn.ch);
+			conn.ch.emptyBuffer;
+			conn.send(#13#10'Slowly, you feel the world as you know it fading away in wisps of steam...'#13#10#13#10);
+			end
+		else
+			begin
+			conn.send(#13#10'This server is rebooting, please continue in a few minutes.'#13#10#13#10);
+			conn.Terminate();
+			end;
+
+		node := node_next;
+		end;
+
+	FillChar(SI, SizeOf(SI), 0);
+	SI.cb := SizeOf(SI);
+	SI.wShowWindow := sw_show;
+
+	if (not CreateProcess('copyover.exe', nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
+		begin
+		bugreport('copyover_mud', 'grendel.dpr', 'Could not execute copyover.exe, copyover failed!');
+		rebootServer();
+		end;
+
+	pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_WAIT or PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 10, 0, 0, 1000, nil);
+
+	if (pipe = INVALID_HANDLE_VALUE) then
+		begin
+		writeConsole('Could not create pipe: ' + IntToStr(GetLastError()));
+		exit;
+		end;
+
+	if (not ConnectNamedPipe(pipe, nil)) then
+		begin
+		bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!');
+		rebootServer();
+		end;
+
+	node := connection_list.head;
+
+	while (node <> nil) do
+		begin
+		conn := GPlayerConnection(node.element);
+		node_next := node.next;
+
+		conn.ch.save(conn.ch.name);
+	
+		if (WSADuplicateSocket(conn.socket.getDescriptor, PI.dwProcessId, @prot) = -1) then
+			begin
+			bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
+			rebootServer();
+			end;
+
+		if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
+			begin
+			bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
+			rebootServer();
+			end;
+
+		strpcopy(name, conn.ch.name);
+		len := strlen(name);
+
+		if (not WriteFile(pipe, len, 4, w, nil)) then
+			begin
+			bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
+			rebootServer();
+			end;
+
+		if (not WriteFile(pipe, name, len, w, nil)) then
+			begin
+			bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
+			rebootServer();
+			end;
+
+		conn.Terminate();
+
+		node := node_next;
+		end;
+
+	Sleep(500);
+
+	CloseHandle(pipe);
+end;
+{$ELSE}
+begin
+	writeConsole('Copyover not supported on this platform.');
+end;
+{$ENDIF}
 
 // Recover from copyover
 procedure from_copyover;
@@ -652,46 +317,51 @@ end;
 {$IFDEF CONSOLEBUILD}
 function controlHandler(event : DWORD) : boolean;
 begin
-  Result := true;
-  grace_exit := true;
-  SetConsoleCtrlHandler(@controlHandler, false);
-  halt;
+	Result := true;
+	SetConsoleCtrlHandler(@controlHandler, false);
+	halt;
 end;
 {$ENDIF}
 {$ENDIF}
 
-procedure gameLoop();
+{ Our last hope, the ExitProc handler }
+procedure serverExitProc; far;
 var
-	iterator : GIterator;
-	socket : GSocket;
+	f : TextFile;
+	serverInstance : GServer;
 begin
-  while (not system_info.terminated) do
-    begin
-    iterator := listenSockets.iterator();
-    
-    while (iterator.hasNext()) do
-    	begin
-    	socket := GSocket(iterator.next());
-    	
-    	if (socket.canRead()) then
-    		acceptConnection(socket);
-    	end;
-    	
-    iterator.Free();
+	ExitProc := oldExitProc;
+	
+	{$I-}
+	AssignFile(f, 'grendel.run');	
+	Erase(f);
+	{$I+}
+	
+	if (serverBooted) then
+		begin
+		sendtoall('------ GAME CRASH DETECTED! ---- Saving all players.'#13#10#13#10);
+		sendtoall('The server should be back online in less than a minute.'#13#10);
+		sendtoall('If the server doesn''t auto-reboot, please notify'#13#10);
+		sendtoall(pchar('the administration, '+system_info.admin_email+'.'#13#10));
 
-    {$IFDEF WIN32}
-    Application.ProcessMessages();
-    {$ENDIF}
+		// save all characters and try to unlog before quitting
+		flushConnections();
 
-		pollConsole();
-    
-    sleep(25);
-    end;    
+		Sleep(1000);
+
+		// give operator/logfile a message
+		writeConsole('CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
+
+		rebootServer();
+		end;
 end;
 
+
 var
-	tm : TDateTime;
+	serverInstance : GServer;
 	f : file;
+	shutdownType : GServerShutdownTypes;
+	tm : TDateTime;
 
 begin
 	if (FileExists('grendel.run')) then
@@ -699,39 +369,57 @@ begin
 		{$IFDEF CONSOLEBUILD}
 		writeln('Server is already running? (delete grendel.run if this is not the case)');
 		{$ELSE}
-			{$IFDEF WIN32}
-			MessageBox(0, 'Server is already running? (delete grendel.run if this is not the case)', 'Server is already running', 0);
-			{$ENDIF}
+		{$IFDEF WIN32}
+		MessageBox(0, 'Server is already running? (delete grendel.run if this is not the case)', 'Server is already running', 0);
+		{$ENDIF}
 		{$ENDIF}
 		exit;
 		end;
+
+	oldExitProc := ExitProc;
+	ExitProc := @serverExitProc;
 		
 	AssignFile(f, 'grendel.run');
 	Rewrite(f);
 	CloseFile(f);
 	
-	old_exitproc := ExitProc;
-	tm := Now();
-	
 	initDebug();
 
-	bootServer();  
-  
-{$IFDEF WIN32}
+	{$IFDEF WIN32}
+	{$IFDEF CONSOLEBUILD}
+	SetConsoleCtrlHandler(@controlHandler, true);
+	{$ENDIF}
+	{$ENDIF}
+
+	serverInstance := GServer.Create();
+
+	tm := Now();
+
+	serverInstance.init();
+
+	{$IFDEF WIN32}
 	if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
 		from_copyover();
-{$ENDIF}
+	{$ENDIF}
 
 	tm := Now() - tm;
 
 	writeConsole('Server boot took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
 	writeConsole('Grendel ' + version_number + ' ready...');
-
-{$IFDEF WIN32}
-{$IFDEF CONSOLEBUILD}
-	SetConsoleCtrlHandler(@controlHandler, true);
-{$ENDIF}
-{$ENDIF}
-
-	gameLoop();
+	
+	shutdownType := serverInstance.gameLoop();
+	
+	if (shutdownType = SHUTDOWNTYPE_COPYOVER) then
+		begin
+		copyoverServer();
+		end
+	else
+		flushConnections();	
+	
+	serverInstance.cleanup();
+	
+	serverInstance.Free();
+	
+	if (shutdownType = SHUTDOWNTYPE_REBOOT) then
+		rebootServer();
 end.

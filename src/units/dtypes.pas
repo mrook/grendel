@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.12 2004/03/14 13:16:16 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.13 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -215,10 +215,10 @@ type
 		procedure FreeInstance; override;
 		
 		{ Actual constructor, override this one instead of TObject.Create() }
-		constructor actualCreate(); virtual; abstract;
+		constructor actualCreate(); virtual;
 		
 		{	Actual destructor, override this one instead of TObject.Destroy() }
-		destructor actualDestroy(); virtual; abstract;
+		destructor actualDestroy(); virtual;
 	end;
 {$M-}    
 
@@ -1371,6 +1371,22 @@ begin
 
 		inherited FreeInstance;
 		end;	
+end;
+
+{
+	Summary:
+		Default GSingleton constructor 
+}
+constructor GSingleton.actualCreate();
+begin
+end;
+
+{
+	Summary:
+		Default GSingleton destructor 
+}
+destructor GSingleton.actualDestroy();
+begin
 end;
 
 

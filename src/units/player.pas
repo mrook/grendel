@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.19 2004/03/13 17:41:44 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.20 2004/03/17 00:19:32 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -275,6 +275,7 @@ uses
 	mudhelp,
 	clan,
 	events,
+	server,
 	bulletinboard,
 	Channels;
 	
@@ -3113,7 +3114,7 @@ begin
     ac.send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
     end
   else
-  if (boot_info.timer >= 0) then
+  if (not serverBooted) then
     begin
     ac.send(system_info.mud_name+#13#10#13#10);
     ac.send('Currently, this server is in the process of a reboot.'#13#10);

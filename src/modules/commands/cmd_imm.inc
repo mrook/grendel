@@ -1,71 +1,72 @@
-// $Id: cmd_imm.inc,v 1.12 2004/03/13 16:09:28 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.13 2004/03/17 00:19:32 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
-   haltparam : string;
+	haltparam : string;
+	serverInstance : GServer;
+	delay : integer;
 begin
-  if (length(param) = 0) then
-    begin
-    ch.sendBuffer('Usage: SHUTDOWN <stop/halt/reboot/copyover> [time]'#13#10#13#10);
-    ch.sendBuffer('If time is not given, a default of 30 seconds is assumed.'#13#10);
-    ch.sendBuffer('Using "stop" as a parameter halts the shutdown.'#13#10);
-    ch.sendBuffer('Using "now" as time value enables immediate shutdown.'#13#10);
-    exit;
-    end;
+	if (length(param) = 0) then
+		begin
+		ch.sendBuffer('Usage: SHUTDOWN <stop/halt/reboot/copyover> [time]'#13#10#13#10);
+		ch.sendBuffer('If time is not given, a default of 30 seconds is assumed.'#13#10);
+		ch.sendBuffer('Using "stop" as a parameter halts the shutdown.'#13#10);
+		ch.sendBuffer('Using "now" as time value enables immediate shutdown.'#13#10);
+		exit;
+		end;
+    
+	serverInstance := GServer.Create();
 
-  param := one_argument(param, haltparam);
+  	param := one_argument(param, haltparam);
+  
+  	if (prep(param) = 'NOW') then
+  		delay := 0
+  	else
+  		try
+			delay := StrToInt(param);
+		except
+	        ch.sendBuffer('Boot timer must be a valid numeric value!'#13#10);
+	        exit;
+		end;
 
-  if (haltparam = 'stop') then
-    begin
-    act(AT_REPORT, 'Timer stopped.',false,ch,nil,nil,TO_CHAR);
-    boot_info.boot_type := 0;
-    boot_info.started_by := nil;
-    boot_info.timer := -1;
-    exit;
-    end
-  else
-  if (haltparam = 'reboot') then
-    begin
-    act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
+	if (haltparam = 'stop') then
+		begin
+		act(AT_REPORT, 'Timer stopped.',false,ch,nil,nil,TO_CHAR);
+		end
+	else
+	if (haltparam = 'reboot') then
+		begin
+		if (delay = 0) then
+			to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+			
+		act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
 
-    boot_info.boot_type := BOOTTYPE_REBOOT;
-    end
-  else
-  if (haltparam = 'halt') then
-    begin
-    act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
+		serverInstance.shutdown(SHUTDOWNTYPE_REBOOT, delay);
+		end
+	else
+	if (haltparam = 'halt') then
+		begin
+		if (delay = 0) then
+			to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+			
+		act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
 
-    boot_info.boot_type := BOOTTYPE_SHUTDOWN;
-    end
-  else
-  if (haltparam = 'copyover') then
-    begin
-    act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
+		serverInstance.shutdown(SHUTDOWNTYPE_HALT, delay);
+		end
+	else
+	if (haltparam = 'copyover') then
+		begin
+		if (delay = 0) then
+			to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+			
+		act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
 
-    boot_info.boot_type := BOOTTYPE_COPYOVER;
-    end
-  else
-    begin
-    ch.sendBuffer('Illegal parameter: use "stop", "halt", "reboot" or "copyover".'#13#10);
-    exit;
-    end;
-
-  if (length(param) > 0) then
-    begin
-    if (param = 'now') then
-      boot_info.timer := 1
-    else
-      try
-        boot_info.timer := strtoint(param) + 1;
-      except
-        ch.sendBuffer('Boot timer must be a valid numeric value!'#13#10);
-        exit;
-      end
-    end
-  else
-    boot_info.timer := 31;
-
-  boot_info.started_by := ch;
+		serverInstance.shutdown(SHUTDOWNTYPE_COPYOVER, delay);
+		end
+	else
+		ch.sendBuffer('Illegal parameter: use "stop", "halt", "reboot" or "copyover".'#13#10);
+	
+	serverInstance.Free();
 end;
 
 // Send message to all players
