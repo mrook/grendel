@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.42 2001/07/28 22:18:18 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.43 2001/07/30 11:12:44 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -691,8 +691,8 @@ begin
     write_console('Loading mud state...');
     loadMudState();
 
-    write_console('String hash stats: ');
-    str_hash.hashStats;
+{    write_console('String hash stats: ');
+    str_hash.hashStats; }
 
     randomize;
 

@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.42 2001/07/17 21:28:02 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.43 2001/07/30 11:12:44 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1038,7 +1038,7 @@ begin
   tm := Now() - tm;
 
   write_console('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
-  room_list.hashStats();
+//  room_list.hashStats();
 end;
 
 { Xenon 28/Apr/2001 : added saving of #RANGES; fixed bug that caused areas
@@ -2925,7 +2925,7 @@ end;
 
 initialization
 area_list := GDLinkedList.Create;
-room_list := GHashTable.Create(16384);
+room_list := GHashTable.Create(32768);
 object_list := GDLinkedList.Create;
 shop_list := GDLinkedList.Create;
 teleport_list := GDLinkedList.Create;

@@ -327,7 +327,7 @@ begin
   if (block = nil) or (pc < 0) or (pc >= block.codeSize) then
     exit;
 
-  writeln('GMC DEBUG: executing ', integer(owner), ' at ', pc, ' stack ', sp);
+//  writeln('GMC DEBUG: executing ', integer(owner), ' at ', pc, ' stack ', sp);
 
   try
     while (pc >= 0) and (pc < block.codeSize) do
