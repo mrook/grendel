@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.38 2001/07/30 13:00:19 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.39 2001/08/18 10:28:31 ***REMOVED*** Exp $
 
 unit constants;
 
@@ -6,9 +6,9 @@ interface
 
 const 
 {$IFDEF LINUX}
-  version_number = 'v0.4.0-linux';
+  version_number = 'v0.4.0a-linux';
 {$ELSE}
-  version_number = 'v0.4.0';
+  version_number = 'v0.4.0a';
 {$ENDIF}
   version_info = 'The Grendel Project - A Win32 MUD Server';
   version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';

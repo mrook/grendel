@@ -239,16 +239,16 @@ begin
 
     if (vict.IS_NPC) then
       begin
-      p := GNPC(ch).context.findSymbol('onBlock');
+      p := GNPC(vict).context.findSymbol('onBlock');
 
       if (p <> -1) then
         begin
-        GNPC(ch).context.push(integer(ch));
-        GNPC(ch).context.push(integer(vict));
-        GNPC(ch).context.setEntryPoint(p);
-        GNPC(ch).context.Execute;
+        GNPC(vict).context.push(integer(ch));
+        GNPC(vict).context.push(integer(vict));
+        GNPC(vict).context.setEntryPoint(p);
+        GNPC(vict).context.Execute;
         
-        if (GNPC(ch).context.pop()) and (not ch.IS_HOLYWALK) then
+        if (GNPC(vict).context.pop()) and (not ch.IS_HOLYWALK) then
           begin
           ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
           exit;
@@ -392,14 +392,14 @@ begin
 
     if (vict.IS_NPC) then
       begin
-      p := GNPC(ch).context.findSymbol('onGreet');
+      p := GNPC(vict).context.findSymbol('onGreet');
 
       if (p <> -1) then
         begin
-        GNPC(ch).context.push(integer(ch));
-        GNPC(ch).context.push(integer(vict));
-        GNPC(ch).context.setEntryPoint(p);
-        GNPC(ch).context.Execute;
+        GNPC(vict).context.push(integer(ch));
+        GNPC(vict).context.push(integer(vict));
+        GNPC(vict).context.setEntryPoint(p);
+        GNPC(vict).context.Execute;
         end;
       end;
 
