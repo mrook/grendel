@@ -2,7 +2,7 @@
 	Summary:
 		Various utility functions
 		
-	## $Id: util.pas,v 1.5 2004/02/28 15:53:24 hemko Exp $
+	## $Id: util.pas,v 1.6 2004/03/04 19:11:24 ***REMOVED*** Exp $
 }
 
 unit util;
@@ -40,6 +40,9 @@ function rolldice(num, size : integer):integer;
 function mudAnsi(color : integer) : string;
 
 function isName(const name, substr : string) : boolean;
+function isNameAny(const name, substr : string) : boolean;
+function isNameStart(const name, substr : string) : boolean;
+
 function isObjectName(const name, substr : string) : boolean;
 function isNumber(const param : string) : boolean;
 
@@ -288,13 +291,45 @@ begin
     Result := '$A$' + inttostr(color);
 end;
 
-{Jago 10/Jan/2001 - utility function (- move it to util.pas)}
-{Xenon 16/Apr/2001: changed code so something like 'eno' doesn''t match xenon }
-{Xenon 16/Apr/2001: reverted last change for now }
+{ alias for isNameAny }
 function isName(const name, substr : string) : boolean;
 begin
+	Result := isNameAny(name, substr);
+end;
+
+{ tests wether substr occurs anywhere in name }
+function isNameAny(const name, substr : string) : boolean;
+begin
   Result := (Pos(trim(uppercase(substr)), trim(uppercase(name)) ) > 0);
-//  Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) = 1);
+end;
+
+{ tests wether substr occurs at the start of 'name' or at the start of the first noun in 'name' }
+function isNameStart(const name, substr : string) : boolean;
+{ list of articles, change this if you wish to recompile Grendel for a different language }
+const
+	articles : array[0..1] of string = ('A', 'THE');
+
+var
+	i : integer;
+begin
+	Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) = 1);
+	
+	if (Result = false) then
+		begin
+		for i := 0 to length(articles) - 1 do
+			begin
+			Result := (Pos(articles[i] + ' ' + trim(uppercase(substr)), trim(uppercase(name))) = 1);
+			
+			if (Result) then
+				exit;
+			end;
+		end;
+end;
+
+{ tests wether substr occurs at the start of name }
+function isNameStartNoun(const name, substr : string) : boolean;
+begin
+	Result := (Pos(trim(uppercase(substr)), trim(uppercase(name))) = 1);
 end;
 
 {Xenon 16/Apr/2001: same as isName() but less strict }

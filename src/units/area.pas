@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.13 2004/02/27 22:24:20 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.14 2004/03/04 19:11:24 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -2090,9 +2090,9 @@ begin
 
     if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
       ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
-      isName(vict.name, name) or isName(vict.short, name) or
+      isNameStart(vict.name, name) or isNameStart(vict.short, name) or
       ((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
-      (isName(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
+      (isNameAny(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
       begin
       inc(cnt);
 
@@ -2105,6 +2105,33 @@ begin
     end;
 
   iterator.Free();
+  
+  if (Result = nil) then
+  	begin
+		iterator := chars.iterator();
+
+		while (iterator.hasNext()) do
+			begin
+			vict := GCharacter(iterator.next());
+
+			if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
+				((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
+				isNameAny(vict.name, name) or isNameAny(vict.short, name) or
+				((not vict.IS_NPC) and (not ch.IS_SAME_ALIGN(vict)) and
+				(isNameAny(vict.race.name, name)))) and (ch.CAN_SEE(vict)) then
+				begin
+				inc(cnt);
+
+				if (cnt = num) then
+					begin
+					Result := vict;
+					break;
+					end;
+				end;
+			end;
+
+		iterator.Free();
+		end;
 end;
 
 // Find random char in room
