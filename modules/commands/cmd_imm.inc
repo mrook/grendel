@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.18 2002/10/13 18:58:47 xenon Exp $
+// $Id: cmd_imm.inc,v 1.19 2002/10/14 15:32:12 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1272,14 +1272,16 @@ begin
   rch_node := ch.room.chars.head;
   while rch_node <> nil do
   begin
-		 rch := GCharacter(rch_node.element);
+    rch := GCharacter(rch_node.element);
     if (rch.fighting <> nil) then
     begin
       stopfighting(rch);
-      if rch <> ch then
-      	interpret(rch, 'sit');
     end;
-  	 rch_node := rch_node.next;
+
+    if rch <> ch then
+      interpret(rch, 'sit');
+
+    rch_node := rch_node.next;
   end;
 
   ch.sendBuffer( 'Ok.'#13#10);
@@ -2016,14 +2018,14 @@ begin
 //  Assert(destRoom.areacoords <> nil, 'destRoom.areacoords = nil');
   if (currRoom.areacoords = nil) then
   begin
-    bugreport('goalDistEstimate', 'cmd_imm.inc', 'currRoom.areacoords = nil');
+    bugreport('goalDistEstimate', 'cmd_imm.inc', 'currRoom.areacoords = nil; this probably means no areacoordinates have been created, see immcommand coordgen');
     raise Exception.Create('currRoom.areacoords = nil');
     Result := -1;
     exit;
   end;
   if (destRoom.areacoords = nil) then
   begin
-    bugreport('goalDistEstimate', 'cmd_imm.inc', 'destRoom.areacoords = nil');
+    bugreport('goalDistEstimate', 'cmd_imm.inc', 'destRoom.areacoords = nil; this probably means no areacoordinates have been created, see immcommand coordgen');
     raise Exception.Create('destRoom.areacoords = nil');
     Result := -1;
     exit;

@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.10 2002/08/03 19:17:56 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.11 2002/10/14 15:32:20 xenon Exp $)
 }
   
 unit modules;
@@ -56,7 +56,9 @@ begin
   if (length(param) = 0) then
     begin
     iterator := module_list.iterator();
-      
+
+    ch.sendBuffer('Usage:  MODULES <load|unload> <modules_name>'#13#10#13#10);
+
     ch.sendBuffer('Registered modules:'#13#10#13#10);
   
     while (iterator.hasNext()) do

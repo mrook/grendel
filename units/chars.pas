@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.66 2002/09/16 21:01:03 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.67 2002/10/14 15:32:17 xenon Exp $)
 }
 
 unit chars;
@@ -75,7 +75,7 @@ type
       objects : GDLinkedList;
 
       reply, master, leader : GCharacter;
-      fighting , hunting : GCharacter;
+      fighting, hunting : GCharacter;
       snooped_by : GCharacter;
 
     private

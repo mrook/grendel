@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.10 2002/08/18 19:35:16 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.11 2002/10/14 15:32:13 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -110,6 +110,8 @@ var vict:GCharacter;
     brief:boolean;
     act_str:string;
     where_str : string;
+    track : GTrack;
+    iterator : GIterator;
 begin
   if (IS_SET(ch.aff_flags,AFF_BLIND)) then
     begin
@@ -292,8 +294,10 @@ begin
       if not IS_SET(obj.flags,OBJ_HIDDEN) then
         begin
         act_str := obj.long^ + '.';
+
         if (obj.count>1) then
           act_str:=act_str+' [$4'+inttostr(obj.count)+'$7x]';
+
         act(AT_OBJ,act_str,false,ch,nil,nil,TO_CHAR);
         end;
 
@@ -346,6 +350,20 @@ begin
 
       node := node.next;
       end;
+
+    if (ch.IS_IMMORT and IS_SET(GPlayer(ch).cfg_flags, CFG_SHOWTRACKS)) then
+    begin
+      iterator := ch.room.tracks.iterator();
+
+      while (iterator.hasNext()) do
+      begin
+        track := GTrack(iterator.next());
+        act(AT_REPORT, Format('$B$7(Tracks of %s heading %s (life: %d).)$A$7', [track.who, headings[track.direction], track.life]), false, ch, nil, nil, TO_CHAR);
+      end;
+
+      iterator.Free();
+    end;
+
     end;
 
   ch.sendBuffer(ch.ansiColor(7));
@@ -1498,6 +1516,12 @@ begin
         hi_type('autocreate','You automatically create new rooms upon walking.')
       else
         lo_type('autocreate','You don''t automatically create new rooms upon walking.');
+
+      if IS_SET(cfg_flags,CFG_SHOWTRACKS) then
+        hi_type('showtracks','You see tracks in a room on looking.')
+      else
+        lo_type('showtracks','You don''t see tracks in a room on looking.');
+
       end;
     end
   else
@@ -1544,6 +1568,9 @@ begin
     else
     if s='AUTOCREATE' then
       d:=CFG_AUTOCREATE
+    else
+    if s='SHOWTRACKS' then
+      d:=CFG_SHOWTRACKS
     else
       begin
       ch.sendBuffer('Unknown option.'#13#10);

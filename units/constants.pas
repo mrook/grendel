@@ -1,6 +1,6 @@
 {
   @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.48 2002/08/18 17:39:37 ***REMOVED*** Exp $)
+  @lastmod($Id: constants.pas,v 1.49 2002/10/14 15:32:18 xenon Exp $)
 }
 
 unit constants;
@@ -209,6 +209,7 @@ const CFG_ASSIST=BV01;
       CFG_PAGER=BV08;           { see pager }
       CFG_AUTOPEEK = BV09;      { peek automatically on look }
       CFG_AUTOCREATE = BV10;    { immflag: autocreate rooms when walking? }
+      CFG_SHOWTRACKS = BV11;    { immflag: show tracks in room on look }
 
 { NPC/PC flags }
 const ACT_AGGRESSIVE=BV02;      { aggressive NPC? }
@@ -225,6 +226,10 @@ const ACT_AGGRESSIVE=BV02;      { aggressive NPC? }
       ACT_SHOPKEEP=BV13;        { shop keeper }
       ACT_IMMORTAL=BV14;        { immortal NPC }
       ACT_PROTO = cardinal(BV31);
+
+const
+      RATE_TRACKROOMS_HUNTING = 1;              { rooms to move when following tracks while hunting }
+      RATE_TRACKROOMS_FASTHUNTING = 2;          { rooms to move when following tracks while fasthunting }
 
 { Item Types }
 const ITEM_WEAPON=1;

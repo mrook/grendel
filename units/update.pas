@@ -1,6 +1,6 @@
 {
   @abstract(Character update & regeneration routines)
-  @lastmod($Id: update.pas,v 1.18 2002/08/03 19:14:04 ***REMOVED*** Exp $)
+  @lastmod($Id: update.pas,v 1.19 2002/10/14 15:32:20 xenon Exp $)
 }
 
 unit update;
@@ -301,41 +301,74 @@ var p:integer;
     e:GExit;
     r:GRoom;
     node : GListNode;
+    rooms : integer;
+    track, newest_tracks : GTrack;
+    iterator : GIterator;
+    i : integer;
 begin
   node := char_list.head;
 
   while (node <> nil) do
-    begin
+  begin
     ch := node.element;
 
     { switched mobs don't wander }
     if (ch.IS_NPC) and (ch.conn = nil) then
-      begin
+    begin
       if not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL) then
-       if ch.position=POS_STANDING then
+      begin
+        if ch.position=POS_STANDING then
         begin
-        p:=random(6)+1;
-
-        e := ch.room.findExit(p);
-
-        if (e <> nil) then
+          if (IS_SET(GNPC(ch).act_flags, ACT_HUNTING)) then
           begin
-          r := findRoom(e.vnum);
+            if (IS_SET(GNPC(ch).act_flags, ACT_FASTHUNT)) then
+              rooms := RATE_TRACKROOMS_FASTHUNTING
+            else
+              rooms := RATE_TRACKROOMS_HUNTING;
 
-          if (r <> nil) and not (IS_SET(GNPC(ch).act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
-            interpret(ch, headings[p]);
+            for i := 1 to rooms do
+            begin
+              newest_tracks := nil;
+              iterator := ch.room.tracks.iterator();
+
+              while (iterator.hasNext()) do
+              begin
+                track := GTrack(iterator.next());
+                if ((track.who = ch.hunting.name^) and ((newest_tracks = nil) or (track.life > newest_tracks.life))) then
+                  newest_tracks := track;
+              end;
+
+              iterator.Free();
+
+              interpret(ch, headings[track.direction]);
+            end;
+          end
+          else
+          begin
+            p:=random(6)+1;
+
+            e := ch.room.findExit(p);
+
+            if (e <> nil) then
+            begin
+              r := findRoom(e.vnum);
+
+              if (r <> nil) and not (IS_SET(GNPC(ch).act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
+                interpret(ch, headings[p]);
+            end;
+          end;
+
+          p := GNPC(ch).context.findSymbol('onTick');
+
+          if (p <> -1) then
+          begin
+            GNPC(ch).context.push(integer(ch));
+            GNPC(ch).context.setEntryPoint(p);
+            GNPC(ch).context.Execute;
           end;
         end;
-
-      p := GNPC(ch).context.findSymbol('onTick');
-
-      if (p <> -1) then
-        begin
-        GNPC(ch).context.push(integer(ch));
-        GNPC(ch).context.setEntryPoint(p);
-        GNPC(ch).context.Execute;
-        end;
       end
+    end
     else
     if (not ch.IS_NPC) then
       begin

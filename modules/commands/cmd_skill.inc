@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.2 2002/08/14 18:15:03 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.3 2002/10/14 15:32:15 xenon Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -528,7 +528,7 @@ begin
       g := node.element;
 
       if (ch.level >= GSkill(g.skill).min_lvl) then
-        act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
+        act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name^, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
 
       node := node.next;
       end;

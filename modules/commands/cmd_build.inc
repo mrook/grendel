@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.5 2001/10/19 19:44:56 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.6 2002/10/14 15:32:11 xenon Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -323,9 +323,14 @@ begin
   	buf1 := buf1 + 'Page Lines: ' + IntToStr(GPlayer(victim).pagerlen) + '.' + #13#10;
 
   if victim.fighting <> nil then
-    buf1 := buf1 + 'Fighting: ' + victim.fighting.name^ + '.' + #13#10
+    buf1 := buf1 + 'Fighting: ' + victim.fighting.name^ + '. '
   else
-    buf1 := buf1 + 'Fighting: (none).' + #13#10;
+    buf1 := buf1 + 'Fighting: (none). ';
+
+  if victim.hunting <> nil then
+    buf1 := buf1 + 'Hunting: ' + victim.hunting.name^ + '.' + #13#10
+  else
+    buf1 := buf1 + 'Hunting: (none).' + #13#10;
 
   if not victim.IS_NPC then
   begin
