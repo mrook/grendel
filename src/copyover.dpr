@@ -41,6 +41,9 @@ var
 	f : file;
 	ret : integer;
 	cons : GConsole;
+	calling_pid : cardinal;
+	hProcess : THandle;
+	exitCode : cardinal;
 	
 
 procedure GConsoleCopyover.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
@@ -79,7 +82,9 @@ begin
 		end;
 
 	sock := -1;
-
+	
+	suc := ReadFile(pipe, calling_pid, 4, w, nil);
+	
 	repeat
 		suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
 
@@ -113,8 +118,20 @@ begin
 
 	CloseHandle(pipe);
 
-	// give Grendel time to die
-	sleep(1000);
+	// wait for calling Grendel process to die
+	cons.write('Waiting for calling process #' + IntToStr(calling_pid) + ' to die...');
+	
+	hProcess := OpenProcess(PROCESS_QUERY_INFORMATION, false, calling_pid);
+	
+	GetExitCodeProcess(hProcess, exitCode);
+	
+	while (exitCode = STILL_ACTIVE) do
+		begin
+		Sleep(25);
+		GetExitCodeProcess(hProcess, exitCode);
+		end;
+	
+	CloseHandle(hProcess);
 
 	// check for any new grendel.exe in dir "bin\"
 	if (FileExists('bin\grendel.exe')) then
@@ -194,6 +211,8 @@ begin
 	CloseHandle(pipe);
 
 	cons.write('Cleaned up.');
+	
+	cons.Free();
 end.
 {$ENDIF}
 {$IFDEF LINUX}

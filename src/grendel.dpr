@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.21 2004/03/26 20:05:10 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.22 2004/03/27 10:40:01 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -131,6 +131,7 @@ var
 	conn : GPlayerConnection;
 	w, len : cardinal;
 	prot : TWSAProtocol_Info;
+	pid : cardinal;
 	name : array[0..1023] of char;
 begin
 	writeConsole('Server starting copyover...');
@@ -181,6 +182,14 @@ begin
 	if (not ConnectNamedPipe(pipe, nil)) then
 		begin
 		bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!');
+		rebootServer();
+		end;
+		
+	pid := GetCurrentProcessID();
+	
+	if (not WriteFile(pipe, pid, 4, w, nil)) then
+		begin
+		bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
 		rebootServer();
 		end;
 		
