@@ -349,7 +349,8 @@ begin
             time := GetTickCount;
 
             cmd.ptr(ch, param);
-            // ch.last_cmd := cmd.ptr;
+
+            ch.last_cmd := @cmd.ptr;
 
             { Disabled this, this is too computer specific, e.g. on a 486
               some commands could lag while on a Pentium they would not.
@@ -1046,7 +1047,7 @@ begin
                        if (not conn.ch.CHAR_DIED) then
                          conn.ch.in_command := false;
                        end;
-          // CON_EDITING: edit_buffer(conn.ch,cmdline);
+          CON_EDITING: conn.ch.editBuffer(cmdline);
           else
             nanny(conn, cmdline);
         end;

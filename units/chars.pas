@@ -108,11 +108,12 @@ type
       reply, master, leader : GCharacter;
       fighting , hunting : GCharacter;
       snooped_by : GCharacter;
-      editor : pointer;
+      edit_buffer : string;
+      edit_dest : pointer;
+
       ability : GAbility;
       point : GPoint;
       conn : pointer;
-      dest_buf : pointer;
       player : ^GPlayer; { Only players have this record }
       position : integer;
       gold : longint;               { Gold carried }
@@ -146,6 +147,10 @@ type
       procedure sendBuffer(s : string);
       procedure sendPager(txt : string);
       procedure emptyBuffer;
+
+      procedure startEditing(text : string);
+      procedure stopEditing;
+      procedure editBuffer(text : string);
 
       function ansiColor(color : integer) : string;
 
@@ -245,6 +250,8 @@ begin
   snooped_by := nil;
   leader := Self;
   tracking := '';
+  edit_buffer := '';
+  edit_dest := nil;
 end;
 
 destructor GCharacter.Destroy;
@@ -1416,13 +1423,79 @@ begin
   c.empty_busy := false;
 end;
 
-{ function GCharacter.get_ansi_line(color:integer):string;
+procedure GCharacter.startEditing(text : string);
 begin
-  if color>8 then
-    get_ansi_line:='$B$'+inttostr(color-8)
-  else
-    get_ansi_line:='$A$'+inttostr(color);
-end; }
+  if (conn = nil) then
+    exit;
+
+  sendBuffer('Editing: Use /c to clear, /s to save, /a to abort'#13#10);
+  sendBuffer('---------------------------------------------------------------------->'#13#10);
+
+  edit_buffer := text;
+  GConnection(conn).state := CON_EDITING;
+end;
+
+procedure GCharacter.stopEditing;
+begin
+  sendBuffer('Done.'#13#10);
+
+  edit_buffer := '';
+  edit_dest := nil;
+  substate := SUB_NONE;
+  GConnection(conn).state:=CON_PLAYING;
+end;
+
+procedure GCharacter.editBuffer(text : string);
+begin
+  if (conn = nil) then
+    exit;
+
+  if (GConnection(conn).state <> CON_EDITING) then
+    begin
+    sendBuffer('You are not editing.'#13#10);
+    exit;
+    end;
+
+  if (text = '/c') then
+    begin
+    sendBuffer('Buffer cleared.'#13#10);
+    edit_buffer := '';
+    exit;
+    end;
+
+  if (text = '/s') then
+    begin
+    GConnection(conn).state := CON_PLAYING;
+
+    if (assigned(last_cmd)) then
+      COMMAND_FUNC(last_cmd^)(Self, '');
+
+    exit;
+    end;
+
+  if (text = '/a') then
+    begin
+    sendBuffer('Aborting...'#13#10);
+    stopEditing;
+    exit;
+    end;
+
+  { if (strlen(text) + cardinal(ch.editor.size) >= MAX_STR_LENGTH) then
+    begin
+    sendtobuffer(ch,'Buffer is full.'#13#10);
+    strlcopy(strend(ch.editor.buffer),text,MAX_STR_LENGTH-ch.editor.size-2);
+    strcat(ch.editor.buffer,#13#10);
+    ch.descr.state:=CON_PLAYING;
+    if (assigned(ch.last_cmd)) then
+      ch.last_cmd(ch,'');
+    exit;
+    end
+  else }
+    begin
+    edit_buffer := edit_buffer + text + #13#10;
+    GConnection(conn).send('> ');
+    end;
+end;
 
 function GCharacter.ansiColor(color : integer) : string;
 begin

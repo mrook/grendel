@@ -1235,14 +1235,14 @@ var
 begin
   if (ch.substate = SUB_ROOM_DESC) then
     begin
-    { location := ch.dest_buf;
-    location.description := ch.editor.buffer;
-    ch.stopEditing; }
+    location := ch.edit_dest;
+    location.description := ch.edit_buffer;
+    ch.stopEditing;
 
     ch.substate := SUB_NONE;
     exit;
     end;
-    
+
   if (length(param) = 0) then
     begin
     ch.sendBuffer('Usage:  REDIT <field> [value]'#13#10#13#10);
@@ -1267,8 +1267,8 @@ begin
   if (sub = 'desc') then
     begin
     ch.substate := SUB_ROOM_DESC;
-    // ch.dest_buf := ch.room;
-    // start_editing(ch,ch.room.description);
+    ch.edit_dest := ch.room;
+    ch.startEditing(ch.room.description);
     exit;
     end
   else
