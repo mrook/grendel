@@ -48,6 +48,7 @@ type
       procedure reset;
 
       procedure load(fn : string);
+      procedure save(fn : string);
 
       constructor Create;
       destructor Destroy; override;
@@ -936,6 +937,117 @@ begin
 
     node := node.next;
     end;
+end;
+
+procedure GArea.save(fn : string);
+var
+   f : textfile;
+   node, node_ex : GListNode;
+   ex : GExit;
+   room : GRoom;
+   npcindex : GNPCIndex;
+   reset : GReset;
+begin
+  assign(f, fn);
+  {$I-}
+  rewrite(f);
+  {$I+}
+
+  if (IOResult <> 0) then
+    begin
+    writeln('Could not open ', paramstr(2), '!');
+    exit;
+    end;
+
+  writeln(f, '#AREA');
+  writeln(f, Self.name);
+  writeln(f, Self.author);
+  writeln(f, Self.reset_msg);
+  writeln(f, Self.max_age);
+  writeln(f, Self.weather.temp_mult, ' ', Self.weather.temp_avg, ' ', Self.flags);
+  writeln(f);
+  writeln(f, '#ROOMS');
+
+  node := room_list.head;
+  while (node <> nil) do
+    begin
+    room := node.element;
+
+    if (room.area <> Self) then
+      continue;
+
+    writeln(f, '#', room.vnum);
+    writeln(f, room.name^);
+    writeln(f, room.description);
+    writeln(f, '~');
+
+    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
+
+    if (IS_SET(room.flags, ROOM_TELEPORT)) then
+      writeln(f, ' ', room.televnum, ' ', room.teledelay)
+    else
+      writeln(f);
+
+    node_ex := room.exits.head;
+    while (node_ex <> nil) do
+      begin
+      ex := node_ex.element;
+
+      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
+
+      if (length(ex.keywords^) > 0) then
+        writeln(f, ' ', ex.keywords^)
+      else
+        writeln(f);
+
+      node_ex := node_ex.next;
+      end;
+
+    writeln(f, 'S');
+
+    node := node.next;
+    end;
+
+  writeln(f, '#END');
+  writeln(f);
+  writeln(f, '#MOBILES');
+
+  node := npc_list.head;
+  while (node <> nil) do
+    begin
+    npcindex := node.element;
+
+    writeln(f, '#', npcindex.vnum);
+    
+    writeln(f, npcindex.name^);
+    writeln(f, npcindex.short^);
+    writeln(f, npcindex.long^);
+
+    writeln(f, npcindex.level, ' ', npcindex.sex);
+    writeln(f, npcindex.natural_ac, ' ', npcindex.act_flags, ' ', npcindex.gold, ' ', npcindex.height, ' ', npcindex.weight);
+
+    node := node.next;
+    end;
+
+  writeln(f, '#END');
+  writeln(f);
+  writeln(f, '#RESETS');
+
+  node := Self.resets.head;
+  while (node <> nil) do
+    begin
+    reset := node.element;
+
+    writeln(f, reset.reset_type, ' ', reset.arg1, ' ', reset.arg2, ' ', reset.arg3);
+
+    node := node.next;
+    end;
+
+  writeln(f, '#END');
+  writeln(f);
+  writeln(f, '$');
+
+  closefile(f);
 end;
 
 procedure GArea.reset;
