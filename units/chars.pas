@@ -10,7 +10,9 @@ uses
     strip,
     area,
     race,
+    md5,
     ansiio,
+    fsys,
     util,
     clan,
     dtypes;
@@ -54,6 +56,7 @@ type
       rank : string;
       clanleader : boolean;         { is clanleader? }
       password : string;
+      md5_password : MD5Digest;
       remorts : integer;            { remorts done }
       condition : array[COND_DRUNK..COND_MAX-1] of integer;
       (* area: GArea;
@@ -590,9 +593,9 @@ begin
 end;
 
 function GCharacter.load(fn : string) : boolean;
-var d : longint;
-    f : textfile;
-    g , a : string;
+var d, x : longint;
+    af : GFileReader;
+    g , a, t : string;
     obj : GObject;
     aff : GAffect;
     inner : integer;
@@ -675,26 +678,24 @@ begin
 
   fighting := nil;
 
-  if (not FileExists('players\' + fn + '.usr')) then
-    begin
+  try
+    af := GFileReader.Create('players\' + fn + '.usr');
+  except
     load := false;
     exit;
-    end;
-
-  assignfile(f, 'players\' + fn + '.usr');
-  reset(f);
+  end;
 
   repeat
     repeat
-      readln(f, s);
+      s := af.readLine;
       s := uppercase(s);
-    until (pos('#', s) = 1) or (eof(f));
+    until (pos('#', s) = 1) or (af.eof);
 
     if (s = '#PLAYER') then
       begin
       inc(inner);
       repeat
-        readln(f, a);
+        a := af.readLine;
 
         g := uppercase(stripl(a,':'));
 
@@ -823,8 +824,28 @@ begin
         if g='AC_MOD' then
           point.ac_mod:=strtoint(striprbeg(a,' '))
         else
+        // for backward compatibility only
         if g='PASSWORD' then
-          player^.password := striprbeg(a,' ')
+          begin
+          player^.password := striprbeg(a,' ');
+          player^.md5_password := MD5String(player^.password);
+          end
+        else
+        // the new md5 encrypted pwd
+        if g='MD5-PASSWORD' then
+          begin
+          t := striprbeg(a,' ');
+
+          d := 1;
+          x := 0;
+
+          while (d <= length(t)) do
+            begin
+            player^.md5_password[x] := strtoint('$' + t[d] + t[d+1]);
+            inc(x);
+            inc(d, 2);
+            end;
+          end
         else
         if g='REMORTS' then
           player^.remorts:=strtoint(striprbeg(a,' '))
@@ -912,7 +933,8 @@ begin
         else
         if (g = 'TAUNT') then
           player^.taunt := striprbeg(a, ' ');
-      until (uppercase(a)='#END') or (eof(f));
+      until (uppercase(a)='#END') or (af.eof);
+
       if (uppercase(a)='#END') then
         dec(inner);
       end
@@ -921,9 +943,9 @@ begin
       begin
       inc(inner);
       repeat
-        readln(f,a);
+        a := af.readLine;
 
-        if (uppercase(a) <> '#END') and (not eof(f)) then
+        if (uppercase(a) <> '#END') and (not af.eof) then
           begin
           a := striprbeg(striprbeg(a,' '),'''');
           g := stripl(a,'''');
@@ -936,7 +958,8 @@ begin
             bugreport('GArea.load', 'charlist.pas', 'skill '+g+' does not exist',
                       'The skill specified in the pfile does not exist.');
           end;
-      until (uppercase(a)='#END') or (eof(f));
+      until (uppercase(a)='#END') or (af.eof);
+
       if (uppercase(a)='#END') then
         dec(inner);
       end
@@ -945,9 +968,9 @@ begin
       begin
       inc(inner);
       repeat
-        readln(f,a);
+        a := af.readLine;
 
-        if (uppercase(a) <> '#END') and (not eof(f)) then
+        if (uppercase(a) <> '#END') and (not af.eof) then
           begin
           a:=striprbeg(striprbeg(a,' '),'''');
           g:=stripl(a,'''');
@@ -972,7 +995,8 @@ begin
           if (aff.sn <> -1) then
             doAffect(Self, aff);
           end;
-      until (uppercase(a)='#END') or (eof(f));
+      until (uppercase(a)='#END') or (af.eof);
+
       if (uppercase(a)='#END') then
         dec(inner);
       end
@@ -981,9 +1005,9 @@ begin
       begin
       inc(inner);
       repeat
-        readln(f,a);
+        a := af.readLine;
 
-        if (uppercase(a) <> '#END') and (not eof(f)) then
+        if (uppercase(a) <> '#END') and (not af.eof) then
           begin
           al := GAlias.Create;
 
@@ -992,7 +1016,8 @@ begin
 
           al.node := player^.aliases.insertLast(al);
           end;
-      until (uppercase(a)='#END') or (eof(f));
+      until (uppercase(a)='#END') or (af.eof);
+
       if (uppercase(a)='#END') then
         dec(inner);
       end
@@ -1001,16 +1026,16 @@ begin
       begin
       inc(inner);
       repeat
-        readln(f,g);
+        g := af.readLine;
 
-        if (uppercase(g) <> '#END') and (not eof(f)) then
+        if (uppercase(g) <> '#END') and (not af.eof) then
           begin
 
           obj := GObject.Create;
 
           with obj do
             begin
-            readln(f,d);
+            d := af.readInteger;
 
             if (d <> -1 ) then
               begin
@@ -1023,20 +1048,21 @@ begin
                 inc(obj_index.obj_count);
               end;
 
-            readln(f, a);
+            a := af.readLine;
             name := hash_string(a);
-            readln(f,a);
+            a := af.readLine;
             short := hash_string(a);
-            readln(f,a);
+            a := af.readLine;
             long := hash_string(a);
 
-            readln(f,a);
+            a := af.readLine;
             item_type:=StrToInt(stripl(a,' '));
             a:=striprbeg(a,' ');
             wear1:=StrToInt(stripl(a,' '));
             a:=striprbeg(a,' ');
             wear2:=StrToInt(stripl(a,' '));
-            readln(f,a);
+
+            a := af.readLine;
             value[1]:=StrToInt(stripl(a,' '));
             a:=striprbeg(a,' ');
             value[2]:=StrToInt(stripl(a,' '));
@@ -1044,7 +1070,8 @@ begin
             value[3]:=StrToInt(stripl(a,' '));
             a:=striprbeg(a,' ');
             value[4]:=StrToInt(stripl(a,' '));
-            readln(f,a);
+
+            a := af.readLine;
             weight:=StrToInt(stripl(a,' '));
             a:=striprbeg(a,' ');
             flags:=StrToInt(stripl(a,' '));
@@ -1062,7 +1089,8 @@ begin
           else
             wear[strtoint(g)] := obj;
           end;
-      until (uppercase(g) = '#END') or (eof(f));
+      until (uppercase(g) = '#END') or (af.eof);
+
       if (uppercase(g) = '#END') then
         dec(inner);
       end
@@ -1071,8 +1099,9 @@ begin
       begin
       inc(inner);
       repeat
-        readln(f,g);
-        if (uppercase(g) <> '#END') and (not eof(f)) then
+        g := af.readLine;
+
+        if (uppercase(g) <> '#END') and (not af.eof) then
           begin
           inc(player^.trophysize);
           g:=striprbeg(g,' ');
@@ -1082,13 +1111,14 @@ begin
           g:=striprbeg(g,' ');
           player^.trophy[player^.trophysize].times:=strtoint(stripl(g,' '));
           end;
-      until (uppercase(g) = '#END') or (eof(f));
+      until (uppercase(g) = '#END') or (af.eof);
+
       if (uppercase(g) = '#END') then
         dec(inner);
       end;
-  until (eof(f));
+  until (af.eof);
 
-  closefile(f);
+  af.Free;
 
   if (inner <> 0) then
     begin
@@ -1142,7 +1172,7 @@ begin
 
   writeln(f,'#PLAYER');
   writeln(f,'User: '+name);
-  writeln(f,'Password: '+player^.password);
+  writeln(f,'MD5-Password: '+MD5Print(player^.md5_password));
   writeln(f,'Sex: ',sex);
   writeln(f,'Race: ',race.name);
   writeln(f,'Alignment: ',alignment);
