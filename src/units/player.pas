@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.8 2004/02/17 11:41:19 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.9 2004/02/18 18:51:40 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -337,6 +337,8 @@ begin
 			outputPager()
 		else
 			ch.emptyBuffer();
+			
+		fcommand := false;
 		end;
 		
 	if (ch.wait > 0) then
@@ -990,7 +992,7 @@ begin
   pclines := UMax(c.pagerlen, 5) - 2;
 
   c.emptyBuffer;
-
+  
   if (pagecmd <> #0) then
     send(#13#10);
     
@@ -998,7 +1000,7 @@ begin
     'b':lines:=-1-(pclines*2);
     'r':lines:=-1-pclines;
     'q':begin
-        c.sendPrompt;
+        ch.sendBuffer(' ');
         pagepoint := 0;
         pagebuf := '';
         exit;
