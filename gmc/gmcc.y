@@ -6,7 +6,15 @@
 
 %{
 
-uses YaccLib, LexLib, SysUtils, Classes, Strip, Windows;
+uses 
+  SysUtils,
+  Classes,
+{$IFDEF WIN32}
+  Windows,
+{$ENDIF}  
+  YaccLib, 
+  LexLib,
+  strip;
 
 
 const
@@ -1367,9 +1375,11 @@ end;
 var
 	ifname : string; 
   ofname : string;
+  {$IFDEF WIN32}
   SI : TStartupInfo;
   PI : TProcessInformation;
   ex : DWORD;
+  {$ENDIF}
 
 begin
   DecimalSeparator := '.';
@@ -1418,6 +1428,7 @@ begin
 
   if (not yyerrors) then
     begin
+    {$IFDEF WIN32}
 	  FillChar(SI, SizeOf(SI), 0);
 	  SI.cb := SizeOf(SI);
 
@@ -1426,5 +1437,6 @@ begin
 	  repeat
 	    GetExitCodeProcess(PI.hProcess, ex);
 	  until (ex <> STILL_ACTIVE);
+    {$ENDIF}	  
     end;
 end.
