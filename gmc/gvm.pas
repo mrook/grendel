@@ -36,9 +36,9 @@ type
   end;
 
 	GContext = class
-  	stack, returns : array[0..stackSize] of variant;
+  	stack : array[0..stackSize] of variant;
 	  data : array of variant;
-	  pc, rp, sp : integer;
+	  pc, sp, bp : integer;
 
     clockTick : integer;
 
@@ -46,12 +46,10 @@ type
     block : GCodeBlock;
 
 		function findSymbol(id : string) : integer;
-    function setEntryPoint(id : string) : boolean;
+    procedure setEntryPoint(addr : integer);
 
 		procedure push(v : variant);
 		function pop : variant;
-		procedure pushr(v : variant);
-		function popr : variant;
 
 		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 
@@ -111,7 +109,6 @@ end;
 function loadCode(fname : string) : GCodeBlock;
 var
   cb : GCodeBlock;
-	i : integer;
   input : file;
   sym : GSymbol;
   t : byte;
@@ -131,7 +128,10 @@ begin
     {$I+}
 
     if (IOResult <> 0) then
+      begin
+      vmError(nil, 'could not open ' + fname);
       exit;
+      end;
 
     blockread(input, cb.codeSize, 4);
     blockread(input, cb.dataSize, 4);
@@ -174,24 +174,12 @@ begin
     Result := sym.addr;
 end;
 
-function GContext.setEntryPoint(id : string) : boolean;
-var
-	i : integer;
+procedure GContext.setEntryPoint(addr : integer);
 begin
-  Result := false;
+  if (addr >= 0) then
+    push(pc);
 
-  if (block = nil) then
-    exit;
-
-  i := findSymbol(id);
-
-  if (i >= 0) then
-    begin
-    Result := true;
-    pushr(block.codeSize);
-    end;
-
-  pc := i;
+  pc := addr;
 end;
 
 procedure GContext.push(v : variant);
@@ -199,8 +187,8 @@ begin
   if (sp > stackSize) then
     vmError(owner, 'data stack overflow');
 
-  stack[sp] := v;
   inc(sp);
+  stack[sp] := v;
 end;
 
 function GContext.pop : variant;
@@ -208,36 +196,15 @@ begin
   if (sp < 0) then
     vmError(owner, 'data stack underflow');
 
-  dec(sp);
-
   Result := stack[sp];
-end;
-
-procedure GContext.pushr(v : variant);
-begin
-  if (rp > stackSize) then
-    vmError(owner, 'address stack overflow');
-
-  returns[rp] := v;
-  inc(rp);
-end;
-
-function GContext.popr : variant;
-begin
-  if (rp < 0) then
-    vmError(owner, 'address stack underflow');
-
-  dec(rp);
-
-  Result := returns[rp];
+  dec(sp);
 end;
 
 procedure GContext.load(cb : GCodeBlock);
 var
 	i : integer;
 begin
-  sp := 0;
-  rp := 0;
+  sp := -1;
   pc := -1;
 
   block := cb;
@@ -262,7 +229,7 @@ begin
   if (methodAddr = nil) then
     exit;
 
-  for i := length(signature.ParamTypes) downto 1 do
+  for i := length(signature.ParamTypes)-1 downto 0 do
     begin
     v := pop();
 
@@ -340,10 +307,10 @@ begin
   if (block = nil) or (pc < 0) or (pc >= block.codeSize) then
     exit;
 
-  writeln('GMC DEBUG: executing ', integer(owner), ' at ', pc);
+  writeln('GMC DEBUG: executing ', integer(owner), ' at ', pc, ' stack ', sp);
 
   try
-    while (pc < block.codeSize) do
+    while (pc >= 0) and (pc < block.codeSize) do
     case ord(block.code[pc]) of
       _GETC		: begin
                 push(cmdline);
@@ -388,15 +355,25 @@ begin
 
                 push(string(p));
                 end;
-      _PUSHR  : begin
-                move(block.code[pc + 1], r, 1);
-                inc(pc, 2);
-                push(data[r]);
+       _PUSHR : begin
+                move(block.code[pc + 1], i, 4);
+                inc(pc, 5);
+                push(data[i]);
                 end;
-      _POPR   : begin
-                move(block.code[pc + 1], r, 1);
-                inc(pc, 2);
-                data[r] := pop();
+        _POPR : begin
+                move(block.code[pc + 1], i, 4);
+                inc(pc, 5);
+                data[i] := pop();
+                end;
+    _PUSHDISP : begin
+                move(block.code[pc + 1], i, 4);
+                inc(pc, 5);
+                push(stack[bp + i]);
+                end;
+     _POPDISP : begin
+                move(block.code[pc + 1], i, 4);
+                inc(pc, 5);
+                stack[bp + i] := pop();
                 end;
       _ADD		: begin
                 v2 := pop();
@@ -466,11 +443,6 @@ begin
                 push(externalTrap(v1, v2));
                 inc(pc);
                 end;
-      _GETR		: begin
-                move(block.code[pc + 1], r, 1);
-                inc(pc, 2);
-                pop();
-                end;
       _TRAP		: begin
                 systemTrap(owner, pop());
                 inc(pc);
@@ -478,15 +450,11 @@ begin
       _SLEEP  : begin
                 v1 := pop();
 
-                if (clockTick >= v1) then
-                  begin
-                  clockTick := 0;
-                  inc(pc);
-                  end
+                if (v1 <= 0) then
+                  inc(pc)
                 else
                   begin
-                  inc(clockTick);
-                  push(v1);
+                  push(v1 - 1);
                   break;
                   end;
                 end;
@@ -507,7 +475,7 @@ begin
                 signalTrap(owner, v1);
                 end;
       _RET		: begin
-                i := popr();
+                i := pop();
                 pc := i;
                 end;
       _CALL 	: begin
@@ -516,7 +484,7 @@ begin
                 if (i < 0) or (i > block.codeSize) then
                   vmError(owner, 'procedure call outside of boundary');
 
-                pushr(pc + 5);					// save return address
+                push(pc + 5);					// save return address
                 pc := i;
                 end;
       _CALLE  : begin
@@ -561,6 +529,37 @@ begin
                   pc := i
                 else
                   inc(pc, 5);
+                end;
+      _PUSHBP : begin 
+                push(bp);
+                inc(pc);
+                end;
+       _POPBP : begin 
+                bp := pop();
+                inc(pc);
+                end;
+       _MBPSP : begin
+                sp := bp;
+                inc(pc);
+                end;
+       _MSPBP : begin
+                bp := sp;
+                inc(pc);
+                end;
+       _ADDSP : begin
+                move(block.code[pc + 1], i, 4);
+                inc(sp, i);
+                inc(pc, 5);
+                end;
+       _SUBSP : begin
+                move(block.code[pc + 1], i, 4);
+                dec(sp, i);
+                inc(pc, 5);
+                end;
+        _MTSD : begin
+                move(block.code[pc + 1], i, 4);
+                stack[sp - i] := stack[sp];
+                inc(pc, 5);
                 end;
       _HALT : pc := block.codeSize;
     else

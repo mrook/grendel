@@ -40,19 +40,27 @@ const
 	_PUSHI = $B0;
   _PUSHF = $B1;
 	_PUSHS = $B2;
-	_PUSHR = $B3;
-
-	_POPR = $C0;
-  _GET = $C1;
-  _GETR = $C2;
+	_PUSHDISP = $B3;
+	_POPDISP = $B4;
+  _PUSHR = $B5;
+	_POPR = $B6;
+  _GET = $B7;
 
   _ITOF = $D0;
   _FTOI = $D1;
 	_ITOS = $D2;
 	_BTOS = $D3;
 	_FTOS = $D4;
+	
+	_PUSHBP = $E0;
+	_POPBP = $E1;
+	_MBPSP = $E2;
+	_MSPBP = $E3;
+	_ADDSP = $E4;
+	_SUBSP = $E5;
+	_MTSD = $E6;
 
-  opcodeNum = 36;
+  opcodeNum = 44;
 	
 	opcodes : array[1..opcodeNum] of opcode_trans = (
                                                 (keyword:'NOP'; opcode:_NOP),
@@ -86,19 +94,26 @@ const
 																								(keyword:'PUSHI'; opcode:_PUSHI),
 																								(keyword:'PUSHF'; opcode:_PUSHF),
 																								(keyword:'PUSHS'; opcode:_PUSHS),
+																								(keyword:'PUSHDISP'; opcode:_PUSHDISP),
+																								(keyword:'POPDISP'; opcode:_POPDISP),
 																								(keyword:'PUSHR'; opcode:_PUSHR),
-
 																								(keyword:'POPR'; opcode:_POPR),
                                                 (keyword:'GET'; opcode:_GET),
-                                                (keyword:'GETR'; opcode:_GETR),
 
 																								(keyword:'ITOF'; opcode:_ITOF),
 																								(keyword:'FTOI'; opcode:_FTOI),
 																								(keyword:'ITOS'; opcode:_ITOS),
 																								(keyword:'BTOS'; opcode:_BTOS),
-																								(keyword:'FTOS'; opcode:_FTOS)
-                                                );
+																								(keyword:'FTOS'; opcode:_FTOS),
 
+																								(keyword:'PUSHBP'; opcode:_PUSHBP),
+																								(keyword:'POPBP'; opcode:_POPBP),
+																								(keyword:'MBPSP'; opcode:_MBPSP),
+																								(keyword:'MSPBP'; opcode:_MSPBP),
+																								(keyword:'ADDSP'; opcode:_ADDSP),
+																								(keyword:'SUBSP'; opcode:_SUBSP),
+																								(keyword:'MTSD'; opcode:_MTSD)
+                                                );
 
 
 implementation

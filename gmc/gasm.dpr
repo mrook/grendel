@@ -199,19 +199,40 @@ begin
 
 									line.code[length(line.attr)] := #0;
 									end; 
-				_PUSHR :  begin
-									b := StrToInt(right(line.attr, 'R'));
-									line.displ := 2;
+ 		 _PUSHDISP :  begin
+									b := StrToInt(line.attr);
+									line.displ := 5;
 
-									setLength(line.code, 1);
-									line.code[0] := chr(b);
+									setLength(line.code, 4);
+									move(b, line.code[0], 4);
 									end;
-				_POPR, _GETR  :  begin
-									b := StrToInt(right(line.attr, 'R'));
-									line.displ := 2;
+ 		  _POPDISP :  begin
+									b := StrToInt(line.attr);
+									line.displ := 5;
 
-									setLength(line.code, 1);
-									line.code[0] := chr(b);
+									setLength(line.code, 4);
+									move(b, line.code[0], 4);
+									end;
+ 			  _PUSHR :  begin
+									b := StrToInt(right(line.attr, 'R'));
+									line.displ := 5;
+
+									setLength(line.code, 4);
+									move(b, line.code[0], 4);
+									end;
+ 			   _POPR :  begin
+									b := StrToInt(right(line.attr, 'R'));
+									line.displ := 5;
+
+									setLength(line.code, 4);
+									move(b, line.code[0], 4);
+									end;
+ 			   _MTSD :  begin
+									b := StrToInt(right(line.attr, 'R'));
+									line.displ := 5;
+
+									setLength(line.code, 4);
+									move(b, line.code[0], 4);
 									end;
 				_CALLE : 	begin
 									line.displ := length(line.attr) + 2;
@@ -222,6 +243,18 @@ begin
 
 									line.code[length(line.attr)] := #0;
 									end; 
+				_ADDSP : 	begin
+									line.displ := 5;
+									setLength(line.code, 4);
+									b := StrToInt(line.attr);
+									move(b, line.code[0], 4);
+									end;
+				_SUBSP : 	begin
+									line.displ := 5;
+									setLength(line.code, 4);
+									b := StrToInt(line.attr);
+									move(b, line.code[0], 4);
+									end;
 
 				else
             begin

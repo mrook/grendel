@@ -20,6 +20,11 @@ const
 	SPECIAL_SLEEP = 2;
 	SPECIAL_WAIT = 3;
 	SPECIAL_SIGNAL = 4;
+	
+	VARTYPE_FUNCTION = 1;
+	VARTYPE_GLOBAL = 2;
+	VARTYPE_LOCAL = 3;
+	VARTYPE_PARAM = 4;
 
 
 type 	Root = class
@@ -87,17 +92,14 @@ type 	Root = class
 
 			Expr_Func = class(Expr)
 				id : string;
-				init, body : Expr;
+				displ : integer;
+				body : Expr;
 				lStart : integer;
       end;
 
 			Expr_Call = class(Expr)
 			  id : string;
 				params : Expr;
-			end;
-
-			Expr_Store = class(Expr)
-				id : string;
 			end;
 
 			Expr_External = class(Expr)
@@ -153,11 +155,12 @@ type 	Root = class
         typ : integer;
 				lbl : integer;
 		 		displ : integer;
+		 		varTyp : integer;
       end;
 
 var
-	  curDispl : integer;
     labelNum : integer;
+    globalCount : integer;
     tmp, varName, varGlob : string;
 		curFunction : string;
     varType : integer;
@@ -167,8 +170,8 @@ var
 
 procedure startCompiler(root : Expr); forward;
 procedure updateLabel(id : string; lbl : integer); forward;
-procedure addEnvironment(lineNum : integer; id : string; typ, lbl : integer); forward;
-function lookupEnv(id : string) : integer; forward;
+procedure addEnvironment(lineNum : integer; id : string; typ, lbl, varTyp : integer); forward;
+function lookupEnv(id : string) : Env_Entry; forward;
 procedure compilerError(lineNum : integer; msg : string); forward;
 
 
@@ -286,7 +289,7 @@ parameter_specifiers 	: { $$ := nil; }
 											| parameter_specifiers ',' parameter_specifier { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $3; Expr_Seq($$).ex := $1; }
 										 	;
  
-parameter_specifier  	:	type_specifier IDENTIFIER { $$ := Expr_Store.Create; Expr_Store($$).id := curFunction + ':' + varName; addEnvironment(yylineno, curFunction + ':' + varName, varType, -1); }
+parameter_specifier  	:	type_specifier IDENTIFIER { $$ := nil; addEnvironment(yylineno, curFunction + ':' + varName, varType, -1, VARTYPE_PARAM); }
 										 	;
 
 parameter_list 	: { $$ := nil; }
@@ -312,7 +315,7 @@ declaration_list		: { $$ := nil; }
 
 function_definition : type_specifier IDENTIFIER { curFunction := varName;	 $$ := Expr_Func.Create; Expr_Func($$).id := curFunction;
 																				Expr_Func($$).lStart := labelNum; inc(labelNum);
-																				addEnvironment(yylineno, varName, varType, Expr_Func($$).lStart); }
+																				addEnvironment(yylineno, varName, varType, Expr_Func($$).lStart, VARTYPE_FUNCTION); }
 										;
 
 function_body : ';'		{ $$ := nil; }
@@ -320,15 +323,19 @@ function_body : ';'		{ $$ := nil; }
 							;
 
 declaration	: type_specifier init_declarator_list ';' { $$ := nil; }
-            | function_definition '(' parameter_specifiers ')' function_body { $$ := $1; Expr_Func($$).init := $3; Expr_Func($$).body := $5; curFunction := ''; }
+            | function_definition '(' parameter_specifiers ')' function_body { $$ := $1; Expr_Func($$).body := $5; curFunction := ''; }
 						;
 
 init_declarator_list	: declarator
 											| init_declarator_list ',' declarator
 											;
 
-declarator			: IDENTIFIER		{ varName := curFunction + ':' + varName; $$ := varName; addEnvironment(yylineno, varName, varType, -1); }
-								;
+declarator			: IDENTIFIER		{ varName := curFunction + ':' + varName; 
+                                  $$ := varName; 
+                                  if (curFunction = '') then
+                                    addEnvironment(yylineno, varName, varType, -1, VARTYPE_GLOBAL)
+                                  else
+                                    addEnvironment(yylineno, varName, varType, -1, VARTYPE_LOCAL); }
 
 type_specifier	: _VOID					{ varType := _VOID; }
 								| _INT					{ varType := _INT; }
@@ -369,7 +376,7 @@ expr 	:  { $$ := nil; }
 														else
  															$$ := nil; }
 		  |  varname		      { $$ := $1; }
-			|  funcname '(' parameter_list ')'					{	if (lookupEnv($1) = -1) then 
+			|  funcname '(' parameter_list ')'					{	if (lookupEnv($1) = nil) then 
 																					  					begin
 																											compilerError(yylineno, 'undefined function ' + $1);
 																											$$ := nil;
@@ -405,14 +412,14 @@ varname  : idlist    	{ varGlob := ':' + $1;
 													$$.lineNum := yylineno; 
 													end
 												else
-												if (lookupEnv(varName) <> -1) then 
+												if (lookupEnv(varName) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
 													$$.lineNum := yylineno; 
 													Expr_Id($$).id := varName;
 													end
 												else
-												if (lookupEnv(varGlob) <> -1) then 
+												if (lookupEnv(varGlob) <> nil) then 
 													begin
 													$$ := Expr_Id.Create;
 													$$.lineNum := yylineno; 
@@ -428,7 +435,7 @@ varname  : idlist    	{ varGlob := ':' + $1;
 													end
 												else
 													begin
-													compilerError(yylineno, 'undeclared identifier ' + varName);
+													compilerError(yylineno, 'undeclared identifier ' + right(varGlob, ':'));
 													$$ := nil;
 													yyabort;
 													end; }
@@ -487,38 +494,39 @@ begin
     end;
 end;
 
-procedure addEnvironment(lineNum : integer; id : string; typ, lbl : integer);
+procedure addEnvironment(lineNum : integer; id : string; typ, lbl, varTyp : integer);
 var
 	  e : Env_Entry;
 begin
-  if (lookupEnv(id) <> -1) then
+  if (lookupEnv(id) <> nil) then
     begin
     compilerError(lineNum, 'identifier redeclared');
     exit;
     end;
-    
+       
   e := Env_Entry.Create;
   e.id := id;
   e.typ := typ;
 	e.lbl := lbl;
- 
-  if (lbl = -1) then
-    begin
-	  e.displ := curDispl;
-  	inc(curDispl);
-		end
+	e.varTyp := varTyp;
+	
+	if (varTyp = VARTYPE_GLOBAL) then
+	  begin
+	  e.displ := globalCount;
+	  inc(globalCount);
+	  end
 	else
-		e.displ := -1;
+	 	e.displ := 0;		
 
   environment.add(e);
 end;
 
-function lookupEnv(id : string) : integer;
+function lookupEnv(id : string) : Env_Entry;
 var
 		a : integer;
     e : Env_Entry;
 begin
-  Result := -1;
+  Result := nil;
  
   for a := 0 to environment.count - 1 do
     begin
@@ -526,45 +534,7 @@ begin
    
     if (e.id = id) then
       begin
-      Result := e.typ;
-      break; 
-      end;
-    end;
-end;
-
-function findDispl(id : string) : integer;
-var
-		a : integer;
-    e : Env_Entry;
-begin
-  Result := 0;
- 
-  for a := 0 to environment.count - 1 do
-    begin
-    e := environment[a];
-   
-    if (e.id = id) then
-      begin
-      Result := e.displ;
-      break; 
-      end;
-    end;
-end;
-
-function findLabel(id : string) : integer;
-var
-		a : integer;
-    e : Env_Entry;
-begin
-  Result := 0;
- 
-  for a := 0 to environment.count - 1 do
-    begin
-    e := environment[a];
-   
-    if (e.id = id) then
-      begin
-      Result := e.lbl;
+      Result := e;
       break; 
       end;
     end;
@@ -728,10 +698,9 @@ begin
   else
   if (expr is Expr_Func) then
     begin
-    Expr_Func(expr).init := typeExpr(Expr_Func(expr).init);
     Expr_Func(expr).body := typeExpr(Expr_Func(expr).body);
 
-		t1 := lookupEnv(Expr_Func(expr).id);
+		t1 := lookupEnv(Expr_Func(expr).id).typ;
    
     if (t1 <> -1) then
 	    expr.typ := t1
@@ -741,7 +710,7 @@ begin
   else
   if (expr is Expr_Call) then
     begin
-		t1 := lookupEnv(Expr_Call(expr).id);
+		t1 := lookupEnv(Expr_Call(expr).id).typ;
    
     if (t1 <> -1) then
 	    expr.typ := t1
@@ -776,7 +745,7 @@ begin
   else
   if (expr is Expr_Id) then
     begin
-		t1 := lookupEnv(Expr_Id(expr).id);
+		t1 := lookupEnv(Expr_Id(expr).id).typ;
    
     if (t1 <> -1) then
       expr.typ := t1
@@ -1010,7 +979,6 @@ begin
   else
   if (expr is Expr_Func) then
     begin
-    Expr_Func(expr).init := optimizeExpr(Expr_Func(expr).init);
     Expr_Func(expr).body := optimizeExpr(Expr_Func(expr).body);
     end
   else
@@ -1129,6 +1097,8 @@ end;
 procedure showExpr(expr : Expr);
 var
 	t : integer;
+	num, displ, pdispl : integer;
+	e : Env_Entry;
 begin
   if (expr = nil) then
     exit;
@@ -1190,18 +1160,63 @@ begin
     begin
     if (Expr_Func(expr).body <> nil) then
       begin
+      displ := 1;
+      pdispl := -2;
+      num := 0;
+      
+      for t := 0 to environment.count - 1 do
+        begin
+        e := environment[t];
+        
+        if (pos(Expr_Func(expr).id + ':', e.id) > 0) then
+          begin
+          inc(num);
+          if (e.varTyp = VARTYPE_PARAM) then
+            begin
+            e.displ := pdispl;
+            dec(pdispl);
+            end
+          else
+          if (e.varTyp = VARTYPE_LOCAL) then
+            begin
+            e.displ := displ;
+            inc(displ);
+            end;
+          end;
+        end;
+        
 	    emit('L' + IntToStr(Expr_Func(expr).lStart) + ':');
+	    emit('PUSHBP');
+	    emit('MSPBP');
+	    
+	    if (displ > 1) then
+  	    emit('ADDSP ' + IntToStr(displ - 1));
 
-			showExpr(Expr_Func(expr).init);
 			showExpr(Expr_Func(expr).body);
+			
+			if (expr.typ <> _VOID) then
+			  begin
+			  emit('POPDISP ' + IntToStr(pdispl + 1));
+			  dec(num);
+			  end;
+			 
+      emit('MBPSP');
+      emit('POPBP');
 
+			if (num > 0) then
+			  begin
+			  emit('MTSD ' + IntToStr(num)); 
+  			  
+  			emit('SUBSP ' + IntToStr(num));
+  			end;
+  			
 			emit('RET');
 	    end;
     end
   else
   if (expr is Expr_Call) then
     begin
-		t := findLabel(Expr_Call(expr).id);
+		t := lookupEnv(Expr_Call(expr).id).lbl;
 
     if (t > 0) then
       begin
@@ -1214,11 +1229,6 @@ begin
   		showExpr(Expr_Call(expr).params);		
   		emit('CALLE ' + Expr_Call(expr).id);
 			end;
-    end
-  else
-  if (expr is Expr_Store) then
-    begin
-    emit('POPR R' + IntToStr(findDispl(Expr_Store(expr).id)));
     end
   else
   if (expr is Expr_Bool) then
@@ -1234,12 +1244,23 @@ begin
   else
   if (expr is Expr_Id) then
     begin
-    emit('PUSHR R' + IntToStr(findDispl(Expr_Id(expr).id)));
+    e := lookupEnv(Expr_Id(expr).id);
+    
+    if (e.varTyp = VARTYPE_GLOBAL) then
+      emit('PUSHR R' + IntToStr(e.displ))
+    else
+      emit('PUSHDISP ' + IntToStr(e.displ));
     end 
   else
   if (expr is Expr_External) then
     begin
-    emit('PUSHR R' + IntToStr(findDispl(Expr_External(expr).id)));
+    e := lookupEnv(Expr_External(expr).id);
+    
+    if (e.varTyp = VARTYPE_GLOBAL) then
+      emit('PUSHR R' + IntToStr(e.displ))
+    else
+      emit('PUSHDISP ' + IntToStr(e.displ));
+      
 		emit('PUSHS ' + Expr_External(expr).assoc);
     emit('GET');
     end
@@ -1248,10 +1269,15 @@ begin
     begin
     showExpr(Expr_Assign(expr).ex);
 
-		if (lookupEnv(Expr_Id(Expr_Assign(expr).id).id) = _EXTERNAL) then
-      emit('GETR R' + IntToStr(findDispl(Expr_Id(Expr_Assign(expr).id).id)))
+    e := lookupEnv(Expr_Id(Expr_Assign(expr).id).id);
+
+		if (e.typ = _EXTERNAL) then
+      emit('GET');
+      
+    if (e.varTyp = VARTYPE_GLOBAL) then
+      emit('POPR R' + IntToStr(e.displ))
     else
-      emit('POPR R' + IntToStr(findDispl(Expr_Id(Expr_Assign(expr).id).id)));
+      emit('POPDISP ' + IntToStr(e.displ));       
     end
   else
   if (expr is Expr_Asm) then
@@ -1309,8 +1335,8 @@ begin
 
   if (not yyerrors) then
     begin
-	  emit('$DATA ' + IntToStr(curDispl) + #13#10);
-
+    emit('$DATA ' + IntToStr(globalCount));
+    
     for a := 0 to environment.count - 1 do
       begin
       e := environment[a];
@@ -1323,9 +1349,7 @@ begin
       
     showExpr(root); 
     
-		emit('HALT');
-		
-	  writeln('Output file written, data size is ', curDispl, ' elements.');
+	  writeln('Output file written, datasize is ', globalCount, ' element(s).');
 		end;
 end;
 
@@ -1371,8 +1395,8 @@ begin
     end;
 
   environment := TList.Create;
-  curDispl := 0;
   labelNum := 1;
+  globalCount := 0;
   yylineno := 1;
 
   start(INITIAL);

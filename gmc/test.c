@@ -1,11 +1,13 @@
-void onTick()
+require "grendel.c"
+
+void onTick(external ch)
+{ 
+  do("say tick!");
+}
+
+void onAct(external ch, external target, string arg)
 {
-  do("mutter");
-  
-  sleep(5);
-  do("sigh");
-  
   sleep(2);
-  do("say does it *really* have to be this way?");
+  do("yell hey he said " + arg);
 }
 

@@ -32,5 +32,6 @@ begin
 
   c.Load(cb);
 
+  c.setEntryPoint('main');
   c.Execute;
 end.
