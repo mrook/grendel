@@ -90,28 +90,28 @@
       <room_message>$n straps $p on $s right arm.</room_message>
     </bodypart>
     <bodypart>
-      <name>lleg<name>
+      <name>lleg</name>
       <char_message>You strap $p on your left leg.</char_message>
-      <room_message>$n straps $p on $s left leg.</char_message>
+      <room_message>$n straps $p on $s left leg.</room_message>
       <description>left leg</description>
     </bodypart>
     <bodypart>
-      <name>rleg<name>
+      <name>rleg</name>
       <char_message>You strap $p on your right leg.</char_message>
-      <room_message>$n straps $p on $s right leg.</char_message>
+      <room_message>$n straps $p on $s right leg.</room_message>
       <description>right leg</description>
     </bodypart>
 <!-- NB: there MUST be lwield/rwield bodyparts or the race will bug -->    
     <bodypart>
       <name>lwield</name>
       <char_message>You hold $p in your left claw.</char_message>
-      <room_message>$n holds $p in $s left claw.</char_message>
+      <room_message>$n holds $p in $s left claw.</room_message>
       <description>left hand</description>
     </bodypart>
     <bodypart>
       <name>rwield</name>
       <char_message>You hold $p in your right claw.</char_message>
-      <room_message>$n holds $p in $s right claw.</char_message>
+      <room_message>$n holds $p in $s right claw.</room_message>
       <description>right hand</description>
     </bodypart>
   </body>
