@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.1 2003/12/12 13:19:55 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.2 2004/03/11 23:30:26 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -17,6 +17,10 @@ uses
 	LibXmlParser,
 	imc3_const;
 	
+
+const
+	IMC3_DRIVER_VERSION = '$Revision: 1.2 $';
+
 
 type
 	GRouter_I3 = class
@@ -110,6 +114,7 @@ implementation
 uses
 	SysUtils,
 	console,
+	constants,
 	mudsystem,
 	util;
 	
@@ -376,9 +381,10 @@ begin
 
 	parser.Free();
 	
-	// Get some info from running core
-	// player_port := system_info.port;
-	// name := system_info.mud_name;
+	// Fill in a few fields using running server
+	player_port := system_info.port;
+	mudlib := version_program + ' ' + version_number;
+	driver := IMC3_DRIVER_VERSION;
 end;
 
 procedure loadMudList();
