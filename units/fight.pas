@@ -889,6 +889,7 @@ var
   ch, vch, gch : GCharacter;
   iter_world, iter_room : GIterator;
   conn : GConnection;
+  p : integer;
 begin
   iter_world := char_list.iterator();
 
@@ -1006,17 +1007,25 @@ begin
       GPlayer(conn.ch).emptyBuffer;
     end;
 
-{  node_world := char_list.head;
+  iter_world := char_list.iterator();
 
-  while (node_world <> nil) do
+  while (iter_world.hasNext()) do
     begin
-    ch := node_world.element;
+    ch := GCharacter(iter_world.next());
 
     if (ch.IS_NPC) and (ch.fighting <> nil) then
-      fightTrigger(ch, ch.fighting);
+      begin
+      p := GNPC(ch).context.findSymbol('onFight');
 
-    node_world := node_world.next;
-    end; }
+      if (p <> -1) then
+        begin
+        GNPC(ch).context.push(integer(ch.fighting));
+        GNPC(ch).context.push(integer(ch));
+        GNPC(ch).context.setEntryPoint(p);
+        GNPC(ch).context.Execute;
+        end;
+      end;
+    end;
 end;
 
 begin
