@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.5 2004/02/11 22:15:25 ***REMOVED*** Exp $
+  ##  $Id: commands.pas,v 1.6 2004/02/23 21:29:30 hemko Exp $
 }
 
 unit commands;
@@ -118,7 +118,7 @@ end;
 procedure loadCommands();
 var 
   af : GFileReader;
-  s,g:string;
+  s, g : string;
   cmd : GCommand;
   alias : GCommand;
 begin
@@ -137,7 +137,7 @@ begin
       break;
 
     alias := nil;
-    cmd := GCommand.Create;
+    cmd := GCommand.Create();
     cmd.allowed_states := [STATE_MEDITATING, STATE_IDLE, STATE_RESTING, STATE_FIGHTING];
 
     with cmd do
@@ -151,7 +151,7 @@ begin
       if g='ALIAS' then
         begin
         // create an alias
-        alias := GCommand.Create;
+        alias := GCommand.Create();
         alias.name := uppercase(right(s,' '));
         end
       else
@@ -193,10 +193,10 @@ begin
       end
     else
       begin
-      cmd.Free;
+      cmd.Free();
 
       if (alias <> nil) then
-        alias.Free;
+        alias.Free();
       end;
   until (af.eof());
 
@@ -273,6 +273,7 @@ begin
     end;
 
   timer := hasTimer(ch, TIMER_ACTION);
+
   if (timer <> nil) then
     begin
     act(AT_REPORT, 'You stop your ' + timer.name + '.', false, ch, nil, nil, TO_CHAR);
@@ -285,6 +286,7 @@ begin
     exit;
     end;
 
+  // Char is being snooped
   if (ch.snooped_by <> nil) then
     GPlayer(ch.snooped_by).conn.send(line + #13#10);
 

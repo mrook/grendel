@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.9 2004/02/19 14:38:12 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.10 2004/02/23 21:29:30 hemko Exp $
 }
 
 program grendel;
@@ -146,8 +146,8 @@ begin
 	
 	mud_booted := false;
 
-	timer_thread.Terminate;
-	clean_thread.Terminate;
+	timer_thread.Terminate();
+	clean_thread.Terminate();
 
 	Sleep(100);
 
@@ -236,10 +236,10 @@ var
 {$ENDIF}
 begin
   writeConsole('Server rebooting...');
-  try
 
+  try
     if MUD_Booted then
-      flushConnections;
+      flushConnections();
 
     { wait for users to logout }
     Sleep(1000);
@@ -611,7 +611,6 @@ begin
       end;
 
     // All pipe instances are busy, so wait a second
-
     if (not WaitNamedPipe(pipeName, 1000)) then
       begin
       bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
