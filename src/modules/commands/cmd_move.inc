@@ -363,7 +363,7 @@ begin
     begin
     vict := GCharacter(iterator.next());
 
-    if (Assigned(vict)) and (vict.master = ch) then
+    if (Assigned(vict)) and (vict.master = ch) and (vict.state = STATE_IDLE) then
       begin
       vict.in_command := true;
 
