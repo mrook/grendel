@@ -33,6 +33,10 @@ function mudAnsi(color : integer) : string;
 
 function isName(name , param : string) : boolean;
 
+function DiffMinutes (const D1, D2 : TDateTime) : Integer;
+function DiffHours (const D1, D2 : TDateTime) : Integer;
+function DiffDays (const D1, D2 : TDateTime) : Integer;
+
 implementation
 
 uses
@@ -250,6 +254,13 @@ begin
 end;
 
 // functions borrowed from the Delphi Fundamentals
+const
+  OneDay         = 1.0;
+  OneHour        = OneDay / 24.0;
+  OneMinute      = OneHour / 60.0;
+  OneSecond      = OneMinute / 60.0;
+  OneMillisecond = OneSecond / 1000.0;
+
 function DiffMinutes (const D1, D2 : TDateTime) : Integer;
 begin
   Result := Trunc ((D2 - D1) / OneMinute);
