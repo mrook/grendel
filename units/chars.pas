@@ -75,6 +75,8 @@ type
       bamfin, bamfout : string;
       taunt : string;
       // profession:PROF_DATA;
+
+      ld_timer : integer;
     end;
 
     GAbility = record
@@ -634,6 +636,7 @@ begin
     condition[COND_HIGH] := 0;
     condition[COND_CAFFEINE] := 0;
     logon_first := Now;
+    ld_timer := 0;
 
     aliases := GDLinkedList.Create;
     end;

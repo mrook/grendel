@@ -883,6 +883,8 @@ begin
                     ch := vict;
                     vict.conn := conn;
 
+                    ch.player^.ld_timer := 0;
+
                     act(AT_REPORT, 'You have reconnected.', false, ch, nil, nil, TO_CHAR);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.player^.flags, PLR_LINKLESS);
