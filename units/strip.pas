@@ -1,7 +1,7 @@
 unit strip;
 
 interface
-uses Sysutils;
+uses SysUtils;
 
 // return the part on the left of the first occurance of 'delim'
 // or the whole string if there is no 'delim'
