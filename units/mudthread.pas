@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.64 2001/08/14 09:39:06 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.65 2001/08/14 13:44:44 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -492,6 +492,7 @@ begin
                     begin
                     writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') Failed password');
                     conn.sock.send('Wrong password.'#13#10);
+                    conn.sock.send('Password: ');
                     exit;
                     end;
 
