@@ -1,5 +1,5 @@
 Wishlist for the 1.0.x tree
-(! = closed, * = normal, l = lower priority, . = ongoing)
+(! = closed, * = normal, l = lower priority, . = ongoing, # = invalidated)
 
 
 ! run as service (NT/2K/XP)
@@ -21,9 +21,11 @@ Wishlist for the 1.0.x tree
     introduce new ones, such as experience formulas, experience per level, 
     damage formulas, number of stats, stat maximums, etc.   
     
-  - GHL (working title): Grendel Help Language, which is an XML DTD or Schema,
+  # GHL (working title): Grendel Help Language, which is an XML DTD or Schema,
     use XML to describe help/manual content, use stylesheets to transform
     GHL to (X)HTML for web viewing or ASCII for online help
+ 
+  - build helpfiles from docbook manual source (using XSLT)
 
 ! events
 

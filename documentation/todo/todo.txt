@@ -57,9 +57,12 @@ Grendel's TODO list with probable release date/version
 ! (0.4.4) re-implement "Switch" and "Snoop"
 
 ! (1.0.0a7) command to switch leadership of a group
+! (1.0.0a7) general format for docs: docbook XML
+
+! (1.0.0a8) sheath/draw for weapons
+
 - (0.4.4) trying to wear an object on a position that's already occupied results in a switch
 - (0.4.4) additional reset command to reset containers
-- (0.4.4) sheath/draw for weapons
 - (0.4.4) work on ranged weapons a bit (load/shoot)
 
 - (long)  when rapier in inv and rapier in eq, make 2.rapier match the one in eq
@@ -72,7 +75,6 @@ Grendel's TODO list with probable release date/version
 	
 l implementation of the mud sound protocol
 l clan competition for wps/pkillnum
-l general format for docs (docwrite-HOWTO something), both for HTML and plaintext docs
 
 
 -- ongoing --
