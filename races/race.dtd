@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT alignment (#PCDATA)>
+<!ELEMENT body (bodypart+)>
+<!ELEMENT bodypart (name, description, char_message, room_message, description)>
+<!ELEMENT bonus (str, int, wis, dex, con)>
+<!ELEMENT breath (#PCDATA)>
+<!ELEMENT char_message (#PCDATA)>
+<!ELEMENT cold (#PCDATA)>
+<!ELEMENT con (#PCDATA)>
+<!ELEMENT convert (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT dex (#PCDATA)>
+<!ELEMENT int (#PCDATA)>
+<!ELEMENT para (#PCDATA)>
+<!ELEMENT poison (#PCDATA)>
+<!ELEMENT race (name, alignment, convert, skills, spells, statmax, bonus, saves, description, body)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT room_message (#PCDATA)>
+<!ELEMENT saves (poison, cold, para, breath, spell)>
+<!ELEMENT skills (#PCDATA)>
+<!ELEMENT spell (#PCDATA)>
+<!ELEMENT spells (#PCDATA)>
+<!ELEMENT statmax (str, int, wis, dex, con)>
+<!ELEMENT str (#PCDATA)>
+<!ELEMENT wis (#PCDATA)>
