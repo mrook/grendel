@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.37 2001/11/24 16:01:59 xenon Exp $
+// $Id: mudsystem.pas,v 1.38 2002/01/24 22:39:34 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -172,7 +172,10 @@ begin
   text := '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] [LOG] ' + text;
 
   if (TTextRec(logfile).mode = fmOutput) then
+    begin
     system.writeln(logfile, text);
+    system.flush(logfile);
+    end;
 end;
 
 procedure bugreport(func, pasfile, bug : string);
