@@ -394,7 +394,7 @@ begin
 
   buf := Format('Vnum: %d.  Type: %s.' + #13#10 +
                 'Short description: %s.' + #13#10 +
-                'Long description: %s' + #13#10,
+                'Long description: %s$A$7' + #13#10,
                 [obj.obj_index.vnum,
                 obj.name^,
                 obj.short^,
