@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.13 2001/08/04 22:10:13 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.14 2001/08/14 09:40:03 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -21,6 +21,7 @@ uses
     dtypes,
     mudthread,
     mudsystem,
+    console,
     conns,
     util,
     fight;
@@ -46,6 +47,7 @@ begin
   else
     begin
     af := GAffect.Create();
+    af.name := sn.name;
     af.wear_msg := 'The poison slowly wears off.';
     af.duration := (ch.level div 8);
 
@@ -89,6 +91,7 @@ begin
   else
     begin
     af := GAffect.Create();
+    af.name := sn.name;
     af.wear_msg := 'The poison slowly wears off.';
     af.duration := (ch.level div 8);
 
@@ -276,8 +279,9 @@ begin
   while (node <> nil) do
     begin
     aff := node.element;
-
+    
     removeAffectName(ch, aff.name^);
+    
     aff.applyTo(ch);
 
     node := node.next;
@@ -363,7 +367,7 @@ begin
 
     repeat
       node_next := node.next;
-      
+           
       if (length(hit_vict) > 0) and (ch <> vict) and (not vict.CHAR_DIED) then
         begin
         act(AT_SPELL,hit_vict,false,ch,nil,vict,TO_VICT);
@@ -377,7 +381,7 @@ begin
       else
       if (length(hit_room)>0) then
         act(AT_SPELL,hit_room,false,ch,nil,vict,TO_ROOM);
-
+        
       if (ch = vict) and (not ch.CHAR_DIED) then
         begin
         if (length(hit_vict) > 0) then

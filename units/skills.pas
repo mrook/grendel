@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.19 2001/08/03 21:35:40 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.20 2001/08/14 09:40:04 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -118,6 +118,7 @@ uses
     fsys,
     magic,
     fight,
+    console,
     update,
     mudsystem;
 
@@ -297,10 +298,7 @@ begin
           try
             modif := strtoint(s);
           except
-            modif := cardinal(findSkill(s));
-
-            if (modif = 0) then
-              modif := cardinal(hash_string(s));
+            modif := cardinal(hash_string(s));
           end;
 
           aff.modifiers[num - 1].modifier := modif;
@@ -588,13 +586,15 @@ function removeAffectName(ch : GCharacter; name : string) : boolean;
 var
    aff : GAffect;
 begin
+  Result := false;
+  
+  if (length(name) = 0) then
+    exit;
+    
   aff := findAffect(ch, name);
 
   if (aff = nil) then
-    begin
-    Result := false;
     exit;
-    end;
 
   removeAffect(ch, aff);
 

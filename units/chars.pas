@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.54 2001/08/11 22:02:03 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.55 2001/08/14 09:40:02 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1458,10 +1458,11 @@ begin
 
               a := right(a, ' ');
 
-              modif := cardinal(findSkill(left(a, ' ')));
-
-              if (modif = 0) then
-                modif := strtointdef(left(a, ' '), 0);
+              try
+                modif := strtoint(left(a, ' '));
+              except
+                modif := cardinal(hash_string(left(a, ' ')));
+              end;
 
               modifiers[len - 1].modifier := modif;
 
