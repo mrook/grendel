@@ -36,8 +36,9 @@ type
     end;
 
     GTimerThread = class (TThread)
-      procedure Execute; override;
+      last_update : TDateTime;
 
+      procedure Execute; override;
       constructor Create;
     end;
 
@@ -106,6 +107,8 @@ var
 begin
   while (not Terminated) do
     begin
+    last_update := Now();
+
     node := timer_list.head;
 
     while (node <> nil) do
@@ -114,42 +117,46 @@ begin
       node_next := node.next;
 
       try
-        dec(timer.counter);
+      dec(timer.counter);
 
-        if (timer.counter = 0) then
-          begin
-          if (timer is GSpecTimer) then
-            begin
-            spec := GSpecTimer(timer);
-
-            if (assigned(spec.spec_func)) then
-              spec.spec_func(spec.ch, spec.victim, spec.sn);
-            end
-          else
-            if (assigned(timer.timer_func)) then
-              timer.timer_func;
-
-          if (not timer.looping) then
-            begin
-            timer_list.remove(node);
-            timer.Free;
-            end
-          else
-            timer.counter := timer.timeout;
-          end;
-      except
-        on E : EExternal do
-          outputError(E.ExceptionRecord.ExceptionAddress)
-        else
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
-
+      if (timer.counter = 0) then
+        begin
         if (timer is GSpecTimer) then
+          begin
+          spec := GSpecTimer(timer);
+
+          if (assigned(spec.spec_func)) then
+            spec.spec_func(spec.ch, spec.victim, spec.sn);
+          end
+        else
+          if (assigned(timer.timer_func)) then
+            timer.timer_func;
+
+        if (not timer.looping) then
           begin
           timer_list.remove(node);
           timer.Free;
           end
         else
           timer.counter := timer.timeout;
+        end;
+
+      except
+        on E : EExternal do
+          begin
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
+          outputError(E.ExceptionRecord.ExceptionAddress);
+          end
+        else
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
+
+{        if (timer is GSpecTimer) then
+          begin
+          timer_list.remove(node);
+          timer.Free;
+          end
+        else
+          timer.counter := timer.timeout; }
       end;
 
       node := node_next;
@@ -280,15 +287,10 @@ begin
     end;
 end;
 
-// kill a non-responsive thread after 30 seconds
-const
-     THREAD_TIMEOUT = 0.5 / 1440.0;
-
 procedure update_main;
 var
    node, node_next : GListNode;
    conn : GConnection;
-   ret : boolean;
 begin
   node := connection_list.head;
 
@@ -298,34 +300,6 @@ begin
     conn := node.element;
 
     inc(conn.idle);
-
-    if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
-      begin
-      bugreport('update_main', 'timers.pas', 'Thread of ' + conn.ch.name^ + ' probably died',
-                'The server has detected a malfunctioning user thread and will terminate it.');
-
-      conn.ch.emptyBuffer;
-
-      conn.send('Your previous command possibly triggered an illegal action on this server.'#13#10);
-      conn.send('The administration has been notified, and you have been disconnected'#13#10);
-      conn.send('to prevent any data loss.'#13#10);
-      conn.send('Your character is linkless, and it would be wise to reconnect as soon'#13#10);
-      conn.send('as possible.'#13#10);
-
-      closesocket(conn.socket);
-
-      conn.ch.conn := nil;
-
-      act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
-      SET_BIT(conn.ch.player^.flags,PLR_LINKLESS);
-
-      conn.Free;
-
-      TerminateThread(conn.thread.handle, 1);
-
-      node := node_next;
-      continue;
-      end;
 
     if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
      ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
@@ -346,9 +320,6 @@ begin
 
     node := node_next;
     end;
-
-  cleanChars;
-  cleanObjects;
 end;
 
 procedure update_gamehour;
@@ -357,6 +328,8 @@ var
    area : GArea;
    ch : GCharacter;
 begin
+  status := GetHeapStatus;
+
   update_affects;
   update_tracks;
 
@@ -399,13 +372,49 @@ procedure update_sec;
 begin
   calculateonline;
 
-  if (boot_info.timer>=0) then
+  if (boot_info.timer >= 0) then
     begin
     dec(boot_info.timer);
 
     case boot_info.timer of
-      60,30,10,5 : clean_thread.SetMessage(CLEAN_BOOT_MSG);
-      0 : clean_thread.SetMessage(CLEAN_MUD_STOP);
+      60,30,10,5 :  begin
+                    case boot_info.boot_type of
+                      BOOTTYPE_SHUTDOWN:begin
+                                        write_log(inttostr(boot_info.timer)+' seconds till shutdown');
+                                        to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+                                        end;
+                        BOOTTYPE_REBOOT:begin
+                                        write_log(inttostr(boot_info.timer)+' seconds till reboot');
+                                        to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+                                        end;
+                      BOOTTYPE_COPYOVER:begin
+                                        write_log(inttostr(boot_info.timer)+' seconds till reboot');
+                                        to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
+                                        end;
+                    end;
+                    end;
+
+      0 :           begin
+                    case boot_info.boot_type of
+                      BOOTTYPE_SHUTDOWN:begin
+                                        write_log('Timer reached zero, starting shutdown now');
+                                        to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+                                        end;
+                        BOOTTYPE_REBOOT:begin
+                                        write_log('Timer reached zero, starting reboot now');
+                                        to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+                                        end;
+                      BOOTTYPE_COPYOVER:begin
+                                        write_log('Timer reached zero, starting copyover now');
+                                        to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+                                        end;
+                    end;
+
+                    boot_type := boot_info.boot_type;
+                    grace_exit := true;
+
+                    halt;
+                    end;
     end;
     end;
 
@@ -422,12 +431,6 @@ begin
   regenerate_chars;
 end;
 
-procedure update_autosave;
-begin
-  status := GetHeapStatus;
-  clean_thread.SetMessage(CLEAN_AUTOSAVE);
-end;
-
 
 begin
   timer_list := GDLinkedList.Create;
@@ -436,5 +439,4 @@ begin
   registerTimer('auction', update_auction, 1, true);
   registerTimer('gamehour', update_gamehour, CPULSE_GAMEHOUR, true);
   registerTimer('second', update_sec, CPULSE_PER_SEC, true);
-  registerTimer('autosave', update_autosave, CPULSE_AUTOSAVE, true);
 end.
