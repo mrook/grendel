@@ -489,21 +489,8 @@ begin
   write_direct(version_copyright + '.');
   write_direct('This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.'#13#10);
   write_console('Booting server...');
-//  write_console('Initializing memory manager...');
-//  GetMemoryManager(OldMgr);
-//  SetMemoryManager(NewMemMgr);
-  write_console('Initializing memory pools...');
-  { init_conns;
-  init_races;
-  init_profs;
-  init_users;
-  AreasInit;
-  init_clans;
-  init_chars;
-  init_updates;
-  init_help; }
-  init_system;
-  load_system; 
+
+  load_system;
 
   s := FormatDateTime('ddddd', Now);
   write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
@@ -537,7 +524,8 @@ begin
 
   BootTime := Now;
 
-  time_info.hour := 1;
+  update_time;
+
   time_info.day := 1;
   time_info.month := 1;
   time_info.year := 1;
@@ -546,6 +534,13 @@ begin
   bg_info.count := -1;
   boot_info.timer := -1;
   mud_booted:=true;
+
+  pulse_sec := CPULSE_PER_SEC;
+  pulse_violence := CPULSE_VIOLENCE;
+  pulse_tick := CPULSE_TICK;
+  pulse_gamehour := CPULSE_GAMEHOUR;
+  pulse_gametime := CPULSE_GAMETIME;
+  pulse_autosave := CPULSE_AUTOSAVE;
 
   calculateonline;
 end;
