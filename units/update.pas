@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.15 2001/08/16 15:40:38 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.16 2001/09/02 21:49:56 ***REMOVED*** Exp $
 
 unit update;
 
@@ -155,8 +155,7 @@ begin
     time_info.month:=1;
 
     { it wouldn't be Grendel without this :) - Grimlord }
-    { sendtoall('The sky lights up with colorful flashes, created by the firework masters.'#13#10);
-    sendtoall('A cheer passes over the lands as a new year starts.'#13#10); }
+    to_channel(nil, 'The sky lights up with colorful flashes, created by the firework masters.'#13#10, CHANNEL_ALL, AT_GREY);
 
     inc(time_info.year);
     end;
