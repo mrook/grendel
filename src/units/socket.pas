@@ -2,7 +2,7 @@
   Summary:
   	Wrappers for IPv4 and IPv6 socket operations
   	
-  ## $Id: socket.pas,v 1.7 2004/03/17 00:21:57 ***REMOVED*** Exp $
+  ## $Id: socket.pas,v 1.8 2004/03/26 23:06:32 ***REMOVED*** Exp $
 }
 
 unit socket;
@@ -133,33 +133,38 @@ end;
 function isSupported(af : integer) : boolean;
 {$IFDEF WIN32}
 var
-	a, t : DWORD;
-	lp : array[0..1] of integer;
-	prot : pointer;
-	pprot : LPWSAProtocol_Info;
+	x, ret, size : integer;
+	lpprot : array[0..1] of integer;
+	lpinfo, pinfo : LPWSAProtocol_Info;
 begin
 	Result := false;
 
-	t := 0;
-	lp[0] := IPPROTO_TCP;
-	lp[1] := 0;
+	size := SizeOf(TWSAProtocol_Info) * 10;
+	
+	GetMem(lpinfo, size);
 
-	WSAEnumProtocols(@lp, nil, t);
+	lpprot[0] := IPPROTO_TCP;
+	lpprot[1] := 0;
 
-	getmem(prot, t);
-	pprot := prot;
-
-	t := WSAEnumProtocols(@lp, pprot, t);
-
-	for a := 0 to t - 1 do
+	x := size;
+	ret := WSAEnumProtocols(@lpprot, lpinfo, x);
+	
+	if (ret = SOCKET_ERROR) then
 		begin
-		pprot := pointer(integer(prot) + (a * sizeof(TWSAProtocol_Info)));
+		raise Exception.Create('WSAEnumProtocols failed: ' + IntToStr(WSAGetLastError()));
+		end
+	else
+		begin
+		for x := 0 to ret - 1 do
+			begin
+			pinfo := pointer(integer(lpinfo) + (x * sizeof(TWSAProtocol_Info)));
 
-		if (pprot^.iAddressFamily = af) then
-			Result := true;
+			if (pinfo^.iAddressFamily = af) then
+				Result := true;
+			end;
 		end;
-
-	freemem(prot, t);
+		
+	FreeMem(lpinfo, size);
 end;
 {$ELSE}
 var
