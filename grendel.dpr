@@ -21,20 +21,24 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.52 2001/08/11 22:05:19 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.53 2001/08/12 18:12:01 ***REMOVED*** Exp $
 }
 
 program grendel;
 
 {$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000,2001 by Michiel Rook.'}
 
-{$IFDEF LINUX}
-{$APPTYPE CONSOLE}
-{$ENDIF}
+{$R grendel_icon.res}
 
 {$DEFINE Grendel}
 
-{$R grendel_icon.res}
+{$IFDEF LINUX}
+{$DEFINE CONSOLEBUILD}
+{$ENDIF}
+
+{$IFDEF CONSOLEBUILD}
+{$APPTYPE CONSOLE}
+{$ENDIF}
 
 {$W+}
 
@@ -49,9 +53,9 @@ uses
 {$IFDEF LINUX}
   Libc,
 {$ENDIF}
+  constants,
   clan,
   mudsystem,
-  constants,
   timers,
   update,
   fight,
@@ -209,9 +213,11 @@ begin
     listenv6.Free();
     listenv6 := nil;
 
-{$IFDEF WIN32}      
-    unregisterSysTray();
-{$ENDIF}
+    {$IFDEF WIN32}      
+      {$IFNDEF CONSOLEBUILD}
+      unregisterSysTray();
+      {$ENDIF}
+    {$ENDIF}
 
     writeConsole('Cleanup complete.');
   except
@@ -554,6 +560,13 @@ begin
       writeConsole('Fatal error while booting: ' + E.Message);
       halt;
       end;
+    
+    on E : EExternal do
+      begin
+      writeConsole('Fatal exception while booting');
+      outputError(E);
+      halt;
+      end;
   end;
 end;
 
@@ -618,11 +631,11 @@ begin
         accept_connection(listenv6);
       end;
 
-    {$IFDEF WIN32}
+    {$IFNDEF CONSOLEBUILD}
     Application.ProcessMessages();
     {$ENDIF}
     
-    sleep(500);
+    sleep(5);
     end;
 end;
 
@@ -700,6 +713,18 @@ begin
 end;
 {$ENDIF}
 
+{$IFDEF WIN32}
+{$IFDEF CONSOLEBUILD}
+function controlHandler(event : DWORD) : boolean;
+begin
+  Result := true;
+  grace_exit := true;
+  SetConsoleCtrlHandler(@controlHandler, false);
+  halt;
+end;
+{$ENDIF}
+{$ENDIF}
+
 begin
   old_exitproc := ExitProc;
 
@@ -717,7 +742,12 @@ begin
   writeConsole('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
 
 {$IFDEF WIN32}
+  {$IFDEF CONSOLEBUILD}
+  SetConsoleCtrlHandler(@controlHandler, true);
+  {$ELSE}
+  Application.Title := 'Grendel ' + version_number;
   registerSysTray();
+  {$ENDIF}  
 {$ENDIF}
 
   try
