@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.26 2004/03/31 22:08:35 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.27 2004/04/03 16:06:19 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -439,7 +439,8 @@ function controlHandler(event : DWORD) : boolean;
 begin
 	Result := true;
 	SetConsoleCtrlHandler(@controlHandler, false);
-	Halt(0);
+	
+	serverInstance.shutdown(SHUTDOWNTYPE_HALT, 0);
 end;
 {$ENDIF}
 {$ENDIF}
