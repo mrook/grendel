@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.7 2003/06/24 21:41:27 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.8 2003/10/15 13:54:12 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -481,14 +481,15 @@ begin
   else
    in_obj := obj.in_obj.name;
 
-  {if obj.carried_by = nil then
+  if obj.carried_by = nil then
   	carried_by := ''
   else
-  	carried_by := obj.carried_by.name;}
-  carried_by := '(none)';
+  	carried_by := GCharacter(obj.carried_by).name;
+  	
+  //carried_by := '(none)';
 
-  buf := Format('In room: %d.  In object: %s.  Carried by: %s.  {Wear_loc:}.' + #13#10,
-                [room, in_obj, carried_by]);
+  buf := Format('In room: %d.  In object: %s.  Carried by: %s.  {Wear_loc: %s %s}.' + #13#10,
+                [room, in_obj, carried_by, obj.wear_location1, obj.wear_location2]);
 
   buf1 := buf1 + buf;
 
@@ -1243,7 +1244,7 @@ begin
 
   num:=0;
   act(AT_REPORT, '$B$1[$B$7Nr$B$1] [$B$7VNum$B$1]  [$B$7Name$B$1]$A$7',false,ch,nil,nil,TO_CHAR);
-
+  
 	iterator := objectIndices.iterator();
 
   while (iterator.hasNext()) do
@@ -1256,6 +1257,8 @@ begin
       inc(num);
       end;
     end;
+    
+	iterator.Free();
 end;
 
 procedure do_redit(ch : GCharacter; param : string);
