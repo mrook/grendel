@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.23 2001/09/28 21:30:38 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.24 2002/01/22 13:54:00 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -175,7 +175,7 @@ procedure load_skills;
 var
   af : GFileReader;
   s,g,a:string;
-  num : integer;
+  num,x : integer;
   sk, skill : GSkill;
   aff : GAffect;
   modif, len : integer;
@@ -285,15 +285,15 @@ begin
         aff.wear_msg := af.readToken();
 
         aff.duration := af.readInteger();
-        num := 1;
+        x := 1;
               
         while (not af.eol) and (af.readToken = '{') do
           begin
-          setLength(aff.modifiers, num);
+          setLength(aff.modifiers, x);
           
           s := af.readToken();
 
-          aff.modifiers[num - 1].apply_type := findApply(s);
+          aff.modifiers[x - 1].apply_type := findApply(s);
 
           s := af.readToken();
 
@@ -303,11 +303,11 @@ begin
             modif := cardinal(hash_string(s));
           end;
 
-          aff.modifiers[num - 1].modifier := modif;
+          aff.modifiers[x - 1].modifier := modif;
 
           s := af.readToken();
           
-          inc(num);
+          inc(x);
           end;
 
         aff.node := affects.insertLast(aff);
