@@ -12,6 +12,7 @@ uses
     SysUtils,
     Classes,
     strip,
+    memcheck,
     mudsystem;
 
 type
@@ -213,8 +214,7 @@ begin
     if (eof(f)) then
       break;
 
-    temp := copy(trim(s), 18, length(s));
-    temp := stripl(temp, ')') + ')'; 
+    temp := stripl(striprbeg(s, '('), ')');
 
     repeat
       readln(f, s);
@@ -251,7 +251,7 @@ begin
   closefile(f);
 end;
 
-procedure outputError(addr : pointer);
+procedure showAddress(addr : pointer);
 var
    section, offset : cardinal;
    modu : array[0..1023] of char;
@@ -274,7 +274,26 @@ begin
   else
     linen := 'no line';
 
-  write_console('Exception @ ' + IntToHex(offset, 8) + ' (Function ' + symboln + ':' + linen + ' in ' + modu + ')');
+  write_console(symboln + ':' + linen + ' (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
+end;
+
+procedure outputError(addr : pointer);
+var
+   st : TCallStack;
+   a : integer;
+begin
+  write_console('Win32 exception detected, call stack follows:');
+  showAddress(addr);
+
+  FillCallStack(st, false);
+
+  for a := 0 to 1 do
+    begin
+    if (st[a] = nil) then
+      continue;
+
+    showAddress(st[a]);
+    end;
 end;
 
 begin
