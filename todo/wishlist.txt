@@ -1,4 +1,4 @@
-Wishlist for the new 0.5.x tree
+Wishlist for the 1.0.x tree
 (! = closed, * = normal, l = lower priority)
 
 
@@ -12,9 +12,22 @@ Wishlist for the new 0.5.x tree
     introduce new ones, such as experience formulas, experience per level, 
     damage formulas, number of stats, stat maximums, etc.   
     
-  - GHL (working title): Grendel Help Language, use XML to describe
-    help/manual content, in cooperation with system configuration elements
-    to describe visual properties (colors, etc.)
+  - GHL (working title): Grendel Help Language, which is an XML DTD or Schema,
+    use XML to describe help/manual content, use stylesheets to transform
+    GHL to (X)HTML for web viewing or ASCII for online help
+    
+* events
+
+  - raise events when important things happen, e.g.
+  	* server boots/shuts down
+  	* player logs in/off
+  	* player enters/leaves a room
+  	* player looks at object/npc/room
+  	* player performs action on object (wear/wield/whatever)
+  	* timers
+  	* etc. etc.
+  
+  - objects/scripts/modules should be able to register event handlers
     
 * revise grouping system: generalize GObject to some form of object 'list'
   (possibly named GItem), which can contain 1 or more GItems or subsets
