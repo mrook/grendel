@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.3 2004/02/11 20:04:02 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.4 2004/02/16 23:06:59 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -106,6 +106,9 @@ type
       constructor Create(socket : GSocket);
       destructor Destroy; override;
       
+      procedure disableCompression();
+      procedure enableCompression();
+      
     published
     	property socket : GSocket read _socket;
 
@@ -118,6 +121,8 @@ type
     	property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
     	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
     	property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
+    	
+    	property useCompress : boolean read compress;
     end;
 
 var
@@ -158,12 +163,6 @@ begin
 	sendbuffer := '';
   
   compress := false;
-
-  FillChar(strm, sizeof(strm), 0);
-  strm.zalloc := zlibAllocMem;
-  strm.zfree := zlibFreeMem;
-
-	deflateInit_(strm, Z_DEFAULT_COMPRESSION, zlib_version, sizeof(strm));
 end;
 
 destructor GConnection.Destroy();
@@ -211,9 +210,47 @@ begin
   connection_list.remove(node);  
 end;
 
+procedure GConnection.enableCompression();
+begin
+  FillChar(strm, sizeof(strm), 0);
+  strm.zalloc := zlibAllocMem;
+  strm.zfree := zlibFreeMem;
+
+	deflateInit_(strm, Z_DEFAULT_COMPRESSION, zlib_version, sizeof(strm));
+
+	sendIAC(IAC_SB, [IAC_COMPRESS2]);
+	sendIAC(IAC_SE, []);
+	
+	compress := true;
+end;
+
+procedure GConnection.disableCompression();
+var
+	t, compress_size : integer;
+	compress_buf : array[0..4095] of char;
+begin
+  if (compress) then
+  	begin
+		strm.next_in := nil;
+		strm.avail_in := 0;
+		strm.next_out := compress_buf;
+		strm.avail_out := 4096;
+
+		t := deflate(strm, Z_FINISH);
+
+		compress_size := 4096 - strm.avail_out;
+
+		_socket.send(compress_buf, compress_size);
+
+	  compress := false;
+
+		deflateEnd(strm);
+  	end;
+end;
+
 procedure GConnection.send(s : PChar; len : integer);
 var
-	compress_size : integer;
+	t, compress_size : integer;
 	compress_buf : array[0..4095] of char;
 begin
 	try
@@ -226,10 +263,10 @@ begin
 			strm.next_out := compress_buf;
 			strm.avail_out := 4096;
 
-			deflate(strm, Z_SYNC_FLUSH);
+			t := deflate(strm, Z_SYNC_FLUSH);
 
 			compress_size := 4096 - strm.avail_out;
-			
+
 			_socket.send(compress_buf, compress_size);
   		end
   	else
@@ -347,9 +384,7 @@ begin
     								case byte(input_buf[i]) of
     									IAC_COMPRESS2:	begin
     																	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') Client has MCCPv2');
-    																	sendIAC(IAC_SB, [IAC_COMPRESS2]);
-    																	sendIAC(IAC_SE, []);
-    																	compress := true;
+    																	enableCompression();
     																	end;
     								end;
     								
@@ -357,6 +392,12 @@ begin
 										end;
     		IAC_DONT: 	begin
 										inc(i);
+										case byte(input_buf[i]) of
+											IAC_COMPRESS2:	begin
+    																	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') Client has disabled MCCPv2');
+    																	disableCompression();
+    																	end;
+    								end;
     								//writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DON''T ' + IntToStr(byte(input_buf[i])));
 										end;
 			else

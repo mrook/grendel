@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.6 2004/02/15 18:51:04 hemko Exp $
+  $Id: grendel.dpr,v 1.7 2004/02/16 23:06:59 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -289,6 +289,9 @@ begin
     begin
     conn := GPlayerConnection(node.element);
     node_next := node.next;
+    
+    // disable MCCP compression 
+    conn.disableCompression();
 
     if (conn.state = CON_PLAYING) then
       begin
@@ -336,6 +339,8 @@ begin
     conn := GPlayerConnection(node.element);
     node_next := node.next;
 
+    conn.ch.save(conn.ch.name);
+
     if (WSADuplicateSocket(conn.socket.getDescriptor, PI.dwProcessId, @prot) = -1) then
       begin
       bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
@@ -362,8 +367,7 @@ begin
       bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
       reboot_mud;
       end;
-
-    conn.ch.save(conn.ch.name);
+      
     conn.Terminate();
 
     node := node_next;
@@ -389,7 +393,7 @@ begin
 	if (mud_booted) then
 		flushConnections();
 
-	Sleep(250);
+	Sleep(1000);
 
   cleanupServer();
 end;
