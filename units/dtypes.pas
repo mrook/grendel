@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.32 2003/10/22 13:11:57 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.33 2003/10/22 14:52:06 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -180,6 +180,8 @@ type
     public
       property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
       property buckets[index : integer] : GDLinkedList read getBucket;
+
+    	property bucketcount : cardinal read hashsize;
     end;   
 
 
