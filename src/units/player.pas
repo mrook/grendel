@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.21 2004/03/22 19:35:33 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.22 2004/03/25 19:55:58 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -197,8 +197,8 @@ type
 	protected
   	_name : string;
   	
-  public		
-  	constructor Create(const name : string);
+	public		
+  		constructor Create(const name : string);
   	
 		function default() : TObject; virtual; abstract;
 		function fromString(const s : string) : TObject; virtual; abstract;
@@ -209,23 +209,23 @@ type
 	
 	GPlayerFieldFlag = class(GPlayerField)
 	public
-  	function default() : TObject; override;
-  	function fromString(const s : string) : TObject; override;
-  	function toString(x : TObject) : string; override;	
+	  	function default() : TObject; override;
+  		function fromString(const s : string) : TObject; override;
+	  	function toString(x : TObject) : string; override;	
 	end;
 
 	GPlayerFieldInteger = class(GPlayerField)
 	public
-  	function default() : TObject; override;
-  	function fromString(const s : string) : TObject; override;
-  	function toString(x : TObject) : string; override;	
+  		function default() : TObject; override;
+	  	function fromString(const s : string) : TObject; override;
+  		function toString(x : TObject) : string; override;	
 	end;
 	
 	GPlayerFieldString = class(GPlayerField)
 	public
-  	function default() : TObject; override;
-  	function fromString(const s : string) : TObject; override;
-  	function toString(x : TObject) : string; override;	
+	  	function default() : TObject; override;
+  		function fromString(const s : string) : TObject; override;
+	  	function toString(x : TObject) : string; override;	
 	end;
 {$M-}
 
@@ -248,8 +248,7 @@ procedure cleanupPlayers();
 function act_string(const acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
 function act_color(to_ch : GCharacter; const acts : string; sep : char) : string;
 
-procedure act(atype : integer; const acts : string; hideinvis : boolean; ch : GCharacter;
-              arg1, arg2 : pointer; typ : integer);
+procedure act(atype : integer; const acts : string; hideinvis : boolean; ch : GCharacter; arg1, arg2 : pointer; typ : integer);
 
 function playername(from_ch, to_ch : GCharacter) : string;
 
@@ -260,8 +259,8 @@ implementation
 uses
 	Math,
 	SysUtils,
-  FastStrings,
-  FastStringFuncs,
+	FastStrings,
+	FastStringFuncs,
 	ansiio,
 	timers,
 	console,
@@ -305,12 +304,12 @@ begin
 	
 	ch := GPlayer.Create(Self);
 
-  node := connection_list.insertLast(Self);
+	node := connection_list.insertLast(Self);
   
-  copyover := from_copyover;
-  Self.copyover_name := copyover_name;
+	copyover := from_copyover;
+	Self.copyover_name := copyover_name;
   
-  commandQueue := TStringList.Create();
+	commandQueue := TStringList.Create();
 
 	Resume();
 end;
@@ -341,35 +340,34 @@ end;
 { Event handler for OnOpen }
 procedure GPlayerConnection.OnOpenEvent();
 var
-  temp_buf : string;
+	temp_buf : string;
 begin
-  if (not copyover) then
-    begin
-    state := CON_STATE_NAME;
+	if (not copyover) then
+		begin
+		state := CON_STATE_NAME;
 
-    send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
+		send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
 
-    temp_buf := AnsiColor(6,0) + #13#10;
+		temp_buf := AnsiColor(6,0) + #13#10;
+		temp_buf := temp_buf + version_info + ', ' + version_number + '.'#13#10;
+		temp_buf := temp_buf + version_copyright + '.';
+		temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
 
-    temp_buf := temp_buf + version_info + ', ' + version_number + '.'#13#10;
-    temp_buf := temp_buf + version_copyright + '.';
-    temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
+		send(temp_buf);
 
-    send(temp_buf);
-
-    send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
-    end
-  else
-  	begin
-    state := CON_STATE_MOTD;
+		send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
+		end
+	else
+  		begin
+		state := CON_STATE_MOTD;
     
-    ch.setName(copyover_name);
-    ch.load(copyover_name);
-    send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
-    send('Copyover complete!'#13#10);
+		ch.setName(copyover_name);
+		ch.load(copyover_name);
+		send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
+		send('Copyover complete!'#13#10);
 
-    nanny('');
-    end;
+		nanny('');
+		end;
 end;
 
 { Event handler for OnClose }
@@ -395,6 +393,9 @@ begin
 		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
 		ch.Free;
 		end;
+		
+	connection_list.remove(node);
+	node := nil;
 end;
 
 { Event handler for OnTick }
@@ -438,18 +439,18 @@ begin
 	else
 		case state of
 			CON_STATE_PLAYING: 	begin
-													if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
-														begin
-														ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
-														ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
-														exit;
-													end;
-										
-													if (not checkAliases(cmdline)) then
-														addCommandQueue(cmdline);												
+						if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
+							begin
+							ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
+							ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
+							exit;
+							end;
+						
+						if (not checkAliases(cmdline)) then
+							addCommandQueue(cmdline);
 
-													emptyCommandQueue();
-													end;
+						emptyCommandQueue();
+						end;
 			CON_STATE_EDITING: ch.editBuffer(cmdline);
 			else
 				nanny(cmdline);
@@ -465,8 +466,8 @@ var
 begin
 	Result := false;
 	
-  param := one_argument(line, cmdline);
-  cmdline := uppercase(cmdline);
+	param := one_argument(line, cmdline);
+	cmdline := uppercase(cmdline);
 
 	iterator := ch.aliases.iterator();
 
@@ -574,23 +575,23 @@ end;
 { Find out wether 'name' is already connected }
 function GPlayerConnection.findDualConnection(const name: string): GPlayer;
 var
-  iterator : GIterator;
-  dual: GPlayerConnection;
+	iterator : GIterator;
+	dual: GPlayerConnection;
 begin
-  Result := nil;
-  iterator := connection_list.iterator();
+	Result := nil;
+	iterator := connection_list.iterator();
 
-  while (iterator.hasNext()) do
-  	begin
-    dual := GPlayerConnection(iterator.next());
+	while (iterator.hasNext()) do
+  		begin
+		dual := GPlayerConnection(iterator.next());
 
-    // is there another conn with exactly the same name?
-    if  (dual <> Self)  and (Assigned(dual)) and Assigned(dual.ch) and (lowercase(dual.ch.name) = lowercase(name)) then
-    	begin
-      Result := dual.ch;
-      exit;
-	    end;
-	  end;
+		// is there another conn with exactly the same name?
+		if  (dual <> Self)  and (Assigned(dual)) and Assigned(dual.ch) and (lowercase(dual.ch.name) = lowercase(name)) then
+			begin
+			Result := dual.ch;
+			exit;
+			end;
+		end;
 	  
 	iterator.Free();
 end;
@@ -605,7 +606,7 @@ var
 	h,top,x,temp:integer;
 	buf, pwd : string;
 begin
-  case state of
+	case state of
         CON_STATE_NAME: begin
                   pwd := one_argument(argument, argument);
                   

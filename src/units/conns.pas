@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.15 2004/03/22 14:20:52 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.16 2004/03/25 19:55:58 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -117,6 +117,7 @@ implementation
 
 uses
 	player,
+	debug,
 	commands;
 
 
@@ -158,39 +159,41 @@ end;
 
 procedure GConnection.Execute();
 begin 
-	negotiateCompression();
+	try
+		negotiateCompression();
+		read();
 
-	read();
-
-	if (Assigned(FOnOpen)) then
-  		FOnOpen();
-
-	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
+		if (Assigned(FOnOpen)) then
+  			FOnOpen();
+  		
+		writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
    
-	while (not Terminated) do
-  	begin
-  	_lastupdate := Now();
+		while (not Terminated) do
+			begin
+			_lastupdate := Now();
   	
-		sleep(50);
-
-	  if (Assigned(FOnTick)) then
-  		FOnTick();
-
-		if (not Terminated) then
-			read();
-
-		if (not Terminated) then
-			readBuffer();
+			sleep(50);
 			
-		if (Assigned(FOnInput)) and (length(comm_buf) > 0) then
-			FOnInput();
-	  end;
-  	
+			if (Assigned(FOnTick)) then
+  				FOnTick();
+
+			if (not Terminated) then
+				read();
+
+			if (not Terminated) then
+				readBuffer();
+			
+			if (Assigned(FOnInput)) and (length(comm_buf) > 0) then
+				FOnInput(); 
+		end;
+  	except
+  		on E : Exception do reportException(E);
+	end;
+
 	if (Assigned(FOnClose)) then
 		FOnClose();
-		
+	
 	_socket.disconnect();
-	connection_list.remove(node);  
 end;
 
 procedure GConnection.enableCompression();
