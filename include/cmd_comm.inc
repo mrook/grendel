@@ -6,6 +6,9 @@ begin
     exit;
     end;
 
+  if (ch.IS_DRUNK) then
+    param := makedrunk(param);
+
   talk_channel(ch,param,CHANNEL_CHAT,'chat',AT_CHAT);
 end;
 

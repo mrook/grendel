@@ -85,13 +85,16 @@ begin
   do_move:=false;
   room_pos:=ch.room;
 
-  if (not ch.IS_NPC) and (number_percent<ch.player^.condition[COND_DRUNK]) then
+  if (not ch.IS_NPC) and (ch.IS_DRUNK) then
     drunk := true
   else
     drunk := false;
 
   if (drunk) then
+    begin
+    ch.sendBuffer('You sway a bit and have trouble maintaining your balance.'#13#10);
     pexit := room_pos.findExit(random(6)+1);
+    end;
 
   { if exit is hidden or it is secret and closed then no exit - Grimlord }
   if (pexit=nil) or (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) and (not IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
