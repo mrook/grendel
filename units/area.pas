@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.24 2001/04/16 17:20:48 xenon Exp $
+// $Id: area.pas,v 1.25 2001/04/26 21:16:33 xenon Exp $
 
 unit area;
 
@@ -477,9 +477,9 @@ begin
     delete(s,1,1);
 
     try
-      npc := GNPCIndex.Create;
-
       num := strtoint(s);
+
+      npc := GNPCIndex.Create;
 
       npc.area := Self;
       npc.skills_learned := GDLinkedList.Create;
