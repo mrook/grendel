@@ -8,7 +8,7 @@ uses Sysutils;
 function left(s : string; delim : char) : string;
 
 // return the part on the right of the first occurance 'delim'
-// or nothing if there is no 'delim'
+// or the whole string if there is no 'delim'
 function right(s : string; delim : char) : string;
 
 // return the part on the left of the last occurance of 'delim'
@@ -16,7 +16,7 @@ function right(s : string; delim : char) : string;
 function leftr(s : string; delim : char) : string;
 
 // return the part on the right of the last occurance 'delim'
-// or nothing if there is no 'delim'
+// or the whole string if there is no 'delim'
 function rightr(s : string; delim : char) : string;
 
 function CharsInStr(s:string;what:char):integer;
@@ -44,7 +44,7 @@ begin
   if (i > 0) then
     Result := Copy(s, i + 1, length(s))
   else
-    Result := '';
+    Result := s;
 end;
 
 function leftr(s : string; delim : char) : string;
@@ -68,7 +68,7 @@ begin
   if (i > 0) then
     Result := Copy(s, i + 1, length(s))
   else
-    Result := '';
+    Result := s;
 end;
 
 function CharsInStr;
