@@ -293,16 +293,16 @@ position: 4
 #end
 
 #command
-name: keylock
-function: do_keylock
-position: 4
-#end
-
-#command
 name: kill
 alias: ki
 function: do_kill
 position: 8
+#end
+
+#command
+name: keylock
+function: do_keylock
+position: 4
 #end
 
 #command
@@ -713,8 +713,15 @@ position: 0
 #end
 
 #command
-name: mstat
-function: do_mstat
+name: pset
+function: do_pset
+level: 997
+position: 0
+#end
+
+#command
+name: pstat
+function: do_pstat
 level: 990
 position: 0
 #end
@@ -842,13 +849,6 @@ position: 0
 #end
 
 #command
-name: ascore
-function: do_ascore
-level: 997
-position: 0
-#end
-
-#command
 name: bamfin
 function: do_bamfin
 level: 990
@@ -971,6 +971,13 @@ position: 0
 name: peace
 function: do_peace
 level: 991
+position: 0
+#end
+
+#command
+name: prename
+function: do_prename
+level: 997
 position: 0
 #end
 
