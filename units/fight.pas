@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.30 2003/10/22 13:12:35 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.31 2003/10/23 08:12:24 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -885,11 +885,11 @@ begin
     end;
 end;
 
-procedure update_fighting;
+procedure update_fighting();
 var 
   ch, vch, gch : GCharacter;
   iter_world, iter_room : GIterator;
-  conn : GConnection;
+  conn : GPlayerConnection;
   p : integer;
 begin
   iter_world := char_list.iterator();
@@ -1016,11 +1016,10 @@ begin
 
   while (iter_world.hasNext()) do
     begin
-    conn := GConnection(iter_world.next());
+    conn := GPlayerConnection(iter_world.next());
 
-    { TODO:
     if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
-      GPlayer(conn.ch).emptyBuffer; }
+      conn.ch.emptyBuffer();
     end;  
 
   iter_world.Free();
