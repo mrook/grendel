@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.16 2002/08/30 21:05:07 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.17 2003/06/16 18:49:56 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -130,16 +130,23 @@ function trail_number(s : integer):string;
 var 
   g : string;
 begin
-  g := inttostr(s);
-  case (s mod 10) of
-    1 : g := g + 'st';
-    2 : g := g + 'nd';
-    3 : g := g + 'rd';
-  else
-    g := g + 'th';
-  end;
-  
-  Result := g;
+	g := IntToStr(s);
+
+	case (s mod 100) of
+		11 : g := g + 'th';
+		12 : g := g + 'th';
+		13 : g := g + 'th';
+		else
+		case (s mod 10) of
+			1 : g := g + 'st';
+			2 : g := g + 'nd';
+			3 : g := g + 'rd';
+		else
+			g := g + 'th';
+		end;
+	end;
+
+	Result := g;
 end;
 
 function findNumber(var s:string):integer;
