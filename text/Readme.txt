@@ -1,4 +1,4 @@
-The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
+The Grendel Project - A Windows MUD Server        (c) 2000-2002 by Michiel Rook
 
 
 

@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: mudthread.pas,v 1.77 2002/08/14 18:15:53 ***REMOVED*** Exp $)
+  @lastmod($Id: mudthread.pas,v 1.78 2002/08/18 17:39:37 ***REMOVED*** Exp $)
 }
 
 unit mudthread;
@@ -1035,7 +1035,6 @@ begin
 
     temp_buf := temp_buf + version_info + ', ' + version_number + '.'#13#10;
     temp_buf := temp_buf + version_copyright + '.';
-    temp_buf := temp_buf + #13#10'This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.';
     temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
 
     conn.send(temp_buf);

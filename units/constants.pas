@@ -1,6 +1,6 @@
 {
   @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.47 2002/08/03 19:13:55 ***REMOVED*** Exp $)
+  @lastmod($Id: constants.pas,v 1.48 2002/08/18 17:39:37 ***REMOVED*** Exp $)
 }
 
 unit constants;
@@ -13,7 +13,7 @@ const
 {$ELSE}
   version_number = 'v0.4.4';
 {$ENDIF}
-  version_info = 'The Grendel Project - A Win32 MUD Server';
+  version_info = 'The Grendel Project - A Windows MUD Server';
   version_copyright = 'Copyright (c) 2000-2002 by Michiel Rook';
 
 {$IFDEF LINUX}

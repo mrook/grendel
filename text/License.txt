@@ -1,11 +1,11 @@
-The Grendel Project - Win32 MUD Server		(c) 2000,2001 by Michiel Rook
+The Grendel Project - A Windows MUD Server		(c) 2000-2002 by Michiel Rook
 
 
-NOTE: Previous Grendel releases where licensed using a modified version of the GPL2
+NOTE: Previous Grendel releases were licensed using a modified version of the GPL2
 license, starting from 0.4.0, The Grendel Project will use the BSD License instead.
 
 
-Copyright (c) 2000,2001, Michiel Rook.
+Copyright (c) 2000-2002, Michiel Rook.
 All rights reserved.
 
 
