@@ -41,7 +41,7 @@ Wishlist for the 1.0.x tree
 * get rid of a lot of obsolete smaug/diku/emlen-inspired code, this
   only helps in keeping the system unstable and hard to manage. 
   
-  - rewrite position code, instead of mutual exclusive POS_XXX identifiers
+  ! rewrite position code, instead of mutual exclusive POS_XXX identifiers
     use flags to describe a combination of states
     
   - possibly rewrite/rename the fighting & magic code, this will break
@@ -59,7 +59,7 @@ Wishlist for the 1.0.x tree
   - modifications possible for areas as well, enables "dynamic" areas,
     such as randomizing mazes etc.
     
-  - give races unique 'wear' locations; dragons should wear armor on their wings
+  ! give races unique 'wear' locations; dragons should wear armor on their wings
     instead of their arms
 
 * use coordinates and mpfindpath code to make NPCs more intelligent
