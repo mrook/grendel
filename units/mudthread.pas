@@ -552,6 +552,12 @@ begin
   if (comparestr(s, 'do_password') = 0) then
     g := do_password
   else
+  if (comparestr(s, 'do_ban') = 0) then
+    g := do_ban
+  else
+  if (comparestr(s, 'do_allow') = 0) then
+    g := do_allow
+  else
     begin
     g := nil;
 
@@ -1340,16 +1346,17 @@ begin
 
   write_console('(' + inttostr(socket) + ') New connection (' + conn.ip_string + ')');
 
-  (* if (banned_sites.indexof(conn.ip_string)<>-1) then
+  if (isMaskBanned(conn.host_string)) then
     begin
-    write_console('('+inttostr(dc)+') IP banned ('+conn.ip_string+')');
-    conn.send(string(system_info.mud_name+#13#10#13#10));
+    write_console('('+inttostr(socket)+') Closed banned IP ('+conn.host_string+')');
+
+    conn.send(system_info.mud_name+#13#10#13#10);
     conn.send('Your site has been banned from this server.'#13#10);
-    conn.send(string('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10));
-    closesocket(dc);
-    conn_del(conn);
+    conn.send('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10);
+    closesocket(socket);
+    conn.Free;
     exit;
-    end; *)
+    end;
 
   ch := GCharacter.Create;
   conn.ch := ch;

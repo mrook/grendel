@@ -4,6 +4,7 @@ interface
 uses
     Winsock,
     SysUtils,
+    Classes,
     constants,
     strip,
     dtypes,
@@ -90,6 +91,8 @@ var
 
    auction_good, auction_evil : GAuction;
 
+   banned_masks : TStringList;
+
 
 var
   OldExit : pointer;
@@ -114,9 +117,9 @@ procedure write_log(s:string);
 procedure bugreport(func, pasfile, bug, desc : string);
 procedure calculateonline;
 
-procedure init_system;
 procedure load_system;
 procedure save_system;
+function isMaskBanned(host : string) : boolean;
 
 procedure load_damage;
 
@@ -132,6 +135,7 @@ uses
     mudthread,
     chars,
     area,
+    fsys,
     conns;
 
 procedure write_direct(s : string);
@@ -187,22 +191,10 @@ begin
                  inttostr(minutes) + ' minutes(s)';
 end;
 
-procedure init_system;
-begin
-  (* banned_names:=TStringList.Create;
-  banned_sites:=TStringList.Create; *)
-
-  pulse_violence := CPULSE_VIOLENCE;
-  pulse_tick := CPULSE_TICK;
-  pulse_gamehour := CPULSE_GAMEHOUR;
-  pulse_sec := CPULSE_PER_SEC;
-  pulse_autosave := CPULSE_AUTOSAVE;
-  pulse_gametime := CPULSE_GAMETIME;
-end;
-
 procedure load_system;
-var f : textfile;
-    s,g : string;
+var
+   s,g : string;
+   af : GFileReader;
 begin
   { first some defaults }
   system_info.mud_name := 'Grendel';
@@ -216,19 +208,16 @@ begin
   system_info.level_log := LEVEL_GOD;
   system_info.bind_ip := INADDR_ANY;
 
-  assignfile(f, 'system\sysdata.dat');
-  {$I-}
-  reset(f);
-  {$I+}
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileReader.Create('system\sysdata.dat');
+  except
     bugreport('load_system', 'mudsystem.pas', 'could not open system\sysdata.dat.',
               'The system file sysdata.dat could not be opened.');
     exit;
-    end;
+  end;
 
   repeat
-    readln(f,s);
+    s := af.readLine;
 
     g := uppercase(stripl(s,':'));
 
@@ -258,49 +247,32 @@ begin
     else
     if g='BINDIP' then
       system_info.bind_ip:=inet_addr(pchar(striprbeg(s,' ')));
-  until (s = '$');
-  close(f);
+  until (s = '$') or (af.eof);
 
-  (* assignfile(f,'system\bannednames.dat');
-  {$I-}
-  reset(f);
-  {$I+}
+  af.Free;
 
-  if (IOResult <> 0) then
-    begin
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\bannednames.dat',
-              'The system file bannednames.dat could not be opened.');
-    exit;
-    end;
-  repeat
-    readln(f,s);
-    if s<>'$' then
-      banned_names.add(uppercase(s));
-  until (s='$') or (eof(f));
-  close(f);
-
-  assignfile(f,'system\bannedsites.dat');
-  {$I-}
-  reset(f);
-  {$I+}
-
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileReader.Create('system\bans.dat');
+  except
     bugreport('load_system', 'mudsystem.pas', 'could not open system\bannedsites.dat',
               'The system file bannedsites.dat could not be opened.');
     exit;
-    end;
+  end;
+
   repeat
-    readln(f,s);
-    if s<>'$' then
-      banned_sites.add(uppercase(s));
-  until (s='$') or (eof(f));
-  close(f); *)
+    s := af.readLine;
+
+    if (s <> '$') then
+      banned_masks.add(s);
+  until (s = '$') or (af.eof);
+
+  af.Free;
 end;
 
 procedure save_system;
-var f:textfile;
-    t:TInAddr;
+var f : textfile;
+    t : TInAddr;
+    a : integer;
 begin
   t.s_addr := system_info.bind_ip;
 
@@ -319,24 +291,30 @@ begin
   writeln(f,'$');
   closefile(f);
 
-(*  assignfile(f,'system\bannednames.dat');
+  assignfile(f, 'system\bans.dat');
   rewrite(f);
 
-  for a:=0 to banned_names.count-1 do
-    writeln(f,banned_names[a]);
-  writeln(f,'$');
+  for a := 0 to banned_masks.count-1 do
+    writeln(f, banned_masks[a]);
 
+  writeln(f,'$');
   closefile(f);
-  assignfile(f,'system\bannedsites.dat');
-  rewrite(f);
-
-  for a:=0 to banned_sites.count-1 do
-    writeln(f,banned_sites[a]);
-  writeln(f,'$');
-
-  closefile(f); *)
 end;
 
+function isMaskBanned(host : string) : boolean;
+var
+   a : integer;
+begin
+  Result := false;
+
+  for a := 0 to banned_masks.count-1 do
+    if (StringMatches(host, banned_masks[a])) then
+      begin
+      Result := true;
+      end;
+end;
+
+// socials
 procedure load_socials;
 var f : textfile;
     s, g : string;
@@ -628,5 +606,7 @@ begin
 
   auction_good := GAuction.Create;
   auction_evil := GAuction.Create;
+
+  banned_masks := TStringList.Create;
 end.
 

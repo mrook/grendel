@@ -805,34 +805,53 @@ begin
   ch.sendBuffer('Ok. New config saved.'#13#10);
 end;
 
-(* procedure do_ban(ch:GCharacter;param:string);
-var a:integer;
+procedure do_ban(ch:GCharacter;param:string);
+var
+   a, count : integer;
+   buf : string;
 begin
-  if (strlen(param)=0) then
+  if (length(param) = 0) then
     begin
-    if (banned_sites.count=0) then
+    if (banned_masks.count=0) then
       begin
       ch.sendBuffer('No sites are currently banned.'#13#10);
       exit;
       end;
-    ch.sendBuffer('Banned sites: '#13#10#13#10);
-    for a:=0 to banned_sites.count-1 do
-      ch.sendBuffer(string(banned_sites[a]+#13#10));
+
+    buf := #13#10 + ch.ansiColor(3) + ' ' + add_chars(78, '---- Banned sites ', '-') + ch.ansiColor(7) + #13#10#13#10;
+    ch.sendPager(buf);
+
+    count := 0;
+
+    for a := 0 to banned_masks.count - 1 do
+      begin
+      ch.sendPager(pad_string(banned_masks[a], 19));
+      inc(count);
+
+      if (count = 4) then
+        begin
+        ch.sendPager(#13#10);
+        count := 0;
+        end;
+      end;
+
+    ch.sendPager(#13#10);
     exit;
     end;
-  if (cardinal(inet_addr(param)) = INADDR_NONE) then
-    begin
-    ch.sendBuffer('Invalid IP address.'#13#10);
-    exit;
-    end;
-  act(AT_REPORT,'IP address '+param+' has been banned.',false,ch,nil,nil,TO_CHAR);
-  banned_sites.add(param);
+
+  act(AT_REPORT, 'Banned mask ''' + param + ''' has been added.',false,ch,nil,nil,TO_CHAR);
+  banned_masks.add(param);
   save_system;
 end;
 
 procedure do_allow(ch:GCharacter;param:string);
 begin
-end; *)
+  if (length(param) = 0) then
+    begin
+    do_ban(ch, param);
+    exit;
+    end;
+end;
 
 procedure do_log(ch:GCharacter;param:string);
 var victim:GCharacter;
@@ -964,8 +983,8 @@ var
   buf : string;
   count : integer;
 begin
-  buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Available immortal commands ', '-') + ch.ansiColor(7) + #13#10#13#10;
-  ch.sendBuffer(buf);
+  buf := #13#10 + ch.ansiColor(3) + ' ' + add_chars(78, '---- Available immortal commands ', '-') + ch.ansiColor(7) + #13#10#13#10;
+  ch.sendPager(buf);
 
   lev := ch.getTrust;
 
@@ -981,13 +1000,13 @@ begin
 
       if (cmd.level > LEVEL_MAX) and (cmd.level <= lev) then
         begin
-        ch.sendBuffer(pad_string(lowercase(cmd.name), 14));
+        ch.sendPager(pad_string(lowercase(cmd.name), 14));
 
         inc(count);
 
         if (count = 5) then
           begin
-          ch.sendBuffer(#13#10);
+          ch.sendPager(#13#10);
           count := 0;
           end;
         end;
@@ -996,7 +1015,7 @@ begin
       end;
     end;
 
-  ch.sendBuffer(#13#10);
+  ch.sendPager(#13#10);
 end;
 
 {Jago 5/Jan/01 : implemented do_restore to use GCharacter instead of CHAR_DATA, }
