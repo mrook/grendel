@@ -603,6 +603,7 @@ begin
   write_console('Loading help...');
   load_help('help.dat');
 
+  write_console('String hash stats: ');
   str_hash.hashStats;
 
   randomize;
