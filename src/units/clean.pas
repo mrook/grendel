@@ -2,7 +2,7 @@
 	Summary:
 		Cleaning (system janitor) thread
 	
-	## $Id: clean.pas,v 1.7 2004/03/18 15:16:56 ***REMOVED*** Exp $
+	## $Id: clean.pas,v 1.8 2004/03/26 16:08:03 ***REMOVED*** Exp $
 }
 
 unit clean;
@@ -116,7 +116,12 @@ begin
         begin
         node_next := node.next;
         conn := GPlayerConnection(node.element);
-
+        
+        if (conn.last_update = 0) then
+        	begin
+        	writeConsole('Stale thread detected, system is unstable!');
+        	end
+        else
         if (conn.last_update + THREAD_TIMEOUT < Now()) then
           begin
           bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name + ' probably died (last update at: ' + TimeToStr(conn.last_update) + ')');

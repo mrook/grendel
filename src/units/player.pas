@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.22 2004/03/25 19:55:58 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.23 2004/03/26 16:08:03 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -310,7 +310,7 @@ begin
 	Self.copyover_name := copyover_name;
   
 	commandQueue := TStringList.Create();
-
+	
 	Resume();
 end;
 
@@ -345,7 +345,7 @@ begin
 	if (not copyover) then
 		begin
 		state := CON_STATE_NAME;
-
+		
 		send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
 
 		temp_buf := AnsiColor(6,0) + #13#10;
@@ -390,7 +390,6 @@ begin
 		end
 	else
 		begin
-		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
 		ch.Free;
 		end;
 		

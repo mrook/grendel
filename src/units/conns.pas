@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.16 2004/03/25 19:55:58 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.17 2004/03/26 16:08:02 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -159,15 +159,15 @@ end;
 
 procedure GConnection.Execute();
 begin 
+	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
+   
 	try
 		negotiateCompression();
 		read();
-
+		
 		if (Assigned(FOnOpen)) then
   			FOnOpen();
-  		
-		writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');
-   
+  			
 		while (not Terminated) do
 			begin
 			_lastupdate := Now();
@@ -187,13 +187,19 @@ begin
 				FOnInput(); 
 		end;
   	except
-  		on E : Exception do reportException(E);
+  		on E : Exception do 
+  			begin
+  			Terminate();
+  			reportException(E);
+  			end;
 	end;
-
+	
 	if (Assigned(FOnClose)) then
 		FOnClose();
 	
 	_socket.disconnect();
+
+	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') Connection closed');
 end;
 
 procedure GConnection.enableCompression();
@@ -243,6 +249,9 @@ var
 	compress_size : integer;
 	compress_buf : array[0..4095] of char;
 begin
+	if (Terminated) then
+		exit;
+		
 	try
 		while (not _socket.canWrite()) do;
 		
@@ -261,9 +270,9 @@ begin
   		end
   	else
 			_socket.send(s^, len);
-  except
-    Terminate();
-  end;
+	except
+		Terminate();
+	end;
 end;
 
 procedure GConnection.send(const s : string);
@@ -276,19 +285,19 @@ var
 	read : integer;
 	buf : array[0..MAX_RECEIVE-1] of char;
 begin
-  if (length(comm_buf) > 0) then
-    exit;
+	if (length(comm_buf) > 0) then
+		exit;
 
-  try
-    if (not _socket.canRead()) then
-      exit;
-  except
+	try
+		if (not _socket.canRead()) then
+			exit;
+	except
 		on E : Exception do
 			begin
 			Terminate();
 			exit;
 			end;
-  end;
+	end;
   
   _idle := 0;
 
@@ -340,9 +349,7 @@ begin
 	for i := 0 to length(params) - 1 do
 		buf[2 + i] := chr(params[i]);
   	
-	while (not _socket.canWrite()) do;
-  	
-  send(buf, 2 + length(params));
+	send(buf, 2 + length(params));
 end;
 
 procedure GConnection.processIAC();
