@@ -6,7 +6,7 @@ uses dtypes;
 const version_number = 'v0.3.5';
       version_info = 'The Grendel Project - A Win32 MUD Server';
       version_copyright = 'Copyright (c) 2000,2001 by Michiel Rook';
-      build_version = '#Build 1#';
+      build_version = '#Build 2#';
 
 const
      NameTablesDataFile = 'system\NameData.xml';
