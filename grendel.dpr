@@ -3,8 +3,8 @@
   Copyright (c) 2000,2001 by Michiel Rook (Grimlord)
 
   Contact information:
-  Webpage:            http://grendel.mudcenter.com/
-  E-Mail:             ***REMOVED***@takeover.nl
+  Webpage:            http://www.grendelproject.nl/
+  E-Mail:             michiel@grendelproject.nl
 
   Please observe LICENSE.TXT prior to using this software.
 
@@ -21,15 +21,20 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.51 2001/08/04 22:12:03 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.52 2001/08/11 22:05:19 ***REMOVED*** Exp $
 }
 
 program grendel;
 
 {$DESCRIPTION 'The Grendel Project - Win32 MUD Server. Copyright (c) 2000,2001 by Michiel Rook.'}
+
+{$IFDEF LINUX}
 {$APPTYPE CONSOLE}
+{$ENDIF}
 
 {$DEFINE Grendel}
+
+{$R grendel_icon.res}
 
 {$W+}
 
@@ -37,74 +42,37 @@ uses
   SysUtils,
 {$IFDEF WIN32}
   Windows,
-  mudsystem in 'units\mudsystem.pas',
-  constants in 'units\constants.pas',
-  dtypes in 'units\dtypes.pas',
-  conns in 'units\conns.pas',
-  util in 'units\util.pas',
-  Strip in 'units\strip.pas',
-  area in 'units\area.pas',
-  fsys in 'units\fsys.pas',
-  mudthread in 'units\mudthread.pas',
-  AnsiIO in 'units\ansiio.pas',
-  chars in 'units\chars.pas',
-  race in 'units\race.pas',
-  fight in 'units\fight.pas',
-  skills in 'units\skills.pas',
-  mudhelp in 'units\mudhelp.pas',
-  magic in 'units\magic.pas',
-  update in 'units\update.pas',
-  clan in 'units\clan.pas',
-  clean in 'units\clean.pas',
-  Winsock2 in 'units\winsock2.pas',
-  md5 in 'units\md5.pas',
-  MemCheck in 'units\MemCheck.pas',
-  timers in 'units\timers.pas',
-  debug in 'units\debug.pas',
-  LibXmlParser in 'units\LibXmlParser.pas',
-  NameGen in 'units\NameGen.pas',
-  bulletinboard in 'units\bulletinboard.pas',
-  Channels in 'units\Channels.pas',
-  progs in 'units\progs.pas',
-  gasmdef in 'gmc\gasmdef.pas',
-  gvm in 'gmc\gvm.pas',
-  modules in 'units\modules.pas',
-  socket in 'units\socket.pas';
+  Winsock2,
+  Forms,
+  systray,
 {$ENDIF}
 {$IFDEF LINUX}
   Libc,
-  mudsystem in 'units/mudsystem.pas',
-  constants in 'units/constants.pas',
-  dtypes in 'units/dtypes.pas',
-  conns in 'units/conns.pas',
-  util in 'units/util.pas',
-  Strip in 'units/strip.pas',
-  area in 'units/area.pas',
-  fsys in 'units/fsys.pas',
-  mudthread in 'units/mudthread.pas',
-  AnsiIO in 'units/ansiio.pas',
-  chars in 'units/chars.pas',
-  race in 'units/race.pas',
-  fight in 'units/fight.pas',
-  skills in 'units/skills.pas',
-  mudhelp in 'units/mudhelp.pas',
-  magic in 'units/magic.pas',
-  update in 'units/update.pas',
-  clan in 'units/clan.pas',
-  clean in 'units/clean.pas',
-  md5 in 'units/md5.pas',
-  timers in 'units/timers.pas',
-  debug in 'units/debug.pas',
-  LibXmlParser in 'units/LibXmlParser.pas',
-  NameGen in 'units/NameGen.pas',
-  bulletinboard in 'units/bulletinboard.pas',
-  Channels in 'units/Channels.pas',
-  progs in 'units/progs.pas',
-  gasmdef in 'gmc/gasmdef.pas',
-  gvm in 'gmc/gvm.pas',
-  modules in 'units/modules.pas',
-  socket in 'units/socket.pas';
 {$ENDIF}
+  clan,
+  mudsystem,
+  constants,
+  timers,
+  update,
+  fight,
+  fsys,
+  modules,
+  mudthread,
+  NameGen,
+  mudhelp,
+  conns,
+  dtypes,
+  socket,
+  console,
+  debug,
+  skills,
+  clean,
+  chars,
+  Channels,
+  Bulletinboard,
+  progs,
+  area,
+  race;
 
 const pipeName : pchar = '\\.\pipe\grendel';
 
@@ -158,12 +126,14 @@ begin
 
     timer_thread.Terminate;
     clean_thread.Terminate;
+    
+    Sleep(250);
 
     saveMudState();
   
     unloadModules();
 
-    write_console('Releasing allocated memory...');
+    writeConsole('Releasing allocated memory...');
 
     node := char_list.tail;
     while (node <> nil) do
@@ -234,13 +204,16 @@ begin
     connection_list.Free;
     commands.Free;
 
-  listenv4.Free();
-  listenv6.Free();
+    listenv4.Free();
+    listenv4 := nil;
+    listenv6.Free();
+    listenv6 := nil;
 
-  write_console('Cleanup complete.');
-  if (TTextRec(logfile).mode = fmOutput) then
-    CloseFile(LogFile);
+{$IFDEF WIN32}      
+    unregisterSysTray();
+{$ENDIF}
 
+    writeConsole('Cleanup complete.');
   except
     on E : EExternal do
       begin
@@ -251,6 +224,9 @@ begin
     on E : Exception do
       bugreport('cleanup', 'grendel.dpr', 'Exception in cleanup procedure: ' + E.Message);
   end;
+
+  if (TTextRec(logfile).mode = fmOutput) then
+    CloseFile(LogFile);
 end;
 
 procedure reboot_mud;
@@ -260,7 +236,7 @@ var
   PI: TProcessInformation;
 {$ENDIF}
 begin
-  write_console('Server rebooting...');
+  writeConsole('Server rebooting...');
   try
 
     if MUD_Booted then
@@ -269,7 +245,7 @@ begin
     { wait for users to logout }
     Sleep(1000);
   except
-    write_console('Exception caught while cleaning up memory');
+    writeConsole('Exception caught while cleaning up memory');
   end;
 
   cleanupServer();
@@ -300,7 +276,7 @@ var
    prot : TWSAProtocol_Info;
    name : array[0..1023] of char;
 begin
-  write_console('Server starting copyover...');
+  writeConsole('Server starting copyover...');
 
   node := connection_list.head;
 
@@ -396,14 +372,14 @@ begin
 end;
 {$ELSE}
 begin
-  write_console('Copyover not supported on this platform.');
+  writeConsole('Copyover not supported on this platform.');
 end;
 {$ENDIF}
 
 procedure shutdown_mud;
 begin
   try
-    write_console('Server shutting down...');
+    writeConsole('Server shutting down...');
 
     if MUD_Booted then
       flushConnections;
@@ -461,7 +437,7 @@ begin
     { give operator/logfile a message }
     bugreport('CRASH', 'grendel.dpr', 'CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
 
-    write_console('---- CRASH TERMINATE. REBOOTING SERVER ----');
+    writeConsole('---- CRASH TERMINATE. REBOOTING SERVER ----');
 
     { close logfile }
     if TTextRec(logfile).mode=fmOutput then
@@ -499,51 +475,47 @@ begin
   {$I+}
 
   if (IOResult <> 0) then
-    write_console('NOTE: Could not open logfile. Messages are not being logged.');
+    writeConsole('NOTE: Could not open logfile. Messages are not being logged.');
 
-{$IFDEF WIN32}
-  SetConsoleTitle(version_info + ', ' + version_number + '(Booting)');
-{$ENDIF}
-
-  write_direct(version_info + ', ' + version_number + '.');
-  write_direct(version_copyright + '.');
-  write_direct('This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.'#13#10);
-  write_console('Booting server...');
+  writeDirect(version_info + ', ' + version_number + '.');
+  writeDirect(version_copyright + '.');
+  writeDirect('This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.'#13#10);
+  writeConsole('Booting server...');
 
   try
     load_system;
 
     s := FormatDateTime('ddddd', Now);
-    write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
+    writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
-    write_console('Initializing GMC contexts...');
+    writeConsole('Initializing GMC contexts...');
     init_progs;
-    write_console('Loading skills...');
+    writeConsole('Loading skills...');
     load_skills;
-    write_console('Loading races...');
+    writeConsole('Loading races...');
     load_races;
-    write_console('Loading clans...');
+    writeConsole('Loading clans...');
     load_clans;
-    write_console('Loading channels...');
+    writeConsole('Loading channels...');
     load_channels();
-    write_console('Loading areas...');
+    writeConsole('Loading areas...');
     load_areas;
-    write_console('Loading help...');
+    writeConsole('Loading help...');
     load_help('help.dat');
-    write_console('Loading namegenerator data...');
+    writeConsole('Loading namegenerator data...');
     loadNameTables(NameTablesDataFile);
-    write_console('Loading noteboards...');
+    writeConsole('Loading noteboards...');
     load_notes('boards.dat');
-    write_console('Loading modules...');
+    writeConsole('Loading modules...');
     loadModules();
-    write_console('Loading texts...');
+    writeConsole('Loading texts...');
     load_commands;
     load_socials;
     load_damage;
-    write_console('Loading mud state...');
+    writeConsole('Loading mud state...');
     loadMudState();
 
-{    write_console('String hash stats: ');
+{    writeConsole('String hash stats: ');
     str_hash.hashStats; }
 
     randomize;
@@ -579,7 +551,7 @@ begin
   except
     on E: GException do
       begin
-      write_console('Fatal error while booting: ' + E.Message);
+      writeConsole('Fatal error while booting: ' + E.Message);
       halt;
       end;
   end;
@@ -628,7 +600,11 @@ end;
 
 procedure game_loop;
 begin
+{$IFDEF WIN32}
+  while (not Application.Terminated) do
+{$ELSE}
   while (true) do
+{$ENDIF}
     begin
     if (listenv4 <> nil) then
       begin
@@ -642,19 +618,13 @@ begin
         accept_connection(listenv6);
       end;
 
+    {$IFDEF WIN32}
+    Application.ProcessMessages();
+    {$ENDIF}
+    
     sleep(500);
     end;
 end;
-
-{$IFDEF WIN32}
-function ctrl_handler(event:dword):boolean;
-begin
-  ctrl_handler:=true;
-  grace_exit:=true;
-  SetConsoleCtrlHandler(@ctrl_handler, false);
-  halt;
-end;
-{$ENDIF}
 
 procedure from_copyover;
 {$IFDEF WIN32}
@@ -726,7 +696,7 @@ begin
 end;
 {$ELSE}
 begin
-  write_console('Copyover not supported on this platform.');
+  writeConsole('Copyover not supported on this platform.');
 end;
 {$ENDIF}
 
@@ -742,22 +712,24 @@ begin
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
     from_copyover;
-
-  SetConsoleCtrlHandler(@ctrl_handler, true);
 {$ENDIF}
 
-  write_console('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
+  writeConsole('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
 
 {$IFDEF WIN32}
-  SetConsoleTitle(version_info + ', ' + version_number + '. ' + version_copyright + '.');
+  registerSysTray();
 {$ENDIF}
 
   try
     game_loop();
   except
-    on EControlC do begin
+    on E: EControlC do begin
                     grace_exit := true;
                     halt;
                     end;
+    on E: Exception do 
+                    writeConsole('Exception in main game loop: ' + E.Message)
+    else
+      writeConsole('Unknown exception in main game loop');
   end;
 end.

@@ -66,7 +66,8 @@ contains
   update in 'units/update.pas',
   util in 'units/util.pas',
   modules in 'units/modules.pas',
-  socket in 'units/socket.pas';
+  socket in 'units/socket.pas',
+  console in 'units/console.pas';
 {$ELSE}
   ansiio in 'units\ansiio.pas',
   area in 'units\area.pas',
@@ -100,7 +101,9 @@ contains
   util in 'units\util.pas',
   modules in 'units\modules.pas',
   Winsock2 in 'units\winsock2.pas',
-  socket in 'units\socket.pas';
+  socket in 'units\socket.pas',
+  systray in 'units\systray.pas',
+  console in 'units\console.pas';
 {$ENDIF}
 
 end.
