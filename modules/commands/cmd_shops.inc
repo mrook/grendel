@@ -60,32 +60,37 @@ begin
     if (param[1] in ['0'..'9']) then
       begin
       try
-        s:=strtoint(param);
+        s := strtoint(param);
       except
         ch.sendBuffer('You must type a number.'#13#10);
         exit;
       end;
-      if s>GPlayer(ch).bankgold then
+      
+      if (s > GPlayer(ch).bankgold) then
         begin
         ch.sendBuffer('You don''t have that much money!'#13#10);
         exit;
         end;
-      dec(GPlayer(ch).bankgold,s);
-      inc(ch.gold,s);
-      ch.sendBuffer('You get '+inttostr(s)+' coins from your account.'#13#10);
+        
+      dec(GPlayer(ch).bankgold, s);
+      ch.gold := ch.gold + s;
+
+      ch.sendBuffer('You get ' + inttostr(s) + ' coins from your account.'#13#10);
       end
     else
     if (param = 'all') then
       begin
-      s:=GPlayer(ch).bankgold;
-      if s=0 then
+      s := GPlayer(ch).bankgold;
+      
+      if (s = 0) then
         begin
         ch.sendBuffer('You don''t have anything in your account!'#13#10);
         exit;
         end;
-      GPlayer(ch).bankgold:=0;
-      inc(ch.gold,s);
-      ch.sendBuffer('You get '+inttostr(s)+' coins from your account.'#13#10);
+        
+      GPlayer(ch).bankgold := 0;
+      ch.gold := ch.gold + s;
+      ch.sendBuffer('You get ' + inttostr(s) + ' coins from your account.'#13#10);
       end
     else
       ch.sendBuffer('Withdraw what?'#13#10);
@@ -97,7 +102,7 @@ var s:integer;
     banker,vict:GCharacter;
     node : GListNode;
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
     ch.sendBuffer('Deposit what?'#13#10);
     exit;
@@ -119,42 +124,46 @@ begin
     node := node.next;
     end;
 
-  if banker=nil then
+  if (banker = nil) then
     ch.sendBuffer('If only there was a banker in sight!'#13#10)
   else
     begin
     if (param[1] in ['0'..'9']) then
       begin
       try
-        s:=strtoint(param);
+        s := strtoint(param);
       except
         ch.sendBuffer('You must type a number.'#13#10);
         exit;
       end;
-      if s=0 then
+      
+      if (s = 0) then
         begin
         ch.sendBuffer('The bank doesn''t accept 0 coins!'#13#10);
         exit;
         end;
-      if (ch.gold=0) or (ch.gold<s) then
+        
+      if (ch.gold = 0) or (ch.gold < s) then
         begin
         ch.sendBuffer('You are not carrying any money!'#13#10);
         exit;
         end;
-      dec(ch.gold,s);
-      inc(GPlayer(ch).bankgold,s);
-      ch.sendBuffer('You store '+inttostr(s)+' coins at the bank.'#13#10);
+        
+      ch.gold := ch.gold - s;
+      inc(GPlayer(ch).bankgold, s);
+      ch.sendBuffer('You store ' + inttostr(s) + ' coins at the bank.'#13#10);
       end
     else
     if (param = 'all') then
       begin
-      if (ch.gold=0) then
+      if (ch.gold = 0) then
         begin
         ch.sendBuffer('You are not carrying any money!'#13#10);
         exit;
         end;
-      inc(GPlayer(ch).bankgold,ch.gold);
-      ch.sendBuffer('You store '+inttostr(ch.gold)+' coins at the bank.'#13#10);
+        
+      inc(GPlayer(ch).bankgold, ch.gold);
+      ch.sendBuffer('You store ' + inttostr(ch.gold) + ' coins at the bank.'#13#10);
       ch.gold:=0;
       end
     else
@@ -273,12 +282,12 @@ begin
       act(AT_REPORT,'You buy $p for '+inttostr(cost)+' coins.',false,ch,newobj,nil,TO_CHAR);
 
       newobj.toChar(ch);
-      dec(ch.gold,cost);
+      ch.gold := ch.gold - cost;
       end;
     end;
 end;
 
-procedure do_sell(ch:GCharacter;param:string);
+procedure do_sell(ch : GCharacter; param : string);
 var i,sell,cost:integer;
     keeper,vict:GCharacter;
     node : GListNode;
@@ -346,6 +355,6 @@ begin
     
   obj.fromChar();
   obj.toChar(keeper);
-  inc(ch.gold, cost);
+  ch.gold := ch.gold + cost;
   act(AT_REPORT,'You sold $p for ' + inttostr(cost) + ' coins.', false, ch, obj, nil, TO_CHAR);
 end;

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.61 2001/10/04 16:00:58 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.62 2002/01/22 13:54:17 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -83,20 +83,26 @@ type
       _mana, _max_mana : integer;
       _apb : integer;
 
+      _alignment : integer;
+      
+      _gold : integer;               { Gold carried }
+      _sex : integer;
+
+      _save_poison, _save_cold, _save_para,  { saving throws }
+      _save_breath, _save_spell : integer;
+
     public
       ac_mod : integer;             { AC modifier (spells?) }
       natural_ac : integer;         { Natural AC (race based for PC's) }
       hac, bac, aac, lac, ac : integer; { head, body, arm, leg and overall ac }
       hitroll : integer;            { the hit roll }
       damnumdie, damsizedie : integer;
-      save_poison, save_cold, save_para,  { saving throws }
-      save_breath, save_spell :integer;
+
       tracking : string;
 
       logging : boolean;
 
       position : integer;
-      gold : longint;               { Gold carried }
       mental_state : integer;
       room : GRoom;
       substate : integer;
@@ -107,9 +113,7 @@ type
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
       name, short, long : PString;
-      sex : integer;
       race : GRace;
-      alignment : integer;
       carried_weight : integer;             { weight of items carried }
       weight, height : integer;       { weight/height of (N)PC }
       last_cmd : pointer;
@@ -187,6 +191,7 @@ type
 
     // properties
       function getName() : string;
+      function getRaceName() : string;
 
       property level : integer read _level write _level;
       property str : integer read _str write _str;
@@ -203,8 +208,20 @@ type
       property max_mana : integer read _max_mana write _max_mana;
 
       property apb : integer read _apb write _apb;
+      
+      property alignment : integer read _alignment write _alignment;
+
+      property gold : integer read _gold write _gold;
+      property sex : integer read _sex write _sex;
+
+      property save_poison : integer read _save_poison write _save_poison;
+      property save_cold : integer read _save_cold write _save_cold;
+      property save_para : integer read _save_para write _save_para;
+      property save_breath : integer read _save_breath write _save_breath;
+      property save_spell : integer read _save_spell write _save_spell;
 
       property pname : string read getName;
+      property rname : string read getRaceName;
     end;
 
     GNPC = class(GCharacter)
@@ -449,6 +466,14 @@ function GCharacter.getName() : string;
 begin
   if (name <> nil) then
     Result := name^
+  else
+    Result := '';
+end;
+
+function GCharacter.getRaceName() : string;
+begin
+  if (race <> nil) then
+    Result := race.name
   else
     Result := '';
 end;

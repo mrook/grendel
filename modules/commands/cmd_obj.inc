@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.5 2001/10/05 15:48:28 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.6 2002/01/22 13:54:16 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -51,8 +51,8 @@ begin
 
       if (obj.item_type=ITEM_MONEY) then
         begin
-        inc(ch.gold, obj.value[1]);
-        obj.extract;
+        ch.gold := ch.gold + obj.value[1];
+        obj.extract();
         end
       else
         begin
@@ -93,8 +93,8 @@ begin
 
       if (obj_in.item_type=ITEM_MONEY) then
         begin
-        inc(ch.gold,obj_in.value[1]);
-        obj_in.extract;
+        ch.gold := ch.gold + obj_in.value[1];
+        obj_in.extract();
         end
       else
         begin
@@ -142,8 +142,8 @@ begin
 
         if (obj_in.item_type = ITEM_MONEY) then
           begin
-          inc(ch.gold,obj_in.value[1]);
-          obj_in.extract;
+          ch.gold := ch.gold + obj_in.value[1];
+          obj_in.extract();
           end
         else
           begin
@@ -185,8 +185,8 @@ begin
 
     if (obj.item_type=ITEM_MONEY) then
       begin
-      inc(ch.gold,obj.value[1]);
-      obj.extract;
+      ch.gold := ch.gold + obj.value[1];
+      obj.extract();
       end
     else
       begin
@@ -893,8 +893,8 @@ begin
       exit;
       end;
 
-    dec(ch.gold, value);
-    inc(vict.gold, value);
+    ch.gold := ch.gold - value;
+    vict.gold := vict.gold + value;
 
     act(AT_REPORT,'You give ' + inttostr(value) + ' coins to $N.',false,ch,nil,vict,TO_CHAR);
     act(AT_REPORT,'$n gives you ' + inttostr(value) + ' coins.',false,ch,nil,vict,TO_VICT);
