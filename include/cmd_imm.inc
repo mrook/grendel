@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.30 2001/04/30 16:05:14 xenon Exp $
+// $Id: cmd_imm.inc,v 1.31 2001/04/30 16:27:33 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1894,6 +1894,9 @@ procedure do_coordgen(ch : GCharacter; param : string);
 var
   room : GRoom;
 begin
+  ch.sendBuffer('NOTE: This command is still experimental and it''s use is discouraged.'#13#10);
+  ch.sendBuffer('      It should only be used when you know what you''re doing. And even then... :P'#13#10#13#10);
+  
   if (length(param) = 0) then
   begin
     ch.sendBuffer('Usage: COORDGEN <vnum>'#13#10#13#10);

@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.29 2001/04/26 21:26:15 xenon Exp $
+// $Id: constants.pas,v 1.30 2001/04/30 16:23:13 xenon Exp $
 
 unit constants;
 
@@ -265,6 +265,7 @@ const headings :array[DIR_NORTH..DIR_SOMEWHERE] of string=('north','east','south
 { standard room vnums }
 const ROOM_VNUM_GOOD_PORTAL=0;
       ROOM_VNUM_EVIL_PORTAL=1;
+      ROOM_VNUM_IMMORTAL_PORTAL=10;
       ROOM_VNUM_ARENA_START=30;       { start of arena (bg zone) }
       ROOM_VNUM_ARENA_END=46;         { end of arena }
 
