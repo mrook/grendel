@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.41 2003/10/08 13:43:03 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.42 2003/10/09 21:05:45 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -117,6 +117,8 @@ end;
 procedure GConnection.send(s : string);
 begin
   try
+  	while (not sock.canWrite()) do;
+  	
     sock.send(s);
   except
     thread.terminate();
