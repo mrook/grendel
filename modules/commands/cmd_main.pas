@@ -849,6 +849,8 @@ initialization
   registerCommand('do_findpath', do_findpath);
   registerCommand('do_reload', do_reload);
   registerCommand('do_cloak', do_cloak);
+  registerCommand('do_showprompt', do_showprompt);
+  registerCommand('do_exits', do_exits);
 
 finalization
   unregisterCommand('do_quit');
@@ -1040,5 +1042,7 @@ finalization
   unregisterCommand('do_findpath');
   unregisterCommand('do_reload');
   unregisterCommand('do_cloak');
+  unregisterCommand('do_showprompt');
+  unregisterCommand('do_exits');
 
 end.

@@ -253,6 +253,12 @@ position: 4
 #end
 
 #command
+name: exits
+function: do_exits
+position: 4
+#end
+
+#command
 name: flee
 alias: fl
 function: do_flee
@@ -477,6 +483,11 @@ function: do_sell
 #command
 name: setpager
 function: do_setpager
+#end
+
+#command
+name: showprompt
+function: do_showprompt
 #end
 
 #command

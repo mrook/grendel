@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.4 2001/08/06 18:55:59 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.5 2001/08/14 09:35:30 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -355,6 +355,44 @@ begin
     end;
 
   ch.sendBuffer(ch.ansiColor(7));
+end;
+
+// 10/aug/2001 - scan exits and give roomnames - Nemesis
+procedure do_exits(ch : GCharacter; param : string);
+var h, counter : integer;
+    pexit : GExit;
+    room : GRoom;
+    buf, rmname : string;
+begin
+  counter := 0;
+  buf := ch.ansiColor(14) + 'Noticeable exits:' + #13#10;
+
+  for h := DIR_NORTH to DIR_UP do
+    begin
+    pexit := ch.room.findExit(h);
+
+    if (pexit <> nil) and (not IS_SET(pexit.flags, EX_SECRET)) then
+      begin
+      room := findRoom(pexit.vnum);
+ 
+      if (room <> nil) then
+        begin
+        inc(counter);
+
+        if IS_SET(pexit.flags, EX_CLOSED) then
+          rmname := 'Closed'
+        else
+          rmname := room.name^;
+
+        buf := buf + ch.ansiColor(14) + pad_string(cap(headings[h]), 5) + ' - ' + rmname + #13#10;
+        end;
+      end;
+    end;
+
+  if (counter = 0) then
+    buf := buf + ch.ansiColor(14) + 'None' + #13#10;
+
+  ch.sendBuffer(buf);
 end;
 
 { Revised 13/Feb/2001 - Nemesis }
@@ -2061,6 +2099,19 @@ begin
       act(AT_REPORT, 'No race like that found.', false, ch, nil, nil, TO_CHAR);
     end;
   end;
+end;
+
+// Command which shows your prompt so it can easily be copied to a different
+// character - Nemesis
+procedure do_showprompt(ch : GCharacter; param : string);
+var buf : string;
+begin
+  if (ch.IS_NPC) then
+    exit;
+
+  buf := 'Your current prompt:' + #13#10 + GPlayer(ch).prompt;
+
+  act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
 end;
 
 procedure do_prompt(ch : GCharacter; param : string);
