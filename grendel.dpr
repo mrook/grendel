@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.32 2001/07/14 13:26:06 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.33 2001/07/15 21:21:11 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -739,7 +739,12 @@ var
 begin
   cl := @client_addr;
   len := 128;
+
+{$IFDEF VER130}
+  ac := accept(list_sock, cl^, len);
+{$ELSE}
   ac := accept(list_sock, cl, @len);
+{$ENDIF}
 
   // set non-blocking mode
 
