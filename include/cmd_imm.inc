@@ -651,6 +651,7 @@ begin
 
   if (obj <> nil) then
     begin
+    obj.seperate;
     obj.fromChar;
     bg_info.prize:=obj;
     end
@@ -1497,5 +1498,19 @@ begin
 
       node := node.next;
       end;
+    end;
+end;
+
+procedure do_holywalk(ch : GCharacter; param : string);
+begin
+  if (IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+    begin
+    ch.sendBuffer('Holy walk off.'#13#10);
+    REMOVE_BIT(ch.aff_flags, AFF_HOLYWALK);
+    end
+  else
+    begin
+    ch.sendBuffer('Holy walk on.'#13#10);
+    SET_BIT(ch.aff_flags, AFF_HOLYWALK);
     end;
 end;
