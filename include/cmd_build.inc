@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.28 2001/04/30 16:03:52 xenon Exp $
+// $Id: cmd_build.inc,v 1.29 2001/05/10 17:18:36 xenon Exp $
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
@@ -205,7 +205,6 @@ var
   node : GListNode;
   g : GLearned;
   sk : GSkill;
-  str : string;
   aff : GAffect;
 begin
 
@@ -1643,7 +1642,6 @@ end;
 
 procedure do_rdelete(ch : GCharacter; param : string);
 var
-  i, j : integer;
   room, room2 : GRoom;
   ex, ex2 : GExit;
   node,node2 : GListNode;
@@ -2034,7 +2032,7 @@ const area_flags : array[0..2] of string = ('noreset','nopc','proto');
 procedure do_aset(ch : GCharacter; param : string);
 var
    area : GArea;
-   sub, str : string;
+   sub : string;
    a : integer;
 begin
   if (length(param) = 0) then
