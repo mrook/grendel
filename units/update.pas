@@ -34,7 +34,8 @@ uses
     mudthread,
     fight,
     progs,
-    conns;
+    conns,
+    Channels;
 
 procedure regenerate_chars;
 var hp_gain,mv_gain,mana_gain:integer;

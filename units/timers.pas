@@ -65,7 +65,8 @@ uses
     update,
     debug,
     area,
-    conns;
+    conns,
+    Channels;
 
 
 // GTimer
