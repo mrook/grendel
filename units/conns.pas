@@ -60,7 +60,7 @@ var
    connection_list : GDLinkedList;
 
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
-function act_color(to_ch : GCharacter; acts : string) : string;
+function act_color(to_ch : GCharacter; acts, sep : string) : string;
 
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
               arg1, arg2 : pointer; typ : integer);
@@ -481,7 +481,7 @@ begin
     playername := 'you';
 end;
 
-function act_color(to_ch : GCharacter; acts : string) : string;
+function act_color(to_ch : GCharacter; acts, sep : string) : string;
 var
    t : integer;
    boldflag:boolean;
@@ -493,7 +493,7 @@ begin
 
   while (t <= length(acts)) do
     begin
-    if (acts[t] = '$') then
+    if (acts[t] = sep) then
       begin
       inc(t);
       i := '';
@@ -647,7 +647,7 @@ begin
 
   acts := cap(s);
 
-  act_string := act_color(to_ch, acts);
+  act_string := act_color(to_ch, acts, '$');
 end;
 
 procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharacter;
