@@ -69,6 +69,7 @@ uses
     update,
     progs,
     timers,
+    debug,
     fight;
 
 constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
@@ -353,9 +354,11 @@ begin
             if (time > 1500) and (not ch.CHAR_DIED) then
               bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.');
           except
-            if (ch.CHAR_DIED) then
-              bugreport('interpret', 'mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' bugged',
-                        'The specified command caused an error and has been terminated.');
+            on E : EExternal do
+              outputError(E.ExceptionRecord.ExceptionAddress);
+
+              //bugreport('interpret', 'mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' bugged',
+              //          'The specified command caused an error and has been terminated.');
           end;
           end;
         end

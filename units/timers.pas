@@ -4,6 +4,7 @@ interface
 
 uses
     Windows,
+    SysUtils,
     Classes,
     dtypes,
     chars;
@@ -59,6 +60,7 @@ uses
     skills,
     util,
     update,
+    debug,
     area,
     conns;
 
@@ -134,13 +136,18 @@ begin
             timer.counter := timer.timeout;
           end;
       except
-        bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
+        on E : EExternal do
+          outputError(E.ExceptionRecord.ExceptionAddress)
+        else
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
 
         if (timer is GSpecTimer) then
           begin
           timer_list.remove(node);
           timer.Free;
-          end;
+          end
+        else
+          timer.counter := timer.timeout;
       end;
 
       node := node_next;
