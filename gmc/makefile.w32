@@ -1,7 +1,7 @@
 .AUTODEPEND
 
 DCC=dcc32
-DCC_FLAGS=-Q -D+ -V- -W+ -O+
+DCC_FLAGS=-Q -D- -W+ -O+
 
 GMCC=gmcc.exe
 GMCC_SOURCES=gmcc.dpr 
@@ -9,8 +9,6 @@ GMCC_LEXFILES=gmcc.y gmclex.l
 
 GASM=gasm.exe
 GASM_SOURCES=gasm.dpr 
-
-CORE=..\core.bpl
 
 all:	$(GMCC) $(GASM)
       
@@ -22,8 +20,8 @@ $(GMCC_SOURCES): $(GMCC_LEXFILES)
   lex gmclex
 
 $(GMCC):	$(GMCC_SOURCES) $(CORE)
-	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU..\core
+	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -U..\units
 	
 $(GASM):	$(GASM_SOURCES) $(CORE)
-	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU..\core
+	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -U..\units
 
