@@ -7,8 +7,8 @@ GRENDEL_SOURCES=grendel.dpr
 CONVERT=convert
 CONVERT_SOURCES=convert.dpr
 
-CORE=core.bpl
-CORE_SOURCES=core.dpk units/*.pas
+CORE=bplcore.so
+CORE_SOURCES=core.dpk units/*.pas gmc/*.pas
 
 all:	$(GRENDEL) $(CONVERT)
 	cd modules && make -f makefile.lnx

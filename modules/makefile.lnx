@@ -1,13 +1,13 @@
 DCC=/usr/local/kylix/bin/dcc
 DCC_FLAGS=-Q -D+ -V- -W+ -O+ -GD
 
-MODULES=core_commands.bpl
+MODULES=bplcore_commands.so
 
 all:	$(MODULES)
 
 clean:
 	rm -f $(MODULES)
 
-core_commands.bpl:	core_commands.dpk commands/*
+bplcore_commands.so:	core_commands.dpk commands/*
 	$(DCC) core_commands.dpk $(DCC_FLAGS) -LU../core
 

@@ -13,7 +13,7 @@ CONVERT=convert.exe
 CONVERT_SOURCES=convert.dpr
 
 CORE=core.bpl
-CORE_SOURCES=core.dpk units/*.pas
+CORE_SOURCES=core.dpk units/*.pas gmc/*.pas
 
 all:	$(GRENDEL) $(COPYOVER) $(CONVERT)
 	cd modules
