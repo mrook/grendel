@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.7 2003/10/02 15:53:23 ***REMOVED*** Exp $)
+  @lastmod($Id: console.pas,v 1.8 2003/10/03 18:04:32 ***REMOVED*** Exp $)
 }
 
 unit console;
@@ -42,6 +42,7 @@ const
 var
   writers : GDLinkedList;
   history : GDLinkedList;
+  queue : GDLinkedList;
   LogFile : textfile;
 
   
@@ -49,6 +50,7 @@ procedure registerConsoleDriver(writer : GConsoleWriter);
 procedure unregisterConsoleDriver(writer : GConsoleWriter);
 procedure writeConsole(text : string);
 procedure fetchConsoleHistory(max : integer; callback : GConsoleWriter);
+procedure pollConsole();
 
 procedure initConsole();
 procedure cleanupConsole();
@@ -86,7 +88,6 @@ procedure writeConsole(text : string);
 var
   iterator : GIterator;
   he : GConsoleHistoryElement;
-  writer : GConsoleWriter;
   timestamp : TDateTime;
 begin
   timestamp := Now();
@@ -97,18 +98,42 @@ begin
   history.insertLast(he);
 
   if (history.getSize() > CONSOLE_HISTORY_MAX) then
+  	begin
+  	GConsoleHistoryElement(history.head.element).Free();
     history.remove(history.head);
-
-  iterator := writers.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    writer := GConsoleWriter(iterator.next());
+    end;
     
-    writer.write(timestamp, text);
-    end;    
-   
-  iterator.Free();
+  he := GConsoleHistoryElement.Create();
+  he.timestamp := timestamp;
+  he.text := text;
+  queue.insertLast(he);
+end;
+
+procedure pollConsole();
+var
+	he : GConsoleHistoryElement;
+	iterator : GIterator;
+	writer : GConsoleWriter;
+begin
+	while (queue.head <> nil) do
+		begin
+		he := GConsoleHistoryElement(queue.head.element);
+  
+  	iterator := writers.iterator();
+  
+		while (iterator.hasNext()) do
+			begin
+			writer := GConsoleWriter(iterator.next());
+
+			writer.write(he.timestamp, he.text);
+			end;    
+
+		iterator.Free();
+		
+		he.Free();
+		
+		queue.remove(queue.head);
+		end;
 end;
 
 procedure fetchConsoleHistory(max : integer; callback : GConsoleWriter);
@@ -156,6 +181,7 @@ end;
 procedure initConsole();
 begin
   writers := GDLinkedList.Create();
+  queue := GDLinkedList.Create();
   history := GDLinkedlist.Create();
   registerConsoleDriver(GConsoleDefault.Create());
   registerConsoleDriver(GConsoleLogWriter.Create());
@@ -178,6 +204,9 @@ begin
 
   writers.clean();
   writers.Free();
+
+  queue.clean();
+  queue.Free();
   
   history.clean();
   history.Free();

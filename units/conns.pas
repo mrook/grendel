@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.38 2003/09/19 09:47:35 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.39 2003/10/03 18:04:31 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -809,6 +809,8 @@ begin
     {$IFDEF WIN32}
       Application.ProcessMessages();
     {$ENDIF}
+
+		pollConsole();
     
     sleep(5);
     end;
