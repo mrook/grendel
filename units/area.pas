@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.44 2001/07/31 22:08:35 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.45 2001/08/03 21:35:04 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1441,7 +1441,7 @@ begin
           npcindex := findNPCIndex(reset.arg1);
 
           if (npcindex = nil) then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
+            bugreport('GArea.reset (M) area: ' + name, 'area.pas', 'npc #' + IntToStr(reset.arg1) + ' null')
           else
             begin
             lastmob := nil;
@@ -1455,7 +1455,7 @@ begin
 
               if (npc.room = nil) then
                 begin
-                bugreport('GArea.reset', 'area.pas', 'room vnum #'+inttostr(reset.arg2)+' null');
+                bugreport('GArea.reset (M) area: ' + name, 'area.pas', 'room #' + IntToStr(reset.arg2) + ' null');
 
                 npc.extract(true);
                 end
@@ -1502,7 +1502,7 @@ begin
 
             if (npc = nil) then
               begin
-              bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null');
+              bugreport('GArea.reset (E) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null');
               node_reset := node_reset.next;
               continue;
               end;
@@ -1517,10 +1517,10 @@ begin
             end;
 
           if (objindex = nil) then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
+            bugreport('GArea.reset (E) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
           else
-          if npc=nil then
-            bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null')
+          if (npc = nil) then
+            bugreport('GArea.reset (E) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null')
           else
           if (number_percent <= reset.arg2) then
             begin
@@ -1555,7 +1555,7 @@ begin
 
             if (npc = nil) then
               begin
-              bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null');
+              bugreport('GArea.reset (G) area: ' + name, 'area.pas', '(' + IntToStr(reset.arg1) + ') npc #' + IntToStr(reset.arg3) + ' null');
               node_reset := node_reset.next;
               continue;
               end;
@@ -1569,8 +1569,8 @@ begin
             continue;
             end;
 
-          if objindex=nil then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
+          if (objindex = nil) then
+            bugreport('GArea.reset (G) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
           else
             begin
             obj := instanceObject(findObjectIndex(reset.arg1));
@@ -1583,7 +1583,7 @@ begin
           objindex:=findObjectIndex(reset.arg1);
 
           if objindex=nil then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
+            bugreport('GArea.reset (O) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
           else
           if (objindex.area.nplayer=0) and (reset.arg3>objindex.obj_count) then
             begin
@@ -1603,7 +1603,7 @@ begin
             end;
 
           if objindex=nil then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
+            bugreport('GArea.reset (I) area: ' + name, 'area.pas', 'obj #' + IntToStr(reset.arg1) + ' null')
           else
           if (objindex.area.nplayer=0) and (reset.arg3>objindex.obj_count) then
             begin
@@ -1615,14 +1615,14 @@ begin
           room := findRoom(reset.arg1);
           if (room = nil) then
             begin
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null');
+            bugreport('GArea.reset (D) area: ' + name, 'area.pas', 'room #' + IntToStr(reset.arg1) + ' null');
             exit;
             end;
 
           pexit := room.findExit(reset.arg2);
           if (pexit = nil) then
             begin
-            bugreport('GArea.reset', 'area.pas', 'direction '+inttostr(reset.arg2) + ' has no exit in room ' + inttostr(reset.arg1));
+            bugreport('GArea.reset (D) area: ' + name, 'area.pas', 'direction ' + IntToStr(reset.arg2) + ' has no exit in room ' + IntToStr(reset.arg1));
             exit;
             end;
 
