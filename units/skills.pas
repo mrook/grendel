@@ -65,6 +65,8 @@ var
    gsn_rescue : integer;
    gsn_dodge : integer;
    gsn_track : integer;
+   gsn_peek : integer;
+   gsn_hide : integer;
 
 
 procedure load_skills;
@@ -317,6 +319,8 @@ begin
   gsn_rescue := assign_gsn('rescue');
   gsn_dodge := assign_gsn('dodge');
   gsn_track := assign_gsn('track');
+  gsn_peek := assign_gsn('peek');
+  gsn_hide := assign_gsn('hide');
 end;
 
 procedure done_skills;
