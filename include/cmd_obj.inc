@@ -796,7 +796,7 @@ begin
     end;
 
   s_name := copy(corpse.short^,h,length(corpse.short^)-cardinal(h)+1);
-  s_name := stripl(s_name,'$');
+  s_name := left(s_name,'$');
 
   scalp := GObject.Create;
 

@@ -80,8 +80,8 @@ begin
           try
             repeat
               full := rf.readLine;
-              lab := uppercase(stripl(full, ':'));
-              arg := trim(striprbeg(full, ':'));
+              lab := uppercase(left(full, ':'));
+              arg := trim(right(full, ':'));
 
               if (lab = 'NAME') then
               begin

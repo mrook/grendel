@@ -218,34 +218,34 @@ begin
   repeat
     s := af.readLine;
 
-    g := uppercase(stripl(s,':'));
+    g := uppercase(left(s,':'));
 
     if g='PORT' then
-      system_info.port:=strtoint(striprbeg(s,' '))
+      system_info.port:=strtoint(right(s,' '))
     else
     if g='NAME' then
-      system_info.mud_name := striprbeg(s,' ')
+      system_info.mud_name := right(s,' ')
     else
     if g='EMAIL' then
-      system_info.admin_email := striprbeg(s,' ')
+      system_info.admin_email := right(s,' ')
     else
     if g='HOSTLOOKUP' then
-      system_info.lookup_hosts:=strtoint(striprbeg(s,' '))<>0
+      system_info.lookup_hosts:=strtoint(right(s,' '))<>0
     else
     if g='DENYNEWCONNS' then
-      system_info.deny_newconns:=strtoint(striprbeg(s,' '))<>0
+      system_info.deny_newconns:=strtoint(right(s,' '))<>0
     else
     if g='DENYNEWPLAYERS' then
-      system_info.deny_newplayers:=strtoint(striprbeg(s,' '))<>0
+      system_info.deny_newplayers:=strtoint(right(s,' '))<>0
     else
     if g='LEVELFORCEPC' then
-      system_info.level_forcepc:=strtoint(striprbeg(s,' '))
+      system_info.level_forcepc:=strtoint(right(s,' '))
     else
     if g='LEVELLOG' then
-      system_info.level_log:=strtoint(striprbeg(s,' '))
+      system_info.level_log:=strtoint(right(s,' '))
     else
     if g='BINDIP' then
-      system_info.bind_ip:=inet_addr(pchar(striprbeg(s,' ')));
+      system_info.bind_ip:=inet_addr(pchar(right(s,' ')));
   until (s = '$') or (af.eof);
 
   af.Free;
@@ -352,37 +352,37 @@ begin
 
       s := trim(s);
 
-      g := uppercase(stripl(s,':'));
+      g := uppercase(left(s,':'));
       
       if g = 'NAME' then
-        name := uppercase(striprbeg(s,' '))
+        name := uppercase(right(s,' '))
       else
       if g='CHARNOARG' then
-        char_no_arg := striprbeg(s,' ')
+        char_no_arg := right(s,' ')
       else
       if g='OTHERSNOARG' then
-        others_no_arg := striprbeg(s,' ')
+        others_no_arg := right(s,' ')
       else
       if g='CHARAUTO' then
-        char_auto := striprbeg(s,' ')
+        char_auto := right(s,' ')
       else
       if g='OTHERSAUTO' then
-        others_auto := striprbeg(s,' ')
+        others_auto := right(s,' ')
       else
       if g='CHARFOUND' then
-        char_found := striprbeg(s,' ')
+        char_found := right(s,' ')
       else
       if g='VICTFOUND' then
-        vict_found := striprbeg(s,' ')
+        vict_found := right(s,' ')
       else
       if g='OTHERSFOUND' then
-        others_found := striprbeg(s,' ')
+        others_found := right(s,' ')
       else
       if g='CHAROBJECT' then
-        char_object := striprbeg(s,' ')
+        char_object := right(s,' ')
       else
       if g='OTHERSOBJECT' then
-        others_object := striprbeg(s,' ');
+        others_object := right(s,' ');
       until (uppercase(s)='#END') or eof(f);
 
     if (findSocial(social.name) <> nil) then
@@ -550,8 +550,8 @@ begin
 
     with dam do
       begin
-      min := strtoint(stripl(s,' '));
-      max := strtoint(striprbeg(s,' '));
+      min := strtoint(left(s,' '));
+      max := strtoint(right(s,' '));
 
       readln(f,s);
       msg[1] := s;

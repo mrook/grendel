@@ -63,35 +63,35 @@ begin
     readln(f,s);
     if pos('#',s)=1 then
       begin
-      g := uppercase(stripl(s,'='));
+      g := uppercase(left(s, '='));
 
       if (g = '#KEYWORD') then
         begin
-        keys:=stripr(s,'=');
+        keys := right(s, '=');
         keyword:=true;
         text:='';
         end
       else
       if (g = '#TYPE') then
         begin
-        helptype := stripr(s,'=');
+        helptype := right(s, '=');
         end
       else
       if (g = '#SYNTAX') then
         begin
-        syntax := stripr(s,'=');
+        syntax := right(s, '=');
         end
       else
       if (g = '#RELATED') then
         begin
-        related := stripr(s,'=');
+        related := right(s, '=');
         end
       else
       if g='#END' then
         begin
         keyword:=false;
         help := GHelp.Create;
-        help.level := StrToInt(stripr(s,'='));
+        help.level := StrToInt(right(s, '='));
 
         help.keywords := keys;
         help.helptype := helptype;
@@ -103,7 +103,7 @@ begin
         end
       else
       if g='#INCLUDE' then
-        load_help(stripr(s,'='));
+        load_help(right(s, '='));
       end
     else
     if keyword then

@@ -192,12 +192,12 @@ begin
       begin
       symbol := TSymbol.Create;
 
-      symbol.section := strtointdef('$' + stripl(g, ':'), 0);
+      symbol.section := strtointdef('$' + left(g, ':'), 0);
 
-      g := striprbeg(g, ':');
-      symbol.startAddress := hexRead(stripl(g, ' '));
+      g := right(g, ':');
+      symbol.startAddress := hexRead(left(g, ' '));
 
-      symbol.name := trim(striprbeg(g, ' '));
+      symbol.name := trim(right(g, ' '));
 
       symbols.add(symbol);
       end;
@@ -214,7 +214,7 @@ begin
     if (eof(f)) then
       break;
 
-    temp := stripl(striprbeg(s, '('), ')');
+    temp := left(right(s, '('), ')');
 
     repeat
       readln(f, s);
@@ -228,20 +228,20 @@ begin
         line := TLine.Create;
 
         line.filename := temp;
-        line.linenr := strtointdef(stripl(g, ' '), 0);
+        line.linenr := strtointdef(left(g, ' '), 0);
 
-        g := striprbeg(g, ' ');
-        line.section := strtointdef('$' + stripl(g, ':'), 0);
+        g := right(g, ' ');
+        line.section := strtointdef('$' + left(g, ':'), 0);
 
-        g := striprbeg(g, ':');
-        line.address := strtointdef('$' + stripl(g, ' '), 0);
+        g := right(g, ':');
+        line.address := strtointdef('$' + left(g, ' '), 0);
 
         lines.add(line);
 
         if (pos(' ', g) = 0) then
           break;
 
-        g := trim(striprbeg(g, ' '));
+        g := trim(right(g, ' '));
         end;
 
       readln(f, s);

@@ -884,154 +884,154 @@ begin
       repeat
         a := af.readLine;
 
-        g := uppercase(stripl(a,':'));
+        g := uppercase(left(a,':'));
 
         if (g = 'TITLE') then
-          player^.title := striprbeg(a,' ')
+          player^.title := right(a,' ')
         else
         if (g ='SEX') then
-          sex := strtoint(striprbeg(a, ' '))
+          sex := strtoint(right(a, ' '))
         else
         if g='RACE' then
-          race := findRace(striprbeg(a, ' '))
+          race := findRace(right(a, ' '))
         else
         if (g = 'ALIGNMENT') then
-          alignment := strtoint(striprbeg(a, ' '))
+          alignment := strtoint(right(a, ' '))
         else
         if (g = 'LEVEL') then
-          level := strtoint(striprbeg(a, ' '))
+          level := strtoint(right(a, ' '))
         else
         if g='HOMETOWN' then
-          player^.hometown:=strtoint(striprbeg(a,' '))
+          player^.hometown:=strtoint(right(a,' '))
         else
         if g='AGE' then
-          player^.age:=strtoint(striprbeg(a,' '))
+          player^.age:=strtoint(right(a,' '))
         else
         if g='WEIGHT' then
-          weight:=strtoint(striprbeg(a,' '))
+          weight:=strtoint(right(a,' '))
         else
         if g='HEIGHT' then
-          height:=strtoint(striprbeg(a,' '))
+          height:=strtoint(right(a,' '))
         else
         if g='STATS' then
           begin
-          a:=striprbeg(a,' ');
-          ability.str:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          ability.con:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          ability.dex:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          ability.int:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          ability.wis:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          ability.str:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          ability.con:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          ability.dex:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          ability.int:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          ability.wis:=strtoint(left(a,' '));
           end
         else
         if (g = 'MAX_SKILLS') then
         begin
-          max_skills := strtoint(striprbeg(a,' '))
+          max_skills := strtoint(right(a,' '))
         end
         else
         if (g = 'MAX_SPELLS') then
         begin
-          max_spells := strtoint(striprbeg(a,' '))
+          max_spells := strtoint(right(a,' '))
         end
         else
         if g='APB' then
-          point.apb:=strtoint(striprbeg(a,' '))
+          point.apb:=strtoint(right(a,' '))
         else
         if g='MANA' then
           begin
-          a:=striprbeg(a,' ');
-          point.mana:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          point.max_mana:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          point.mana:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          point.max_mana:=strtoint(left(a,' '));
           end
         else
         if g='HP' then
           begin
-          a:=striprbeg(a,' ');
-          point.hp:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          point.max_hp:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          point.hp:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          point.max_hp:=strtoint(left(a,' '));
           end
         else
         if g='MV' then
           begin
-          a:=striprbeg(a,' ');
-          point.mv:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          point.max_mv:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          point.mv:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          point.max_mv:=strtoint(left(a,' '));
           end
         else
         if g='AC' then
-          point.ac:=strtoint(striprbeg(a,' '))
+          point.ac:=strtoint(right(a,' '))
         else
         if g='HAC' then
-          point.hac:=strtoint(striprbeg(a,' '))
+          point.hac:=strtoint(right(a,' '))
         else
         if g='BAC' then
-          point.bac:=strtoint(striprbeg(a,' '))
+          point.bac:=strtoint(right(a,' '))
         else
         if g='AAC' then
-          point.aac:=strtoint(striprbeg(a,' '))
+          point.aac:=strtoint(right(a,' '))
         else
         if g='LAC' then
-          point.lac:=strtoint(striprbeg(a,' '))
+          point.lac:=strtoint(right(a,' '))
         else
         if g='GOLD' then
           begin
-          a:=striprbeg(a,' ');
-          gold := UMax(strtointdef(stripl(a, ' '), 0), 0);
-          a:=striprbeg(a,' ');
-          player^.bankgold := UMax(strtointdef(stripl(a, ' '), 0), 0);
+          a:=right(a,' ');
+          gold := UMax(strtointdef(left(a, ' '), 0), 0);
+          a:=right(a,' ');
+          player^.bankgold := UMax(strtointdef(left(a, ' '), 0), 0);
           end
         else
         if g='XP' then
           begin
-          a:=striprbeg(a,' ');
-          player^.xptot:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.xptogo:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          player^.xptot:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.xptogo:=strtoint(left(a,' '));
           end
         else
         if g='ROOMVNUM' then
-          room := findRoom(strtoint(striprbeg(a, ' ')))
+          room := findRoom(strtoint(right(a, ' ')))
         else
         if g='KILLS' then
-          kills:=strtoint(striprbeg(a,' '))
+          kills:=strtoint(right(a,' '))
         else
         if g='DEATHS' then
-          player^.deaths:=strtoint(striprbeg(a,' '))
+          player^.deaths:=strtoint(right(a,' '))
         else
         if g='FLAGS' then
-          player^.flags:=strtoint(striprbeg(a,' '))
+          player^.flags:=strtoint(right(a,' '))
         else
         if g='CLAN' then
           begin
-          clan := findClan(striprbeg(a,' '));
+          clan := findClan(right(a,' '));
 
           if (clan <> nil) and(clan.leader = name^) then
             player^.clanleader := true;
           end
         else
         if g='CONFIG' then
-          player^.cfg_flags:=strtoint(striprbeg(a,' '))
+          player^.cfg_flags:=strtoint(right(a,' '))
         else
         if g='AC_MOD' then
-          point.ac_mod:=strtoint(striprbeg(a,' '))
+          point.ac_mod:=strtoint(right(a,' '))
         else
         // for backward compatibility only
         if g='PASSWORD' then
           begin
-          player^.password := striprbeg(a,' ');
+          player^.password := right(a,' ');
           player^.md5_password := MD5String(player^.password);
           end
         else
         // the new md5 encrypted pwd
         if g='MD5-PASSWORD' then
           begin
-          t := striprbeg(a,' ');
+          t := right(a,' ');
 
           d := 1;
           x := 0;
@@ -1045,94 +1045,94 @@ begin
           end
         else
         if g='REMORTS' then
-          player^.remorts:=strtoint(striprbeg(a,' '))
+          player^.remorts:=strtoint(right(a,' '))
         else
         if g='WIMPY' then
-          player^.wimpy:=strtoint(striprbeg(a,' '))
+          player^.wimpy:=strtoint(right(a,' '))
         else
         if g='AFF_FLAGS' then
-          aff_flags:=strtoint(striprbeg(a,' '))
+          aff_flags:=strtoint(right(a,' '))
         else
         if g='MENTALSTATE' then
-          mental_state:=strtoint(striprbeg(a,' '))
+          mental_state:=strtoint(right(a,' '))
         else
         if g='CONDITION' then
           begin
-          a:=striprbeg(a,' ');
-          player^.condition[COND_DRUNK]:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.condition[COND_FULL]:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.condition[COND_THIRST]:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.condition[COND_CAFFEINE]:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.condition[COND_HIGH]:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          player^.condition[COND_DRUNK]:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.condition[COND_FULL]:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.condition[COND_THIRST]:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.condition[COND_CAFFEINE]:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.condition[COND_HIGH]:=strtoint(left(a,' '));
           end
         else
         if g='AREA' then
           begin
-          player^.area_fname := striprbeg(a,' ');
+          player^.area_fname := right(a,' ');
           player^.area := findArea(player^.area_fname);
           end
         else
         if g='RANGES' then
           begin
-          a:=striprbeg(a,' ');
-          player^.r_lo:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.r_hi:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.m_lo:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.m_hi:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.o_lo:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.o_hi:=strtoint(stripl(a,' '));
+          a:=right(a,' ');
+          player^.r_lo:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.r_hi:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.m_lo:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.m_hi:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.o_lo:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.o_hi:=strtoint(left(a,' '));
           end
         else
         if g='WIZLEVEL' then
-          player^.wiz_level:=strtoint(striprbeg(a,' '))
+          player^.wiz_level:=strtoint(right(a,' '))
         else
         if g='BGPOINTS' then
-          player^.bg_points:=strtoint(striprbeg(a,' '))
+          player^.bg_points:=strtoint(right(a,' '))
         else
         if g='ACTFLAGS' then
-          act_flags:=strtoint(striprbeg(a,' '))
+          act_flags:=strtoint(right(a,' '))
         else
         if g='PAGELEN' then
-          player^.pagerlen:=strtoint(striprbeg(a,' '))
+          player^.pagerlen:=strtoint(right(a,' '))
         else
         if g='LOGON' then
           begin
-          a:=striprbeg(a,' ');
-          player^.logon_first:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.logon_first:=player^.logon_first + (strtoint(stripl(a,' '))/MSecsPerDay);
+          a:=right(a,' ');
+          player^.logon_first:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.logon_first:=player^.logon_first + (strtoint(left(a,' '))/MSecsPerDay);
           if (player^.logon_first = 0) then
             player^.logon_first:=Now;
           end
         else
         if g='PLAYED' then
           begin
-          a:=striprbeg(a,' ');
-          player^.played:=strtoint(stripl(a,' '));
-          a:=striprbeg(a,' ');
-          player^.played:=player^.played + (strtoint(stripl(a,' '))/MSecsPerDay);
+          a:=right(a,' ');
+          player^.played:=strtoint(left(a,' '));
+          a:=right(a,' ');
+          player^.played:=player^.played + (strtoint(left(a,' '))/MSecsPerDay);
           end
         else
         if (g = 'BAMFIN') then
-          player^.bamfin := striprbeg(a, ' ')
+          player^.bamfin := right(a, ' ')
         else
         if (g = 'BAMFOUT') then
-          player^.bamfout := striprbeg(a, ' ')
+          player^.bamfout := right(a, ' ')
         else
         if (g = 'TAUNT') then
-          player^.taunt := striprbeg(a, ' ')
+          player^.taunt := right(a, ' ')
         else
         if (g = 'PROMPT') then
-          player^.prompt := striprbeg(a, ' ');
+          player^.prompt := right(a, ' ');
       until (uppercase(a)='#END') or (af.eof);
 
       if (uppercase(a)='#END') then
@@ -1147,13 +1147,13 @@ begin
 
         if (uppercase(a) <> '#END') and (not af.eof) then
           begin
-          a := striprbeg(striprbeg(a,' '),'''');
-          g := stripl(a,'''');
-          a := striprbeg(striprbeg(a,''''),' ');
+          a := right(right(a,' '),'''');
+          g := left(a,'''');
+          a := right(right(a,''''),' ');
           sk := findSkill(g);
 
           if (sk <> nil) then
-            SET_LEARNED(strtointdef(stripl(a,' '), 0), sk)
+            SET_LEARNED(strtointdef(left(a,' '), 0), sk)
           else
             bugreport('GArea.load', 'charlist.pas', 'skill '+g+' does not exist',
                       'The skill specified in the pfile does not exist.');
@@ -1172,9 +1172,9 @@ begin
 
         if (uppercase(a) <> '#END') and (not af.eof) then
           begin
-          a:=striprbeg(striprbeg(a,' '),'''');
-          g:=stripl(a,'''');
-          a:=striprbeg(striprbeg(a,''''),' ');
+          a:=right(right(a,' '),'''');
+          g:=left(a,'''');
+          a:=right(right(a,''''),' ');
 
           aff := GAffect.Create;
 
@@ -1182,14 +1182,14 @@ begin
             begin
             skill := findSkill(g);
 
-            g := stripl(a, ' ');
+            g := left(a, ' ');
             apply_type := findApply(g);
 
-            a := striprbeg(a, ' ');
-            duration := strtointdef(stripl(a, ' '), 0);
+            a := right(a, ' ');
+            duration := strtointdef(left(a, ' '), 0);
 
-            a := striprbeg(a, ' ');
-            modifier := strtointdef(stripl(a, ' '), 0);
+            a := right(a, ' ');
+            modifier := strtointdef(left(a, ' '), 0);
             end;
 
           if (aff.skill <> nil) then
@@ -1211,8 +1211,8 @@ begin
           begin
           al := GAlias.Create;
 
-          al.alias := stripl(a, ':');
-          al.expand := striprbeg(a, ':');
+          al.alias := left(a, ':');
+          al.expand := right(a, ':');
 
           al.node := player^.aliases.insertLast(al);
           end;
@@ -1256,29 +1256,29 @@ begin
             long := hash_string(a);
 
             a := af.readLine;
-            item_type:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            wear1:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            wear2:=StrToInt(stripl(a,' '));
+            item_type:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            wear1:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            wear2:=StrToInt(left(a,' '));
 
             a := af.readLine;
-            value[1]:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            value[2]:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            value[3]:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            value[4]:=StrToInt(stripl(a,' '));
+            value[1]:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            value[2]:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            value[3]:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            value[4]:=StrToInt(left(a,' '));
 
             a := af.readLine;
-            weight:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            flags:=StrToInt(stripl(a,' '));
-            a:=striprbeg(a,' ');
-            cost:=StrToInt(stripl(a,' '));
-            a := striprbeg(a, ' ');
-            count := strtointdef(stripl(a, ' '), 1);
+            weight:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            flags:=StrToInt(left(a,' '));
+            a:=right(a,' ');
+            cost:=StrToInt(left(a,' '));
+            a := right(a, ' ');
+            count := strtointdef(left(a, ' '), 1);
             if (count = 0) then
               count := 1;
 
@@ -1309,12 +1309,12 @@ begin
         if (uppercase(g) <> '#END') and (not af.eof) then
           begin
           inc(player^.trophysize);
-          g:=striprbeg(g,' ');
-          player^.trophy[player^.trophysize].name := stripl(g,' ');
-          g:=striprbeg(g,' ');
-          player^.trophy[player^.trophysize].level:=strtoint(stripl(g,' '));
-          g:=striprbeg(g,' ');
-          player^.trophy[player^.trophysize].times:=strtoint(stripl(g,' '));
+          g:=right(g,' ');
+          player^.trophy[player^.trophysize].name := left(g,' ');
+          g:=right(g,' ');
+          player^.trophy[player^.trophysize].level:=strtoint(left(g,' '));
+          g:=right(g,' ');
+          player^.trophy[player^.trophysize].times:=strtoint(left(g,' '));
           end;
       until (uppercase(g) = '#END') or (af.eof);
 

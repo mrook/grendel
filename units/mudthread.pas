@@ -153,27 +153,27 @@ begin
     with cmd do
       repeat
       readln(f,s);
-      g:=uppercase(stripl(s,':'));
+      g:=uppercase(left(s,':'));
 
       if g='NAME' then
-        name := uppercase(striprbeg(s,' '))
+        name := uppercase(right(s,' '))
       else
       if g='ALIAS' then
         begin
         // create an alias
         alias := GCommand.Create;
-        alias.name := uppercase(striprbeg(s,' '));
+        alias.name := uppercase(right(s,' '));
         end
       else
       if g='LEVEL' then
-        level:=strtoint(striprbeg(s,' '))
+        level:=strtoint(right(s,' '))
       else
       if g='POSITION' then
-        position:=strtoint(striprbeg(s,' '))
+        position:=strtoint(right(s,' '))
       else
       if g='FUNCTION' then
         begin
-        func_name := striprbeg(s,' ');
+        func_name := right(s,' ');
         ptr := findCommand(func_name);
         end;
       until (uppercase(s)='#END') or eof(f);
@@ -375,7 +375,7 @@ begin
 
     if (cmd = nil) and (not checkSocial(ch, cmdline, param)) then
       begin
-      a:=random(8);
+      a := random(9);
       if a<1 then
         cmdline := 'Sorry, that command doesn''t exist in my vocabulaire!'
       else
@@ -398,7 +398,10 @@ begin
         cmdline := 'Huh?'
       else
       if a<8 then
-        cmdline := 'Yeah, right!';
+        cmdline := 'Yeah, right!'
+      else
+      if a<9 then
+        cmdline := 'What you say??';
 
       act(AT_DGREEN, cmdline, false, ch, nil, nil, TO_CHAR);
       end;

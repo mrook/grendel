@@ -65,10 +65,10 @@ procedure GProgram.load(var fp : GFileReader; trigger : string; npc : GNPCIndex)
 var
    g : string;
 begin
-  g := striprbeg(uppercase(trigger),' ');
-  args := striprbeg(g,' ');
+  g := right(uppercase(trigger),' ');
+  args := right(g,' ');
 
-  g:=stripl(g,' ');
+  g := left(g,' ');
   perc := strtointdef(args, 0);
 
   if (g = 'ON_ACT') then
@@ -259,8 +259,8 @@ begin
 
   if (pos('(', ifcheck) > 0) then
     begin
-    chck := stripl(ifcheck, '(');
-    ifcheck := striprbeg(ifcheck, '(');
+    chck := left(ifcheck, '(');
+    ifcheck := right(ifcheck, '(');
     end
   else
     begin
@@ -273,8 +273,8 @@ begin
 
   if (pos(')', ifcheck) > 0) then
     begin
-    cvar := stripl(ifcheck, ')');
-    ifcheck := striprbeg(ifcheck, ')');
+    cvar := left(ifcheck, ')');
+    ifcheck := right(ifcheck, ')');
     end
   else
     begin
@@ -296,8 +296,8 @@ begin
     begin
     if (pos(' ', ifcheck) > 0) then
       begin
-      opr := stripl(ifcheck, ' ');
-      ifcheck := striprbeg(ifcheck, ' ');
+      opr := left(ifcheck, ' ');
+      ifcheck := right(ifcheck, ' ');
       end
     else
       begin
@@ -399,8 +399,8 @@ var
 begin
   cmd := trim(cmd);
 
-  firstword := stripl(cmd, ' ');
-  rest := striprbeg(cmd, ' ');
+  firstword := left(cmd, ' ');
+  rest := right(cmd, ' ');
 
   if (firstword = 'if') then
     begin

@@ -66,20 +66,20 @@ begin
   repeat
     readln(cf,d);
 
-    r:=uppercase(stripl(d,':'));
+    r:=uppercase(left(d,':'));
 
     if r='NAME' then
       begin
-      name := striprbeg(d,' ');
+      name := right(d,' ');
       write_console('   '+name);
       end
     else
     if r='LEADER' then
-      leader := striprbeg(d,' ')
+      leader := right(d,' ')
     else
     if r='MINLEVEL' then
       try
-        minlevel:=strtoint(striprbeg(d,' '))
+        minlevel := strtointdef(right(d,' '), 0)
       except
         minlevel:=0;
         bugreport('load_clan', 'area.pas', 'illegal character in MINLEVEL parameter',
@@ -88,7 +88,7 @@ begin
     else
     if r='CLANOBJ' then
       try
-        clanobj:=strtoint(striprbeg(d,' '))
+        clanobj := strtoint(right(d,' '))
       except
         clanobj:=0;
         bugreport('load_clan', 'area.pas', 'illegal character in CLANOBJ parameter',
@@ -97,7 +97,7 @@ begin
     else
     if r='CLANVNUM' then
       try
-        clanvnum:=strtoint(striprbeg(d,' '));
+        clanvnum:=strtoint(right(d,' '));
       except
         clanvnum:=0;
         bugreport('load_clan', 'area.pas', 'illegal character in CLANVNUM parameter',

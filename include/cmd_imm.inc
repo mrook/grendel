@@ -314,11 +314,11 @@ begin
     repeat
       readln(f, s);
 
-      g := uppercase(stripl(s, ':'));
+      g := uppercase(left(s, ':'));
 
       if (g = 'LEVEL') then
         begin
-        level := strtoint(striprbeg(s, ' '));
+        level := strtoint(right(s, ' '));
 
         if (level >= 990) then
           begin

@@ -1829,16 +1829,16 @@ begin
       repeat
         readln(f, s);
 
-        g := uppercase(stripl(s, ':'));
+        g := uppercase(left(s, ':'));
 
         if (g = 'LEVEL') then
-          level := strtoint(striprbeg(s, ' '))
+          level := strtoint(right(s, ' '))
         else
         if (g = 'RACE') then
-          race := striprbeg(s, ' ')
+          race := right(s, ' ')
         else
         if (g = 'LAST-LOGIN') then
-          last_login := striprbeg(s, ' ');
+          last_login := right(s, ' ');
 
       until eof(f);
 

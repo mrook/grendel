@@ -141,8 +141,8 @@ begin
     Result := 1
   else
     begin
-    g := stripl(s,'.');
-    s := striprbeg(s,'.');
+    g := left(s, '.');
+    s := right(s, '.');
 
     try
       Result := strtoint(g);

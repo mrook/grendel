@@ -169,17 +169,17 @@ begin
 
   with aff do
     begin
-    apply_type := findApply(stripl(format, ' '));
+    apply_type := findApply(left(format, ' '));
 
-    format := striprbeg(format, ' ');
+    format := right(format, ' ');
 
-    modifier := cardinal(findSkill(stripl(format, ' ')));
+    modifier := cardinal(findSkill(left(format, ' ')));
 
     if (modifier = 0) then
-      modifier := strtointdef(stripl(format, ' '), 0);
+      modifier := strtointdef(left(format, ' '), 0);
 
-    format := striprbeg(format, ' ');
-    duration := strtointdef(stripl(format, ' '), 0);
+    format := right(format, ' ');
+    duration := strtointdef(left(format, ' '), 0);
     end;
 
   aff.node := skill.affects.insertLast(aff);
@@ -220,11 +220,11 @@ begin
       repeat
       readln(f, s);
 
-      g := uppercase(stripl(s,':'));
+      g := uppercase(left(s,':'));
 
       if (g = 'TYPE') then
         begin
-        s := uppercase(striprbeg(s,' '));
+        s := uppercase(right(s,' '));
 
         if (s = 'SPELL') then
           skill_type := SKILL_SPELL
@@ -237,72 +237,72 @@ begin
         end
       else
       if (g = 'NAME') then
-        name := striprbeg(s,' ')
+        name := right(s,' ')
       else
       if g='ROUNDS' then
-        beats:=strtoint(striprbeg(s,' '))
+        beats:=strtoint(right(s,' '))
       else
       if g='MINLEVEL' then
-        min_lvl:=strtoint(striprbeg(s,' '))
+        min_lvl:=strtoint(right(s,' '))
       else
       if g='MANA' then
-        min_mana:=strtoint(striprbeg(s,' '))
+        min_mana:=strtoint(right(s,' '))
       else
       if g='TARGET' then
-        target:=strtoint(striprbeg(s,' '))
+        target:=strtoint(right(s,' '))
       else
       if g='FUNCTION' then
-        func := findFunc(striprbeg(s,' '))
+        func := findFunc(right(s,' '))
       else
       if g='STARTCHAR' then
-        start_char := striprbeg(s,' ')
+        start_char := right(s,' ')
       else
       if g='STARTVICT' then
-        start_vict := striprbeg(s,' ')
+        start_vict := right(s,' ')
       else
       if g='STARTROOM' then
-        start_room := striprbeg(s,' ')
+        start_room := right(s,' ')
       else
       if g='HITCHAR' then
-        hit_char := striprbeg(s,' ')
+        hit_char := right(s,' ')
       else
       if g='HITVICT' then
-        hit_vict := striprbeg(s,' ')
+        hit_vict := right(s,' ')
       else
       if g='HITROOM' then
-        hit_room := striprbeg(s,' ')
+        hit_room := right(s,' ')
       else
       if g='MISSCHAR' then
-        miss_char := striprbeg(s,' ')
+        miss_char := right(s,' ')
       else
       if g='MISSVICT' then
-        miss_vict := striprbeg(s,' ')
+        miss_vict := right(s,' ')
       else
       if g='MISSROOM' then
-        miss_room := striprbeg(s,' ')
+        miss_room := right(s,' ')
       else
       if g='DAMMSG' then
-        dam_msg := striprbeg(s,' ')
+        dam_msg := right(s,' ')
       else
       if g='WEAROFF' then
-        wear_msg := striprbeg(s,' ')
+        wear_msg := right(s,' ')
       else
       if g='DICE' then
         begin
-        a:=uppercase(striprbeg(s,' '));
-        dicenum:=strtoint(stripl(a,'D'));
-        a:=striprbeg(a,'D');
-        dicesize:=strtoint(stripl(a,'+'));
-        a:=striprbeg(a,'+');
-        diceadd:=strtoint(stripl(a,' '));
+        a:=uppercase(right(s,' '));
+        dicenum:=strtoint(left(a,'D'));
+        a:=right(a,'D');
+        dicesize:=strtoint(left(a,'+'));
+        a:=right(a,'+');
+        diceadd:=strtoint(left(a,' '));
         end
       else
       if g='AFFECTS' then
-        process_affect(skill, striprbeg(s,' '))
+        process_affect(skill, right(s,' '))
       else
       if g='PREREQ' then
         begin
-        a := striprbeg(s, ' ');
+        a := right(s, ' ');
         sk := findSkill(a);
 
         if (sk <> nil) then

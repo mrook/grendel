@@ -3,74 +3,72 @@ unit strip;
 interface
 uses Sysutils;
 
-function stripl(s:string;f:char):string;  // returns everything from string s before char f
+// return the part on the left of the first occurance of 'delim'
+// or the whole string if there is no 'delim'
+function left(s : string; delim : char) : string;
 
-function striplend(s:string; f:char):string;
+// return the part on the right of the first occurance 'delim'
+// or nothing if there is no 'delim'
+function right(s : string; delim : char) : string;
 
-function stripr(s:string;f:char):string;
+// return the part on the left of the last occurance of 'delim'
+// or the whole string if there is no 'delim'
+function leftr(s : string; delim : char) : string;
 
-function StripRbeg(s:string;what:char):string;
+// return the part on the right of the last occurance 'delim'
+// or nothing if there is no 'delim'
+function rightr(s : string; delim : char) : string;
 
 function CharsInStr(s:string;what:char):integer;
 
 implementation
 
-function stripl(s:string;f:char):string;  // returns everything from string s before char f
-var i:integer;
-    g:string;
+function left(s : string; delim : char) : string;
+var
+   i : integer;
 begin
-  i:=pos(f,s);
-  if i>0 then
-    begin
-    g:=s;
-    delete(g,i,length(g)-i+1);
-    stripl:=g;
-    end
-  else
-    stripl:=s;
-end;
+  i := pos(delim, s);
 
-function striplend(s:string;f:char):string;
-var i:integer;
-    g:string;
-begin
-  i := LastDelimiter(f, s);
   if (i > 0) then
-    begin
-    g:=s;
-    delete(g,i,length(g)-i+1);
-    striplend:=g;
-    end
+    Result := Copy(s, 1, i - 1)
   else
-    striplend:=s;
+    Result := s;
 end;
 
-function stripr(s:string;f:char):string;
-var i:integer;
-    g:string;
+function right(s : string; delim : char) : string;
+var
+   i : integer;
 begin
-  i:=pos(f,s);
-  if i>0 then
-    begin
-    g:=s;
-    delete(g,1,i);
-    stripr:=g;
-    end
+  i := pos(delim, s);
+
+  if (i > 0) then
+    Result := Copy(s, i + 1, length(s))
   else
-    stripr:=s;
+    Result := '';
 end;
 
-function StripRbeg;
-var a:word;
+function leftr(s : string; delim : char) : string;
+var
+   i : integer;
 begin
-  a:=pos(what,s);
-  if a=0 then
-    begin
-    striprbeg:=s;
-    exit;
-    end;
-  delete(s,1,a);
-  striprbeg:=s;
+  i := LastDelimiter(delim, s);
+
+  if (i > 0) then
+    Result := Copy(s, 1, i - 1)
+  else
+    Result := s;
+end;
+
+function rightr(s : string; delim : char) : string;
+var
+   i : integer;
+begin
+  i := LastDelimiter(delim, s);
+
+  if (i > 0) then
+    Result := Copy(s, i + 1, length(s))
+  else
+    Result := '';
 end;
 
 function CharsInStr;

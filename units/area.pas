@@ -332,7 +332,7 @@ begin
     delete(s, 1, 1);
 
     try
-      vnum := strtoint(stripl(s, ' '));
+      vnum := strtoint(left(s, ' '));
     except
       areaBug('rooms_load', 'invalid numeric format ' + s);
       exit;
@@ -531,7 +531,7 @@ begin
             end
           else
             begin
-            s := striprbeg(s,' ');
+            s := right(s,' ');
             sk := findSkill(s);
 
             if (sk <> nil) then
@@ -573,7 +573,7 @@ begin
 
     num:=0;
     try
-      num:=StrToInt(striprbeg(s,'#'));
+      num:=StrToInt(right(s,'#'));
     except
       areaBug('load_objects','illegal numeric format '+s);
       exit;
@@ -665,15 +665,15 @@ begin
 
       with g do
         begin
-        d := stripl(s,':');
+        d := left(s,':');
         reset_type := d[1];
 
-        s := striprbeg(s,' ');
-        arg1 := strtoint(stripl(s,' '));
-        s := striprbeg(s,' ');
-        arg2 := strtoint(stripl(s,' '));
-        s := striprbeg(s,' ');
-        arg3 := strtoint(stripl(s,' '));
+        s := right(s,' ');
+        arg1 := strtoint(left(s,' '));
+        s := right(s,' ');
+        arg2 := strtoint(left(s,' '));
+        s := right(s,' ');
+        arg3 := strtoint(left(s,' '));
 
         if (reset_type = 'M') then
           begin
@@ -750,7 +750,7 @@ begin
       begin
       shop := GShop.Create;
       shop.area := Self;
-      shop.keeper := strtoint(stripl(s,' '));
+      shop.keeper := strtoint(left(s,' '));
 
       npc := findNPCIndex(shop.keeper);
 
@@ -761,25 +761,25 @@ begin
 
       s := af.readLine;
 
-      shop.item_buy[1]:=strtoint(stripl(s,' '));
+      shop.item_buy[1]:=strtoint(left(s,' '));
 
-      s:=striprbeg(s,' ');
-      shop.item_buy[2]:=strtoint(stripl(s,' '));
+      s:=right(s,' ');
+      shop.item_buy[2]:=strtoint(left(s,' '));
 
-      s:=striprbeg(s,' ');
-      shop.item_buy[3]:=strtoint(stripl(s,' '));
+      s:=right(s,' ');
+      shop.item_buy[3]:=strtoint(left(s,' '));
 
-      s:=striprbeg(s,' ');
-      shop.item_buy[4]:=strtoint(stripl(s,' '));
+      s:=right(s,' ');
+      shop.item_buy[4]:=strtoint(left(s,' '));
 
-      s:=striprbeg(s,' ');
-      shop.item_buy[5]:=strtoint(stripl(s,' '));
+      s:=right(s,' ');
+      shop.item_buy[5]:=strtoint(left(s,' '));
 
       s := af.readLine;
-      shop.open_hour:=strtoint(stripl(s,' '));
+      shop.open_hour:=strtoint(left(s,' '));
 
-      s:=striprbeg(s,' ');
-      shop.close_hour:=strtoint(stripl(s,' '));
+      s:=right(s,' ');
+      shop.close_hour:=strtoint(left(s,' '));
 
       repeat
         s := af.readLine;
