@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.18 2004/06/10 18:10:56 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.19 2004/06/10 20:59:16 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -1764,7 +1764,8 @@ begin
   
   if (obj <> nil) then	
   	begin
-  	vict.unequip(obj);
+  	ch.equipment.remove(obj.worn);
+  	obj.worn := '';
   	end
   else
   	begin
@@ -2604,7 +2605,8 @@ begin
   
   if (obj <> nil) then	
   	begin
-  	vict.unequip(obj);
+  	ch.equipment.remove(obj.worn);
+  	obj.worn := '';
   	end
   else
   	begin

@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.11 2004/06/10 18:28:09 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.12 2004/06/10 20:59:16 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -181,7 +181,7 @@ begin
       end
     else
       begin
-      //ch.room.objects.remove(obj);
+      ch.room.objects.remove(obj);
       ch.addInventory(obj);
       end;
       
@@ -233,12 +233,8 @@ begin
 				ch.sendBuffer('You cannot drop that.'#13#10)
 			else
 				begin
-				for d := 1 to obj.count do
-					begin
-					act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
-					act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
-					end;
-
+				act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
+				act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
 				
 				iterator.remove();
 				ch.room.objects.add(obj);
@@ -394,7 +390,11 @@ begin
 			begin
 			obj := GObject(iterator.next());
 
-			ch.unequip(obj);
+			if (ch.unequip(obj)) then
+				begin
+				iterator.remove();
+				obj.worn := '';
+				end;
 			end;
 			
 		iterator.Free();
@@ -406,7 +406,8 @@ begin
 		if (obj = nil) then
 			ch.sendBuffer('You are not wearing this object.'#13#10)
 		else
-			ch.unequip(obj);
+		if (ch.unequip(obj)) then
+			ch.equipment.remove(obj.worn);
 	end;
 end;
 
@@ -1398,6 +1399,7 @@ begin
 	act(AT_REPORT, 'You sheath $p through $P.', false, ch, weapon, belt, TO_CHAR);
 	act(AT_REPORT, '$n sheaths $p through $P.', false, ch, weapon, belt, TO_ROOM);
 	
-	ch.removeInventory(weapon);
+	ch.equipment.remove(weapon.worn);
+	weapon.worn := '';
 	weapon.toObject(belt);
 end;

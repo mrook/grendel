@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.15 2004/06/10 18:10:56 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.16 2004/06/10 20:59:17 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -1048,9 +1048,6 @@ begin
 		act(AT_REPORT, '$n removes $p.', false, Self, obj, nil, TO_ROOM);
 		end;
 		
-	equipment.remove(obj.worn);
-
-	obj.worn := '';			
 	inventory.add(obj);
 
 	affectObject(obj, true);
@@ -1116,6 +1113,9 @@ begin
 				if (not unequip(eq1, silent)) then
 					exit;
 					
+				equipment.remove(eq1.worn);
+				eq1.worn := '';
+					
 				eq1 := nil;
 				end
 			else
@@ -1123,6 +1123,9 @@ begin
 				begin
 				if (not unequip(eq2, silent)) then
 					exit;
+
+				equipment.remove(eq2.worn);
+				eq2.worn := '';
 					
 				eq2 := nil;
 				end			
