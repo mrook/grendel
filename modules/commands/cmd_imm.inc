@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.9 2001/08/02 20:13:57 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.10 2001/08/11 22:02:55 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -310,7 +310,7 @@ begin
       GPlayer(vict).quit;
 
       ch.sendBuffer('Ok.'#13#10);
-      write_console(vict.name^ + ' has been destroyed.');
+      writeConsole(vict.name^ + ' has been destroyed.');
 
       assignfile(f, 'players\' + vict.name^ + '.usr');
       rename(f, 'backup\' + vict.name^ + '.usr');
@@ -343,7 +343,7 @@ begin
 
     closefile(f);
 
-    write_console(param + ' has been destroyed.');
+    writeConsole(param + ' has been destroyed.');
     ch.sendBuffer('Ok.'#13#10);
 
     rename(f, 'backup\' + param + '.usr');
@@ -1706,7 +1706,7 @@ begin
 
   deleteFile('players\' + curr_name + '.usr');
 
-  write_console(ch.name^ + ' has renamed ' + curr_name + ' to ' + new_name);
+  writeConsole(ch.name^ + ' has renamed ' + curr_name + ' to ' + new_name);
 
   buf := Format('$B$5%s$A$7 has renamed you to $B$5%s$A$7.', [ch.name^, new_name]);
   act(AT_REPORT,buf,false,vict,nil,nil,TO_CHAR);
@@ -2123,7 +2123,7 @@ begin
 
     if (room = nil) then
     begin
-      write_console('room = nil');
+      writeConsole('room = nil');
       continue;
     end;
     

@@ -38,6 +38,7 @@ uses
   chars,
   util,
   mudthread,
+  console,
   mudsystem;
 
 procedure loadModules();
@@ -74,7 +75,7 @@ begin
     
     UnloadPackage(module.handle);
       
-    write_console('Unloaded module ' + module.fname);
+    writeConsole('Unloaded module ' + module.fname);
     end;
     
   module_list.clear();
@@ -100,7 +101,7 @@ begin
         
     module_list.put(name, module);
 
-    write_console('Loaded module ' + name + ' (' + module.desc + ')');
+    writeConsole('Loaded module ' + name + ' (' + module.desc + ')');
     
     readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
   except
@@ -120,7 +121,7 @@ begin
       
     UnloadPackage(module.handle);
       
-    write_console('Unloaded module ' + module.fname);
+    writeConsole('Unloaded module ' + module.fname);
     
     module_list.remove(name);
     module.Free;

@@ -1,4 +1,4 @@
-// $Id: timers.pas,v 1.15 2001/07/17 15:24:14 ***REMOVED*** Exp $
+// $Id: timers.pas,v 1.16 2001/08/11 22:02:07 ***REMOVED*** Exp $
 
 unit timers;
 
@@ -155,7 +155,9 @@ begin
           begin
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
           outputError(E);
-          end
+          end;
+        on E : Exception do
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed: ' + E.Message)
         else
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
 
@@ -391,15 +393,15 @@ begin
       60,30,10,5 :  begin
                     case boot_info.boot_type of
                       BOOTTYPE_SHUTDOWN:begin
-                                        write_log(inttostr(boot_info.timer)+' seconds till shutdown');
+                                        writeLog(inttostr(boot_info.timer)+' seconds till shutdown');
                                         to_channel(nil, '$B$1 ---- Server $3shutdown$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                         BOOTTYPE_REBOOT:begin
-                                        write_log(inttostr(boot_info.timer)+' seconds till reboot');
+                                        writeLog(inttostr(boot_info.timer)+' seconds till reboot');
                                         to_channel(nil, '$B$1 ---- Server $3reboot$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                       BOOTTYPE_COPYOVER:begin
-                                        write_log(inttostr(boot_info.timer)+' seconds till reboot');
+                                        writeLog(inttostr(boot_info.timer)+' seconds till reboot');
                                         to_channel(nil, '$B$1 ---- Server $3copyover$1 in $7' + inttostr(boot_info.timer) + '$1 seconds! ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                     end;
@@ -408,15 +410,15 @@ begin
       0 :           begin
                     case boot_info.boot_type of
                       BOOTTYPE_SHUTDOWN:begin
-                                        write_log('Timer reached zero, starting shutdown now');
+                                        writeLog('Timer reached zero, starting shutdown now');
                                         to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                         BOOTTYPE_REBOOT:begin
-                                        write_log('Timer reached zero, starting reboot now');
+                                        writeLog('Timer reached zero, starting reboot now');
                                         to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                       BOOTTYPE_COPYOVER:begin
-                                        write_log('Timer reached zero, starting copyover now');
+                                        writeLog('Timer reached zero, starting copyover now');
                                         to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
                                         end;
                     end;

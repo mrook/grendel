@@ -20,6 +20,7 @@ uses
     Classes,
     strip,
     fsys,
+    console,
     mudsystem;
 
 type
@@ -176,7 +177,7 @@ begin
   try
     af := GFileReader.Create(fname);
   except
-    write_console('Could not load mapfile, symbol info disabled.');
+    writeConsole('Could not load mapfile, symbol info disabled.');
     exit;
   end;
 
@@ -277,9 +278,9 @@ begin
   else
     linen := 'no line';
 
-  write_console(linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
+  writeConsole(linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
 {$ELSE}
-  write_console(IntToHex(integer(addr), 8));
+  writeConsole(IntToHex(integer(addr), 8));
 {$ENDIF}
 end;
 
@@ -293,11 +294,11 @@ var
 begin
 {$IFDEF WIN32}
   addr := E.ExceptionRecord.ExceptionAddress;
-  write_console('Win32 exception detected.');
-  write_console('Exception message: "' + E.Message + '".');
+  writeConsole('Win32 exception detected.');
+  writeConsole('Exception message: "' + E.Message + '".');
   
   try
-    write_console('Call stack follows:');
+    writeConsole('Call stack follows:');
     showAddress(addr);
 
     FillCallStack(st, false);
@@ -310,10 +311,10 @@ begin
       showAddress(st[a]);
       end;
   except
-    write_console('Unable to read call stack.');
+    writeConsole('Unable to read call stack.');
   end;
 {$ELSE}
-  write_console('Exception detected, debugging disabled on this platform.');
+  writeConsole('Exception detected, debugging disabled on this platform.');
 {$ENDIF}
 end;
 

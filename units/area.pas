@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.45 2001/08/03 21:35:04 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.46 2001/08/11 22:02:02 ***REMOVED*** Exp $
 
 unit area;
 
@@ -286,6 +286,7 @@ uses
     chars,
     skills,
     fight,
+    console,
     mudsystem,
     conns;
 
@@ -962,13 +963,13 @@ begin
           s:=s+' O '+pad_integer(o_lo,5)+'-'+pad_integer(o_hi,5);
         end;
 
-      write_console(s);
+      writeConsole(s);
       end;
   until (s = '$');
 
   af.Free();
 
-  write_console('Checking exits...');
+  writeConsole('Checking exits...');
 
   { Checking rooms for errors }
 
@@ -1037,7 +1038,7 @@ begin
 
   tm := Now() - tm;
 
-  write_console('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
+  writeConsole('Area loading took ' + FormatDateTime('n "minute(s)," s "second(s)"', tm));
 //  room_list.hashStats();
 end;
 
@@ -1712,7 +1713,7 @@ begin
 
   if (age >= max_age) then
     begin
-    write_console('Resetting ' + fname + '...');
+    writeConsole('Resetting ' + fname + '...');
 
     reset;
     end;

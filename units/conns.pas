@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.31 2001/08/07 16:10:49 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.32 2001/08/11 22:02:04 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -20,6 +20,7 @@ uses
     util,
     area,
     socket,
+    console,
     mudsystem;
 
 
@@ -159,7 +160,7 @@ begin
     try
       thread.terminate;
     except
-      write_console('could not terminate thread');
+      writeConsole('could not terminate thread');
     end;
   end;
   
@@ -179,7 +180,7 @@ begin
       try
         thread.terminate;
       except
-        write_console('could not terminate thread');
+        writeConsole('could not terminate thread');
       end;
 
       exit;
@@ -197,7 +198,7 @@ begin
         try
           thread.terminate;
         except
-          write_console('could not terminate thread');
+          writeConsole('could not terminate thread');
         end;
 
         exit;
@@ -438,34 +439,34 @@ begin
         'n': i := playername(ch, to_ch);
         'N': begin
              if (vch = nil) then
-               write_console('[BUG]: act() -> vch null')
+               writeConsole('[BUG]: act() -> vch null')
              else
                i := playername(vch, to_ch);
              end;
         'm': i := sex_nm[ch.sex];
         'M': begin
              if (vch = nil) then
-               write_console('[BUG]: act() -> vch null')
+               writeConsole('[BUG]: act() -> vch null')
              else
                i := sex_nm[vch.sex];
              end;
         's': i := sex_bm[ch.sex];
         'S': begin
              if (vch = nil) then
-               write_console('[BUG]: act() -> vch null')
+               writeConsole('[BUG]: act() -> vch null')
              else
                i := sex_bm[vch.sex];
              end;
         'e': i := sex_pm[ch.sex];
         'E': begin
              if (vch = nil) then
-               write_console('[BUG]: act() -> vch null')
+               writeConsole('[BUG]: act() -> vch null')
              else
                i := sex_pm[vch.sex];
              end;
        'o': begin
              if (obj1 = nil) then
-               write_console('[BUG]: act() -> obj1 null')
+               writeConsole('[BUG]: act() -> obj1 null')
              else
                begin
                if (obj1 is GObjectIndex) then
@@ -476,7 +477,7 @@ begin
              end;
         'O': begin
              if (obj2 = nil) then
-               write_console('[BUG]: act() -> obj2 null')
+               writeConsole('[BUG]: act() -> obj2 null')
              else
                begin
                if (obj1 is GObjectIndex) then
@@ -487,7 +488,7 @@ begin
              end;
         'p': begin
              if (obj1 = nil) then
-               write_console('[BUG]: act() -> obj1 null')
+               writeConsole('[BUG]: act() -> obj1 null')
              else
                begin
                if (obj1 is GObjectIndex) then
@@ -498,7 +499,7 @@ begin
              end;
         'P': begin
              if (obj2 = nil) then
-               write_console('[BUG]: act() -> obj2 null')
+               writeConsole('[BUG]: act() -> obj2 null')
              else
                begin
                if (obj2 is GObjectIndex) then
@@ -509,19 +510,19 @@ begin
              end;
         't': begin
              if (arg1 = nil) then
-               write_console('[BUG]: act() -> pchar(arg1) null')
+               writeConsole('[BUG]: act() -> pchar(arg1) null')
              else
                i := (PString(arg1))^;
              end;
         'T': begin
              if (arg2 = nil) then
-               write_console('[BUG]: act() -> pchar(arg2) null')
+               writeConsole('[BUG]: act() -> pchar(arg2) null')
              else
                i := (PString(arg2))^;
              end;
         'd': begin
                if (arg2 = nil) then
-                 write_console('[BUG]: act() -> arg2 is nil')
+                 writeConsole('[BUG]: act() -> arg2 is nil')
                else
                begin
                  ex := GExit(arg2);
@@ -536,7 +537,7 @@ begin
                     i:='$'+acts[t];
                     end;
       else
-        write_console('[BUG]: act() -> bad format code');
+        writeConsole('[BUG]: act() -> bad format code');
       end;
       s := s + i;
       end
@@ -593,7 +594,7 @@ begin
 
   if (ch = nil) and (typ <> TO_ALL) then
     begin
-    write_console('[BUG]: act() -> ch null');
+    writeConsole('[BUG]: act() -> ch null');
     exit;
     end;
 
@@ -604,7 +605,7 @@ begin
     begin
     if (vch = nil) then
       begin
-      write_console('[BUG]: act() -> vch null');
+      writeConsole('[BUG]: act() -> vch null');
       exit;
       end;
 

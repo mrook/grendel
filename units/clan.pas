@@ -31,6 +31,7 @@ implementation
 uses
     SysUtils,
     Strip,
+    console,
     mudsystem;
 
 constructor GClan.Create;
@@ -71,7 +72,7 @@ begin
     if r='NAME' then
       begin
       name := right(d,' ');
-      write_console('   '+name);
+      writeConsole('   '+name);
       end
     else
     if r='LEADER' then

@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.15 2001/08/09 12:05:31 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.16 2001/08/11 22:02:04 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -31,6 +31,7 @@ uses
     chars,
     conns,
     constants,
+    console,
     dtypes,
     area,
     util,
@@ -49,7 +50,7 @@ constructor GCleanThread.Create;
 begin
   inherited Create(false);
 
-  write_console('Started cleanup thread.');
+  writeConsole('Started cleanup thread.');
 {$IFDEF WIN32}
   SetThreadPriority(Handle, THREAD_PRIORITY_IDLE);
 {$ENDIF}
@@ -61,7 +62,7 @@ var
    ch : GCharacter;
    node : GListNode;
 begin
-  write_console('Autosaving characters...');
+  writeConsole('Autosaving characters...');
 
   node := char_list.head;
 

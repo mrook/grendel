@@ -12,6 +12,7 @@ uses
     mudsystem,
     mudthread,
     dtypes,
+    console,
     util,
     chars;
 
@@ -303,14 +304,14 @@ begin
     oppnt.fighting := ch;
     end;
 
-  if (dam > 5) and (oppnt.position = POS_CASTING) then
+{  if (dam > 5) and (oppnt.position = POS_CASTING) then
     begin
     act(AT_FIGHT_HIT, '$B$4OUCH$7!$A$7 You lost your concentration!',false,oppnt,nil,ch,TO_CHAR);
 
     unregisterTimer(oppnt, TIMER_CAST);
 
     oppnt.position := POS_FIGHTING;
-    end;
+    end; }
 
   if (dam>10) and (dt<>TYPE_UNDEFINED) then
     begin
@@ -791,7 +792,7 @@ begin
     ch.position := POS_STANDING;
 
     bugreport('multi_hit', 'fight.pas', 'desync error: ch.fighting & vict not same');
-    write_console('System is unstable - prepare for a rough ride');
+    writeConsole('System is unstable - prepare for a rough ride');
 
     exit;
     end;

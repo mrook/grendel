@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.27 2001/07/18 14:15:59 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.28 2001/08/11 22:02:05 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -116,9 +116,8 @@ var
   boot_type : integer = BOOTTYPE_SHUTDOWN;
 
 
-procedure write_direct(s:string);
-procedure write_console(s:string);
-procedure write_log(s:string);
+procedure writeDirect(text : string);
+procedure writeLog(text : string);
 procedure bugreport(func, pasfile, bug : string);
 procedure calculateonline;
 
@@ -144,37 +143,29 @@ uses
     area,
     fsys,
     conns,
+    console,
     Channels;
 
-procedure write_direct(s : string);
+procedure writeDirect(text : string);
 begin
-  write_log(s);
-  writeln(s);
+  writeLog(text);
+
+{$IFDEF LINUX}
+  writeln(text);
+{$ENDIF}
 end;
 
-procedure write_console(s:string);
+procedure writeLog(text : string);
 begin
-  write_log(s);
+  text := '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] [LOG] ' + text;
 
-  s := FormatDateTime('[tt] ', Now) + s;
-
-  writeln(s);
-
-  if (mud_booted and channels_loaded) then
-    to_channel(nil, s + '$7',CHANNEL_LOG,AT_LOG);
-end;
-
-procedure write_log(s:string);
-begin
-  s := '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] [LOG] ' + s;
-
-  if TTextRec(logfile).mode=fmOutput then
-    system.writeln(logfile,s);
+  if (TTextRec(logfile).mode = fmOutput) then
+    system.writeln(logfile, text);
 end;
 
 procedure bugreport(func, pasfile, bug : string);
 begin
-  write_console('[BUG] ' + func + ' -> ' + bug);
+  writeConsole('[BUG] ' + func + ' -> ' + bug);
 
 {  write_direct('[Extended error information]');
   write_direct('Location:    function ' + func + ' in ' + pasfile);
@@ -405,7 +396,7 @@ begin
 
     if (findSocial(social.name) <> nil) then
       begin
-      write_console('duplicate social "' + social.name + '" on line ' + inttostr(af.line) + ', discarding');
+      writeConsole('duplicate social "' + social.name + '" on line ' + inttostr(af.line) + ', discarding');
       social.Free;
       end
     else
@@ -742,5 +733,6 @@ initialization
   auction_good := GAuction.Create;
   auction_evil := GAuction.Create;
   banned_masks := TStringList.Create;
+
 end.
 

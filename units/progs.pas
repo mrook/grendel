@@ -39,6 +39,7 @@ uses
     SysUtils,
     TypInfo,
     chars,
+    console,
     dtypes,
     util,
     mudthread,
@@ -100,9 +101,9 @@ end;
 procedure grendelVMError(owner : TObject; msg : string);
 begin
   if (owner <> nil) then
-    write_console('VM error in context of ' + GNPC(owner).name^ + ': ' + msg)
+    writeConsole('VM error in context of ' + GNPC(owner).name^ + ': ' + msg)
   else
-    write_console('VM error: ' + msg);
+    writeConsole('VM error: ' + msg);
 end;
 
 function grendelExternalTrap(obj : variant; member : string) : variant;

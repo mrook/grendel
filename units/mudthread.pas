@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.62 2001/08/04 22:12:04 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.63 2001/08/11 22:02:06 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -17,6 +17,7 @@ uses
     Math,
     ansiio,
     constants,
+    console,
     conns,
     chars,
     race,
@@ -113,7 +114,7 @@ begin
   
   if (f = nil) then
     begin
-    write_console('Could not find function for command "' + s + '"');
+    writeConsole('Could not find function for command "' + s + '"');
     f := @do_dummy;
     end;
     
@@ -347,10 +348,10 @@ begin
         else
           begin
           if (system_info.log_all) or (ch.logging) then
-            write_log(ch.name^ + ': ' + line);
+            writeLog(ch.name^ + ': ' + line);
 
           if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
-            write_console('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+            writeConsole('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
           try
 //            time := GetTickCount;
@@ -489,7 +490,7 @@ begin
 
                   if (not MD5Match(MD5String(argument), ch.md5_password)) then
                     begin
-                    write_console('(' + inttostr(conn.sock.getDescriptor) + ') Failed password');
+                    writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') Failed password');
                     conn.sock.send('Wrong password.'#13#10);
                     exit;
                     end;
@@ -509,7 +510,7 @@ begin
                     conn.sock.send('You have reconnected.'#13#10);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.flags, PLR_LINKLESS);
-                    write_console('(' + inttostr(conn.sock.getDescriptor) + ') ' + ch.name^ + ' has reconnected');
+                    writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') ' + ch.name^ + ' has reconnected');
 
                     ch.sendPrompt;
                     conn.state := CON_PLAYING;
@@ -537,7 +538,7 @@ begin
                   ch.toRoom(ch.room);
 
                   act(AT_WHITE, '$n enters through a magic portal.', true, ch, nil, nil, TO_ROOM);
-                  write_console('(' + inttostr(conn.sock.getDescriptor) + ') '+ ch.name^ +' has logged in');
+                  writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+ ch.name^ +' has logged in');
 
                   ch.node_world := char_list.insertLast(ch);
                   ch.logon_now := Now;
@@ -935,11 +936,11 @@ label nameinput,stopthread;
 begin
   freeonterminate := true;
 
-  write_console('(' + inttostr(conn.sock.getDescriptor) + ') New connection (' + conn.sock.host_string + ')');
+  writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') New connection (' + conn.sock.host_string + ')');
 
   if (isMaskBanned(conn.sock.host_string)) then
     begin
-    write_console('('+inttostr(conn.sock.getDescriptor)+') Closed banned IP (' + conn.sock.host_string + ')');
+    writeConsole('('+inttostr(conn.sock.getDescriptor)+') Closed banned IP (' + conn.sock.host_string + ')');
 
     conn.sock.send(system_info.mud_name+#13#10#13#10);
     conn.sock.send('Your site has been banned from this server.'#13#10);
@@ -1049,7 +1050,7 @@ begin
   try
     if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
       begin
-      write_console('(' + inttostr(conn.sock.getDescriptor) + ') '+conn.ch.name^+' has lost the link');
+      writeConsole('(' + inttostr(conn.sock.getDescriptor) + ') '+conn.ch.name^+' has lost the link');
 
       interpret(conn.ch, 'return');
 
@@ -1063,7 +1064,7 @@ begin
       dec(system_info.user_cur)
     else
       begin
-      write_console('('+inttostr(conn.sock.getDescriptor)+') Connection reset by peer');
+      writeConsole('('+inttostr(conn.sock.getDescriptor)+') Connection reset by peer');
       conn.ch.Free;
       end;
 
@@ -1107,7 +1108,7 @@ begin
     
     if (c.func_name = name) then
       begin
-//      write_console('Found empty command with my name: ' + c.name);
+//      writeConsole('Found empty command with my name: ' + c.name);
       c.ptr := func;
       end;
     end;  
@@ -1136,7 +1137,7 @@ begin
       
       if (@c.ptr = @g.func) then
         begin
-//        write_console('Resetting command with my name: ' + c.name);
+//        writeConsole('Resetting command with my name: ' + c.name);
         c.ptr := do_dummy;
         end;
       end;

@@ -34,6 +34,7 @@ uses
   timers,
   util,
   md5,
+  console,
   fight,
   bulletinboard,
   modules,
@@ -308,7 +309,7 @@ begin
 
   GConnection(ch.conn).send('You feel yourself dissolving, atom by atom...'#13#10);
 
-  write_console(ch.name^ + ' has deleted');
+  writeConsole(ch.name^ + ' has deleted');
   GPlayer(ch).quit;
 
   assignfile(f, 'players\' + ch.name^ + '.usr');

@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.8 2001/07/31 16:32:49 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.9 2001/08/11 22:02:03 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -13,6 +13,7 @@ interface
 uses
   dtypes,
   chars,
+  console,
   constants;
 
 const
@@ -264,7 +265,7 @@ var
 begin
   if (not channels_loaded) then
   begin
-    write_console('to_channel(): channels not loaded! Perhaps error loading/parsing ' + channelDataFile + '? Please correct this error.');
+    writeConsole('to_channel(): channels not loaded! Perhaps error loading/parsing ' + channelDataFile + '? Please correct this error.');
     exit;
   end;
   
@@ -359,7 +360,7 @@ var
 begin
   if (not channels_loaded) then
     begin
-    write_console('channelCommunicate(): channels not loaded! Perhaps error loading/parsing ' + channelDataFile + '? Please correct this error.');
+    writeConsole('channelCommunicate(): channels not loaded! Perhaps error loading/parsing ' + channelDataFile + '? Please correct this error.');
     exit;
     end;
     
@@ -417,7 +418,7 @@ begin
   begin
     if (chan.LOG()) then
     begin
-      write_console(Format('Logged channel [%s]: %s ' + chan.verbother, [chan.channelname, ch.name^, param]));
+      writeConsole(Format('Logged channel [%s]: %s ' + chan.verbother, [chan.channelname, ch.name^, param]));
     end;
     
     if (not ch.IS_IMMORT()) then
@@ -448,19 +449,19 @@ begin
     case parser.CurPartType of // Here the parser tells you what it has found
 {      ptDtdc:
         begin
-          writeln('ptDtdc: ' + StrSFPas (Parser.CurStart, Parser.CurFinal));
+          writeConsole('ptDtdc: ' + StrSFPas (Parser.CurStart, Parser.CurFinal));
         end;}
 {      ptEmptyTag:
         begin
-          writeln('ptEmptyTag');
+          writeConsole('ptEmptyTag');
         end;}
 {      ptCData    : // Process Parser.CurContent field here
         begin
-          writeln('ptCData: CurContent: ' + parser.CurContent);
+          writeConsole('ptCData: CurContent: ' + parser.CurContent);
         end;}
 {        ptPI       : // Process PI here (Parser.CurName is the target, Parser.CurContent)
         begin
-          writeln('ptPI: CurName: ' + parser.CurName + ' CurContent: ' + parser.CurContent);
+          writeConsole('ptPI: CurName: ' + parser.CurName + ' CurContent: ' + parser.CurContent);
         end;}
       ptStartTag: // Process Parser.CurName and Parser.CurAttr (see below) fields here
         begin
@@ -480,7 +481,7 @@ begin
               end;
               if (str = '') then
               begin
-                write_console(errprefix + 'found channeldata tag with fields but no name field (error in channelfile).');
+                writeConsole(errprefix + 'found channeldata tag with fields but no name field (error in channelfile).');
               end
               else
               begin
@@ -490,7 +491,7 @@ begin
             end
             else
             begin
-              write_console(errprefix + 'found channeldata tag without a name field (error in channelfile).');
+              writeConsole(errprefix + 'found channeldata tag without a name field (error in channelfile).');
             end;
           end
           else
@@ -528,12 +529,12 @@ begin
       ptContent:
         begin
           if (chanparam = nil) then
-            write_console(errprefix + '(ptContent) chanparam = nil (error in code).')
+            writeConsole(errprefix + '(ptContent) chanparam = nil (error in code).')
           else
             case Field of
               FieldNone:
                 begin
-                  write_console(errprefix + 'found unrecognized tag ''' + parser.CurName + ''' with content ''' + parser.CurContent + ''' (error in channelfile).');
+                  writeConsole(errprefix + 'found unrecognized tag ''' + parser.CurName + ''' with content ''' + parser.CurContent + ''' (error in channelfile).');
                 end;
               FieldCommand:
                 begin
@@ -551,12 +552,12 @@ begin
                     chanparam.minleveluse := StrToInt(parser.CurContent);
                     if ((chanparam.minleveluse < LEVEL_START) or (chanparam.minleveluse > LEVEL_MAX_IMMORTAL)) then
                     begin
-                      write_console(errprefix + Format('found invalid value for Minimumleveluse tag (%d), value supposed to be >= %d and =< %d.', [chanparam.minleveluse, LEVEL_START, LEVEL_MAX_IMMORTAL]));
+                      writeConsole(errprefix + Format('found invalid value for Minimumleveluse tag (%d), value supposed to be >= %d and =< %d.', [chanparam.minleveluse, LEVEL_START, LEVEL_MAX_IMMORTAL]));
                     end;
                   except
                     on EConvertError do
                     begin
-                      write_console(errprefix + Format('found invalid value for Minimumleveluse tag (''%s''), setting to %d.', [parser.CurContent, LEVEL_MAX_IMMORTAL]));
+                      writeConsole(errprefix + Format('found invalid value for Minimumleveluse tag (''%s''), setting to %d.', [parser.CurContent, LEVEL_MAX_IMMORTAL]));
                       chanparam.minleveluse := LEVEL_MAX_IMMORTAL;
                     end;
                   end;
@@ -568,12 +569,12 @@ begin
                     chanparam.minlevelsee := StrToInt(parser.CurContent);
                     if ((chanparam.minlevelsee < LEVEL_START) or (chanparam.minlevelsee > LEVEL_MAX_IMMORTAL)) then
                     begin
-                      write_console(errprefix + Format('found invalid value for Minimumlevelsee tag (%d), value supposed to be >= %d and =< %d.', [chanparam.minlevelsee, LEVEL_START, LEVEL_MAX_IMMORTAL]));
+                      writeConsole(errprefix + Format('found invalid value for Minimumlevelsee tag (%d), value supposed to be >= %d and =< %d.', [chanparam.minlevelsee, LEVEL_START, LEVEL_MAX_IMMORTAL]));
                     end;
                   except
                     on EConvertError do
                     begin
-                      write_console(errprefix + Format('found invalid value for Minimumlevelsee tag (''%s''), setting to %d.', [parser.CurContent, LEVEL_MAX_IMMORTAL]));
+                      writeConsole(errprefix + Format('found invalid value for Minimumlevelsee tag (''%s''), setting to %d.', [parser.CurContent, LEVEL_MAX_IMMORTAL]));
                       chanparam.minlevelsee := LEVEL_MAX_IMMORTAL;
                     end;
                   end;
@@ -590,12 +591,12 @@ begin
                     chanparam.channelcolor := StrToInt(parser.CurContent);
                     if (chanparam.channelcolor < 0) then
                     begin
-                      write_console(errprefix + Format('found invalid value for Channelcolor tag (%d), value supposed to be >= %d.', [chanparam.channelcolor, 0]));
+                      writeConsole(errprefix + Format('found invalid value for Channelcolor tag (%d), value supposed to be >= %d.', [chanparam.channelcolor, 0]));
                     end;
                   except
                     on EConvertError do
                     begin
-                      write_console(errprefix + Format('found invalid value for Channelcolor tag (''%s''), setting to %d.', [parser.CurContent, LEVEL_MAX_IMMORTAL]));
+                      writeConsole(errprefix + Format('found invalid value for Channelcolor tag (''%s''), setting to %d.', [parser.CurContent, LEVEL_MAX_IMMORTAL]));
                       chanparam.channelcolor := LEVEL_MAX_IMMORTAL;
                     end;
                   end;
@@ -618,7 +619,7 @@ begin
                   except
                     on E: EConvertError do
                     begin
-                      write_console(errprefix + Format('error parsing value for Flags tag (''%s''): %s.', [parser.CurContent, e.Message]));
+                      writeConsole(errprefix + Format('error parsing value for Flags tag (''%s''): %s.', [parser.CurContent, e.Message]));
                     end;
                   end;
                   exit;
@@ -630,14 +631,14 @@ begin
                   except
                     on EConvertError do
                     begin
-                      write_console(errprefix + Format('found invalid value for Cost tag (''%s''), setting to %d.', [parser.CurContent, 0]));
+                      writeConsole(errprefix + Format('found invalid value for Cost tag (''%s''), setting to %d.', [parser.CurContent, 0]));
                       chanparam.cost := 0;
                     end;
                   end;
                   exit;
                 end;
             else
-              write_console(errprefix + '(ptContent) found unrecognized Field enum (possible error in code).');
+              writeConsole(errprefix + '(ptContent) found unrecognized Field enum (possible error in code).');
             end;
         end;
       ptEndTag   : // Process End-Tag here (Parser.CurName)
@@ -652,7 +653,7 @@ begin
           end
           else
           begin
-//            write_console(errprefix + 'found unrecognized EndTag ''' + parser.CurName + ''' (error in channelfile).');
+//            writeConsole(errprefix + 'found unrecognized EndTag ''' + parser.CurName + ''' (error in channelfile).');
           end;
         end;
     end;
@@ -712,18 +713,17 @@ begin
 
     with chan do
     begin
-      writeln('channelname: ' + channelname);
-      writeln('  command:       ' + command);
-      writeln('  alias:         ' + alias);
-      writeln('  minleveluse:   ' + IntToStr(minleveluse));
-      writeln('  minlevelsee:   ' + IntToStr(minlevelsee));
-      writeln('  comment:       ' + comment);
-      writeln('  channelcolor:  ' + IntToStr(channelcolor));
-      writeln('  verbyou:       ' + verbyou);
-      writeln('  verbother:     ' + verbother);
-      writeln('  flags:         ' + IntToStr(integer(channel_flags)));
+      writeConsole('channelname: ' + channelname);
+      writeConsole('  command:       ' + command);
+      writeConsole('  alias:         ' + alias);
+      writeConsole('  minleveluse:   ' + IntToStr(minleveluse));
+      writeConsole('  minlevelsee:   ' + IntToStr(minlevelsee));
+      writeConsole('  comment:       ' + comment);
+      writeConsole('  channelcolor:  ' + IntToStr(channelcolor));
+      writeConsole('  verbyou:       ' + verbyou);
+      writeConsole('  verbother:     ' + verbother);
+      writeConsole('  flags:         ' + IntToStr(integer(channel_flags)));
     end;
-    writeln;
 
     node := node.next;
   end;
@@ -741,7 +741,7 @@ begin
   
   if (parser.Source <> channelDataFile) then
   begin
-    write_console('Could not open ' + channelDataFile + ', channels disabled.');
+    writeConsole('Could not open ' + channelDataFile + ', channels disabled.');
     exit;
   end;
 
@@ -770,20 +770,20 @@ begin
   chan := lookupChannel(CHANNEL_LOG);
   if (chan = nil) then
   begin
-    write_console('PANIC: no LOG channel found while loading channels from ' + channelDatafile + '.');
-    write_console('PANIC: this channel is *ESSENTIAL* to this mud.');
-    write_console('PANIC: Please add the following to ' + channelDataFile + ':');
-    write_console('         <ChannelData Name="log">');
-    write_console('           <Flags>1|32</Flags>');
-    write_console('         </ChannelData>');
+    writeConsole('PANIC: no LOG channel found while loading channels from ' + channelDatafile + '.');
+    writeConsole('PANIC: this channel is *ESSENTIAL* to this mud.');
+    writeConsole('PANIC: Please add the following to ' + channelDataFile + ':');
+    writeConsole('         <ChannelData Name="log">');
+    writeConsole('           <Flags>1|32</Flags>');
+    writeConsole('         </ChannelData>');
     halt;
   end
   else
   begin
     if (chan.minlevelsee <> system_info.level_log) then
     begin
-      write_console(Format('Warning: value of minimumlevelsee field of channel ''log'' (%d) doesn''t equal LevelLog value in system\sysdata.dat ().', [chan.minlevelsee, system_info.level_log]));
-      write_console('Warning: setting minimumlevelsee to value in system\sysdata.dat.');
+      writeConsole(Format('Warning: value of minimumlevelsee field of channel ''log'' (%d) doesn''t equal LevelLog value in system\sysdata.dat ().', [chan.minlevelsee, system_info.level_log]));
+      writeConsole('Warning: setting minimumlevelsee to value in system\sysdata.dat.');
       chan.minlevelsee := system_info.level_log;
     end;
   end;
@@ -791,9 +791,9 @@ begin
   registerChannels(channellist);
 
   if (channellist.getSize() < 1) then
-    write_console('no channels loaded from ' + channelDataFile + ', please check that file. Channels disabled for now.')
+    writeConsole('no channels loaded from ' + channelDataFile + ', please check that file. Channels disabled for now.')
   else
-    write_console(Format('%d channels loaded from file %s and registered.', [channellist.getSize(), channelDataFile]));
+    writeConsole(Format('%d channels loaded from file %s and registered.', [channellist.getSize(), channelDataFile]));
 
 //  writeChannelsToConsole();
   channels_loaded := true;
@@ -895,8 +895,28 @@ begin
   end;
 end;
 
+
+type 
+  GConsoleChannel = class(GConsoleWriter)
+  public
+    procedure write(timestamp : TDateTime; text : string); override;
+  end;
+
+procedure GConsoleChannel.write(timestamp : TDateTime; text : string);
 begin
+  if (channels_loaded) then
+    to_channel(nil, FormatDateTime('[tt] ', Now) + text + '$7',CHANNEL_LOG,AT_LOG);
+end;
+
+initialization
   channellist := GDLinkedList.Create();
   channels_loaded := false;
+  
+  registerConsoleDriver(GConsoleChannel.Create());
+  
+finalization
+  channellist.clean();
+  channellist.Free();
+  
 end.
 

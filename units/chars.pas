@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.53 2001/08/04 16:10:46 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.54 2001/08/11 22:02:03 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -334,6 +334,7 @@ implementation
 uses
     conns,
     skills,
+    console,
     mudsystem,
     mudthread,
     Channels;
@@ -652,10 +653,10 @@ begin
     end;
 
   if (c = nil) then
-    write_console('(Linkless) '+ name^+ ' has logged out')
+    writeConsole('(Linkless) '+ name^+ ' has logged out')
   else
   if (c <> nil) then
-    write_console('(' + inttostr(c.sock.getDescriptor) + ') ' + name^ + ' has logged out');
+    writeConsole('(' + inttostr(c.sock.getDescriptor) + ') ' + name^ + ' has logged out');
 
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
@@ -666,7 +667,7 @@ begin
     try
       c.thread.terminate;
     except
-      write_console('could not delete thread of ' + name^);
+      writeConsole('could not delete thread of ' + name^);
     end;
 
     conn := nil;
@@ -2300,7 +2301,7 @@ begin
       begin
       bugreport('GCharacter.toRoom', 'chars.pas', 'HELP! even portal is NULL room! what did you do?');
 
-      write_console('System is unstable - prepare for a rough ride');
+      writeConsole('System is unstable - prepare for a rough ride');
       exit;
       end;
     end;

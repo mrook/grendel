@@ -35,7 +35,8 @@ function findRace(name : string) : GRace;
 implementation
 
 uses
-    skills;
+  console,
+  skills;
 
 constructor GRace.Create;
 begin
@@ -95,7 +96,7 @@ begin
               if (lab = 'NAME') then
               begin
                 name := arg;
-                write_console('   Race: ' + name);
+                writeConsole('   Race: ' + name);
               end
               else
               if (lab = 'ALIGN') then

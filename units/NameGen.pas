@@ -50,6 +50,7 @@ implementation
 uses
   SysUtils,
   mudsystem,
+  console,
   util,
   LibXmlParser;
   
@@ -138,7 +139,7 @@ begin
   if (parser.Source <> dfile) then
   begin
     namegenerator_enabled := false;
-    write_console('Could not open ' + dfile + ' (automatic namegenerator), disabled.');
+    writeConsole('Could not open ' + dfile + ' (automatic namegenerator), disabled.');
     exit;
   end;
   
@@ -228,7 +229,7 @@ begin
   parser.Free();
 
   namegenerator_enabled := true;
-  write_console('Loaded ' + inttostr(PhonemeList.getSize()) + ' phoneme classes and ' + inttostr(NameTemplateList.getSize()) + ' name templates from ' + dfile + '.');
+  writeConsole('Loaded ' + inttostr(PhonemeList.getSize()) + ' phoneme classes and ' + inttostr(NameTemplateList.getSize()) + ' name templates from ' + dfile + '.');
 end;
 
 function findPhoneme(str : string) : TPhoneme;
@@ -307,7 +308,7 @@ begin
   NameTemplateList.Clean();
   NameTemplateList.Free();
   namegenerator_enabled := false;
-  write_console('Reloading ' + NameTablesDataFile + '.');
+  writeConsole('Reloading ' + NameTablesDataFile + '.');
   loadNameTables(NameTablesDataFile);
 end;
 

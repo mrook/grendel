@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.1 2001/07/28 20:53:25 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.2 2001/08/11 22:02:55 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -112,7 +112,7 @@ begin
     exit;
     end;
   act(AT_SUGGEST,'You suggest, '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  write_console(ch.name^+' suggested '''+param+'''');
+  writeConsole(ch.name^+' suggested '''+param+'''');
   assignfile(f,'system\suggest.dat');
   append(f);
   writeln(f,DateTimeToStr(Now),'> ','Suggestion by ',ch.name^,': ',param);
@@ -127,7 +127,7 @@ begin
     exit;
     end;
   act(AT_PRAY,'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
-  write_console(ch.name^+' prays '''+param+'''');
+  writeConsole(ch.name^+' prays '''+param+'''');
 end;
 
 procedure do_clanadd(ch:GCharacter;param:string);

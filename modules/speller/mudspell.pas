@@ -64,6 +64,7 @@ implementation
 
 uses
     mudsystem,
+    console,
     util;
 
 // Utility //
@@ -579,7 +580,7 @@ begin
   enabled := spell.OpenFile;
 
   if (not enabled) then
-    write_console('Could not open dictionary, spell checking is disabled.')
+    writeConsole('Could not open dictionary, spell checking is disabled.')
   else
     spell.CustomDictionary := 'custom.dic';
 end.
