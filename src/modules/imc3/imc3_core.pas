@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.3 2004/03/11 23:29:57 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.4 2004/03/14 11:54:22 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -84,7 +84,7 @@ type
 		procedure shutdown();
 		
 		constructor Create(debugLevel : integer = 0);
-		destructor Destroy;
+		destructor Destroy; override;
 		
 		procedure setDebugLevel(debugLevel : integer = 0);
 		
@@ -1049,7 +1049,7 @@ begin
 					end;
 			end;
 		end;
-
+		
 	if (connected) then
 		disconnect();
 end;
