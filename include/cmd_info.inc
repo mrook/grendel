@@ -85,7 +85,6 @@ begin
 
       cnt := 0;
       node := vict.objects.head;
-      buf := '';
 
       while (node <> nil) do
         begin
@@ -101,9 +100,7 @@ begin
 
           act(AT_REPORT, pad_string(buf1 + eq_string[obj.wear_location] + ')', 30) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
           inc(cnt);
-          end
-        else
-          buf := buf + '      ' + obj.short^ + #13#10;
+          end;
 
         node := node.next;
         end;
@@ -113,12 +110,26 @@ begin
 
       if (number_percent <= ch.learned[gsn_peek]) then
         begin
-        ch.sendBuffer(#13#10'You peek at the inventory and see:'#13#10);
+        act(AT_REPORT, #13#10'You peek at the inventory and see:', false, ch, nil, nil, TO_CHAR);
 
-        if (length(buf) = 0) then
-          buf := buf + '  nothing.' + #13#10;
+        cnt := 0;
+        node := vict.objects.head;
 
-        ch.sendBuffer(buf);
+        while (node <> nil) do
+          begin
+          obj := node.element;
+
+          if (obj.wear_location = WEAR_NULL) then
+            begin
+            act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+            inc(cnt);
+            end;
+
+          node := node.next;
+          end;
+
+        if (cnt = 0) then
+          ch.sendBuffer('  nothing.'#13#10);
         end;
       end
     else
@@ -303,9 +314,9 @@ begin
     if (obj.wear_location = WEAR_NULL) then
       begin
       if (obj.count > 1) then
-        act(AT_REPORT, '  $p [' + inttostr(obj.count) + ']', false, ch, obj, nil, TO_CHAR)
+        act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
       else
-        act(AT_REPORT, '  $p', false, ch, obj, nil, TO_CHAR);
+        act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
 
       inc(counter);
       end;
@@ -1055,8 +1066,19 @@ var g,h:integer;
     node : GListNode;
     aff : GAffect;
 begin
+  act(AT_REPORT, '$B$1[$B$7Current status:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);
+
+  if (ch.IS_FLYING) then
+    ch.sendBuffer('You are flying.'#13#10);
+  if (IS_SET(ch.aff_flags, AFF_SNEAK)) then
+    ch.sendBuffer('You attempt to sneak.'#13#10);
+  if (IS_SET(ch.aff_flags, AFF_HIDE)) then
+    ch.sendBuffer('You attempt to hide.'#13#10);
+  if (IS_SET(ch.aff_flags, AFF_HOLYWALK)) then
+    ch.sendBuffer('Holy walk is on.'#13#10);
+
   h:=0;
-  ch.sendBuffer('Current affects:'#13#10#13#10);
+  act(AT_REPORT, #13#10'$B$1[$B$7Current affects:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);
 
   node := ch.affects.head;
 
