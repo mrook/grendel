@@ -51,7 +51,8 @@ uses
   clean in 'units\clean.pas',
   Winsock2 in 'units\winsock2.pas',
   progs in 'units\progs.pas',
-  md5 in 'units\md5.pas';
+  md5 in 'units\md5.pas',
+  MemCheck in 'units\MemCheck.pas';
 
 const pipeName : pchar = '\\.\pipe\grendel';
 const use_ipv4 : boolean = false;
@@ -209,14 +210,81 @@ begin
 end;
 
 procedure cleanup_mud;
+var
+   n : integer;
+   node : GListNode;
 begin
+  mud_booted := false;
+
   clean_thread.Terminate;
   KillTimer(0, timer_ident);
 
   write_console('Releasing allocated memory...');
 
   try
+    node := char_list.tail;
+    while (node <> nil) do
+      begin
+      GCharacter(node.element).extract(true);
+      node := char_list.tail;
+      end;
+
+    node := object_list.tail;
+    while (node <> nil) do
+      begin
+      GObject(node.element).extract;
+      node := object_list.tail;
+      end;
+
     cleanChars;
+    cleanObjects;
+
+    char_list.Free;
+    object_list.Free;
+
+    // clean up rooms and all
+    area_list.clean;
+    room_list.clean;
+    shop_list.clean;
+    teleport_list.clean;
+    extracted_object_list.clean;
+    extracted_chars.clean;
+    npc_list.clean;
+    obj_list.Clean;
+    timers.clean;
+    race_list.clean;
+    clan_list.clean;
+    help_files.clean;
+    dm_msg.clean;
+
+    area_list.Free;
+    room_list.Free;
+    shop_list.Free;
+    teleport_list.Free;
+    extracted_object_list.Free;
+    extracted_chars.Free;
+    npc_list.Free;
+    obj_list.Free;
+    timers.Free;
+    race_list.Free;
+    clan_list.Free;
+    help_files.Free;
+    dm_msg.Free;
+
+    for n := 0 to MAX_SKILLS - 1 do
+     if (skill_table[n] <> nil) then
+      begin
+      skill_table[n].prereqs.smallClean;
+      skill_table[n].prereqs.Free;
+      skill_table[n].affect.Free;
+      skill_table[n].Free;
+      end;
+
+    socials.Free;
+    str_hash.Free;
+    auction_good.Free;
+    auction_evil.Free;
+    banned_masks.Free;
   except
     bugreport('cleanup', 'grendel.dpr', 'something went wrong',
               'A procedure in the cleanup cycle failed. Contact Grimlord.');
@@ -925,6 +993,8 @@ end;
 
 begin
   old_exitproc := ExitProc;
+
+  MemChk;
 
   boot_mud;
 
