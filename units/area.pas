@@ -625,6 +625,17 @@ begin
             resets.insertLast(g);
           end
         else
+        if (reset_type = 'I') then
+          begin
+          if (findObjectIndex(arg1) = nil) then
+            begin
+            areaBug('GArea.loadResets', 'insert reset ' + inttostr(arg1) + ' null');
+            g.Free;
+            end
+          else
+            resets.insertLast(g);
+          end
+        else
         if (reset_type = 'G') then
           begin
           if (findObjectIndex(arg1) = nil) then
