@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.15 2003/10/16 16:07:29 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.16 2003/10/29 12:53:18 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -21,7 +21,9 @@ uses
 
 type 
   IModuleInterface = interface
-  	procedure registerModule();
+  ['{8DF7865B-69A9-4AA8-A415-E82553597B1C}']
+
+   	procedure registerModule();
   	procedure unregisterModule();
   end;
 
