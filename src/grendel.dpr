@@ -34,7 +34,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
   USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.32 2004/04/14 21:56:46 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.33 2004/05/06 20:50:27 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -190,9 +190,9 @@ begin
 	SI.cb := SizeOf(SI);
 	SI.wShowWindow := sw_show;
 
-	if (not CreateProcess('copyover.exe', nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
+	if (not CreateProcess('helper.exe', 'helper copyover', Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
 		begin
-		bugreport('copyover_mud', 'grendel.dpr', 'Could not execute copyover.exe, copyover failed!');
+		bugreport('copyover_mud', 'grendel.dpr', 'Could not execute helper.exe, copyover failed!');
 		rebootServer();
 		end;
 
