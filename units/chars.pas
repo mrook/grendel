@@ -900,10 +900,10 @@ begin
           player^.condition[COND_HIGH]:=strtoint(stripl(a,' '));
           end
         else
-        {if g='AREA' then
+        if g='AREA' then
           begin
-          alloc_string(striprbeg(a,' '),player^.area_fname);
-          player^.area:=FindArea(player^.area_fname);
+          player^.area_fname := striprbeg(a,' ');
+          player^.area := findArea(player^.area_fname);
           end
         else
         if g='RANGES' then
@@ -921,7 +921,7 @@ begin
           a:=striprbeg(a,' ');
           player^.o_hi:=strtoint(stripl(a,' '));
           end
-        else }
+        else
         if g='WIZLEVEL' then
           player^.wiz_level:=strtoint(striprbeg(a,' '))
         else
@@ -1247,10 +1247,10 @@ begin
     if clan<>nil then
       writeln(f,'Clan: ',clan.name);
 
-    (* if area_fname<>'' then
+    if area_fname<>'' then
       writeln(f,'Area: ',area_fname);
 
-    writeln(f,'Ranges: ',r_lo,' ',r_hi,' ',m_lo,' ',m_hi,' ',o_lo,' ',o_hi); *)
+    writeln(f,'Ranges: ',r_lo,' ',r_hi,' ',m_lo,' ',m_hi,' ',o_lo,' ',o_hi);
 
     writeln(f,'Wizlevel: ',wiz_level);
     writeln(f,'BGpoints: ',bg_points);
