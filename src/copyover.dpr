@@ -1,3 +1,9 @@
+{
+	Summary:
+		Windows copyover controller
+		
+	## $Id: copyover.dpr,v 1.6 2004/03/27 10:49:20 ***REMOVED*** Exp $
+}
 program copyover;
 {$APPTYPE CONSOLE}
 {$IFDEF WIN32}
