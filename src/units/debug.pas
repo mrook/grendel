@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.12 2004/03/19 15:40:42 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.13 2004/03/30 12:22:55 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -99,7 +99,7 @@ var
 begin
 	dladdr(addr, info);
 	
-	writeln('(', IntToHex(integer(addr), 8), ') ', info.dli_sname, ' in ', info.dli_fname);
+	writeConsole('(' + IntToHex(integer(addr), 8) + ') ' + info.dli_sname + ' in ' + info.dli_fname, 1);
 end;
 
 procedure listBackTrace();
@@ -129,7 +129,7 @@ var
 procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
 begin
 	ExceptProc := oldExceptProc;
-
+	
 	{$IFDEF LINUX}	
 	reportException(ExceptObject as Exception, 'debug.pas:ExceptHandler');
 	{$ENDIF}
