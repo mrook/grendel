@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.7 2003/06/24 21:41:29 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.8 2003/09/16 16:29:04 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -344,17 +344,20 @@ begin
     iterator := ch.inventory.iterator();
     cnt := 0;
 
-    while (iterator.hasNext()) do
-      begin
-      obj := GObject(iterator.next());
-
+		repeat
+      obj := GObject(iterator.getCurrent());
+      
 	    if (obj.wear_location1 <> '') or (obj.wear_location2 <> '') then
         if (ch.equip(obj)) then
           begin
           obj.seperate;
           inc(cnt);
           end;
-      end;
+
+      iterator.next();
+		until (not iterator.hasNext());
+    
+    iterator.Free();
 
     if (cnt = 0) then
       ch.sendBuffer( 'You aren''t carrying anything that can be worn.'#13#10);
