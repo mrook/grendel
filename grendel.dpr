@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.39 2001/07/23 15:53:47 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.40 2001/07/23 16:08:46 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -639,7 +639,7 @@ var
   s : string;
 begin
   { open a standard log file, filename is given by current system time }
-  AssignFile(LogFile, translateFileName('log\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
+  AssignFile(LogFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
 
   {$I-}
   rewrite(LogFile);
