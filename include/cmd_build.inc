@@ -633,116 +633,87 @@ begin
   ch.sendBuffer('Ok.');
 end;
 
-
 {Jago 18/Jan/2001 - OFIND - find an object}
+{ Revised 25/Feb/2001 - Nemesis }
 procedure do_ofind(ch : GCharacter; param : string);
-var
-top_obj_index, vnum, nMatch : integer;
-buf, buf1, arg : string;
-obj_index : GObjectIndex;
-found, fAll : boolean;
-obj_node : GListNode;
+var buf : string;
+    obj : GObjectIndex;
+    node : GListNode;
+    found, fAll : boolean;
 begin
-  one_argument( param, arg );
-
-  if length(arg) = 0 then
-  begin
-   ch.sendBuffer('Ofind what?' + #13#10);
-   exit;
-  end;
-
-  buf := '';
-  buf1 := '';
-  fAll := (UpperCase(arg) = 'ALL');  //fAll	= !str_cmp( arg, "all" );
-  found := False;
-  nMatch := 0;
-
-  // need to find a good way of doing this
-  // iterating over all objects is SLOW!
-
-  // does it make a difference if we iterate over object_list or obj_reset?
-
-  obj_node := obj_list.head;
-  while obj_node <> nil do
-  begin
-    obj_index := GObjectIndex(obj_node.element);
-    if (fAll) or (isName(obj_index.name^, arg)) then
+  if (length(param) = 0) then
     begin
-      found := True;
-      buf := Format('[%5d] %s' + #13#10, [obj_index.vnum, obj_index.short]);
-
-      if not fAll then
-        buf1 := buf1 + buf
-      else
-        act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+    ch.sendBuffer('Ofind what?' + #13#10);
+    exit;
     end;
-    obj_node := obj_node.next;
-  end;
 
-  if not found then
-  begin
-   ch.sendBuffer('Nothing like that in hell, earth, or heaven.' + #13#10);
-   exit;
-  end;
+  fAll := (uppercase(param) = 'ALL');
+  buf := #13#10 + '[Vnum] [Name]' + #13#10;
 
-  if not fAll then
-   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
+  node := obj_list.head;
+
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (fAll) or (isName(obj.name^, param)) then
+      begin
+      found := true;
+      buf := buf + pad_integer_front(obj.vnum,5) + '   ' + obj.name^ + #13#10;
+      end;
+
+    node := node.next;
+    end;
+
+  if (not found) then
+    begin
+    ch.sendBuffer('Nothing like that in hell, earth, or heaven.' + #13#10);
+    exit;
+    end;
+
+  ch.sendPager(buf);
 end;
 
 {Jago 18/Jan/2001 - MFIND - find a NPC}
+{ Revised 25/Feb/2001 - Nemesis }
 procedure do_mfind(ch : GCharacter; param : string);
-var
-top_npc_index, vnum, nMatch : integer;
-buf, buf1, arg : string;
-npc_index : GNPCIndex;
-found, fAll : boolean;
-npc_node : GListNode;
+var buf : string;
+    found, fAll : boolean;
+    node : GListNode;
+    npc : GNPCIndex;
 begin
-  one_argument( param, arg );
-
-  if length(arg) = 0 then
-  begin
-   ch.sendBuffer('Mfind whom?' + #13#10);
-   exit;
-  end;
-
-  buf := '';
-  buf1 := '';
-  fAll := (UpperCase(arg) = 'ALL');  //fAll	= !str_cmp( arg, "all" );
-  found := False;
-  nMatch := 0;
-
-  // need to find a good way of doing this
-  // iterating over all npcs is SLOW!
-
-  // does it make a difference if we iterate over character_list or
-  // npc_reset?
-
-  npc_node := npc_list.head;
-  while npc_node <> nil do
-  begin
-    npc_index := GNPCIndex(npc_node.element);
-    if (fAll) or (isName(npc_index.name^, arg)) then
+  if (length(param) = 0) then
     begin
-      found := True;
-      buf := Format('[%5d] %s' + #13#10, [npc_index.vnum, npc_index.short]);
-
-      if not fAll then
-        buf1 := buf1 + buf
-      else
-        act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
+    ch.sendBuffer('Mfind whom?' + #13#10);
+    exit;
     end;
-    npc_node := npc_node.next;
-  end;
 
-  if not found then
-  begin
+  found := False;
+  fAll := (uppercase(param) = 'ALL');
+  buf := #13#10 + '[Vnum] [Name]' + #13#10;
+
+  node := npc_list.head;
+
+  while (node <> nil) do
+    begin
+    npc := node.element;
+
+    if (fAll) or (isName(npc.name^, param)) then
+      begin
+      found := True;
+      buf := buf + pad_integer_front(npc.vnum,5) + '   ' + npc.name^ + #13#10;
+      end;
+
+    node := node.next;
+    end;
+
+  if (not found) then
+    begin
     ch.sendBuffer('Nothing like that in hell, earth, or heaven.' + #13#10);
     exit;
-  end;
+    end;
 
-  if not fAll then
-    act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
+  ch.sendPager(buf);
 end;
 
 { Adjust scores NPC's and PC's - Nemesis }
