@@ -48,14 +48,30 @@ Grendel's TODO list with probable release date/version
 ! (0.4.2) online suggest/pray history
 ! (0.4.2) abbreviation of clanname (3-4 chars) in who list (with toggle on/off)
 
+! (0.4.3) Multi-command alias, commands seperated door bijvoorbeeld ":" teken
+! (0.4.3) fix for logfile truncation
 
-* (0.4.2) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
-* (0.4.2) Better online construction (autocreate exit+room when moving),
+
+- (0.4.3) Variable usage in alias, bijv %1 (voor bijv: "cm Nemesis" en dat alias cm dan staat voor "Cast 'missile' %1")
+
+- (0.4.4) prolonging defensive spells: "You prolong <victims> holy armour."
+          prolonging offensive spells: "<victim> is already affected by <spellname>"
+          removal spells: "<victim> is not cursed".
+- (0.4.4) re-implement "Switch" and "Snoop"
+- (0.4.4) command to switch tank in a group
+- (0.4.4) command to switch leadership of a group
+- (0.4.4) trying to wear an object on a position that's already occupied results in a switch
+- (0.4.4) additional reset command to reset containers
+
+- (long)  when rapier in inv and rapier in eq, make 2.rapier match the one in eq
+- (long)  Better online construction (autocreate exit+room when moving),
           mobile create/edit, reset edit etc.
-* (0.4.2) expand tracking system
-- (0.4.2) reloadarea command
+- (long)  expand tracking system
+- (long)  reloadarea command
+- (long)  waitstates for commands
+- (long)  use race defined size of characters (base movement costs on size, room size?)
 
-
+	
 l implementation of the mud sound protocol
 l clan competition for wps/pkillnum
 l general format for docs (docwrite-HOWTO something), both

@@ -1,5 +1,5 @@
 Wishlist for the new 0.5.x tree
-(! = closed, * = urgent, l = lower priority)
+(! = closed, * = normal, l = lower priority)
 
 
 * use XML extensively, use dynamic storage of properties in objects
@@ -7,7 +7,7 @@ Wishlist for the new 0.5.x tree
   - player & area files: dynamic storage of "modifcation" specific data
     in an associative array, possibly with callbacks/triggers when
     new data is stored, see below for description of "modifications"
-  
+   
   - server configuration: store known server-side variables and
     introduce new ones, such as experience formulas, experience per level, 
     damage formulas, number of stats, stat maximums, etc.   
@@ -20,6 +20,11 @@ Wishlist for the new 0.5.x tree
   (possibly named GItem), which can contain 1 or more GItems or subsets
   of GItem, something along those lines
   
+  -> do not group objects solely on basic stats, two objects must be an
+     *exact* match if they are to be grouped
+     
+  -> Bags and containers should be saveable
+    
 * get rid of a lot of obsolete smaug/diku/emlen-inspired code, this
   only helps in keeping the system unstable and hard to manage. 
   
@@ -59,6 +64,22 @@ Wishlist for the new 0.5.x tree
   
   - global/mudwide (static) variables
   
+* area loader
+  
+  - auto linewrap, filter out hard line breaks
+
+* shops
+
+  - opening times
+  
+  - out-of-stock possibility
+  
+  - shopkeepers must be able to carry their own gear
+
+* string matching
+  "Goto orc"; first complete match, then names that *start* with orc, and then
+   a full search on '*orc*'
+
 
 l implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
