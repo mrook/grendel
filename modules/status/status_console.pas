@@ -73,6 +73,7 @@ initialization
   
 
 finalization  
+	consoleForm.Free();
   unregisterMenuItem('Show console');
   unregisterConsoleDriver(consoleDriver);
   consoleDriver.Free();
