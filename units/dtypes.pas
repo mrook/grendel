@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.33 2003/10/22 14:52:06 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.34 2003/10/22 16:06:30 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -801,9 +801,12 @@ end;
 }
 function GHashTable.getBucket(index : integer) : GDLinkedList;
 begin
-	if (index < 0) or (index >= sizeof(bucketList)) then
-		Result := nil
-	else
+	if (index < 0) or (index >= length(bucketList)) then
+		begin
+		Result := nil;
+		raise Exception.Create('Index (' + IntToStr(index) + ') out of bounds');
+		end
+	else	
 		Result := bucketList[index];
 end;
 
