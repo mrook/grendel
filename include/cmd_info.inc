@@ -46,7 +46,7 @@ var a:integer;
     pexit:GExit;
     w1,w2:byte;
     inside:string[20];
-    buf1,buf2 : string;
+    buf, buf1 : string;
     cnt:integer;
     brief:boolean;
     r,act_str:string;
@@ -85,6 +85,8 @@ begin
 
       cnt := 0;
       node := vict.objects.head;
+      buf := '';
+
       while (node <> nil) do
         begin
         obj := node.element;
@@ -99,13 +101,25 @@ begin
 
           act(AT_REPORT, pad_string(buf1 + eq_string[obj.wear_location] + ')', 30) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
           inc(cnt);
-          end;
+          end
+        else
+          buf := buf + '      ' + obj.short^ + #13#10;
 
         node := node.next;
         end;
 
       if (cnt = 0) then
         ch.sendBuffer('  nothing.'#13#10);
+
+      if (number_percent <= ch.learned[gsn_peek]) then
+        begin
+        ch.sendBuffer(#13#10'You peek at the inventory and see:'#13#10);
+
+        if (length(buf) = 0) then
+          buf := buf + '  nothing.' + #13#10;
+
+        ch.sendBuffer(buf);
+        end;
       end
     else
     if obj<>nil then
@@ -194,9 +208,7 @@ begin
     if (length(buf1) = 0) then
       buf1 := 'none';
 
-    buf2 := '[Exits: ' + buf1 + ']';
-
-    act(AT_YELLOW,buf2,false,ch,nil,nil,TO_CHAR);
+    act(AT_YELLOW, '[Exits: ' + buf1 + ']',false,ch,nil,nil,TO_CHAR);
 
     node := objects.head;
 
@@ -269,36 +281,42 @@ begin
   ch.sendBuffer(ch.ansiColor(7));
 end;
 
+{ Revised 13/Feb/2001 - Nemesis }
 procedure do_inventory(ch:GCharacter;param:string);
-var
-   obj : GObject;
-   node : GListNode;
+var obj : GObject;
+    node : GListNode;
+    counter : integer;
 begin
-  act(AT_REPORT,'You are carrying: ',false,ch,nil,nil,TO_CHAR);
+  counter := 0;
 
+  act(AT_REPORT,'You are carrying: ',false,ch,nil,nil,TO_CHAR);
+  
   if (ch.gold > 0) then
     act(AT_REPORT, '  $3' + inttostr(ch.gold) + '$7 coin(s).', false, ch, nil, nil, TO_CHAR);
 
-  if (ch.objects.getSize = 0) and (ch.gold = 0) then
-    act(AT_REPORT,'  nothing',false,ch,nil,nil,TO_CHAR)
-  else
+  node := ch.objects.head;
+
+  while (node <> nil) do
     begin
-    node := ch.objects.head;
+    obj := node.element;
 
-    while (node <> nil) do
+    if (obj.wear_location = WEAR_NULL) then
       begin
-      obj := node.element;
+      if (obj.count > 1) then
+        act(AT_REPORT, '  $p [' + inttostr(obj.count) + ']', false, ch, obj, nil, TO_CHAR)
+      else
+        act(AT_REPORT, '  $p', false, ch, obj, nil, TO_CHAR);
 
-      if (obj.wear_location = WEAR_NULL) then
-        begin
-        if (obj.count > 1) then
-          act(AT_REPORT, '  $p [' + inttostr(obj.count) + ']', false, ch, obj, nil, TO_CHAR)
-        else
-          act(AT_REPORT, '  $p', false, ch, obj, nil, TO_CHAR);
-        end;
-
-      node := node.next;
+      inc(counter);
       end;
+
+    node := node.next;
+    end;
+
+  if (counter = 0) and (ch.gold = 0) then
+    begin
+    ch.sendBuffer('      nothing.'#13#10);
+    exit;
     end;
 end;
 
