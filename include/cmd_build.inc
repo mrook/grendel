@@ -1,27 +1,10 @@
-// $Id: cmd_build.inc,v 1.30 2001/05/11 14:25:02 ***REMOVED*** Exp $
-
-const room_flags:array[0..30] of string = ('dark','death','nomob',
-                                        'indoors','good','evil',
-                                        'nocast','tunnel','private',
-                                        'safe','solitary','norecall',
-                                        'nodropall','nosummon',
-                                        'clanstore','teleport',
-                                        'nofloor','manaroom','bv18',
-                                        'bv19','bv20','bv21','bv22',
-                                        'bv23','bv24','bv25','bv26',
-                                        'bv27','bv28','bv29','proto');
-
-const exit_flags:array[0..12] of string = ('isdoor','closed','locked',
-                                        'pickproof','secret','swim',
-                                        'fly','clibm','portal',
-                                        'nobreak','nomob','enter',
-                                        'underwater');
+// $Id: cmd_build.inc,v 1.31 2001/06/06 18:47:26 xenon Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
 procedure do_rstat(ch : GCharacter; param : string);
 var
-  buf, buf1, arg, buf_flags : string;
+  buf, buf1, arg, buf_flags, str : string;
   location : GRoom;
   obj_data : GObject;
   obj_node : GListNode;
@@ -41,71 +24,106 @@ begin
 
   if location = nil then
   begin
-  	ch.sendBuffer('No such location' + #13#10);
-   exit;
+    ch.sendBuffer('No such location' + #13#10);
+    exit;
   end;
 
   // allow rstat of private rooms
 
   buf1 := '';
-  buf := Format('Name: %s.' + #13#10 + 'Area: %s.' + #13#10 + 'Author: %s' + #13#10#13#10,
-                 [location.name^, location.area.name, location.area.author]);
+  buf := Format('Name:   %s.' + #13#10 + 'Area:   %s.' + #13#10 + 'Vnum:   %d'#13#10#13#10,
+                 [location.name^, location.area.name, location.vnum]);
 
   buf1 := buf1 + buf;
 
-  buf := Format('Vnum %d, sector [%s].' + #13#10,
-                [location.vnum, sector_types[location.sector]]);
-
-  buf1 := buf1 + buf;
-
-  buf := '';
-
-  if (location.flags = 0) then
-    buf := 'none'
+  buf := 'Areacoords: ';
+  if (location.areacoords <> nil) then
+    buf := buf + location.areacoords.toString()
   else
-  for a:=0 to High(room_flags) do
-   if IS_SET(location.flags, 1 shl a) then
-    buf := buf + room_flags[a] + ' ';
-
-  buf := Format('Room flags: [%s].' + #13#10#13#10 + 'Description: ' + #13#10 + '%s'#13#10,
-                [buf, location.description]);
-
-  buf1 := buf1 + buf;
+    buf := buf + '(none)';
+  buf := buf + '. Worldcoords: ';
+  if (location.worldcoords <> nil) then
+    buf := buf + location.worldcoords.toString()
+  else
+    buf := buf + '(none)';
+  buf1 := buf1 + buf + #13#10;
 
   buf1 := buf1 + 'Characters: ';
 
+  buf := '';
   rch_node := location.chars.head;
   while rch_node <> nil do
   begin
     rch := GCharacter(rch_node.element);
 
-    buf := rch.name^;
-    buf1 := buf1 + buf;
-    buf1 := buf1 + ', ';
+    if (length(buf) <> 0) then
+      buf := buf + ', ';
+
+    buf := buf + rch.name^;
 
     rch_node := rch_node.next;
   end;
 
-  buf1 := buf1 + #13#10;
-  buf1 := buf1 + 'Objects: ';
+  buf1 := buf1 + buf + '.'#13#10;
 
+  buf1 := buf1 + 'Objects:    ';
+
+  buf := '';
   obj_node := location.objects.head;
   while obj_node <> nil do
   begin
     obj_data := GObject(obj_node.element);
 
-    buf := obj_data.name^;
-    buf1 := buf1 + buf;
-    buf1 := buf1 + ', ';
+    if (length(buf) <> 0) then
+      buf := buf + ', ';
 
+    buf := buf + obj_data.name^;
+    
     obj_node := obj_node.next;
   end;
 
+  if (length(buf) <> 0) then
+    buf1 := buf1 + buf + '.';
   buf1 := buf1 + #13#10#13#10;
 
+  buf := Format('Sectortype: [%s].' + #13#10,
+                [sector_types[location.sector]]);
+
+  buf1 := buf1 + buf;
+
+  buf := '';
+  if (location.flags = 0) then
+    buf := 'none'
+  else
+  for a:=0 to High(room_flags) do
+    if IS_SET(location.flags, 1 shl a) then
+    begin
+      if (length(buf) <> 0) then
+        buf := buf + ' ';
+      buf := buf + room_flags[a];
+    end;
+
+  buf1 := buf1 + Format('Room flags: [%s].' + #13#10,
+                [buf]);
+  buf1 := buf1 + Format('Light:      %d.' + #13#10,
+                [location.light]);
+  
+  buf1 := buf1 + #13#10;
+
+  buf1 := buf1 +
+    Format('Televnum: %d. Teledelay: %d.'#13#10, [location.televnum, location.teledelay]);
+
+  buf1 := buf1 +
+    Format('Min_level: %d. Max_level: %d.'#13#10#13#10, [location.min_level, location.max_level]);
+  
+  buf1 := buf1 +
+    Format('Description: ' + #13#10 + '%s'#13#10, [location.description]);
+  
   door := 0;
+  buf := '';
   exit_node := location.exits.head;
-  while exit_node <> nil do begin
+  while (exit_node <> nil) do
+  begin
     exit_data := GExit(exit_node.element);
 
     inc(door);
@@ -113,39 +131,37 @@ begin
     if (exit_data.flags = 0) then
       buf_flags := 'none'
     else
-      begin
+    begin
       buf_flags := '';
       for a:=0 to High(exit_flags) do
-       if IS_SET(exit_data.flags,1 shl a) then
-        buf_flags := buf_flags + exit_flags[a] + ' ';
-      end;
-
-(*    buf := Format('Door: %d.  To: %d.  Key: %d.  Exit flags: [%s].', +
-    							 #13#10 + 'Keyword: "%s".',
-                  [door,
-                  exit_data.to_room.vnum,
-                  exit_data.key,
-                  buf_flags,
-                  exit_data.keywords^]);*)
-
-    buf := Format('Door: %d.  To: %d.  Key: %d.  Exit flags: [%s].',
-                  [door,
-                  exit_data.to_room.vnum,
-                  exit_data.key,
-                  buf_flags]);
-
-    buf1 := buf1 + buf + #13#10;
+        if IS_SET(exit_data.flags,1 shl a) then
+        begin
+          if (length(buf_flags) <> 0) then
+            buf_flags := buf_flags + ' ';
+          buf_flags := buf_flags + exit_flags[a];
+        end;
+    end;
 
     if (exit_data.keywords <> nil) then
-    begin
-      buf := Format('Keyword: "%s".', [exit_data.keywords^]);
-      buf1 := buf1 + buf + #13#10;
-    end;
+      str := exit_data.keywords^
+    else
+      str := '(none)';
+      
+    buf := buf + Format('Door: %d.  To: %d.  Key: %d.  Keyword: [%s].'#13#10'  Exit flags: [%s]'#13#10,
+                  [door,
+                  exit_data.to_room.vnum,
+                  exit_data.key,
+                  str,
+                  buf_flags]);
                   
     exit_node := exit_node.next;
   end;
 
-  buf1 := buf1 + #13#10;
+  if (length(buf) = 0) then
+    buf1 := buf1 + 'No exits.'#13#10
+  else
+    buf1 := buf1 + buf;
+
   ch.sendBuffer(buf1);
 end;
 
