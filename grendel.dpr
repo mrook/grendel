@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.26 2001/04/26 21:01:08 xenon Exp $
+  $Id: grendel.dpr,v 1.27 2001/04/27 19:39:38 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -605,8 +605,6 @@ begin
   s := FormatDateTime('ddddd', Now);
   write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
-  clean_thread := GCleanThread.Create;
-
   write_console('Loading races...');
   load_races;
   // write_console('Loading professions...');
@@ -662,6 +660,7 @@ begin
   registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
 
   timer_thread := GTimerThread.Create;
+  clean_thread := GCleanThread.Create;
 
   calculateonline;
 end;
