@@ -1,183 +1,193 @@
-The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2004 by Michiel Rook
+  The Grendel Project - A Windows/Linux MUD Server    
+  Copyright (C) 2000-2004 by Michiel Rook <michiel@grendelproject.nl>
+    
+  Please observe the file "documentation\License.txt" before using this 
+  software.
 
+  Redistribution and use in source and binary forms, with or without 
+  modification, are permitted provided that the following conditions are met:
 
+  * Redistributions of source code must retain the above copyright notice, 
+    this list of conditions and the following disclaimer. 
 
-= Last minute information =======================================================
-
-
-1. Introduction
-
-It's time for a new Grendel release! This development release is mainly
-focused on fixing a lot of trivial, annoying and/or serious bugs, slowly
-paving the way towards Grendel 1.0!
-
-Check the file "ChangeLog" for the details.
-
-Enjoy!
-
-  Michiel
-
-
-2. Features
-
-Grendel requires Winsock2 to be installed. Windows 98, Me, NT4 and 2000
-all come with this preinstalled, Windows 95 users will have to download
-this update from the Microsoft site:
-
-  http://www.microsoft.com/windows/downloads/bin/W95ws2setup.exe
-
-  - GMC, or Grendel MUD C, is a replacement for the original (limited)
-    mobprogs. It's a fully functional language based on C, which
-    runs in Grendel using virtual machinecode - very speedy & flexible
-  - Modularized mud: most functionality has been placed inside seperate
-    modules which can be loaded/unloaded at will - this opens up
-    the possibility of arbitrary code that can be loaded even
-    while your server is running!
-  - Linux support: Grendel now runs on Linux, using the new Kylix
-    compiler from Borland (the Linux version of Delphi). 
-    Note: this is entirely experimental, some features are missing
-    (like copyover, and the graphical goodies), and we will not provide 
-    any binaries
-  - Copyover system: Grendel can respawn itself without dumping all the
-    connections, e.g. users stay online during the reboot process,
-    more info below
-  - IPv6 support: Grendel natively supports the new internet protocol,
-    on all Linux machines with an IPv6 enabled kernel, and on 
-    NT4/2000 machines that have the MSRIPv6 preview from Microsoft 
-    installed. Don't worry if you don't have this, Grendel will auto-detect 
-    your settings and use them accordingly
-  - Way better OOP design: greatly increases stability, looks better,
-    works better
-  - Old code removed: no more pchars, thus no more buffer overflows,
-    no more wicked crashes, no more strange things - lot clearer,
-    lot better
-  - Tracking system: not totally finished, but tracking people
-    already works pretty nice
-  - New immortal commands
-  - Hashing of important tables: commands/socials tables are
-    searched faster, and use less memory
-  - Smaug area convertor: converts most information from a smaug
-    .are file to the Grendel format
-  - Password encryption: player passwords are encrypted using
-    the MD5 Message Digest Algorithm
-  - OLC support: design and builds your area without leaving the MUD!
-
-
-3. Documentation
-
-Documentation has never been the strongest point during the development
-of The Grendel Project, but the tide is slowly turning.
-
-In the directory 'text' you will find a few plain-text documents
-describing various parts of the server. These are Modules.txt (for
-info on how to best code a module), Scripting.txt (info about
-the GMC syntax & structure) and Coding.txt (guidelines on
-coding conventions and tips on which units to use).
-
-
-4. Compiling & running
-
-Normally, you'd download the binary distribution (grendel-....-bin.zip), but
-if you wish to modify and/or (re)compile the sources, you will need the
-source distribution (grendel-....-src.zip).
-
-When installed, the sources can be compiled by running (in the root dir)
-
-  'make -f makefile.w32' on the Windows platform, or
+  * Redistributions in binary form must reproduce the above copyright notice, 
+    this list of conditions and the following disclaimer in the documentation 
+    and/or other materials provided with the distribution. 
   
-  'make -f makefile.lnx' on the Linux platform
+  Neither the name of The Grendel Project nor the names of its contributors 
+  may be used to endorse or promote products derived from this software 
+  without specific prior written permission. 
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+  ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR 
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
-You can ofcourse also use the Delphi IDE, but this is not recommended.
-
-When you have a binary (either by downloading it, or compiling it), you
-can start it by typing 'grendel' <ENTER> in the Grendel root directory.
-
-The default port is 4444, so get hold of a telnet client, and connect
-to the server.
-
-
-5. Copyover
-
-Grendel sports a neat copyover system, which I think is relatively uncommon on
-Win32 servers. The copyover procedure also supports copying a new grendel executable
-into the dir and starting that (hence the name :P).
-
-This only works if you start grendel from the base directory and compile new
-executables in a bin\ subdirectory. This is already done in the compile.bat and
-other scripts in the distribution, so your best shot would be to keep it that way.
-
-The copyover system is very itchy, which means that if *anything* goes wrong,
-it immediately dumps everything and starts a normal reboot instead - there shouldn't
-be any endless loops.
+          
+  -------------------------------------------------------------------------
+    
+   
+  * Introduction:
+    
+  The Grendel Project is an attempt at creating a solid, fast, and 
+  stable MUD server codebase, that runs natively on Windows and Linux. 
 
 
-6. The new affects system
+  * Changes in this release:
 
-0.3.5 saw the addition of a brand new affects system, which looked promising,
-but had a few defects. Those have now been fixed (finally, hopefully).
+  For the list of changes, see the included ChangeLog file.
 
-An affect consists of a name, a wear-off message, a duration and a number 
-of modifier/apply-type combinations.
 
-At the moment, the following apply types are supported:
+  * Requirements
 
-  APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
-  APPLY_HP, APPLY_MAX_HP, APPLY_MV, APPLY_MAX_MV, APPLY_MANA, APPLY_MAX_MANA,
-  APPLY_AC, APPLY_APB, APPLY_AFFECT, APPLY_REMOVE,
-  APPLY_STRIPNAME, APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_CAFFEINE
+    Windows:
 
-The modifier is specific to the apply type used, for example, when you use
-APPLY_INT, the modifier reflects the amount of intelligence gained (or lost)
-through this affect, whereas with APPLY_AFFECT, the modifier is one of the
-AFF_ flags found in constants.pas (or the manual).
+    Grendel requires Winsock2 to be installed. Windows 98/Me/NT4/2000/XP
+    are shipped with Winsock2, users of Windows 95 will have to download 
+    the following update:
 
-For spells/skills, the syntax is:
+    http://www.microsoft.com/windows/downloads/bin/W95ws2setup.exe
 
-  "affects: <affect name> <wear-off message> <duration> { <apply type> <modifier> } { ... }", 
+    Linux:
+
+    Glibc version 2.2 or higher and a recent kernel (2.2+) are required.
+ 
+    Grendel does not require you to install the software as root, unless
+    you configure the software to open a priviliged (< 1024) port.
+
+
+  * Features
+
+    - GMC, or Grendel MUD C, is a replacement for the original (limited)
+      mobprogs. It's a fully functional language based on C, which
+      is compiled and executed in a virtual stackmachine
+
+    - Plugin architecture: code can be grouped and modularized in plugin
+      modules, which can be loaded/unloaded during runtime
+
+    - Copyover system a.k.a. hot reboot, more info below
+ 
+    - IPv6 support: Grendel auto-detects and natively supports the new 
+      internet protocol, on all Linux machines with an IPv6 enabled kernel, 
+      and on NT4/2000/XP machines with the proper software installed
+ 
+    
+  * Installation:
+    
+  The archive you have downloaded, which contains this README file,
+  also contains prebuilt binaries for the target operating system.
+  The target operating system can be identified by the extension
+  of the archive; .zip => Windows, .tar.gz => Linux.
+    
+  You can install the software in any location you deem useful.
+    
+    
+  * Compilation:
+    
+  If you want to recompile the binaries, you need the following ingredients:
+    
+    Linux:
+      * Borland Kylix 3
+      * GNU make (usually pre-installed on your system)
+    		
+    Windows:
+      * Borland Delphi 6 or higher
+      * GNU make (available at 
+        http://www.grendelproject.nl/dls/gnumake-win32.zip)  
+
+  If these ingredients are present, you can run 'make' in the directory
+  where you've installed Grendel.
+
+
+  * Running
   
-for objects, the syntax is:
-  "A <affect name> <wear-off message> <duration> { <apply type> <modifier> } { ... }".
-
-Check the areas and system\skills.dat for examples on objects and spells,
-respectively.
-
-
-7. Known problems
-
-The server has never been this stable. Roughly 90% of the active code has been
-guarded by exception handling and debugging code, enabling developers to track 
-down bugs and keeping uptime at a maximum.
-
-However, there are probably pieces we've missed, so if you run across one,
-please mail everything you did, so we can reproduce the error and help you out.
-
-You will need either Delphi 5 or Kylix 1 to compile the Grendel sources,
-earlier versions are not supported.
-
-
-8. Contact information
-
-Below you will find a few important email addresses, for
-support, info, list communication or personal contact.
-
-
-General e-mail addresses:
-
-  info@grendelproject.nl    - Requests for info about the project/site
-  support@grendelproject.nl - Requests for support on serious errors
+  Starting Grendel is simple. Windows users can click on the 'grendel.exe' 
+  icon, or open a console window and start the grendel.exe file manually.
   
-Developers:
+  Linux users can either start the executable 'grendel' from an automated 
+  script or manually from a terminal. 
+  Note: under Linux forks to the background by default, to override this 
+  and let Grendel write to stdout run 'grendel -f' instead.
+  
+  If all is well, you should be able to connect to Grendel by using
+  a telnet client to connect to localhost, port 4444. 
+  
+  
+  * Creating immortals
+  
+  Grendel comes shipped without any users, so you'll have to create your own.
+  
+  After connecting to Grendel, you should see a brief introductory message,
+  and a prompt. Here you can create a new user and explore the example world.
+  
+  Once you've created a new user, navigate to the 'players' directory,
+  and edit the file <your new user>.usr. To 'immortalize' this user,
+  change the number on the line with 'Level:' in the range 990-1000, where
+  990 is the lowest ranking Immortal, and 1000 the highest.
+  
+  
+  * Using the copyover system
+  
+  Grendel features a copyover (a.k.a. hot reboot) system similar to that
+  of other MUD codebases. It is present in both the Linux and the Windows
+  builds, with one difference: the Windows system has the ability to "copy over"
+  (hence the name) a new version of the grendel.exe file.
 
-  Michiel Rook          (michiel@grendelproject.nl)     manager, website, code
-  Hemko de Visser       (nemesis@grendelproject.nl)     code, field testing
-  Roeland van Houte     (xenon@grendelproject.nl)       code
-  Oscar Martin          (jago@grendelproject.nl)        code, field testing
-  Jeremiah Davis        (woodstock@grendelproject.nl)   documentation
+  To achieve this, place the new grendel.exe (and/or core.bpl) in the "bin"
+  directory, and start copyover.
+  
+  
+  * Using the service (Windows NT/2000/XP only)
+  
+  Users of Windows NT/2000/XP have the ability to run Grendel as a background
+  service. The advantage of this is that Grendel can start when the computer
+  boots, instead of when a user logs in and runs it.
+  
+  To enable the service, enter 'grendelservice /install', then open
+  the Service Control Manager through the menus Programs -> 
+  Administrative Tools -> Services. Right-click on the 'Grendel MUD Server'
+  service, and select 'start'.  
+  
+  To uninstall the service, enter 'grendelservice /uninstall'.
+  
+    
+  * Bug reporting:
+    
+  If you think you have discovered a bug in the code, please use the 
+  online bug tracking system available at:
+    
+    http://www.grendelproject.nl/bt/
 
-Forum / website:
-  http://www.grendelproject.nl/
 
-Postcards:
+  * Documentation
+
+  The manual and other documentation can be found in the "documentation"
+  directory.
+    
+    
+  * Contact:
+    
+  E-Mail: info@grendelproject.nl
+  Website: http://www.grendelproject.nl/
+    
+    
+  * Credits:
+    
+  Michiel Rook (founder/website/code):       michiel@grendelproject.nl
+  Hemko de Visser (code/testing):            nemesis@grendelproject.nl
+    
+  Roeland van Houte (code/inactive):         xenon@grendelproject.nl
+  Oscar Martin (code/testing/inactive):      jago@grendelproject.nl
+  Jeremiah Davis (documentation/inactive):   N/A
+        
+
+
   
   If you use and like Grendel, I'd very much appreciate it if you
   send a postcard to me:
@@ -186,3 +196,8 @@ Postcards:
   ***REMOVED***
   ***REMOVED***
   The Netherlands
+    		
+    
+  -------------------------------------------------------------------------
+
+  $Id: Readme.txt,v 1.4 2004/04/08 21:28:50 ***REMOVED*** Exp $
