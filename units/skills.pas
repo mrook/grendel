@@ -1,6 +1,6 @@
 {
   @abstract(Various skill related functions)
-  @lastmod($Id: skills.pas,v 1.26 2002/08/14 18:16:21 ***REMOVED*** Exp $)
+  @lastmod($Id: skills.pas,v 1.27 2003/06/27 13:15:58 ***REMOVED*** Exp $)
 }
 
 unit skills;
@@ -301,11 +301,10 @@ begin
 
           s := af.readToken();
 
-          try
-            modif := strtoint(s);
-          except
+          modif := StrToIntDef(s, 0);
+          
+          if (modif = 0) then
             modif := cardinal(hash_string(s));
-          end;
 
           aff.modifiers[x - 1].modifier := modif;
 
