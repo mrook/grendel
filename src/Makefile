@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.5 2004/02/19 14:38:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.6 2004/03/18 09:55:52 ***REMOVED*** Exp $
 #
 
 
@@ -43,7 +43,7 @@ RM=rm -f
 endif
 
 
-DCC_FLAGS=-Q -D+ -V- -W+ -O+
+DCC_FLAGS=-Q '-$$W+' -GD
 
 GRENDEL_SOURCES=grendel.dpr
 COPYOVER_SOURCES=copyover.dpr
@@ -70,7 +70,7 @@ $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
 	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
 	
 $(COPYOVER):	$(COPYOVER_SOURCES)
-	$(DCC) $(COPYOVER_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -Uunits
+	$(DCC) $(COPYOVER_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
 
 $(CORE): $(CORE_SOURCES)
 	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -Ugmc -GD -Ucontrib/jcl

@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.16 2004/02/21 17:47:28 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.17 2004/03/18 09:55:52 ***REMOVED*** Exp $
 #
 
 
@@ -28,9 +28,8 @@ all:
 	$(MAKE) -C src
 ifdef WIN32
 	$(CP) 'src\grendel.exe'
-	$(CP) 'src\grendel.map'
 	$(CP) 'src\core.bpl'
-	$(CP) 'src\core.map'
+	$(CP) 'src\*.map'
 	$(CP) 'src\copyover.exe'
 	$(CP) 'src\gmc\gmcc.exe'
 	$(CP) 'src\gmc\gasm.exe'
@@ -39,9 +38,8 @@ ifdef WIN32
 endif
 ifdef LINUX
 	$(CP) src/grendel .
-	$(CP) src/grendel.map .
 	$(CP) src/bplcore.so .
-	$(CP) src/bplcore.map .
+	$(CP) src/*.map .
 	$(CP) src/gmc/gmcc .
 	$(CP) src/gmc/gasm .
 	$(CP) src/modules/bpl*.so modules
