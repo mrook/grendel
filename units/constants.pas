@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.30 2001/04/30 16:23:13 xenon Exp $
+// $Id: constants.pas,v 1.31 2001/05/10 17:28:58 xenon Exp $
 
 unit constants;
 
@@ -245,6 +245,7 @@ const eq_string:array[1..MAX_WEAR] of string=
        'on left shoulder','on right shoulder','on face',
        'in left ear','in right ear','on left ankle','on right ankle');
 
+// do NOT just change the order of these exit constants; used in a couple for-loops
 { directions }
 const DIR_NORTH=1;
       DIR_EAST=2;
@@ -257,6 +258,8 @@ const DIR_NORTH=1;
 { headings and inverted headings }
 const headings :array[DIR_NORTH..DIR_SOMEWHERE] of string=('north','east','south','west','down','up','somewhere');
       headingsi:array[DIR_NORTH..DIR_SOMEWHERE] of string=('the south','the west','the north','the east','above','below','somewhere');
+      headings_short :array[DIR_NORTH..DIR_SOMEWHERE] of string=('n','e','s','w','d','u','?');
+      headings_short_i :array[DIR_NORTH..DIR_SOMEWHERE] of string=('s','w','n','e','u','d','?');
       dir_inv:array[DIR_NORTH..DIR_SOMEWHERE] of integer=(DIR_SOUTH,DIR_WEST,
                                                           DIR_NORTH,DIR_EAST,
                                                           DIR_UP,DIR_DOWN,
