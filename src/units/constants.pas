@@ -2,7 +2,7 @@
   Summary:
     Constants
     
-  ## $Id: constants.pas,v 1.10 2004/03/12 14:09:11 ***REMOVED*** Exp $
+  ## $Id: constants.pas,v 1.11 2004/05/06 20:33:39 ***REMOVED*** Exp $
 }
 
 unit constants;
@@ -10,7 +10,7 @@ unit constants;
 interface
 
 const 
-  version_number = '1.0.0a7';
+  version_number = '1.0.0a8';
   version_program = 'Grendel';
   version_info = 'The Grendel Project - A Windows/Linux MUD Server';
   version_copyright = 'Copyright (c) 2000-2004 by Michiel Rook';
