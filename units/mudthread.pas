@@ -872,6 +872,7 @@ begin
                   if (comparestr(argument, ch.player^.password) <> 0) then
                     begin
                     write_console('(' + inttostr(conn.socket) + ') Failed password');
+                    conn.send('Wrong password.'#13#10);
                     closesocket(conn.socket);
                     exit;
                     end;
