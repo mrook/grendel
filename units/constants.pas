@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.27 2001/04/22 15:11:16 xenon Exp $
+// $Id: constants.pas,v 1.28 2001/04/22 21:33:12 xenon Exp $
 
 unit constants;
 
@@ -539,6 +539,9 @@ const liq_types:array[LIQ_WATER..LIQ_SPECIAL] of GLiquid =((name:'water';affect:
                                                          (name:'cola';affect:(0,0,22,7)),
                                                          (name:'special brew';affect:(18,0,15,0)));
 
+{ Xenon 22/Apr/2001: if you change any of these TARGET_* fields,
+                     **ALSO** have a look at do_spells()! Else
+                     do_spells might start bugging *severely*. }
 { spell targets }
 const
       TARGET_OFF_ATTACK=1;         { attack spell }
