@@ -5,9 +5,11 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! copyover procedure
 ! show bamfin/bamfout with their respective commands
 ! taunt messages (configurable by player) will be sent at kill to (dead) target
-! Mobs can't cast spells > lvl 100
-            
-* Area casting on yourself bugs (?)
+! Mobs can't cast spells > lvl 100           
+! Area casting on yourself bugs
+
+
+* better damage/xp system (more balanced)
 * Better online construction (autocreate exit+room when moving), object
 * edit/instance, mobile create/edit/instance, reset edit etc.
 - some form of classes/professions/guilds/religions/whatever
