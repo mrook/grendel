@@ -306,8 +306,9 @@ begin
   if (dam>10) and (dt<>TYPE_UNDEFINED) then
     begin
     dameq := random(MAX_WEAR)+1;
-    damobj:=oppnt.wear[dameq];
-    if (damobj<>nil) then
+    damobj := oppnt.getEQ(dameq);
+
+    if (damobj <> nil) then
       begin
       { damage the object }
       dec(dam,5);
@@ -597,8 +598,9 @@ begin
       end
     else
       dual_flip := false;
-    end
-  else
+    end;
+
+  if (wield = nil) or (wield.item_type <> ITEM_WEAPON) then
     wield := ch.getWield(ITEM_WEAPON);
 
   if (wield = nil) then
@@ -705,6 +707,7 @@ begin
       end;
 
     dam := (dam * ch.ability.str) div 50;
+
     one_hit:=damage(ch,victim,dam, TYPE_HIT + ds);
     end
   else
@@ -819,7 +822,7 @@ begin
 
       if skill_success(ch,gsn_dual_wield) then
         begin
-        improve_skill(ch, gsn_second_attack);
+        improve_skill(ch, gsn_dual_wield);
         if (one_hit(ch, vict) <> RESULT_NONE) then
           exit;
         end;
