@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.32 2001/09/02 21:53:02 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.33 2001/10/04 17:14:02 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -99,7 +99,7 @@ var
 
    auction_good, auction_evil : GAuction;
 
-   banned_masks : TStringList;
+   banned_masks, banned_names : TStringList;
 
 
 var
@@ -124,6 +124,7 @@ procedure calculateonline;
 procedure load_system;
 procedure save_system;
 function isMaskBanned(host : string) : boolean;
+function isNameBanned(name : string) : boolean;
 
 procedure load_damage;
 
@@ -279,6 +280,22 @@ begin
   until (s = '$') or (af.eof);
 
   af.Free;
+
+  try
+    af := GFileReader.Create(SystemDir + 'names.dat');
+  except
+    bugreport('load_system', 'mudsystem.pas', 'could not open system\names.dat');
+    exit;
+  end;
+
+  repeat
+    s := af.readLine;
+
+    if (s <> '$') then
+      banned_names.add(lowercase(s));
+  until (s = '$') or (af.eof);
+
+  af.Free;
 end;
 
 procedure save_system;
@@ -322,6 +339,19 @@ begin
   af.writeLine('$');
 
   af.Free();
+
+  try
+    af := GFileWriter.Create(SystemDir + 'names.dat');
+  except
+    exit;
+  end;
+
+  for a := 0 to banned_names.count-1 do
+    af.writeLine(banned_names[a]);
+
+  af.writeLine('$');
+
+  af.Free();
 end;
 
 function isMaskBanned(host : string) : boolean;
@@ -334,6 +364,30 @@ begin
     if (StringMatches(host, banned_masks[a])) then
       begin
       Result := true;
+      end;
+end;
+
+function isNameBanned(name : string) : boolean;
+var
+  a : integer;
+begin
+  Result := false;
+  
+  name := lowercase(name);
+  
+  // exclude any names that contains non-alpha characters
+  for a := 1 to length(name) do 
+    if (not (name[a] in ['a'..'z'])) then
+      begin
+      Result := true;
+      exit;
+      end;
+
+  for a := 0 to banned_names.count-1 do
+    if (pos(banned_names[a], name) > 0) then
+      begin
+      Result := true;
+      exit;
       end;
 end;
 
@@ -743,6 +797,7 @@ begin
   auction_good := GAuction.Create;
   auction_evil := GAuction.Create;
   banned_masks := TStringList.Create;
+  banned_names := TStringList.Create;
 end;
 
 procedure cleanupSystem();

@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.70 2001/10/04 16:00:59 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.71 2001/10/04 17:14:02 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -482,6 +482,13 @@ begin
                     conn.state := CON_NEW_NAME;
                     exit;
                     end;
+                    
+                  if (isNameBanned(argument)) then
+                    begin;
+                    conn.sock.send('Illegal name.'#13#10);
+                    conn.sock.send('Please enter your name: ');
+                    exit;
+                    end;
 
                   vict := findDualConnection(conn, argument); // returns nil if player is 
 
@@ -606,8 +613,9 @@ begin
                     exit;
                     end;
 
-                  tmp := findCharWorld(nil, argument);
-                  if (* ((banned_names.indexof(uppercase(argument)) <> -1) or *) (tmp <> nil) and (uppercase(tmp.name^) = uppercase(argument)) then
+                  tmp := findPlayerWorldEx(nil, argument);
+                  
+                  if (isNameBanned(argument)) or (tmp <> nil) then
                     begin
                     conn.send('That name cannot be used.'#13#10);
                     conn.send('By what name do you wish to be known? ');
