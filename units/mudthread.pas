@@ -1266,6 +1266,7 @@ begin
   registerCommand('do_olist', do_olist);
   registerCommand('do_rlink', do_rlink);
   registerCommand('do_rmake', do_rmake);
+  registerCommand('do_rclone', do_rclone);
   registerCommand('do_aassign', do_aassign);
 end;
 

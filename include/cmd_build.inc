@@ -1377,6 +1377,84 @@ begin
   interpret(ch,headings[dir]);
 end;
 
+procedure do_rclone(ch : GCharacter; param : string);
+var dir : integer;
+    new_vnum : integer;
+    to_exit, from_exit : GExit;
+    new_room : GRoom;
+    area : GArea;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: RCLONE <direction>'#13#10#13#10);
+    ch.sendBuffer('Creates a new room within your vnum range linked to the current room,'#13#10);
+    ch.sendBuffer('cloning all the information, except for the exits.'#13#10);
+    exit;
+    end;
+
+  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area_fname = '') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if (ch.getTrust() < LEVEL_GOD) and (ch.player^.area = nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  dir := FindHeading(param);
+  if (dir = -1) then
+    begin
+    ch.sendBuffer('Invalid direction. Please use north, south, west, east, down or up.'#13#10);
+    exit;
+    end;
+
+  new_vnum := findFreeVNum(ch);
+  if (new_vnum = -1) then
+    begin
+    ch.sendBuffer('No more vnums available in your range. Try decreasing the size'#13#10);
+    ch.sendBuffer('of your area or asking another immortal for a bigger range.'#13#10);
+    exit;
+    end;
+
+  if (ch.room.findExit(dir) <> nil) then
+    begin
+    ch.sendBuffer('An exit in that direction already exists!'#13#10);
+    exit;
+    end;
+
+  ch.sendBuffer('Creating room #'+inttostr(new_vnum)+'.'#13#10);
+
+  area := ch.player^.area;
+  new_room := createRoom(new_vnum, area);
+  new_room.name := hash_string(ch.room.name);
+  new_room.description := ch.room.description;
+  new_room.flags := ch.room.flags;
+  new_room.televnum := ch.room.televnum;
+  new_room.teledelay := ch.room.teledelay;
+  new_room.min_level := ch.room.min_level;
+  new_room.max_level := ch.room.max_level;
+  new_room.sector := ch.room.sector;
+
+  to_exit := GExit.Create;
+  to_exit.direction := dir;
+  to_exit.vnum := new_vnum;
+  to_exit.to_room := new_room;
+
+  ch.room.exits.insertLast(to_exit);
+
+  from_exit := GExit.Create;
+  from_exit.direction := dir_inv[dir];
+  from_exit.vnum := ch.room.vnum;
+  from_exit.to_room := ch.room;
+
+  new_room.exits.insertLast(from_exit);
+
+  interpret(ch,headings[dir]);
+end;
+
 { Re-added area assign - Nemesis }
 procedure do_aassign(ch:GCharacter;param:string);
 var vict : GCharacter;
