@@ -1,6 +1,8 @@
 {
-  @abstract(Character update & regeneration routines)
-  @lastmod($Id: update.pas,v 1.23 2003/10/17 09:04:01 ***REMOVED*** Exp $)
+	Summary:
+		Character update & regeneration routines
+		
+	## $Id: update.pas,v 1.24 2003/10/22 13:12:38 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -17,20 +19,20 @@ uses
 	skills;
 
 
-procedure regenerate_chars;
+procedure regenerate_chars();
 
-procedure update_chars;
-procedure update_tracks;
-procedure update_teleports;
-procedure update_time;
+procedure update_chars();
+procedure update_tracks();
+procedure update_teleports();
+procedure update_time();
 
-procedure gain_condition(ch:GCharacter;iCond,value:integer);
+procedure gain_condition(ch : GCharacter; iCond, value : integer);
 
-procedure battlegroundMessage;
-procedure startBattleground;
-procedure update_battleground;
+procedure battlegroundMessage();
+procedure startBattleground();
+procedure update_battleground();
 
-procedure update_objects;
+procedure update_objects();
 
 implementation
 
@@ -44,16 +46,17 @@ uses
 	Channels;
 
 
-procedure regenerate_chars;
-var hp_gain,mv_gain,mana_gain:integer;
-    ch : GCharacter;
-    node : GListNode;
+procedure regenerate_chars();
+var 
+	hp_gain, mv_gain, mana_gain : integer;
+	ch : GCharacter;
+	iterator : GIterator;
 begin
-  node := char_list.head;
+  iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    ch := node.element;
+    ch := GCharacter(iterator.next());
 
     hp_gain:=0; mv_gain:=0; mana_gain:=0;
 
@@ -106,12 +109,12 @@ begin
     // progress the script
     if (ch.IS_NPC) and (GNPC(ch).npc_index.prog <> nil) then
       GNPC(ch).context.Execute;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
-procedure update_time;
+procedure update_time();
 var 
 	buf : string;
 	iterator : GIterator;
@@ -302,7 +305,7 @@ begin
     end;
 end;
 
-procedure update_chars;
+procedure update_chars();
 var 
 	p:integer;
 	ch : GCharacter;
@@ -434,55 +437,53 @@ begin
   interpret(ch,'look _AUTO');
 end;
 
-procedure update_tracks;
+procedure update_tracks();
 var
+	iterator_room : GIterator;
    node_room, node_track, node_tracknext : GListNode;
    room : GRoom;
    track : GTrack;
    h : integer;
 begin
-  for h := 0 to room_list.hashsize - 1 do
-    begin
-    node_room := room_list.bucketList[h].head;
+	iterator_room := room_list.iterator();
+	
+	while (iterator_room.hasNext()) do
+		begin
+		room := GRoom(iterator_room.next());
+		node_track := room.tracks.head;
 
-    while (node_room <> nil) do
-      begin
-      room := GRoom(GHashValue(node_room.element).value);
-      node_track := room.tracks.head;
+		while (node_track <> nil) do
+			begin
+			node_tracknext := node_track.next;
 
-      while (node_track <> nil) do
-        begin
-        node_tracknext := node_track.next;
+			track := GTrack(node_track.element);
 
-        track := node_track.element;
+			dec(track.life);
 
-        dec(track.life);
+			if (track.life = 0) then
+				begin
+				room.tracks.remove(node_track);
+				track.Free;
+				end;
 
-        if (track.life = 0) then
-          begin
-          room.tracks.remove(node_track);
-          track.Free;
-          end;
-
-        node_track := node_tracknext;
-        end;
-
-      node_room := node_room.next;
-      end;
-    end;
+			node_track := node_tracknext;
+			end;
+		end;
+		
+	iterator_room.Free();
 end;
 
-procedure update_teleports;
-var tele : GTeleport;
-    room,dest : GRoom;
-    node, node_next : GListNode;
+procedure update_teleports();
+var 
+	tele : GTeleport;
+	room,dest : GRoom;
+	iterator : GIterator;
 begin
-  node := teleport_list.head;
+  iterator := teleport_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    tele := node.element;
-    node_next := node.next;
+    tele := GTeleport(iterator.next());
 
     dec(tele.timer);
 
@@ -491,14 +492,14 @@ begin
       room := tele.t_room;
       dest := findRoom(room.televnum);
 
-      while (room.chars.getSize > 0) do
-        teleportChar(room.chars.head.element, dest);
+      while (room.chars.size() > 0) do
+        teleportChar(GCharacter(room.chars.head.element), dest);
 
-      teleport_list.remove(node);
+      { TODO teleport_list.remove(tele.node); }
       end;
-
-    node := node_next;
     end;
+    
+  iterator.Free();
 end;
 
 { procedure update_timers;
@@ -528,7 +529,7 @@ begin
     end;
 end; }
 
-procedure battlegroundMessage;
+procedure battlegroundMessage();
 begin
   if (bg_info.prize<>nil) then
     to_channel(nil,pchar('[$B$7Battleground starting in '+inttostr(bg_info.count)+' seconds$A$7]'#13#10+
@@ -540,7 +541,7 @@ begin
                '-'+inttostr(bg_info.hi_range)),CHANNEL_ALL,AT_REPORT)
 end;
 
-procedure startBattleground;
+procedure startBattleground();
 var 
 	iterator : GIterator;
 	ch : GCharacter;
@@ -580,7 +581,7 @@ begin
   iterator.Free();
 end;
 
-procedure update_battleground;
+procedure update_battleground();
 var 
 	s : integer;
 	ch, last : GCharacter;
@@ -643,7 +644,7 @@ begin
     end;
 end;
 
-procedure update_objects;
+procedure update_objects();
 var 
   obj : GObject;
   rch : GCharacter;
@@ -693,7 +694,7 @@ begin
     if (obj.room <> nil) then
       begin
       if (obj.room.chars.head <> nil) then
-        rch := obj.room.chars.head.element
+        rch := GCharacter(obj.room.chars.head.element)
       else
         rch := nil;
 

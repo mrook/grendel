@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: commands.pas,v 1.4 2003/10/18 11:09:33 ***REMOVED*** Exp $)
+  @lastmod($Id: commands.pas,v 1.5 2003/10/22 13:12:34 ***REMOVED*** Exp $)
 }
 
 unit commands;
@@ -206,14 +206,15 @@ end;
 
 procedure interpret(ch : GCharacter; line : string);
 var
-    a : longint;
-    gc : GCommand;
-    cmd : GCommand;
-    node : GListNode;
-    cmdline, param, ale : string;
-    hash, time : cardinal;
-    al : GAlias;
-    timer : GTimer;
+	a : longint;
+	gc : GCommand;
+	cmd : GCommand;
+	node : GListNode;
+	cmdline, param, ale : string;
+	hash, time : cardinal;
+	al : GAlias;
+	iterator : GIterator;
+	timer : GTimer;
 begin
   if (not ch.IS_NPC) and (GPlayer(ch).switching <> nil) then
     begin
@@ -282,11 +283,11 @@ begin
 	// check for aliases first
 	if (not ch.IS_NPC) then
 		begin
-		node := GPlayer(ch).aliases.head;
+		iterator := GPlayer(ch).aliases.iterator();
 
-		while (node <> nil) do
+		while (iterator.hasNext()) do
 			begin
-			al := node.element;
+			al := GAlias(iterator.next());
 
 			if (uppercase(al.alias) = cmdline) then
 				begin
@@ -306,15 +307,15 @@ begin
 
 				break;
 				end;
-
-			node := node.next;
 			end;
+			
+		iterator.Free();
 		end;
 
 	cmd := nil;
 
 	hash := commandList.getHash(cmdline);
-	node := commandList.bucketList[hash].head;
+	node := commandList.buckets[hash].head;
 
 	while (node <> nil) do
 		begin

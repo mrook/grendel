@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.45 2003/10/17 16:34:40 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.46 2003/10/22 13:12:36 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -681,7 +681,7 @@ end;
 procedure saveMudState();
 var
   af : GFileWriter;
-  node : GListNode;
+  iterator : GIterator;
   area : GArea;
 begin
   try
@@ -694,11 +694,11 @@ begin
     af.writeLine('Time: ' + IntToStr(hour) + ' ' + IntToStr(day) + ' ' +
                  IntToStr(month) + ' ' + IntToStr(year) + ' ' + IntToStr(sunlight));
 
-  node := area_list.head;
+  iterator := area_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    area := node.element;
+    area := GArea(iterator.next());
 
     if (not area.flags.isBitSet(AREA_PROTO)) then
       with area do
@@ -707,9 +707,9 @@ begin
         af.writeLine('Weather: ' + IntToStr(weather.mmhg) + ' ' + IntToStr(weather.change) +
                      ' ' + IntToStr(weather.sky) + ' ' + IntToStr(weather.temp));
         end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 
   af.writeLine('$');
   af.Free;

@@ -1,6 +1,8 @@
 {
-  @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.52 2003/10/20 12:34:11 ***REMOVED*** Exp $)
+  Summary:
+  	Connection manager
+  	
+  ## $Id: conns.pas,v 1.53 2003/10/22 13:12:34 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -911,7 +913,7 @@ begin
     ac.Free();
     end
   else
-  if (connection_list.getSize >= system_info.max_conns) then
+  if (connection_list.size() >= system_info.max_conns) then
     begin
     ac.send(system_info.mud_name+#13#10#13#10);
     ac.send('Currently, this server is too busy to accept new connections.'#13#10);

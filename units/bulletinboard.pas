@@ -1,6 +1,6 @@
 {
   @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id: bulletinboard.pas,v 1.12 2003/10/17 12:39:57 ***REMOVED*** Exp $)
+  @lastmod($Id: bulletinboard.pas,v 1.13 2003/10/22 13:12:33 ***REMOVED*** Exp $)
 }
 
 unit bulletinboard;
@@ -22,7 +22,7 @@ var
    notes : GDLinkedList;
 
 procedure load_notes(fname : string);
-procedure save_notes;
+procedure save_notes();
 function findNote(board, number : integer) : GNote;
 function noteNumber(board : integer) : integer;
 procedure postNote(c : pointer; text : string);
@@ -111,23 +111,23 @@ begin
   af.Free();
 end;
 
-procedure save_notes;
-var node : GListNode;
-    f : textfile;
-    note : GNote;
-    i : integer;
+procedure save_notes();
+var 
+	iterator : GIterator;
+	f : textfile;
+	note : GNote;
+	i : integer;
 begin
   for i:=1 to BOARD_MAX-1 do
     begin
     assignfile(f, translateFileName('boards\' + board_names[i] + '.brd'));
     rewrite(f);
 
-    node := notes.head;
+    iterator := notes.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-
-      note := node.element;
+			note := GNote(iterator.next());
 
       if (note.board = i) then
         begin
@@ -142,53 +142,55 @@ begin
         writeln(f, '#END');
         writeln(f);
         end;
-
-      node := node.next;
-      end;
+			end;
+			
+		iterator.Free();
 
     closefile(f);
     end;
 end;
 
 function findNote(board, number : integer) : GNote;
-var node : GListNode;
-    note : GNote;
+var 
+	iterator : GIterator;
+	note : GNote;
 begin
   Result := nil;
 
-  node := notes.head;
+	iterator := notes.iterator();
 
-  while (node <> nil) do
-    begin
-    note := node.element;
+	while (iterator.hasNext()) do
+		begin
+		note := GNote(iterator.next());
 
     if (note.board = board) and (note.number = number) then
       begin
       Result := note;
       exit;
       end;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 end;
 
 function noteNumber(board : integer) : integer;
-var node : GListNode;
-    note : GNote;
-    number : integer;
+var
+	iterator : GIterator;
+	note : GNote;
+	number : integer;
 begin
   number := 0;
-  node := notes.head;
+	iterator := notes.iterator();
 
-  while (node <> nil) do
-    begin
-    note := node.element;
+	while (iterator.hasNext()) do
+		begin
+		note := GNote(iterator.next());
 
     if (note.board = board) and (note.number > number) then
       number := note.number;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 
   Result := number + 1;
 end;

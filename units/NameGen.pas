@@ -1,6 +1,6 @@
 {
   @abstract(Phonetic namegenerator)
-  @lastmod($Id: NameGen.pas,v 1.7 2002/08/03 19:17:56 ***REMOVED*** Exp $)
+  @lastmod($Id: NameGen.pas,v 1.8 2003/10/22 13:12:37 ***REMOVED*** Exp $)
 }
 
 unit NameGen;
@@ -234,7 +234,7 @@ begin
   parser.Free();
 
   namegenerator_enabled := true;
-  writeConsole('Loaded ' + inttostr(PhonemeList.getSize()) + ' phoneme classes and ' + inttostr(NameTemplateList.getSize()) + ' name templates from ' + dfile + '.');
+  writeConsole('Loaded ' + inttostr(PhonemeList.size()) + ' phoneme classes and ' + inttostr(NameTemplateList.size()) + ' name templates from ' + dfile + '.');
 end;
 
 function findPhoneme(str : string) : TPhoneme;
@@ -273,7 +273,7 @@ end;
 
 function generateName(nametemplate : string) : string;
 var
-  node : GListNode;
+  iterator : GIterator;
   ph : TPhoneme;
   phpart : TPhonemePart;
   ntpart : TNameTemplatePart;
@@ -290,20 +290,20 @@ begin
     exit;
   end;
   
-  node := nt.template_parts.head;
-  while (node <> nil) do
-  begin
-    ntpart := node.element;
+  iterator := nt.template_parts.iterator();
+  while (iterator.hasNext()) do
+  	begin
+    ntpart := TNameTemplatePart(iterator.next());
     ph := findPhoneme(ntpart.part_value);
     assert(ph <> nil, 'findPhoneme() returned nil');
-    phpart := ph.getNthPhonemePart(random(ph.phoneme_parts.getSize()));
+    phpart := ph.getNthPhonemePart(random(ph.phoneme_parts.size()));
     assert(phpart <> nil, 'getNthPhonemePart() returned nil');
     if (ntpart.part_type = 'Cap') then
       result := result + cap(phpart.part_value)
     else
       result := result + phpart.part_value;
-    node := node.next;
-  end;
+  end;  
+  iterator.Free();
 end;
 
 procedure reloadNameTables();

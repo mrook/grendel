@@ -1,6 +1,6 @@
 {
   @abstract(Clan routines)
-  @lastmod($Id: clan.pas,v 1.10 2002/08/03 19:17:47 ***REMOVED*** Exp $)
+  @lastmod($Id: clan.pas,v 1.11 2003/10/22 13:12:34 ***REMOVED*** Exp $)
 }
 
 unit clan;
@@ -28,7 +28,7 @@ type
 var
    clan_list : GDLinkedList;
 
-procedure load_clans;
+procedure load_clans();
 
 function findClan(s : string) : GClan;
 
@@ -43,7 +43,7 @@ uses
     console,
     mudsystem;
 
-constructor GClan.Create;
+constructor GClan.Create();
 begin
   inherited Create;
 
@@ -132,7 +132,7 @@ begin
   close(cf);
 end;
 
-procedure load_clans;
+procedure load_clans();
 var clan : GClan;
     s:string;
     f:textfile;
@@ -164,24 +164,24 @@ end;
 
 function findClan(s : string) : GClan;
 var
-   node : GListNode;
-   clan : GClan;
+	iterator : GIterator;
+	clan : GClan;
 begin
-  findClan := nil;
-  node := clan_list.head;
+  Result := nil;
+  iterator := clan_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    clan := node.element;
+    clan := GClan(iterator.next());
 
     if (s = clan.name) then
       begin
-      findClan := clan;
-      exit;
+      Result := clan;
+      break;
       end;
-
-    node := node.next;
     end;
+
+	iterator.Free();
 end;
 
 procedure initClans();

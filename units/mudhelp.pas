@@ -1,6 +1,6 @@
 {
   @abstract(Online help interface)
-  @lastmod($Id: mudhelp.pas,v 1.12 2002/08/03 19:14:00 ***REMOVED*** Exp $)
+  @lastmod($Id: mudhelp.pas,v 1.13 2003/10/22 13:12:36 ***REMOVED*** Exp $)
 }
 
 unit mudhelp;
@@ -69,7 +69,7 @@ function getSkillSpellList(sktype : integer) : string;
     node := ll.head;
     while (node <> nil) do
     begin
-      sk := node.element;
+      sk := ASkill(node.element);
 
       if (ask.min_lvl > sk.min_lvl) then
       begin
@@ -89,7 +89,7 @@ function getSkillSpellList(sktype : integer) : string;
 
 var
   buf : string;
-  node : GListNode;
+  iterator : GIterator;
   gsk : GSkill;
   ask : ASkill;
   ll : GDLinkedList;
@@ -97,29 +97,26 @@ begin
   buf := '';
   ll := GDLinkedList.Create();
 
-  node := skill_table.head;
-  while (node <> nil) do
-  begin
-    gsk := node.element;
+	iterator := skill_table.iterator();
+  while (iterator.hasNext()) do
+  	begin
+    gsk := GSkill(iterator.next());
     if (gsk.skill_type = sktype) then
-    begin
+    	begin
       ask := ASkill.Create(gsk.min_lvl, gsk.name^);
       insertLevelSorted(ll, ask);
-    end;
-    
-    node := node.next;
-  end;
+    	end;    
+	  end;
+	iterator.Free();
   
-  node := ll.head;
-  while (node <> nil) do
-  begin
-    ask := node.element;
+	iterator := ll.iterator();
+  while (iterator.hasNext()) do
+  	begin
+    ask := ASkill(iterator.next());
     buf := buf + Format('[$B$4%3d$A$7]  %s', [ask.min_lvl, ask.name]);
-    if (node <> ll.tail) then
+    if (iterator.hasNext()) then
       buf := buf + #13#10;
-
-    node := node.next;
-  end;
+  	end;
 
   Result := buf;
 end;
@@ -263,21 +260,21 @@ end;
 
 function findHelp(text : string) : GHelp;
 var
-   node : GListNode;
-   help : GHelp;
-   key, arg : string;
-   s, p : integer;
+	help : GHelp;
+	key, arg : string;
+	s, p : integer;
+	iterator : GIterator;
 begin
-  Result := help_files.head.element;
+  Result := GHelp(help_files.head.element);
   p := high(integer);
 
   text := uppercase(text);
 
-  node := help_files.head;
+  iterator := help_files.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    help := node.element;
+    help := GHelp(iterator.next());
 
     key := help.keywords;
 
@@ -292,9 +289,9 @@ begin
         Result := help;
         end;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 procedure initHelp();

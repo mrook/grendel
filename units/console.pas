@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.10 2003/10/09 14:55:40 ***REMOVED*** Exp $)
+  @lastmod($Id: console.pas,v 1.11 2003/10/22 13:12:35 ***REMOVED*** Exp $)
 }
 
 unit console;
@@ -98,7 +98,7 @@ begin
   he.text := text;
   history.insertLast(he);
 
-  if (history.getSize() > CONSOLE_HISTORY_MAX) then
+  if (history.size() > CONSOLE_HISTORY_MAX) then
   	begin
   	GConsoleHistoryElement(history.head.element).Free();
     history.remove(history.head);

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.7 2003/10/18 11:09:35 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.8 2003/10/22 13:12:37 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -468,7 +468,7 @@ begin
 
                   with system_info do
                     begin
-                    user_cur := connection_list.getSize;
+                    user_cur := connection_list.size();
                     if (user_cur > user_high) then
                       user_high := user_cur;
                     end;
@@ -980,9 +980,9 @@ end;
 // GPlayer
 constructor GPlayer.Create(conn : GPlayerConnection);
 var
-   iterator : GIterator;
-   chan : TChannel;
-   tc : TChannel;
+	iterator : GIterator;
+	chan : GUserChannel;
+	tc : GUserChannel;
 begin
   inherited Create();
 
@@ -1022,8 +1022,8 @@ begin
   
   while (iterator.hasNext()) do
     begin
-    chan := TChannel(iterator.next());
-    tc := TChannel.Create(chan.channelname);
+    chan := GUserChannel(iterator.next());
+    tc := GUserChannel.Create(chan.channelname);
     channels.insertLast(tc);
     end;
 
@@ -1066,8 +1066,8 @@ end;
 
 destructor GPlayer.Destroy();
 var
-   node, node_next : GListNode;
-   tc : TChannel;
+	node, node_next : GListNode;
+	tc : GUserChannel;
 begin
   aliases.clean;
   aliases.Free;
@@ -1076,7 +1076,7 @@ begin
   while (node <> nil) do
     begin
     node_next := node.next;
-    tc := node.element;
+    tc := GUserChannel(node.element);
     channels.remove(node);
     tc.Free();
 
@@ -1094,17 +1094,10 @@ end;
 
 procedure GPlayer.quit();
 var
-   vict : GCharacter;
-   node : GListNode;
+	vict : GCharacter;
+	iterator : GIterator;
 begin
-  emptyBuffer;
-
-{  if (IS_NPC) then
-    begin
-    if (conn <> nil) then
-      conn.send('You''re an NPC, you can''t quit!'#13#10);
-    exit;
-    end; }
+  emptyBuffer();
 
   if (conn = nil) then
     writeConsole('(Linkless) '+ name+ ' has logged out')
@@ -1149,11 +1142,11 @@ begin
     end
   else
     begin
-    node := char_list.head;
+    iterator := char_list.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      vict := node.element;
+      vict := GCharacter(iterator.next());
 
       if (vict <> Self) and ((vict.leader = Self) or (vict.master = Self)) then
         begin
@@ -1161,9 +1154,9 @@ begin
         vict.master := nil;
         vict.leader := vict;
         end;
-
-      node := node.next;
       end;
+    
+    iterator.Free();
     end;
 
   save(name);
@@ -1238,36 +1231,38 @@ end;
 
 function GPlayer.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
 var
-  node : GListNode;
+  iterator : GIterator;
   g : GLearned;
 begin
   Result := 0;
-  node := skills_learned.head;
+  iterator := skills_learned.iterator();
 
-  while (node <> nil) do
-  begin
-    g := node.element;
+  while (iterator.hasNext()) do
+  	begin
+    g := GLearned(iterator.next());
     if (GSkill(g.skill).skill_type <> SKILL_SPELL) then
       inc(Result);
-    node := node.next;
-  end;
+	  end;
+	
+	iterator.Free();
 end;
 
 function GPlayer.getUsedSpellslots() : integer;       // returns nr. of spellslots occupied
 var
-  node : GListNode;
+  iterator : GIterator;
   g : GLearned;
 begin
   Result := 0;
-  node := skills_learned.head;
+  iterator := skills_learned.iterator();
 
-  while (node <> nil) do
-  begin
-    g := node.element;
+  while (iterator.hasNext()) do
+  	begin
+    g := GLearned(iterator.next());
     if (GSkill(g.skill).skill_type = SKILL_SPELL) then
       inc(Result);
-    node := node.next;
-  end;
+	  end;
+	
+	iterator.Free();
 end;
 
 function GPlayer.load(fn : string) : boolean;
@@ -1283,7 +1278,7 @@ var d, x : longint;
     node : GListNode;
     chan : GChannel;
     iterator : GIterator;
-    tc : TChannel;
+    tc : GUserChannel;
 begin
   inner := 0;
 
@@ -1329,7 +1324,7 @@ begin
           if (race = nil) then
             begin
             bugreport('GPlayer.load', 'chars.pas', 'Unknown race ' + right(a, ' ') + ', reverting to default instead');
-            race := raceList.head.element;
+            race := GRace(raceList.head.element);
             end;
           end
         else
@@ -1589,7 +1584,7 @@ begin
           
           while (iterator.hasNext()) do
             begin
-            tc := TChannel(iterator.next());
+            tc := GUserChannel(iterator.next());
             
             if (tc.channelname = right(a, ' ')) then
               tc.ignored := true;
@@ -1848,7 +1843,7 @@ var
    g : GLearned;
    aff : GAffect;
    fl : cardinal;
-   tc : TChannel;
+   tc : GUserChannel;
    iterator : GIterator;
    w1, w2 : string;
 begin
@@ -1951,7 +1946,7 @@ begin
   
   while (iterator.hasNext()) do
     begin
-    tc := TChannel(iterator.next());
+    tc := GUserChannel(iterator.next());
     
     if (tc.ignored) then
       af.writeLine('Ignore: ' + tc.channelname);
@@ -2485,7 +2480,7 @@ begin
     if (node = nil) then
       break;
 
-    removeAffect(Self, node.element);
+    removeAffect(Self, GAffect(node.element));
     end;
 end;
 

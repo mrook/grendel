@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.23 2003/10/16 16:07:30 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.24 2003/10/22 13:12:36 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -280,14 +280,14 @@ end;
 
 procedure spell_affect(ch,caster:GCharacter; sn : GSkill);
 var
-   node : GListNode;
-   aff, aff_find : GAffect;
+	iterator : GIterator;
+	aff, aff_find : GAffect;
 begin
-  node := sn.affects.head;
+  iterator := sn.affects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    aff := node.element;
+    aff := GAffect(iterator.next());
     
     aff_find := findAffect(ch, aff.name^);
     
@@ -296,9 +296,9 @@ begin
       aff_find.duration := aff.duration
     else
       aff.applyTo(ch);
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 procedure spell_generic(ch,victim:GCharacter; sn : GSkill);
@@ -335,7 +335,7 @@ begin
 
                         while (node <> nil) do
                           begin
-                          vict := node.element;
+                          vict := GCharacter(node.element);
 
                           if (vict <> ch) then
                             begin
@@ -355,7 +355,7 @@ begin
 
                         while (node <> nil) do
                           begin
-                          vict := node.element;
+                          vict := GCharacter(node.element);
 
                           if (ch.IS_SAME_ALIGN(vict)) and (not vict.IS_NPC) then
                              break;
@@ -420,7 +420,7 @@ begin
         damage(ch,vict,dam, cardinal(sn));
         end;
 
-      if (not vict.CHAR_DIED) and (affects.getSize() > 0) then
+      if (not vict.CHAR_DIED) and (affects.size() > 0) then
         spell_affect(vict,ch,sn);
 
       case target of
@@ -438,7 +438,7 @@ begin
                               break;
                               end;
 
-                            vict := node.element;
+                            vict := GCharacter(node.element);
 
                             if (vict <> ch) then
                               begin
@@ -461,7 +461,7 @@ begin
                               break;
                               end;
 
-                            vict := node.element;
+                            vict := GCharacter(node.element);
 
                             if (ch.IS_SAME_ALIGN(vict)) and (not vict.IS_NPC) then
                                break;

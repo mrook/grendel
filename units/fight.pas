@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.29 2003/10/18 11:09:34 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.30 2003/10/22 13:12:35 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -87,24 +87,24 @@ var
   dual_flip : boolean;
 
 procedure stopfighting(ch : GCharacter);
-var vict : GCharacter;
-    node : GListNode;
+var 
+	vict : GCharacter;
+	iterator : GIterator;
 begin
-  node := char_list.head;
+	iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.fighting = ch) then
       begin
       vict.fighting := nil;
       vict.state := STATE_IDLE;
       end;
-
-    node := node.next;
     end;
 
+	iterator.Free();
   ch.fighting := nil;
   ch.state := STATE_IDLE;
 end;
@@ -114,29 +114,29 @@ var chance:integer;
     s_room : GRoom;
     vict : GCharacter;
     pexit : GExit;
-    node_exit, node_char : GListNode;
+    iterator_exit, iterator_char : GIterator;
 begin
-  node_exit := ch.room.exits.head;
+	iterator_exit := ch.room.exits.iterator();
 
-  while (node_exit <> nil) do
+  while (iterator_exit.hasNext()) do
     begin
-    pexit := node_exit.element;
+    pexit := GExit(iterator_exit.next());
 
     s_room := findRoom(pexit.vnum);
 
-    node_char := s_room.chars.head;
+    iterator_char := s_room.chars.iterator();
 
-    while (node_char <> nil) do
+    while (iterator_char.hasNext()) do
       begin
-      vict := node_char.element;
+      vict := GCharacter(iterator_char.next());
 
       vict.sendBuffer('You hear a chilling death cry.'#13#10);
-
-      node_char := node_char.next;
       end;
 
-    node_exit := node_exit.next;
+		iterator_char.Free();
     end;
+    
+  iterator_exit.Free();
 
   chance:=random(14);
   if (ch.room = killer.room) then
@@ -237,25 +237,25 @@ end;
 
 function findDamage(dam : integer) : GDamMessage;
 var
-   node : GListNode;
-   dm : GDamMessage;
+	iterator : GIterator;
+	dm : GDamMessage;
 begin
   findDamage := nil;
 
-  node := dm_msg.head;
+  iterator := dm_msg.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    dm := node.element;
+    dm := GDamMessage(iterator.next());
 
     if (dam >= dm.min) and (dam <= dm.max) then
       begin
       findDamage := dm;
       exit;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 function damage(ch, oppnt : GCharacter; dam : integer; dt : integer) : integer;
@@ -754,9 +754,9 @@ end;
 
 function in_melee(ch, vict : GCharacter) : boolean;
 var
-   node : GListNode;
-   t : GCharacter;
-   num : integer;
+	iterator : GIterator;
+	t : GCharacter;
+	num : integer;
 begin
   in_melee := true;
 
@@ -765,11 +765,11 @@ begin
 
   num := 0;
 
-  node := char_list.head;
+  iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    t := node.element;
+    t := GCharacter(iterator.next());
 
     if (t.state = STATE_FIGHTING) and (t.fighting = vict) then
       begin
@@ -783,9 +783,9 @@ begin
         exit;
         end;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 procedure multi_hit(ch, vict : GCharacter);

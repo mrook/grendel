@@ -1,6 +1,8 @@
 {
-  @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.54 2003/10/17 09:04:00 ***REMOVED*** Exp $)
+	Summary:
+		Constants
+		
+  ## $Id: constants.pas,v 1.55 2003/10/22 13:12:35 ***REMOVED*** Exp $
 }
 
 unit constants;
@@ -9,9 +11,9 @@ interface
 
 const 
 {$IFDEF LINUX}
-  version_number = '1.0.0 alpha2 (linux)';
+  version_number = '1.0.0 alpha3 (linux)';
 {$ELSE}
-  version_number = '1.0.0 alpha2';
+  version_number = '1.0.0 alpha3';
 {$ENDIF}
   version_info = 'The Grendel Project - A Windows/Linux MUD Server';
   version_copyright = 'Copyright (c) 2000-2003 by Michiel Rook';

@@ -1,6 +1,8 @@
 {
-  @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.21 2003/10/16 16:07:30 ***REMOVED*** Exp $)
+	Summary:
+		Channel manager
+		
+  ## $Id: Channels.pas,v 1.22 2003/10/22 13:12:33 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -30,30 +32,29 @@ const
   CHANNEL_FLAG_GROUP = BV07;
 
 type
-  GChannel =
-    class
-      channelname : string;
-      command : string;
-      alias : string;
-      minleveluse : integer; // minimum level to *use* channel
-      minlevelsee : integer; // minimum level to *see* channel
-      comment : string;
-      channelcolor : integer;
-      verbyou : string;
-      verbother : string;
-      channelFlags : GBitVector;
-      cost : integer;
-      
-      constructor Create(chname : string);
-      function LOG() : boolean;
-      function HISTORY() : boolean;
-      function ROOM() : boolean;
-      function AREA() : boolean;
-      function ALIGN() : boolean;
-      function GLOBAL() : boolean;
-      function CLAN() : boolean;
-      function GROUP() : boolean;
-    end;
+  GChannel = class
+  	channelname : string;
+		command : string;
+		alias : string;
+		minleveluse : integer; // minimum level to *use* channel
+		minlevelsee : integer; // minimum level to *see* channel
+		comment : string;
+		channelcolor : integer;
+		verbyou : string;
+		verbother : string;
+		channelFlags : GBitVector;
+		cost : integer;
+
+		constructor Create(name : string);
+		function LOG() : boolean;
+		function HISTORY() : boolean;
+		function ROOM() : boolean;
+		function AREA() : boolean;
+		function ALIGN() : boolean;
+		function GLOBAL() : boolean;
+		function CLAN() : boolean;
+		function GROUP() : boolean;
+	end;
 
   EBooleanConvertError = class(Exception);
 
@@ -100,11 +101,9 @@ uses
 var
   errprefix : string;
 
-constructor GChannel.Create(chname : string);
+constructor GChannel.Create(name : string);
 begin
-  inherited Create();
-
-  channelname := chname;
+  channelname := name;
   command := '';
   alias := '';
   minleveluse := 1;
@@ -177,10 +176,10 @@ begin
   if (prep(str) = 'OFF') then
     Result := false
   else
-  begin
+  	begin
     Result := false;
     raise EBooleanConvertError.CreateFmt('''%s'' invalid value for boolean; expected one of: true/false, yes/no, on/off', [str]);
-  end;
+  	end;
 end;
 
 function BooleanToStr(b : boolean) : string;
@@ -211,7 +210,7 @@ end;
 function chan_ignored(ch : GPlayer; chanstr : string) : boolean;
 var
   iterator : GIterator;
-  tc : TChannel;
+  tc : GUserChannel;
 begin
   Result := false;
     
@@ -219,7 +218,7 @@ begin
 
   while (iterator.hasNext()) do
     begin
-    tc := TChannel(iterator.next());
+    tc := GUserChannel(iterator.next());
     
     if ((pos(prep(chanstr), prep(tc.channelname)) = 1)) then
       begin
@@ -232,18 +231,18 @@ end;
 procedure channelAddHistory(vict, actor : GPlayer; channel : GChannel; str : string);
 var
   node : GListNode;
-  he : THistoryElement;
-  tc : TChannel;
+  he : GHistoryElement;
+  tc : GUserChannel;
 begin
   node := vict.channels.head;
   while (node <> nil) do
   begin
-    tc := node.element;
+    tc := GUserChannel(node.element);
     if (tc.channelname = channel.channelname) then
     begin
-      he := THistoryElement.Create(vict.ansiColor(channel.channelcolor) + act_string(str, vict, nil, nil, actor));
+      he := GHistoryElement.Create(vict.ansiColor(channel.channelcolor) + act_string(str, vict, nil, nil, actor));
       tc.history.insertLast(he);
-      if (tc.history.getSize() > CHANNEL_HISTORY_MAX) then
+      if (tc.history.size() > CHANNEL_HISTORY_MAX) then
       begin
         tc.history.remove(tc.history.head);
       end;
@@ -324,14 +323,14 @@ end;
 
 function lookupChannel(chname : string) : GChannel;
 var
-  node : GListNode;
+  iterator : GIterator;
   chan : GChannel;
 begin
   Result := nil;
-  node := channellist.head;
-  while (node <> nil) do
+  iterator := channellist.iterator();
+  while (iterator.hasNext()) do
   begin
-    chan := node.element;
+    chan := GChannel(iterator.next());
     if (chname = chan.channelname) or
        (pos(chname, chan.command) = 1) or
        ((chan.alias <> '') and (chname = chan.alias)) then
@@ -339,17 +338,17 @@ begin
       Result := chan;
       exit;
     end;
-    node := node.next;
   end;
+  iterator.Free();
 end;
 
 procedure channelCommunicate(ch : GCharacter; param : string);
 var
   arg0, buf : string;
   chan : GChannel;
-  node, node2 : GListNode;
-  tc : TChannel;
-  he : THistoryElement;
+  iterator1, iterator2 : GIterator;
+  tc : GUserChannel;
+  he : GHistoryElement;
 begin
   if (not channels_loaded) then
     begin
@@ -379,40 +378,42 @@ begin
     end;
   
   if ((length(param) = 0) and chan.HISTORY()) then
-  begin
+  	begin
     if (ch.IS_NPC()) then
-    begin
+    	begin
       ch.sendBuffer('Channel histories not available for NPCs.'#13#10);
       exit;
-    end;
+    	end;
+    	
     if chan.HISTORY() then
-    begin
-      node := GPlayer(ch).channels.head;
-      while (node <> nil) do
-      begin
-        tc := node.element;
+    	begin
+    	iterator1 := GPlayer(ch).channels.iterator();
+      while (iterator1.hasNext()) do
+      	begin
+        tc := GUserChannel(iterator1.next());
+        
         if (tc.channelname = chan.channelname) then
-        begin
-          node2 := tc.history.head;
-          while (node2 <> nil) do
-          begin
-            he := node2.element;
+        	begin
+        	iterator2 := tc.history.iterator();
+          while (iterator2.hasNext()) do
+          	begin
+            he := GHistoryElement(iterator2.next());
             ch.sendBuffer(he.contents^ + #13#10);
-            node2 := node2.next;
-          end;
+          	end;
+          iterator2.Free();
           break;
-        end;
-        node := node.next;
-      end;
+        	end;
+      	end;
+      iterator1.Free();
       ch.sendBuffer(#13#10);
-    end;
-  end
+    	end;
+	  end
   else
-  begin
+  	begin
     if (chan.LOG()) then
-    begin
+    	begin
       writeConsole(Format('Logged channel [%s]: %s ' + chan.verbother, [chan.channelname, ch.name, param]));
-    end;
+    	end;
     
     if (not ch.IS_IMMORT()) then
       ch.mv := ch.mv - chan.cost;
@@ -425,7 +426,7 @@ begin
 
     buf := Format('$N ' + chan.verbother, [param]);
     to_channel(ch, buf, chan, chan.channelcolor, false);
-  end;
+  	end;
 end;
 
 procedure processChannels(parser : TXmlParser; errprefix : string; Field : ChannelFieldEnum; ptr : pointer);
@@ -654,18 +655,18 @@ end;
 
 procedure registerChannels(list : GDLinkedList);
 var
-  node : GListNode;
+  iterator : GIterator;
   chan : GChannel;
   cmd : GCommand;
   alias : GCommand;
 begin
-  node := list.head;
-  while (node <> nil) do
-  begin
-    chan := node.element;
+	iterator := list.iterator();
+  while (iterator.hasNext()) do
+	  begin
+    chan := GChannel(iterator.next());
     
     if (chan.command <> '') then
-    begin
+    	begin
       cmd := GCommand.Create();
       cmd.allowed_states := [STATE_IDLE,STATE_FIGHTING,STATE_RESTING,STATE_MEDITATING];
       cmd.name := chan.command;
@@ -677,7 +678,7 @@ begin
       commandList.put(cmd.name, cmd);
 
       if (chan.alias <> '') then
-      begin
+     		begin
         alias := GCommand.Create();
         alias.allowed_states := cmd.allowed_states;
         alias.name := chan.alias;
@@ -687,25 +688,24 @@ begin
         alias.addArg0 := cmd.addArg0;
 
         commandList.put(alias.name, alias);
-      end;
-    end;
-    
-    node := node.next;
-  end;
+      	end;
+    	end;    
+  	end;
+  iterator.Free();
 end;
 
 procedure writeChannelsToConsole();
 var
-  node : GListNode;
+  iterator : GIterator;
   chan : GChannel;
 begin
-  node := channellist.head;
-  while (node <> nil) do
-  begin
-    chan := node.element;
+	iterator := channellist.iterator();
+  while (iterator.hasNext()) do  
+  	begin
+    chan := GChannel(iterator.next());
 
     with chan do
-    begin
+    	begin
       writeConsole('channelname: ' + channelname);
       writeConsole('  command:       ' + command);
       writeConsole('  alias:         ' + alias);
@@ -716,16 +716,15 @@ begin
       writeConsole('  verbyou:       ' + verbyou);
       writeConsole('  verbother:     ' + verbother);
       writeConsole('  flags:         ' + IntToStr(integer(channelFlags)));
-    end;
-
-    node := node.next;
-  end;
+    	end;
+  	end;
+  iterator.Free();
 end;
 
 procedure load_channels();
 var
   parser : TXmlParser;
-  node : GListNode;
+  iterator : GIterator;
   chan : GChannel;
 begin
   parser := TXmlParser.Create();
@@ -733,10 +732,10 @@ begin
   parser.LoadFromFile(channelDataFile);
   
   if (parser.Source <> channelDataFile) then
-  begin
+  	begin
     writeConsole('Could not open ' + channelDataFile + ', channels disabled.');
     exit;
-  end;
+  	end;
 
   errprefix := 'Error processing ' + channelDataFile + ': ';
   
@@ -744,21 +743,22 @@ begin
   processChannels(parser, errprefix, FieldNone, nil);
   parser.Free();
 
-  node := channellist.head;
-  while (node <> nil) do // cpl sanity checks
-  begin
-    chan := node.element;
+	iterator := channellist.iterator();
+  while (iterator.hasNext()) do // cpl sanity checks
+  	begin
+    chan := GChannel(iterator.next());
+    
     with chan do
-    begin
+    	begin
       if (verbyou = '') then
         verbyou := command;
       if (verbother = '') then
         verbother := verbyou + 's';
       if (minlevelsee = -1) then
         minlevelsee := minleveluse;
-    end;
-    node := node.next;
-  end;
+    	end;
+	 end;
+	iterator.Free();
 
   chan := lookupChannel(CHANNEL_LOG);
   if (chan = nil) then
@@ -783,10 +783,10 @@ begin
 
   registerChannels(channellist);
 
-  if (channellist.getSize() < 1) then
+  if (channellist.size() < 1) then
     writeConsole('no channels loaded from ' + channelDataFile + ', please check that file. Channels disabled for now.')
   else
-    writeConsole(Format('%d channels loaded from file %s and registered.', [channellist.getSize(), channelDataFile]));
+    writeConsole(Format('%d channels loaded from file %s and registered.', [channellist.size(), channelDataFile]));
 
 //  writeChannelsToConsole();
   channels_loaded := true;
@@ -794,29 +794,29 @@ end;
 
 procedure do_channel(ch : GCharacter; param : string);
 var
-  node : GListNode;
+  iterator : GIterator;
   chan : GChannel;
   buf : string;
   arg1, arg2 : string;
-  tc : TChannel;
+  tc : GUserChannel;
 begin
   param := one_argument(param, arg1);
   param := one_argument(param, arg2);
 
   if (length(arg1) = 0) then
-  begin
+  	begin
     ch.sendBuffer('Usage: CHANNEL <list> | [<channelname> <on/off>] '#13#10);
     exit;
-  end
+  	end
   else
   if (prep(arg1) = 'LIST') then
-  begin
-    node := channellist.head;
-    while (node <> nil) do
-    begin
-      chan := node.element;
+  	begin
+  	iterator := channellist.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      chan := GChannel(iterator.next());
       if (ch.level >= chan.minleveluse) then
-      begin
+      	begin
         buf := '';
 
         if (not ch.IS_NPC()) then
@@ -826,54 +826,55 @@ begin
             buf := '$B$7not ignored$A$7';
 
         with chan do
-        begin
+        	begin
           if (ch.IS_IMMORT()) then
-          begin
+          	begin
             buf := Format('%s%s$A$7: (%s) command: %s; alias: %s; minleveluse: %d; minlevelsee: %d.$A$7'#13#10, [ch.ansiColor(channelcolor), channelname, buf, command, alias, minleveluse, minlevelsee]);
             buf := buf + '  verbyou: "' + verbyou + '" verbother: "' + verbother + '"'#13#10;
-          end
+          	end
           else
-          begin
+          	begin
             buf := Format('%s%s$A$7: (%s) command: %s; alias: %s; minimumlevel: %d.$A$7'#13#10, [ch.ansiColor(channelcolor), channelname, buf, command, alias, minleveluse]);
-          end;
+          	end;
           buf := buf + Format('  %s'#13#10, [comment]);
-        end;
+        	end;
         ch.sendPager(act_string(buf, ch, nil, nil, nil));
-      end;
-      node := node.next;
-    end;
-  end
+      	end;
+	    end;
+   	iterator.Free();
+	  end
   else
-  begin
+  	begin
     if (ch.IS_NPC()) then
-    begin
+    	begin
       ch.sendBuffer('This command is not available for NPCs.'#13#10);
       exit;
-    end;
+    	end;
 
-    node := GPlayer(ch).channels.head;
-    while (node <> nil) do
-    begin
-      tc := node.element;
+    iterator := GPlayer(ch).channels.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      tc := GUserChannel(iterator.next());
+      
       if ((pos(prep(arg1), prep(tc.channelname)) = 1)) then
-      begin
+      	begin
         if (length(arg2) = 0) then
-        begin
+        	begin
           if (tc.ignored) then
             buf := '$B$7ignored$A$7'
           else
             buf := '$B$7not ignored$A$7';
           ch.sendBuffer(act_string(Format('%s is currently %s.'#13#10, [tc.channelname, buf]), ch, nil, nil, nil));
-        end
+        	end
         else
-        begin
+        	begin
           try
             tc.ignored := not StrToBoolean(arg2);
           except
             on E: EBooleanConvertError do
-            begin
+            	begin
               ch.sendBuffer(Format('Invalid argument ''%s''.'#13#10, [arg2]));
-            end;
+            	end;
           end;
           
           if (tc.ignored) then
@@ -881,10 +882,10 @@ begin
           else
             buf := '$B$7not ignored$A$7';
           ch.sendBuffer(act_string(Format('%s is now %s.'#13#10, [tc.channelname, buf]), ch, nil, nil, nil));
-        end;
-      end;
-      node := node.next;
-    end;
+        	end;
+      	end;
+	    end;
+		iterator.Free();
   end;
 end;
 

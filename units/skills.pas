@@ -1,6 +1,6 @@
 {
   @abstract(Various skill related functions)
-  @lastmod($Id: skills.pas,v 1.28 2003/09/12 14:21:34 ***REMOVED*** Exp $)
+  @lastmod($Id: skills.pas,v 1.29 2003/10/22 13:12:38 ***REMOVED*** Exp $)
 }
 
 unit skills;
@@ -98,7 +98,7 @@ var
    gsn_lockpick : GSkill;
 
 
-procedure load_skills;
+procedure load_skills();
 
 function findSkill(s : string) : GSkill;
 function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
@@ -112,7 +112,7 @@ function findAffect(ch : GCharacter; name : string) : GAffect;
 procedure removeAffect(ch : GCharacter; aff : GAffect);
 function removeAffectName(ch:GCharacter; name : string):boolean;
 function removeAffectFlag(ch:GCharacter; flag : integer):boolean;
-procedure update_affects;
+procedure update_affects();
 
 procedure initSkills();
 procedure cleanupSkills();
@@ -131,25 +131,26 @@ uses
 
 function findSkill(s : string) : GSkill;
 var
-   node : GListNode;
-   sk : GSkill;
+	iterator : GIterator;
+	sk : GSkill;
 begin
   s := trim(uppercase(s));
   Result := nil;
-  node := skill_table.head;
+  iterator := skill_table.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    sk := node.element;
+    sk := GSkill(iterator.next());
 
     if (s = uppercase(sk.name^)) or (pos(s, uppercase(sk.name^)) = 1) then
       begin
       Result := sk;
       break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
+  
 end;
 
 function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
@@ -175,7 +176,7 @@ begin
   assign_gsn := gsn;
 end;
 
-procedure load_skills;
+procedure load_skills();
 var
   af : GFileReader;
   s,g,a:string;
@@ -557,25 +558,25 @@ end;
 
 function findAffect(ch : GCharacter; name : string) : GAffect;
 var
-   node : GListNode;
-   aff : GAffect;
+	iterator : GIterator;
+	aff : GAffect;
 begin
   Result := nil;
 
-  node := ch.affects.head;
+  iterator := ch.affects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    aff := node.element;
+    aff := GAffect(iterator.next());
 
     if (aff.name^ = name) then
       begin
       Result := aff;
       exit;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 procedure removeAffect(ch : GCharacter; aff : GAffect);
@@ -608,29 +609,29 @@ end;
 
 function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
 var
-   node : GListNode;
-   aff, taff : GAffect;
-   a : integer;
+	iterator : GIterator;
+	aff, taff : GAffect;
+	a : integer;
 begin
   removeAffectFlag := false;
   aff := nil;
-  node := ch.affects.head;
+  iterator := ch.affects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    taff := node.element;
+    taff := GAffect(iterator.next());
 
     for a := 0 to length(taff.modifiers) - 1 do
       begin
       if (taff.modifiers[a].apply_type = APPLY_AFFECT) and (taff.modifiers[a].modifier = flag) then
         begin
-        aff := node.element;
+        aff := taff;
         break;
         end;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 
   if (aff = nil) then
     exit;
@@ -640,24 +641,26 @@ begin
   removeAffectFlag := true;
 end;
 
-procedure update_affects;
-var ch : GCharacter;
-    node, node_aff : GListNode;
-    aff : GAffect;
+procedure update_affects();
+var 
+	ch : GCharacter;
+	aff : GAffect;
+	iterator_char, iterator_aff : GIterator;
 begin
-  node := char_list.head;
+  iterator_char := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator_char.hasNext()) do
     begin
-    ch := node.element;
+    ch := GCharacter(iterator_char.next());
 
-    if IS_SET(ch.aff_flags,AFF_POISON) then
+    if (IS_SET(ch.aff_flags,AFF_POISON)) then
       begin
       act(AT_REPORT,'You shiver and suffer.',false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,'$n shivers and suffers.',false,ch,nil,nil,TO_ROOM);
       ch.mental_state:=URANGE(20,ch.mental_state+4,100);
       damage(ch,ch,6, cardinal(gsn_poison));
       end;
+      
 {    if IS_SET(ch.aff_flags,AFF_COLD) then
       begin
       i:=random(5);
@@ -678,11 +681,11 @@ begin
       end;
       end; }
 
-    node_aff := ch.affects.head;
+    iterator_aff := ch.affects.iterator();
 
-    while (node_aff <> nil) do
+    while (iterator_aff.hasNext()) do
       begin
-      aff := node_aff.element;
+      aff := GAffect(iterator_aff.next());
 
       dec(aff.duration);
 
@@ -691,37 +694,37 @@ begin
         act(AT_REPORT, aff.wear_msg, false,ch,nil,nil,TO_CHAR);
         removeAffect(ch, aff);
         end;
-
-      node_aff := node_aff.next;
       end;
-
-    node := node.next;
+      
+    iterator_aff.Free();
     end;
+    
+	iterator_char.Free();    
 end;
 
 { GSkill }
-constructor GSkill.Create;
+constructor GSkill.Create();
 begin
-  inherited Create;
+  inherited Create();
 
-  affects := GDLinkedList.Create;
-  prereqs := GDLinkedList.Create;
+  affects := GDLinkedList.Create();
+  prereqs := GDLinkedList.Create();
 end;
 
 destructor GSkill.Destroy;
 begin
-  affects.clean;
-  affects.Free;
+  affects.clean();
+  affects.Free();
 
-  prereqs.smallClean;
-  prereqs.Free;
+  prereqs.smallClean();
+  prereqs.Free();
   
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 procedure initSkills();
 begin
-  skill_table := GDLinkedList.Create;
+  skill_table := GDLinkedList.Create();
 end;
 
 procedure cleanupSkills();

@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.23 2003/10/17 16:34:40 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.24 2003/10/22 13:12:34 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -65,22 +65,22 @@ end;
 
 procedure GCleanThread.AutoSave;
 var
-   ch : GCharacter;
-   node : GListNode;
+	ch : GCharacter;
+	iterator : GIterator;
 begin
   writeConsole('Autosaving characters...');
 
-  node := char_list.head;
+  iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    ch := node.element;
+    ch := GCharacter(iterator.next());
 
     if (not ch.IS_NPC) then
       GPlayer(ch).save(ch.name);
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 // kill a non-responsive thread after 30 seconds
@@ -110,7 +110,7 @@ begin
       while (node <> nil) do
         begin
         node_next := node.next;
-        conn := node.element;
+        conn := GPlayerConnection(node.element);
 
         if (conn.last_update + THREAD_TIMEOUT < Now()) then
           begin

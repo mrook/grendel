@@ -1,6 +1,8 @@
 {
-  @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.74 2003/10/18 11:09:33 ***REMOVED*** Exp $)
+  Summary:
+  	(N)PC classes & routines
+  	
+  ## $Id: chars.pas,v 1.75 2003/10/22 13:12:33 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -45,22 +47,21 @@ type
       node : GListNode;
     end;
 
-    THistoryElement = // channelhistory stuff
-      class
+    GHistoryElement = class
         time : TDateTime;
         contents : PString;
         constructor Create(txt : string);
         destructor Destroy(); override;
       end;
 
-    TChannel =
-      class
-        channelname : string;
-        history : GDLinkedList;
-        ignored : boolean;
-        constructor Create(txt : string);
-        destructor Destroy(); override;
-      end;
+    GUserChannel = class
+			channelname : string;
+			history : GDLinkedList;
+			ignored : boolean;
+			
+			constructor Create(name : string);
+			destructor Destroy(); override;
+		end;
 
     GLearned = class
       skill : pointer;
@@ -281,42 +282,37 @@ uses
 	Channels;
 
 
-constructor THistoryElement.Create(txt : string);
+constructor GHistoryElement.Create(txt : string);
 begin
   inherited Create();
+  
   time := Now();
   contents := hash_string(txt);
 end;
 
-destructor THistoryElement.Destroy();
+destructor GHistoryElement.Destroy();
 begin
   unhash_string(contents);
   inherited Destroy();
 end;
 
-constructor TChannel.Create(txt : string);
+constructor GUserChannel.Create(name : string);
 begin
   inherited Create();
-  channelname := txt;
+  
+  channelname := name;
   history := GDLinkedList.Create();
   ignored := false;
 end;
 
-destructor TChannel.Destroy();
+destructor GUserChannel.Destroy();
 var
   node : GListNode;
-  he : THistoryElement;
-begin
-  node := history.head;
-  while (node <> nil) do
-  begin
-    he := node.element;
-    history.remove(node);
-    he.Free();
-    node := node.next;
-  end;
+  he : GHistoryElement;
+begin	
   history.clean();
   history.Free();
+  
   inherited Destroy();
 end;
 
@@ -338,7 +334,7 @@ destructor GCharacter.Destroy();
 var
    obj : GObject;
    node : GListNode;
-   tc : TChannel;
+   tc : GUserChannel;
 begin
   affects.clean();
   affects.Free();
@@ -617,8 +613,7 @@ end;
 
 function GCharacter.IS_DRUNK : boolean;
 begin
-  if (IS_NPC) then
-    IS_DRUNK := false;
+	IS_DRUNK := false;
 end;
 
 function GCharacter.IS_WEARING(item_type : integer) : boolean;
@@ -720,54 +715,58 @@ end;
 
 function GCharacter.LEARNED(skill : pointer) : integer;
 var
-   node : GListNode;
-   g : GLearned;
+	iterator : GIterator;
+	g : GLearned;
 begin
   Result := 0;
 
-  node := skills_learned.head;
+  iterator := skills_learned.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    g := node.element;
+    g := GLearned(iterator.next());
 
     if (g.skill = skill) then
       begin
       Result := g.perc;
       break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 end;
 
 // Xenon 10/Apr/2001: Modified SET_LEARNED() to remove skill from linked list when perc = 0
 procedure GCharacter.SET_LEARNED(perc : integer; skill : pointer);
 var
-   g : GLearned;
-   node : GListNode;
+	iterator : GIterator;
+	g, x : GLearned;
 begin
-  g := nil;
-  node := skills_learned.head;
+	g := nil;
+  iterator := skills_learned.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    if (GLearned(node.element).skill = skill) then
+    x := GLearned(iterator.next());
+    
+    if (x.skill = skill) then
       begin
-      g := node.element;
+      g := x;
       break;
       end;
-
-    node := node.next;
     end;
+  
+  iterator.Free();
 
   if (g = nil) then
     skills_learned.insertLast(GLearned.Create(perc, skill))
   else
+  	begin
     if (perc > 0) then
       g.perc := perc
     else
-      skills_learned.remove(node);
+      { TODO skills_learned.remove(g.node); }
+    end;
 end;
 
 function GCharacter.ansiColor(color : integer) : string;
@@ -797,8 +796,8 @@ end;
 
 procedure GCharacter.toRoom(to_room : GRoom);
 var
-   tele : GTeleport;
-   node : GListNode;
+	tele : GTeleport;
+	iterator : GIterator;
 begin
   if (to_room = nil) then
     begin
@@ -841,20 +840,21 @@ begin
     inc(to_room.area.nplayer);
 
   { check for teleports }
-  if (to_room.flags.isBitSet(ROOM_TELEPORT)) and (to_room.teledelay>0) then
+  if (to_room.flags.isBitSet(ROOM_TELEPORT)) and (to_room.teledelay > 0) then
     begin
-    node := teleport_list.head;
+    iterator := teleport_list.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      tele := node.element;
-      if (tele.t_room=to_room) then
+      tele := GTeleport(iterator.next());
+      
+      if (tele.t_room = to_room) then
         exit;
-
-      node := node.next;
       end;
+      
+    iterator.Free();
 
-    tele := GTeleport.Create;
+    tele := GTeleport.Create();
     tele.t_room := to_room;
     tele.timer := to_room.teledelay;
 
@@ -1251,9 +1251,9 @@ end;
 { Added 2.<char> - Nemesis }
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
 var
-   node : GListNode;
-   vict : GCharacter;
-   number,count : integer;
+	iterator : GIterator;
+	vict : GCharacter;
+	number,count : integer;
 begin
   findCharWorld := nil;
 
@@ -1267,11 +1267,11 @@ begin
 
   count := 0;
 
-  node := char_list.head;
+  iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (isName(vict.name,name)) or (isName(vict.short,name)) and (ch.CAN_SEE(vict)) then
       begin
@@ -1283,16 +1283,16 @@ begin
         exit;
         end;
       end;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 end;
 
 function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
 var
-   iterator : GIterator;
-   vict : GCharacter;
-   number,count : integer;
+	iterator : GIterator;
+	vict : GCharacter;
+	number,count : integer;
 begin
   Result := nil;
 

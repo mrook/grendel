@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.24 2003/10/17 11:05:57 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.25 2003/10/22 13:12:38 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -116,6 +116,7 @@ begin
   last_update := Now();
 end;
 
+{ TODO remove nodes }
 procedure GTimerThread.Execute;
 var
    node, node_next : GListNode;
@@ -130,34 +131,33 @@ begin
 
     while (node <> nil) do
       begin
-      timer := node.element;
+      timer := GTimer(node.element);
       node_next := node.next;
 
       try
-      dec(timer.counter);
+				dec(timer.counter);
 
-      if (timer.counter = 0) then
-        begin
-        if (timer is GSpecTimer) then
-          begin
-          spec := GSpecTimer(timer);
+				if (timer.counter = 0) then
+					begin
+					if (timer is GSpecTimer) then
+						begin
+						spec := GSpecTimer(timer);
 
-          if (assigned(spec.spec_func)) then
-            spec.spec_func(spec.ch, spec.victim, spec.sn);
-          end
-        else
-          if (assigned(timer.timer_func)) then
-            timer.timer_func;
+						if (assigned(spec.spec_func)) then
+							spec.spec_func(spec.ch, spec.victim, spec.sn);
+						end
+					else
+						if (assigned(timer.timer_func)) then
+							timer.timer_func;
 
-        if (not timer.looping) then
-          begin
-          timer_list.remove(node);
-          timer.Free;
-          end
-        else
-          timer.counter := timer.timeout;
-        end;
-
+					if (not timer.looping) then
+						begin
+						timer_list.remove(node);
+						timer.Free;
+						end
+					else
+						timer.counter := timer.timeout;
+					end;
       except
 {        on E : EExternal do
           begin
@@ -167,7 +167,11 @@ begin
         on E : Exception do
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed: ' + E.Message)
         else }
-        bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
+        on E : Exception do
+        	begin
+        	writeConsole('[EX:' + E.ClassName + '] ' + E.Message);
+        	bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
+        	end;
 
 {        if (timer is GSpecTimer) then
           begin
@@ -203,6 +207,7 @@ begin
   timer_list.insertLast(timer);
 end;
 
+{ TODO remove nodes }
 procedure unregisterTimer(name_ : string);
 var
    timer : GTimer;
@@ -212,7 +217,7 @@ begin
 
   while (node <> nil) do
     begin
-    timer := node.element;
+    timer := GTimer(node.element);
 
     if (timer.name = name_) then
       begin
@@ -225,6 +230,7 @@ begin
     end;
 end;
 
+{ TODO remove nodes }
 procedure unregisterTimer(ch : GCharacter; timer_type : integer);
 var
    timer : GTimer;
@@ -235,7 +241,7 @@ begin
 
   while (node <> nil) do
     begin
-    timer := node.element;
+    timer := GTimer(node.element);
 
     if (timer is GSpecTimer) then
       begin
@@ -255,17 +261,17 @@ end;
 
 function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
 var
-   timer : GTimer;
-   spec : GSpecTimer;
-   node : GListNode;
+	timer : GTimer;
+	spec : GSpecTimer;
+	iterator : GIterator;
 begin
   Result := nil;
 
-  node := timer_list.head;
+  iterator := timer_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    timer := node.element;
+    timer := GTimer(iterator.next());
 
     if (timer is GSpecTimer) then
       begin
@@ -277,24 +283,24 @@ begin
         break;
         end;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 function hasTimer(ch : GCharacter; const timer_name : string) : GTimer;
 var
-   timer : GTimer;
-   spec : GSpecTimer;
-   node : GListNode;
+	timer : GTimer;
+	spec : GSpecTimer;
+	iterator : GIterator;
 begin
   Result := nil;
 
-  node := timer_list.head;
+  iterator := timer_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    timer := node.element;
+    timer := GTimer(iterator.next());
 
     if (timer is GSpecTimer) then
       begin
@@ -306,9 +312,9 @@ begin
         break;
         end;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 // main timers
@@ -333,17 +339,16 @@ begin
     end;
 end;
 
-procedure update_main;
+procedure update_main();
 var
-   node, node_next : GListNode;
-   conn : GPlayerConnection;
+	iterator : GIterator;
+	conn : GPlayerConnection;
 begin
-  node := connection_list.head;
+  iterator := connection_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    node_next := node.next;
-    conn := node.element;
+    conn := GPlayerConnection(iterator.next());
 
     conn.idle := conn.idle + 1;
 
@@ -354,7 +359,6 @@ begin
        conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
        conn.Terminate();
 
-       node := node_next;
        continue;
        end;
 
@@ -363,16 +367,16 @@ begin
 
     if (conn.state=CON_PLAYING) and (conn.ch.wait>0) then
       dec(conn.ch.wait);
-
-    node := node_next;
     end;
+    
+	iterator.Free();
 end;
 
-procedure update_gamehour;
+procedure update_gamehour();
 var
-   node, node_next : GListNode;
-   area : GArea;
-   ch : GCharacter;
+	iterator : GIterator;
+	area : GArea;
+	ch : GCharacter;
 begin
 {$IFDEF WIN32}
   status := GetHeapStatus;
@@ -382,23 +386,19 @@ begin
   update_tracks;
 
   { update age of areas and reset if hit timer }
-  node := area_list.head;
-
-  while (node <> nil) do
+  iterator := area_list.iterator();
+  while (iterator.hasNext()) do
     begin
-    area := node.element;
+    area := GArea(iterator.next());
 
-    area.update;
-
-    node := node.next;
+    area.update();
     end;
+	iterator.Free();
 
-  node := char_list.head;
-
-  while (node <> nil) do
+  iterator := char_list.iterator();
+  while (iterator.hasNext()) do
     begin
-    ch := node.element;
-    node_next := node.next;
+    ch := GCharacter(iterator.next());
 
     if (not ch.IS_NPC) and (IS_SET(GPlayer(ch).flags, PLR_LINKLESS)) then
       begin
@@ -406,19 +406,17 @@ begin
 
       if (GPlayer(ch).ld_timer > IDLE_LINKDEAD) then
         begin
-        node := node_next;
         GPlayer(ch).quit;
         continue;
         end;
       end;
-
-    node := node_next;
     end;
+  iterator.Free();
 end;
 
-procedure update_sec;
+procedure update_sec();
 begin
-  calculateonline;
+  calculateonline();
 
   if (boot_info.timer >= 0) then
     begin
@@ -470,12 +468,12 @@ begin
     dec(bg_info.count);
 
     case bg_info.count of
-      60,30,10,5,2 : battlegroundMessage;
-      0 : startBattleground;
+      60,30,10,5,2 : battlegroundMessage();
+      0 : startBattleground();
     end;
     end;
 
-  regenerate_chars;
+  regenerate_chars();
 end;
 
 procedure initTimers();

@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.64 2003/10/20 12:34:47 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.65 2003/10/22 13:12:32 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -618,7 +618,7 @@ begin
           s := af.readLine;
           end;
 
-        race := raceList.head.element;
+        race := GRace(raceList.head.element);
 
         count := 0;
 
@@ -959,6 +959,7 @@ var
   pexit : GExit;
   s : string;
   area : GArea;
+  iterator : GIterator;
   node, node_exit : GListNode;
   h : integer;
   tm : TDateTime;
@@ -1001,82 +1002,70 @@ begin
 
   { Checking rooms for errors }
 
-  for h := 0 to room_list.hashsize - 1 do
-    begin
-    node := room_list.bucketList[h].head;
+	iterator := room_list.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		room := GRoom(iterator.next());
 
-    while (node <> nil) do
-      begin
-      room := GRoom(GHashValue(node.element).value);
+		node_exit := room.exits.head;
 
-      node_exit := room.exits.head;
+		while (node_exit <> nil) do
+			begin
+			pexit := GExit(node_exit.element);
 
-      while (node_exit <> nil) do
-        begin
-        pexit := node_exit.element;
+			to_room := findRoom(pexit.vnum);
 
-        to_room := findRoom(pexit.vnum);
+			if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
+				begin
+				bugreport('loadAreas()', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
+									' for exit in room #' + IntToStr(room.vnum));
 
-        if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
-          begin
-          bugreport('loadAreas()', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
-                    ' for exit in room #' + IntToStr(room.vnum));
+				room.exits.remove(node_exit);
 
-          room.exits.remove(node_exit);
+				node_exit := room.exits.head;
+				end
+			else
+			if (to_room = room) then
+				begin
+				bugreport('loadAreas()', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
 
-          node_exit := room.exits.head;
-          end
-        else
-        if (to_room = room) then
-          begin
-          bugreport('loadAreas()', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
+				room.exits.remove(node_exit);
 
-          room.exits.remove(node_exit);
+				node_exit := room.exits.head;
+				end
+			else
+			if (to_room = nil) then
+				begin
+				bugreport('loadAreas()', 'area.pas', 'exit ' + headings[pexit.direction] +
+									' from room #' + IntToStr(room.vnum) + ' to unexisting room # '+ IntToStr(pexit.vnum));
 
-          node_exit := room.exits.head;
-          end
-        else
-        if (to_room = nil) then
-          begin
-          bugreport('loadAreas()', 'area.pas', 'exit ' + headings[pexit.direction] +
-                    ' from room #' + IntToStr(room.vnum) + ' to unexisting room # '+ IntToStr(pexit.vnum));
+				room.exits.remove(node_exit);
 
-          room.exits.remove(node_exit);
+				node_exit := room.exits.head;
+				end
+			else
+				begin
+				pexit.to_room:=to_room;
 
-          node_exit := room.exits.head;
-          end
-        else
-          begin
-          pexit.to_room:=to_room;
-
-          node_exit := node_exit.next;
-          end;
-        end;
-
-      node := node.next;
-      end;
-    end;
-
-  { check the links }
-  (* CHECK_LINKS(areas_first,areas_last,0,4,'areas');
-  CHECK_LINKS(rooms_first,rooms_last,0,4,'rooms');
-  CHECK_LINKS(obj_reset_first,obj_reset_last,0,4,'obj_reset');
-  CHECK_LINKS(mob_reset_first,mob_reset_last,0,4,'mob_reset'); *)
+				node_exit := node_exit.next;
+				end;
+			end;
+		end;
+		
+	iterator.Free();
 
   { reset the areas }
-  node := area_list.head;
+  iterator := area_list.iterator();
 
-  while (node <> nil) do
-    begin
-    GArea(node.element).reset;
+  while (iterator.hasNext()) do
+    GArea(iterator.next()).reset();
 
-    node := node.next;
-    end;
-
+	iterator.Free();
+	
   tm := Now() - tm;
 
   writeConsole('Area loading took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
-//  room_list.hashStats();
 end;
 
 { Xenon 28/Apr/2001 : added saving of #RANGES; fixed bug that caused areas
@@ -1144,7 +1133,7 @@ begin
     node_ex := room.exits.head;
     while (node_ex <> nil) do
       begin
-      ex := node_ex.element;
+      ex := GExit(node_ex.element);
 
       write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
 
@@ -1159,7 +1148,7 @@ begin
     node_ex := room.extra.head;
     while (node_ex <> nil) do
       begin
-      extra := node_ex.element;
+      extra := GExtraDescription(node_ex.element);
 
       writeln(f, 'E ', extra.keywords);
       write(f, extra.description);
@@ -1178,16 +1167,13 @@ begin
   
   writeln(f, '#MOBILES');
 
-  node := npc_list.head;
-  while (node <> nil) do
+  iterator := npc_list.iterator();
+  while (iterator.hasNext()) do
     begin
-    npcindex := node.element;
+    npcindex := GNPCIndex(iterator.next());
 
     if (npcindex.area <> Self) then
-      begin
-      node := node.next;
       continue;
-      end;
 
     writeln(f, '#', npcindex.vnum);
 
@@ -1234,15 +1220,14 @@ begin
     node_ex := npcindex.skills_learned.head;;
     while (node_ex <> nil) do
       begin
-      g := node_ex.element;
+      g := GLearned(node_ex.element);
 
       writeln(f, 'Skill: ''', GSkill(g.skill).name^, ''' ', g.perc);
 
       node_ex := node_ex.next;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   writeln(f, '#END');
   writeln(f);
@@ -1264,44 +1249,40 @@ begin
     writeln(f, obj.value[1],' ',obj.value[2],' ',obj.value[3],' ',obj.value[4]);
     writeln(f, obj.weight,' ',obj.flags,' ',obj.cost);
     end;
+  iterator.Free();
 
   writeln(f, '#END');
   writeln(f);
   writeln(f, '#RESETS');
 
-  node := Self.resets.head;
-  while (node <> nil) do
+  iterator := Self.resets.iterator();
+  while (iterator.hasNext()) do
     begin
-    reset := node.element;
+    reset := GReset(iterator.next());
 
     writeln(f, reset.reset_type, ' ', reset.arg1, ' ', reset.arg2, ' ', reset.arg3);
-
-    node := node.next;
     end;
+  iterator.Free();
 
   writeln(f, '#END');
   writeln(f);
   writeln(f, '#SHOPS');
 
-  node := shop_list.head;
-  while (node <> nil) do
+  iterator := shop_list.iterator();
+  while (iterator.hasNext()) do
     begin
-    shop := node.element;
+    shop := GShop(iterator.next());
 
     if (shop.area <> Self) then
-      begin
-      node := node.next;
       continue;
-      end;
 
     writeln(f, shop.keeper);
     writeln(f, shop.item_buy[1],' ',shop.item_buy[2],' ',
                shop.item_buy[3],' ',shop.item_buy[4],' ',shop.item_buy[5]);
     writeln(f, shop.open_hour,' ',shop.close_hour);
     writeln(f, '~');
-
-    node := node.next;
     end;
+  iterator.Free();
 
   writeln(f, '#END');
   writeln(f);
@@ -1418,7 +1399,7 @@ begin
   node_reset := resets.head;
   while (node_reset <> nil) do
     begin
-    reset := node_reset.element;
+    reset := GReset(node_reset.element);
 
     case reset.reset_type of
       'M':begin
@@ -2042,9 +2023,9 @@ end;
 
 function GRoom.findChar(c : pointer; name : string) : pointer;
 var
-   node : GListNode;
-   num, cnt : integer;
-   ch, vict : GCharacter;
+	iterator : GIterator;
+	num, cnt : integer;
+	ch, vict : GCharacter;
 begin
   findChar := nil;
   ch := c;
@@ -2060,11 +2041,10 @@ begin
     exit;
     end;
 
-  node := chars.head;
-
-  while (node <> nil) do
+  iterator := chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (((name = 'GOOD') and (not vict.IS_NPC) and (vict.IS_GOOD)) or
       ((name = 'EVIL') and (not vict.IS_NPC) and (vict.IS_EVIL)) or
@@ -2080,9 +2060,8 @@ begin
         exit;
         end;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 end;
 
 function GRoom.findRandomChar() : pointer;
@@ -2091,10 +2070,10 @@ var a, num : integer;
 begin
   Result := nil;
   
-  if (chars.getSize() = 0) then
+  if (chars.size() = 0) then
     exit;
   
-  num := random(chars.getSize());
+  num := random(chars.size());
 
   node := chars.head;
   for a := 0 to num do
@@ -2105,93 +2084,91 @@ begin
 end;
 
 function GRoom.findRandomGood() : pointer;
-var a, cnt, num : integer;
-    vict : GCharacter;
-    node : GListNode;
+var 
+	a, cnt, num : integer;
+	vict : GCharacter;
+	iterator : GIterator;
 begin
   Result := nil;
 
   cnt := 0;
-  node := chars.head;
-  while (node <> nil) do
+  iterator := chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_GOOD) then
       inc(cnt);
-
-    node := node.next;
     end;
+  iterator.Free();
 
   num := random(cnt);
   a := 0;
 
-  node := chars.head;
-  while (node <> nil) do
+  iterator := chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_GOOD) and (a = num) then
       begin
       Result := vict;
       break;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 end;
 
 function GRoom.findRandomEvil() : pointer;
-var a, cnt, num : integer;
-    vict : GCharacter;
-    node : GListNode;
+var 
+	a, cnt, num : integer;
+	vict : GCharacter;
+	iterator : GIterator;
 begin
   Result := nil;
 
   cnt := 0;
-  node := chars.head;
-  while (node <> nil) do
+  iterator := chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_EVIL) then
       inc(cnt);
-
-    node := node.next;
     end;
+  iterator.Free();
 
   num := random(cnt);
   a := 0;
 
-  node := chars.head;
-  while (node <> nil) do
+  iterator := chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_EVIL) and (a = num) then
       begin
       Result := vict;
       break;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 end;
 
 function GRoom.findObject(name : string) : pointer;
 var
-   node : GListNode;
-   obj : GObject;
-   num, cnt : integer;
+	iterator : GIterator;
+	obj : GObject;
+	num, cnt : integer;
 begin
-  node := objects.head;
+  iterator := objects.iterator();
   num := findNumber(name);
-  findObject := nil;
+  Result := nil;
   cnt := 0;
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     if isObjectName(obj.name, name) or isObjectName(obj.short, name) or isObjectName(obj.long, name) then
       begin
@@ -2199,29 +2176,29 @@ begin
 
       if (cnt >= num) then
         begin
-        findObject := obj;
-        exit;
+        Result := obj;
+        break;
         end;
       end;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 end;
 
 function GRoom.findDescription(keyword : string) : GExtraDescription;
 var
-   node : GListNode;
-   s_extra : GExtraDescription;
-   s, p : integer;
-   sub, key : string;
+	iterator : GIterator;
+	s_extra : GExtraDescription;
+	s, p : integer;
+	sub, key : string;
 begin
   Result := nil;
   p := high(integer);
 
-  node := extra.head;
-  while (node <> nil) do
+  iterator := extra.iterator();
+  while (iterator.hasNext()) do
     begin
-    s_extra := node.element;
+    s_extra := GExtraDescription(iterator.next());
     key := s_extra.keywords;
 
     while (length(key) > 0) do
@@ -2235,77 +2212,80 @@ begin
         Result := s_extra;
         end;
       end;
-
-    node := node.next;
     end;
+
+	iterator.Free();
 end;
 
 { Xenon 7/6/2001: added isConnectedTo() because I needed it for do_map() :-) }
 function GRoom.isConnectedTo(dir : integer) : GRoom;
 var
-   node : GListNode;
-   pexit : Gexit;
+	iterator : GIterator;
+	pexit : GExit;
 begin
-  isConnectedTo := nil;
+	Result := nil;
 
-  node := exits.head;
-  while (node <> nil) do
-  begin
-    pexit := node.element;
+  iterator := exits.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    pexit := GExit(iterator.next());
 
     if (pexit.direction = dir) then
-    begin
-      isConnectedTo := pexit.to_room;
-      exit;
+    	begin
+      Result := pexit.to_room;
+      break;
+    	end;
     end;
-
-    node := node.next;
-  end;
+    
+	iterator.Free();
 end;
 
 function GRoom.findExit(dir : integer) : GExit;
 var
-   node : GListNode;
-   pexit : Gexit;
+	iterator : GIterator;
+	pexit : GExit;
 begin
-  findExit := nil;
+  Result := nil;
 
-  node := exits.head;
-  while (node <> nil) do
+  iterator := exits.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    pexit := node.element;
+    pexit := GExit(iterator.next());
 
     if (pexit.direction = dir) then
       begin
-      findExit := pexit;
-      exit;
+      Result := pexit;
+      break;
       end;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 end;
 
 function GRoom.findExitKeyword(s : string) : GExit;
 var
-   node : GListNode;
-   pexit : GExit;
+	iterator : GIterator;
+	pexit : GExit;
 begin
   Result := nil;
   s := uppercase(s);
 
-  node := exits.head;
-  while (node <> nil) do
+  iterator := exits.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    pexit := node.element;
+    pexit := GExit(iterator.next());
 
     if (Assigned(pexit.keywords)) and (pos(s, uppercase(pexit.keywords^)) <> 0) then
       begin
       Result := pexit;
-      exit;
+      break;
       end;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 end;
 
 
@@ -2327,7 +2307,7 @@ begin
   count := 1;
 end;
 
-destructor GObject.Destroy;
+destructor GObject.Destroy();
 var 
   obj_in : GObject;
 begin
@@ -2336,19 +2316,19 @@ begin
 
   while (contents.tail <> nil) do
     begin
-    obj_in := contents.tail.element;
+    obj_in := GObject(contents.tail.element);
 
     obj_in.Free();
     end;
 
   if (room <> nil) then
-    fromRoom;
+    fromRoom();
 
   if (carried_by <> nil) then
-    fromChar;
+    fromChar();
 
   if (in_obj <> nil) then
-    fromObject;
+    fromObject();
 
   obj_in := GObject(objectIndices[vnum]);
   
@@ -2366,13 +2346,13 @@ begin
 
   contents.Free();
   
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 procedure GObject.toRoom(to_room : GRoom);
 var
-   node : GListNode;
-   otmp : GObject;
+	iterator : GIterator;
+	otmp : GObject;
 begin
   if (to_room = nil) then
     begin
@@ -2380,18 +2360,21 @@ begin
     exit;
     end;
 
-  node := to_room.objects.head;
+  iterator := to_room.objects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    otmp := node.element;
+    otmp := GObject(iterator.next());
 
     if (otmp.group(Self)) then
+    	begin
+		  iterator.Free();
       exit;
-
-    node := node.next;
+      end;
     end;
 
+	iterator.Free();
+	
   node_room := to_room.objects.insertLast(Self);
 
   room := to_room;
@@ -2466,20 +2449,24 @@ end;
 
 { grouped obj.toObject - Nemesis }
 procedure GObject.toObject(obj : GObject);
-var node : GListNode;
-    otmp : GObject;
+var 
+	iterator : GIterator;
+	otmp : GObject;
 begin
-  node := obj.contents.head;
+  iterator := obj.contents.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    otmp := node.element;
+    otmp := GObject(iterator.next());
 
     if (otmp.group(Self)) then
+    	begin
+		  iterator.Free();
       exit;
-
-    node := node.next;
+      end;
     end;
+    
+  iterator.Free();
 
   node_in := obj.contents.insertLast(Self);
   in_obj := obj;
@@ -2493,23 +2480,24 @@ begin
 end;
 
 function GObject.getWeight : integer;
-var we : integer;
-    node : GListNode;
-    obj : GObject;
+var 
+	we : integer;
+	iterator : GIterator;
+	obj : GObject;
 begin
   we := count * weight;
 
-  node := contents.head;
+  iterator := contents.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
     inc(we, obj.getWeight);
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 
-  getWeight := we;
+  Result := we;
 end;
 
 procedure GObject.setName(const name : string);
@@ -2617,25 +2605,25 @@ end;
 
 function findNPCIndex(vnum : integer) : GNPCIndex;
 var
-   node : GListNode;
-   npc : GNPCIndex;
+	iterator : GIterator;
+	npc : GNPCIndex;
 begin
-  findNPCIndex := nil;
+  Result := nil;
 
-  node := npc_list.head;
+  iterator := npc_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    npc := node.element;
+    npc := GNPCIndex(iterator.next());
 
     if (npc.vnum = vnum) then
       begin
-      findNPCIndex := npc;
-      exit;
+      Result := npc;
+      break;
       end;
-
-    node := node.next;
     end;
+    
+	iterator.Free();
 end;
 
 { function findObjectIndex(vnum : integer) : GObjectIndex;
