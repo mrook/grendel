@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.13 2004/04/10 22:24:03 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.14 2004/04/11 13:07:59 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -51,6 +51,8 @@ type
 		procedure detachWriter(writer : GConsoleWriter);
 
 		procedure fetchHistory(callback : GConsoleWriter; max : integer = 0);
+		
+		function fetchHistoryTimestamp(callback : GConsoleWriter; timestamp : TDateTime) : TDateTime;
 	end;
 
   
@@ -186,6 +188,38 @@ begin
 				break;
 			end;
 
+		iterator.Free();
+	finally
+		// unlock read
+		synchronizer.EndRead();
+	end;
+end;
+
+{ Enumerate all items with item.timestamp >= timestamp, return last known timestamp }
+function GConsole.fetchHistoryTimestamp(callback : GConsoleWriter; timestamp : TDateTime) : TDateTime;
+var
+	iterator : GIterator;
+	he : GConsoleHistoryElement;
+begin
+	// lock read
+	synchronizer.BeginRead();
+	
+	Result := timestamp;
+	
+	try
+		iterator := history.iterator();
+
+		while (iterator.hasNext()) do
+			begin
+			he := GConsoleHistoryElement(iterator.next());
+			
+			if (he.timestamp < timestamp) then
+				continue;
+
+			Result := he.timestamp;
+			callback.write(he.timestamp, he.text);
+			end;
+			
 		iterator.Free();
 	finally
 		// unlock read
