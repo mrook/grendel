@@ -143,3 +143,41 @@ Another example, following on the previous one:
 Again, this will have the callback trying to associate the member variable 'alignment'
 with the (already associated) variable 'ch'. Care must be taken that this member variable
 does actually exist, or hell will fall down and chaos will ensue.
+
+
+7. Common entry points
+
+An 'entry point' is a position in your script code that has a common syntax or structure,
+and can be easily identified by the calling process. These entry points can be viewed
+as seperate blocks of code that are called when a particular event is triggered.
+
+Below you will find some common entry points that are used throughout the server code.
+
+
+void onTick(external ch)
+ - is called every second
+
+void onAct(external ch, external target, string arg)
+ - is called whenever 'ch' receives some action 'arg' from 'target'
+ 
+void onFight(external ch, external target)
+ - is called every fight tick
+ 
+void onDeath(external ch, external target)
+ - is called when 'ch' dies at the hands of 'target'
+
+void onReset(external ch)
+ - is called when 'ch' resets
+ 
+void onGive(external ch, external target, external obj)
+ - is called when 'target' gives 'obj' to 'ch'
+ 
+bool onBlock(external ch, external target)
+ - is called when 'target' tries to leave a room with 'ch' blocking
+ 
+void onEmoteTarget(external victim, external actor, string arg)
+ - is called when (e.g.) mob is target of an emote (e.g. 'slap <mobname>');
+   'victim' is the target, e.g. the mob; 'actor' the person executing the emote
+   (you, when you slap a mob); 'arg' will contain the emotename (Name:-field from
+   system\socials.dat) (e.g. 'SLAP' when entry point action the default emote
+   handling (as defined in checkSocial() in mudsystem.pas) will not be executed.
