@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.45 2001/07/30 15:50:25 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.46 2001/07/31 16:34:55 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -303,6 +303,8 @@ begin
   clean_thread.Terminate;
 
   saveMudState();
+  
+  unloadModules();
 
   write_console('Releasing allocated memory...');
 

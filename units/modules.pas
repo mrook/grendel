@@ -22,6 +22,8 @@ type
   end;
 
 procedure loadModules();
+procedure unloadModules();
+
 procedure addModule(name : string);
 procedure removeModule(name : string);
 
@@ -31,6 +33,8 @@ var
 implementation
 
 uses
+  strip,
+  debug,
   chars,
   util,
   mudthread,
@@ -57,6 +61,26 @@ begin
   FindClose(t);
 end;
 
+procedure unloadModules();
+var
+  iterator : GIterator;
+  module : GModule;
+begin
+  iterator := module_list.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    module := GModule(iterator.next());
+    
+    UnloadPackage(module.handle);
+      
+    write_console('Unloaded module ' + module.fname);
+    end;
+    
+  module_list.clear();
+  module_list.Free();
+end;
+
 procedure addModule(name : string);
 var
   hndl : HMODULE;
@@ -77,6 +101,8 @@ begin
     module_list.put(name, module);
 
     write_console('Loaded module ' + name + ' (' + module.desc + ')');
+    
+    readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
   except
     on E : Exception do raise GException.Create('modules.pas:addModule()',E.Message);
   end;
