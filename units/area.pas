@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.52 2001/09/17 21:13:23 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.53 2001/10/04 20:58:52 ***REMOVED*** Exp $
 
 unit area;
 
@@ -2098,12 +2098,16 @@ begin
     end;
 end;
 
-function GRoom.findRandomChar : pointer;
+function GRoom.findRandomChar() : pointer;
 var a, num : integer;
     node : GListNode;
 begin
   Result := nil;
-  num := random(chars.getSize);
+  
+  if (chars.getSize() = 0) then
+    exit;
+  
+  num := random(chars.getSize());
 
   node := chars.head;
   for a := 0 to num do
@@ -2113,7 +2117,7 @@ begin
     Result := node.element;
 end;
 
-function GRoom.findRandomGood : pointer;
+function GRoom.findRandomGood() : pointer;
 var a, cnt, num : integer;
     vict : GCharacter;
     node : GListNode;
@@ -2150,7 +2154,7 @@ begin
     end;
 end;
 
-function GRoom.findRandomEvil : pointer;
+function GRoom.findRandomEvil() : pointer;
 var a, cnt, num : integer;
     vict : GCharacter;
     node : GListNode;

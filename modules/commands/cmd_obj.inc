@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.2 2001/08/15 13:26:38 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.3 2001/10/04 20:58:52 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -547,11 +547,11 @@ begin
         act(AT_REPORT,'You throw $p '+headings[dir]+'.',false,ch,obj,nil,TO_CHAR);
         act(AT_REPORT,'$n throws something '+headings[dir]+'.',false,ch,nil,nil,TO_ROOM);
 
-        obj.fromChar;
+        obj.fromChar();
 
         dest := findRoom(pexit.vnum);
 
-        vict := dest.findRandomChar;
+        vict := dest.findRandomChar();
 
         obj.toRoom(dest);
 
