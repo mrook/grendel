@@ -364,6 +364,7 @@ expr 	:  { $$ := nil; }
          %prec UMINUS
 			|  INT             	{ $$ := Expr_ConstInt.Create; $$.lineNum := yylineno; Expr_ConstInt($$).value := $1; }
 			|  FLOAT           	{ $$ := Expr_ConstFloat.Create; $$.lineNum := yylineno; Expr_ConstFloat($$).value := $1; }
+      |  '\"' '\"'		    { $$ := Expr_String.Create; $$.lineNum := yylineno; Expr_String($$).value := ''; }
       |  '\"' LINE '\"'		{ $$ := Expr_String.Create; $$.lineNum := yylineno; Expr_String($$).value := varName; }
       | '(' type_specifier ')' expr { $$ := Expr_Cast.Create; $$.lineNum := yylineno; Expr_Cast($$).ex := $4; Expr_Cast($$).desttype := $2; }
 		  |  varname '=' expr { if ($1 <> nil) then
