@@ -45,7 +45,7 @@ And the last exciting feature is something you probably saw in the two
 
 Some example mobprogs, courtesy of Hemko de Visser and Tristan
 Pothoven (also a resident Dreaven immortal), can be found in the
-"progs" directory!
+"progs\examples" directory!
 
 All in all, this release is something very special. I hope that
 you will have fun toying around with it.
@@ -64,9 +64,9 @@ this update from the Microsoft site:
   http://www.microsoft.com/windows/downloads/bin/W95ws2setup.exe
 
   - GMC, or Grendel MUD C, is a replacement for the original (limited)
-    mobprogs. It's a fully functional languaged based on C, which
+    mobprogs. It's a fully functional language based on C, which
     runs in Grendel using virtual machinecode - very speedy & flexible
-  - Modularized mud: most functionality has been place inside seperate
+  - Modularized mud: most functionality has been placed inside seperate
     modules which can be loaded/unloaded at will - this opens up
     the possibility of arbitrary code that can be loaded even
     while your server is running!
@@ -79,10 +79,10 @@ this update from the Microsoft site:
     connections, e.g. users stay online during the reboot process,
     more info below
   - IPv6 support: Grendel natively supports the new internet protocol,
-    however, on all Linux machines with a IPv6 enabled kernel, and on 
+    on all Linux machines with an IPv6 enabled kernel, and on 
     NT4/2000 machines that have the MSRIPv6 preview from Microsoft 
     installed. Don't worry if you don't have this, Grendel will auto-detect 
-    your settings and use them appropiately
+    your settings and use them accordingly
   - Way better OOP design: greatly increases stability, looks better,
     works better
   - Old code removed: no more pchars, thus no more buffer overflows,
