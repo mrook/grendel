@@ -106,8 +106,6 @@ begin
 	console.detachWriter(consoleDriver);
 	console.Free();
 
-	FreeAndNil(consoleMemo);
-	FreeAndNil(consoleFont);
 	consoleForm.Release();
 
 	unregisterMenuItem('Show console');
