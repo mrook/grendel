@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.53 2001/08/12 18:12:01 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.54 2001/08/14 09:40:32 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -47,8 +47,10 @@ uses
 {$IFDEF WIN32}
   Windows,
   Winsock2,
+  {$IFNDEF CONSOLEBUILD}
   Forms,
   systray,
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF LINUX}
   Libc,
@@ -109,7 +111,7 @@ var
    iterator : GIterator;
 begin
   iterator := connection_list.iterator();
-
+  
   while (iterator.hasNext()) do
     begin
     conn := GConnection(iterator.next());
@@ -386,10 +388,10 @@ procedure shutdown_mud;
 begin
   try
     writeConsole('Server shutting down...');
-
+    
     if MUD_Booted then
       flushConnections;
-
+      
     Sleep(1000);
   except
     on E : EExternal do
@@ -614,7 +616,11 @@ end;
 procedure game_loop;
 begin
 {$IFDEF WIN32}
+  {$IFNDEF CONSOLEBUILD}
   while (not Application.Terminated) do
+  {$ELSE}
+  while (true) do
+  {$ENDIF}
 {$ELSE}
   while (true) do
 {$ENDIF}
