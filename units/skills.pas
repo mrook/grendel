@@ -13,10 +13,22 @@ uses
 type
     SPEC_FUNC = procedure(ch, victim : GCharacter; sn : integer);
 
+    GAffect = class
+      sn : integer;
+      apply_type : GApplyTypes;
+      modifier : longint;
+      duration : longint;
+
+      node : GListNode;
+
+      procedure modify(ch : GCharacter; add : boolean);
+      procedure applyTo(ch : GCharacter);
+    end;
+
     GSkill = class
       func : SPEC_FUNC;
-      affect : GAffect;
 
+      affects : GDLinkedList;
       prereqs : GDLinkedList;
 
       name : string;
@@ -78,8 +90,8 @@ function findSkillPlayer(ch : GCharacter; s : string) : integer;
 procedure improve_skill(ch : GCharacter; sn : integer);
 function skill_success(ch : GCharacter; sn : integer) : boolean;
 
-function findAffect(ch:GCharacter;sn:integer) : GAffect;
-procedure doAffect(ch:GCharacter;affect:GAffect);
+function findApply(s : string) : GApplyTypes;
+function findAffect(ch : GCharacter; sn : integer) : GAffect;
 procedure removeAffect(ch : GCharacter; aff : GAffect);
 function removeAffectSkill(ch:GCharacter;gsn:integer):boolean;
 function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
@@ -92,6 +104,7 @@ uses
     strip,
     magic,
     fight,
+    update,
     mudsystem;
 
 
@@ -143,20 +156,30 @@ begin
   assign_gsn := gsn;
 end;
 
-procedure process_affect(skill : GSkill; s : integer; format:string);
+procedure process_affect(skill : GSkill; s : integer; format : string);
+var
+   aff : GAffect;
 begin
-  skill.affect := GAffect.Create;
-  with skill.affect do
+  aff := GAffect.Create;
+
+  with aff do
     begin
-    sn:=s;
-    aff_type:=upcase(format[1]);
-    format:=striprbeg(format,' ');
-    modifier:=strtoint(stripl(format,' '));
-    format:=striprbeg(format,' ');
-    duration:=strtoint(stripl(format,' '));
-    format:=striprbeg(format,' ');
-    aff_flag:=strtoint(stripl(format,' '));
+    sn := s;
+
+    apply_type := findApply(stripl(format, ' '));
+
+    format := striprbeg(format, ' ');
+
+    modifier := findSkill(stripl(format, ' '));
+
+    if (modifier = -1) then
+      modifier := strtointdef(stripl(format, ' '), 0);
+
+    format := striprbeg(format, ' ');
+    duration := strtointdef(stripl(format, ' '), 0);
     end;
+
+  aff.node := skill.affects.insertLast(aff);
 end;
 
 procedure load_skills;
@@ -190,7 +213,7 @@ begin
 
     skill := GSkill.Create;
 
-    skill.affect := nil;
+    skill.affects := GDLinkedList.Create;
     skill.prereqs := GDLinkedList.Create;
     skill.sn := num_skills;
 
@@ -355,6 +378,112 @@ begin
   skill_success := (number_percent <= ch.learned[sn]);
 end;
 
+procedure GAffect.modify(ch : GCharacter; add : boolean);
+var
+   modif : integer;
+begin
+  modif := modifier;
+
+  if (not add) then
+    begin
+    case apply_type of
+      APPLY_AFFECT: begin
+                    REMOVE_BIT(ch.aff_flags, modif);
+                    exit;
+                    end;
+      APPLY_REMOVE: begin
+                    SET_BIT(ch.aff_flags, modif);
+                    exit;
+                    end;
+    end;
+
+    modif := -modif;
+    end;
+
+  case apply_type of
+    APPLY_STR: inc(ch.ability.str, modif);
+    APPLY_DEX: inc(ch.ability.dex, modif);
+    APPLY_INT: inc(ch.ability.int, modif);
+    APPLY_WIS: inc(ch.ability.wis, modif);
+    APPLY_CON: inc(ch.ability.con, modif);
+    APPLY_HP: ch.point.hp := UMin(ch.point.hp + modif, ch.point.max_hp);
+    APPLY_MAX_HP: inc(ch.point.max_hp, modif);
+    APPLY_MV: ch.point.mv := UMin(ch.point.mv + modif, ch.point.max_mv);
+    APPLY_MAX_MV: inc(ch.point.max_mv, modif);
+    APPLY_MANA: ch.point.mana := UMin(ch.point.mana + modif, ch.point.max_mana);
+    APPLY_MAX_MANA: inc(ch.point.max_mana, modif);
+    APPLY_APB: inc(ch.point.apb, modif);
+    APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
+    APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
+    APPLY_STRIPSPELL: removeAffectSkill(ch, modif);
+    APPLY_FULL: gain_condition(ch, COND_FULL, modif);
+    APPLY_THIRST: gain_condition(ch, COND_THIRST, modif);
+    APPLY_DRUNK: gain_condition(ch, COND_DRUNK, modif);
+    APPLY_CAFFEINE: gain_condition(ch, COND_CAFFEINE, modif);
+  end;
+end;
+
+procedure GAffect.applyTo(ch : GCharacter);
+var
+   aff : GAffect;
+   node : GListNode;
+begin
+  if (duration > 0) then
+    begin
+    aff := GAffect.Create;
+    aff.sn := Self.sn;
+    aff.apply_type := Self.apply_type;
+    aff.duration := Self.duration;
+    aff.modifier := Self.modifier;
+
+    aff.node := ch.affects.insertLast(aff);
+
+    aff.modify(ch, true);
+    end
+  else
+    modify(ch, true);
+end;
+
+function findApply(s : string) : GApplyTypes;
+begin
+  s := uppercase(s);
+
+  if (s = 'APPLY_HP') then
+    Result := APPLY_HP
+  else
+  if (s = 'APPLY_MAX_HP') then
+    Result := APPLY_MAX_HP
+  else
+  if (s = 'APPLY_MV') then
+    Result := APPLY_MV
+  else
+  if (s = 'APPLY_MAX_MV') then
+    Result := APPLY_MAX_MV
+  else
+  if (s = 'APPLY_MANA') then
+    Result := APPLY_MANA
+  else
+  if (s = 'APPLY_MAX_MANA') then
+    Result := APPLY_MAX_MANA
+  else
+  if (s = 'APPLY_AFFECT') then
+    Result := APPLY_AFFECT
+  else
+  if (s = 'APPLY_REMOVE') then
+    Result := APPLY_REMOVE
+  else
+  if (s = 'APPLY_AC') then
+    Result := APPLY_AC
+  else
+  if (s = 'APPLY_STRIPSPELL') then
+    Result := APPLY_STRIPSPELL
+  else
+    begin
+    bugreport('findApply', 'skills.pas', 'Illegal apply type "' + s + '"', '');
+    Result := APPLY_NONE;
+    end;
+end;
+
 function findAffect(ch:GCharacter;sn:integer) : GAffect;
 var
    node : GListNode;
@@ -378,80 +507,9 @@ begin
     end;
 end;
 
-procedure doAffect(ch:GCharacter;affect:GAffect);
-var
-   aff : GAffect;
-   node : GListNode;
-begin
-  if (affect = nil) then
-    exit;
-    
-  with ch do
-  { first check if the damn affect doesn't exist already }
-    begin
-    aff := findAffect(ch,affect.sn);
-
-    if (aff <> nil) then
-      begin
-      aff.duration := affect.duration; {reset duration }
-      exit;
-      end;
-
-    aff := GAffect.Create;
-    aff.sn := affect.sn;
-    aff.aff_type := affect.aff_type;
-    aff.aff_flag := affect.aff_flag;
-    aff.duration := affect.duration;
-    aff.modifier := affect.modifier;
-
-    if (aff.duration > 0) then
-      begin
-      SET_BIT(ch.aff_flags, affect.aff_flag);
-      aff.node := ch.affects.insertLast(aff);
-      end;
-
-    with aff do
-      case aff_type of
-          'H':inc(ch.point.max_hp, modifier);
-          'M':inc(ch.point.max_mv, modifier);
-          'N':inc(ch.point.max_mana, modifier);
-          'S':inc(ch.ability.str, modifier);
-          'C':inc(ch.ability.con, modifier);
-          'D':inc(ch.ability.dex, modifier);
-          'I':inc(ch.ability.int, modifier);
-          'W':inc(ch.ability.wis, modifier);
-          'F':ch.startFlying;
-          'A':begin
-              inc(ch.point.ac_mod,modifier);
-
-              ch.calcAC;
-              end;
-      end;
-    end;
-end;
-
 procedure removeAffect(ch : GCharacter; aff : GAffect);
 begin
-  with aff do
-    begin
-    REMOVE_BIT(ch.aff_flags,aff_flag);
-
-    case aff_type of
-      'H':dec(ch.point.max_hp, modifier);
-      'M':dec(ch.point.max_mv, modifier);
-      'N':dec(ch.point.max_mana, modifier);
-      'S':dec(ch.ability.str, modifier);
-      'C':dec(ch.ability.con, modifier);
-      'D':dec(ch.ability.dex, modifier);
-      'I':dec(ch.ability.int, modifier);
-      'W':dec(ch.ability.wis, modifier);
-      'F':ch.stopFlying;
-      'A':begin
-          dec(ch.point.ac_mod,modifier);
-          ch.calcAc;
-          end;
-    end;
-    end;
+  aff.modify(ch, false);
 
   ch.affects.remove(aff.node);
 
@@ -466,14 +524,13 @@ begin
 
   if (aff = nil) then
     begin
-    bugreport('removeAffectSkill', 'skills.pas', 'skill number null, ch ' + ch.name^,
-              'An attempt was made to remove an unexisting affect.');
+    Result := false;
     exit;
     end;
 
   removeAffect(ch, aff);
 
-  removeAffectSkill := true;
+  Result := true;
 end;
 
 function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
@@ -487,7 +544,7 @@ begin
 
   while (node <> nil) do
     begin
-    if (GAffect(node.element).aff_flag = flag) then
+    if (GAffect(node.element).apply_type = APPLY_AFFECT) and (GAffect(node.element).modifier = flag) then
       begin
       aff := node.element;
       break;
