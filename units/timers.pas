@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.19 2003/06/24 21:41:35 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.20 2003/09/22 21:30:54 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -269,7 +269,7 @@ begin
       begin
       spec := GSpecTimer(timer);
 
-      if (spec.ch = ch) and (spec.timer_type = timer_type) then
+      if (spec.ch = ch) and (spec.timer_type = timer_type) and (spec.counter > 0) then
         begin
         Result := timer;
         break;
@@ -298,7 +298,7 @@ begin
       begin
       spec := GSpecTimer(timer);
 
-      if (spec.ch = ch) and (spec.name = timer_name) then
+      if (spec.ch = ch) and (spec.name = timer_name) and (spec.counter > 0) then
         begin
         Result := timer;
         break;
