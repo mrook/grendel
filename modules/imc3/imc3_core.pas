@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.16 2003/10/31 11:29:42 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.17 2003/10/31 12:34:18 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -84,14 +84,19 @@ type
 implementation
 
 uses
+{$IFDEF WIN32}
 	WinSock2,
+{$ENDIF}
+{$IFDEF LINUX}
+	Libc,
+{$ENDIF}
 	SysUtils,
 	FastStrings,
 	Channels,
 	constants,
 	console,
 	chars,
-  player,
+	player,
 	mudsystem,
 	util;
 
