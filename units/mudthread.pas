@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: mudthread.pas,v 1.81 2003/09/12 14:21:34 ***REMOVED*** Exp $)
+  @lastmod($Id: mudthread.pas,v 1.82 2003/10/02 15:53:33 ***REMOVED*** Exp $)
 }
 
 unit mudthread;
@@ -120,10 +120,10 @@ begin
   if (f = nil) then
     begin
     writeConsole('Could not find function for command "' + s + '"');
-    f := @do_dummy;
-    end;
-    
-  Result := f.func;
+    Result := @do_dummy;
+    end
+  else   
+  	Result := f.func;
 end;
 
 procedure load_commands;
@@ -372,9 +372,9 @@ begin
           begin
           try
             if (system_info.log_all) or (ch.logging) then
-              writeLog(ch.name + ': ' + line);
+              writeConsole(ch.name + ': ' + line);
             if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
-              writeConsole('[LOG] ' + ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+              writeConsole(ch.name + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
 
 //            time := GetTickCount;
 
