@@ -15,6 +15,7 @@ type
     GStringLib = class
       function left(src, delim : string) : string; stdcall;
       function right(src, delim : string) : string; stdcall;
+      function match(src, pattern : string) : boolean; stdcall;
       function IntToStr(x : integer) : string; stdcall;
       function StrToInt(x : string) : integer; stdcall;
       function uppercase(s : string) : string; stdcall;
@@ -39,6 +40,7 @@ uses
     TypInfo,
     chars,
     dtypes,
+    util,
     mudthread,
     mudsystem,
     gvm;
@@ -73,6 +75,11 @@ end;
 function GStringLib.right(src, delim : string) : string; stdcall;
 begin
   Result := Strip.right(src, delim[1]);
+end;
+
+function GStringLib.match(src, pattern : string) : boolean; stdcall;
+begin
+  Result := Util.StringMatches(src, pattern);
 end;
 
 function GStringLib.IntToStr(x : integer) : string; stdcall;
@@ -166,7 +173,14 @@ begin
 
   registerExternalMethod('left', gslib, gslib.MethodAddress('left'), sig);
   registerExternalMethod('right', gslib, gslib.MethodAddress('right'), sig);
-  
+
+  sig.resultType := varBoolean;
+  setLength(sig.paramTypes, 2);
+  sig.paramTypes[0] := varString;
+  sig.paramTypes[1] := varString;
+
+  registerExternalMethod('match', gslib, gslib.MethodAddress('match'), sig);
+
   sig.resultType := varString;
   setLength(sig.paramTypes, 1);
   sig.paramTypes[0] := varInteger;
