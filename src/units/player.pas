@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.12 2004/02/19 19:51:09 hemko Exp $
+	## $Id: player.pas,v 1.13 2004/02/22 20:41:45 hemko Exp $
 }
 unit player;
 
@@ -142,11 +142,11 @@ type
 		function load(fn : string) : boolean;
 		function save(fn : string) : boolean;
 
-		function getAge : integer;
-		function getPlayed : integer;
+		function getAge() : integer;
+		function getPlayed() : integer;
 
 		procedure die; override;
-		procedure calcRank;
+		procedure calcRank();
 
 		procedure quit;
 
@@ -156,7 +156,7 @@ type
 		procedure emptyBuffer; override;
 
 		procedure startEditing(text : string);
-		procedure stopEditing;
+		procedure stopEditing();
 		procedure editBuffer(text : string);
 		procedure sendEdit(text : string);
 
@@ -325,8 +325,8 @@ begin
 
 		ch.conn := nil;
 
-		act(AT_REPORT,'$n has lost $s link.',false,ch,nil,nil,TO_ROOM);
-		SET_BIT(ch.flags,PLR_LINKLESS);
+		act(AT_REPORT,'$n has lost $s link.', false, ch, nil, nil, TO_ROOM);
+		SET_BIT(ch.flags, PLR_LINKLESS);
 		end
 	else
 		begin
@@ -528,7 +528,6 @@ begin
                     ch.Free;
 
                     ch := vict;
-                    ch := vict;
                     vict.conn := Self;
 
                     ch.ld_timer := 0;
@@ -572,7 +571,7 @@ begin
                   if (ch.level = LEVEL_RULER) then
                     interpret(ch, 'uptime')
                   else
-                    ch.sendPrompt;
+                    ch.sendPrompt();
 
                   state := CON_PLAYING;
                   fcommand := true;
@@ -1162,8 +1161,8 @@ var
 	node, node_next : GListNode;
 	tc : GUserChannel;
 begin
-  aliases.clean;
-  aliases.Free;
+  aliases.clean();
+  aliases.Free();
 
   node := channels.head;
   while (node <> nil) do
@@ -1230,7 +1229,7 @@ begin
   emptyBuffer();
 
   if (conn = nil) then
-    writeConsole('(Linkless) '+ name+ ' has logged out')
+    writeConsole('(Linkless) '+ name + ' has logged out')
   else
   if (conn <> nil) then
     writeConsole('(' + IntToStr(conn.socket.getDescriptor) + ') ' + name + ' has logged out');
@@ -1464,7 +1463,7 @@ begin
         if (g ='SEX') then
           sex := strtoint(right(a, ' '))
         else
-        if g='RACE' then
+        if (g = 'RACE') then
           begin
           race := findRace(right(a, ' '));
           
@@ -1481,16 +1480,16 @@ begin
         if (g = 'LEVEL') then
           level := UMin(strtoint(right(a, ' ')), LEVEL_MAX_IMMORTAL)
         else
-        if g='AGE' then
-          age:=strtoint(right(a,' '))
+        if (g = 'AGE') then
+          age := strtoint(right(a,' '))
         else
-        if g='WEIGHT' then
-          weight:=strtoint(right(a,' '))
+        if (g = 'WEIGHT') then
+          weight := strtoint(right(a,' '))
         else
-        if g='HEIGHT' then
-          height:=strtoint(right(a,' '))
+        if (g = 'HEIGHT') then
+          height := strtoint(right(a,' '))
         else
-        if g='STATS' then
+        if (g = 'STATS') then
           begin
           a := right(a,' ');
           str := strtoint(left(a,' '));
@@ -1682,9 +1681,9 @@ begin
           a := right(a,' ');
           logon_first := strtoint(left(a,' '));
           a := right(a,' ');
-          logon_first := logon_first + (strtoint(left(a,' '))/MSecsPerDay);
+          logon_first := logon_first + (strtoint(left(a,' ')) / MSecsPerDay);
           
-          if (logon_first = 0)then
+          if (logon_first = 0) then
             logon_first := Now;
           end
         else
@@ -1785,7 +1784,7 @@ begin
 
         if (uppercase(a) <> '#END') and (not af.eof) then
           begin
-          aff := GAffect.Create;
+          aff := GAffect.Create();
 
           with aff do
             begin
@@ -2434,7 +2433,7 @@ begin
 end;
 
 // Return from editing mode
-procedure GPlayer.stopEditing;
+procedure GPlayer.stopEditing();
 begin
   sendBuffer('Ok.'#13#10);
 
@@ -2741,7 +2740,7 @@ begin
     begin
     hp := max_hp;
     bg_status := BG_NOJOIN;
-    fromRoom;
+    fromRoom();
     toRoom(bg_room);
     exit;
     end;
@@ -2885,7 +2884,7 @@ function findPlayerWorld(ch : GCharacter; name : string) : GCharacter;
 var
 	iterator : GIterator;
 	vict : GCharacter;
-	number,count : integer;
+	number, count : integer;
 begin
   Result := nil;
 
@@ -2927,7 +2926,7 @@ function findPlayerWorldEx(ch : GCharacter; name : string) : GCharacter;
 var
    iterator : GIterator;
    vict : GCharacter;
-   number,count : integer;
+   number, count : integer;
 begin
   Result := nil;
 

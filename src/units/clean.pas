@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.2 2004/02/11 22:15:25 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.3 2004/02/22 20:41:45 hemko Exp $)
 }
 
 unit clean;
@@ -116,7 +116,7 @@ begin
 
         if (conn.last_update + THREAD_TIMEOUT < Now()) then
           begin
-          bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name + ' probably died (last update at: ' + TimeToStr(conn.last_update));
+          bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name + ' probably died (last update at: ' + TimeToStr(conn.last_update) + ')');
           
           conn.ch.emptyBuffer();
 
