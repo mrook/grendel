@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.2 2004/02/01 12:06:34 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.3 2004/05/24 20:38:00 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -75,7 +75,8 @@ begin
         end;
       end;
 
-    chance := ch.LEARNED(gsn_bash);
+	// 50% failrate if skill is learned max
+    chance := ch.LEARNED(gsn_bash) div 2;
 
     if (vict.bash_timer>0) then
       act(AT_REPORT,'$N is already bashed to the ground!',false,ch,nil,vict,TO_CHAR)
