@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.3 2004/03/06 20:18:40 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.4 2004/03/07 15:37:37 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var 
@@ -829,7 +829,6 @@ var arg, arg2, arg3 : string;
     vict : GCharacter;
     value, counter : integer;
     node : GListNode;
-    p : integer;
 begin
   param := one_argument(param,arg);
   param := one_argument(param,arg2);

@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.6 2004/03/04 19:12:11 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.7 2004/03/07 15:37:37 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -43,7 +43,6 @@ var
 	e : Exception;
 	strings : TStringList;
 	list : TJclExceptFrameList;
-	t : string;
 begin
 	list := JclLastExceptFrameList;
 	
@@ -58,22 +57,7 @@ begin
 		end
 	else
 		writeConsole('[EX Unknown]');	
-	
-	{ writeConsole(IntToStr(list.Count) + ' frames in list');
-	
-	for a := 0 to list.Count - 1 do
-		begin
-		case list.items[a].FrameKind of
-			efkUnknown: t := 'efkUnknown';
-			efkFinally: t := 'efkFinally';
-			efkAnyException: t := 'efkAnyException';
-			efkOnException: t := 'efkOnException';
-    	efkAutoException: t := 'efkAutoException';
-    end;
-    
-		writeConsole('Frame ' + IntToStr(a) + ': ' + t + ' ' + GetLocationInfoStr(list.items[a].CodeLocation, False, False, False) + ' ' + IntToStr(integer(list.items[a].Handles(e))));
-		end; }
-	
+		
 	strings := TStringList.Create();
 
 	JclLastExceptStackListToStrings(strings, False, False, False);
