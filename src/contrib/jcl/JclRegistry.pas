@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclRegistry.pas.                                                            }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -22,16 +22,18 @@
 { directly call the registry API they do not suffer from the resource overhead as TRegistry does.  }
 {                                                                                                  }
 { Unit owner: Eric S.Fisher                                                                        }
-{ Last modified: June 1, 2002                                                                      }
 {                                                                                                  }
 {**************************************************************************************************}
 
+// $Id: JclRegistry.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclRegistry;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
@@ -324,7 +326,7 @@ begin
       if RegKind in [REG_SZ, REG_EXPAND_SZ] then
       begin
         SetLength(StrVal, Size);
-        RegQueryValueEx(RegKey, PChar(Name), nil, @RegKind, PByte(StrVal), @Size);
+        RegQueryValueEx(RegKey, PChar(Name), nil, @RegKind, PByte(PChar(StrVal)), @Size);
         SetLength(StrVal, StrLen(PChar(StrVal)));
         Result := StrVal;
       end;
@@ -354,7 +356,7 @@ begin
       if RegKind in [REG_SZ, REG_EXPAND_SZ] then
       begin
         SetLength(StrVal, Size);
-        if RegQueryValueEx(RegKey, PChar(Name), nil, @RegKind, PByte(StrVal), @Size) = ERROR_SUCCESS then
+        if RegQueryValueEx(RegKey, PChar(Name), nil, @RegKind, PByte(PChar(StrVal)), @Size) = ERROR_SUCCESS then
         begin
           SetLength(StrVal, StrLen(PChar(StrVal)));
           Result := StrVal;
@@ -512,7 +514,7 @@ var
 begin
   if RegOpenKeyEx(RootKey, RelativeKey(Key), 0, KEY_SET_VALUE, RegKey) = ERROR_SUCCESS then
   begin
-    Ret := RegSetValueEx(RegKey, PChar(Name), 0, REG_SZ, PChar(Value), Length(Value)+1);
+    Ret := RegSetValueEx(RegKey, PChar(Name), 0, REG_SZ, PByte(PChar(Value)), Length(Value)+1);
     RegCloseKey(RegKey);
     if Ret <> ERROR_SUCCESS then
       WriteError(Key);

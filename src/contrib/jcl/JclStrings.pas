@@ -12,18 +12,20 @@
 {                                                                                                  }
 { The Original Code is JclStrings.pas.                                                             }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
 { Various character and string routines (searching, testing and transforming)                      }
 {                                                                                                  }
 { Unit owner: Azret Botash                                                                         }
-{ Last modified: September 30, 2002                                                                    }
 {                                                                                                  }
 {**************************************************************************************************}
 
+// $Id: JclStrings.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
+
+// rr  25 feb 2003 Linux port (implemented LoadCharTypes & LoadCaseMap)
 // mvb 20 jan 2002 added StrIToStrings to interface section
 // mvb 20 jan 2002 added AllowEmptyString parameter to StringsToStr function
 // mvb 20 jan 2002 added AddStringToStrings() by Jeff
@@ -113,6 +115,9 @@ const
   {$IFDEF MSWINDOWS}
   AnsiLineBreak      = AnsiCrLf;
   {$ENDIF}
+  {$IFDEF UNIX}
+  AnsiLineBreak      = AnsiLineFeed;
+  {$ENDIF}
 
 // Misc. character sets
 
@@ -122,8 +127,6 @@ const
   AnsiDecDigits      = ['0'..'9'];
   AnsiOctDigits      = ['0'..'7'];
   AnsiHexDigits      = ['0'..'9', 'A'..'F', 'a'..'f'];
-
-{$IFDEF MSWINDOWS}
 
 const
   // CharType return values
@@ -137,18 +140,19 @@ const
   C1_XDIGIT = $0080; // Hexadecimal digits
   C1_ALPHA  = $0100; // Any linguistic character: alphabetic, syllabary, or ideographic
 
-{$IFDEF SUPPORTS_EXTSYM}
-  {$EXTERNALSYM C1_UPPER}
-  {$EXTERNALSYM C1_LOWER}
-  {$EXTERNALSYM C1_DIGIT}
-  {$EXTERNALSYM C1_SPACE}
-  {$EXTERNALSYM C1_PUNCT}
-  {$EXTERNALSYM C1_CNTRL}
-  {$EXTERNALSYM C1_BLANK}
-  {$EXTERNALSYM C1_XDIGIT}
-  {$EXTERNALSYM C1_ALPHA}
-{$ENDIF}
-{$ENDIF}
+{$IFDEF MSWINDOWS}
+  {$IFDEF SUPPORTS_EXTSYM}
+    {$EXTERNALSYM C1_UPPER}
+    {$EXTERNALSYM C1_LOWER}
+    {$EXTERNALSYM C1_DIGIT}
+    {$EXTERNALSYM C1_SPACE}
+    {$EXTERNALSYM C1_PUNCT}
+    {$EXTERNALSYM C1_CNTRL}
+    {$EXTERNALSYM C1_BLANK}
+    {$EXTERNALSYM C1_XDIGIT}
+    {$EXTERNALSYM C1_ALPHA}
+  {$ENDIF}
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 // String Test Routines
@@ -171,6 +175,8 @@ function StrCenter(const S: AnsiString; L: Integer; C: AnsiChar  = ' '): AnsiStr
 function StrCharPosLower(const S: AnsiString; CharPos: Integer): AnsiString;
 function StrCharPosUpper(const S: AnsiString; CharPos: Integer): AnsiString;
 function StrDoubleQuote(const S: AnsiString): AnsiString;
+function StrEnsureNoPrefix(const Prefix, Text: AnsiString): AnsiString;
+function StrEnsureNoSuffix(const Suffix, Text: AnsiString): AnsiString;
 function StrEnsurePrefix(const Prefix, Text: AnsiString): AnsiString;
 function StrEnsureSuffix(const Suffix, Text: AnsiString): AnsiString;
 function StrEscapedToString(const S: AnsiString): AnsiString;
@@ -307,8 +313,8 @@ type
   PCharVector = ^PChar;
 
 function StringsToPCharVector(var Dest: PCharVector; const Source: TStrings): PCharVector;
-function PCharVectorCount(const Source: PCharVector): Integer;
-procedure PCharVectorToStrings(const Dest: TStrings; const Source: PCharVector);
+function PCharVectorCount(Source: PCharVector): Integer;
+procedure PCharVectorToStrings(const Dest: TStrings; Source: PCharVector);
 procedure FreePCharVector(var Dest: PCharVector);
 
 //--------------------------------------------------------------------------------------------------
@@ -325,7 +331,7 @@ procedure FreeMultiSz(var Dest: PChar);
 
 procedure StrIToStrings(S, Sep: AnsiString; const List: TStrings; const AllowEmptyString: Boolean = True);
 procedure StrToStrings(S, Sep: AnsiString; const List: TStrings; const AllowEmptyString: Boolean = True);
-function StringsToStr(const List: TStrings; const Sep: AnsiString;const AllowEmptyString: Boolean = True): AnsiString;
+function StringsToStr(const List: TStrings; const Sep: AnsiString; const AllowEmptyString: Boolean = True): AnsiString;
 procedure TrimStrings(const List: TStrings; DeleteIfEmpty: Boolean = True );
 procedure TrimStringsRight(const List: TStrings; DeleteIfEmpty: Boolean = True);
 procedure TrimStringsLeft(const List: TStrings; DeleteIfEmpty: Boolean = True );
@@ -346,7 +352,7 @@ function StrToFloatSafe(const S: AnsiString): Float;
 function StrToIntSafe(const S: AnsiString): Integer;
 procedure StrNormIndex(const StrLen: integer; var Index: integer; var Count: integer); overload;
 
-{$IFNDEF DELPHI5_UP}
+{$IFNDEF COMPILER5_UP}
 
 //--------------------------------------------------------------------------------------------------
 // Backward compatibility
@@ -354,7 +360,7 @@ procedure StrNormIndex(const StrLen: integer; var Index: integer; var Count: int
 
 function AnsiSameText(const S1, S2: AnsiString): Boolean;
 
-{$ENDIF DELPHI5_UP}
+{$ENDIF COMPILER5_UP}
 
 //--------------------------------------------------------------------------------------------------
 // Exceptions
@@ -366,9 +372,12 @@ type
 implementation
 
 uses
-  {$IFDEF WIN32}
+  {$IFDEF MSWINDOWS}
   Windows,
-  {$ENDIF WIN32}
+  {$ENDIF MSWINDOWS}
+  {$IFDEF LINUX}
+  Libc,
+  {$ENDIF LINUX}
   JclLogic,
   JclResources;
 
@@ -406,15 +415,35 @@ var
   CurrChar: AnsiChar;
   CurrType: Word;
 begin
-  {$IFDEF MSWINDOWS}
   for CurrChar := Low(AnsiChar) to High(AnsiChar) do
   begin
+    {$IFDEF MSWINDOWS}
     GetStringTypeExA(LOCALE_USER_DEFAULT, CT_CTYPE1, @CurrChar, SizeOf(AnsiChar), CurrType);
+    {$ENDIF MSWINDOWS}
+    {$IFDEF LINUX}
+    CurrType := 0;
+    if isupper(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_UPPER;
+    if islower(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_LOWER;
+    if isdigit(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_DIGIT;
+    if isspace(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_SPACE;
+    if ispunct(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_PUNCT;
+    if iscntrl(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_CNTRL;
+    if isblank(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_BLANK;
+    if isxdigit(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_XDIGIT;
+    if isalpha(Byte(CurrChar)) <> 0 then
+      CurrType := CurrType or C1_ALPHA;
+    {$ENDIF LINUX}
     AnsiCharTypes[CurrChar] := CurrType;
   end;
-  {$ENDIF}
 end;
-
 
 //--------------------------------------------------------------------------------------------------
 
@@ -422,15 +451,20 @@ procedure LoadCaseMap;
 var
   CurrChar, UpCaseChar, LoCaseChar, ReCaseChar: AnsiChar;
 begin
-  {$IFDEF MSWINDOWS}
   if not AnsiCaseMapReady then
   begin
     for CurrChar := Low(AnsiChar) to High(AnsiChar) do
     begin
+      {$IFDEF MSWINDOWS}
       LoCaseChar := CurrChar;
       UpCaseChar := CurrChar;
       Windows.CharLowerBuff(@LoCaseChar, 1);
       Windows.CharUpperBuff(@UpCaseChar, 1);
+      {$ENDIF MSWINDOWS}
+      {$IFDEF LINUX}
+      LoCaseChar := AnsiChar(tolower(Byte(CurrChar)));
+      UpCaseChar := AnsiChar(toupper(Byte(CurrChar)));
+      {$ENDIF LINUX}
       if CharIsUpper(CurrChar) then
         ReCaseChar := LoCaseChar
       else
@@ -438,14 +472,12 @@ begin
           ReCaseChar := UpCaseChar
         else
           ReCaseChar := CurrChar;
-
       AnsiCaseMap[Ord(CurrChar) + AnsiLoOffset] := LoCaseChar;
       AnsiCaseMap[Ord(CurrChar) + AnsiUpOffset] := UpCaseChar;
       AnsiCaseMap[Ord(CurrChar) + AnsiReOffset] := ReCaseChar;
     end;
     AnsiCaseMapReady := True;
   end;
-  {$ENDIF MSWINDOWS}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -453,7 +485,7 @@ end;
 // Uppercases or Lowercases a give AnsiString depending on the
 // passed offset. (UpOffset or LoOffset)
 
-procedure StrCase{(var Str: AnsiString; const Offset: Integer)}; assembler;
+procedure StrCase(var Str: AnsiString; const Offset: Integer); register; assembler;
 asm
         // make sure that the string is not null
 
@@ -485,7 +517,11 @@ asm
 
         // load case map and prepare variables }
 
-        LEA     EBX,[AnsiCaseMap + EDX]
+{$IFDEF PIC}
+        LEA     EBX, [EBX][AnsiCaseMap + EDX]
+{$ELSE}
+        LEA     EBX, [AnsiCaseMap + EDX]
+{$ENDIF}
         MOV     ESI, EAX
         XOR     EDX, EDX
         XOR     EAX, EAX
@@ -549,7 +585,7 @@ end;
 // Uppercases or Lowercases a give null terminated string depending on the
 // passed offset. (UpOffset or LoOffset)
 
-procedure StrCaseBuff{(S: PAnsiChar; const Offset: Integer)}; assembler;
+procedure StrCaseBuff(S: PAnsiChar; const Offset: Integer); register; assembler;
 asm
         // make sure the string is not null
 
@@ -563,7 +599,11 @@ asm
 
         // load case map and prepare variables
 
+{$IFDEF PIC}
+        LEA     EBX, [EBX][AnsiCaseMap + EDX]
+{$ELSE}
         LEA     EBX, [AnsiCaseMap + EDX]
+{$ENDIF}
         MOV     ESI, EAX
         XOR     EDX, EDX
         XOR     EAX, EAX
@@ -661,35 +701,32 @@ var
   I: Integer;
   C: Char;
 begin
-  Result := False;
-  if CheckAll then
+  Result := Chars = [];
+  if not Result then
   begin
-    for I := 1 to Length(S) do
+    if CheckAll then
     begin
-      C := S[I];
-      if C in Chars then
+      for I := 1 to Length(S) do
       begin
-        Chars := Chars - [C];
-        if Chars = [] then
+        C := S[I];
+        if C in Chars then
+        begin
+          Chars := Chars - [C];
+          if Chars = [] then
+            Break;
+        end;
+      end;
+      Result := (Chars = []);
+    end
+    else
+    begin
+      for I := 1 to Length(S) do
+        if S[I] in Chars then
+        begin
+          Result := True;
           Break;
-      end;
+        end;
     end;
-    Result := (Chars = []);
-  end
-  else
-  begin
-   {!CheckAll  TODO
-      S = '' Chars = [] => False Should return True
-      S = '' Chars <> [] => False
-      S <> '' Chars = [] => False Should return True
-      S <> '' Chars <> [] => False
-   }
-    for I := 1 to Length(S) do
-      if S[I] in Chars then
-      begin
-        Result := True;
-        Break;
-      end;
   end;
 end;
 
@@ -803,7 +840,7 @@ function StrCharPosUpper(const S: AnsiString; CharPos: Integer): AnsiString;
 begin
   Result := S;
   if (CharPos > 0) and (CharPos <= Length(S)) then
-    Result[CharPos] := JclStrings.CharUpper(Result[CharPos]);
+    Result[CharPos] := CharUpper(Result[CharPos]);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -814,6 +851,38 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+function StrEnsureNoPrefix(const Prefix, Text: AnsiString): AnsiString;
+var
+  PrefixLen : Integer;
+begin
+  PrefixLen := Length(Prefix);
+  if Copy(Text, 1, PrefixLen) = Prefix then
+    Result := Copy(Text, PrefixLen + 1, Length(Text))
+  else
+    Result := Text;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+{ TODOc Author: Olivier Sannier}
+
+function StrEnsureNoSuffix(const Suffix, Text: AnsiString): AnsiString;
+var
+  SuffixLen : Integer;
+  StrLength : Integer;
+begin
+  SuffixLen := Length(Suffix);
+  StrLength := Length(Text);
+  if Copy(Text, StrLength - SuffixLen + 1, SuffixLen) = Suffix then
+    Result := Copy(Text, 1, StrLength - SuffixLen)
+  else
+    Result := Text;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+{ TODOc Author: Olivier Sannier}
 
 function StrEnsurePrefix(const Prefix, Text: AnsiString): AnsiString;
 var
@@ -974,21 +1043,33 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 procedure StrLowerInPlace(var S: AnsiString); assembler;
+{$IFDEF PIC}
+begin
+  StrCase(S, AnsiLoOffset);
+end;
+{$ELSE}
 asm
-        // StrCase(Str, LoOffset)
+        // StrCase(S, AnsiLoOffset)
 
         XOR     EDX, EDX         // MOV     EDX, LoOffset
         JMP     StrCase
 end;
+{$ENDIF}
 
 //--------------------------------------------------------------------------------------------------
 
 procedure StrLowerBuff(S: PAnsiChar); assembler;
+{$IFDEF PIC}
+begin
+  StrCaseBuff(S, AnsiLoOffset);
+end;
+{$ELSE}
 asm
         // StrCaseBuff(S, LoOffset)
         XOR     EDX, EDX                // MOV     EDX, LoOffset
         JMP     StrCaseBuff
 end;
+{$ENDIF}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1003,6 +1084,7 @@ begin
   if (FromIndex <= 0) or (FromIndex > Length(Source)) or
      (ToIndex <= 0) or (ToIndex > Length(Dest)) or
      ((FromIndex + Count - 1) > Length(Source)) or ((ToIndex + Count - 1) > Length(Dest)) then
+     { TODO -orr : Is failure without notice the proper thing to do here? }
      Exit;
 
   // Move
@@ -1226,8 +1308,9 @@ begin
       { did we find a complete match? }
       if SearchMatchPtr^ = #0 then
       begin
-        { append replace to result and move past the search string in source }
-        Move((@Replace[1])^, ResultPtr^, ReplaceLength);
+        if ReplaceLength > 0 then
+          { append replace to result and move past the search string in source }
+          Move((@Replace[1])^, ResultPtr^, ReplaceLength);
         Inc(SourcePtr, SearchLength);
         Inc(ResultPtr, ReplaceLength);
         { replace all instances or just one? }
@@ -1273,7 +1356,7 @@ var
   C: Char;               { first character of search string }
 begin
   //if (S = '') or (Search = '') then Exit;
-  Search := UpperCase(Search);
+  Search := AnsiUpperCase(Search);
   { avoid having to call Length() within the loop }
   SearchLength := Length(Search);
   ReplaceLength := Length(Replace);
@@ -1291,7 +1374,7 @@ begin
   while True do
   begin
     { copy characters until we find the first character of the search string }
-    while (UpCase(SourcePtr^) <> C) and (SourcePtr^ <> #0) do
+    while (CharUpper(SourcePtr^) <> C) and (SourcePtr^ <> #0) do
     begin
       ResultPtr^ := SourcePtr^;
       Inc(ResultPtr);
@@ -1305,7 +1388,7 @@ begin
       { continue comparing, +1 because first character was matched already }
       SourceMatchPtr := SourcePtr + 1;
       SearchMatchPtr := PChar(Search) + 1;
-      while (UpCase(SourceMatchPtr^) = SearchMatchPtr^) and (SearchMatchPtr^ <> #0) do
+      while (CharUpper(SourceMatchPtr^) = SearchMatchPtr^) and (SearchMatchPtr^ <> #0) do
       begin
         Inc(SourceMatchPtr);
         Inc(SearchMatchPtr);
@@ -1313,8 +1396,9 @@ begin
       { did we find a complete match? }
       if SearchMatchPtr^ = #0 then
       begin
-        { append replace to result and move past the search string in source }
-        Move((@Replace[1])^, ResultPtr^, ReplaceLength);
+        if ReplaceLength > 0 then
+          { append replace to result and move past the search string in source }
+          Move((@Replace[1])^, ResultPtr^, ReplaceLength);
         Inc(SourcePtr, SearchLength);
         Inc(ResultPtr, ReplaceLength);
         { replace all instances or just one? }
@@ -1347,7 +1431,10 @@ end;
 
 procedure StrReplace(var S: AnsiString; const Search, Replace: AnsiString; Flags: TReplaceFlags);
 begin
-  if (S <> '') and (Search <> '') then
+  if Search = '' then
+    raise EJclStringError.CreateResRec(@RsBlankSearchString);
+    
+  if S <> '' then
   begin
     if rfIgnoreCase in Flags then
       StrReplaceCI(S, Search, Replace, Flags)
@@ -1452,13 +1539,13 @@ begin
     while Source^ <> #0 do
     begin
       if (Source^ in Delimiters) and (Dest^ <> #0) then
-        Dest^ := UpCase(Dest^);
+        Dest^ := CharUpper(Dest^);
 
       Inc(Dest);
       Inc(Source);
     end;
 
-    Result[1] := UpCase(Result[1]); 
+    Result[1] := CharUpper(Result[1]);
   end;
 end;
 
@@ -1627,32 +1714,40 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 function StrUpper(const S: AnsiString): AnsiString;
-var
-  L: Integer;
 begin
-  L := Length(S);
-  SetLength(Result, L);
-  Move(S[1], Result[1], L);
+  Result := S;
   StrUpperInPlace(Result);
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 procedure StrUpperInPlace(var S: AnsiString); assembler;
+{$IFDEF PIC}
+begin
+  StrCase(S, AnsiUpOffset);
+end;
+{$ELSE}
 asm
-        // StrCase(Str, UpOffset)
+        // StrCase(Str, AnsiUpOffset)
         MOV     EDX, AnsiUpOffset
         JMP     StrCase
 end;
+{$ENDIF}
 
 //--------------------------------------------------------------------------------------------------
 
 procedure StrUpperBuff(S: PAnsiChar); assembler;
+{$IFDEF PIC}
+begin
+  StrCaseBuff(S, AnsiUpOffset);
+end;
+{$ELSE}
 asm
         // StrCaseBuff(S, UpOffset)
         MOV     EDX, AnsiUpOffset
         JMP     StrCaseBuff
 end;
+{$ENDIF}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1850,7 +1945,18 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+{$IFDEF PIC}
+function _StrCompare(const S1, S2: AnsiString): Integer; forward;
+
+function StrCompare(const S1, S2: AnsiString): Integer;
+begin
+  Result := _StrCompare(S1, S2);
+end;
+
+function _StrCompare(const S1, S2: AnsiString): Integer; assembler;
+{$ELSE}
 function StrCompare(const S1, S2: AnsiString): Integer; assembler;
+{$ENDIF PIC}
 asm
         // check if pointers are equal
 
@@ -1862,7 +1968,7 @@ asm
         TEST    EAX, EAX
         JZ      @@Str1Null
 
-        // if S2 is nill return  Length(S1)
+        // if S2 is nil return  Length(S1)
 
         TEST    EDX, EDX
         JZ      @@Str2Null
@@ -2527,14 +2633,18 @@ var
   PatternRes: PChar;
 
 begin
-  Result := False;
+  if SubStr = '' then
+    raise EJclStringError.CreateResRec(@RsBlankSearchString);
+
+  Result := SubStr = '*';
+
+  if Result or (S = '') then
+    Exit;
+
   StringPtr := PChar(@S[Index]);
   PatternPtr := PChar(SubStr);
   StringRes := nil;
   PatternRes := nil;
-
-  if (S='') or (SubStr='') then
-    Exit;
 
   repeat
     repeat
@@ -2886,6 +2996,7 @@ begin
     Result := StrLeft(S, P - 1);
 end;
 
+
 //--------------------------------------------------------------------------------------------------
 
 function StrBetween(const S: AnsiString; const Start, Stop: AnsiChar): AnsiString;
@@ -2951,6 +3062,7 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
 
 function CharIsAlpha(const C: AnsiChar): Boolean;
 begin
@@ -3083,7 +3195,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PCharVectorCount(const Source: PCharVector): Integer;
+function PCharVectorCount(Source: PCharVector): Integer;
 var
   P: PChar;
 begin
@@ -3101,7 +3213,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-procedure PCharVectorToStrings(const Dest: TStrings; const Source: PCharVector);
+procedure PCharVectorToStrings(const Dest: TStrings; Source: PCharVector);
 var
   I, Count: Integer;
   List: array of PChar;
@@ -3186,7 +3298,8 @@ begin
   if (Index > 0) and (Index <= Length(S)) then
   begin
     P := PAnsiChar(S);
-    Inc(P, Index - 1);
+    Result := Index - 1;
+    Inc(P, Result);
     while P^ <> #0 do
     begin
       Inc(Result);
@@ -3211,7 +3324,8 @@ begin
   begin
     CU := CharUpper(C);
     P := PAnsiChar(S);
-    Inc(P, Index - 1);
+    Result := Index - 1;
+    Inc(P, Result);
     while P^ <> #0 do
     begin
       Inc(Result);
@@ -3226,7 +3340,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function CharReplace(var S: AnsiString; const Search, Replace: AnsiChar): Integer; 
+function CharReplace(var S: AnsiString; const Search, Replace: AnsiChar): Integer;
 var
   P: PAnsiChar;
 begin
@@ -3444,7 +3558,7 @@ begin
 end;
 
 //==================================================================================================
-// Miscelanuous
+// Miscellaneous
 //==================================================================================================
 
 function BooleanToStr(B: Boolean): AnsiString;
@@ -3453,7 +3567,6 @@ const
 begin
   Result := Bools[B];
 end;
-
 
 //--------------------------------------------------------------------------------------------------
 
@@ -3595,38 +3708,68 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-Function StrToFloatSafe(const S: AnsiString): Float;
+function StrToFloatSafe(const S: AnsiString): Float;
+{ TODOc: Contributors: Robert Rossmair }
 var
-  TempS: AnsiString;
-  PosL, PosR: Integer;
-  IsNegative: Boolean;
+  Temp: AnsiString;
+  I, J, K: Integer;
+  SwapSeparators, IsNegative: Boolean;
 begin
-  TempS := StrReplaceChar(S, ThousandSeparator, DecimalSeparator);
-  IsNegative   := False;
-  PosL := Pos('-', TempS);
-  while (PosL > 0) do
+  Temp := S;
+  SwapSeparators := False;
+
+  IsNegative := False;
+  J := 0;
+  for I := 1 to Length(Temp) do
   begin
-    IsNegative := True;
-    Delete(TempS, PosL, 1);
-    PosL := Pos('-', TempS);
+    if Temp[I] = '-' then
+      IsNegative := not IsNegative
+    else
+      if not (Temp[I] in [' ', '(', '+']) then
+      begin
+        // if it appears prior to any digit, it has to be a decimal separator
+        SwapSeparators := Temp[I] = ThousandSeparator;
+        J := I;
+        Break;
+      end;
   end;
-  TempS := StrKeepChars(TempS, ['0'..'9',DecimalSeparator]);
-  PosR := StrLastPos(DecimalSeparator, TempS);
-  PosL := Pos(DecimalSeparator, TempS);
-  while (PosL <> PosR) and (PosL > 0) do
+
+  if not SwapSeparators then
   begin
-    Delete(TempS, PosL, 1);
-    PosL := Pos(DecimalSeparator, TempS);
+    K := CharPos(Temp, DecimalSeparator);
+    SwapSeparators :=
+      // if it appears prior to any digit, it has to be a decimal separator
+      (K > J) and
+      // if it appears multiple times, it has to be a thousand separator
+      ((StrCharCount(Temp, DecimalSeparator) > 1) or
+      // we assume (consistent with Windows Platform SDK documentation),
+      // that thousand separators appear only to the left of the decimal
+      (K < CharPos(Temp, ThousandSeparator)));
   end;
-  if Length(TempS) > 0 then
+
+  if SwapSeparators then
   begin
-    if TempS[1] = DecimalSeparator then
-      TempS := '0' + TempS;
-    if TempS[length(TempS)] = DecimalSeparator then
-      TempS := TempS + '0';
-    Result := StrToFloat(TempS);
+    // assume a numerical string from a different locale,
+    // where DecimalSeparator and ThousandSeparator are exchanged
+    for I := 1 to Length(Temp) do
+      if Temp[I] = DecimalSeparator then
+        Temp[I] := ThousandSeparator
+      else
+        if Temp[I] = ThousandSeparator then
+          Temp[I] := DecimalSeparator;
+  end;
+
+  Temp := StrKeepChars(Temp, ['0'..'9', DecimalSeparator]);
+
+  if Length(Temp) > 0 then
+  begin
+    if Temp[1] = DecimalSeparator then
+      Temp := '0' + Temp;
+    if Temp[length(Temp)] = DecimalSeparator then
+      Temp := Temp + '0';
+    Result := StrToFloat(Temp);
     if IsNegative then
-      Result := Result * -1;
+      Result := -Result;
   end
   else
     Result := 0.0;
@@ -3651,7 +3794,7 @@ end;
 // Backward compatibility
 //==================================================================================================
 
-{$IFNDEF DELPHI5_UP}
+{$IFNDEF COMPILER5_UP}
 
 function AnsiSameText(const S1, S2: AnsiString): Boolean;
 begin
@@ -3659,7 +3802,7 @@ begin
     Length(S1), PChar(S2), Length(S2)) = 2;
 end;
 
-{$ENDIF DELPHI5_UP}
+{$ENDIF COMPILER5_UP}
 
 //==================================================================================================
 // Initialization
@@ -3669,6 +3812,6 @@ initialization
 
   LoadCharTypes;  // this table first
   LoadCaseMap;    // or this function does not work
-  
+
 end.
 

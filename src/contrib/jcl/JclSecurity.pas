@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclSecurity.pas.                                                            }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -21,15 +21,20 @@
 { privileges.                                                                                      }
 {                                                                                                  }
 { Unit owner: Peter Friese                                                                         }
-{ Last modified: January 29, 2000                                                                  }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclSecurity.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclSecurity;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
+
+{$HPPEMIT '#define TTokenInformationClass TOKEN_INFORMATION_CLASS'}
 
 interface
 
@@ -67,14 +72,16 @@ function GetUserObjectName(hUserObject: THandle): string;
 
 procedure LookupAccountBySid(Sid: PSID; var Name, Domain: string);
 procedure QueryTokenInformation(Token: THandle; InformationClass: TTokenInformationClass; var Buffer: Pointer);
-function GetInteractiveUserName: string;  
+{$IFNDEF FPC}
+function GetInteractiveUserName: string;
+{$ENDIF}  
 
 implementation
 
 uses
-  {$IFDEF COMPILER5_UP}
-  AccCtrl, AclApi,
-  {$ENDIF COMPILER5_UP}
+{$IFNDEF FPC}
+  AccCtrl, 
+{$ENDIF}
   JclStrings, JclSysInfo, JclWin32;
 
 //==================================================================================================
@@ -156,11 +163,19 @@ begin
       Win32Check(AllocateAndInitializeSid(SECURITY_NT_AUTHORITY, 2,
         SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0,
         psidAdmin));
+      {$IFDEF FPC}
+      if GetTokenInformation(Token, TokenGroups, nil, 0, @Count) or
+       (GetLastError <> ERROR_INSUFFICIENT_BUFFER) then
+         RaiseLastOSError;
+      TokenInfo := PTokenGroups(AllocMem(Count));
+      Win32Check(GetTokenInformation(Token, TokenGroups, TokenInfo, Count, @Count));
+      {$ELSE FPC}
       if GetTokenInformation(Token, TokenGroups, nil, 0, Count) or
        (GetLastError <> ERROR_INSUFFICIENT_BUFFER) then
          RaiseLastOSError;
       TokenInfo := PTokenGroups(AllocMem(Count));
       Win32Check(GetTokenInformation(Token, TokenGroups, TokenInfo, Count, Count));
+      {$ENDIF FPC}
       for I := 0 to TokenInfo^.GroupCount - 1 do
       begin
         {$RANGECHECKS OFF} // Groups is an array [0..0] of TSIDAndAttributes, ignore ERangeError
@@ -320,7 +335,7 @@ end;
 procedure LookupAccountBySid(Sid: PSID; var Name, Domain: string);
 var
   NameSize, DomainSize: DWORD;
-  Use: DWORD;
+  Use: SID_NAME_USE;
 begin
   NameSize := 0;
   DomainSize := 0;
@@ -343,11 +358,19 @@ begin
   Buffer := nil;
   Length := 0;
   LastError := 0;
+  {$IFDEF FPC}
+  B := GetTokenInformation(Token, InformationClass, Buffer, Length, @Length);
+  {$ELSE}
   B := GetTokenInformation(Token, InformationClass, Buffer, Length, Length);
+  {$ENDIF}
   while (not B) and (GetLastError = ERROR_INSUFFICIENT_BUFFER) do
   begin
     ReallocMem(Buffer, Length);
+    {$IFDEF FPC}
+    B := GetTokenInformation(Token, InformationClass, Buffer, Length, @Length);
+    {$ELSE}
     B := GetTokenInformation(Token, InformationClass, Buffer, Length, Length);
+    {$ENDIF}
     if not B then
       LastError := GetLastError;
   end;
@@ -360,6 +383,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFNDEF FPC} // JclSysInfo.GetShellProcessHandle not available
 
 function GetInteractiveUserName: string;
 var
@@ -386,5 +411,7 @@ begin
     CloseHandle(Handle);
   end;
 end;
+
+{$ENDIF not FPC}
 
 end.

@@ -35,6 +35,8 @@
 {                                                                  }
 {******************************************************************}
 
+// $Id: Snmp.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
+
 unit Snmp;
 
 interface
@@ -45,9 +47,12 @@ interface
 {$DEFINE SNMP_DYNAMIC_LINK_EXPLICIT}
 {$DEFINE SNMPSTRICT}
 
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
+
 {$ALIGN ON}
 {$MINENUMSIZE 4}
-{$WEAKPACKAGEUNIT ON}
 
 uses
   Windows;
@@ -61,14 +66,12 @@ type
     length: UINT;
     dynamic_: Boolean;
   end;
-  {$EXTERNALSYM TAsnOctetString}
 
   PAsnObjectIdentifier = ^TAsnObjectIdentifier;
   TAsnObjectIdentifier = record
     idLength: UINT;
     ids: PUINT;
   end;
-  {$EXTERNALSYM TAsnObjectIdentifier}
 
   TAsnInteger32        = LongInt;
   {$EXTERNALSYM TAsnInteger32}
@@ -114,26 +117,21 @@ type
      10: (ticks: TAsnTimeticks);           // ASN_TIMETICKS
      11: (arbitrary: TAsnOpaque);          // ASN_OPAQUE
   end;
-  {$EXTERNALSYM TAsnAny}
 
   TAsnObjectName = TAsnObjectIdentifier;
-  {$EXTERNALSYM TAsnObjectName}
   TAsnObjectSyntax = TAsnAny;
-  {$EXTERNALSYM TAsnObjectSyntax}
 
   PSnmpVarBind = ^TSnmpVarBind;
   TSnmpVarBind = record
     name: TAsnObjectName;
     value: TAsnObjectSyntax;
   end;
-  {$EXTERNALSYM TSnmpVarBind}
 
   PSnmpVarBindList = ^TSnmpVarBindList;
   TSnmpVarBindList = record
     list: PSnmpVarBind;
     len: UINT;
   end;
-  {$EXTERNALSYM TSnmpVarBindList}
 
 const
 

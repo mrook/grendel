@@ -10,11 +10,10 @@
 { ANY KIND, either express or implied. See the License for the specific language governing rights  }
 { and limitations under the License.                                                               }
 {                                                                                                  }
-{ The Original Code is JclDateTime.pas.                                                                }
+{ The Original Code is JclDateTime.pas.                                                            }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C)                       }
-{ of these individuals.                                                                            }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -22,7 +21,6 @@
 { different formats but also some date testing routines (is leap year? etc)                        }
 {                                                                                                  }
 { Unit Owner: Michael Schnell                                                                      }
-{ Last modified: June 18, 2000                                                                     }
 {                                                                                                  }
 {**************************************************************************************************}
 
@@ -129,16 +127,26 @@
 {                                                                                                  }
 {**************************************************************************************************}
 
+// $Id: JclDateTime.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
+
 unit JclDateTime;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
 uses
-  Windows, SysUtils,
+  {$IFDEF MSWINDOWS}
+  Windows,
+  {$ENDIF MSWINDOWS}
+  {$IFDEF LINUX}
+  Types,
+  {$ENDIF LINUX}
+  SysUtils,
   JclBase, JclResources;
 
 { Encode / Decode functions }
@@ -193,6 +201,7 @@ function SecondsToMSecs(Seconds: Integer): Integer;
 function TimeOfDateTimeToSeconds(DateTime: TDateTime): Integer;
 function TimeOfDateTimeToMSecs(DateTime: TDateTime): Integer;
 
+{$IFDEF MSWINDOWS}
 function DateTimeToLocalDateTime(DateTime: TDateTime): TDateTime;
 function DateTimeToDosDateTime(const DateTime: TDateTime): TDosDateTime;
 function DateTimeToFileTime(DateTime: TDateTime): TFileTime;
@@ -201,21 +210,27 @@ procedure DateTimeToSystemTime(DateTime: TDateTime; var SysTime : TSystemTime); 
 
 function LocalDateTimeToFileTime(DateTime: TDateTime): FileTime;
 function LocalDateTimeToDateTime(DateTime: TDateTime): TDateTime;
+{$ENDIF MSWINDOWS}
 
 function DosDateTimeToDateTime(const DosTime: TDosDateTime): TDateTime;
+{$IFDEF MSWINDOWS}
 function DosDateTimeToFileTime(DosTime: TDosDateTime): TFileTime; overload;
 procedure DosDateTimeToFileTime(DTH, DTL: Word; FT: TFileTime); overload;
 function DosDateTimeToSystemTime(const DosTime: TDosDateTime): TSystemTime;
+{$ENDIF MSWINDOWS}
 function DosDateTimeToStr(DateTime: Integer): string;
 
 function FileTimeToDateTime(const FileTime: TFileTime): TDateTime;
+{$IFDEF MSWINDOWS}
 function FileTimeToLocalDateTime(const FileTime: TFileTime): TDateTime;
 function FileTimeToDosDateTime(const FileTime: TFileTime): TDosDateTime; overload;
 procedure FileTimeToDosDateTime(const FileTime: TFileTime; var Date, Time: Word); overload;
 function FileTimeToSystemTime(const FileTime: TFileTime): TSystemTime; overload;
-procedure  FileTimeToSystemTime(const FileTime: TFileTime; var ST: TSystemTime); overload
+procedure  FileTimeToSystemTime(const FileTime: TFileTime; var ST: TSystemTime); overload;
+{$ENDIF MSWINDOWS}
 function FileTimeToStr(const FileTime: TFileTime): string;
 
+{$IFDEF MSWINDOWS}
 function SystemTimeToDosDateTime(const SystemTime: TSystemTime): TDosDateTime;
 function SystemTimeToFileTime(const SystemTime: TSystemTime): TFileTime; overload;
 procedure SystemTimeToFileTime(const SystemTime: TSystemTime; FTime : TFileTime); overload;
@@ -228,14 +243,16 @@ function SystemTimeToStr(const SystemTime: TSystemTime): string;
 function CreationDateTimeOfFile(const Sr: TSearchRec): TDateTime;
 function LastAccessDateTimeOfFile(const Sr: TSearchRec): TDateTime;
 function LastWriteDateTimeOfFile(const Sr: TSearchRec): TDateTime;
+{$ENDIF MSWINDOWS}
 
 type
-  EJclDateTimeError = class (EJclError);
+  EJclDateTimeError = class(EJclError);
 
 implementation
 
 const
-  DaysInMonths: array [1..12] of Integer = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+  DaysInMonths: array [1..12] of Integer =
+    (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
   MinutesPerDay     = 60 * 24;
   SecondsPerDay     = MinutesPerDay * 60;
@@ -245,7 +262,7 @@ const
   DaysPerMonth      = DaysPerYear / 12;
   DateTimeBaseDay   = -693593;              //  1/1/0001
   EncodeDateMaxYear = 9999;
-  SolarDifference   = 1.7882454;            //  Difference of Juliab Calendar to Solar Calendar at 1/1/10000
+  SolarDifference   = 1.7882454;            //  Difference of Julian Calendar to Solar Calendar at 1/1/10000
   DateTimeMaxDay    = 2958466;              //  12/31/EncodeDateMaxYear + 1;
   FileTimeBase      = -109205.0;
   FileTimeStep: Extended = 24.0 * 60.0 * 60.0 * 1000.0 * 1000.0 * 10.0; // 100 nSek per Day
@@ -639,9 +656,11 @@ begin
   Result := EncodeDate(Year, Month, Day);
 end;
 
-//==============================================================================
+//==================================================================================================
 // Conversion
-//==============================================================================
+//==================================================================================================
+
+{$IFDEF MSWINDOWS}
 
 function DateTimeToLocalDateTime(DateTime: TDateTime): TDateTime;
 var
@@ -649,7 +668,7 @@ var
 begin
   FillChar(TimeZoneInfo, SizeOf(TimeZoneInfo), #0);
   case GetTimeZoneInformation(TimeZoneInfo) of
-    TIME_ZONE_ID_STANDARD:
+    TIME_ZONE_ID_STANDARD, TIME_ZONE_ID_UNKNOWN:
       Result := DateTime + (TimeZoneInfo.Bias / MinutesPerDay);
     TIME_ZONE_ID_DAYLIGHT:
       Result := DateTime - ((TimeZoneInfo.Bias + TimeZoneInfo.DaylightBias) / MinutesPerDay);
@@ -666,7 +685,7 @@ var
 begin
   FillChar(TimeZoneInfo, SizeOf(TimeZoneInfo), #0);
   case GetTimeZoneInformation(TimeZoneInfo) of
-    TIME_ZONE_ID_STANDARD:
+    TIME_ZONE_ID_STANDARD, TIME_ZONE_ID_UNKNOWN:
       Result := DateTime + (TimeZoneInfo.Bias / MinutesPerDay);
     TIME_ZONE_ID_DAYLIGHT:
       Result := DateTime + ((TimeZoneInfo.Bias + TimeZoneInfo.DaylightBias) / MinutesPerDay);
@@ -674,6 +693,8 @@ begin
     raise EJclDateTimeError.Create(RsMakeUTCTime);
   end;
 end;                    
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -716,6 +737,8 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+{$IFDEF MSWINDOWS}
+
 function FileTimeToLocalDateTime(const FileTime: TFileTime): TDateTime;
 var
   LocalFileTime: TFileTime;
@@ -734,6 +757,8 @@ begin
   ResultCheck(LocalFileTimeToFileTime(LocalFileTime, Result));
 end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
 
 function DateTimeToFileTime(DateTime: TDateTime): TFileTime;
@@ -747,6 +772,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function DosDateTimeToSystemTime(const DosTime: TDosDateTime): TSystemTime;
 var
@@ -765,6 +792,8 @@ begin
   FileTime := SystemTimeToFileTime(SystemTime);
   Result := FileTimeToDosDateTime(FileTime);
 end;
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -804,6 +833,8 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+{$IFDEF MSWINDOWS}
+
 function FileTimeToSystemTime(const FileTime: TFileTime): TSystemTime; overload;
 begin
   ResultCheck(Windows.FileTimeToSystemTime(FileTime, Result));
@@ -811,7 +842,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-procedure  FileTimeToSystemTime(const FileTime: TFileTime; var ST: TSystemTime); overload
+procedure FileTimeToSystemTime(const FileTime: TFileTime; var ST: TSystemTime); overload;
 begin
   Windows.FileTimeToSystemTime(FileTime, ST);
 end;
@@ -875,6 +906,8 @@ begin
   Windows.FileTimeToDosDateTime(FileTime, Date, Time);
 end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
 
 function FileTimeToStr(const FileTime: TFileTime): string;
@@ -893,6 +926,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 // we can't do this better without copying Borland-owned code from the Delphi VCL,
 // as the straight forward conversion doing exactly this task is hidden
@@ -925,6 +960,8 @@ function LastWriteDateTimeOfFile(const Sr: TSearchRec): TDateTime;
 begin
   Result := FileTimeToDateTime(Sr.FindData.ftLastWriteTime);
 end;
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1092,18 +1129,16 @@ begin
           end
         end;
     else
-      begin
-        Inc(N);
-      end;
-    end; // case
-  end; // while
+      Inc(N);
+    end;
+  end;
   Result := SysUtils.FormatDateTime(Result + Form, DateTime);
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 // FAT has a granularity of 2 seconds
-// The intervals are /10 of a second
+// The intervals are 1/10 of a second
 
 function FATDatesEqual(const FileTime1, FileTime2: Int64): Boolean;
 const

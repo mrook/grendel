@@ -12,17 +12,18 @@
 {                                                                                                  }
 { The Original Code is JclTD32.pas.                                                                }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
 { Borland TD32 symbolic debugging information support routines and classes.                        }
 {                                                                                                  }
 { Unit owner: Flier Lu                                                                             }
-{ Last modified: July 5, 2002                                                                      }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclTD32.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclTD32;
 
@@ -30,16 +31,15 @@ interface
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 uses
   {$IFDEF MSWINDOWS}
   Windows,
   {$ENDIF MSWINDOWS}
-  Classes, SysUtils,
-  {$IFDEF COMPILER5_UP}
-  Contnrs,
-  {$ENDIF COMPILER5_UP}
+  Classes, SysUtils, Contnrs,
   JclBase, JclFileUtils, JclPeImage;
 
 { TODO -cDOC : Original code: "Flier Lu" <flier_lu@yahoo.com.cn> }
@@ -51,7 +51,7 @@ uses
 {*******************************************************************************
 
   [-----------------------------------------------------------------------]
-  [	        Symbol and Type OMF Format Borland Executable Files       ]
+  [         Symbol and Type OMF Format Borland Executable Files           ]
   [-----------------------------------------------------------------------]
 
   Introduction
@@ -75,7 +75,7 @@ uses
 
   The signatures have the following meanings:
 
-    FB09       	The signature for a Borland 32 bit symbol file.
+    FB09        The signature for a Borland 32 bit symbol file.
 
   The value
 
@@ -117,13 +117,13 @@ uses
     .
     sstModule [n]
 
-    sstAlignSym	[1]
-    sstSrcModule	[1]
+    sstAlignSym [1]
+    sstSrcModule [1]
     .
     .
     .
-    sstAlignSym	[n]
-    sstSrcModule	[n]
+    sstAlignSym [n]
+    sstSrcModule [n]
 
     sstGlobalSym
     sstGlobalTypes
@@ -139,16 +139,16 @@ const
   Borland32BitSymbolFileSignatureForDelphi = $39304246; // 'FB09'
   Borland32BitSymbolFileSignatureForBCB    = $41304246; // 'FB0A'
 
-{ Signature structure }
 type
+  { Signature structure }
   PJclTD32FileSignature = ^TJclTD32FileSignature;
   TJclTD32FileSignature = packed record
     Signature: DWORD;
     Offset: DWORD;
   end;
 
-{ Subsection Types }
 const
+  { Subsection Types }
   SUBSECTION_TYPE_MODULE         = $120;
   SUBSECTION_TYPE_TYPES          = $121;
   SUBSECTION_TYPE_SYMBOLS        = $124;
@@ -158,8 +158,8 @@ const
   SUBSECTION_TYPE_GLOBAL_TYPES   = $12B;
   SUBSECTION_TYPE_NAMES          = $130;
 
-{ Subsection directory header structure }
 type
+  { Subsection directory header structure }
   { The directory header structure is followed by the directory entries
     which specify the subsection type, module index, file offset, and size.
     The subsection directory gives the location (LFO) and size of each subsection,
@@ -181,13 +181,13 @@ type
     DirEntryCount: DWORD; // Number of directory entries
     lfoNextDir: DWORD;    // Offset from lfoBase of next directory.
     Flags: DWORD;         // Flags describing directory and subsection tables.
-    DirEntries: array[0..0] of TDirectoryEntry;
+    DirEntries: array [0..0] of TDirectoryEntry;
   end;
 
 
 {*******************************************************************************
 
-  SUBSECTION_TYPE_MODULE	0x120
+  SUBSECTION_TYPE_MODULE $120
 
   This describes the basic information about an object module including  code
   segments, module name,  and the  number of  segments for  the modules  that
@@ -195,32 +195,33 @@ type
   directory entries.
 
 *******************************************************************************}
+
 type
   PSegmentInfo = ^TSegmentInfo;
   TSegmentInfo = packed record
     Segment: Word; // Segment that this structure describes
     Flags: Word;   // Attributes for the logical segment.
                    // The following attributes are defined:
-				         //   0x0000	Data segment
-				         //   0x0001	Code segment
+                   //   $0000  Data segment
+                   //   $0001  Code segment
     Offset: DWORD; // Offset in segment where the code starts
     Size: DWORD;   // Count of the number of bytes of code in the segment
   end;
   PSegmentInfoArray = ^TSegmentInfoArray;
-  TSegmentInfoArray = array[0..32767] of TSegmentInfo;
+  TSegmentInfoArray = array [0..32767] of TSegmentInfo;
 
   PModuleInfo = ^TModuleInfo;
   TModuleInfo = packed record
     OverlayNumber: Word;  // Overlay number
     LibraryIndex: Word;   // Index into sstLibraries subsection
-			                    // if this module was linked from a library
+                          // if this module was linked from a library
     SegmentCount: Word;   // Count of the number of code segments
                           // this module contributes to
     DebuggingStyle: Word; // Debugging style  for this  module.
     NameIndex: DWORD;     // Name index of module.
     TimeStamp: DWORD;     // Time stamp from the OBJ file.
-    Reserved: array[0..2] of DWORD; // Set to 0.
-    Segments: array[0..0] of TSegmentInfo;
+    Reserved: array [0..2] of DWORD; // Set to 0.
+    Segments: array [0..0] of TSegmentInfo;
                           // Detailed information about each segment
                           // that code is contributed to.
                           // This is an array of cSeg count segment
@@ -229,7 +230,7 @@ type
 
 {*******************************************************************************
 
-  SUBSECTION_TYPE_SOURCE_MODULE	   0x0127
+  SUBSECTION_TYPE_SOURCE_MODULE $0127
 
   This table describes the source line number to addressing mapping
   information for a module. The table permits the description of a module
@@ -268,7 +269,7 @@ type
   TLineMappingEntry = packed record
     SegmentIndex: Word;  // Segment index for this table
     PairCount: Word;     // Count of the number of source line pairs to follow
-    Offsets: array[0..0] of DWORD;
+    Offsets: array [0..0] of DWORD;
                      // An array of 32-bit offsets for the offset
                      // within the code segment ofthe start of ine contained
                      // in the parallel array linenumber.
@@ -278,7 +279,7 @@ type
       This array is parallel to the offset array.
       If cPair is not even, then a zero word is emitted to
       maintain natural alignment in the sstSrcModule table. }
-    LineNumbers: array[0..PairCount - 1] of Word;
+    LineNumbers: array [0..PairCount - 1] of Word;
     *)
   end;
 
@@ -287,7 +288,7 @@ type
     EndOffset: DWORD;
   end;
   POffsetPairArray = ^TOffsetPairArray;
-  TOffsetPairArray = array[0..32767] of TOffsetPair;
+  TOffsetPairArray = array [0..32767] of TOffsetPair;
 
   { The file table describes the code segments that receive code from this
     source file. Source file entries have the following format: }
@@ -296,23 +297,23 @@ type
     SegmentCount: Word; // Number of segments that receive code from this source file.
     NameIndex: DWORD;   // Name index of Source file name.
 
-    BaseSrcLines: array[0..0] of DWORD;
+    BaseSrcLines: array [0..0] of DWORD;
                         // An array of offsets for the line/address mapping
-			// tables for each of the segments that receive code
-			// from this source file.
+                        // tables for each of the segments that receive code
+                        // from this source file.
     (*
     { An array  of two  32-bit offsets  per segment  that
-			receives code from this  module.  The first  offset
-			is the offset within the segment of the first  byte
-			of code from this module.  The second offset is the
-			ending address of the  code from this module.   The
-			order of these pairs corresponds to the ordering of
-			the segments in the  seg  array.   Zeros  in  these
-			entries means that the information is not known and
-			the file and line tables described below need to be
-			examined to determine if an address of interest  is
-			contained within the code from this module. }
-    SegmentAddress: array[0..SegmentCount - 1] of TOffsetPair;
+      receives code from this  module.  The first  offset
+      is the offset within the segment of the first  byte
+      of code from this module.  The second offset is the
+      ending address of the  code from this module.   The
+      order of these pairs corresponds to the ordering of
+      the segments in the  seg  array.   Zeros  in  these
+      entries means that the information is not known and
+      the file and line tables described below need to be
+      examined to determine if an address of interest  is
+      contained within the code from this module. }
+    SegmentAddress: array [0..SegmentCount - 1] of TOffsetPair;
 
     Name: ShortString; // Count of the number of bytes in source file name
     *)
@@ -325,35 +326,35 @@ type
     FileCount: Word;    // The number of source file scontributing code to segments
     SegmentCount: Word; // The number of code segments receiving code from this module
 
-    BaseSrcFiles: array[0..0] of DWORD;
+    BaseSrcFiles: array [0..0] of DWORD;
     (*
     // This is an array of base offsets from the beginning of the sstSrcModule table
-    BaseSrcFiles: array[0..FileCount - 1] of DWORD;
+    BaseSrcFiles: array [0..FileCount - 1] of DWORD;
 
     { An array  of two  32-bit offsets  per segment  that
-			receives code from this  module.  The first  offset
-			is the offset within the segment of the first  byte
-			of code from this module.  The second offset is the
-			ending address of the  code from this module.   The
-			order of these pairs corresponds to the ordering of
-			the segments in the  seg  array.   Zeros  in  these
-			entries means that the information is not known and
-			the file and line tables described below need to be
-			examined to determine if an address of interest  is
-			contained within the code from this module. }
-    SegmentAddress: array[0..SegmentCount - 1] of TOffsetPair;
+      receives code from this  module.  The first  offset
+      is the offset within the segment of the first  byte
+      of code from this module.  The second offset is the
+      ending address of the  code from this module.   The
+      order of these pairs corresponds to the ordering of
+      the segments in the  seg  array.   Zeros  in  these
+      entries means that the information is not known and
+      the file and line tables described below need to be
+      examined to determine if an address of interest  is
+      contained within the code from this module. }
+    SegmentAddress: array [0..SegmentCount - 1] of TOffsetPair;
 
     { An array of segment indices that receive code  from
-			this module.  If the  number  of  segments  is  not
-			even, a pad word  is inserted  to maintain  natural
-			alignment. }
-    SegmentIndexes: array[0..SegmentCount - 1] of Word;
+      this module.  If the  number  of  segments  is  not
+      even, a pad word  is inserted  to maintain  natural
+      alignment. }
+    SegmentIndexes: array [0..SegmentCount - 1] of Word;
     *)
   end;
 
 {*******************************************************************************
 
-  SUBSECTION_TYPE_GLOBAL_TYPES	0x12b
+  SUBSECTION_TYPE_GLOBAL_TYPES $12b
 
   This subsection contains the packed  type records for the executable  file.
   The first long word of the subsection  contains the number of types in  the
@@ -364,17 +365,17 @@ type
   The remainder of the subsection contains  the type records.
 
 *******************************************************************************}
+
 type
   PGlobalTypeInfo = ^TGlobalTypeInfo;
   TGlobalTypeInfo = packed record
     Count: DWORD; // count of the number of types
-
     // offset of each type string from the beginning of table
-    Offsets: array[0..0] of DWORD;
+    Offsets: array [0..0] of DWORD;
   end;
 
-{ Symbol type defines }
 const
+  { Symbol type defines }
   SYMBOL_TYPE_COMPILE        = $0001; // Compile flags symbol
   SYMBOL_TYPE_REGISTER       = $0002; // Register variable
   SYMBOL_TYPE_CONST          = $0003; // Constant symbol
@@ -415,8 +416,8 @@ const
 
   Global and Local Procedure Start 16:32
 
-  SYMBOL_TYPE_LPROC32	0x0204
-  SYMBOL_TYPE_GPROC32   0x0205
+  SYMBOL_TYPE_LPROC32 $0204
+  SYMBOL_TYPE_GPROC32 $0205
 
     The symbol records define local (file static) and global procedure
   definition. For C/C++, functions that are declared static to a module are
@@ -426,6 +427,7 @@ const
   must be fabricated and emitted to the SUBSECTION_TYPE_GLOBAL_SYMBOLS section.
 
 *******************************************************************************}
+
 type
   TSymbolProcInfo = packed record
     pParent: DWORD;
@@ -450,21 +452,21 @@ type
     NameIndex: DWORD;   // Name index of procedure
   end;
 
-{ Symbol Information Records }
 type
+  { Symbol Information Records }
   PSymbolInfo = ^TSymbolInfo;
   TSymbolInfo = packed record
     Size: Word;
     SymbolType: Word;
     case Word of
-      SYMBOL_TYPE_LPROC32,
-      SYMBOL_TYPE_GPROC32:   ( Proc: TSymbolProcInfo; );
+      SYMBOL_TYPE_LPROC32, SYMBOL_TYPE_GPROC32:
+        (Proc: TSymbolProcInfo;);
   end;
 
   PSymbolInfos = ^TSymbolInfos;
   TSymbolInfos = packed record
     Signature: DWORD;
-    Symbols: array[0..0] of TSymbolInfo;
+    Symbols: array [0..0] of TSymbolInfo;
   end;
 
 {$IFDEF SUPPORTS_EXTSYM}
@@ -524,21 +526,21 @@ type
 //--------------------------------------------------------------------------------------------------
 
 type
-  TJclModuleInfo = class (TObject)
+  TJclModuleInfo = class(TObject)
   private
     FNameIndex: DWORD;
     FSegments: PSegmentInfoArray;
     FSegmentCount: Integer;
     function GetSegment(const Idx: Integer): TSegmentInfo;
   protected
-    constructor Create(const pModInfo: PModuleInfo);
+    constructor Create(pModInfo: PModuleInfo);
   public
     property NameIndex: DWORD read FNameIndex;
-    property SegmentCount: Integer read FSegmentCount;//GetSegmentCount;
+    property SegmentCount: Integer read FSegmentCount; //GetSegmentCount;
     property Segment[const Idx: Integer]: TSegmentInfo read GetSegment; default;
   end;
 
-  TJclLineInfo = class (TObject)
+  TJclLineInfo = class(TObject)
   private
     FLineNo: DWORD;
     FOffset: DWORD;
@@ -549,7 +551,7 @@ type
     property Offset: DWORD read FOffset;
   end;
 
-  TJclSourceModuleInfo = class (TObject)
+  TJclSourceModuleInfo = class(TObject)
   private
     FLines: TObjectList;
     FSegments: POffsetPairArray;
@@ -559,46 +561,46 @@ type
     function GetLineCount: Integer;
     function GetSegment(const Idx: Integer): TOffsetPair;
   protected
-    constructor Create(const pSrcFile: PSourceFileEntry; Base: DWORD);
+    constructor Create(pSrcFile: PSourceFileEntry; Base: DWORD);
   public
     destructor Destroy; override;
     function FindLine(const AAddr: DWORD; var ALine: TJclLineInfo): Boolean;
     property NameIndex: DWORD read FNameIndex;
     property LineCount: Integer read GetLineCount;
     property Line[const Idx: Integer]: TJclLineInfo read GetLine; default;
-    property SegmentCount: Integer read FSegmentCount;//GetSegmentCount;
+    property SegmentCount: Integer read FSegmentCount; //GetSegmentCount;
     property Segment[const Idx: Integer]: TOffsetPair read GetSegment;
   end;
 
-  TJclSymbolInfo = class (TObject)
+  TJclSymbolInfo = class(TObject)
   private
     FSymbolType: Word;
   protected
-    constructor Create(const pSymInfo: PSymbolInfo); virtual;
+    constructor Create(pSymInfo: PSymbolInfo); virtual;
     property SymbolType: Word read FSymbolType;
   end;
 
-  TJclProcSymbolInfo = class (TJclSymbolInfo)
+  TJclProcSymbolInfo = class(TJclSymbolInfo)
   private
     FNameIndex: DWORD;
     FOffset: DWORD;
     FSize: DWORD;
   protected
-    constructor Create(const pSymInfo: PSymbolInfo); override;
+    constructor Create(pSymInfo: PSymbolInfo); override;
   public
     property NameIndex: DWORD read FNameIndex;
     property Offset: DWORD read FOffset;
     property Size: DWORD read FSize;
   end;
 
-  TJclLocalProcSymbolInfo = class (TJclProcSymbolInfo);
-  TJclGlobalProcSymbolInfo = class (TJclProcSymbolInfo);
+  TJclLocalProcSymbolInfo = class(TJclProcSymbolInfo);
+  TJclGlobalProcSymbolInfo = class(TJclProcSymbolInfo);
 
 //--------------------------------------------------------------------------------------------------
 // TD32 parser
 //--------------------------------------------------------------------------------------------------
 
-  TJclTD32InfoParser = class (TObject)
+  TJclTD32InfoParser = class(TObject)
   private
     FBase: Pointer;
     FData: TCustomMemoryStream;
@@ -618,9 +620,9 @@ type
   protected
     procedure Analyse;
     procedure AnalyseNames(const pSubsection: Pointer; const Size: DWORD); virtual;
-    procedure AnalyseAlignSymbols(const pSymbols: PSymbolInfos; const Size: DWORD); virtual;
-    procedure AnalyseModules(const pModInfo: PModuleInfo; const Size: DWORD); virtual;
-    procedure AnalyseSourceModules(const pSrcModInfo: PSourceModuleInfo; const Size: DWORD); virtual;
+    procedure AnalyseAlignSymbols(pSymbols: PSymbolInfos; const Size: DWORD); virtual;
+    procedure AnalyseModules(pModInfo: PModuleInfo; const Size: DWORD); virtual;
+    procedure AnalyseSourceModules(pSrcModInfo: PSourceModuleInfo; const Size: DWORD); virtual;
     procedure AnalyseUnknownSubSection(const pSubsection: Pointer; const Size: DWORD); virtual;
     function LfaToVa(Lfa: DWORD): Pointer;
   public
@@ -647,7 +649,7 @@ type
 // TD32 scanner with source location methods
 //--------------------------------------------------------------------------------------------------
 
-  TJclTD32InfoScanner = class (TJclTD32InfoParser)
+  TJclTD32InfoScanner = class(TJclTD32InfoParser)
   public
     function LineNumberFromAddr(AAddr: DWORD; var Offset: Integer): Integer; overload;
     function LineNumberFromAddr(AAddr: DWORD): Integer; overload;
@@ -661,7 +663,7 @@ type
 // PE Image with TD32 information and source location support 
 //--------------------------------------------------------------------------------------------------
 
-  TJclPeBorTD32Image = class (TJclPeBorImage)
+  TJclPeBorTD32Image = class(TJclPeBorImage)
   private
     FIsTD32DebugPresent: Boolean;
     FTD32DebugData: TCustomMemoryStream;
@@ -682,10 +684,7 @@ type
 implementation
 
 uses
-  Math,
   JclResources, JclSysUtils;
-
-//--------------------------------------------------------------------------------------------------
 
 const
   TurboDebuggerSymbolExt = '.tds';
@@ -694,7 +693,7 @@ const
 // TJclModuleInfo
 //==================================================================================================
 
-constructor TJclModuleInfo.Create(const pModInfo: PModuleInfo);
+constructor TJclModuleInfo.Create(pModInfo: PModuleInfo);
 begin
   Assert(Assigned(pModInfo));
   inherited Create;
@@ -726,10 +725,10 @@ end;
 // TJclSourceModuleInfo
 //==================================================================================================
 
-constructor TJclSourceModuleInfo.Create(const pSrcFile: PSourceFileEntry; Base: DWORD);
+constructor TJclSourceModuleInfo.Create(pSrcFile: PSourceFileEntry; Base: DWORD);
 type
   PArrayOfWord = ^TArrayOfWord;
-  TArrayOfWord = array[0..0] of Word;
+  TArrayOfWord = array [0..0] of Word;
 var
   I, J: Integer;
   pLineEntry: PLineMappingEntry;
@@ -760,7 +759,7 @@ end;
 destructor TJclSourceModuleInfo.Destroy;
 begin
   FreeAndNil(FLines);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -797,26 +796,26 @@ begin
       if AAddr = Offset then
       begin
         Result := True;
-        ALine  := Line[I];
+        ALine := Line[I];
         Exit;
       end
       else
       if (I > 1) and (Line[I - 1].Offset < AAddr) and (AAddr < Offset) then
       begin
         Result := True;
-        ALine  := Line[I-1];
+        ALine := Line[I-1];
         Exit;
       end;
     end;
   Result := False;
-  ALine  := nil;
+  ALine := nil;
 end;
 
 //==================================================================================================
 // TJclSymbolInfo
 //==================================================================================================
 
-constructor TJclSymbolInfo.Create(const pSymInfo: PSymbolInfo);
+constructor TJclSymbolInfo.Create(pSymInfo: PSymbolInfo);
 begin
   Assert(Assigned(pSymInfo));
   inherited Create;
@@ -827,7 +826,7 @@ end;
 // TJclProcSymbolInfo
 //==================================================================================================
 
-constructor TJclProcSymbolInfo.Create(const pSymInfo: PSymbolInfo);
+constructor TJclProcSymbolInfo.Create(pSymInfo: PSymbolInfo);
 begin
   Assert(Assigned(pSymInfo));
   inherited Create(pSymInfo);
@@ -835,13 +834,42 @@ begin
   begin
     FNameIndex := Proc.NameIndex;
     FOffset := Proc.Offset;
-    FSize  := Proc.Size;
+    FSize := Proc.Size;
   end;
 end;
 
 //==================================================================================================
 // TJclTD32InfoParser
 //==================================================================================================
+
+constructor TJclTD32InfoParser.Create(const ATD32Data: TCustomMemoryStream);
+begin
+  Assert(Assigned(ATD32Data));
+  inherited Create;
+  FNames := TList.Create;
+  FModules := TObjectList.Create;
+  FSourceModules := TObjectList.Create;
+  FSymbols := TObjectList.Create;
+  FNames.Add(nil);
+  FData := ATD32Data;
+  FBase := FData.Memory;
+  FValidData := IsTD32DebugInfoValid(FBase, FData.Size);
+  if FValidData then
+    Analyse;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+destructor TJclTD32InfoParser.Destroy;
+begin
+  FreeAndNil(FSymbols);
+  FreeAndNil(FSourceModules);
+  FreeAndNil(FModules);
+  FreeAndNil(FNames);
+  inherited Destroy;
+end;
+
+//--------------------------------------------------------------------------------------------------
 
 procedure TJclTD32InfoParser.Analyse;
 var
@@ -904,7 +932,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-procedure TJclTD32InfoParser.AnalyseAlignSymbols(const pSymbols: PSymbolInfos; const Size: DWORD);
+procedure TJclTD32InfoParser.AnalyseAlignSymbols(pSymbols: PSymbolInfos; const Size: DWORD);
 var
   Offset: DWORD;
   pInfo: PSymbolInfo;
@@ -930,14 +958,14 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-procedure TJclTD32InfoParser.AnalyseModules(const pModInfo: PModuleInfo; const Size: DWORD);
+procedure TJclTD32InfoParser.AnalyseModules(pModInfo: PModuleInfo; const Size: DWORD);
 begin
   FModules.Add(TJclModuleInfo.Create(pModInfo));
 end;
 
 //--------------------------------------------------------------------------------------------------
 
-procedure TJclTD32InfoParser.AnalyseSourceModules(const pSrcModInfo: PSourceModuleInfo; const Size: DWORD);
+procedure TJclTD32InfoParser.AnalyseSourceModules(pSrcModInfo: PSourceModuleInfo; const Size: DWORD);
 var
   I: Integer;
   pSrcFile: PSourceFileEntry;
@@ -959,35 +987,6 @@ end;
 procedure TJclTD32InfoParser.AnalyseUnknownSubSection(const pSubsection: Pointer; const Size: DWORD);
 begin
   // do nothing
-end;
-
-//--------------------------------------------------------------------------------------------------
-
-constructor TJclTD32InfoParser.Create(const ATD32Data: TCustomMemoryStream);
-begin
-  Assert(Assigned(ATD32Data));
-  inherited Create;
-  FNames := TList.Create;
-  FModules := TObjectList.Create;
-  FSourceModules := TObjectList.Create;
-  FSymbols := TObjectList.Create;
-  FNames.Add(nil);
-  FData := ATD32Data;
-  FBase := FData.Memory;
-  FValidData := IsTD32DebugInfoValid(FBase, FData.Size);
-  if FValidData then
-    Analyse;
-end;
-
-//--------------------------------------------------------------------------------------------------
-
-destructor TJclTD32InfoParser.Destroy;
-begin
-  FreeAndNil(FSymbols);
-  FreeAndNil(FSourceModules);
-  FreeAndNil(FModules);
-  FreeAndNil(FNames);
-  inherited;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1048,33 +1047,34 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function TJclTD32InfoParser.FindModule(
-  const AAddr: DWORD; var AMod: TJclModuleInfo): Boolean;
+function TJclTD32InfoParser.FindModule(const AAddr: DWORD;
+  var AMod: TJclModuleInfo): Boolean;
 var
-  I, J, Offset: Integer;
+  I, J: Integer;
 begin
   if ValidData then
     for I := 0 to ModuleCount - 1 do
     with Modules[I] do
       for J := 0 to SegmentCount - 1 do
       begin
-        Offset := AAddr - FSegments[J].Offset;
-        if (0 <= Offset) and (Offset <= Integer(Segment[J].Size)) then
+        if AAddr >= FSegments[J].Offset then
         begin
-          Result := True;
-          AMod   := Modules[I];
-          Exit;
+          if AAddr - FSegments[J].Offset <= Segment[J].Size then
+          begin
+            Result := True;
+            AMod := Modules[I];
+            Exit;
+          end;
         end;
       end;
-
   Result := False;
-  AMod   := nil;
+  AMod := nil;
 end;
 
 //--------------------------------------------------------------------------------------------------
 
-function TJclTD32InfoParser.FindSourceModule(
-  const AAddr: DWORD; var ASrcMod: TJclSourceModuleInfo): Boolean;
+function TJclTD32InfoParser.FindSourceModule(const AAddr: DWORD;
+  var ASrcMod: TJclSourceModuleInfo): Boolean;
 var
   I, J: Integer;
 begin
@@ -1085,12 +1085,11 @@ begin
       with Segment[J] do
         if (StartOffset <= AAddr) and (AAddr < EndOffset) then
         begin
-          Result  := True;
+          Result := True;
           ASrcMod := SourceModules[I];
           Exit;
         end;
-
-  Result  := False;
+  Result := False;
   ASrcMod := nil;
 end;
 
@@ -1107,12 +1106,11 @@ begin
         if (Offset <= AAddr) and (AAddr < Offset + Size) then
         begin
           Result := True;
-          AProc  := TJclProcSymbolInfo(Symbols[I]);
+          AProc := TJclProcSymbolInfo(Symbols[I]);
           Exit;
         end;
-
   Result := False;
-  AProc  := nil;
+  AProc := nil;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1262,7 +1260,7 @@ end;
 
 procedure TJclPeBorTD32Image.AfterOpen;
 begin
-  inherited;
+  inherited AfterOpen;
   CheckDebugData;
 end;
 
@@ -1290,7 +1288,7 @@ end;
 procedure TJclPeBorTD32Image.Clear;
 begin
   ClearDebugData;
-  inherited;
+  inherited Clear;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1351,7 +1349,5 @@ begin
     end;
   end;
 end;
-
-//--------------------------------------------------------------------------------------------------
 
 end.

@@ -12,9 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclMath.pas.                                                                }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C)                       }
-{ of these individuals.                                                                            }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -23,9 +22,11 @@
 { routines, NAN and INF support and more.                                                          }
 {                                                                                                  }
 { Unit owner: Matthias Thoma                                                                       }
-{ Last modified: December 15, 2001                                                                 }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclMath.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
+
 // - Added functions: Versine, Coversine, Haversine, exsecand
 // - Added TruncPower function (Truncated Power)
 //   A: MT
@@ -42,52 +43,70 @@
 // - Fixed a bug: Rational.Add(TRational) was buggy and delivered wrong results.
 // - Fixed a bug: Rational.Subtract(TRational) was buggy and delivered wrong results.
 
+// rr, April 2003:
+// - Made assembler code PIC-ready where necessary (Linux)
+// - Fixed a bug: So-called "CotH" function was CosH
+// - Added functions: CommercialRound, CotH
+
+// mt, October 2003:
+// - Added EulerMascheroni constant.
+// - Added GoldenMean constant
+// - Added Bernstein constant
+// - Added Catalan constant
+// -
+// rr, November 2003:
+// - Changes to make it compile with free pascal compiler v1.9
+// - Removed "uses JclUnitConv"
+// -
+// -
+// -
+
 
 unit JclMath;
 
 {$I jcl.inc}
-{$WEAKPACKAGEUNIT ON}
 
 interface
 
 uses
-  {$IFDEF MSWINDOWS}
-  Windows,
-  {$ENDIF}
   Classes, SysUtils,
   JclBase;
 
 { Mathematical constants }
 
 const
-  Cbrt2: Float   = 1.2599210498948731647672106072782;  // CubeRoot(2)
-  Cbrt3: Float   = 1.4422495703074083823216383107801;  // CubeRoot(3)
-  Cbrt10: Float  = 2.1544346900318837217592935665194;  // CubeRoot(10)
-  Cbrt100: Float = 4.6415888336127788924100763509194;  // CubeRoot(100)
-  CbrtPi: Float  = 1.4645918875615232630201425272638;  // CubeRoot(PI)
-  Pi: Float      = 3.1415926535897932384626433832795;  // PI
-  PiOn2: Float   = 1.5707963267948966192313216916398;  // PI / 2
-  PiOn3: Float   = 1.0471975511965977461542144610932;  // PI / 3
-  PiOn4: Float   = 0.78539816339744830961566084581988; // PI / 4
-  Sqrt2: Float   = 1.4142135623730950488016887242097;  // Sqrt(2)
-  Sqrt3: Float   = 1.7320508075688772935274463415059;  // Sqrt(3)
-  Sqrt5: Float   = 2.2360679774997896964091736687313;  // Sqrt(5)
-  Sqrt10: Float  = 3.1622776601683793319988935444327;  // Sqrt(10)
-  SqrtPi: Float  = 1.7724538509055160272981674833411;  // Sqrt(PI)
-  Sqrt2Pi: Float = 2.506628274631000502415765284811;   // Sqrt(2 * PI)
-  TwoPi: Float   = 6.283185307179586476925286766559;   // 2 * PI
-  ThreePi: Float = 9.4247779607693797153879301498385;  // 3 * PI
-  Ln2: Float     = 0.69314718055994530941723212145818; // Ln(2)
-  Ln10: Float    = 2.3025850929940456840179914546844;  // Ln(10)
-  LnPi: Float    = 1.1447298858494001741434273513531;  // Ln(PI)
-  Log2: Float    = 0.30102999566398119521373889472449; // Log10(2)
-  Log3: Float    = 0.47712125471966243729502790325512; // Log10(3)
-  LogPi: Float   = 0.4971498726941338543512682882909;  // Log10(PI)
-  LogE: Float    = 0.43429448190325182765112891891661; // Log10(E)
-  E: Float       = 2.7182818284590452353602874713527;  // Natural constant
-  hLn2Pi: Float  = 0.91893853320467274178032973640562; // Ln(2*PI)/2
-  inv2Pi: Float  = 0.159154943091895;                  // 0.5 / Pi
-  TwoToPower63: Float = 9223372036854775808.0;         // 2^63
+  Bernstein: Float = 0.2801694990238691330364364912307;  // Bernstein constant
+  Cbrt2: Float     = 1.2599210498948731647672106072782;  // CubeRoot(2)
+  Cbrt3: Float     = 1.4422495703074083823216383107801;  // CubeRoot(3)
+  Cbrt10: Float    = 2.1544346900318837217592935665194;  // CubeRoot(10)
+  Cbrt100: Float   = 4.6415888336127788924100763509194;  // CubeRoot(100)
+  CbrtPi: Float    = 1.4645918875615232630201425272638;  // CubeRoot(PI)
+  Catalan: Float   = 0.9159655941772190150546035149324;  // Catalan constant
+  Pi: Float        = 3.1415926535897932384626433832795;  // PI
+  PiOn2: Float     = 1.5707963267948966192313216916398;  // PI / 2
+  PiOn3: Float     = 1.0471975511965977461542144610932;  // PI / 3
+  PiOn4: Float     = 0.78539816339744830961566084581988; // PI / 4
+  Sqrt2: Float     = 1.4142135623730950488016887242097;  // Sqrt(2)
+  Sqrt3: Float     = 1.7320508075688772935274463415059;  // Sqrt(3)
+  Sqrt5: Float     = 2.2360679774997896964091736687313;  // Sqrt(5)
+  Sqrt10: Float    = 3.1622776601683793319988935444327;  // Sqrt(10)
+  SqrtPi: Float    = 1.7724538509055160272981674833411;  // Sqrt(PI)
+  Sqrt2Pi: Float   = 2.506628274631000502415765284811;   // Sqrt(2 * PI)
+  TwoPi: Float     = 6.283185307179586476925286766559;   // 2 * PI
+  ThreePi: Float   = 9.4247779607693797153879301498385;  // 3 * PI
+  Ln2: Float       = 0.69314718055994530941723212145818; // Ln(2)
+  Ln10: Float      = 2.3025850929940456840179914546844;  // Ln(10)
+  LnPi: Float      = 1.1447298858494001741434273513531;  // Ln(PI)
+  Log2: Float      = 0.30102999566398119521373889472449; // Log10(2)
+  Log3: Float      = 0.47712125471966243729502790325512; // Log10(3)
+  LogPi: Float     = 0.4971498726941338543512682882909;  // Log10(PI)
+  LogE: Float      = 0.43429448190325182765112891891661; // Log10(E)
+  E: Float         = 2.7182818284590452353602874713527;  // Natural constant
+  hLn2Pi: Float    = 0.91893853320467274178032973640562; // Ln(2*PI)/2
+  inv2Pi: Float    = 0.159154943091895;                  // 0.5 / Pi
+  TwoToPower63: Float = 9223372036854775808.0;           // 2^63
+  GoldenMean: Float   = 1.618033988749894848204586834365638;  // GoldenMean
+  EulerMascheroni: Float = 0.5772156649015328606065120900824;  // Euler GAMMA
 
 
 const
@@ -140,7 +159,7 @@ function ArcCsc(X: Float): Float;
 function ArcSec(X: Float): Float;
 function ArcSin(X: Float): Float;
 function ArcTan(X: Float): Float;
-function ArcTan2(Y, X: Float): Float; 
+function ArcTan2(Y, X: Float): Float;
 function Cos(X: Float): Float;
 function Cot(X: Float): Float;
 function Coversine(X: Float): Float;
@@ -204,6 +223,7 @@ procedure SetPrecisionToleranceToEpsilon;
 
 function Ackermann(const A, B: Integer): Integer;
 function Ceiling(const X: Float): Integer;
+function CommercialRound(const X: Float): Int64;
 function Factorial(const N: Integer): Float;
 function Fibonacci(const N: Integer): Integer;
 function Floor(const X: Float): Integer;
@@ -455,11 +475,28 @@ procedure InitCrc16 (Polynom, Start: Word);
 implementation
 
 uses
-  Jcl8087, JclResources, JclUnitConv;
+{$IFDEF MSWINDOWS}
+  Windows,
+{$ENDIF MSWINDOWS}
+  Jcl8087, JclResources;
 
 //==================================================================================================
 // Internal helper routines
 //==================================================================================================
+
+// Linux: Get Global Offset Table (GOT) adress for Position Independent Code
+// (PIC, used by shared objects)
+
+{$IFDEF PIC}
+function GetGOT: Pointer; export;
+begin
+  asm
+        MOV Result, EBX
+  end;
+end;
+{$ENDIF}
+
+//--------------------------------------------------------------------------------------------------
 
 // to be independent from JclLogic
 
@@ -519,8 +556,15 @@ const
 
 procedure FDegToRad; assembler;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+{$ENDIF PIC}
         FLDPI
+{$IFDEF PIC}
+        FIDIV   [EAX][_180]
+{$ELSE}
         FIDIV   [_180]
+{$ENDIF}
         FMUL
         FWAIT
 end;
@@ -532,10 +576,17 @@ end;
 
 procedure FRadToDeg; assembler;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+{$ENDIF PIC}
         FLD1
         FLDPI
         FDIV
-        FLD     [_180]
+{$IFDEF PIC}
+        FLD   [EAX][_180]
+{$ELSE}
+        FLD   [_180]
+{$ENDIF}
         FMUL
         FMUL
         FWAIT
@@ -548,8 +599,15 @@ end;
 
 procedure FGradToRad; assembler;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+{$ENDIF PIC}
         FLDPI
+{$IFDEF PIC}
+        FIDIV   [EAX][_200]
+{$ELSE}
         FIDIV   [_200]
+{$ENDIF}
         FMUL
         FWAIT
 end;
@@ -561,10 +619,17 @@ end;
 
 procedure FRadToGrad; assembler;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+{$ENDIF PIC}
         FLD1
         FLDPI
         FDIV
-        FLD     [_200]
+{$IFDEF PIC}
+        FLD   [EAX][_200]
+{$ELSE}
+        FLD   [_200]
+{$ENDIF}
         FMUL
         FMUL
         FWAIT
@@ -691,7 +756,7 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
-       
+
 function ArcSin(X: Float): Float;
 
   function FArcSin(X: Float): Float; assembler;
@@ -976,24 +1041,29 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 function CosH(X: Float): Float;
+{$IFDEF PUREPASCAL}
 begin
   Result := 0.5 * (Exp(X) + Exp(-X));
 end;
-
-//--------------------------------------------------------------------------------------------------
-
-function CotH(X: Float): Float; assembler;
+{$ELSE}
 const
   RoundDown: Word = $177F;
   OneHalf: Float = 0.5;
 var
   ControlWW: Word;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+{$ENDIF PIC}
         FLD     X  // TODO Legal values for X?
         FLDL2E
         FMULP   ST(1), ST
         FSTCW   ControlWW
+{$IFDEF PIC}
+        FLDCW   [EAX].RoundDown
+{$ELSE}
         FLDCW   RoundDown
+{$ENDIF PIC}
         FLD     ST(0)
         FRNDINT
         FLDCW   ControlWW
@@ -1007,9 +1077,21 @@ asm
         FLD1
         FDIVRP  ST(1), ST
         FADDP   ST(1), ST
+{$IFDEF PIC}
+        FLD     [EAX].OneHalf
+{$ELSE}
         FLD     OneHalf
+{$ENDIF PIC}
         FMULP   ST(1), ST
         FWAIT
+end;
+{$ENDIF PUREPASCAL}
+
+//--------------------------------------------------------------------------------------------------
+
+function CotH(X: Float): Float;
+begin
+  Result := 1 / TanH(X);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1039,11 +1121,18 @@ const
 var
   ControlWW: Word;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+{$ENDIF PIC}
         FLD     X // TODO Legal values for X?
         FLDL2E
         FMULP   ST(1), ST
         FSTCW   ControlWW
+{$IFDEF PIC}
+        FLDCW   [EAX].RoundDown
+{$ELSE}
         FLDCW   RoundDown
+{$ENDIF PIC}
         FLD     ST(0)
         FRNDINT
         FLDCW   ControlWW
@@ -1057,7 +1146,11 @@ asm
         FLD1
         FDIVRP  ST(1), ST
         FSUBP   ST(1), ST
+{$IFDEF PIC}
+        FLD     [EAX].OneHalf
+{$ELSE}
         FLD     OneHalf
+{$ENDIF PIC}
         FMULP   ST(1), ST
         FWAIT
 end;
@@ -1138,7 +1231,7 @@ begin
         Result := 0.0
       else
         {$IFDEF MATH_EXT_EXTREMEVALUES}
-        Result := Infinity; 
+        Result := Infinity;
         {$ELSE}
         raise EJclMathError.Create('Power function: Result is infinite');
         {$ENDIF}
@@ -1414,6 +1507,15 @@ begin
   Result := Integer(Trunc(X));
   if Frac(X) > 0 then
     Inc(Result);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function CommercialRound(const X: Float): Int64;
+begin
+  Result := Trunc(X);
+  if Frac(Abs(X)) >= 0.5 then
+    Result := Result + Sgn(X);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2235,6 +2337,7 @@ const
 
 function _FPClass: TFloatingPointClass;
 // In: ST(0) Value to examine
+//     ECX   address of GOT (PIC only)
 asm
         FXAM
         XOR     EDX, EDX
@@ -2247,13 +2350,21 @@ asm
         RCL     EDX, 1
         BT      EAX, 8  // C0
         RCL     EDX, 1
+{$IFDEF PIC}
+        MOVZX   EAX, TFloatingPointClass([ECX].FPClasses[EDX])
+{$ELSE}
         MOVZX   EAX, TFloatingPointClass(FPClasses[EDX])
+{$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 function FloatingPointClass(const Value: Single): TFloatingPointClass; overload;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+        MOV     ECX, EAX
+{$ENDIF PIC}
         FLD     Value
         CALL    _FPClass
 end;
@@ -2262,6 +2373,10 @@ end;
 
 function FloatingPointClass(const Value: Double): TFloatingPointClass; overload;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+        MOV     ECX, EAX
+{$ENDIF PIC}
         FLD     Value
         CALL    _FPClass
 end;
@@ -2270,10 +2385,13 @@ end;
 
 function FloatingPointClass(const Value: Extended): TFloatingPointClass; overload;
 asm
+{$IFDEF PIC}
+        CALL    GetGOT
+        MOV     ECX, EAX
+{$ENDIF PIC}
         FLD     Value
         CALL    _FPClass
 end;
-
 
 //===================================================================================================
 // NaN and Infinity support
@@ -2435,7 +2553,11 @@ var
 begin
   CheckNaN(NaN);
   Temp := (PInt64(@NaN)^ shr dNaNTagShift) and NaNTagMask;
+  {$IFDEF FPC}
+  if Int64(NaN) < 0 then
+  {$ELSE}
   if dSignBit in TDoubleBits(NaN) then
+  {$ENDIF}
     Result := -Temp
   else
     if Temp = ZeroTag then
@@ -2453,7 +2575,11 @@ begin
   CheckNaN(NaN);
   Temp := (PExtendedRec(@NaN)^.Significand shr xNaNTagShift) and NaNTagMask;
 
+  {$IFDEF FPC}
+  if (TExtendedRec(NaN).Exponent and $8000) <> 0 then
+  {$ELSE}
    if xSignBit in TExtendedBits(NaN) then
+  {$ENDIF}
     Result := -Temp
   else
     if Temp = ZeroTag then
@@ -2555,6 +2681,7 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 {$IFDEF MSWINDOWS}
+{$IFNDEF FPC}
 
 procedure InitExceptObjProc;
 
@@ -2570,6 +2697,7 @@ begin
       PrevExceptObjProc := Pointer(InterlockedExchange(Integer(ExceptObjProc), Integer(@GetExceptionObject)));
       end;
 
+{$ENDIF}
 {$ENDIF}
 
 //--------------------------------------------------------------------------------------------------
@@ -2592,7 +2720,7 @@ end;
 
 procedure MakeQuietNaN(var X: Single; Tag: TNaNTag);
 var
-  Bits: DWord;
+  Bits: LongWord;
 begin
   CheckTag(Tag);
   if Tag = 0 then
@@ -2601,7 +2729,7 @@ begin
     Bits := Abs(Tag) or sQuietNaNBits;
   if Tag < 0 then
     Include(TSingleBits(Bits), sSignBit);
-  PDWord(@X)^ := Bits;
+  PLongWord(@X)^ := Bits;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2617,7 +2745,11 @@ begin
     Bits := Abs(Tag);
   PInt64(@X)^ := (Bits shl dNaNTagShift) or dQuietNaNBits;
   if Tag < 0 then
+    {$IFDEF FPC}
+    QWord(X) := QWord(X) or (1 shl dSignBit);
+    {$ELSE}
     Include(TDoubleBits(X), dSignBit);
+    {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2637,7 +2769,11 @@ begin
   TExtendedRec(X).Significand := (Bits shl xNaNTagShift) or QuietNaNSignificand;
   TExtendedRec(X).Exponent := QuietNaNExponent;
   if Tag < 0 then
+    {$IFDEF FPC}
+    TExtendedRec(X).Exponent := TExtendedRec(X).Exponent or $8000;
+    {$ELSE}
     Include(TExtendedBits(X), xSignBit);
+    {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2645,7 +2781,9 @@ end;
 procedure MakeSignalingNaN(var X: Single; Tag: TNaNTag);
 begin
   {$IFDEF MSWINDOWS}
+  {$IFNDEF FPC}
   InitExceptObjProc;
+  {$ENDIF}
   {$ENDIF}
   MakeQuietNaN(X, Tag);
   Exclude(TSingleBits(X), sNaNQuietFlag);
@@ -2655,22 +2793,32 @@ end;
 
 procedure MakeSignalingNaN(var X: Double; Tag: TNaNTag);
 begin
+  {$IFDEF FPC}
+  MakeQuietNaN(X, Tag);
+  QWord(X) := QWord(X) and not (1 shl dNaNQuietFlag);
+  {$ELSE}
   {$IFDEF MSWINDOWS}
   InitExceptObjProc;
   {$ENDIF}
   MakeQuietNaN(X, Tag);
   Exclude(TDoubleBits(X), dNaNQuietFlag);
+  {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 procedure MakeSignalingNaN(var X: Extended; Tag: TNaNTag);
 begin
+  {$IFDEF FPC}
+  MakeQuietNaN(X, Tag);
+  TExtendedRec(X).Significand := TExtendedRec(X).Significand and not (1 shl xNaNQuietFlag);
+  {$ELSE}
   {$IFDEF MSWINDOWS}
   //InitExceptObjProc;
   {$ENDIF}
   MakeQuietNaN(X, Tag);
   Exclude(TExtendedBits(X), xNaNQuietFlag);
+  {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2681,7 +2829,9 @@ var
   P: PLongint;
 begin
   {$IFDEF MSWINDOWS}
+  {$IFNDEF FPC}
   InitExceptObjProc;
+  {$ENDIF}
   {$ENDIF}
   StopTag := StartTag + Count - 1;
   CheckTag(StartTag);
@@ -2708,7 +2858,9 @@ var
   P: PInt64;
 begin
   {$IFDEF MSWINDOWS}
+  {$IFNDEF FPC}
   InitExceptObjProc;
+  {$ENDIF}
   {$ENDIF}
   StopTag := StartTag + Count - 1;
   CheckTag(StartTag);

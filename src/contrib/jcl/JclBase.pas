@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclBase.pas.                                                                }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -21,15 +21,18 @@
 { versions of Delphi as well as FPC.                                                               }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: July 5, 2002                                                                      }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclBase.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclBase;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
@@ -37,7 +40,7 @@ uses
   {$IFDEF MSWINDOWS}
   Windows,
   {$ENDIF MSWINDOWS}
-  Classes, SysUtils;
+  SysUtils;
 
 //--------------------------------------------------------------------------------------------------
 // Version
@@ -45,11 +48,11 @@ uses
 
 const
   JclVersionMajor   = 1;    // 0=pre-release|beta/1, 2, ...=final
-  JclVersionMinor   = 22;   // Forth minor release JCL 1.22
-  JclVersionRelease = 1;    // 0=pre-release|beta/1=release
-  JclVersionBuild   = 965;  // build number, days since march 1, 2000
+  JclVersionMinor   = 90;   // Forth minor release JCL 1.20
+  JclVersionRelease = 0;    // 0=pre-release|beta/1=release
+  JclVersionBuild   = 1497; // build number, days since march 1, 2000
   JclVersion = (JclVersionMajor shl 24) or (JclVersionMinor shl 16) or
-               (JclVersionRelease shl 15) or (JclVersionBuild shl 0);
+    (JclVersionRelease shl 15) or (JclVersionBuild shl 0);
 
 //--------------------------------------------------------------------------------------------------
 // FreePascal Support
@@ -64,6 +67,7 @@ function SysErrorMessage(ErrNo: Integer): string;
 
 {$IFDEF MSWINDOWS}
 procedure RaiseLastWin32Error;
+function Win32Check(RetVal: BOOL): BOOL;
 
 procedure QueryPerformanceCounter(var C: Int64);
 function QueryPerformanceFrequency(var Frequency: Int64): Boolean;
@@ -78,7 +82,7 @@ var
 //--------------------------------------------------------------------------------------------------
 
 type
-  EJclError = class (Exception)
+  EJclError = class(Exception)
   public
     constructor CreateResRec(ResStringRec: PResStringRec);
     constructor CreateResRecFmt(ResStringRec: PResStringRec; const Args: array of const);
@@ -91,7 +95,7 @@ type
 {$IFDEF MSWINDOWS}
 
 type
-  EJclWin32Error = class (EJclError)
+  EJclWin32Error = class(EJclError)
   private
     FLastError: DWORD;
     FLastErrorMsg: string;
@@ -125,12 +129,18 @@ type
 
 {$IFDEF FPC}
 type
-  LongWord = Cardinal;
+  Largeint    = Int64;
+  LongWord    = Cardinal;
   TSysCharSet = set of Char;
 {$ENDIF FPC}
 
 type
   PPointer = ^Pointer;
+
+  {$IFNDEF COMPILER6_UP}
+  PBoolean = ^Boolean;
+  {$ENDIF COMPILER6_UP}
+
 
 //--------------------------------------------------------------------------------------------------
 // Int64 support
@@ -143,14 +153,7 @@ procedure CardinalsToI64(var I: Int64; const LowPart, HighPart: Cardinal);
 
 type
   PLargeInteger = ^TLargeInteger;
-  TLargeInteger = record
-    case Integer of
-    0: (
-      LowPart: LongWord;
-      HighPart: Longint);
-    1: (
-      QuadPart: Int64);
-  end;
+  TLargeInteger = Int64;
 
 // Redefinition of TULargeInteger to relieve dependency on Windows.pas
 
@@ -158,11 +161,11 @@ type
   PULargeInteger = ^TULargeInteger;
   TULargeInteger = record
     case Integer of
-    0: (
-      LowPart: LongWord;
+    0:
+     (LowPart: LongWord;
       HighPart: LongWord);
-    1: (
-      QuadPart: Int64);
+    1:
+     (QuadPart: Int64);
   end;
 
 //--------------------------------------------------------------------------------------------------
@@ -186,25 +189,6 @@ type
   TDynStringArray   = array of string;
 
 //--------------------------------------------------------------------------------------------------
-// TObjectList
-//--------------------------------------------------------------------------------------------------
-
-{$IFNDEF COMPILER5_UP}
-type
-  TObjectList = class (TList)
-  private
-    FOwnsObjects: Boolean;
-    function GetItems(Index: Integer): TObject;
-    procedure SetItems(Index: Integer; const Value: TObject);
-  public
-    procedure Clear; override;
-    constructor Create(AOwnsObjects: Boolean = False);
-    property Items[Index: Integer]: TObject read GetItems write SetItems; default;
-    property OwnsObjects: Boolean read FOwnsObjects write FOwnsObjects;
-  end;
-{$ENDIF COMPILER5_UP}
-
-//--------------------------------------------------------------------------------------------------
 // Cross-Platform Compatibility
 //--------------------------------------------------------------------------------------------------
 
@@ -224,19 +208,6 @@ type
 
 {$ENDIF COMPILER6_UP}
 {$ENDIF SUPPORTS_INTERFACE}
-
-//--------------------------------------------------------------------------------------------------
-// TStringList.CustomSort compatibility
-//--------------------------------------------------------------------------------------------------
-
-{$IFDEF COMPILER4}
-
-type
-  TStringListCustomSortCompare = function(List: TStringList; Index1, Index2: Integer): Integer;
-
-procedure StringListCustomSort(StringList: TStringList; SortFunc: TStringListCustomSortCompare);
-
-{$ENDIF COMPILER4}
 
 implementation
 
@@ -293,7 +264,7 @@ end;
 
 function QueryPerformanceFrequency(var Frequency: Int64): Boolean;
 var
-  T: TLargeInteger;
+  T: TULargeInteger;
 begin
   Windows.QueryPerformanceFrequency(@T);
   CardinalsToI64(Frequency, T.LowPart, T.HighPart);
@@ -303,10 +274,18 @@ end;
 
 procedure QueryPerformanceCounter(var C: Int64);
 var
-  T: TLargeInteger;
+  T: TULargeInteger;
 begin
   Windows.QueryPerformanceCounter(@T);
   CardinalsToI64(C, T.LowPart, T.HighPart);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function Win32Check(RetVal: BOOL): BOOL;
+begin
+  if not RetVal then RaiseLastOSError;
+  Result := RetVal;
 end;
 
 {$ELSE MSWINDOWS}
@@ -384,46 +363,6 @@ begin
 end;
 
 //==================================================================================================
-// TObjectList
-//==================================================================================================
-
-{$IFNDEF COMPILER5_UP}
-
-procedure TObjectList.Clear;
-var
-  I: Integer;
-begin
-  if OwnsObjects then
-    for I := 0 to Count - 1 do
-      Items[I].Free;
-  inherited;
-end;
-
-//--------------------------------------------------------------------------------------------------
-
-constructor TObjectList.Create(AOwnsObjects: Boolean);
-begin
-  inherited Create;
-  FOwnsObjects := AOwnsObjects;
-end;
-
-//--------------------------------------------------------------------------------------------------
-
-function TObjectList.GetItems(Index: Integer): TObject;
-begin
-  Result := TObject(Get(Index));
-end;
-
-//--------------------------------------------------------------------------------------------------
-
-procedure TObjectList.SetItems(Index: Integer; const Value: TObject);
-begin
-  Put(Index, Value);
-end;
-
-{$ENDIF COMPILER5_UP}
-
-//==================================================================================================
 // Cross=Platform Compatibility
 //==================================================================================================
 
@@ -435,50 +374,5 @@ begin
 end;
 
 {$ENDIF COMPILER6_UP}
-
-//==================================================================================================
-// TStringList.CustomSort compatibility
-//==================================================================================================
-
-{$IFDEF COMPILER4}
-
-procedure StringListCustomSort(StringList: TStringList; SortFunc: TStringListCustomSortCompare);
-
-  procedure QuickSort(L, R: Integer);
-  var
-    I, J, P: Integer;
-  begin
-    repeat
-      I := L;
-      J := R;
-      P := (L + R) shr 1;
-      repeat
-        while SortFunc(StringList, I, P) < 0 do
-          Inc(I);
-        while SortFunc(StringList, J, P) > 0 do
-          Dec(J);
-        if I <= J then
-        begin
-          StringList.Exchange(I, J);
-          if P = I then
-            P := J
-          else
-          if P = J then
-            P := I;
-          Inc(I);
-          Dec(J);
-        end;
-      until I > J;
-      if L < J then
-        QuickSort(L, J);
-      L := I;
-    until I >= R;
-  end;
-
-begin
-  QuickSort(0, StringList.Count - 1);
-end;
-
-{$ENDIF COMPILER4}
 
 end.

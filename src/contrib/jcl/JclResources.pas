@@ -12,23 +12,22 @@
 {                                                                                                  }
 { The Original Code is JclResources.pas.                                                           }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
 { Unit which provides a central place for all resource strings used in the JCL                     }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: September 5, 2002                                                                 }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclResources.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclResources;
 
 {$I jcl.inc}
-
-{$WEAKPACKAGEUNIT ON}
 
 interface
 
@@ -42,11 +41,26 @@ resourcestring
   RsSysErrorMessageFmt = 'Win32 Error %d (%x)';
 
 //--------------------------------------------------------------------------------------------------
+// JclCIL
+//--------------------------------------------------------------------------------------------------
+
+resourcestring
+  RsInstructionStreamInvalid = 'Invalid IL instruction stream';
+
+//--------------------------------------------------------------------------------------------------
 // JclClasses
 //--------------------------------------------------------------------------------------------------
 
 resourcestring
   RsVMTMemoryWriteError = 'Error writing VMT memory (%s)';
+
+//--------------------------------------------------------------------------------------------------
+// JclClr
+//--------------------------------------------------------------------------------------------------
+
+resourcestring
+  RsClrCopyright = '// Delphi-JEDI .NET Framework IL Disassembler.  Version 0.1' +  #13#10 +
+                   '// Project JEDI Code Library (JCL) Team. All rights reserved.' +  #13#10;
 
 //--------------------------------------------------------------------------------------------------
 // JclCOM
@@ -108,80 +122,140 @@ resourcestring
 //--------------------------------------------------------------------------------------------------
 
 resourcestring
-  EDIError001 = 'Could not set interchange at index [%s], Index too high.';
-  EDIError002 = 'Could not set interchange at index [%s], Index too low.';
-  EDIError003 = 'Could not set interchange at index [%s].';
-  EDIError004 = 'Could not save edi file.  File name and path not specified.';
-  EDIError005 = 'Could not save edi file.  File name and path not specified.';
-  EDIError006 = 'Could not open edi file.  File not specified.';
-  EDIError007 = 'Could not get interchange at index [%s], Interchanges does not exist.';
-  EDIError008 = 'Could not get interchange at index [%s], Index too high.';
-  EDIError009 = 'Could not get interchange at index [%s], Index too low.';
-  EDIError010 = 'Could not get interchanges at index [%s], There were no interchanges to get.';
-  EDIError011 = 'Could not find interchange control header.';
-  EDIError012 = 'Could not find interchange control trailer segment terminator.';
-  EDIError013 = 'Could not find interchange control trailer.';
-  EDIError014 = 'Could not find interchange control trailer or garbage at end of file.';
-  EDIError015 = 'Could not delete interchanges at index [%s].';
-  EDIError016 = 'Could not delete interchange at index [%s].';
-  EDIError017 = 'Could not set functional group at index [%s], Index too high.';
-  EDIError018 = 'Could not set functional group at index [%s], Index too low.';
-  EDIError019 = 'Could not set functional group at index [%s].';
-  EDIError020 = 'Could not get functional group at index [%s], Functional Group does not exist.';
-  EDIError021 = 'Could not get functional group at index [%s], Index too high.';
-  EDIError022 = 'Could not get functional group at index [%s], Index too low.';
-  EDIError023 = 'Could not get functional group at index [%s], There were no functional groups to get.';
-  EDIError024 = 'Delimiters have not been assigned to interchange.  Dissassemble cancelled.';
-  EDIError025 = 'Could not find interchange control header segment terminator.';
-  EDIError026 = 'Could not find interchange control header.';
-  EDIError027 = 'Could not find functional group header.';
-  EDIError028 = 'Could not find functional group trailer segment terminator.';
-  EDIError029 = 'Could not find functional group trailer.';
-  EDIError030 = 'Could not find interchange control trailer segment terminator.';
-  EDIError031 = 'Could not find interchange control trailer.';
-  EDIError032 = 'Could not delete functional groups at index [%s].';
-  EDIError033 = 'Could not delete functional group at index [%s].';
-  EDIError034 = 'Delimiters have not been assigned to interchange.  Assemble cancelled.';
-  EDIError035 = 'Could not set transaction set at index [%s], Index too high.';
-  EDIError036 = 'Could not set transaction set at index [%s], Index too low.';
-  EDIError037 = 'Could not set transaction set at index [%s].';
-  EDIError038 = 'Could not get transaction set at index [%s], Transaction Set does not exist.';
-  EDIError039 = 'Could not get transaction set at index [%s], Index too high.';
-  EDIError040 = 'Could not get transaction set at index [%s], Index too low.';
-  EDIError041 = 'Could not get transaction set at index [%s], There were no Transaction Sets to get.';
-  EDIError042 = 'Could not assign delimiters to functional group.  Dissassemble cancelled.';
-  EDIError043 = 'Could not find functional group header segment terminator.';
-  EDIError044 = 'Could not find functional group header.';
-  EDIError045 = 'Could not find transaction set header.';
-  EDIError046 = 'Could not find transaction set trailer segment terminator.';
-  EDIError047 = 'Could not find transaction set trailer.';
-  EDIError048 = 'Could not find functional group trailer segment terminator.';
-  EDIError049 = 'Could not find functional group trailer..';
-  EDIError050 = 'Could not delete transaction sets at index [%s].';
-  EDIError051 = 'Could not delete transaction set at index [%s].';
-  EDIError052 = 'Could not assign delimiters to functional group.  Assemble cancelled.';
-  EDIError053 = 'Could not set segment at index [%s], Index too high.';
-  EDIError054 = 'Could not set segment at index [%s], Index too low.';
-  EDIError055 = 'Could not set segment at index [%s].';
-  EDIError056 = 'Could not get segment at index [%s], Segment does not exist.';
-  EDIError057 = 'Could not get segment at index [%s], Index too high.';
-  EDIError058 = 'Could not get segment at index [%s], Index too low.';
-  EDIError059 = 'Could not get segment at index [%s], There were no segments to get.';
-  EDIError060 = 'Could not assign delimiters to transaction set.  Dissassemble cancelled.';
-  EDIError061 = 'Could not delete segment at index [%s].';
-  EDIError062 = 'Could not delete segment at index [%s].';
-  EDIError063 = 'Could not assign delimiters to transaction set.  Assemble cancelled.';
-  EDIError064 = 'Could not set element at index [%s], Index too high.';
-  EDIError065 = 'Could not set element at index [%s], Index too low.';
-  EDIError066 = 'Could not set element at index [%s].';
-  EDIError067 = 'Could not get element at index [%s], Element does not exist.';
-  EDIError068 = 'Could not get element at index [%s], Index too high.';
-  EDIError069 = 'Could not get element at index [%s], Index too low.';
-  EDIError070 = 'Could not get element at index [%s], There were no elements to get.';
-  EDIError071 = 'Could not assign delimiters to segment.  Dissassemble cancelled.';
-  EDIError072 = 'Could not delete element at index [%s].';
-  EDIError073 = 'Could not delete element at index [%s].';
-  EDIError074 = 'Could not assign delimiters to segment.  Assemble cancelled.';
+  RsEDIError001 = 'Could not open edi file.  File not specified.';
+  RsEDIError002 = 'Could not save edi file.  File name and path not specified.';
+  RsEDIError003 = 'Could not get data object from %s at index [%s],';
+  RsEDIError004 = 'Could not get data object from %s at index [%s], Index too low.';
+  RsEDIError005 = 'Could not get data object from %s at index [%s], Index too high.';
+  RsEDIError006 = 'Could not get data object from %s at index [%s], ' +
+                  'There was no data object assigned.';
+  RsEDIError007 = 'Could not set data object from %s at index [%s].';
+  RsEDIError008 = 'Could not set data object from %s at index [%s], Index too low.';
+  RsEDIError009 = 'Could not set data object from %s at index [%s], Index too high.';
+  RsEDIError010 = 'Could not delete data object from %s at index [%s]';
+  RsEDIError011 = 'Could not delete data objects from %s at index [%s]';
+  RsEDIError012 = 'Delimiters have not been assigned to interchange.  Dissassemble cancelled.';
+  RsEDIError013 = 'Delimiters have not been assigned to interchange.  Assemble cancelled.';
+  RsEDIError014 = 'Could not find interchange control header segment terminator.';
+  RsEDIError015 = 'Could not find interchange control header.';
+  RsEDIError016 = 'Could not find interchange control trailer segment terminator.';
+  RsEDIError017 = 'Could not find interchange control trailer.';
+  RsEDIError018 = 'Could not find interchange control trailer or garbage at end of file.';
+  RsEDIError019 = 'Could not assign delimiters to functional group.  Dissassemble cancelled.';
+  RsEDIError020 = 'Could not assign delimiters to functional group.  Assemble cancelled.';
+  RsEDIError021 = 'Could not find functional group header segment terminator.';
+  RsEDIError022 = 'Could not find functional group header.'; //conditional for UN/EDIFACT
+  RsEDIError023 = 'Could not find functional group trailer segment terminator.';
+  RsEDIError024 = 'Could not find functional group trailer.';
+  RsEDIError025 = 'Could not assign delimiters to transaction set.  Dissassemble cancelled.';
+  RsEDIError026 = 'Could not assign delimiters to transaction set.  Assemble cancelled.';
+  RsEDIError027 = 'Could not find transaction set header.';
+  RsEDIError028 = 'Could not find transaction set trailer segment terminator.';
+  RsEDIError029 = 'Could not find transaction set trailer.';
+  RsEDIError030 = 'Could not assign delimiters to message.  Dissassemble cancelled.';
+  RsEDIError031 = 'Could not assign delimiters to message.  Assemble cancelled.';
+  RsEDIError032 = 'Could not find message header.';
+  RsEDIError033 = 'Could not find message trailer segment terminator.';
+  RsEDIError034 = 'Could not find message trailer.';
+  RsEDIError035 = 'Could not assign delimiters to segment.  Dissassemble cancelled.';
+  RsEDIError036 = 'Could not assign delimiters to segment.  Assemble cancelled.';
+  RsEDIError037 = 'Could not assign delimiters to composite element.  Dissassemble cancelled.';
+  RsEDIError038 = 'Could not assign delimiters to composite element.  Assemble cancelled.';
+  RsEDIError039 = 'Could not get data object in transaction set loop at index [%s], ' +
+                  'Data object does not exist.';
+  RsEDIError040 = 'Could not get data object in transaction set loop at index [%s], ' +
+                  'Index too high.';
+  RsEDIError041 = 'Could not get data object in transaction set loop at index [%s], Index too low.';
+  RsEDIError042 = 'Could not get data object in transaction set loop at index [%s].';
+  RsEDIError043 = 'Could not set data object in transaction set loop at index [%s], ' +
+                  'Index too high.';
+  RsEDIError044 = 'Could not set data object in transaction set loop at index [%s], Index too low.';
+  RsEDIError045 = 'Could not set data object in transaction set loop at index [%s].';
+  RsEDIError046 = 'Could not get data object in message loop at index [%s], ' +
+                  'Data object does not exist.';
+  RsEDIError047 = 'Could not get data object in message loop at index [%s], Index too high.';
+  RsEDIError048 = 'Could not get data object in message loop at index [%s], Index too low.';
+  RsEDIError049 = 'Could not get data object in message loop at index [%s].';
+  RsEDIError050 = 'Could not set data object in message loop at index [%s], Index too high.';
+  RsEDIError051 = 'Could not set data object in message loop at index [%s], Index too low.';
+  RsEDIError052 = 'Could not set data object in message loop at index [%s].';
+  RsEDIError053 = 'Loop in loop stack record at index [%s] does not exist.';
+  RsEDIError054 = 'Could not get loop stack record at index [%s], Index too high.';
+  RsEDIError055 = 'Could not get loop stack record at index [%s], Index too low.';
+  RsEDIError056 = 'Could not get loop stack record at index [%s].';
+  RsEDIError057 = 'Could not get safe loop stack index [%s].';
+  RsEDIError058 = 'Could not assign element specification to element at index [%s] ' +
+                  'in segment [%s] at index [%s] in transaction set.';
+
+  RsUnknownAttribute = 'Unknown Attribute';
+
+//--------------------------------------------------------------------------------------------------
+// JclEDIXML
+//--------------------------------------------------------------------------------------------------
+
+resourcestring
+  EDIXMLError001 = 'Could not open edi file.  File not specified.';
+  EDIXMLError002 = 'Could not save edi file.  File name and path not specified.';
+  EDIXMLError003 = 'Could not assign delimiters to edi file.  Disassemble cancelled.';
+  EDIXMLError004 = 'Could not assign delimiters to edi file.  Assemble cancelled.';
+  EDIXMLError005 = 'Could not assign delimiters to interchange control.  Disassemble cancelled.';
+  EDIXMLError006 = 'Could not assign delimiters to interchange control.  Assemble cancelled.';
+  EDIXMLError007 = 'Could not find interchange control end tag.';
+  EDIXMLError008 = 'Could not find interchange control end tag delimiter.';
+  EDIXMLError009 = 'Could not find interchange control header.';
+  EDIXMLError010 = 'Could not find interchange control header end tag.';
+  EDIXMLError011 = 'Could not find interchange control header end tag delimiter.';
+  EDIXMLError012 = 'Could not find interchange control trailer.';
+  EDIXMLError013 = 'Could not find interchange control trailer end tag.';
+  EDIXMLError014 = 'Could not find interchange control trailer end tag delimiter.';
+  EDIXMLError015 = 'Could not assign delimiters to functional group.  Disassemble cancelled.';
+  EDIXMLError016 = 'Could not assign delimiters to functional group.  Assemble cancelled.';
+  EDIXMLError017 = 'Could not find functional group end tag.';
+  EDIXMLError018 = 'Could not find functional group end tag delimiter.';
+  EDIXMLError019 = 'Could not find functional group header.';
+  EDIXMLError020 = 'Could not find functional group header end tag.';
+  EDIXMLError021 = 'Could not find functional group header end tag delimiter.';
+  EDIXMLError022 = 'Could not find functional group trailer.';
+  EDIXMLError023 = 'Could not find functional group trailer end tag.';
+  EDIXMLError024 = 'Could not find functional group trailer end tag delimiter.';
+  EDIXMLError025 = 'Could not assign delimiters to transactoin set.  Disassemble cancelled.';
+  EDIXMLError026 = 'Could not assign delimiters to transactoin set.  Assemble cancelled.';
+  EDIXMLError027 = 'Could not find transaction set end tag.';
+  EDIXMLError028 = 'Could not find transaction set end tag delimiter.';
+  EDIXMLError029 = 'Could not assign delimiters to transactoin set loop.  Disassemble cancelled.';
+  EDIXMLError030 = 'Could not assign delimiters to transactoin set loop.  Assemble cancelled.';
+  EDIXMLError031 = 'Could not find loop end tag';
+  EDIXMLError032 = 'Could not find loop end tag delimiter';
+  EDIXMLError033 = 'Could not set data object at index [%s].';
+  EDIXMLError034 = 'Could not set data object at index [%s], Index too low.';
+  EDIXMLError035 = 'Could not set data object at index [%s], Index too high.';
+  EDIXMLError036 = 'Could not get data object at index [%s], There was no data object to get.';
+  EDIXMLError037 = 'Could not get data object at index [%s], Index too low.';
+  EDIXMLError038 = 'Could not get data object at index [%s], Index too high.';
+  EDIXMLError039 = 'Could not get data object at index [%s], Data object does not exist.';
+  EDIXMLError040 = 'Could not delete EDI data object';
+  EDIXMLError041 = 'Could not assign delimiters to segment.  Disassemble cancelled.';
+  EDIXMLError042 = 'Could not assign delimiters to segment.  Assemble cancelled.';
+  EDIXMLError043 = 'Could not find segment begin tag';
+  EDIXMLError044 = 'Could not find segment end tag';
+  EDIXMLError045 = 'Could not find segment end tag delimiter';
+  EDIXMLError046 = 'Could not assign delimiters to element.  Disassemble cancelled.';
+  EDIXMLError047 = 'Could not assign delimiters to element.  Assemble cancelled.';
+  EDIXMLError048 = 'Could not find element tag';
+  EDIXMLError049 = 'Could not find element end tag';
+  EDIXMLError050 = 'Could not find element end tag delimiter';
+  EDIXMLError051 = 'Could not set element at index [%s].';
+  EDIXMLError052 = 'Could not set element at index [%s], Index too low.';
+  EDIXMLError053 = 'Could not set element at index [%s], Index too high.';
+  EDIXMLError054 = 'Could not get element at index [%s], There was no element to get.';
+  EDIXMLError055 = 'Could not get element at index [%s], Index too low.';
+  EDIXMLError056 = 'Could not get element at index [%s], Index too high.';
+  EDIXMLError057 = 'Could not get element at index [%s], Element does not exist.';
+  EDIXMLError058 = 'Could not delete element at index [%s].';
+  EDIXMLError059 = 'Could not find transaction set header.';
+  EDIXMLError060 = 'Could not find transaction set trailer.';
+  EDIXMLError061 = 'Could not find transaction set header and trailer.';
+  EDIXMLError062 = 'TEDIXMLANSIX12FormatTranslator: Unexpected object [%s] found.';
 
 //--------------------------------------------------------------------------------------------------
 // JclExprEval
@@ -225,6 +299,8 @@ resourcestring
   RsFileUtilsAttrUnavailable = 'Unable to retrieve attributes of %s';
 
   RsCannotCreateDir = 'Unable to create directory';
+  RsDelTreePathIsEmpty = 'DelTree: Path is empty';
+  RsFileSearchAttrInconsistency = 'Some file search attributes are required AND rejected!';
 
   // TJclFileVersionInfo
 
@@ -331,24 +407,25 @@ resourcestring
 //--------------------------------------------------------------------------------------------------
 
 resourcestring
-  RsAssertUnpairedEndUpdate  = 'Unpaired BeginUpdate EndUpdate';
-  RsCreateCompatibleDc       = 'Could not create compatible DC';
-  RsDestinationBitmapEmpty   = 'Destination bitmap is empty';
-  RsDibHandleAllocation      = 'Could not allocate handle for DIB';
-  RsMapSizeFmt               = 'Could not set size on class "%s"';
-  RsSelectObjectInDc         = 'Could not select object in DC';
-  RsSourceBitmapEmpty        = 'Source bitmap is empty';
-  RsSourceBitmapInvalid      = 'Source bitmap is invalid';
-  RsNoBitmapForRegion        = 'No bitmap for region';
-  RsNoDeviceContextForWindow = 'Cannot get device context of the window';
-  RsInvalidRegion            = 'Invalid Region defined for RegionInfo';
-  RsRegionDataOutOfBound     = 'Out of bound index on RegionData';
-  RsRegionCouldNotCreated    = 'Region could not be created';
-  RsInvalidHandleForRegion   = 'Invalid handle for region';
-  RsInvalidRegionInfo        = 'Invalid RegionInfo';
+  RsBitsPerSampleNotSupported = '%d bits per sample not supported in color space conversion';
+  RsAssertUnpairedEndUpdate   = 'Unpaired BeginUpdate EndUpdate';
+  RsCreateCompatibleDc        = 'Could not create compatible DC';
+  RsDestinationBitmapEmpty    = 'Destination bitmap is empty';
+  RsDibHandleAllocation       = 'Could not allocate handle for DIB';
+  RsMapSizeFmt                = 'Could not set size on class "%s"';
+  RsSelectObjectInDc          = 'Could not select object in DC';
+  RsSourceBitmapEmpty         = 'Source bitmap is empty';
+  RsSourceBitmapInvalid       = 'Source bitmap is invalid';
+  RsNoBitmapForRegion         = 'No bitmap for region';
+  RsNoDeviceContextForWindow  = 'Cannot get device context of the window';
+  RsInvalidRegion             = 'Invalid Region defined for RegionInfo';
+  RsRegionDataOutOfBound      = 'Out of bound index on RegionData';
+  RsRegionCouldNotCreated     = 'Region could not be created';
+  RsInvalidHandleForRegion    = 'Invalid handle for region';
+  RsInvalidRegionInfo         = 'Invalid RegionInfo';
 
-  RsBitmapExtension          = '.bmp';
-  RsJpegExtension            = '.jpg';
+  RsBitmapExtension           = '.bmp';
+  RsJpegExtension             = '.jpg';
 
 //--------------------------------------------------------------------------------------------------
 // JclMapi
@@ -410,6 +487,18 @@ resourcestring
   RsNoNaN              = 'NaN expected';
   RsNaNTagError        = 'NaN Tag value %d out of range';
   RsNaNSignal          = 'NaN signaling %d';
+
+//--------------------------------------------------------------------------------------------------
+// JclMetadata
+//--------------------------------------------------------------------------------------------------
+
+resourcestring
+  RsUnknownClassLayout      = 'Unknown class layout - $%.8x';
+  RsUnknownStringFormatting = 'Unknown string formatting - $%.8x';
+  RsInvalidSignatureData    = 'Invalid compressed signature data - %.2x %.2x %.2x %.2x';
+  RsUnknownManifestResource = 'Unknown manifest resource visibility - %d';
+  RsNoLocalVarSig           = 'Signature %s is not LocalVarSig';
+  RsLocalVarSigOutOfRange   = 'LocalVarSig count %d is out of range [1..$$FFFE]';
 
 //--------------------------------------------------------------------------------------------------
 // JclMidi
@@ -516,9 +605,11 @@ resourcestring
 // JclPeImage
 //--------------------------------------------------------------------------------------------------
 
+resourcestring
+  RsPeReadOnlyStream          = 'Stream is read-only';
+
   // TJclPeImage
 
-resourcestring
   RsPeCantOpen                = 'Cannot open file "%s"';
   RsPeNotPE                   = 'This is not a PE format';
   RsPeNotResDir               = 'Not a resource directory';
@@ -807,6 +898,7 @@ resourcestring
 //--------------------------------------------------------------------------------------------------
 
 resourcestring
+  RsBlankSearchString = 'Search string cannot be blank';
   RsInvalidEmptyStringItem  = 'String list passed to StringsToMultiSz cannot contain empty strings.';
   RsNumericConstantTooLarge = 'Numeric constant too large.';
   
@@ -855,22 +947,23 @@ resourcestring
   RsIntelCacheDescr45 = 'Unified cache, 32 byte cache line, 4-way set associative, 2Mb';
 
 resourcestring
-  RsOSVersionWin95 = 'Windows 95';
+  RsOSVersionWin95     = 'Windows 95';
   RsOSVersionWin95OSR2 = 'Windows 95 OSR2';
-  RsOSVersionWin98 = 'Windows 98';
-  RsOSVersionWin98SE = 'Windows 98 SE';
-  RsOSVersionWinME = 'Windows ME';
-  RsOSVersionWinNT3 = 'Windows NT 3.%u';
-  RsOSVersionWinNT4 = 'Windows NT 4.%u';
-  RsOSVersionWin2000 = 'Windows 2000';
-  RsOSVersionWinXP = 'Windows XP';
+  RsOSVersionWin98     = 'Windows 98';
+  RsOSVersionWin98SE   = 'Windows 98 SE';
+  RsOSVersionWinME     = 'Windows ME';
+  RsOSVersionWinNT3    = 'Windows NT 3.%u';
+  RsOSVersionWinNT4    = 'Windows NT 4.%u';
+  RsOSVersionWin2000   = 'Windows 2000';
+  RsOSVersionWinXP     = 'Windows XP';
+  RsOSVersionWin2003   = 'Windows Server 2003';
 
 resourcestring
-  RsProductTypeWorkStation = 'Workstation';
-  RsProductTypeServer = 'Server';
-  RsProductTypeAdvancedServer = 'Advanced Server';
-  RsProductTypePersonal = 'Home Edition';
-  RsProductTypeProfessional = 'Professional';
+  RsProductTypeWorkStation      = 'Workstation';
+  RsProductTypeServer           = 'Server';
+  RsProductTypeAdvancedServer   = 'Advanced Server';
+  RsProductTypePersonal         = 'Home Edition';
+  RsProductTypeProfessional     = 'Professional';
   RsProductTypeDatacenterServer = 'Datacenter Server';
 
 //--------------------------------------------------------------------------------------------------
@@ -880,6 +973,8 @@ resourcestring
 resourcestring
   RsCannotWriteRefStream = 'Can not write to a read-only memory stream';
   RsStringToBoolean = 'Unable to convert the string "%s" to a boolean';
+  RsInvalidDigit = 'Invalid base %d digit ''%s'' encountered.';
+  RsInvalidDigitValue = 'There is no valid base %d digit for decimal value %d';
 
 //--------------------------------------------------------------------------------------------------
 // JclTD32

@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclWin32.pas.                                                               }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -22,32 +22,130 @@
 { declarations.                                                                                    }
 {                                                                                                  }
 { Unit owner: Peter Friese                                                                         }
-{ Last modified: July 18, 2002                                                                     }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclWin32.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclWin32;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
 uses
-  Windows, ActiveX, ImageHlp, WinSvc,
-  {$IFDEF COMPILER5_UP}
-  AccCtrl, AclApi,
-  {$ENDIF COMPILER5_UP}
-  ShlObj,
+  Windows, ActiveX,
+  {$IFNDEF FPC}
+  AccCtrl,
+  {$IFNDEF BCB5}
+  ImageHlp,
+  {$ENDIF BCB5}
+  {$ENDIF FPC}
   JclBase;
+
+{$HPPEMIT '#include <winnt.h>'}
+{$HPPEMIT 'typedef _IMAGE_THUNK_DATA32 _IMAGE_THUNK_DATA;'}
+{$HPPEMIT 'typedef _IMAGE_TLS_DIRECTORY32 _IMAGE_TLS_DIRECTORY;'}
+
+{$HPPEMIT '#include <winioctl.h>'}
+{$HPPEMIT '#include <delayimp.h>'}
+{$HPPEMIT '#include <nb30.h>'}
+
+//==================================================================================================
+// FPC compatibility
+//==================================================================================================
+
+{$IFDEF FPC}
+
+// from unit Windows
+const
+  FILE_ATTRIBUTE_OFFLINE              = $00001000;
+
+  HKEY_CLASSES_ROOT     = DWORD($80000000);
+  HKEY_CURRENT_USER     = DWORD($80000001);
+  HKEY_LOCAL_MACHINE    = DWORD($80000002);
+  HKEY_USERS            = DWORD($80000003);
+  HKEY_PERFORMANCE_DATA = DWORD($80000004);
+  HKEY_CURRENT_CONFIG   = DWORD($80000005);
+  HKEY_DYN_DATA         = DWORD($80000006);
+
+  VOS__BASE = 0;
+  VOS__WINDOWS16 = 1;
+  VOS__PM16 = 2;
+  VOS__PM32 = 3;
+  VOS__WINDOWS32 = 4;
+
+{ VS_VERSION.dwFileSubtype for VFT_WINDOWS_DRV }
+
+  VFT2_UNKNOWN = 0;
+  VFT2_DRV_PRINTER = 1;
+  VFT2_DRV_KEYBOARD = 2;
+  VFT2_DRV_LANGUAGE = 3;
+  VFT2_DRV_DISPLAY = 4;
+  VFT2_DRV_MOUSE = 5;
+  VFT2_DRV_NETWORK = 6;
+  VFT2_DRV_SYSTEM = 7;
+  VFT2_DRV_INSTALLABLE = 8;
+  VFT2_DRV_SOUND = 9;
+  VFT2_DRV_COMM = 10;
+type
+  _GET_FILEEX_INFO_LEVELS = (GetFileExInfoStandard, GetFileExMaxInfoLevel);
+  TGetFileExInfoLevels = _GET_FILEEX_INFO_LEVELS;
+  GET_FILEEX_INFO_LEVELS = _GET_FILEEX_INFO_LEVELS;
+
+type
+  PKeyboardState = ^TKeyboardState;
+  TKeyboardState = array[0..255] of Byte;
+
+function GetFileAttributesEx(lpFileName: PChar;
+  fInfoLevelId: TGetFileExInfoLevels; lpFileInformation: Pointer): BOOL; stdcall;
+  external kernel32 name 'GetFileAttributesExA';
+function CancelWaitableTimer(hTimer: THandle): BOOL; stdcall;
+  external kernel32 name 'CancelWaitableTimer';
+function CreateWaitableTimer(lpTimerAttributes: PSecurityAttributes; bManualReset: BOOL;
+  lpTimerName: PChar): THandle; stdcall;
+  external kernel32 name 'CreateWaitableTimerA';
+function OpenWaitableTimer(dwDesiredAccess: DWORD; bInheritHandle: BOOL;
+  lpTimerName: PChar): THandle; stdcall;
+  external kernel32 name 'OpenWaitableTimerA';
+
+// from unit AccCtrl
+type
+  SE_OBJECT_TYPE = (
+    SE_UNKNOWN_OBJECT_TYPE,
+    SE_FILE_OBJECT,
+    SE_SERVICE,
+    SE_PRINTER,
+    SE_REGISTRY_KEY,
+    SE_LMSHARE,
+    SE_KERNEL_OBJECT,
+    SE_WINDOW_OBJECT,
+    SE_DS_OBJECT,
+    SE_DS_OBJECT_ALL,
+    SE_PROVIDER_DEFINED_OBJECT,
+    SE_WMIGUID_OBJECT
+  );
+
+// from ActiveX
+const
+  DROPEFFECT_NONE   = 0;
+  DROPEFFECT_COPY   = 1;
+  DROPEFFECT_MOVE   = 2;
+  DROPEFFECT_LINK   = 4;
+  DROPEFFECT_SCROLL = DWORD($80000000);
+
+{$ENDIF FPC}
 
 //--------------------------------------------------------------------------------------------------
 // Locales related
 //--------------------------------------------------------------------------------------------------
 
 const
-  KLF_SETFORPROCESS = $00000100;
+  KLF_SETFORPROCESS         = $00000100;
 
   LCID_ALTERNATE_SORTS      = $00000004;
 
@@ -420,7 +518,6 @@ const
   DOMAIN_ALIAS_RID_RAS_SERVERS      = ($00000229);
   DOMAIN_ALIAS_RID_PREW2KCOMPACCESS = ($0000022A);
 
-
   SE_CREATE_TOKEN_NAME        = 'SeCreateTokenPrivilege';
   SE_ASSIGNPRIMARYTOKEN_NAME  = 'SeAssignPrimaryTokenPrivilege';
   SE_LOCK_MEMORY_NAME         = 'SeLockMemoryPrivilege';
@@ -449,26 +546,6 @@ const
   SE_SYNC_AGENT_NAME          = 'SeSyncAgentPrivilege';
   SE_ENABLE_DELEGATION_NAME   = 'SeEnableDelegationPrivilege';
 
-{$IFNDEF COMPILER5_UP}
-
-type
-  SE_OBJECT_TYPE = (
-    SE_UNKNOWN_OBJECT_TYPE,
-    SE_FILE_OBJECT,
-    SE_SERVICE,
-    SE_PRINTER,
-    SE_REGISTRY_KEY,
-    SE_LMSHARE,
-    SE_KERNEL_OBJECT,
-    SE_WINDOW_OBJECT,
-    SE_DS_OBJECT,
-    SE_DS_OBJECT_ALL,
-    SE_PROVIDER_DEFINED_OBJECT,
-    SE_WMIGUID_OBJECT
-  );
-
-{$ENDIF COMPILER5_UP}
-
 // TODO SetNamedSecurityInfo is incorrectly declared, at least for Windows 2000
 // it is. D5 unit tries to import from aclapi.dll but it is located in advapi3.dll
 // Have to check whether this is also true for Windows NT 4.
@@ -483,14 +560,15 @@ type
   TTokenUser = TOKEN_USER;
   PTokenUser = ^TOKEN_USER;
 
+{.$IFNDEF FPC}
 function SetNamedSecurityInfoW(pObjectName: PWideChar; ObjectType: SE_OBJECT_TYPE;
   SecurityInfo: SECURITY_INFORMATION; ppsidOwner, ppsidGroup: PPSID; ppDacl,
   ppSacl: PACL): DWORD; stdcall; external 'advapi32.dll' name 'SetNamedSecurityInfoW';
-
+{.$ENDIF FPC}
 function AdjustTokenPrivileges(TokenHandle: THandle; DisableAllPrivileges: BOOL;
   const NewState: TTokenPrivileges; BufferLength: DWORD;
   PreviousState: PTokenPrivileges; ReturnLength: PDWORD): BOOL; stdcall;
-  external 'advapi32.dll' name 'AdjustTokenPrivileges'
+  external 'advapi32.dll' name 'AdjustTokenPrivileges';
 
 //==================================================================================================
 // NTFS related I/O control codes, types and constants from winnt.h, winioctl.h
@@ -801,25 +879,6 @@ const
 
 type
 
-{$IFNDEF COMPILER5_UP}
-  PImageExportDirectory = ^TImageExportDirectory;
-  _IMAGE_EXPORT_DIRECTORY = packed record
-    Characteristics: DWORD;
-    TimeDateStamp: DWORD;
-    MajorVersion: Word;
-    MinorVersion: Word;
-    Name: DWORD;
-    Base: DWORD;
-    NumberOfFunctions: DWORD;
-    NumberOfNames: DWORD;
-    AddressOfFunctions: DWORD;    // RVA from base of image
-    AddressOfNames: DWORD;        // RVA from base of image
-    AddressOfNameOrdinals: DWORD; // RVA from base of image
-  end;
-  TImageExportDirectory = _IMAGE_EXPORT_DIRECTORY;
-  IMAGE_EXPORT_DIRECTORY = _IMAGE_EXPORT_DIRECTORY;
-{$ENDIF COMPILER5_UP}
-
 { Non-COFF Object file header }
 
   PANonObjectHeader = ^TANonObjectHeader;
@@ -1028,6 +1087,8 @@ const
 // Missing WinUser.h translations
 //--------------------------------------------------------------------------------------------------
 
+
+{$IFNDEF FPC}
 const
   RT_HTML     = MakeIntResource(23);
   RT_MANIFEST = MakeIntResource(24);
@@ -1037,6 +1098,7 @@ const
   ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID = MakeIntResource(3);
   MINIMUM_RESERVED_MANIFEST_RESOURCE_ID              = MakeIntResource(1);
   MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID              = MakeIntResource(16);
+{$ENDIF FPC}
 
 //--------------------------------------------------------------------------------------------------
 // CorHdr.h translations (part of CLR)
@@ -1049,6 +1111,7 @@ const
   COMIMAGE_FLAGS_STRONGNAMESIGNED = $00000008;
   COMIMAGE_FLAGS_TRACKDEBUGDATA   = $00010000;
 
+{$IFNDEF FPC}
 type
   PImageCor20Header = ^TImageCor20Header;
   IMAGE_COR20_HEADER = record
@@ -1066,11 +1129,14 @@ type
     ManagedNativeHeader: TImageDataDirectory;
   end;
   TImageCor20Header = IMAGE_COR20_HEADER;
+{$ENDIF FPC}
 
 //--------------------------------------------------------------------------------------------------
 // Incorrect translations
 //--------------------------------------------------------------------------------------------------
 
+{$IFNDEF BCB5}
+{$IFNDEF FPC}
 type
 {$IFNDEF COMPILER6_UP}
   // possibly Borland's header translation bug, fixed in Delphi 6
@@ -1079,28 +1145,22 @@ type
 
   PPImageSectionHeader = ^PImageSectionHeader;
 
-  // wrong translation - LastRvaSection parameter is not var
-  function ImageRvaToVa(NtHeaders: PImageNtHeaders; Base: Pointer;
-    Rva: ULONG; LastRvaSection: PPImageSectionHeader): Pointer; stdcall;
-    external 'imagehlp.dll' name 'ImageRvaToVa';
+// wrong translation - LastRvaSection parameter is not var
+function ImageRvaToVa(NtHeaders: PImageNtHeaders; Base: Pointer;
+  Rva: ULONG; LastRvaSection: PPImageSectionHeader): Pointer; stdcall;
+  external 'imagehlp.dll' name 'ImageRvaToVa';
 
-  // wrong translation - last parameter is incorrect
-  function BindImageEx(Flags: DWORD; ImageName, DllPath, SymbolPath: LPSTR;
-    StatusRoutine: TImagehlpStatusRoutine): Bool; stdcall;
-    external 'imagehlp.dll' name 'BindImageEx';
+// wrong translation - last parameter is incorrect
+function BindImageEx(Flags: DWORD; ImageName, DllPath, SymbolPath: LPSTR;
+  StatusRoutine: TImagehlpStatusRoutine): Bool; stdcall;
+  external 'imagehlp.dll' name 'BindImageEx';
+{$ENDIF FPC}
 
-  // wrong translation - last parameter is incorrect
-  function ImageEnumerateCertificates(FileHandle: THandle; TypeFilter: Word;
-    CertificateCount, Indices: PDWORD; IndexCount: DWORD): Bool; stdcall;
-    external 'imagehlp.dll' name 'ImageEnumerateCertificates';
-
-{$IFNDEF COMPILER5_UP}
-  // lpServiceConfig can be nil
-  function QueryServiceConfig(hService: SC_HANDLE;
-    lpServiceConfig: PQueryServiceConfig; cbBufSize: DWORD;
-    var pcbBytesNeeded: DWORD): BOOL; stdcall;
-    external advapi32 name 'QueryServiceConfigA';
-{$ENDIF COMPILER5_UP}
+// wrong translation - last parameter is incorrect
+function ImageEnumerateCertificates(FileHandle: THandle; TypeFilter: Word;
+  CertificateCount, Indices: PDWORD; IndexCount: DWORD): Bool; stdcall;
+  external 'imagehlp.dll' name 'ImageEnumerateCertificates';
+{$ENDIF BCB5}
 
 //==================================================================================================
 // JclShell
@@ -1134,20 +1194,52 @@ type
     reserved2: Longword;
   end;
 
-  TRasDialDlgA = function (lpszPhonebook, lpszEntry, lpszPhoneNumber: PAnsiChar; lpInfo: PRasDialDlg): BOOL; stdcall;
+  TRasDialDlgA = function(lpszPhonebook, lpszEntry, lpszPhoneNumber: PAnsiChar; lpInfo: PRasDialDlg): BOOL; stdcall;
 
 //==================================================================================================
 // JclSysInfo
 //==================================================================================================
 
 const
-  CSIDL_COMMON_APPDATA = $0023; { All Users\Application Data }
+  CSIDL_COMMON_APPDATA       = $0023; { All Users\Application Data }
+  CSIDL_WINDOWS              = $0024; { GetWindowsDirectory() }
+  CSIDL_SYSTEM               = $0025; { GetSystemDirectory() }
+  CSIDL_PROGRAM_FILES        = $0026; { C:\Program Files }
+  CSIDL_MYPICTURES           = $0027; { C:\Program Files\My Pictures }
+  CSIDL_PROFILE              = $0028; { USERPROFILE }
+  CSIDL_PROGRAM_FILES_COMMON = $002B; { C:\Program Files\Common }
+  CSIDL_COMMON_TEMPLATES     = $002D; { All Users\Templates }
+  CSIDL_COMMON_DOCUMENTS     = $002E; { All Users\Documents }
+  CSIDL_COMMON_ADMINTOOLS    = $002F; { All Users\Start Menu\Programs\Administrative Tools }
+  CSIDL_ADMINTOOLS           = $0030; { <user name>\Start Menu\Programs\Administrative Tools }
+  CSIDL_CONNECTIONS          = $0031; { Network and Dial-up Connections }
+  CSIDL_COMMON_MUSIC         = $0035; { All Users\My Music }
+  CSIDL_COMMON_PICTURES      = $0036; { All Users\My Pictures }
+  CSIDL_COMMON_VIDEO         = $0037; { All Users\My Video }
+  CSIDL_RESOURCES            = $0038; { Resource Direcotry }
+  CSIDL_RESOURCES_LOCALIZED  = $0039; { Localized Resource Direcotry }
+  CSIDL_COMMON_OEM_LINKS     = $003A; { Links to All Users OEM specific apps }
+  CSIDL_CDBURN_AREA          = $003B; { USERPROFILE\Local Settings\Application Data\Microsoft\CD Burning }
+  CSIDL_COMPUTERSNEARME      = $003D; { Computers Near Me (computered from Workgroup membership) }
 
 //--------------------------------------------------------------------------------------------------
 
 {$IFDEF SUPPORTS_EXTSYM}
 
 // centralized EXTERNALSYMs to keep this Delphi 3 compatible
+
+{$EXTERNALSYM KLF_SETFORPROCESS}
+{$EXTERNALSYM MAXIMUM_REPARSE_DATA_BUFFER_SIZE}
+{$EXTERNALSYM IO_REPARSE_TAG_RESERVED_ZERO}
+{$EXTERNALSYM IO_REPARSE_TAG_RESERVED_ONE}
+{$EXTERNALSYM IO_REPARSE_TAG_RESERVED_RANGE}
+{$EXTERNALSYM FILE_FLAG_OPEN_REPARSE_POINT}
+
+{$EXTERNALSYM MAKELANGID}
+{$EXTERNALSYM PRIMARYLANGID}
+{$EXTERNALSYM SUBLANGID}
+{$EXTERNALSYM MAKELCID}
+{$EXTERNALSYM SORTIDFROMLCID}
 
 {$EXTERNALSYM LCID_ALTERNATE_SORTS}
 {$EXTERNALSYM CP_THREAD_ACP}
@@ -1301,6 +1393,8 @@ const
 {$EXTERNALSYM LGRPID_GEORGIAN}
 {$EXTERNALSYM LGRPID_ARMENIAN}
 
+{$EXTERNALSYM LANGIDFROMLCID}
+
 {$EXTERNALSYM InterlockedExchangePointer}
 {$EXTERNALSYM SignalObjectAndWait}
 {$EXTERNALSYM GetVersionEx}
@@ -1419,12 +1513,6 @@ const
   {$EXTERNALSYM SE_SYNC_AGENT_NAME}
   {$EXTERNALSYM SE_ENABLE_DELEGATION_NAME}
 
-{$IFNDEF COMPILER5_UP}
-
-  {$EXTERNALSYM SE_OBJECT_TYPE}
-
-{$ENDIF COMPILER5_UP}
-
 {$EXTERNALSYM PPSID}
 {$EXTERNALSYM _TOKEN_USER}
 {$EXTERNALSYM TOKEN_USER}
@@ -1512,10 +1600,6 @@ const
   {$EXTERNALSYM IMAGE_DLLCHARACTERISTICS_WDM_DRIVER}
   {$EXTERNALSYM IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE}
 
-{$IFNDEF COMPILER5_UP}
-  {$EXTERNALSYM _IMAGE_EXPORT_DIRECTORY}
-  {$EXTERNALSYM IMAGE_EXPORT_DIRECTORY}
-{$ENDIF COMPILER5_UP}
   {$EXTERNALSYM ANON_OBJECT_HEADER}
   {$EXTERNALSYM _IMAGE_IMPORT_BY_NAME}
   {$EXTERNALSYM IMAGE_IMPORT_BY_NAME}
@@ -1573,16 +1657,35 @@ const
   {$EXTERNALSYM COMIMAGE_FLAGS_IL_LIBRARY}
   {$EXTERNALSYM COMIMAGE_FLAGS_STRONGNAMESIGNED}
   {$EXTERNALSYM COMIMAGE_FLAGS_TRACKDEBUGDATA}
+{$IFDEF COMPILER6_UP}
   {$EXTERNALSYM IMAGE_COR20_HEADER}
+{$ENDIF}
+{$IFNDEF BCB5}
   {$EXTERNALSYM ImageRvaToVa}
   {$EXTERNALSYM BindImageEx}
   {$EXTERNALSYM ImageEnumerateCertificates}
-
-{$IFNDEF COMPILER5_UP}
-  {$EXTERNALSYM QueryServiceConfig}
-{$ENDIF COMPILER5_UP}
+{$ENDIF}
 
   {$EXTERNALSYM CSIDL_COMMON_APPDATA}
+  {$EXTERNALSYM CSIDL_WINDOWS}
+  {$EXTERNALSYM CSIDL_SYSTEM}
+  {$EXTERNALSYM CSIDL_PROGRAM_FILES}
+  {$EXTERNALSYM CSIDL_MYPICTURES}
+  {$EXTERNALSYM CSIDL_PROFILE}
+  {$EXTERNALSYM CSIDL_PROGRAM_FILES_COMMON}
+  {$EXTERNALSYM CSIDL_COMMON_TEMPLATES}
+  {$EXTERNALSYM CSIDL_COMMON_DOCUMENTS}
+  {$EXTERNALSYM CSIDL_COMMON_ADMINTOOLS}
+  {$EXTERNALSYM CSIDL_ADMINTOOLS}
+  {$EXTERNALSYM CSIDL_CONNECTIONS}
+  {$EXTERNALSYM CSIDL_COMMON_MUSIC}
+  {$EXTERNALSYM CSIDL_COMMON_PICTURES}
+  {$EXTERNALSYM CSIDL_COMMON_VIDEO}
+  {$EXTERNALSYM CSIDL_RESOURCES}
+  {$EXTERNALSYM CSIDL_RESOURCES_LOCALIZED}
+  {$EXTERNALSYM CSIDL_COMMON_OEM_LINKS}
+  {$EXTERNALSYM CSIDL_CDBURN_AREA}
+  {$EXTERNALSYM CSIDL_COMPUTERSNEARME}
 
 {$ENDIF SUPPORTS_EXTSYM}
 
@@ -1635,13 +1738,13 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 var
-  _GetCalendarInfoA: function (Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PAnsiChar;
+  _GetCalendarInfoA: function(Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PAnsiChar;
     cchData: Integer; lpValue: PDWORD): Integer; stdcall;
-  _GetCalendarInfoW: function (Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PWideChar;
+  _GetCalendarInfoW: function(Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PWideChar;
     cchData: Integer; lpValue: PDWORD): Integer; stdcall;
-  _SetCalendarInfoA: function (Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PAnsiChar): Integer; stdcall;
-  _SetCalendarInfoW: function (Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PWideChar): Integer; stdcall;
-  _EnumCalendarInfoEx: function (lpCalInfoEnumProc: TEnumCalendarInfoProcEx; Locale: LCID;
+  _SetCalendarInfoA: function(Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PAnsiChar): Integer; stdcall;
+  _SetCalendarInfoW: function(Locale: LCID; Calendar: CALID; CalType: CALTYPE; lpCalData: PWideChar): Integer; stdcall;
+  _EnumCalendarInfoEx: function(lpCalInfoEnumProc: TEnumCalendarInfoProcEx; Locale: LCID;
     Calendar: CALID; CalType: CALTYPE): BOOL; stdcall;
 
 //--------------------------------------------------------------------------------------------------
@@ -1727,9 +1830,9 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 var
-  _GetVolumeNameForVolumeMountPoint: function (lpszVolumeMountPoint: LPCSTR; lpszVolumeName: LPSTR; cchBufferLength: DWORD): BOOL; stdcall;
-  _SetVolumeMountPoint: function (lpszVolumeMountPoint: LPCSTR; lpszVolumeName: LPCSTR): BOOL; stdcall;
-  _DeleteVolumeMountPoint: function (lpszVolumeMountPoint: LPCSTR): BOOL; stdcall;
+  _GetVolumeNameForVolumeMountPoint: function(lpszVolumeMountPoint: LPCSTR; lpszVolumeName: LPSTR; cchBufferLength: DWORD): BOOL; stdcall;
+  _SetVolumeMountPoint: function(lpszVolumeMountPoint: LPCSTR; lpszVolumeName: LPCSTR): BOOL; stdcall;
+  _DeleteVolumeMountPoint: function(lpszVolumeMountPoint: LPCSTR): BOOL; stdcall;
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1792,7 +1895,7 @@ function GetVersionEx; external kernel32 name 'GetVersionExA';
 //==================================================================================================
 
 type
-  TNetBios = function (P: PNCB): Byte; stdcall;
+  TNetBios = function(P: PNCB): Byte; stdcall;
 
 var
   NetBiosLib: HINST = 0;
@@ -1847,5 +1950,5 @@ begin
   Result := Ordinal and $FFFF;
 end;
 
-
 end.
+

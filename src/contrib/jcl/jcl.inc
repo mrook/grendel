@@ -10,7 +10,7 @@
 { ANY KIND, either express or implied. See the License for the specific language governing rights  }
 { and limitations under the License.                                                               }
 {                                                                                                  }
-{ The Original Code is JCL.INC                                                                     } 
+{ The Original Code is jcl.inc                                                                     } 
 {                                                                                                  }
 { The Initial Developer of the Original Code is documented in the accompanying                     }
 { help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
@@ -18,7 +18,7 @@
 {**************************************************************************************************}
 {                                                                                                  }
 { This include file defines various JCL specific defines. The more generic defines are defined in  }
-{ the JEDI.INC file which is shared with the JEDI VCL.                                             }
+{ the jedi.inc file which is shared with the JEDI VCL.                                             }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
 { Last modified: July 5, 2002                                                                      }
@@ -51,25 +51,10 @@
 
 {.$DEFINE HOOK_DLL_EXCEPTIONS}
 
-// Free Pascal specific
-
-{$DEFINE UseRegAsm}
-{$DEFINE UseAsm}
-
-{$IFDEF FPC}
-  {$DEFINE SUPPORTS_WIDESTRING}
-  {$DEFINE SUPPORTS_INTERFACE}
-  {$DEFINE SUPPORTS_INT64}
-  {$DEFINE SUPPORTS_DYNAMICARRAYS}
-  {$DEFINE SUPPORTS_DEFAULTPARAMS}
-  {$DEFINE SUPPORTS_OVERLOAD}
-  {$ASMMODE Intel}
-  {$MODE DELPHI}
-  {$UNDEF UseRegAsm}
-{$ENDIF}
-
 {$IFDEF DELPHI6_UP}
-  {$WARN SYMBOL_PLATFORM OFF}  // Platform warnings off
+  // Platform warnings off
+  {$WARN SYMBOL_PLATFORM OFF}
+  {$WARN UNIT_PLATFORM OFF}
 {$ENDIF}
 
 {$IFDEF DELPHI7_UP}

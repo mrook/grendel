@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclFileUtils.pas.                                                           }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -25,24 +25,45 @@
 { routines as well but they are specific to the Windows shell.                                     }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: September 2, 2002                                                                 }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclFileUtils.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclFileUtils;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
 uses
+  {$IFDEF UNIX}
+  Types, Libc,
+  {$ENDIF UNIX}
   {$IFDEF MSWINDOWS}
   Windows,
   {$ENDIF MSWINDOWS}
-  Classes, Graphics, SysUtils,
-  JclBase, JclSysInfo;
+  Classes, SysUtils,
+  JclBase;
+
+//--------------------------------------------------------------------------------------------------
+// replacements for defective Libc.pas declarations
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF UNIX}
+
+function stat64(FileName: PChar; var StatBuffer: TStatBuf64): Integer; cdecl;
+{$EXTERNALSYM stat64}
+function fstat64(FileDes: Integer; var StatBuffer: TStatBuf64): Integer; cdecl;
+{$EXTERNALSYM fstat64}
+function lstat64(FileName: PChar; var StatBuffer: TStatBuf64): Integer; cdecl;
+{$EXTERNALSYM lstat64}
+
+{$ENDIF UNIX}
 
 //--------------------------------------------------------------------------------------------------
 // Path Manipulation
@@ -53,15 +74,30 @@ uses
 //--------------------------------------------------------------------------------------------------
 
 const
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   PathSeparator    = '/';
-  {$ENDIF LINUX}
+  {$ENDIF UNIX}
   {$IFDEF MSWINDOWS}
   DriveLetters     = ['a'..'z', 'A'..'Z'];
   PathDevicePrefix = '\\.\';
   PathSeparator    = '\';
   PathUncPrefix    = '\\';
   {$ENDIF MSWINDOWS}
+
+  faSymLink           = $00000040 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF}; // defined since D7
+  faNormalFile        = $00000080;
+  faTemporary         = $00000100 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+  faSparseFile        = $00000200 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+  faReparsePoint      = $00000400 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+  faCompressed        = $00000800 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+  faOffline           = $00001000 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+  faNotContentIndexed = $00002000 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+  faEncrypted         = $00004000 {$IFDEF SUPPORTS_PLATFORM} platform {$ENDIF};
+
+  faRejectedByDefault = faHidden + faSysFile + faVolumeID + faDirectory;
+  faWindowsSpecific   = faVolumeID + faArchive + faTemporary + faSparseFile + faReparsePoint +
+                        faCompressed + faOffline + faNotContentIndexed + faEncrypted;
+  faUnixSpecific      = faSymLink;
 
 type
   TCompactPath = ({cpBegin, }cpCenter, cpEnd);
@@ -72,18 +108,23 @@ function PathAppend(const Path, Append: string): string;
 function PathBuildRoot(const Drive: Byte): string;
 function PathCanonicalize(const Path: string): string;
 function PathCommonPrefix(const Path1, Path2: string): Integer;
+{$IFDEF MSWINDOWS}
 function PathCompactPath(const DC: HDC; const Path: string; const Width: Integer;
-  CmpFmt: TCompactPath): string; overload;
-function PathCompactPath(const Canvas: TCanvas; const Path: string; const Width: Integer;
-  CmpFmt: TCompactPath): string; overload;
+  CmpFmt: TCompactPath): string;
+{$ENDIF MSWINDOWS}
 procedure PathExtractElements(const Source: string; var Drive, Path, FileName, Ext: string);
 function PathExtractFileDirFixed(const S: AnsiString): AnsiString;
 function PathExtractFileNameNoExt(const Path: string): string;
 function PathExtractPathDepth(const Path: string; Depth: Integer): string;
 function PathGetDepth(const Path: string): Integer;
+{$IFDEF MSWINDOWS}
+{$IFNDEF FPC}
 function PathGetLongName(const Path: string): string;
+{$ENDIF}
 function PathGetLongName2(Path: string): string;
 function PathGetShortName(const Path: string): string;
+{$ENDIF MSWINDOWS}
+function PathGetRelativePath(Origin, Destination: string): string;
 function PathIsAbsolute(const Path: string): Boolean;
 function PathIsChild(const Path, Base: AnsiString): Boolean;
 function PathIsDiskDevice(const Path: string): Boolean;
@@ -104,62 +145,407 @@ type
   TFileListOptions = set of TFileListOption;
   TJclAttributeMatch = (amAny, amExact, amSubSetOf, amSuperSetOf, amCustom);
   TFileMatchFunc = function(const Attr: Integer; const FileInfo: TSearchRec): Boolean;
+  TFileHandler = procedure (const FileName: string) of object;
+  TFileHandlerEx = procedure (const Directory: string; const FileInfo: TSearchRec) of object;
 
 function BuildFileList(const Path: string; const Attr: Integer; const List: TStrings): Boolean;
 function AdvBuildFileList(const Path: string; const Attr: Integer; const Files: TStrings;
-  const AttributeMatch: TJclAttributeMatch = amSubsetOf; const Options: TFileListOptions = [];
+  const AttributeMatch: TJclAttributeMatch = amSuperSetOf; const Options: TFileListOptions = [];
   const SubfoldersMask: string = ''; const FileMatchFunc: TFileMatchFunc = nil): Boolean;
+function VerifyFileAttributeMask(var RejectedAttributes, RequiredAttributes: Integer): Boolean;
+function IsFileAttributeMatch(FileAttributes, RejectedAttributes,
+  RequiredAttributes: Integer): Boolean;
+function FileAttributesStr(const FileInfo: TSearchRec): string;
+function IsFileNameMatch(FileName: string; const Mask: string;
+  const CaseSensitive: Boolean = {$IFDEF MSWINDOWS} False {$ELSE} True {$ENDIF}): Boolean;
+procedure EnumFiles(const Path: string; HandleFile: TFileHandlerEx;
+  RejectedAttributes: Integer = faRejectedByDefault; RequiredAttributes: Integer = 0;
+  Abort: PBoolean = nil);
+procedure EnumDirectories(const Root: string; const HandleDirectory: TFileHandler;
+  const IncludeHiddenDirectories: Boolean = False; const SubDirectoriesMask: string = '';
+  Abort: PBoolean = nil {$IFDEF UNIX}; ResolveSymLinks: Boolean = True {$ENDIF});
+{$IFDEF MSWINDOWS}
 function CloseVolume(var Volume: THandle): Boolean;
 procedure CreateEmptyFile(const FileName: string);
+{$IFNDEF FPC}
 function DeleteDirectory(const DirectoryName: string; MoveToRecycleBin: Boolean): Boolean;
+{$ENDIF}
 function DelTree(const Path: string): Boolean;
 function DelTreeEx(const Path: string; AbortOnFailure: Boolean; Progress: TDelTreeProgress): Boolean;
-function DirectoryExists(const Name: string): Boolean;
+{$ENDIF MSWINDOWS}
+function DirectoryExists(const Name: string {$IFDEF UNIX}; ResolveSymLinks: Boolean = True {$ENDIF}): Boolean;
 {$IFDEF MSWINDOWS}
 function DiskInDrive(Drive: Char): Boolean;
-{$ENDIF MSWINDOWS}
 function FileCreateTemp(var Prefix: string): THandle;
+{$ENDIF MSWINDOWS}
 function FileExists(const FileName: string): Boolean;
 function GetBackupFileName(const FileName: string): string;
 function FileGetDisplayName(const FileName: string): string;
 function FileGetSize(const FileName: string): Integer;
+{$IFDEF MSWINDOWS}
 function FileGetTempName(const Prefix: string): string;
 function FileGetTypeName(const FileName: string): string;
+{$ENDIF MSWINDOWS}
 function FindUnusedFileName(const FileName, FileExt, Suffix: AnsiString): AnsiString;
 function ForceDirectories(Name: string): Boolean;
 function GetDirectorySize(const Path: string): Int64;
+{$IFDEF MSWINDOWS}
 function GetDriveTypeStr(const Drive: Char): string;
 function GetFileAgeCoherence(const FileName: string): Boolean;
+{$ENDIF MSWINDOWS}
 procedure GetFileAttributeList(const Items: TStrings; const Attr: Integer);
+{$IFDEF MSWINDOWS}
 procedure GetFileAttributeListEx(const Items: TStrings; const Attr: Integer);
-function GetFileInformation(const FileName: string): TSearchRec;
-function GetFileLastWrite(const FileName: string): TFileTime;
-function GetFileLastAccess(const FileName: string): TFileTime;
-function GetFileCreation(const FileName: string): TFileTime;
+{$ENDIF MSWINDOWS}
+function GetFileInformation(const FileName: string; out FileInfo: TSearchRec): Boolean; overload;
+function GetFileInformation(const FileName: string): TSearchRec; overload;
+{$IFDEF UNIX}
+function GetFileStatus(const FileName: string; out StatBuf: TStatBuf64;
+  const ResolveSymLinks: Boolean): Integer;
+{$ENDIF UNIX}
+{$IFDEF MSWINDOWS}
+function GetFileLastWrite(const FileName: string): TFileTime; overload;
+function GetFileLastWrite(const FileName: string; out LocalTime: TDateTime): Boolean; overload;
+function GetFileLastAccess(const FileName: string): TFileTime; overload;
+function GetFileLastAccess(const FileName: string; out LocalTime: TDateTime): Boolean; overload;
+function GetFileCreation(const FileName: string): TFileTime; overload;
+function GetFileCreation(const FileName: string; out LocalTime: TDateTime): Boolean; overload;
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+function GetFileLastWrite(const FileName: string; out TimeStamp: Integer; ResolveSymLinks: Boolean = True): Boolean; overload;
+function GetFileLastWrite(const FileName: string; out LocalTime: TDateTime; ResolveSymLinks: Boolean = True): Boolean; overload;
+function GetFileLastWrite(const FileName: string; ResolveSymLinks: Boolean = True): Integer; overload;
+function GetFileLastAccess(const FileName: string; out TimeStamp: Integer; ResolveSymLinks: Boolean = True): Boolean; overload;
+function GetFileLastAccess(const FileName: string; out LocalTime: TDateTime; ResolveSymLinks: Boolean = True): Boolean; overload;
+function GetFileLastAccess(const FileName: string; ResolveSymLinks: Boolean = True): Integer; overload;
+function GetFileLastAttrChange(const FileName: string; out TimeStamp: Integer; ResolveSymLinks: Boolean = True): Boolean; overload;
+function GetFileLastAttrChange(const FileName: string; out LocalTime: TDateTime; ResolveSymLinks: Boolean = True): Boolean; overload;
+function GetFileLastAttrChange(const FileName: string; ResolveSymLinks: Boolean = True): Integer; overload;
+{$ENDIF UNIX}
 function GetModulePath(const Module: HMODULE): string;
 function GetSizeOfFile(const FileName: string): Int64; overload;
+function GetSizeOfFile(const FileInfo: TSearchRec): Int64; overload;
+{$IFDEF MSWINDOWS}
 function GetSizeOfFile(Handle: THandle): Int64; overload;
 function GetStandardFileInfo(const FileName: string): TWin32FileAttributeData;
-function IsDirectory(const FileName: string): Boolean;
+{$ENDIF MSWINDOWS}
+function IsDirectory(const FileName: string {$IFDEF UNIX}; ResolveSymLinks: Boolean = True {$ENDIF}): Boolean;
+function IsRootDirectory(const CanonicFileName: string): Boolean;
+{$IFDEF MSWINDOWS}
 function LockVolume(const Volume: string; var Handle: THandle): Boolean;
 function OpenVolume(const Drive: Char): THandle;
 function SetDirLastWrite(const DirName: string; const DateTime: TDateTime): Boolean;
 function SetDirLastAccess(const DirName: string; const DateTime: TDateTime): Boolean;
 function SetDirCreation(const DirName: string; const DateTime: TDateTime): Boolean;
+{$ENDIF MSWINDOWS}
 function SetFileLastWrite(const FileName: string; const DateTime: TDateTime): Boolean;
 function SetFileLastAccess(const FileName: string; const DateTime: TDateTime): Boolean;
+{$IFDEF MSWINDOWS}
 function SetFileCreation(const FileName: string; const DateTime: TDateTime): Boolean;
 procedure ShredFile(const FileName: string; Times: Integer = 1);
 function UnlockVolume(var Handle: THandle): Boolean;
+{$IFNDEF FPC}
 function Win32DeleteFile(const FileName: string; MoveToRecycleBin: Boolean): Boolean;
+{$ENDIF FPC}
 function Win32BackupFile(const FileName: string; Move: Boolean): Boolean;
 function Win32RestoreFile(const FileName: string): Boolean;
+{$ENDIF MSWINDOWS}
+
+{$IFDEF UNIX}
+function CreateSymbolicLink(const Name, Target: string): Boolean;
+{ This function gets the value of the symbolic link filename. }
+function SymbolicLinkTarget(const Name: string): string;
+{$ENDIF UNIX}
+
+//--------------------------------------------------------------------------------------------------
+// TJclFileAttributeMask
+//
+// File search helper class, allows to specify required/rejected attributes
+//--------------------------------------------------------------------------------------------------
+
+type
+  TAttributeInterest = (aiIgnored, aiRejected, aiRequired);
+
+  TJclCustomFileAttrMask = class(TPersistent)
+  private
+    FRequiredAttr: Integer;
+    FRejectedAttr: Integer;
+    function GetAttr(Index: Integer): TAttributeInterest;
+    procedure SetAttr(Index: Integer; const Value: TAttributeInterest);
+    procedure ReadRequiredAttributes(Reader: TReader);
+    procedure ReadRejectedAttributes(Reader: TReader);
+    procedure WriteRequiredAttributes(Writer: TWriter);
+    procedure WriteRejectedAttributes(Writer: TWriter);
+  protected
+    procedure DefineProperties(Filer: TFiler); override;
+    property ReadOnly: TAttributeInterest index faReadOnly
+      read GetAttr write SetAttr stored False;
+    property Hidden: TAttributeInterest index faHidden
+      read GetAttr write SetAttr stored False;
+    property System: TAttributeInterest index faSysFile
+      read GetAttr write SetAttr stored False;
+    property VolumeID: TAttributeInterest index faVolumeID
+      read GetAttr write SetAttr stored False;
+    property Directory: TAttributeInterest index faDirectory
+      read GetAttr write SetAttr stored False;
+    property SymLink: TAttributeInterest index faSymLink
+      read GetAttr write SetAttr stored False;
+    property Normal: TAttributeInterest index faNormalFile
+      read GetAttr write SetAttr stored False;
+    property Archive: TAttributeInterest index faArchive
+      read GetAttr write SetAttr stored False;
+    property Temporary: TAttributeInterest index faTemporary
+      read GetAttr write SetAttr stored False;
+    property SparseFile: TAttributeInterest index faSparseFile
+      read GetAttr write SetAttr stored False;
+    property ReparsePoint: TAttributeInterest index faReparsePoint
+      read GetAttr write SetAttr stored False;
+    property Compressed: TAttributeInterest index faCompressed
+      read GetAttr write SetAttr stored False;
+    property OffLine: TAttributeInterest index faOffline
+      read GetAttr write SetAttr stored False;
+    property NotContentIndexed: TAttributeInterest index faNotContentIndexed
+      read GetAttr write SetAttr stored False;
+    property Encrypted: TAttributeInterest index faEncrypted
+      read GetAttr write SetAttr stored False;
+  public
+    constructor Create;
+    procedure Assign(Source: TPersistent); override;
+    procedure Clear;
+    function Match(FileAttributes: Integer): Boolean; overload;
+    function Match(const FileInfo: TSearchRec): Boolean; overload;
+    property Required: Integer read FRequiredAttr write FRequiredAttr;
+    property Rejected: Integer read FRejectedAttr write FRejectedAttr;
+    property Attribute[Index: Integer]: TAttributeInterest read GetAttr write SetAttr; default;
+  end;
+
+  TJclFileAttributeMask = class(TJclCustomFileAttrMask)
+  published
+    property ReadOnly;
+    property Hidden;
+    property System;
+    property Directory;
+    property Normal;
+    {$IFDEF UNIX}
+    property SymLink;
+    {$ENDIF UNIX}
+    {$IFDEF MSWINDOWS}
+    property VolumeID;
+    property Archive;
+    property Temporary;
+    property SparseFile;
+    property ReparsePoint;
+    property Compressed;
+    property OffLine;
+    property NotContentIndexed;
+    property Encrypted;
+    {$ENDIF MSWINDOWS}
+  end;
+
+//--------------------------------------------------------------------------------------------------
+// IJclFileEnumerator / TJclFileEnumerator
+//
+// Interface / class for thread-based file search
+//--------------------------------------------------------------------------------------------------
+
+type
+  TFileSearchOption = (fsIncludeSubDirectories, fsIncludeHiddenSubDirectories, fsLastChangeAfter,
+    fsLastChangeBefore, fsMaxSize, fsMinSize);
+  TFileSearchOptions = set of TFileSearchOption;
+  TFileSearchTaskID = Integer;
+  TFileSearchTerminationEvent = procedure (const ID: TFileSearchTaskID; const Aborted: Boolean) of object;
+  TFileEnumeratorSyncMode = (smPerFile, smPerDirectory);
+
+  IJclFileEnumerator = interface
+    ['{F7E747ED-1C41-441F-B25B-BB314E00C4E9}']
+    // property access methods
+    function GetAttributeMask: TJclFileAttributeMask;
+    function GetCaseSensitiveSearch: Boolean;
+    function GetRootDirectory: string;
+    function GetFileMask: string;
+    function GetFileMasks: TStrings;
+    function GetFileSizeMax: Int64;
+    function GetFileSizeMin: Int64;
+    function GetIncludeSubDirectories: Boolean;
+    function GetIncludeHiddenSubDirectories: Boolean;
+    function GetLastChangeAfter: TDateTime;
+    function GetLastChangeBefore: TDateTime;
+    function GetLastChangeAfterStr: string;
+    function GetLastChangeBeforeStr: string;
+    function GetRunningTasks: Integer;
+    function GetSubDirectoryMask: string;
+    function GetSynchronizationMode: TFileEnumeratorSyncMode;
+    function GetOnEnterDirectory: TFileHandler;
+    function GetOnTerminateTask: TFileSearchTerminationEvent;
+    function GetOption(const Option: TFileSearchOption): Boolean;
+    function GetOptions: TFileSearchoptions;
+    procedure SetAttributeMask(const Value: TJclFileAttributeMask);
+    procedure SetCaseSensitiveSearch(const Value: Boolean);
+    procedure SetRootDirectory(const Value: string);
+    procedure SetFileMask(const Value: string);
+    procedure SetFileMasks(const Value: TStrings);
+    procedure SetFileSizeMax(const Value: Int64);
+    procedure SetFileSizeMin(const Value: Int64);
+    procedure SetIncludeSubDirectories(const Value: Boolean);
+    procedure SetIncludeHiddenSubDirectories(const Value: Boolean);
+    procedure SetLastChangeAfter(const Value: TDateTime);
+    procedure SetLastChangeBefore(const Value: TDateTime);
+    procedure SetLastChangeAfterStr(const Value: string);
+    procedure SetLastChangeBeforeStr(const Value: string);
+    procedure SetOption(const Option: TFileSearchOption; const Value: Boolean);
+    procedure SetOptions(const Value: TFileSearchOptions);
+    procedure SetSubDirectoryMask(const Value: string);
+    procedure SetSynchronizationMode(const Value: TFileEnumeratorSyncMode);
+    procedure SetOnEnterDirectory(const Value: TFileHandler);
+    procedure SetOnTerminateTask(const Value: TFileSearchTerminationEvent);
+    // other methods
+    function FillList(List: TStrings): TFileSearchTaskID;
+    function ForEach(Handler: TFileHandler): TFileSearchTaskID; overload;
+    function ForEach(Handler: TFileHandlerEx): TFileSearchTaskID; overload;
+    procedure StopTask(ID: TFileSearchTaskID);
+    procedure StopAllTasks(Silently: Boolean = False); // Silently: Don't call OnTerminateTask
+    // properties
+    property CaseSensitiveSearch: Boolean read GetCaseSensitiveSearch write SetCaseSensitiveSearch;
+    property RootDirectory: string read GetRootDirectory write SetRootDirectory;
+    property FileMask: string read GetFileMask write SetFileMask;
+    property SubDirectoryMask: string read GetSubDirectoryMask write SetSubDirectoryMask;
+    property AttributeMask: TJclFileAttributeMask read GetAttributeMask write SetAttributeMask;
+    property FileSizeMin: Int64 read GetFileSizeMin write SetFileSizeMin;
+    property FileSizeMax: Int64 read GetFileSizeMax write SetFileSizeMax; // default InvalidFileSize;
+    property LastChangeAfter: TDateTime read GetLastChangeAfter write SetLastChangeAfter;
+    property LastChangeBefore: TDateTime read GetLastChangeBefore write SetLastChangeBefore;
+    property LastChangeAfterAsString: string read GetLastChangeAfterStr write SetLastChangeAfterStr;
+    property LastChangeBeforeAsString: string read GetLastChangeBeforeStr write SetLastChangeBeforeStr;
+    property IncludeSubDirectories: Boolean read GetIncludeSubDirectories
+      write SetIncludeSubDirectories;
+    property IncludeHiddenSubDirectories: Boolean read GetIncludeHiddenSubDirectories
+      write SetIncludeHiddenSubDirectories;
+    property RunningTasks: Integer read GetRunningTasks;
+    property SynchronizationMode: TFileEnumeratorSyncMode read GetSynchronizationMode
+      write SetSynchronizationMode;
+    property OnEnterDirectory: TFileHandler read GetOnEnterDirectory write SetOnEnterDirectory;
+    property OnTerminateTask: TFileSearchTerminationEvent read GetOnTerminateTask
+      write SetOnTerminateTask;
+  end;
+
+  TJclFileEnumerator = class(TPersistent, IJclFileEnumerator)
+  private
+    FOwnerInterface: IInterface;
+    FTasks: TList;
+    FFileMasks: TStrings;
+    FRootDirectory: string;
+    FSubDirectoryMask: string;
+    FOnEnterDirectory: TFileHandler;
+    FOnTerminateTask: TFileSearchTerminationEvent;
+    FNextTaskID: TFileSearchTaskID;
+    FAttributeMask: TJclFileAttributeMask;
+    FSynchronizationMode: TFileEnumeratorSyncMode;
+    FFileSizeMin: Int64;
+    FFileSizeMax: Int64;
+    FLastChangeBefore: TDateTime;
+    FLastChangeAfter: TDateTime;
+    FOptions: TFileSearchOptions;
+    FCaseSensitiveSearch: Boolean;
+    function IsLastChangeAfterStored: Boolean;
+    function IsLastChangeBeforeStored: Boolean;
+    function GetNextTaskID: TFileSearchTaskID;
+    function GetCaseSensitiveSearch: Boolean;
+    procedure SetCaseSensitiveSearch(const Value: Boolean);
+  protected
+    FRefCount: Integer;
+    function CreateTask: TThread;
+    procedure TaskTerminated(Sender: TObject);
+    function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+    // IJclFileEnumerator property access methods
+    function GetAttributeMask: TJclFileAttributeMask;
+    function GetRootDirectory: string;
+    function GetFileMask: string;
+    function GetFileMasks: TStrings;
+    function GetFileSizeMax: Int64;
+    function GetFileSizeMin: Int64;
+    function GetIncludeSubDirectories: Boolean;
+    function GetIncludeHiddenSubDirectories: Boolean;
+    function GetLastChangeAfter: TDateTime;
+    function GetLastChangeBefore: TDateTime;
+    function GetLastChangeAfterStr: string;
+    function GetLastChangeBeforeStr: string;
+    function GetOption(const Option: TFileSearchOption): Boolean;
+    function GetOptions: TFileSearchoptions;
+    function GetRunningTasks: Integer;
+    function GetSubDirectoryMask: string;
+    function GetSynchronizationMode: TFileEnumeratorSyncMode;
+    function GetOnEnterDirectory: TFileHandler;
+    function GetOnTerminateTask: TFileSearchTerminationEvent;
+    procedure SetAttributeMask(const Value: TJclFileAttributeMask);
+    procedure SetRootDirectory(const Value: string);
+    procedure SetFileMask(const Value: string);
+    procedure SetFileMasks(const Value: TStrings);
+    procedure SetFileSizeMax(const Value: Int64);
+    procedure SetFileSizeMin(const Value: Int64);
+    procedure SetIncludeSubDirectories(const Value: Boolean);
+    procedure SetIncludeHiddenSubDirectories(const Value: Boolean);
+    procedure SetLastChangeAfter(const Value: TDateTime);
+    procedure SetLastChangeBefore(const Value: TDateTime);
+    procedure SetLastChangeAfterStr(const Value: string);
+    procedure SetLastChangeBeforeStr(const Value: string);
+    procedure SetOption(const Option: TFileSearchOption; const Value: Boolean);
+    procedure SetOptions(const Value: TFileSearchOptions);
+    procedure SetSubDirectoryMask(const Value: string);
+    procedure SetSynchronizationMode(const Value: TFileEnumeratorSyncMode);
+    procedure SetOnEnterDirectory(const Value: TFileHandler);
+    procedure SetOnTerminateTask(const Value: TFileSearchTerminationEvent);
+    property NextTaskID: TFileSearchTaskID read GetNextTaskID;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure AfterConstruction; override;
+    procedure Assign(Source: TPersistent); override;
+    function FillList(List: TStrings): TFileSearchTaskID;
+    function ForEach(Handler: TFileHandler): TFileSearchTaskID; overload;
+    function ForEach(Handler: TFileHandlerEx): TFileSearchTaskID; overload;
+    procedure StopTask(ID: TFileSearchTaskID);
+    procedure StopAllTasks(Silently: Boolean = False); // Silently: Don't call OnTerminateTask
+    property FileMask: string read GetFileMask write SetFileMask;
+    property IncludeSubDirectories: Boolean
+      read GetIncludeSubDirectories write SetIncludeSubDirectories;
+    property IncludeHiddenSubDirectories: Boolean 
+      read GetIncludeHiddenSubDirectories write SetIncludeHiddenSubDirectories;
+    property SearchOption[const Option: TFileSearchOption]: Boolean read GetOption write SetOption;
+    property LastChangeAfterAsString: string read GetLastChangeAfterStr write SetLastChangeAfterStr;
+    property LastChangeBeforeAsString: string read GetLastChangeBeforeStr write SetLastChangeBeforeStr;
+  published
+    property CaseSensitiveSearch: Boolean read GetCaseSensitiveSearch write SetCaseSensitiveSearch
+      default {$IFDEF MSWINDOWS} False {$ELSE} True {$ENDIF};
+    property FileMasks: TStrings read FFileMasks write SetFileMasks;
+    property RootDirectory: string read FRootDirectory write FRootDirectory;
+    property SubDirectoryMask: string read FSubDirectoryMask write FSubDirectoryMask;
+    property AttributeMask: TJclFileAttributeMask read FAttributeMask write SetAttributeMask;
+    property FileSizeMin: Int64 read FFileSizeMin write FFileSizeMin;
+    property FileSizeMax: Int64 read FFileSizeMax write FFileSizeMax;
+    property LastChangeAfter: TDateTime read FLastChangeAfter write FLastChangeAfter
+      stored IsLastChangeAfterStored;
+    property LastChangeBefore: TDateTime read FLastChangeBefore write FLastChangeBefore
+      stored IsLastChangeBeforeStored;
+    property Options: TFileSearchOptions read FOptions write FOptions
+      default [fsIncludeSubDirectories];
+    property RunningTasks: Integer read GetRunningTasks;
+    property SynchronizationMode: TFileEnumeratorSyncMode read FSynchronizationMode write FSynchronizationMode
+      default smPerDirectory;
+    property OnEnterDirectory: TFileHandler read FOnEnterDirectory write FOnEnterDirectory;
+    property OnTerminateTask: TFileSearchTerminationEvent read FOnTerminateTask write FOnTerminateTask;
+  end;
+
+function FileSearch: IJclFileEnumerator;
 
 //--------------------------------------------------------------------------------------------------
 // TFileVersionInfo
 //
 // Class that enables reading the version information stored in a PE file.
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 type
   TFileFlag = (ffDebug, ffInfoInferred, ffPatched, ffPreRelease, ffPrivateBuild, ffSpecialBuild);
@@ -175,9 +561,9 @@ type
       Pair: DWORD);
   end;
 
-  EJclFileVersionInfoError = class (EJclError);
+  EJclFileVersionInfoError = class(EJclError);
 
-  TJclFileVersionInfo = class (TObject)
+  TJclFileVersionInfo = class(TObject)
   private
     FBuffer: string;
     FFixedInfo: PVSFixedFileInfo;
@@ -246,10 +632,39 @@ function OSIdentToString(const OSIdent: DWORD): string;
 function OSFileTypeToString(const OSFileType: DWORD; const OSFileSubType: DWORD = 0): string;
 
 function VersionResourceAvailable(const FileName: string): Boolean;
-function VersionFixedFileInfo(const FileName: string; var FixedInfo: TVSFixedFileInfo): Boolean;
+
+{$ENDIF MSWINDOWS}
+
+//--------------------------------------------------------------------------------------------------
+// Version Info formatting
+//--------------------------------------------------------------------------------------------------
+
+type
+  TFileVersionFormat = (vfMajorMinor, vfFull);
 
 function FormatVersionString(const HiV, LoV: Word): string; overload;
 function FormatVersionString(const Major, Minor, Build, Revision: Word): string; overload;
+
+{$IFDEF MSWINDOWS}
+
+function FormatVersionString(const FixedInfo: TVSFixedFileInfo; VersionFormat: TFileVersionFormat = vfFull): string; overload;
+
+//--------------------------------------------------------------------------------------------------
+// Version Info extracting
+//--------------------------------------------------------------------------------------------------
+
+procedure VersionExtractFileInfo(const FixedInfo: TVSFixedFileInfo; var Major, Minor, Build, Revision: Word);
+procedure VersionExtractProductInfo(const FixedInfo: TVSFixedFileInfo; var Major, Minor, Build, Revision: Word);
+
+//--------------------------------------------------------------------------------------------------
+// Fixed Version Info routines
+//--------------------------------------------------------------------------------------------------
+
+function VersionFixedFileInfo(const FileName: string; var FixedInfo: TVSFixedFileInfo): Boolean;
+function VersionFixedFileInfoString(const FileName: string; VersionFormat: TFileVersionFormat = vfFull;
+  const NotAvailableText: string = ''): string;
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 // Streams
@@ -257,10 +672,10 @@ function FormatVersionString(const Major, Minor, Build, Revision: Word): string;
 // TStream descendent classes for dealing with temporary files and for using file mapping objects.
 //--------------------------------------------------------------------------------------------------
 
-{ TTempFileStream }
+{$IFDEF MSWINDOWS}
 
 type
-  TJclTempFileStream = class (THandleStream)
+  TJclTempFileStream = class(THandleStream)
   private
     FFileName: string;
   public
@@ -269,11 +684,10 @@ type
     property FileName: string read FFileName;
   end;
 
+
   TJclCustomFileMapping = class;
 
-{ TJclFileMappingView }
-
-  TJclFileMappingView = class (TCustomMemoryStream)
+  TJclFileMappingView = class(TCustomMemoryStream)
   private
     FFileMapping: TJclCustomFileMapping;
     FOffsetHigh: Cardinal;
@@ -295,11 +709,9 @@ type
     property Offset: Int64 read GetOffset;
   end;
 
-{ TJclCustomFileMapping }
-
   TJclFileMappingRoundOffset = (rvDown, rvUp);
 
-  TJclCustomFileMapping = class (TObject)
+  TJclCustomFileMapping = class(TObject)
   private
     FExisted: Boolean;
     FHandle: THandle;
@@ -311,7 +723,7 @@ type
   protected
     procedure ClearViews;
     procedure InternalCreate(const FileHandle: THandle; const Name: string;
-      const Protect: Cardinal; MaximumSize: Int64; const SecAttr: PSecurityAttributes);
+      const Protect: Cardinal; MaximumSize: Int64; SecAttr: PSecurityAttributes);
     procedure InternalOpen(const Name: string; const InheritHandle: Boolean;
       const DesiredAccess: Cardinal);
     constructor Create;
@@ -330,35 +742,31 @@ type
     property Views[index: Integer]: TJclFileMappingView read GetView;
   end;
 
-{ TJclFileMapping }
-
-  TJclFileMapping = class (TJclCustomFileMapping)
+  TJclFileMapping = class(TJclCustomFileMapping)
   private
     FFileHandle: THandle;
   public
     constructor Create(const FileName: string; FileMode: Cardinal;
       const Name: string; Protect: Cardinal; const MaximumSize: Int64;
-      const SecAttr: PSecurityAttributes); overload;
+      SecAttr: PSecurityAttributes); overload;
     constructor Create(const FileHandle: THandle; const Name: string;
       Protect: Cardinal; const MaximumSize: Int64;
-      const SecAttr: PSecurityAttributes); overload;
+      SecAttr: PSecurityAttributes); overload;
     destructor Destroy; override;
     property FileHandle: THandle read FFileHandle;
   end;
 
-{ TJclSwapFileMapping }
-
-  TJclSwapFileMapping = class (TJclCustomFileMapping)
+  TJclSwapFileMapping = class(TJclCustomFileMapping)
   public
     constructor Create(const Name: string; Protect: Cardinal;
-      const MaximumSize: Int64; const SecAttr: PSecurityAttributes);
+      const MaximumSize: Int64; SecAttr: PSecurityAttributes);
   end;
 
 //--------------------------------------------------------------------------------------------------
 // TJclFileMappingStream
 //--------------------------------------------------------------------------------------------------
 
-  TJclFileMappingStream = class (TCustomMemoryStream)
+  TJclFileMappingStream = class(TCustomMemoryStream)
   private
     FFileHandle: THandle;
     FMapping: THandle;
@@ -379,7 +787,7 @@ type
   PPCharArray = ^TPCharArray;
   TPCharArray = array [0..0] of PChar;
 
-  TJclMappedTextReader = class (TPersistent)
+  TJclMappedTextReader = class(TPersistent)
   private
     FContent: PChar;
     FEnd: PChar;
@@ -427,11 +835,13 @@ type
     property Size: Integer read FSize;
   end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
 // TJclFileMaskComparator
 //--------------------------------------------------------------------------------------------------
 
-// TODO UNTESTET/UNDOCUMENTED
+// TODO UNTESTED/UNDOCUMENTED
 
 type
   TJclFileMaskComparator = class(TObject)
@@ -463,36 +873,90 @@ type
 // Exceptions
 //--------------------------------------------------------------------------------------------------
 
-  EJclPathError = class (EJclError);
-  EJclFileUtilsError = class (EJclError);
-  EJclTempFileStreamError = class (EJclWin32Error);
-  EJclFileMappingError = class (EJclWin32Error);
-  EJclFileMappingViewError = class (EJclWin32Error);
+  EJclPathError = class(EJclError);
+  EJclFileUtilsError = class(EJclError);
+  {$IFDEF MSWINDOWS}
+  EJclTempFileStreamError = class(EJclWin32Error);
+  EJclFileMappingError = class(EJclWin32Error);
+  EJclFileMappingViewError = class(EJclWin32Error);
+  {$ENDIF MSWINDOWS}
 
 implementation
 
 uses
   {$IFDEF MSWINDOWS}
-  ActiveX, ShellApi, ShlObj,
+  ActiveX, ShellApi,
+  {$IFNDEF FPC}
+  ShlObj,
+  JclShell,
+  {$ENDIF}
+  JclWin32, JclDateTime, JclSecurity, JclSysInfo,
   {$ENDIF MSWINDOWS}
-  JclDateTime, JclResources, JclSecurity, JclShell, JclStrings, JclSysUtils, JclWin32;
+  JclResources, JclStrings;
 
 { Some general notes:
 
-  This unit redeclares some functions from FileCtrl.pas to avoid a dependeny on that unit in the
+  This unit redeclares some functions from FileCtrl.pas to avoid a dependency on that unit in the
   JCL. The problem is that FileCtrl.pas uses some units (eg Forms.pas) which have ridiculous
   initialization requirements. They add 4KB (!) to the executable and roughly 1 second of startup.
   That initialization is only necessary for GUI applications and is unacceptable for high
   performance services or console apps.
 
   The routines which query files or directories for their attributes deliberately use FindFirst
-  eventhough there may be easier ways to get at the required information. This is because FindFirst
+  even though there may be easier ways to get at the required information. This is because FindFirst
   is about the only routine which doesn't cause the file's last modification/accessed time to be
   changed which is usually an undesired side-effect. }
+
+{$IFNDEF COMPILER6_UP}
+const
+  MinDateTime: TDateTime = -657434.0;      { 01/01/0100 12:00:00.000 AM }
+  MaxDateTime: TDateTime =  2958465.99999; { 12/31/9999 11:59:59.999 PM }
+{$ENDIF not def COMPILER6_UP}
+
+{$IFDEF UNIX}
+const
+  ERROR_NO_MORE_FILES = -1;
+{$ENDIF UNIX}
+
+{$IFDEF FPC}
+{$IFDEF MSWINDOWS}
+type
+  TSHFileInfo = SHFILEINFOA;
+{$ENDIF MSWINDOWS}
+{$ENDIF FPC}
+
+//==================================================================================================
+// replacements for defective Libc.pas declarations
+//==================================================================================================
+
+{$IFDEF UNIX}
+
+function fstat64(FileDes: Integer; var StatBuffer: TStatBuf64): Integer;
+begin
+  Result := __fxstat64(_STAT_VER, FileDes, StatBuffer);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function lstat64(FileName: PChar; var StatBuffer: TStatBuf64): Integer;
+begin
+  Result := __lxstat64(_STAT_VER, FileName, StatBuffer);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function stat64(FileName: PChar; var StatBuffer: TStatBuf64): Integer;
+begin
+  Result := __xstat64(_STAT_VER, FileName, StatBuffer);
+end;
+
+{$ENDIF UNIX}
 
 //==================================================================================================
 // TJclTempFileStream
 //==================================================================================================
+
+{$IFDEF MSWINDOWS}
 
 constructor TJclTempFileStream.Create(const Prefix: string);
 var
@@ -500,6 +964,7 @@ var
 begin
   FFileName := Prefix;
   FileHandle := FileCreateTemp(FFileName);
+  // (rom) is it really wise to throw an exception before calling inherited?
   if FileHandle = INVALID_HANDLE_VALUE then
     raise EJclTempFileStreamError.CreateResRec(@RsFileStreamCreate);
   inherited Create(FileHandle);
@@ -664,7 +1129,7 @@ begin
   Result := 0;
   if (Size - Position) >= Count then
   begin
-    System.Move(Buffer, Pointer(Longint(Memory) + Position)^, Count);
+    System.Move(Buffer, Pointer(Longint(Memory) + Longint(Position))^, Count);
     Position := Position + Count;
     Result := Count;
   end;
@@ -769,7 +1234,7 @@ end;
 
 procedure TJclCustomFileMapping.InternalCreate(const FileHandle: THandle;
   const Name: string; const Protect: Cardinal; MaximumSize: Int64;
-  const SecAttr: PSecurityAttributes);
+  SecAttr: PSecurityAttributes);
 var
   MaximumSizeLow, MaximumSizeHigh: Cardinal;
 begin
@@ -800,7 +1265,7 @@ end;
 
 constructor TJclFileMapping.Create(const FileName: string; FileMode: Cardinal;
   const Name: string; Protect: Cardinal; const MaximumSize: Int64;
-  const SecAttr: PSecurityAttributes);
+  SecAttr: PSecurityAttributes);
 begin
   FFileHandle := INVALID_HANDLE_VALUE;
   inherited Create;
@@ -813,7 +1278,7 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 constructor TJclFileMapping.Create(const FileHandle: THandle; const Name: string;
-  Protect: Cardinal; const MaximumSize: Int64; const SecAttr: PSecurityAttributes);
+  Protect: Cardinal; const MaximumSize: Int64; SecAttr: PSecurityAttributes);
 begin
   FFileHandle := INVALID_HANDLE_VALUE;
   inherited Create;
@@ -842,7 +1307,7 @@ end;
 //==================================================================================================
 
 constructor TJclSwapFileMapping.Create(const Name: string; Protect: Cardinal;
-  const MaximumSize: Int64; const SecAttr: PSecurityAttributes);
+  const MaximumSize: Int64; SecAttr: PSecurityAttributes);
 begin
   inherited Create;
   InternalCreate(INVALID_HANDLE_VALUE, Name, Protect, MaximumSize, SecAttr);
@@ -919,7 +1384,7 @@ end;
 destructor TJclFileMappingStream.Destroy;
 begin
   Close;
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -929,7 +1394,7 @@ begin
   Result := 0;
   if (Size - Position) >= Count then
   begin
-    System.Move(Buffer, Pointer(Longint(Memory) + Position)^, Count);
+    System.Move(Buffer, Pointer(Longint(Memory) + Longint(Position))^, Count);
     Position := Position + Count;
     Result := Count;
   end;
@@ -948,7 +1413,7 @@ begin
       TStrings(Dest).Add(ReadLn);
   end
   else
-    inherited;
+    inherited AssignTo(Dest);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -956,6 +1421,7 @@ end;
 constructor TJclMappedTextReader.Create(MemoryStream: TCustomMemoryStream; FreeStream: Boolean;
   const AIndexOption: TJclMappedTextReaderIndex);
 begin
+  // (rom) why no inherited Create?
   FMemoryStream := MemoryStream;
   FFreeStream := FreeStream;
   FIndexOption := AIndexOption;
@@ -967,6 +1433,7 @@ end;
 constructor TJclMappedTextReader.Create(const FileName: string;
   const AIndexOption: TJclMappedTextReaderIndex);
 begin
+  // (rom) why no inherited Create?
   FMemoryStream := TJclFileMappingStream.Create(FileName);
   FFreeStream := True;
   FIndexOption := AIndexOption;
@@ -1017,7 +1484,7 @@ begin
   if FFreeStream then
     FMemoryStream.Free;
   FreeMem(FIndex);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1047,7 +1514,20 @@ end;
 
 function TJclMappedTextReader.GetLineCount: Integer;
 
-  function CountLines(StartPtr: PChar; Len: Integer): Integer; assembler;
+  function CountLines(P: PChar; Len: Integer): Integer;
+  {$IFDEF PUREPASCAL}
+  var
+    I: Integer;
+  begin
+    Result := 0;
+    for I := 0 to Len-1 do
+    begin
+      if P^ = AnsiLineFeed then
+        Inc(Result);
+      Inc(P);
+    end;
+  end;
+  {$ELSE}
   asm
        PUSH    EDI
        MOV     EDI, EAX
@@ -1061,6 +1541,7 @@ function TJclMappedTextReader.GetLineCount: Integer;
        MOV     EAX, EDX
        POP     EDI
   end;
+  {$ENDIF}
 
 begin
   if FLineCount = -1 then
@@ -1234,6 +1715,8 @@ begin
   end;
 end;
 
+{$ENDIF MSWINDOWS}
+
 //==================================================================================================
 // Path manipulation
 //==================================================================================================
@@ -1252,7 +1735,7 @@ begin
   Result := Path;
   if (Path <> '') and (ExtractFileExt(Path) = '') and (Extension <> '') then
   begin
-    // Note that if we get here Path is quarenteed not to end in a '.' otherwise ExtractFileExt
+    // Note that if we get here Path is guarenteed not to end in a '.' otherwise ExtractFileExt
     // would have returned '.' therefore there's no need to check it explicitly in the code below
     if Extension[1] = '.' then
       Result := Result + Extension
@@ -1277,7 +1760,7 @@ begin
       Result := Append
     else
     begin
-      // The following code may look a bit complex but al it does is add Append to Path ensuring
+      // The following code may look a bit complex but all it does is add Append to Path ensuring
       // that there is one and only one path separator character between them
       B1 := Path[PathLength] = PathSeparator;
       B2 := Append[1] = PathSeparator;
@@ -1298,9 +1781,9 @@ end;
 
 function PathBuildRoot(const Drive: Byte): string;
 begin
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   Result := PathSeparator;
-  {$ENDIF LINUX}
+  {$ENDIF UNIX}
   {$IFDEF MSWINDOWS}
   // Remember, Win32 only allows 'a' to 'z' as drive letters (mapped to 0..25)
   if Drive < 26 then
@@ -1330,34 +1813,57 @@ end;
   Path: the path to canonicalize
   Result: the canonicalized path
   Author: Jeff
-  Notes: This function does not behave exactly like the one from shlwapi.dll!!
-         Especially 'c:\..' => 'c:' whereas shlwapi returns 'c:\'
+
+  Unix: Libc.canonicalize_file_name() is different in that it converts relative paths
+        to absolute ones - and thus needs to evaluate the program's environment.
+
 }
 
 function PathCanonicalize(const Path: string): string;
 var
   List: TStrings;
-  I: Integer;
+  S: string;
+  I, K: Integer;
+  IsAbsolute: Boolean;
 begin
+  I := Pos(':', Path); // for Windows' sake
+  K := Pos(PathSeparator, Path);
+  IsAbsolute := K - I = 1;
+  if not IsAbsolute then
+    K := I;
+  if K = 0 then
+    S := Path
+  else
+    S := Copy(Path, K + 1, Length(Path));
   List := TStringList.Create;
   try
-    StrIToStrings(Path, '\', List, False);
+    StrIToStrings(S, PathSeparator, List, False);
     I := 0;
     while I < List.Count do
     begin
-      if List[I] = '.' then List.Delete(I)
-      else if (List[I] = '..') then
+      if List[I] = '.' then
+        List.Delete(I)
+      else
+      if (IsAbsolute or (I > 0) and not (List[I-1] = '..')) and (List[I] = '..') then
       begin
         List.Delete(I);
-        Dec(I);
-        if I > 0 then List.Delete(I);
+        if I > 0 then
+        begin
+          Dec(I);
+          List.Delete(I);
+        end;
       end
       else Inc(I);
     end;
-    Result := StringsToStr(List, '\', False);
+    Result := StringsToStr(List, PathSeparator, False);
   finally
     List.Free;
   end;
+  if K > 0 then
+    Result := Copy(Path, 1, K) + Result
+  else
+  if Result = '' then
+    Result := '.';
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1386,15 +1892,19 @@ begin
     while (P1^ = P2^) and (P1^ <> #0) do
     begin
       Inc(Result);
-      if P1^ in [PathSeparator, ':'] then LastSeparator := Result;
+      if P1^ in [PathSeparator, ':'] then
+        LastSeparator := Result;
       Inc(P1);
       Inc(P2);
     end;
-    if (LastSeparator < Result) and (P1^ <> #0) then Result := LastSeparator;
+    if (LastSeparator < Result) and (P1^ <> #0) then
+      Result := LastSeparator;
   end;
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function PathCompactPath(const DC: HDC; const Path: string;
   const Width: Integer; CmpFmt: TCompactPath): string;
@@ -1425,13 +1935,7 @@ begin
   end;
 end;
 
-//--------------------------------------------------------------------------------------------------
-
-function PathCompactPath(const Canvas: TCanvas; const Path: string;
-  const Width: Integer; CmpFmt: TCompactPath): string; overload;
-begin
-  Result := PathCompactPath(Canvas.Handle, Path, Width, CmpFmt);
-end;
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1493,7 +1997,8 @@ begin
     I := Depth + 1;
     if PathIsUNC(LocalPath) then
       I := I + 2;
-    while (I < List.Count) do List.Delete(I);
+    while I < List.Count do
+      List.Delete(I);
     Result := PathAddSeparator(StringsToStr(List, '\', True));
   finally
     List.Free;
@@ -1531,7 +2036,8 @@ begin
       Start := 0;
     for I := Start to List.Count - 1 do
     begin
-      if (Pos(':', List[I]) = 0) then Inc(Result);
+      if Pos(':', List[I]) = 0 then
+        Inc(Result);
     end;
   finally
     List.Free;
@@ -1539,6 +2045,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function PathGetLongName2(Path: string): string;
 var
@@ -1585,7 +2093,7 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
-
+{$IFNDEF FPC}
 function PathGetLongName(const Path: string): string;
 var
   PIDL: PItemIDList;
@@ -1611,7 +2119,7 @@ begin
     end;
   end;
 end;
-
+{$ENDIF}
 //--------------------------------------------------------------------------------------------------
 
 function PathGetShortName(const Path: string): string;
@@ -1631,6 +2139,74 @@ begin
   end;
 end;
 
+{$ENDIF MSWINDOWS}
+
+//--------------------------------------------------------------------------------------------------
+
+{ TODOc Author: Olivier Sannier}
+
+function PathGetRelativePath(Origin, Destination: string): string;
+var
+  OrigList: TStringList;
+  DestList: TStringList;
+  DiffIndex: Integer;
+  I: Integer;
+begin
+  Origin := PathCanonicalize(Origin);
+  Destination := PathCanonicalize(Destination);
+  // create a list of paths as separate strings
+  OrigList := TStringList.Create;
+  DestList := TStringList.Create;
+  try
+    // NOTE: DO NOT USE DELIMITER AND DELIMITEDTEXT FROM
+    // TSTRINGS, THEY WILL SPLIT PATHS WITH SPACES !!!!
+    StrToStrings(Origin, PathSeparator, OrigList);
+    StrToStrings(Destination, PathSeparator, DestList);
+    {$IFDEF MSWINDOWS}
+    { TODO : Handle UNC names properly }
+
+    // Let's do some tests when the paths indicate drive letters
+    // This, of course, only happens under a Windows platform
+
+    // If the destination indicates a drive and the drive
+    // letter is different from the one from the one in
+    // origin, then simply return it as the result
+    // Else, if the origin indicates a drive and destination
+    // doesn't, then return the concatenation of origin and
+    // destination, ensuring a pathseparator between them.
+    // Else, try to find the relative path between the two.
+    if (OrigList[0][2] = ':') and (DestList[0][2] = ':') and (DestList[0][1] <> OrigList[0][1]) then
+      Result := Destination
+    else
+    if (OrigList[0][2] = ':') and (DestList[0][2] <> ':') then
+      Result := StrEnsureSuffix(PathSeparator, Origin) +
+        StrEnsureNoPrefix(PathSeparator, Destination)
+    else
+    {$ENDIF}
+    begin
+      // find the first directory that is not the same
+      DiffIndex := 0;
+      {$IFDEF MSWINDOWS} // case insensitive
+      while StrSame(OrigList[DiffIndex], DestList[DiffIndex]) do
+      {$ELSE}            // case sensitive
+      while OrigList[DiffIndex] = DestList[DiffIndex] do
+      {$ENDIF}
+        Inc(DiffIndex);
+
+      Result := StrRepeat('..'+PathSeparator, OrigList.Count - DiffIndex);
+      if DiffIndex < DestList.Count then
+      begin
+        for I := DiffIndex to DestList.Count - 2 do
+          Result := Result + DestList[i] + PathSeparator;
+        Result := Result + DestList[DestList.Count-1];
+      end;
+    end;
+  finally
+    DestList.Free;
+    OrigList.Free;
+  end;
+end;
+
 //--------------------------------------------------------------------------------------------------
 
 function PathIsAbsolute(const Path: string): Boolean;
@@ -1642,9 +2218,9 @@ begin
   Result := False;
   if Path <> '' then
   begin
-    {$IFDEF LINUX}
+    {$IFDEF UNIX}
     Result := (Path[1] = PathSeparator);
-    {$ENDIF LINUX}
+    {$ENDIF UNIX}
     {$IFDEF MSWINDOWS}
     I := 0;
     if PathIsUnc(Path) then
@@ -1675,26 +2251,75 @@ begin
   {$IFDEF MSWINDOWS}
   Result := AnsiSameText(StrLeft(P, L), B) and (P[L+1] = PathSeparator);
   {$ENDIF MSWINDOWS}
-  {$IFDEF LINUX}
+  {$IFDEF UNIX}
   Result := AnsiSameStr(StrLeft(P, L), B) and (P[L+1] = PathSeparator);
-  {$ENDIF LINUX}
+  {$ENDIF UNIX}
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 function PathIsDiskDevice(const Path: string): Boolean;
+{$IFDEF UNIX}
+{ TODOc Author: Andr� Snepvangers, contributor: Robert Rossmair }
+  procedure GetAvailableFileSystems(const List: TStrings);
+  var
+    F: TextFile;
+    S: string;
+  begin
+    AssignFile(F, '/proc/filesystems');
+    Reset(F);
+    repeat
+      ReadLn(F, S);
+      if Pos('nodev', S) = 0 then // how portable is this ?
+        List.Add(Trim(S));
+    until Eof(F);
+    List.Add('supermount');    
+    CloseFile(F);
+  end;
+
+var
+  FullPath: string;
+  F: PIOFile;
+  Buffer: array [0..255] of char;
+  MountEntry: TMountEntry;
+  FsTypes: TStrings;
 begin
-  {$IFDEF LINUX}
-  NotImplemented('PathIsDiskDevice');
-  {$ENDIF LINUX}
-  {$IFDEF MSWINDOWS}
-  Result := Copy(Path, 1, Length(PathDevicePrefix)) = PathDevicePrefix;
-  {$ENDIF MSWINDOWS}
+  Result := False;
+
+  SetLength(FullPath, _POSIX_PATH_MAX);
+  if realpath(PChar(Path), PChar(FullPath)) = nil then
+    RaiseLastOSError;
+  StrResetLength(FullPath);
+  
+  FsTypes := TStringlist.Create;
+  try
+    GetAvailableFileSystems(FsTypes);
+    F := setmntent(_PATH_MOUNTED, 'r'); // PATH_MOUNTED is deprecated,
+                                        // but PATH_MNTTAB is defective in Libc.pas
+    try
+      // get drives from mtab
+      while not Result and (getmntent_r(F, MountEntry, Buffer, SizeOf(Buffer)) <> nil) do
+        if FsTypes.IndexOf(MountEntry.mnt_type) <> -1 then
+          Result := MountEntry.mnt_dir = FullPath;
+
+    finally
+      endmntent(F);
+    end;
+  finally
+    FsTypes.Free;
+  end;
 end;
+{$ENDIF UNIX}
+{$IFDEF MSWINDOWS}
+begin
+  Result := Copy(Path, 1, Length(PathDevicePrefix)) = PathDevicePrefix;
+end;
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
 function PathIsUNC(const Path: string): Boolean;
+
 {$IFDEF MSWINDOWS}
 
 const
@@ -1776,13 +2401,14 @@ begin
 end;
 
 {$ENDIF MSWINDOWS}
-{$IFDEF LINUX}
+
+{$IFDEF UNIX}
 
 begin
   Result := False;
 end;
 
-{$ENDIF LINUX}
+{$ENDIF UNIX}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1840,6 +2466,8 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+{$IFDEF MSWINDOWS}
+
 function CloseVolume(var Volume: THandle): Boolean;
 begin
   Result := False;
@@ -1866,6 +2494,8 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+{$IFNDEF FPC}  // needs JclShell
+
 // todoc author Jeff
 
 function DeleteDirectory(const DirectoryName: string; MoveToRecycleBin: Boolean): Boolean;
@@ -1875,6 +2505,8 @@ begin
   else
     Result := DelTree(DirectoryName);
 end;
+
+{$ENDIF}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1894,6 +2526,14 @@ var
   PartialResult: Boolean;
   Attr: DWORD;
 begin
+  Assert(Path <> '', RsDelTreePathIsEmpty);
+{$IFOPT C-}
+  if Path = '' then
+  begin
+    Result := False;
+    Exit;
+  end;
+{$ENDIF ASSERTIONS OFF}
   Result := True;
   Files := TStringList.Create;
   try
@@ -1954,6 +2594,15 @@ begin
   R := GetFileAttributes(PChar(Name));
   Result := (R <> DWORD(-1)) and ((R and FILE_ATTRIBUTE_DIRECTORY) <> 0);
 end;
+{$ENDIF MSWINDOWS}
+
+{$IFDEF UNIX}
+function DirectoryExists(const Name: string; ResolveSymLinks: Boolean): Boolean;
+{TODOc Author: Robert Rossmair}
+begin
+  Result := IsDirectory(Name, ResolveSymLinks);
+end;
+{$ENDIF UNIX}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1981,8 +2630,6 @@ begin
   end;
 end;
 
-{$ENDIF MSWINDOWS}
-
 //--------------------------------------------------------------------------------------------------
 
 function FileCreateTemp(var Prefix: string): THandle;
@@ -2002,6 +2649,8 @@ begin
     Prefix := TempName;
   end;
 end;
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2038,37 +2687,57 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 function FileGetDisplayName(const FileName: string): string;
+{$IFDEF MSWINDOWS}
 var
   FileInfo: TSHFileInfo;
 begin
   FillChar(FileInfo, SizeOf(FileInfo), #0);
+  {$IFDEF FPC}
+  if SHGetFileInfo(PChar(FileName), 0, @FileInfo, SizeOf(FileInfo), SHGFI_DISPLAYNAME) <> nil then
+    Result := PChar(FileInfo.szDisplayName)
+  {$ELSE}
   if SHGetFileInfo(PChar(FileName), 0, FileInfo, SizeOf(FileInfo), SHGFI_DISPLAYNAME) <> 0 then
     Result := FileInfo.szDisplayName
+  {$ENDIF FPC}
   else
     Result := FileName;
 end;
+{$ELSE}
+begin
+  Result := FileName;
+end;
+{$ENDIF MSWINDOWS}
+
 
 //--------------------------------------------------------------------------------------------------
 
 function FileGetSize(const FileName: string): Integer;
 var
   SearchRec: TSearchRec;
+{$IFDEF MSWINDOWS}
   OldMode: Cardinal;
+{$ENDIF MSWINDOWS}
 begin
   Result := -1;
+{$IFDEF MSWINDOWS}
   OldMode := SetErrorMode(SEM_FAILCRITICALERRORS);
   try
+{$ENDIF MSWINDOWS}
     if FindFirst(FileName, faAnyFile, SearchRec) = 0 then
     begin
       Result := SearchRec.Size;
       SysUtils.FindClose(SearchRec);
     end;
+{$IFDEF MSWINDOWS}
   finally
     SetErrorMode(OldMode);
   end;
+{$ENDIF MSWINDOWS}
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function FileGetTempName(const Prefix: string): string;
 var
@@ -2100,8 +2769,13 @@ var
   RetVal: DWORD;
 begin
   FillChar(FileInfo, SizeOf(FileInfo), #0);
+  {$IFDEF FPC}
+  RetVal := DWORD(SHGetFileInfo(PChar(FileNAme), 0, @FileInfo, SizeOf(FileInfo),
+    SHGFI_TYPENAME or SHGFI_USEFILEATTRIBUTES));
+  {$ELSE}
   RetVal := SHGetFileInfo(PChar(FileNAme), 0, FileInfo, SizeOf(FileInfo),
     SHGFI_TYPENAME or SHGFI_USEFILEATTRIBUTES);
+  {$ENDIF FPC}
   if RetVal <> 0 then
     Result := FileInfo.szTypeName;
   if (RetVal = 0) or (Trim(Result) = '') then
@@ -2112,6 +2786,8 @@ begin
     Result := TrimLeft(UpperCase(Result) + RsDefaultFileTypeName);
   end;
 end;
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2139,9 +2815,14 @@ begin
   if Length(Name) = 0 then
     raise EJclFileUtilsError.CreateResRec(@RsCannotCreateDir);
   Name := PathRemoveSeparator(Name);
-  if (Length(Name) < 3) or DirectoryExists(Name)
-    or (ExtractFilePath(Name) = Name) then
+  {$IFDEF MSWINDOWS}
+  if (Length(Name) < 3) or DirectoryExists(Name) or (ExtractFilePath(Name) = Name) then
     Exit;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  if (Length(Name) = 0) or DirectoryExists(Name) then
+    Exit;
+  {$ENDIF UNIX}
   Result := ForceDirectories(ExtractFilePath(Name)) and CreateDir(Name);
 end;
 
@@ -2153,7 +2834,9 @@ function GetDirectorySize(const Path: string): Int64;
   var
     F: TSearchRec;
     R: Integer;
+    {$IFDEF MSWINDOWS}
     TempSize: TULargeInteger;
+    {$ENDIF MSWINDOWS}
   begin
     Result := 0;
     R := SysUtils.FindFirst(Path + '*.*', faAnyFile, F);
@@ -2166,11 +2849,17 @@ function GetDirectorySize(const Path: string): Int64;
           if (F.Attr and faDirectory) = faDirectory then
             Inc(Result, RecurseFolder(Path + F.Name + '\'))
           else
+          {$IFDEF MSWINDOWS}
           begin
             TempSize.LowPart := F.FindData.nFileSizeLow;
             TempSize.HighPart := F.FindData.nFileSizeHigh;
             Inc(Result, TempSize.QuadPart);
           end;
+          {$ENDIF MSWINDOWS}
+          {$IFDEF UNIX}
+            // SysUtils.Find* don't perceive files >= 2 GB anyway 
+            Inc(Result, Int64(F.Size));
+          {$ENDIF UNIX}
         end;
         R := SysUtils.FindNext(F);
       end;
@@ -2193,6 +2882,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function GetDriveTypeStr(const Drive: Char): string;
 var
@@ -2231,9 +2922,15 @@ begin
   if Handle <> INVALID_HANDLE_VALUE then
   begin
     Windows.FindClose(Handle);
+    {$IFDEF FPC}
+    Result := CompareFileTime(@FindData.ftCreationTime, @FindData.ftLastWriteTime) <= 0;
+    {$ELSE}
     Result := CompareFileTime(FindData.ftCreationTime, FindData.ftLastWriteTime) <= 0;
+    {$ENDIF FPC}
   end;
 end;
+
+{$ENDIF MSWINDOWS}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2257,6 +2954,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 procedure GetFileAttributeListEx(const Items: TStrings; const Attr: Integer);
 begin
@@ -2287,36 +2986,197 @@ begin
     Items.Add(RsAttrSparseFile);
 end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
+
+function GetFileInformation(const FileName: string; out FileInfo: TSearchRec): Boolean;
+begin
+  Result := FindFirst(FileName, faAnyFile, FileInfo) = 0;
+  if Result then
+    SysUtils.FindClose(FileInfo);
+end;
 
 function GetFileInformation(const FileName: string): TSearchRec;
 begin
-  if FindFirst(FileName, faAnyFile, Result) = 0 then
-    SysUtils.FindClose(Result)
-  else
+  if not GetFileInformation(FileName, Result) then
     RaiseLastOSError;
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF UNIX}
+
+{TODOc Author: Robert Rossmair}
+
+function GetFileStatus(const FileName: string; out StatBuf: TStatBuf64;
+  const ResolveSymLinks: Boolean): Integer;
+begin
+  if ResolveSymLinks then
+    Result := stat64(PChar(FileName), StatBuf)
+  else
+    Result := lstat64(PChar(FileName), StatBuf);
+end;
+
+{$ENDIF UNIX}
+
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function GetFileLastWrite(const FileName: string): TFileTime;
 begin
   Result := GetFileInformation(FileName).FindData.ftLastWriteTime;
 end;
 
+function GetFileLastWrite(const FileName: string; out LocalTime: TDateTime): Boolean;
+var
+  FileInfo: TSearchRec;
+begin
+  Result := GetFileInformation(FileName, FileInfo);
+  if Result then
+    LocalTime := FileTimeToLocalDateTime(GetFileInformation(FileName).FindData.ftLastWriteTime);
+end;
+
+{$ENDIF MSWINDOWS}
+
+{$IFDEF UNIX}
+
+function GetFileLastWrite(const FileName: string; out TimeStamp: Integer; ResolveSymLinks: Boolean): Boolean;
+var
+  Buf: TStatBuf64;
+begin
+  Result := GetFileStatus(FileName, Buf, ResolveSymLinks) = 0;
+  if Result then
+    TimeStamp := Buf.st_mtime
+end;
+
+function GetFileLastWrite(const FileName: string; out LocalTime: TDateTime; ResolveSymLinks: Boolean): Boolean;
+var
+  Buf: TStatBuf64;
+begin
+  Result := GetFileStatus(FileName, Buf, ResolveSymLinks) = 0;
+  if Result then
+    LocalTime := FileDateToDateTime(Buf.st_mtime);
+end;
+
+function GetFileLastWrite(const FileName: string; ResolveSymLinks: Boolean): Integer;
+var
+  Buf: TStatBuf64;
+begin
+  if GetFileStatus(FileName, Buf, ResolveSymLinks) = 0 then
+    Result := Buf.st_mtime
+  else
+    Result := -1;
+end;
+
+{$ENDIF UNIX}
+
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function GetFileLastAccess(const FileName: string): TFileTime;
 begin
   Result := GetFileInformation(FileName).FindData.ftLastAccessTime;
 end;
 
+function GetFileLastAccess(const FileName: string; out LocalTime: TDateTime): Boolean;
+var
+  FileInfo: TSearchRec;
+begin
+  Result := GetFileInformation(FileName, FileInfo);
+  if Result then
+    LocalTime := FileTimeToLocalDateTime(GetFileInformation(FileName).FindData.ftLastAccessTime);
+end;
+
+{$ENDIF MSWINDOWS}
+
+{$IFDEF UNIX}
+
+function GetFileLastAccess(const FileName: string; out TimeStamp: Integer; ResolveSymLinks: Boolean): Boolean;
+var
+  Buf: TStatBuf64;
+begin
+  Result := GetFileStatus(FileName, Buf, ResolveSymLinks) = 0;
+  if Result then
+    TimeStamp := Buf.st_atime
+end;
+
+function GetFileLastAccess(const FileName: string; out LocalTime: TDateTime; ResolveSymLinks: Boolean): Boolean;
+var
+  Buf: TStatBuf64;
+begin
+  Result := GetFileStatus(FileName, Buf, ResolveSymLinks) = 0;
+  if Result then
+    LocalTime := FileDateToDateTime(Buf.st_atime);
+end;
+
+function GetFileLastAccess(const FileName: string; ResolveSymLinks: Boolean): Integer;
+var
+  Buf: TStatBuf64;
+begin
+  if GetFileStatus(FileName, Buf, ResolveSymLinks) = 0 then
+    Result := Buf.st_atime
+  else
+    Result := -1;
+end;
+
+{$ENDIF UNIX}
+
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function GetFileCreation(const FileName: string): TFileTime;
 begin
   Result := GetFileInformation(FileName).FindData.ftCreationTime;
 end;
+
+function GetFileCreation(const FileName: string; out LocalTime: TDateTime): Boolean;
+var
+  FileInfo: TSearchRec;
+begin
+  Result := GetFileInformation(FileName, FileInfo);
+  if Result then
+    LocalTime := FileTimeToLocalDateTime(GetFileInformation(FileName).FindData.ftCreationTime);
+end;
+
+{$ENDIF MSWINDOWS}
+
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF UNIX}
+
+function GetFileLastAttrChange(const FileName: string; out TimeStamp: Integer; ResolveSymLinks: Boolean): Boolean;
+var
+  Buf: TStatBuf64;
+begin
+  Result := GetFileStatus(FileName, Buf, ResolveSymLinks) = 0;
+  if Result then
+    TimeStamp := Buf.st_ctime
+end;
+
+function GetFileLastAttrChange(const FileName: string; out LocalTime: TDateTime; ResolveSymLinks: Boolean): Boolean;
+var
+  Buf: TStatBuf64;
+begin
+  Result := GetFileStatus(FileName, Buf, ResolveSymLinks) = 0;
+  if Result then
+    LocalTime := FileDateToDateTime(Buf.st_ctime);
+end;
+
+function GetFileLastAttrChange(const FileName: string; ResolveSymLinks: Boolean): Integer;
+var
+  Buf: TStatBuf64;
+begin
+  if GetFileStatus(FileName, Buf, ResolveSymLinks) = 0 then
+    Result := Buf.st_ctime
+  else
+    Result := -1;
+end;
+
+{$ENDIF UNIX}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2326,13 +3186,19 @@ var
 begin
   L := MAX_PATH + 1;
   SetLength(Result, L);
+{$IFDEF MSWINDOWS}
   L := Windows.GetModuleFileName(Module, Pointer(Result), L);
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+  L := GetModuleFileName(Module, Pointer(Result), L);
+{$ENDIF UNIX}
   SetLength(Result, L);
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 function GetSizeOfFile(const FileName: string): Int64;
+{$IFDEF MSWINDOWS}
 var
   Handle: THandle;
   FindData: TWin32FindData;
@@ -2350,8 +3216,20 @@ begin
   else
     RaiseLastOSError;
 end;
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+var
+  Buf: TStatBuf64;
+begin
+  if GetFileStatus(FileName, Buf, False) <> 0 then
+    RaiseLastOSError;
+  Result := Buf.st_size
+end;
+{$ENDIF UNIX}
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function GetSizeOfFile(Handle: THandle): Int64;
 var
@@ -2361,7 +3239,37 @@ begin
   Result := Size.QuadPart;
 end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
+
+function GetSizeOfFile(const FileInfo: TSearchRec): Int64;
+{$IFDEF MSWINDOWS}
+begin
+  with Int64Rec(Result) do
+  begin
+    Lo := FileInfo.FindData.nFileSizeLow;
+    Hi := FileInfo.FindData.nFileSizeHigh;
+  end;
+end;
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+var
+  Buf: TStatBuf64;
+begin
+  // Note that SysUtils.FindFirst/Next ignore files >= 2 GB under Linux, thus the following code is
+  // rather pointless at the moment of this writing.
+  // We apparently need to write our own set of Findxxx functions to overcome this limitation.
+  if GetFileStatus(FileInfo.PathOnly + FileInfo.Name, Buf, True) <> 0 then
+    Result := -1
+  else
+    Result := Buf.st_size
+end;
+{$ENDIF UNIX}
+
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function GetStandardFileInfo(const FileName: string): TWin32FileAttributeData;
 var
@@ -2395,8 +3303,11 @@ begin
   end;
 end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
 
+{$IFDEF MSWINDOWS}
 function IsDirectory(const FileName: string): Boolean;
 var
   R: DWORD;
@@ -2404,8 +3315,39 @@ begin
   R := GetFileAttributes(PChar(FileName));
   Result := (R <> DWORD(-1)) and ((R and FILE_ATTRIBUTE_DIRECTORY) <> 0);
 end;
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+function IsDirectory(const FileName: string; ResolveSymLinks: Boolean): Boolean;
+{TODOc Author: Robert Rossmair}
+var
+  Buf: TStatBuf64;
+begin
+  Result := False;
+  if GetFileStatus(FileName, Buf, ResolveSymLinks) = 0 then
+    Result := S_ISDIR(Buf.st_mode);
+end;
+{$ENDIF UNIX}
 
 //--------------------------------------------------------------------------------------------------
+
+function IsRootDirectory(const CanonicFileName: string): Boolean;
+{$IFDEF MSWINDOWS}
+var
+  I: Integer;
+begin
+  I := Pos(':\', CanonicFileName);
+  Result := (I > 0) and (I + 1 = Length(CanonicFileName));
+end;
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+begin
+  Result := CanonicFileName = PathSeparator;
+end;
+{$ENDIF UNIX}
+
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function LockVolume(const Volume: string; var Handle: THandle): Boolean;
 var
@@ -2439,11 +3381,15 @@ begin
     nil, OPEN_EXISTING, 0, 0);
 end;
 
+{$ENDIF MSWINDOWS}
+
 //--------------------------------------------------------------------------------------------------
 
 type
   // indicates the file time to set, used by SetFileTimesHelper and SetDirTimesHelper
-  TFileTimes = (ftLastAccess, ftLastWrite, ftCreation);
+  TFileTimes = (ftLastAccess, ftLastWrite{$IFDEF MSWINDOWS}, ftCreation{$ENDIF});
+
+{$IFDEF MSWINDOWS}
 
 function SetFileTimesHelper(const FileName: string; const DateTime: TDateTime; Times: TFileTimes): Boolean;
 var
@@ -2474,6 +3420,34 @@ begin
   end;
 end;
 
+{$ENDIF MSWINDOWS}
+
+{$IFDEF UNIX}
+
+function SetFileTimesHelper(const FileName: string; const DateTime: TDateTime; Times: TFileTimes): Boolean;
+var
+  FileTime: Integer;
+  StatBuf: TStatBuf64;
+  TimeBuf: utimbuf;
+begin
+  Result := False;
+  FileTime := DateTimeToFileDate(DateTime);
+  if GetFileStatus(FileName, StatBuf, False) = 0 then
+  begin
+    TimeBuf.actime := StatBuf.st_atime;
+    TimeBuf.modtime := StatBuf.st_mtime;
+    case Times of
+      ftLastAccess:
+        TimeBuf.actime := FileTime;
+      ftLastWrite:
+        TimeBuf.modtime := FileTime;
+    end;
+    Result := utime(PChar(FileName), @TimeBuf) = 0;
+  end;
+end;
+
+{$ENDIF UNIX}
+
 //--------------------------------------------------------------------------------------------------
 
 function SetFileLastAccess(const FileName: string; const DateTime: TDateTime): Boolean;
@@ -2489,6 +3463,8 @@ begin
 end;
 
 //--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
 
 function SetFileCreation(const FileName: string; const DateTime: TDateTime): Boolean;
 begin
@@ -2632,6 +3608,8 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
+{$IFNDEF FPC}  // needs JclShell
+
 // todoc Author: Jeff
 
 function Win32DeleteFile(const FileName: string; MoveToRecycleBin: Boolean): Boolean;
@@ -2641,6 +3619,8 @@ begin
   else
     Result := Windows.DeleteFile(PChar(FileName));
 end;
+
+{$ENDIF FPC}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2655,7 +3635,7 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 function Win32RestoreFile(const FileName: string): Boolean;
-var 
+var
   TempFileName: string;
 begin
   Result := False;
@@ -2663,12 +3643,47 @@ begin
 
    if MoveFileEx(PChar(GetBackupFileName(FileName)), PChar(TempFileName), MOVEFILE_REPLACE_EXISTING) then
      if Win32BackupFile(FileName, False) then
-       Result := MoveFileEx(PChar(TempFileName), PChar(FileName), MOVEFILE_REPLACE_EXISTING); 
+       Result := MoveFileEx(PChar(TempFileName), PChar(FileName), MOVEFILE_REPLACE_EXISTING);
 end;
+
+{$ENDIF MSWINDOWS}
+
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF UNIX}
+
+function CreateSymbolicLink(const Name, Target: string): Boolean;
+begin
+  Result := symlink(PChar(Target), PChar(Name)) = 0;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function SymbolicLinkTarget(const Name: string): string;
+var
+  N, BufLen: Integer;
+begin
+  BufLen := 128;
+  repeat
+    Inc(BufLen, BufLen);
+    SetLength(Result, BufLen);
+    N := readlink(PChar(Name), PChar(Result), BufLen);
+    if N < 0 then // Error
+    begin
+      Result := '';
+      Exit;
+    end;
+  until N < BufLen;
+  SetLength(Result, N);
+end;
+
+{$ENDIF UNIX}
 
 //==================================================================================================
 // File Version info routines
 //==================================================================================================
+
+{$IFDEF MSWINDOWS}
 
 const
   VerKeyNames: array [1..12] of string[17] =
@@ -2805,7 +3820,65 @@ begin
   end;
 end;
 
+{$ENDIF MSWINDOWS}
+
+//==================================================================================================
+// Version Info formatting
+//==================================================================================================
+
+function FormatVersionString(const HiV, LoV: Word): string;
+begin
+  Result := Format('%u.%.2u', [HiV, LoV]);
+end;
+
 //--------------------------------------------------------------------------------------------------
+
+function FormatVersionString(const Major, Minor, Build, Revision: Word): string;
+begin
+  Result := Format('%u.%u.%u.%u', [Major, Minor, Build, Revision]);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+{$IFDEF MSWINDOWS}
+
+function FormatVersionString(const FixedInfo: TVSFixedFileInfo; VersionFormat: TFileVersionFormat): string;
+begin
+  with FixedInfo do
+    case VersionFormat of
+      vfMajorMinor:
+        Result := Format('%u.%u', [HiWord(dwFileVersionMS), LoWord(dwFileVersionMS)]);
+      vfFull:
+        Result := Format('%u.%u.%u.%u', [HiWord(dwFileVersionMS), LoWord(dwFileVersionMS),
+          HiWord(dwFileVersionLS), LoWord(dwFileVersionLS)]);
+    end;
+end;
+
+//==================================================================================================
+// Version Info extracting
+//==================================================================================================
+
+procedure VersionExtractFileInfo(const FixedInfo: TVSFixedFileInfo; var Major, Minor, Build, Revision: Word);
+begin
+  Major := HiWord(FixedInfo.dwFileVersionMS);
+  Minor := LoWord(FixedInfo.dwFileVersionMS);
+  Build := HiWord(FixedInfo.dwFileVersionLS);
+  Revision := LoWord(FixedInfo.dwFileVersionLS);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure VersionExtractProductInfo(const FixedInfo: TVSFixedFileInfo; var Major, Minor, Build, Revision: Word);
+begin
+  Major := HiWord(FixedInfo.dwProductVersionMS);
+  Minor := LoWord(FixedInfo.dwProductVersionMS);
+  Build := HiWord(FixedInfo.dwProductVersionLS);
+  Revision := LoWord(FixedInfo.dwProductVersionLS);
+end;
+
+//==================================================================================================
+// Fixed Version Info routines
+//==================================================================================================
 
 function VersionFixedFileInfo(const FileName: string; var FixedInfo: TVSFixedFileInfo): Boolean;
 var
@@ -2831,16 +3904,15 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function FormatVersionString(const HiV, LoV: Word): string;
+function VersionFixedFileInfoString(const FileName: string; VersionFormat: TFileVersionFormat;
+  const NotAvailableText: string): string;
+var
+  FixedInfo: TVSFixedFileInfo;
 begin
-  Result := Format('%u.%.2u', [HiV, LoV]);
-end;
-
-//--------------------------------------------------------------------------------------------------
-
-function FormatVersionString(const Major, Minor, Build, Revision: Word): string;
-begin
-  Result := Format('%u.%u.%u.%u', [Major, Minor, Build, Revision]);
+  if VersionFixedFileInfo(FileName, FixedInfo) then
+    Result := FormatVersionString(FixedInfo, VersionFormat)
+  else
+    Result := NotAvailableText;
 end;
 
 //==================================================================================================
@@ -2894,7 +3966,7 @@ destructor TJclFileVersionInfo.Destroy;
 begin
   FreeAndNil(FItemList);
   FreeAndNil(FItems);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3226,7 +4298,7 @@ begin
         Result := False;
         Break;
       end;
-    end;  
+    end;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3247,6 +4319,8 @@ begin
   R := VerLanguageName(LangId, PChar(Result), MAX_PATH);
   SetLength(Result, R);
 end;
+
+{$ENDIF MSWINDOWS}
 
 //==================================================================================================
 // TJclFileMaskComparator
@@ -3289,7 +4363,7 @@ end;
 
 constructor TJclFileMaskComparator.Create;
 begin
-  inherited;
+  inherited Create;
   FSeparator := ';';
 end;
 
@@ -3391,14 +4465,13 @@ end;
 function AdvBuildFileList(const Path: string; const Attr: Integer; const Files: TStrings;
   const AttributeMatch: TJclAttributeMatch; const Options: TFileListOptions;
   const SubfoldersMask: string; const FileMatchFunc: TFileMatchFunc): Boolean;
-
 var
   FileMask: string;
   RootDir: string;
   Folders: TStringList;
   CurrentItem: Integer;
   Counter: Integer;
-  LocAttr: Integer;
+  FindAttr: Integer;
 
   procedure BuildFolderList;
   var
@@ -3435,10 +4508,10 @@ var
     Rslt: Integer;
     CurrentFolder: String;
     Matches: Boolean;
-
   begin
     CurrentFolder := Folders[CurrentCounter];
-    Rslt := FindFirst(CurrentFolder + FileMask, LocAttr, FindInfo);
+
+    Rslt := FindFirst(CurrentFolder + FileMask, FindAttr, FindInfo);
 
     try
       while Rslt = 0 do
@@ -3446,12 +4519,17 @@ var
          Matches := False;
 
          case AttributeMatch of
-           amAny: Matches := (LocAttr and FindInfo.Attr) <> 0;
-           amExact: Matches := LocAttr = FindInfo.Attr;
-           amSuperSetOf: Matches := (LocAttr and FindInfo.Attr) = FindInfo.Attr;
-           amSubSetOf: Matches := (LocAttr and FindInfo.Attr) = LocAttr;
-           amCustom: if @FileMatchFunc <> nil then
-                       Matches := FileMatchFunc(LocAttr,  FindInfo);
+           amAny:
+             Matches := True;
+           amExact:
+             Matches := Attr = FindInfo.Attr;
+           amSubSetOf:
+             Matches := (Attr and FindInfo.Attr) = Attr;
+           amSuperSetOf:
+             Matches := (Attr and FindInfo.Attr) = FindInfo.Attr;
+           amCustom:
+             if Assigned(FileMatchFunc) then
+               Matches := FileMatchFunc(Attr,  FindInfo);
          end;
 
          if Matches then
@@ -3476,10 +4554,12 @@ begin
   try
     Folders.Add(RootDir);
 
-    if Attr = faAnyFile then
-      LocAttr := faReadOnly + faHidden + faSysFile + faArchive
+    case AttributeMatch of
+      amExact, amSuperSetOf:
+        FindAttr := Attr;
     else
-      LocAttr := Attr;
+      FindAttr := faAnyFile;
+    end;
 
     // here's the recursive search for nested folders
 
@@ -3498,5 +4578,1113 @@ begin
   Result := True;
 end;
 
+//--------------------------------------------------------------------------------------------------
+
+function VerifyFileAttributeMask(var RejectedAttributes, RequiredAttributes: Integer): Boolean;
+begin
+  if RequiredAttributes and faNormalFile <> 0 then
+    RejectedAttributes := not faNormalFile or RejectedAttributes;
+  Result := RequiredAttributes and RejectedAttributes = 0;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function AttributeMatch(FileAttributes, RejectedAttr, RequiredAttr: Integer): Boolean;
+begin
+  if FileAttributes = 0 then
+    FileAttributes := faNormalFile;
+  {$IFDEF MSWINDOWS}
+  RequiredAttr := RequiredAttr and not faUnixSpecific;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  RequiredAttr := RequiredAttr and not faWindowsSpecific;
+  {$ENDIF UNIX}
+  Result := (FileAttributes and RejectedAttr = 0)
+    and (FileAttributes and RequiredAttr = RequiredAttr);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function IsFileAttributeMatch(FileAttributes, RejectedAttributes,
+  RequiredAttributes: Integer): Boolean;
+begin
+  VerifyFileAttributeMask(RejectedAttributes, RequiredAttributes);
+  Result := AttributeMatch(FileAttributes, RejectedAttributes, RequiredAttributes);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function FileAttributesStr(const FileInfo: TSearchRec): string;
+{$IFDEF MSWINDOWS}
+const
+  SAllAttrSet = 'rahs'; // readonly, archive, hidden, system
+  Attributes: array[1..4] of Integer =
+    (
+      faReadOnly,
+      faArchive,
+      faHidden,
+      faSysFile
+    );
+var
+  I: Integer;
+begin
+  Result := SAllAttrSet;
+  for I := 1 to 4 do
+    if (FileInfo.Attr and Attributes[I]) = 0 then
+      Result[I] := '-';
+end;
+{$ENDIF MSWINDOWS}
+{$IFDEF UNIX}
+const
+  SAllAttrSet = 'drwxrwxrwx';
+var
+  I: Integer;
+  Flag: Cardinal;
+begin
+  Result := SAllAttrSet;
+  if FileInfo.Attr and faDirectory = 0 then
+    Result[1] := '-'; // no directory
+  Flag := 1 shl 8;
+  for I := 2 to 10 do
+  begin
+    if FileInfo.Mode and Flag = 0 then
+      Result[I] := '-';
+    Flag := Flag shr 1;
+  end;
+end;
+{$ENDIF UNIX}
+
+//--------------------------------------------------------------------------------------------------
+
+function IsFileNameMatch(FileName: string; const Mask: string;
+  const CaseSensitive: Boolean): Boolean;
+begin
+  Result := True;
+  {$IFDEF MSWINDOWS}
+  if (Mask = '') or (Mask = '*') or (Mask = '*.*') then
+    Exit;
+  if Pos('.', FileName) = 0 then
+    FileName := FileName + '.';  // file names w/o extension match '*.'
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  if (Mask = '') or (Mask = '*') then
+    Exit;
+  {$ENDIF UNIX}
+  if CaseSensitive then
+    Result := StrMatches(Mask, FileName)
+  else
+    Result := StrMatches(AnsiUpperCase(Mask), AnsiUpperCase(FileName));
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function CanonicalizedSearchPath(const Directory: string): string;
+begin
+  Result := PathCanonicalize(Directory);
+  {$IFDEF MSWINDOWS}
+  // avoid changing "X:" (current directory on drive X:) into "X:\" (root dir.)
+  if Result[Length(Result)] <> ':' then
+  {$ENDIF MSWINDOWS}
+    Result := PathAddSeparator(Result);
+  // strip leading "./" resp. ".\"
+  if Pos('.' + PathSeparator, Result) = 1 then
+    Result := Copy(Result, 3, Length(Result) - 2);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure EnumFiles(const Path: string; HandleFile: TFileHandlerEx;
+  RejectedAttributes: Integer = faRejectedByDefault; RequiredAttributes: Integer = 0;
+  Abort: PBoolean = nil);
+var
+  Directory: string;
+  FileInfo: TSearchRec;
+  Attr: Integer;
+  Found: Boolean;
+begin
+  Assert(Assigned(HandleFile));
+  Assert(VerifyFileAttributeMask(RejectedAttributes, RequiredAttributes),
+    RsFileSearchAttrInconsistency);
+
+  Directory := ExtractFilePath(Path);
+
+  Attr := faAnyFile and not RejectedAttributes;
+
+  Found := FindFirst(Path, Attr, FileInfo) = 0;
+  try
+    while Found do
+    begin
+      if (Abort <> nil) and Abort^ then
+        Exit;
+      if AttributeMatch(FileInfo.Attr, RejectedAttributes, RequiredAttributes) then
+        if ((FileInfo.Attr and faDirectory = 0)
+        or ((FileInfo.Name <> '.') and (FileInfo.Name <> '..'))) then
+          HandleFile(Directory, FileInfo);
+      Found := FindNext(FileInfo) = 0;
+    end;
+  finally
+    FindClose(FileInfo);
+  end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure EnumDirectories(const Root: string; const HandleDirectory: TFileHandler;
+  const IncludeHiddenDirectories: Boolean; const SubDirectoriesMask: string;
+  Abort: PBoolean{$IFDEF UNIX}; ResolveSymLinks: Boolean{$ENDIF});
+var
+  RootDir: string;
+  Attr: Integer;
+
+  procedure Process(const Directory: string);
+  var
+    DirInfo: TSearchRec;
+    SubDir: string;
+    Found: Boolean;
+  begin
+    HandleDirectory(Directory);
+
+    Found := FindFirst(Directory + '*', Attr, DirInfo) = 0;
+    try
+      while Found do
+      begin
+        if (Abort <> nil) and Abort^ then
+          Exit;
+        if (DirInfo.Name <> '.') and (DirInfo.Name <> '..') and
+          {$IFDEF UNIX}
+          (IncludeHiddenDirectories or (Pos('.', DirInfo.Name) <> 1)) and
+          ((DirInfo.Attr and faSymLink = 0) or ResolveSymLinks) and
+          {$ENDIF UNIX}
+          (DirInfo.Attr and faDirectory <> 0) then
+        begin
+          SubDir := Directory + DirInfo.Name + PathSeparator;
+          if (SubDirectoriesMask = '') or StrMatches(SubDirectoriesMask, SubDir, Length(RootDir)) then
+            Process(SubDir);
+        end;
+        Found := FindNext(DirInfo) = 0;
+      end;
+    finally
+      FindClose(DirInfo);
+    end;
+  end;
+
+begin
+  Assert(Assigned(HandleDirectory));
+  RootDir := CanonicalizedSearchPath(Root);
+
+  if IncludeHiddenDirectories then
+    Attr := faDirectory + faHidden  // no effect on Linux
+  else
+    Attr := faDirectory;
+
+  Process(RootDir);
+end;
+
+//==================================================================================================
+// TJclFileAttributeMask
+//==================================================================================================
+
+constructor TJclCustomFileAttrMask.Create;
+begin
+  inherited Create;
+  FRejectedAttr := faRejectedByDefault;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.Assign(Source: TPersistent);
+begin
+  if Source is TJclCustomFileAttrMask then
+  begin
+    Required := TJclCustomFileAttrMask(Source).Required;
+    Rejected := TJclCustomFileAttrMask(Source).Rejected;
+  end
+  else
+    inherited Assign(Source);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.Clear;
+begin
+  Rejected := 0;
+  Required := 0;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.DefineProperties(Filer: TFiler);
+var
+  Ancestor: TJclCustomFileAttrMask;
+  Attr: Integer;
+begin
+  Attr := 0;
+  Ancestor := TJclCustomFileAttrMask(Filer.Ancestor);
+  if Assigned(Ancestor) then
+    Attr := Ancestor.FRequiredAttr;
+  Filer.DefineProperty('Required', ReadRequiredAttributes, WriteRequiredAttributes,
+    Attr <> FRequiredAttr);
+  if Assigned(Ancestor) then
+    Attr := Ancestor.FRejectedAttr;
+  Filer.DefineProperty('Rejected', ReadRejectedAttributes, WriteRejectedAttributes,
+    Attr <> FRejectedAttr);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclCustomFileAttrMask.Match(FileAttributes: Integer): Boolean;
+begin
+  Result := AttributeMatch(FileAttributes, Rejected, Required);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclCustomFileAttrMask.Match(const FileInfo: TSearchRec): Boolean;
+begin
+  Result := Match(FileInfo.Attr);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclCustomFileAttrMask.GetAttr(Index: Integer): TAttributeInterest;
+begin
+  if ((FRequiredAttr and Index) <> 0) or (Index = faNormalFile) and
+    (FRejectedAttr = not faNormalFile) then
+    Result := aiRequired
+  else
+  if (FRejectedAttr and Index) <> 0 then
+    Result := aiRejected
+  else
+    Result := aiIgnored;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.ReadRejectedAttributes(Reader: TReader);
+begin
+  FRejectedAttr := Reader.ReadInteger;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.ReadRequiredAttributes(Reader: TReader);
+begin
+  FRequiredAttr := Reader.ReadInteger;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.SetAttr(Index: Integer; const Value: TAttributeInterest);
+begin
+  case Value of
+    aiIgnored:
+      begin
+        FRequiredAttr := FRequiredAttr and not Index;
+        FRejectedAttr := FRejectedAttr and not Index;
+      end;
+    aiRejected:
+      begin
+        FRequiredAttr := FRequiredAttr and not Index;
+        FRejectedAttr := FRejectedAttr or Index;
+      end;
+    aiRequired:
+      begin
+        if Index = faNormalFile then
+        begin
+          FRequiredAttr := faNormalFile;
+          FRejectedAttr := not faNormalFile;
+        end
+        else
+        begin
+          FRequiredAttr := FRequiredAttr or Index;
+          FRejectedAttr := FRejectedAttr and not Index;
+        end;
+      end;
+  end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.WriteRejectedAttributes(Writer: TWriter);
+begin
+  Writer.WriteInteger(FRejectedAttr);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclCustomFileAttrMask.WriteRequiredAttributes(Writer: TWriter);
+begin
+  Writer.WriteInteger(FRequiredAttr);
+end;
+
+//==================================================================================================
+// internal class TEnumFileThread
+//==================================================================================================
+
+type
+  TEnumFileThread = class(TThread)
+  private
+    FID: TFileSearchTaskID;
+    FFileMasks: TStrings;
+    FDirectory: string;
+    FSubDirectoryMask: string;
+    FOnEnterDirectory: TFileHandler;
+    FFileHandlerEx: TFileHandlerEx;
+    FFileHandler: TFileHandler;
+    FInternalDirHandler: TFileHandler;
+    FInternalFileHandler: TFileHandlerEx;
+    FFileInfo: TSearchRec;
+    FRejectedAttr: Integer;
+    FRequiredAttr: Integer;
+    FFileSizeMin: Int64;
+    FFileSizeMax: Int64;
+    FFileTimeMin: Integer;
+    FFileTimeMax: Integer;
+    FSynchronizationMode: TFileEnumeratorSyncMode;
+    FIncludeSubDirectories: Boolean;
+    FIncludeHiddenSubDirectories: Boolean;
+    FNotifyOnTermination: Boolean;
+    FCaseSensitiveSearch: Boolean;
+    FAllNamesMatch: Boolean;
+    procedure EnterDirectory;
+    procedure AsyncProcessDirectory(const Directory: string);
+    procedure SyncProcessDirectory(const Directory: string);
+    procedure AsyncProcessFile(const Directory: string; const FileInfo: TSearchRec);
+    procedure SyncProcessFile(const Directory: string; const FileInfo: TSearchRec);
+    procedure SetFileMasks(const Value: TStrings);
+  protected
+    procedure DoTerminate; override;
+    procedure Execute; override;
+    function FileMatch: Boolean;
+    function FileNameMatchesMask: Boolean;
+    procedure ProcessDirectory;
+    procedure ProcessDirFiles;
+    procedure ProcessFile;
+    property AllNamesMatch: Boolean read FAllNamesMatch;
+    property CaseSensitiveSearch: Boolean read FCaseSensitiveSearch write FCaseSensitiveSearch;
+    property FileMasks: TStrings read FFileMasks write SetFileMasks;
+    property FileSizeMin: Int64 read FFileSizeMin write FFileSizeMin;
+    property FileSizeMax: Int64 read FFileSizeMax write FFileSizeMax;
+    property Directory: string read FDirectory write FDirectory;
+    property IncludeSubDirectories: Boolean
+      read FIncludeSubDirectories write FIncludeSubDirectories;
+    property IncludeHiddenSubDirectories: Boolean
+      read FIncludeHiddenSubDirectories write FIncludeHiddenSubDirectories;
+    property RejectedAttr: Integer read FRejectedAttr write FRejectedAttr;
+    property RequiredAttr: Integer read FRequiredAttr write FRequiredAttr;
+    property SynchronizationMode: TFileEnumeratorSyncMode
+      read FSynchronizationMode write FSynchronizationMode;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    property ID: TFileSearchTaskID read FID;
+    {$IFDEF FPC} // protected property
+    property Terminated;
+    {$ENDIF}
+  end;
+
+//--------------------------------------------------------------------------------------------------
+
+constructor TEnumFileThread.Create;
+begin
+  inherited Create(True);
+  FFileMasks := TStringList.Create;
+  FFileTimeMin := Low(FFileInfo.Time);
+  FFileTimeMax := High(FFileInfo.Time);
+  FFileSizeMax := High(FFileSizeMax);
+  {$IFDEF MSWINDOWS}
+  Priority := tpIdle;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  Priority := 0;
+  {$ENDIF UNIX}
+  FreeOnTerminate := True;
+  FNotifyOnTermination := True;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+destructor TEnumFileThread.Destroy;
+begin
+  FFileMasks.Free;
+  inherited Destroy;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.Execute;
+begin
+  if SynchronizationMode = smPerDirectory then
+  begin
+    FInternalDirHandler := SyncProcessDirectory;
+    FInternalFileHandler := AsyncProcessFile;
+  end
+  else // SynchronizationMode = smPerFile
+  begin
+    FInternalDirHandler := AsyncProcessDirectory;
+    FInternalFileHandler := SyncProcessFile;
+  end;
+
+  if FIncludeSubDirectories then
+    EnumDirectories(Directory, FInternalDirHandler, FIncludeHiddenSubDirectories,
+      FSubDirectoryMask, @Terminated)
+  else
+    FInternalDirHandler(CanonicalizedSearchPath(Directory));
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.DoTerminate;
+begin
+  if FNotifyOnTermination then
+    inherited DoTerminate;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.EnterDirectory;
+begin
+  FOnEnterDirectory(Directory);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.ProcessDirectory;
+begin
+  if Assigned(FOnEnterDirectory) then
+    EnterDirectory;
+  ProcessDirFiles;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.AsyncProcessDirectory(const Directory: string);
+begin
+  FDirectory := Directory;
+  if Assigned(FOnEnterDirectory) then
+    Synchronize(EnterDirectory);
+  ProcessDirFiles;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.SyncProcessDirectory(const Directory: string);
+begin
+  FDirectory := Directory;
+  Synchronize(ProcessDirectory);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.ProcessDirFiles;
+begin
+  EnumFiles(Directory + '*', FInternalFileHandler, FRejectedAttr, FRequiredAttr, @Terminated);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TEnumFileThread.FileMatch: Boolean;
+var
+  FileSize: Int64;
+begin
+  Result := FileNameMatchesMask and (FFileInfo.Time >= FFileTimeMin) and (FFileInfo.Time <= FFileTimeMax);
+  if Result then
+  begin
+    FileSize := GetSizeOfFile(FFileInfo);
+    Result := (FileSize >= FFileSizeMin) and (FileSize <= FFileSizeMax);
+  end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TEnumFileThread.FileNameMatchesMask: Boolean;
+var
+  I: Integer;
+begin
+  Result := AllNamesMatch;
+  if not Result then
+    for I := 0 to FFileMasks.Count - 1 do
+      if IsFileNameMatch(FFileInfo.Name, FFileMasks[I], CaseSensitiveSearch) then
+      begin
+        Result := True;
+        Break;
+      end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.ProcessFile;
+begin
+  if Assigned(FFileHandlerEx) then
+    FFileHandlerEx(Directory, FFileInfo)
+  else
+    FFileHandler(Directory + FFileInfo.Name);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.AsyncProcessFile(const Directory: string; const FileInfo: TSearchRec);
+begin
+  FFileInfo := FileInfo;
+  if FileMatch then
+    ProcessFile;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.SyncProcessFile(const Directory: string; const FileInfo: TSearchRec);
+begin
+  FFileInfo := FileInfo;
+  if FileMatch then
+    Synchronize(ProcessFile);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TEnumFileThread.SetFileMasks(const Value: TStrings);
+var
+  I: Integer;
+begin
+  FAllNamesMatch := Value.Count = 0;
+  for I := 0 to Value.Count - 1 do
+    if (Value[I] = '*') {$IFDEF MSWINDOWS} or (Value[I] = '*.*') {$ENDIF} then
+    begin
+      FAllNamesMatch := True;
+      Break;
+    end;
+  if FAllNamesMatch then
+    FileMasks.Clear
+  else
+    FileMasks.Assign(Value);
+end;
+
+//==================================================================================================
+// TJclFileEnumerator
+//==================================================================================================
+
+constructor TJclFileEnumerator.Create;
+begin
+  inherited Create;
+  FTasks := TList.Create;
+  FAttributeMask := TJclFileAttributeMask.Create;
+  FRootDirectory := '.';
+  FFileMasks := TStringList.Create;
+  FFileMasks.Add('*');
+  FSubDirectoryMask := '*';
+  FOptions := [fsIncludeSubDirectories];
+  FLastChangeAfter := MinDateTime;
+  FLastChangeBefore := MaxDateTime;
+  {$IFDEF UNIX}
+  FCaseSensitiveSearch := True;
+  {$ENDIF}
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+destructor TJclFileEnumerator.Destroy;
+begin
+  StopAllTasks(True);
+  FTasks.Free;
+  FAttributeMask.Free;
+  FFileMasks.Free;
+  inherited Destroy;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  if GetOwner <> nil then
+    GetOwner.GetInterface(IInterface, FOwnerInterface);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.QueryInterface(const IID: TGUID; out Obj): HRESULT;
+begin
+  if GetInterface(IID, Obj) then
+    Result := S_OK
+  else
+    Result := E_NOINTERFACE;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator._AddRef: Integer;
+begin
+  if FOwnerInterface <> nil then
+    Result := FOwnerInterface._AddRef
+  else
+    Result := InterlockedIncrement(FRefCount);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator._Release: Integer;
+begin
+  if FOwnerInterface <> nil then
+    Result := FOwnerInterface._Release
+  else
+  begin
+    Result := InterlockedDecrement(FRefCount);
+    if Result = 0 then
+      Destroy;
+  end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.Assign(Source: TPersistent);
+var
+  Src: TJclFileEnumerator;
+begin
+  if Source is TJclFileEnumerator then
+  begin
+    Src := TJclFileEnumerator(Source);
+    FCaseSensitiveSearch := Src.FCaseSensitiveSearch;
+    FileMasks.Assign(Src.FileMasks);
+    RootDirectory := Src.RootDirectory;
+    SubDirectoryMask := Src.SubDirectoryMask;
+    AttributeMask := Src.AttributeMask;
+    Options := Src.Options;
+    FileSizeMin := Src.FileSizeMin;
+    FileSizeMax := Src.FileSizeMax;
+    LastChangeAfter := Src.LastChangeAfter;
+    LastChangeBefore := Src.LastChangeBefore;
+    SynchronizationMode := Src.SynchronizationMode;
+    OnEnterDirectory := Src.OnEnterDirectory;
+    OnTerminateTask := Src.OnTerminateTask;
+  end
+  else
+    inherited Assign(Source);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.CreateTask: TThread;
+var
+  Task: TEnumFileThread;
+begin
+  Task := TEnumFileThread.Create;
+  Task.FID := NextTaskID;
+  Task.CaseSensitiveSearch := FCaseSensitiveSearch;
+  Task.FileMasks := FileMasks;
+  Task.Directory := RootDirectory;
+  Task.RejectedAttr := AttributeMask.Rejected;
+  Task.RequiredAttr := AttributeMask.Required;
+  Task.IncludeSubDirectories := IncludeSubDirectories;
+  Task.IncludeHiddenSubDirectories := IncludeHiddenSubDirectories;
+  if fsMinSize in Options then
+    Task.FileSizeMin := FileSizeMin;
+  if fsMaxSize in Options then
+    Task.FileSizeMax := FileSizeMax;
+  if fsLastChangeAfter in Options then
+    Task.FFileTimeMin := DateTimeToFileDate(LastChangeAfter);
+  if fsLastChangeBefore in Options then
+    Task.FFileTimeMax := DateTimeToFileDate(LastChangeBefore);
+  Task.SynchronizationMode := SynchronizationMode;
+  Task.FOnEnterDirectory := OnEnterDirectory;
+  Task.OnTerminate := TaskTerminated;
+  FTasks.Add(Task);
+  if FRefCount > 0 then
+    _AddRef;
+  Result := Task;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.FillList(List: TStrings): TFileSearchTaskID;
+begin
+  Result := ForEach(List.Append);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.ForEach(Handler: TFileHandlerEx): TFileSearchTaskID;
+var
+  Task: TEnumFileThread;
+begin
+  Task := TEnumFileThread(CreateTask);
+  Task.FFileHandlerEx := Handler;
+  Result := Task.ID;
+  Task.Resume;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.ForEach(Handler: TFileHandler): TFileSearchTaskID;
+var
+  Task: TEnumFileThread;
+begin
+  Task := TEnumFileThread(CreateTask);
+  Task.FFileHandler := Handler;
+  Result := Task.ID;
+  Task.Resume;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetRunningTasks: Integer;
+begin
+  Result := FTasks.Count;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.StopTask(ID: TFileSearchTaskID);
+var
+  Task: TEnumFileThread;
+  I: Integer;
+begin
+  for I := 0 to FTasks.Count - 1 do
+  begin
+    Task := TEnumFileThread(FTasks[I]);
+    if Task.ID = ID then
+    begin
+      Task.Terminate;
+      Break;
+    end;
+  end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.StopAllTasks(Silently: Boolean = False);
+var
+  I: Integer;
+begin
+  for I := 0 to FTasks.Count - 1 do
+    with TEnumFileThread(FTasks[I]) do
+    begin
+      FNotifyOnTermination := not Silently;
+      Terminate;
+    end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.TaskTerminated(Sender: TObject);
+begin
+  FTasks.Remove(Sender);
+  try
+    if Assigned(FOnTerminateTask) then
+      with TEnumFileThread(Sender) do
+        FOnTerminateTask(ID, Terminated);
+  finally
+    if FRefCount > 0 then
+      _Release;
+  end;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetNextTaskID: TFileSearchTaskID;
+begin
+  Result := FNextTaskID;
+  Inc(FNextTaskID);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetAttributeMask(
+  const Value: TJclFileAttributeMask);
+begin
+  FAttributeMask.Assign(Value);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetLastChangeAfterStr: string;
+begin
+  Result := DateTimeToStr(LastChangeAfter);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetLastChangeBeforeStr: string;
+begin
+  Result := DateTimeToStr(LastChangeBefore);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetLastChangeAfterStr(const Value: string);
+begin
+  if Value = '' then
+    LastChangeAfter := MinDateTime
+  else
+    LastChangeAfter := StrToDateTime(Value);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetLastChangeBeforeStr(const Value: string);
+begin
+  if Value = '' then
+    LastChangeBefore := MaxDateTime
+  else
+    LastChangeBefore := StrToDateTime(Value);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetAttributeMask: TJclFileAttributeMask;
+begin
+  Result := FAttributeMask;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetCaseSensitiveSearch: Boolean;
+begin
+  Result := FCaseSensitiveSearch;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetRootDirectory: string;
+begin
+  Result := FRootDirectory;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetFileMask: string;
+begin
+  Result := StringsToStr(FFileMasks, ';', False);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetFileMasks: TStrings;
+begin
+  Result := FFileMasks;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetFileSizeMax: Int64;
+begin
+  Result := FFileSizeMax;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetFileSizeMin: Int64;
+begin
+  Result := FFileSizeMin;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetIncludeHiddenSubDirectories: Boolean;
+begin
+  Result := fsIncludeHiddenSubDirectories in Options;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetIncludeSubDirectories: Boolean;
+begin
+  Result := fsIncludeSubDirectories in Options;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetLastChangeAfter: TDateTime;
+begin
+  Result := FLastChangeAfter;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetLastChangeBefore: TDateTime;
+begin
+  Result := FLastChangeBefore;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetOnEnterDirectory: TFileHandler;
+begin
+  Result := FOnEnterDirectory;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetOnTerminateTask: TFileSearchTerminationEvent;
+begin
+  Result := FOnTerminateTask;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetOption(const Option: TFileSearchOption): Boolean;
+begin
+  Result := Option in FOptions;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetOptions: TFileSearchOptions;
+begin
+  Result := FOptions;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetSubDirectoryMask: string;
+begin
+  Result := FSubDirectoryMask;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.GetSynchronizationMode: TFileEnumeratorSyncMode;
+begin
+  Result := FSynchronizationMode;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.IsLastChangeAfterStored: Boolean;
+begin
+  Result := FLastChangeAfter <> MinDateTime;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function TJclFileEnumerator.IsLastChangeBeforeStored: Boolean;
+begin
+  Result := FLastChangeBefore <> MaxDateTime;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetCaseSensitiveSearch(const Value: Boolean);
+begin
+  FCaseSensitiveSearch := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetRootDirectory(const Value: string);
+begin
+  FRootDirectory := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetFileMask(const Value: string);
+begin
+  StrToStrings(Value, ';', FFileMasks, False);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetFileMasks(const Value: TStrings);
+begin
+  FileMasks.Assign(Value);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetFileSizeMax(const Value: Int64);
+begin
+  FFileSizeMax := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetFileSizeMin(const Value: Int64);
+begin
+  FFileSizeMin := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetIncludeHiddenSubDirectories(
+  const Value: Boolean);
+begin
+  SetOption(fsIncludeHiddenSubDirectories, Value);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetIncludeSubDirectories(
+  const Value: Boolean);
+begin
+  SetOption(fsIncludeSubDirectories, Value);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetLastChangeAfter(const Value: TDateTime);
+begin
+  FLastChangeAfter := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetLastChangeBefore(const Value: TDateTime);
+begin
+  FLastChangeBefore := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetOnEnterDirectory(
+  const Value: TFileHandler);
+begin
+  FOnEnterDirectory := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetOnTerminateTask(
+  const Value: TFileSearchTerminationEvent);
+begin
+  FOnTerminateTask := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetOption(const Option: TFileSearchOption; const Value: Boolean);
+begin
+  if Value then
+    Include(FOptions, Option)
+  else
+    Exclude(FOptions, Option);
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetOptions(const Value: TFileSearchOptions);
+begin
+  FOptions := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetSubDirectoryMask(const Value: string);
+begin
+  FSubDirectoryMask := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+procedure TJclFileEnumerator.SetSynchronizationMode(
+  const Value: TFileEnumeratorSyncMode);
+begin
+  FSynchronizationMode := Value;
+end;
+
+//--------------------------------------------------------------------------------------------------
+
+function FileSearch: IJclFileEnumerator;
+begin
+  Result := TJclFileEnumerator.Create;
+end;
 
 end.

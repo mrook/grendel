@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is Jcl8087.pas.                                                                }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -22,14 +22,24 @@
 { retrieving the coprocessor's status word.                                                        }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: January 29, 2001                                                                  }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: Jcl8087.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
+
+// rr 2003-10-12:
+//   Removed references to Default8087CW because of compiler problems when including Jcl8087 in
+//   package (D7, I remember having seen that with D5, too; Kylix 3 however went smoothly). Error
+//   message was, in spite of {$IMPORTEDDATA ON}:
+//   "Need imported data reference ($G) to access Default8087CW".
 
 unit Jcl8087;
 
 {$I jcl.inc}
-{$WEAKPACKAGEUNIT ON}
+
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
@@ -63,8 +73,6 @@ function Mask8087Exceptions(Exceptions: T8087Exceptions): T8087Exceptions;
 function Unmask8087Exceptions(Exceptions: T8087Exceptions; ClearBefore: Boolean = True): T8087Exceptions;
 
 implementation
-uses
-  JclBase;
 
 const
   X87ExceptBits = $3F;
@@ -154,9 +162,19 @@ end;
 function Set8087ControlWord(const Control: Word): Word; assembler;
 asm
         FNCLEX
-        FSTCW   Default8087CW
-        XCHG    Default8087CW, AX
-        FLDCW   Default8087CW
+        {$IFNDEF FPC}
+        SUB     ESP, TYPE WORD
+        {$ELSE}
+        SUB     ESP, $2
+        {$ENDIF}
+        FSTCW   [ESP]
+        XCHG    [ESP], AX
+        FLDCW   [ESP]
+        {$IFNDEF FPC}
+        ADD     ESP, TYPE WORD
+        {$ELSE}
+        ADD     ESP, $2
+        {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -199,13 +217,23 @@ asm
         JZ      @1
         FNCLEX                     // clear pending exceptions
 @1:
-        FSTCW   Default8087CW
+        {$IFNDEF FPC}
+        SUB     ESP, TYPE WORD
+        {$ELSE}
+        SUB     ESP, $2
+        {$ENDIF}
+        FSTCW   [ESP]
         FWAIT
         AND     AX, X87ExceptBits  // mask exception mask bits 0..5
-        MOV     DX, Default8087CW
-        AND     Default8087CW, NOT X87ExceptBits
-        OR      Default8087CW, AX
-        FLDCW   Default8087CW
+        MOV     DX, [ESP]
+        AND     WORD PTR [ESP], NOT X87ExceptBits
+        OR      [ESP], AX
+        FLDCW   [ESP]
+        {$IFNDEF FPC}
+        ADD     ESP, TYPE WORD
+        {$ELSE}
+        ADD     ESP, $2
+        {$ENDIF}
         MOV     AX, DX
         AND     AX, X87ExceptBits
 end;

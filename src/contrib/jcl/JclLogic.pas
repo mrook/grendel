@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclLogic.pas.                                                               }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -22,15 +22,19 @@
 { conversion to string.                                                                            }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: September 2, 2001                                                                 }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclLogic.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclLogic;
 
 {$I jcl.inc}
-{$R-}
-{$WEAKPACKAGEUNIT ON}
+{$RANGECHECKS OFF}
+
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
@@ -238,7 +242,7 @@ function Min(const B1, B2: Int64): Int64; overload;
 implementation
 
 uses
-  JclBase, JclResources;
+  JclBase;
 
 type
   PByte = ^Byte;
@@ -462,15 +466,15 @@ end;
 
 function BitsHighest(X: Int64): Integer;
 begin
-  if TLargeInteger(X).HighPart = 0 then
+  if TULargeInteger(X).HighPart = 0 then
   begin
-    if TLargeInteger(X).LowPart = 0 then
+    if TULargeInteger(X).LowPart = 0 then
       Result := -1
     else
-      Result := BitsHighest(TLargeInteger(X).LowPart);
+      Result := BitsHighest(TULargeInteger(X).LowPart);
   end
   else
-    Result := BitsHighest(TLargeInteger(X).HighPart) + 32;
+    Result := BitsHighest(TULargeInteger(X).HighPart) + 32;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -521,15 +525,15 @@ end;
 
 function BitsLowest(X: Int64): Integer;
 begin
-  if TLargeInteger(X).LowPart = 0 then
+  if TULargeInteger(X).LowPart = 0 then
   begin
-    if TLargeInteger(X).HighPart = 0 then
+    if TULargeInteger(X).HighPart = 0 then
       Result := -1
     else
-      Result := BitsLowest(TLargeInteger(X).HighPart) + 32;
+      Result := BitsLowest(TULargeInteger(X).HighPart) + 32;
   end
   else
-    Result := BitsLowest(TLargeInteger(X).LowPart);
+    Result := BitsLowest(TULargeInteger(X).LowPart);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -664,7 +668,7 @@ end;
 
 function CountBitsSet(X: Int64): Integer;
 begin
-  Result := CountBitsSet(TLargeInteger(X).LowPart) + CountBitsSet(TLargeInteger(X).HighPart);
+  Result := CountBitsSet(TULargeInteger(X).LowPart) + CountBitsSet(TULargeInteger(X).HighPart);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1906,7 +1910,5 @@ begin
   else
     Result := B2;
 end;
-
-//--------------------------------------------------------------------------------------------------
 
 end.

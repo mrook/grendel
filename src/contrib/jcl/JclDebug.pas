@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclDebug.pas.                                                               }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -21,9 +21,10 @@
 { routines, Stack tracing and Source Locations a la the C/C++ __FILE__ and __LINE__ macros.        }
 {                                                                                                  }
 { Unit owner: Petr Vones                                                                           }
-{ Last modified: October 13, 2002                                                                  }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclDebug.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclDebug;
 
@@ -35,11 +36,8 @@ uses
   {$IFDEF MSWINDOWS}
   Windows,
   {$ENDIF MSWINDOWS}
-  Classes, SysUtils,
-  {$IFDEF COMPILER5_UP}
-  Contnrs,
-  {$ENDIF COMPILER5_UP}
-  JclBase, JclFileUtils, JclPeImage, JclSynch, JclTD32;
+  Classes, SysUtils, Contnrs,
+  JclFileUtils, JclPeImage, JclSynch, JclTD32;
 
 //--------------------------------------------------------------------------------------------------
 // Diagnostics
@@ -58,7 +56,7 @@ procedure TraceLocFmt(const Fmt: string; const Args: array of const);
 //--------------------------------------------------------------------------------------------------
 
 type
-  TJclModuleInfo = class (TObject)
+  TJclModuleInfo = class(TObject)
   private
     FSize: Cardinal;
     FEndAddr: Pointer;
@@ -71,7 +69,7 @@ type
     property SystemModule: Boolean read FSystemModule;
   end;
 
-  TJclModuleInfoList = class (TObjectList)
+  TJclModuleInfoList = class(TObjectList)
   private
     FDynamicBuild: Boolean;
     FSystemModulesOnly: Boolean;
@@ -105,7 +103,7 @@ type
 
   PJclMapString = PAnsiChar;
 
-  TJclAbstractMapParser = class (TObject)
+  TJclAbstractMapParser = class(TObject)
   private
     FLinkerBug: Boolean;
     FLinkerBugUnitName: PJclMapString;
@@ -134,13 +132,13 @@ type
 // MAP file parser
 //--------------------------------------------------------------------------------------------------
 
-  TJclMapClassTableEvent = procedure (Sender: TObject; const Address: TJclMapAddress; Len: Integer; const SectionName, GroupName: string) of object;
-  TJclMapSegmentEvent = procedure (Sender: TObject; const Address: TJclMapAddress; Len: Integer; const GroupName, UnitName: string) of object;
-  TJclMapPublicsEvent = procedure (Sender: TObject; const Address: TJclMapAddress; const Name: string) of object;
-  TJclMapLineNumberUnitEvent = procedure (Sender: TObject; const UnitName, UnitFileName: string) of object;
-  TJclMapLineNumbersEvent = procedure (Sender: TObject; LineNumber: Integer; const Address: TJclMapAddress) of object;
+  TJclMapClassTableEvent = procedure(Sender: TObject; const Address: TJclMapAddress; Len: Integer; const SectionName, GroupName: string) of object;
+  TJclMapSegmentEvent = procedure(Sender: TObject; const Address: TJclMapAddress; Len: Integer; const GroupName, UnitName: string) of object;
+  TJclMapPublicsEvent = procedure(Sender: TObject; const Address: TJclMapAddress; const Name: string) of object;
+  TJclMapLineNumberUnitEvent = procedure(Sender: TObject; const UnitName, UnitFileName: string) of object;
+  TJclMapLineNumbersEvent = procedure(Sender: TObject; LineNumber: Integer; const Address: TJclMapAddress) of object;
 
-  TJclMapParser = class (TJclAbstractMapParser)
+  TJclMapParser = class(TJclAbstractMapParser)
   private
     FOnClassTable: TJclMapClassTableEvent;
     FOnLineNumbers: TJclMapLineNumbersEvent;
@@ -187,7 +185,7 @@ type
     LineNumber: Integer;
   end;
 
-  TJclMapScanner = class (TJclAbstractMapParser)
+  TJclMapScanner = class(TJclAbstractMapParser)
   private
     FLineNumbers: array of TJclMapLineNumber;
     FProcNames: array of TJclMapProcName;
@@ -248,7 +246,7 @@ type
     CheckSumValid: Boolean;
   end;
 
-  TJclBinDebugGenerator = class (TJclMapScanner)
+  TJclBinDebugGenerator = class(TJclMapScanner)
   private
     FDataStream: TMemoryStream;
     FMapFileName: TFileName;
@@ -267,7 +265,7 @@ type
     SecondWord: Integer;
   end;
 
-  TJclBinDebugScanner = class (TObject)
+  TJclBinDebugScanner = class(TObject)
   private
     FCacheData: Boolean;
     FStream: TCustomMemoryStream;
@@ -333,7 +331,7 @@ type
     DebugInfo: TJclDebugInfoSource; // Location object
   end;
 
-  TJclDebugInfoSource = class (TObject)
+  TJclDebugInfoSource = class(TObject)
   private
     FModule: HMODULE;
     function GetFileName: TFileName;
@@ -349,7 +347,7 @@ type
 
   TJclDebugInfoSourceClass = class of TJclDebugInfoSource;
 
-  TJclDebugInfoList = class (TObjectList)
+  TJclDebugInfoList = class(TObjectList)
   private
     function GetItemFromModule(const Module: HMODULE): TJclDebugInfoSource;
     function GetItems(Index: Integer): TJclDebugInfoSource;
@@ -365,7 +363,7 @@ type
 // Various source location implementations
 //--------------------------------------------------------------------------------------------------
 
-  TJclDebugInfoMap = class (TJclDebugInfoSource)
+  TJclDebugInfoMap = class(TJclDebugInfoSource)
   private
     FScanner: TJclMapScanner;
   protected
@@ -375,7 +373,7 @@ type
     function GetLocationInfo(const Addr: Pointer; var Info: TJclLocationInfo): Boolean; override;
   end;
 
-  TJclDebugInfoBinary = class (TJclDebugInfoSource)
+  TJclDebugInfoBinary = class(TJclDebugInfoSource)
   private
     FScanner: TJclBinDebugScanner;
     FStream: TCustomMemoryStream;
@@ -386,7 +384,7 @@ type
     function GetLocationInfo(const Addr: Pointer; var Info: TJclLocationInfo): Boolean; override;
   end;
 
-  TJclDebugInfoExports = class (TJclDebugInfoSource)
+  TJclDebugInfoExports = class(TJclDebugInfoSource)
   private
     FBorImage: TJclPeBorImage;
   protected
@@ -415,7 +413,8 @@ function Caller(Level: Integer = 0; FastStackWalk: Boolean = False): Pointer;
 function GetLocationInfo(const Addr: Pointer): TJclLocationInfo; overload;
 function GetLocationInfo(const Addr: Pointer; var Info: TJclLocationInfo): Boolean; overload;
 function GetLocationInfoStr(const Addr: Pointer; IncludeModuleName: Boolean = False;
-  IncludeAddressOffset: Boolean = False; IncludeStartProcLineOffset: Boolean = False): string;
+  IncludeAddressOffset: Boolean = False; IncludeStartProcLineOffset: Boolean = False;
+  IncludeVAdress: Boolean = False): string;
 function DebugInfoAvailable(const Module: HMODULE): Boolean;
 procedure ClearLocationData;
 
@@ -453,7 +452,7 @@ function __MAP_OF_ADDR__(const Addr: Pointer; var _File, _Module, _Proc: string;
 //--------------------------------------------------------------------------------------------------
 
 type
-  TJclStackBaseList = class (TObjectList)
+  TJclStackBaseList = class(TObjectList)
   private
     FThreadID: DWORD;
     FTimeStamp: TDateTime;
@@ -486,11 +485,13 @@ type
     ParamSize: DWORD;
     ParamPtr: PDWORDArray;
     case Integer of
-      0: (StackFrame: PStackFrame);
-      1: (DumpPtr: PByteArray);
+      0:
+        (StackFrame: PStackFrame);
+      1:
+        (DumpPtr: PByteArray);
   end;
 
-  TJclStackInfoItem = class (TObject)
+  TJclStackInfoItem = class(TObject)
   private
     FStackInfo: TStackInfo;
     function GetCallerAdr: Pointer;
@@ -501,7 +502,7 @@ type
     property StackInfo: TStackInfo read FStackInfo;
   end;
 
-  TJclStackInfoList = class (TJclStackBaseList)
+  TJclStackInfoList = class(TJclStackBaseList)
   private
     FIgnoreLevels: DWORD;
     TopOfStack: Cardinal;
@@ -518,16 +519,18 @@ type
     constructor Create(Raw: Boolean; AIgnoreLevels: DWORD; FirstCaller: Pointer);
     destructor Destroy; override;
     procedure AddToStrings(Strings: TStrings; IncludeModuleName: Boolean = False;
-      IncludeAddressOffset: Boolean = False; IncludeStartProcLineOffset: Boolean = False);
+      IncludeAddressOffset: Boolean = False; IncludeStartProcLineOffset: Boolean = False;
+      IncludeVAdress: Boolean = False);
     property Items[Index: Integer]: TJclStackInfoItem read GetItems; default;
     property IgnoreLevels: DWORD read FIgnoreLevels;
   end;
 
-function JclCreateStackList(Raw: Boolean; AIgnoreLevels: Integer; FirstCaller: Pointer): TJclStackInfoList;
+function JclCreateStackList(Raw: Boolean; AIgnoreLevels: DWORD; FirstCaller: Pointer): TJclStackInfoList;
 
 function JclLastExceptStackList: TJclStackInfoList;
 function JclLastExceptStackListToStrings(Strings: TStrings; IncludeModuleName: Boolean = False;
-  IncludeAddressOffset: Boolean = False; IncludeStartProcLineOffset: Boolean = False): Boolean;
+  IncludeAddressOffset: Boolean = False; IncludeStartProcLineOffset: Boolean = False;
+  IncludeVAdress: Boolean = False): Boolean;
 
 //--------------------------------------------------------------------------------------------------
 // Exception frame info routines
@@ -549,10 +552,10 @@ type
   TExcDesc = packed record // from System.pas
     JMP: TJmpInstruction;
     case Integer of
-      0: (
-        Instructions: array [0..0] of Byte);
-      1: (
-        Cnt: Integer;
+      0:
+        (Instructions: array [0..0] of Byte);
+      1:
+       (Cnt: Integer;
         ExcTab: array [0..0] of TExcDescEntry);
   end;
 
@@ -562,9 +565,12 @@ type
     Desc: PExcDesc;
     HEBP: Pointer;
     case Integer of
-      0: ();
-      1: (ConstructedObject: Pointer);
-      2: (SelfOfMethod: Pointer);
+      0:
+        ();
+      1:
+        (ConstructedObject: Pointer);
+      2:
+        (SelfOfMethod: Pointer);
   end;
 
   PJmpTable = ^TJmpTable;
@@ -573,10 +579,10 @@ type
     Ptr: Pointer;
   end;
 
-  TExceptFrameKind = (efkUnknown, efkFinally, efkAnyException, efkOnException,
-    efkAutoException);
+  TExceptFrameKind =
+    (efkUnknown, efkFinally, efkAnyException, efkOnException, efkAutoException);
 
-  TJclExceptFrame = class (TObject)
+  TJclExceptFrame = class(TObject)
   private
     FExcFrame: PExcFrame;
     FFrameKind: TExceptFrameKind;
@@ -591,7 +597,7 @@ type
     property FrameKind: TExceptFrameKind read FFrameKind;
   end;
 
-  TJclExceptFrameList = class (TJclStackBaseList)
+  TJclExceptFrameList = class(TJclStackBaseList)
   private
     FIgnoreLevels: Integer;
     function GetItems(Index: Integer): TJclExceptFrame;
@@ -612,7 +618,8 @@ function JclLastExceptFrameList: TJclExceptFrameList;
 //--------------------------------------------------------------------------------------------------
 
 type
-  TJclStackTrackingOption = (stStack, stExceptFrame, stRawMode, stAllModules, stStaticModuleList);
+  TJclStackTrackingOption =
+    (stStack, stExceptFrame, stRawMode, stAllModules, stStaticModuleList);
   TJclStackTrackingOptions = set of TJclStackTrackingOption;
 
 var
@@ -629,7 +636,7 @@ function JclTrackExceptionsFromLibraries: Boolean;
 //--------------------------------------------------------------------------------------------------
 
 type
-  TJclDebugThread = class (TThread)
+  TJclDebugThread = class(TThread)
   private
     FSyncException: Exception;
     FThreadName: string;
@@ -647,10 +654,10 @@ type
     property ThreadName: string read FThreadName;
   end;
 
-  TJclDebugThreadNotifyEvent = procedure (Thread: TJclDebugThread) of object;
-  TJclThreadIDNotifyEvent = procedure (ThreadID: DWORD) of object;
+  TJclDebugThreadNotifyEvent = procedure(Thread: TJclDebugThread) of object;
+  TJclThreadIDNotifyEvent = procedure(ThreadID: DWORD) of object;
 
-  TJclDebugThreadList = class (TObject)
+  TJclDebugThreadList = class(TObject)
   private
     FList: TStringList;
     FLock: TJclCriticalSection;
@@ -694,12 +701,15 @@ function JclDebugThreadList: TJclDebugThreadList;
 //--------------------------------------------------------------------------------------------------
 
 {$IFDEF MSWINDOWS}
-
 function EnableCrashOnCtrlScroll(const Enable: Boolean): Boolean;
 function IsDebuggerAttached: Boolean;
 function IsHandleValid(Handle: THandle): Boolean;
-
 {$ENDIF MSWINDOWS}
+
+{$IFDEF SUPPORTS_EXTSYM}
+  {$EXTERNALSYM __FILE__}
+  {$EXTERNALSYM __LINE__}
+{$ENDIF}
 
 implementation
 
@@ -713,26 +723,29 @@ uses
 // Helper assembler routines
 //==================================================================================================
 
+const
+  ModuleCodeOffset = $1000;
+
 {$STACKFRAMES OFF}
 
 function GetEBP: Pointer;
 asm
-  MOV EAX, EBP
+        MOV     EAX, EBP
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 function GetESP: Pointer;
 asm
-  MOV EAX, ESP
+        MOV     EAX, ESP
 end;
 
 //--------------------------------------------------------------------------------------------------
 
 function GetFS: Pointer;
 asm
-  XOR EAX, EAX
-  MOV EAX, FS:[EAX]
+        XOR     EAX, EAX
+        MOV     EAX, FS:[EAX]
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -742,7 +755,7 @@ end;
 
 function GetStackTop: DWORD;
 asm
-  MOV EAX, FS:[4]
+        MOV     EAX, FS:[4]
 end;
 
 {$IFDEF STACKFRAMES_ON}
@@ -791,8 +804,8 @@ end;
 
 procedure TraceLoc(const Msg: string);
 begin
-  OutputDebugString(PChar(Format('%s:%u (%s) "%s"', [FileByLevel(1), LineByLevel(1),
-    ProcByLevel(1), Msg])));
+  OutputDebugString(PChar(Format('%s:%u (%s) "%s"',
+    [FileByLevel(1), LineByLevel(1), ProcByLevel(1), Msg])));
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -945,7 +958,7 @@ end;
 destructor TJclAbstractMapParser.Destroy;
 begin
   FreeAndNil(FStream);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1042,7 +1055,7 @@ var
     end;
   end;
 
-{$OVERFLOWCHECKS OFF}
+  {$OVERFLOWCHECKS OFF}
 
   function ReadHexValue: Integer;
   var
@@ -1079,9 +1092,9 @@ var
     until False;
   end;
 
-{$IFDEF OVERFLOWCHECKS_ON}
-{$OVERFLOWCHECKS ON}
-{$ENDIF OVERFLOWCHECKS_ON}
+  {$IFDEF OVERFLOWCHECKS_ON}
+  {$OVERFLOWCHECKS ON}
+  {$ENDIF OVERFLOWCHECKS_ON}
 
   function ReadAddress: TJclMapAddress;
   begin
@@ -1294,7 +1307,7 @@ end;
 
 constructor TJclMapScanner.Create(const MapFileName: TFileName);
 begin
-  inherited;
+  inherited Create(MapFileName);
   Scan;
 end;
 
@@ -1459,7 +1472,6 @@ begin
   Parse;
   SetLength(FLineNumbers, FLineNumbersCnt);
   SetLength(FProcNames, FProcNamesCnt);
-//  FreeAndNil(FStream);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1541,7 +1553,7 @@ var
   I, B: Integer;
   C: Byte;
   P: PByte;
-  Buffer: array[0..255] of Char;
+  Buffer: array [0..255] of Char;
 begin
   Result := '';
   B := 0;
@@ -1815,7 +1827,7 @@ begin
       // JCLDEBUG Virtual Address
       JclDebugSection^.VirtualAddress := LastSection^.VirtualAddress + LastSection^.Misc.VirtualSize;
       RoundUpToAlignment(JclDebugSection^.VirtualAddress, NtHeaders^.OptionalHeader.SectionAlignment);
-      // JCLDEBUG Physical Ofset
+      // JCLDEBUG Physical Offset
       JclDebugSection^.PointerToRawData := LastSection^.PointerToRawData + LastSection^.SizeOfRawData;
       RoundUpToAlignment(JclDebugSection^.PointerToRawData, NtHeaders^.OptionalHeader.FileAlignment);
       // JCLDEBUG Section name
@@ -1894,7 +1906,7 @@ end;
 
 constructor TJclBinDebugGenerator.Create(const MapFileName: TFileName);
 begin
-  inherited;
+  inherited Create(MapFileName);
   FDataStream := TMemoryStream.Create;
   FMapFileName := MapFileName;
   if FStream <> nil then
@@ -2053,7 +2065,7 @@ end;
 destructor TJclBinDebugGenerator.Destroy;
 begin
   FreeAndNil(FDataStream);
-  inherited;
+  inherited Destroy;
 end;
 
 //==================================================================================================
@@ -2454,7 +2466,7 @@ end;
 
 function TJclDebugInfoSource.VAFromAddr(const Addr: Pointer): DWORD;
 begin
-  Result := DWORD(Addr) - FModule - $1000;
+  Result := DWORD(Addr) - FModule - ModuleCodeOffset;
 end;
 
 //==================================================================================================
@@ -2552,7 +2564,7 @@ end;
 destructor TJclDebugInfoMap.Destroy;
 begin
   FreeAndNil(FScanner);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2597,7 +2609,7 @@ destructor TJclDebugInfoBinary.Destroy;
 begin
   FreeAndNil(FScanner);
   FreeAndNil(FStream);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2658,7 +2670,7 @@ end;
 destructor TJclDebugInfoExports.Destroy;
 begin
   FreeAndNil(FBorImage);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2737,7 +2749,7 @@ end;
 destructor TJclDebugInfoTD32.Destroy;
 begin
   FreeAndNil(FImage);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -2857,15 +2869,16 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 function GetLocationInfoStr(const Addr: Pointer; IncludeModuleName, IncludeAddressOffset,
-  IncludeStartProcLineOffset: Boolean): string;
+  IncludeStartProcLineOffset: Boolean; IncludeVAdress: Boolean): string;
 var
   Info, StartProcInfo: TJclLocationInfo;
   OffsetStr, StartProcOffsetStr: string;
+  Module : HMODULE;
 begin
+  OffsetStr := '';
   if GetLocationInfo(Addr, Info) then
   with Info do
   begin
-    OffsetStr := '';
     if LineNumber > 0 then
     begin
       if IncludeStartProcLineOffset and GetLocationInfo(Pointer(Cardinal(Info.Address) -
@@ -2895,8 +2908,15 @@ begin
   end
   else
     Result := Format('[%p]', [Addr]);
-  if IncludeModuleName then
-    Insert(Format('{%-12s}', [ExtractFileName(GetModulePath(ModuleFromAddr(Addr)))]), Result, 11);
+  if IncludeVAdress or IncludeModuleName then
+  begin
+    Module := ModuleFromAddr(Addr);
+    if IncludeVAdress then
+      OffsetStr :=  Format('(%p) ', [Pointer(DWORD(Addr) - Module - ModuleCodeOffset)]);
+    if IncludeModuleName then
+      Insert(Format('{%-12s}', [ExtractFileName(GetModulePath(Module))]), Result, 11);
+    Result := OffsetStr + Result;
+  end;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3122,7 +3142,7 @@ end;
 type
   TJclStackBaseListClass = class of TJclStackBaseList;
 
-  TJclGlobalStackList = class (TThreadList)
+  TJclGlobalStackList = class(TThreadList)
   private
     FLockedTID: DWORD;
     FTIDLocked: Boolean;
@@ -3174,7 +3194,7 @@ begin
   finally
     UnlockList;
   end;
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3252,7 +3272,7 @@ end;
 //==================================================================================================
 
 type
-  TJclGlobalModulesList = class (TObject)
+  TJclGlobalModulesList = class(TObject)
   private
     FHookedModules: TJclModuleArray;
     FLock: TJclCriticalSection;
@@ -3308,7 +3328,7 @@ destructor TJclGlobalModulesList.Destroy;
 begin
   FreeAndNil(FLock);
   FreeAndNil(FModulesList);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3390,7 +3410,7 @@ end;
 
 procedure DoExceptionStackTrace(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
 var
-  IgnoreLevels: Integer;
+  IgnoreLevels: DWORD;
   FirstCaller: Pointer;
   RawMode: Boolean;
 begin
@@ -3416,19 +3436,20 @@ end;
 //--------------------------------------------------------------------------------------------------
 
 function JclLastExceptStackListToStrings(Strings: TStrings; IncludeModuleName, IncludeAddressOffset,
-  IncludeStartProcLineOffset: Boolean): Boolean;
+  IncludeStartProcLineOffset, IncludeVAdress: Boolean): Boolean;
 var
   List: TJclStackInfoList;
 begin
   List := JclLastExceptStackList;
   Result := Assigned(List);
   if Result then
-    List.AddToStrings(Strings, IncludeModuleName, IncludeAddressOffset, IncludeStartProcLineOffset);
+    List.AddToStrings(Strings, IncludeModuleName, IncludeAddressOffset, IncludeStartProcLineOffset,
+      IncludeVAdress);
 end;
 
 //--------------------------------------------------------------------------------------------------
 
-function JclCreateStackList(Raw: Boolean; AIgnoreLevels: Integer; FirstCaller: Pointer): TJclStackInfoList;
+function JclCreateStackList(Raw: Boolean; AIgnoreLevels: DWORD; FirstCaller: Pointer): TJclStackInfoList;
 begin
   Result := TJclStackInfoList.Create(Raw, AIgnoreLevels, FirstCaller);
   GlobalStackList.AddObject(Result);
@@ -3455,13 +3476,13 @@ end;
 //==================================================================================================
 
 procedure TJclStackInfoList.AddToStrings(Strings: TStrings; IncludeModuleName, IncludeAddressOffset,
-  IncludeStartProcLineOffset: Boolean);
+  IncludeStartProcLineOffset, IncludeVAdress: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
     Strings.Add(GetLocationInfoStr(Items[I].CallerAdr, IncludeModuleName, IncludeAddressOffset,
-      IncludeStartProcLineOffset));
+      IncludeStartProcLineOffset, IncludeVAdress));
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3491,7 +3512,7 @@ end;
 destructor TJclStackInfoList.Destroy;
 begin
   GlobalModulesList.FreeModulesList(FModuleInfoList);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -3997,7 +4018,7 @@ end;
 destructor TJclDebugThread.Destroy;
 begin
   JclDebugThreadList.UnregisterThread(Self);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -4028,7 +4049,7 @@ begin
   // exception handling routine easily.
   // Any other call of those JclLastXXX routines from another thread at the same
   // time will return expected information for current Thread ID.
-   DoNotify;
+  DoNotify;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -4056,7 +4077,7 @@ end;
 //==================================================================================================
 
 type
-  TThreadAccess = class (TThread);
+  TThreadAccess = class(TThread);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -4074,7 +4095,7 @@ begin
   FreeAndNil(FList);
   FreeAndNil(FLock);
   FreeAndNil(FReadLock);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -4089,7 +4110,7 @@ end;
 
 procedure TJclDebugThreadList.DoSyncThreadRegistered;
 begin
-  if Assigned(FOnThreadUnregistered) then
+  if Assigned(FOnThreadRegistered) then
     FOnThreadRegistered(FRegSyncThreadID);
 end;
 

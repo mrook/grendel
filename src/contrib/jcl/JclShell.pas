@@ -12,8 +12,8 @@
 {                                                                                                  }
 { The Original Code is JclShell.pas.                                                               }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
@@ -22,21 +22,27 @@
 { through shell interfaces, shortcut's and program execution.                                      }
 {                                                                                                  }
 { Unit owner: Marcel van Brakel                                                                    }
-{ Last modified: May 26, 2002                                                                      }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclShell.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclShell;
 
 {$I jcl.inc}
 
-{$WEAKPACKAGEUNIT ON}
+{$IFDEF SUPPORTS_WEAKPACKAGEUNIT}
+  {$WEAKPACKAGEUNIT ON}
+{$ENDIF SUPPORTS_WEAKPACKAGEUNIT}
 
 interface
 
 uses
-  Windows, Graphics, ShlObj, SysUtils,
-  JclBase, JclWin32;
+  Windows, SysUtils,
+  {$IFNDEF FPC}
+  ShlObj,
+  {$ENDIF}
+  JclWin32;
 
 //--------------------------------------------------------------------------------------------------
 // Files and Folders
@@ -79,7 +85,7 @@ function SHEnumFolderNext(var F: TEnumFolderRec): Boolean;
 function GetSpecialFolderLocation(const Folder: Integer): string;
 
 function DisplayPropDialog(const Handle: HWND; const FileName: string): Boolean; overload;
-function DisplayPropDialog(const Handle: HWND; const Item: PItemIdList): Boolean; overload;
+function DisplayPropDialog(const Handle: HWND; Item: PItemIdList): Boolean; overload;
 
 function DisplayContextMenuPidl(const Handle: HWND; const Folder: IShellFolder;
   Item: PItemIdList; Pos: TPoint): Boolean;
@@ -105,13 +111,13 @@ function SHFreeMem(var P: Pointer): Boolean;
 function DriveToPidlBind(const DriveName: string; out Folder: IShellFolder): PItemIdList;
 function PathToPidl(const Path: string; Folder: IShellFolder): PItemIdList;
 function PathToPidlBind(const FileName: string; out Folder: IShellFolder): PItemIdList;
-function PidlBindToParent(const IdList: PItemIdList; out Folder: IShellFolder; out Last: PItemIdList): Boolean;
-function PidlCompare(const Pidl1, Pidl2: PItemIdList): Boolean;
-function PidlCopy(const Source: PItemIdList; out Dest: PItemIdList): Boolean;
+function PidlBindToParent(IdList: PItemIdList; out Folder: IShellFolder; out Last: PItemIdList): Boolean;
+function PidlCompare(Pidl1, Pidl2: PItemIdList): Boolean;
+function PidlCopy(Source: PItemIdList; out Dest: PItemIdList): Boolean;
 function PidlFree(var IdList: PItemIdList): Boolean;
-function PidlGetDepth(const Pidl: PItemIdList): Integer;
-function PidlGetLength(const Pidl: PItemIdList): Integer;
-function PidlGetNext(const Pidl: PItemIdList): PItemIdList;
+function PidlGetDepth(Pidl: PItemIdList): Integer;
+function PidlGetLength(Pidl: PItemIdList): Integer;
+function PidlGetNext(Pidl: PItemIdList): PItemIdList;
 function PidlToPath(IdList: PItemIdList): string;
 
 function StrRetFreeMem(StrRet: TStrRet): Boolean;
@@ -139,10 +145,11 @@ procedure ShellLinkFree(var Link: TShellLink);
 function ShellLinkResolve(const FileName: string; var Link: TShellLink): HRESULT;
 function ShellLinkCreate(const Link: TShellLink; const FileName: string): HRESULT;
 function ShellLinkCreateSystem(const Link: TShellLink; const Folder: Integer; const FileName: string): HRESULT;
-function ShellLinkGetIcon(const Link: TShellLink; const Icon: TIcon): Boolean;
+function ShellLinkIcon(const Link: TShellLink): HICON; overload;
+function ShellLinkIcon(const FileName: string): HICON; overload;
 
 //--------------------------------------------------------------------------------------------------
-// Miscellanuous
+// Miscellaneous
 //--------------------------------------------------------------------------------------------------
 
 function SHDllGetVersion(const FileName: string; var Version: TDllVersionInfo): Boolean;
@@ -175,7 +182,11 @@ function ShellFindExecutable(const FileName, DefaultDir: string): string;
 implementation
 
 uses
-  ActiveX, CommCtrl, ComObj, Messages, ShellApi,
+  ActiveX,
+  {$IFNDEF FPC}
+  CommCtrl,
+  {$ENDIF FPC}
+  Messages, ShellApi,
   JclFileUtils, JclStrings, JclSysInfo, JclSysUtils;
 
 const
@@ -213,13 +224,21 @@ begin
   FillChar(FileOp, SizeOf(FileOp), #0);
   with FileOp do
   begin
+    {$IFDEF FPC}
+    hwnd := Parent;
+    {$ELSE}
     Wnd := Parent;
+    {$ENDIF}
     wFunc := FO_DELETE;
     Source := Files + #0#0;
     pFrom := PChar(Source);
     fFlags := DeleteOptionsToCardinal(Options);
   end;
+  {$IFDEF FPC}
+  Result := SHFileOperation(@FileOp) = 0;
+  {$ELSE}
   Result := SHFileOperation(FileOp) = 0;
+  {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -254,7 +273,11 @@ begin
   FillChar(FileOp, SizeOf(FileOp), #0);
   with FileOp do
   begin
+    {$IFDEF FPC}
+    hwnd := GetDesktopWindow;
+    {$ELSE}
     Wnd := GetDesktopWindow;
+    {$ENDIF}
     wFunc := FO_RENAME;
     Source := Src + #0#0;
     Destination := Dest + #0#0;
@@ -262,7 +285,11 @@ begin
     pTo := PChar(Destination);
     fFlags := RenameOptionsToCardinal(Options);
   end;
+  {$IFDEF FPC}
+  Result := SHFileOperation(@FileOp) = 0;
+  {$ELSE}
   Result := SHFileOperation(FileOp) = 0;
+  {$ENDIF}
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -291,7 +318,7 @@ begin
   begin
     PidlFree(F.Item);
     DestroyIcon(F.IconLarge);
-    DestroyIcon(F.IconLarge);
+    DestroyIcon(F.IconSmall);
   end;
   F.Attributes := 0;
   F.Item := nil;
@@ -427,7 +454,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function DisplayPropDialog(const Handle: HWND; const Item: PItemIdList): Boolean;
+function DisplayPropDialog(const Handle: HWND; Item: PItemIdList): Boolean;
 var
   Info: TShellExecuteInfo;
 begin
@@ -778,7 +805,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PidlBindToParent(const IdList: PItemIdList; out Folder: IShellFolder; out Last: PItemIdList): Boolean;
+function PidlBindToParent(IdList: PItemIdList; out Folder: IShellFolder; out Last: PItemIdList): Boolean;
 var
   Path: string;
 begin
@@ -792,7 +819,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PidlCompare(const Pidl1, Pidl2: PItemIdList): Boolean;
+function PidlCompare(Pidl1, Pidl2: PItemIdList): Boolean;
 var
   L: Integer;
 begin
@@ -804,7 +831,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PidlCopy(const Source: PItemIdList; out Dest: PItemIdList): Boolean;
+function PidlCopy(Source: PItemIdList; out Dest: PItemIdList): Boolean;
 var
   L: Integer;
 begin
@@ -843,7 +870,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PidlGetDepth(const Pidl: PItemIdList): Integer;
+function PidlGetDepth(Pidl: PItemIdList): Integer;
 var
   P: PItemIdList;
 begin
@@ -863,7 +890,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PidlGetLength(const Pidl: PItemIdList): Integer;
+function PidlGetLength(Pidl: PItemIdList): Integer;
 var
   P: PItemIdList;
   I: Integer;
@@ -886,7 +913,7 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function PidlGetNext(const Pidl: PItemIdList): PItemIdList;
+function PidlGetNext(Pidl: PItemIdList): PItemIdList;
 begin
   Result := nil;
   if (Pidl <> nil) and (Pidl^.mkid.cb <> 0) then
@@ -1047,54 +1074,59 @@ end;
 
 //--------------------------------------------------------------------------------------------------
 
-function ShellLinkGetIcon(const Link: TShellLink; const Icon: TIcon): Boolean;
+function ShellLinkIcon(const Link: TShellLink): HICON; overload;
 var
   LocExt: string;
   Info: TSHFileInfo;
 begin
-  Result := False;
+  Result := 0;
   LocExt := LowerCase(ExtractFileExt(Link.IconLocation));
   // 1. See if IconLocation specifies a valid icon file
   if (LocExt = '.ico') and (FileExists(Link.IconLocation)) then
   begin
-    Icon.LoadFromFile(Link.IconLocation);
-    Result := True;
+    { TODO : Implement loading from an .ico file }
   end;
   // 2. See if IconLocation specifies an executable
-  if not Result then
+  if Result = 0 then
   begin
     if (LocExt = '.dll') or (LocExt = '.exe') then
-    begin
-      Icon.Handle := ExtractIcon(0, PChar(Link.IconLocation), Link.IconIndex);
-      Result := Icon.Handle <> 0;
-    end;
+      Result := ExtractIcon(0, PChar(Link.IconLocation), Link.IconIndex);
   end;
   // 3. See if target specifies a file
-  if not Result then
+  if Result = 0 then
   begin
     if FileExists(Link.Target) then
-    begin
-      Icon.Handle := ExtractIcon(0, PChar(Link.Target), Link.IconIndex);
-      Result := Icon.Handle <> 0;
-    end;
+      Result := ExtractIcon(0, PChar(Link.Target), Link.IconIndex);
   end;
   // 4. See if the target is an object
-  if not Result then
+  if Result = 0 then
   begin
     if Link.IdList <> nil then
     begin
       FillChar(Info, SizeOf(Info), 0);
       if SHGetFileInfo(PChar(Link.IdList), 0, Info, SizeOf(Info), SHGFI_PIDL or SHGFI_ICON) <> 0 then
-      begin
-        Icon.Handle := Info.hIcon;
-        Result := True;
-      end;
+        Result := Info.hIcon;
     end;
   end;
 end;
 
+//--------------------------------------------------------------------------------------------------
+
+function ShellLinkIcon(const FileName: string): HICON; overload;
+var
+  Link: TShellLink;
+begin
+  if Succeeded(ShellLinkResolve(FileName, Link)) then
+  begin
+    Result := ShellLinkIcon(Link);
+    ShellLinkFree(Link);
+  end
+  else
+    Result := 0;
+end;
+
 //==================================================================================================
-// Miscellanuous
+// Miscellaneous
 //==================================================================================================
 
 function SHGetItemInfoTip(const Folder: IShellFolder; Item: PItemIdList): string;
@@ -1317,7 +1349,7 @@ begin
     end;
   end
   else
-    Result := ShellExecEx('rundll32', Format('rnaui.dll,RnaDial "%s"', [EntryName]),'',SW_SHOWNORMAL);
+    Result := ShellExecEx('rundll32', Format('rnaui.dll,RnaDial "%s"', [EntryName]), '', SW_SHOWNORMAL);
 end;
 
 //--------------------------------------------------------------------------------------------------
@@ -1406,5 +1438,7 @@ begin
   else
     Result := 0;
 end;
+
+//--------------------------------------------------------------------------------------------------
 
 end.

@@ -21,23 +21,20 @@
 { from the VERXXX directives defined by Delphi and C++ Builder to friendly     }
 { names such as DELPHI5 and SUPPORTS_WIDESTRING. These friendly names are      }
 { subsequently used in both libraries to test for compiler versions and/or     }
-{ whether the compiler supports certain features (such as widestring's or 64   }
+{ whether the compiler supports certain features (such as widestrings or 64    }
 { bit integers. Both libraries provide an additional, library specific,        }
 { include file. For the JCL this is JCL.INC. These files should be included in }
 { source files instead of this file (which is pulled in automatically).        }
 {                                                                              }
-{ Maintainer: Marcel van Brakel                                                }
-{ Last modified: Februari 21, 2001                                             }
-{                                                                              }
 {******************************************************************************}
 
+// $Id: JEDI.inc,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 (*
 
 - Development environment directives
 
-  This file defines two driectives to indicate which development environment the
-  library is being compiled with. Currently this can either be Delphi or
-  C++ Builder (in the near future "Kylix" will be added).
+  This file defines two directives to indicate which development environment the
+  library is being compiled with.
 
   Directive    Description
   ------------------------------------------------------------------------------
@@ -51,7 +48,7 @@
 
   Directive    Description
   ------------------------------------------------------------------------------
-  WIN32        Defined when target platform is 32 bit Windows
+  MSWINDOWS    Defined when target platform is 32 bit Windows
   LINUX        Defined when target platform is Linux
 
 - Delphi Versions
@@ -68,6 +65,7 @@
   DELPHI4      Defined when compiling with Delphi 4
   DELPHI5      Defined when compiling with Delphi 5
   DELPHI6      Defined when compiling with Delphi 6
+  DELPHI7      Defined when compiling with Delphi 7
   DELPHI1_UP   Defined when compiling with Delphi 1 or higher
   DELPHI2_UP   Defined when compiling with Delphi 2 or higher
   DELPHI3_UP   Defined when compiling with Delphi 3 or higher
@@ -251,6 +249,7 @@
 {$IFDEF VER110}
   {$DEFINE COMPILER35}
   {$DEFINE BCB3}
+  {$DEFINE BCB}
 {$ENDIF}
 
 {$IFDEF VER100}
@@ -438,13 +437,25 @@
 {$ENDIF}
 
 //------------------------------------------------------------------------------
+// Free Pascal specific
+//------------------------------------------------------------------------------
+
+{$IFDEF FPC}
+  {$MODE DELPHI}
+  {$ASMMODE Intel}
+{$ENDIF FPC}
+
+//------------------------------------------------------------------------------
 // Map COMPILERX_UP to friendly feature names
 //------------------------------------------------------------------------------
 
 {$IFDEF COMPILER3_UP}
+  {$DEFINE SUPPORTS_OUTPARAMS}
   {$DEFINE SUPPORTS_WIDESTRING}
   {$DEFINE SUPPORTS_INTERFACE}
-{$ENDIF}
+  {$DEFINE SUPPORTS_DISPINTERFACE}
+  {$DEFINE SUPPORTS_WEAKPACKAGEUNIT}
+{$ENDIF COMPILER3_UP}
 
 {$IFDEF COMPILER35_UP}
   {$DEFINE SUPPORTS_EXTSYM}
@@ -458,6 +469,26 @@
   {$DEFINE SUPPORTS_OVERLOAD}
 {$ENDIF}
 
+{$IFDEF COMPILER6_UP}
+  {$DEFINE SUPPORTS_DEPRECATED}
+  {$DEFINE SUPPORTS_LIBRARY}
+  {$DEFINE SUPPORTS_PLATFORM}
+  {$DEFINE SUPPORTS_CUSTOMVARIANTS}
+  {$DEFINE HAS_UNIT_RTLCONSTS}
+  {$DEFINE HAS_UNIT_STRUTILS}
+  {$DEFINE HAS_UNIT_TYPES}
+  {$DEFINE HAS_UNIT_VARIANTS}
+{$ENDIF COMPILER6_UP}
+
+{$IFDEF FPC}
+  {$DEFINE SUPPORTS_WIDESTRING}
+  {$DEFINE SUPPORTS_INTERFACE}
+  {$DEFINE SUPPORTS_INT64}
+  {$DEFINE SUPPORTS_DYNAMICARRAYS}
+  {$DEFINE SUPPORTS_DEFAULTPARAMS}
+  {$DEFINE SUPPORTS_OVERLOAD}
+{$ENDIF FPC}
+
 //------------------------------------------------------------------------------
 // Cross-platform related defines
 //------------------------------------------------------------------------------
@@ -468,9 +499,14 @@
 
 {$IFDEF LINUX}
   {$DEFINE UNIX}
-  {$DEFINE COMPLIB_CLX}
+  {$DEFINE KYLIX}
+  {$DEFINE VisualCLX}
 {$ENDIF}
 
-{$IFNDEF COMPLIB_CLX}
-  {$DEFINE COMPLIB_VCL}
+{$IFNDEF VisualCLX}
+  {$DEFINE VCL}
 {$ENDIF}
+
+// for Delphi/BCB trial versions remove the point from the line below  
+{.$UNDEF SUPPORTS_WEAKPACKAGEUNIT}
+

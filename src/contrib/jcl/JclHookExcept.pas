@@ -12,17 +12,18 @@
 {                                                                                                  }
 { The Original Code is JclHookExcept.pas.                                                          }
 {                                                                                                  }
-{ The Initial Developer of the Original Code is documented in the accompanying                     }
-{ help file JCL.chm. Portions created by these individuals are Copyright (C) of these individuals. }
+{ The Initial Developers of the Original Code are documented in the accompanying help file         }
+{ JCLHELP.hlp. Portions created by these individuals are Copyright (C) of these individuals.       }
 {                                                                                                  }
 {**************************************************************************************************}
 {                                                                                                  }
 { Exception hooking routines                                                                       }
 {                                                                                                  }
 { Unit owner: Petr Vones                                                                           }
-{ Last modified: July 5, 2002                                                                      }
 {                                                                                                  }
 {**************************************************************************************************}
+
+// $Id: JclHookExcept.pas,v 1.2 2004/04/14 21:55:07 ***REMOVED*** Exp $
 
 unit JclHookExcept;
 
@@ -38,8 +39,8 @@ uses
 //--------------------------------------------------------------------------------------------------
 
 type
-  TJclExceptNotifyProc = procedure (ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
-  TJclExceptNotifyMethod = procedure (ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean) of object;
+  TJclExceptNotifyProc = procedure(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
+  TJclExceptNotifyMethod = procedure(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean) of object;
 
   TJclExceptNotifyPriority = (npNormal, npFirstChain);
 
@@ -91,7 +92,7 @@ type
     ExceptObj: Exception;
   end;
 
-  TNotifierItem = class (TObject)
+  TNotifierItem = class(TObject)
   private
     FNotifyMethod: TJclExceptNotifyMethod;
     FNotifyProc: TJclExceptNotifyProc;
@@ -114,9 +115,9 @@ const
   JclHookExceptDebugHookName = '__JclHookExcept';
 
 type
-  TJclHookExceptDebugHook = procedure (Module: HMODULE; Hook: Boolean); stdcall;
+  TJclHookExceptDebugHook = procedure(Module: HMODULE; Hook: Boolean); stdcall;
 
-  TJclHookExceptModuleList = class (TObject)
+  TJclHookExceptModuleList = class(TObject)
   private
     FModules: TThreadList;
   protected
@@ -177,6 +178,8 @@ end;
 
 constructor TNotifierItem.Create(const NotifyProc: TJclExceptNotifyProc; Priority: TJclExceptNotifyPriority);
 begin
+  // (rom) added inherited Create
+  inherited Create;
   FNotifyProc := NotifyProc;
   FPriority := Priority;
 end;
@@ -185,6 +188,8 @@ end;
 
 constructor TNotifierItem.Create(const NotifyMethod: TJclExceptNotifyMethod; Priority: TJclExceptNotifyPriority);
 begin
+  // (rom) added inherited Create
+  inherited Create;
   FNotifyMethod := NotifyMethod;
   FPriority := Priority;
 end;
@@ -506,6 +511,8 @@ end;
 
 constructor TJclHookExceptModuleList.Create;
 begin
+  // (rom) added inherited Create
+  inherited Create;
   FModules := TThreadList.Create;
   HookStaticModules;
   JclHookExceptDebugHook := @JclHookExceptDebugHookProc;
@@ -517,7 +524,7 @@ destructor TJclHookExceptModuleList.Destroy;
 begin
   JclHookExceptDebugHook := nil;
   FreeAndNil(FModules);
-  inherited;
+  inherited Destroy;
 end;
 
 //--------------------------------------------------------------------------------------------------
