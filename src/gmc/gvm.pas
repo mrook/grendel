@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.4 2004/03/06 20:18:40 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.5 2004/03/10 22:10:01 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -66,8 +66,6 @@ type
     block : GCodeBlock;
 
 	protected
-		procedure run();
-
 		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 
 		function findSymbol(const id : string) : integer;
@@ -78,6 +76,8 @@ type
 
 	public
     procedure load(cb : GCodeBlock);
+
+		procedure run();
 
 		function runSymbol(const id : string; params : array of variant) : boolean;
 		function getResult() : variant;

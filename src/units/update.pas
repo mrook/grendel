@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.5 2004/03/08 23:30:07 hemko Exp $
+	## $Id: update.pas,v 1.6 2004/03/10 22:10:01 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -105,9 +105,15 @@ begin
       hp := UMin(hp + hp_gain, max_hp);
       mv := UMin(mv + mv_gain, max_mv);
       mana := UMin(mana + mana_gain, max_mana);
-      end;
+      end
+		else
+			begin
+			// update progress of running gmc scripts
+		
+			GNPC(ch).context.run();
+			end;
     end;
-    
+		
   iterator.Free();
 end;
 
