@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.36 2003/10/30 19:48:13 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.37 2003/12/09 22:38:24 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -206,6 +206,7 @@ procedure unhash_string(var src : PString);
 function md5Hash(size, prime : cardinal; key : string) : cardinal;
 function defaultHash(size, prime : cardinal; key : string) : cardinal;
 function firstHash(size, prime : cardinal; key : string) : cardinal;
+function sortedHash(size, prime : cardinal; key : string) : cardinal;
 
 implementation
 
@@ -341,7 +342,10 @@ end;
 }
 function GDLinkedListIterator.getCurrent() : TObject;
 begin
-	Result := current.element;
+	if (current <> nil) then
+		Result := current.element
+	else
+		Result := nil;
 end;
 
 {
@@ -677,6 +681,18 @@ function firstHash(size, prime : cardinal; key : string) : cardinal;
 begin
   if (length(key) >= 1) then
     Result := (byte(key[1]) * prime) mod size
+  else
+    Result := 0;
+end;
+
+{ 
+	Summary:
+		Alternative string hashing function, sorts linearly on first character in string
+}
+function sortedHash(size, prime : cardinal; key : string) : cardinal;
+begin
+  if (length(key) >= 1) then
+    Result := (byte(key[1]) * size) div 256
   else
     Result := 0;
 end;
