@@ -222,7 +222,7 @@ end;
 
 function number_range(val_from, val_to : integer) : integer;
 begin
-  number_range := ((random(val_to - val_from) + val_from) + (random(val_to) - val_from)) div 2;
+  number_range := random(val_to - val_from) + val_from;
 end;
 
 function number_percent:integer;
