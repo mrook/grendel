@@ -296,29 +296,30 @@ begin
 
   vict := findCharWorld(ch,param);
 
-  if (vict=nil) then
-    ch.sendBuffer('That character does not exist.'#13#10)
-  else
-  if (vict.IS_NPC) then
-    ch.sendBuffer('Can only destroy players.'#13#10)
-  else
-  if (vict.IS_IMMORT) then
-    ch.sendBuffer('That player cannot be destroyed.'#13#10)
-  else
-  if (vict = ch) then
-    ch.sendBuffer('Use DELETE to erase yourself.'#13#10)
-  else
+  if (vict <> nil) then
     begin
-    stopfighting(vict);
-    vict.sendBuffer(#13#10 + findHelp('M_DESTROY_').text);
-    vict.emptyBuffer;
-    vict.quit;
+    if (vict.IS_NPC) then
+      ch.sendBuffer('Can only destroy players.'#13#10)
+    else
+    if (vict.IS_IMMORT) then
+      ch.sendBuffer('That player cannot be destroyed.'#13#10)
+    else
+    if (vict = ch) then
+      ch.sendBuffer('Use DELETE to erase yourself.'#13#10)
+    else
+      begin
+      stopfighting(vict);
+      vict.sendBuffer(#13#10 + findHelp('M_DESTROY_').text);
+      vict.emptyBuffer;
+      vict.quit;
 
-    ch.sendBuffer('Ok.'#13#10);
-    write_console(vict.name + ' has been destroyed.');
+      ch.sendBuffer('Ok.'#13#10);
+      write_console(vict.name + ' has been destroyed.');
 
-    assignfile(f, 'players\' + vict.name + '.usr');
-    rename(f, 'backup\' + vict.name + '.usr');
+      assignfile(f, 'players\' + vict.name + '.usr');
+      rename(f, 'backup\' + vict.name + '.usr');
+      exit;
+      end;
     end;
 
   if FileExists('players\' + param + '.usr') then
@@ -349,7 +350,7 @@ begin
     write_console(param + ' has been destroyed.');
     ch.sendBuffer('Ok.'#13#10);
 
-    rename(f, 'backup\' + vict.name + '.usr');
+    rename(f, 'backup\' + param + '.usr');
     end
   else
     begin
