@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.2 2003/12/12 23:01:15 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.3 2004/01/30 20:45:19 hemko Exp $
 }
 
 unit chars;
@@ -1203,9 +1203,14 @@ function GCharacter.findInventory(s : string) : GObject;
 var 
   obj : GObject;
   iterator : Giterator;
+  number, count : integer;
 begin
   Result := nil;
   
+  number := findNumber(s); // eg 2.object
+
+  count := 0;
+
   iterator := inventory.iterator();
 
   while (iterator.hasNext()) do
@@ -1214,8 +1219,13 @@ begin
     
     if (isObjectName(obj.name, s) or isObjectName(obj.short, s)) then
       begin
-      Result := obj;
-      break;
+      inc(count);
+  
+      if (count = number) then
+        begin
+        Result := obj;
+        break;
+        end;
       end;
     end;
     
