@@ -1,8 +1,19 @@
-Name: Illithid
-align: -1000
-convert: 0
-Bonus: -5 0 0 5 5
-Saves: 13 14 13 16 15
+Name:           Illithid
+Align:          -1000
+Convert:        0
+Bonus_str:      -5
+Bonus_con:      0
+Bonus_dex:      0
+Bonus_int:      5
+Bonus_wis:      5
+Save_poison:    13
+Save_cold:      14
+Save_para:      13
+Save_breath:    16
+Save_spell:     15
+Skillslots:     10
+Spellslots:     10
+Description:
 As surprising their entry into the War was, their appearance isn't any
 less amazing. Usually wearing massive garbs and dark cloaks, they are
 a sinister people with sinister behaviours. They are said to be

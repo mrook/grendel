@@ -1,8 +1,19 @@
-Name: Stone-Giant
-Align: 1000
-Convert: 0
-Bonus: 5 5 0 -5 -5
-Saves: 12 12 14 15 16
+Name:           Stone-Giant
+Align:          1000
+Convert:        0
+Bonus_str:      5
+Bonus_con:      5
+Bonus_dex:      0
+Bonus_int:      -5
+Bonus_wis:      -5
+Save_poison:    12
+Save_cold:      12
+Save_para:      14
+Save_breath:    15
+Save_spell:     16
+Skillslots:     10
+Spellslots:     10
+Description:
 Stone-Giants were always known for their incredible strength and stamina.
 They were also one of the first races to join the High-Elves in the War
 against the Dark-Elves. Once created by powerful magicians, these

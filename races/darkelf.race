@@ -1,8 +1,19 @@
-Name: Dark-Elf
-Align: -1000
-Convert: 0
-Bonus: 0 5 -5 0 5
-Saves: 12 13 13 15 15
+Name:           Dark-Elf
+Align:          -1000
+Convert:        0
+Bonus_str:      0
+Bonus_con:      5
+Bonus_dex:      -5
+Bonus_int:      0
+Bonus_wis:      5
+Save_poison:    12
+Save_cold:      13
+Save_para:      13
+Save_breath:    15
+Save_spell:     15
+Skillslots:     10
+Spellslots:     10
+Description:
 Turned by powerful magical forces, these elves, once defending their
 beautiful homelands, joined the forces of Darkness. Taking the lead in
 what would be known as The War, they drew many evil races together

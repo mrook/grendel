@@ -1,8 +1,19 @@
-Name     Human
-Align    0
-Convert  1
-Bonus    0 0 0 0 0
-Saves    14 15 16 17 17
+Name:           Human
+Align:          0
+Convert:        1
+Bonus_str:      0
+Bonus_con:      0
+Bonus_dex:      0
+Bonus_int:      0
+Bonus_wis:      0
+Save_poison:    14
+Save_cold:      15
+Save_para:      16
+Save_breath:    17
+Save_spell:     17
+Skillslots:     10
+Spellslots:     10
+Description:
 During the War, the Humans chose both sides. They were very quick in
 joining, and have felt that in their numbers. Humans can do almost
 anything and are a balanced race.

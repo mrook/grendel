@@ -1,8 +1,19 @@
-Name: High-Elf
-Align: 1000
-Convert: 0
-Bonus: 0 -5 -5 5 5
-Saves: 12 13 13 15 15
+Name:           High-Elf
+Align:          1000
+Convert:        0
+Bonus_str:      0
+Bonus_con:      -5
+Bonus_dex:      -5
+Bonus_int:      5
+Bonus_wis:      5
+Save_poison:    12
+Save_cold:      13
+Save_para:      13
+Save_breath:    15
+Save_spell:     15
+Skillslots:     10
+Spellslots:     10
+Description:
 The High-Elves, the oldest of all races, were the first to oppose the
 oncoming forces of Evil. Known for their great intellect and wisdom,
 they are the guardians of all that is good.
