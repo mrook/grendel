@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.29 2001/07/31 21:47:27 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.30 2001/08/02 20:13:30 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -152,8 +152,16 @@ begin
   if (length(comm_buf) > 0) then
     exit;
 
-  if (not sock.canRead()) then
-    exit;
+  try
+    if (not sock.canRead()) then
+      exit;
+  except
+    try
+      thread.terminate;
+    except
+      write_console('could not terminate thread');
+    end;
+  end;
 
   repeat
     read := recv(sock.getDescriptor, buf, MAX_RECEIVE - 10, 0);
