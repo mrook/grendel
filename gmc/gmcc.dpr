@@ -29,6 +29,7 @@ const
 	VARTYPE_GLOBAL = 2;
 	VARTYPE_LOCAL = 3;
 	VARTYPE_PARAM = 4;
+	VARTYPE_STATIC = 5;
 
 
 type 	Root = class
@@ -163,6 +164,7 @@ var
     tmp, varName, varGlob : string;
 		curFunction : string;
     varType : integer;
+    includeList : TStringList;
     environment : TList;
     f : textfile;
 
@@ -172,6 +174,7 @@ procedure updateLabel(id : string; lbl : integer); forward;
 procedure addEnvironment(lineNum : integer; id : string; typ, lbl, varTyp : integer); forward;
 function lookupEnv(id : string) : Env_Entry; forward;
 procedure compilerError(lineNum : integer; msg : string); forward;
+procedure compilerWarning(lineNum : integer; msg : string); forward;
 
 
 const IDENTIFIER = 257;
@@ -290,8 +293,14 @@ begin
          																											 		if (not FileExists(varName)) then
          																													  compilerError(yylineno, 'could not open include file ' + varName)
          																													else
-         																													  begin																													
-         																													  yyopen(varName);
+         																													  begin
+         																													  if (includeList.IndexOf(varName) > -1) then
+         																													  	compilerWarning(yylineno, 'ignoring previously included file ' + varName)
+         																													  else
+         																													  	begin
+         																													  	includeList.Add(varName);
+         																													  	yyopen(varName);
+         																													  	end;
          																														end;	
        end;
   20 : begin
@@ -3997,6 +4006,11 @@ begin
   yyerrors := true;
 end;
 
+procedure compilerWarning(lineNum : integer; msg : string);
+begin
+  writeln('warning (line ', lineNum, ', file ', yyfname, '): ', msg);
+end;
+
 procedure updateLabel(id : string; lbl : integer);
 var
 		a : integer;
@@ -4908,6 +4922,7 @@ begin
     end;
 
   environment := TList.Create;
+  includeList := TStringList.Create();
   labelNum := 1;
   globalCount := 0;
   yylineno := 1;
