@@ -1,0 +1,69 @@
+- Introduction
+
+GMC (or Grendel MUD C if you will) is a language similar to C, devised for
+the sole purpose of powering the scripted parts of the Grendel MUD Server.
+
+It has support for variables, control structures, (nested) functions
+and external variables/traps.
+
+The system consists of a compiler, an assembler and a virtual machine setup
+which can be called from an application, in this case Grendel.
+
+
+- Getting out of the VM
+
+The VM has support for a number of mechanisms to help a program 'get out' of the 
+environment and have some interaction with the calling application.
+
+These mechanisms are:
+
+   - System traps
+   - Wait statement
+   - External variables
+
+The system trap (in the form of do <string expression>) can be set to a
+userspecified function by the calling application. The trap can do with
+the string expression as it sees fit.
+
+A wait statement suspends the execution of the program until one of its
+conditions are met.
+
+External variables are a construct to associate external data with names
+or expressions in the GMC language.
+
+
+- Types
+
+GMC only allows basic (primitive) types - thus compound and structured types
+or arrays are not included in the language.
+
+The following basic types are supported:
+
+   char, int, float, string, void, bool and external
+
+'void' should not be used for basic identifiers, as these have no semantic
+meaning - any operations with these identifiers can be considered unsafe.
+'int', 'float' and 'bool' exhibit the normal behaviour you would expect.
+'string' works the same as the pascal type LongString.
+'char' is possibly obsolete and should therefor be considered deprecated.
+'external' is a special type - it has no strict semantic meaning in itself, but will evaluate
+to a callback to the shell surrounding (or calling, if you will) the VM.
+This callback will take care of the necessary checks (including or excluding typing)
+and return a value associated with the external.
+
+An example:
+
+  external ch;
+  ch = "Grimlord";
+
+Executing this snippet will have the external callback trying to associate the string
+value "Grimlord" with some enviroment. If this association succeeds, the resulting value
+will be placed in 'ch'.
+
+Another example, following on the previous one:
+
+  x = ch.alignment;
+
+Again, this will have the callback trying to associate the member variable 'alignment'
+with the (already associated) variable 'ch'. Care must be taken that this member variable
+does actually exist, or hell will fall down and chaos will ensue.
