@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.17 2004/03/18 09:55:52 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.18 2004/03/22 14:55:49 ***REMOVED*** Exp $
 #
 
 
@@ -28,6 +28,7 @@ all:
 	$(MAKE) -C src
 ifdef WIN32
 	$(CP) 'src\grendel.exe'
+	$(CP) 'src\grendelservice.exe'
 	$(CP) 'src\core.bpl'
 	$(CP) 'src\*.map'
 	$(CP) 'src\copyover.exe'
