@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.3 2004/02/01 12:06:34 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.4 2004/02/01 19:46:04 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -35,6 +35,8 @@ type
 		pagebuf : string;
 		pagecmd : char;
 		fcommand : boolean;
+		copyover : boolean;
+		copyover_name : string;
 
 		procedure OnOpenEvent();
 		procedure OnInputEvent();
@@ -254,6 +256,9 @@ begin
 	ch := GPlayer.Create(Self);
 
   node := connection_list.insertLast(Self);
+  
+  copyover := from_copyover;
+  Self.copyover_name := copyover_name;
 
 	Resume();
 end;
@@ -262,7 +267,7 @@ procedure GPlayerConnection.OnOpenEvent();
 var
   temp_buf : string;
 begin
-  //if (not copyover) then
+  if (not copyover) then
     begin
     state := CON_NAME;
 
@@ -278,17 +283,17 @@ begin
 
     send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
     end
-{  else
+  else
   	begin
-    conn.state := CON_MOTD;
+    state := CON_MOTD;
 
-    conn.ch.setName(copyover_name);
-    conn.ch.load(copyover_name);
-    conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
-    conn.send('Copyover complete!'#13#10);
+    ch.setName(copyover_name);
+    ch.load(copyover_name);
+    send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
+    send('Copyover complete!'#13#10);
 
-    nanny(conn, '');
-    end; }
+    nanny('');
+    end;
 end;
 
 procedure GPlayerConnection.OnCloseEvent();
