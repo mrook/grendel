@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.15 2003/09/16 18:15:32 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.16 2003/09/25 16:06:18 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -103,11 +103,6 @@ begin
   max_spells := 10;
   abilities := GDLinkedList.Create();
   bodyparts := GHashTable.Create(32);
-end;
-
-function prep(str : string) : string;
-begin
-  Result := trim(uppercase(str));
 end;
 
 procedure loadBodyParts(parser : TXmlParser; race : GRace);

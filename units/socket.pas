@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.10 2003/09/19 09:03:48 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.11 2003/09/25 16:06:18 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -49,7 +49,7 @@ type
     
     function acceptConnection(lookup_hosts : boolean) : GSocket;
     
-    procedure connect(remoteName : string; port : integer);
+    function connect(remoteName : string; port : integer) : boolean;
     
     constructor Create(_af : integer; _fd : TSocket = -1);
     destructor Destroy; override;
@@ -392,13 +392,15 @@ begin
   Result := sk;
 end;
 
-procedure GSocket.connect(remoteName : string; port : integer);
+function GSocket.connect(remoteName : string; port : integer) : boolean;
 var
 	addrLength : integer;
 	addrPointer : PChar;
 	sockAddr : TSockAddr;
 	hostent : PHostEnt;
 begin
+	Result := false;
+	
 	hostent := gethostbyname(PChar(remoteName));
 	
 	if (hostent = nil) then
@@ -411,8 +413,10 @@ begin
   sockAddr.sin_port := htons(port);
   StrMove (PChar(@sockAddr.sin_addr.s_addr), addrPointer, addrLength);
         
-	if (WinSock2.connect(fd, sockAddr, sizeof(sockAddr)) <> 0) then 
+	if (WinSock2.connect(fd, sockAddr, sizeof(sockAddr)) <> 0) then
 		raise Exception.Create('Could not connect to ' + remoteName);
+		
+	Result := true;
 end;
 
 procedure GSocket.openPort(port : integer);

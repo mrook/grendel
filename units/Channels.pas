@@ -1,6 +1,6 @@
 {
   @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.18 2003/09/16 16:25:45 ***REMOVED*** Exp $)
+  @lastmod($Id: Channels.pas,v 1.19 2003/09/25 16:06:25 ***REMOVED*** Exp $)
 }
 
 unit Channels;
@@ -154,11 +154,6 @@ end;
 function GChannel.GROUP() : boolean;
 begin
   Result := channelFlags.isBitSet(CHANNEL_FLAG_GROUP);
-end;
-
-function prep(str : string) : string;
-begin
-  Result := trim(uppercase(str));
 end;
 
 function StrToBoolean(str : string) : boolean;
