@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.7 2004/03/19 20:55:53 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.8 2004/03/22 14:32:15 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -16,6 +16,8 @@ uses
 type
 	GServerShutdownTypes = (SHUTDOWNTYPE_REBOOT, SHUTDOWNTYPE_COPYOVER, SHUTDOWNTYPE_HALT);
 	
+	GServerEvent = procedure() of object;
+	
 	GServer = class(GSingleton)
 	private
 		listenSockets : GDLinkedList;
@@ -24,6 +26,9 @@ type
 		
 		shutdownType : GServerShutdownTypes;
 		shutdownDelay : integer;
+		
+		{ Called for every iteration in GServer.gameLoop() }
+		FOnTick : GServerEvent;
 		
 		procedure openListenSockets();
 		
@@ -43,6 +48,8 @@ type
 		
 		function getShutdownDelay() : integer;
 		function getShutdownType() : GServerShutdownTypes;
+
+		property OnTick : GServerEvent read FOnTick write FOnTick;
 	end;
 
 
@@ -373,6 +380,9 @@ begin
 			pollConsole();
 
 			Sleep(SERVER_PULSE_SLEEP);
+		
+			if (Assigned(FOnTick)) then
+				FOnTick();
 		
 			if (shutdownDelay > 0) then
 				dec(shutdownDelay);
