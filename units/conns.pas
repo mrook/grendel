@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.43 2003/10/10 20:13:43 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.44 2003/10/15 21:08:43 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -51,8 +51,9 @@ type
       fcommand : boolean;
 
       procedure send(s : string);
-      procedure read;
-      procedure readBuffer;
+      procedure read();
+      procedure processIAC();
+      procedure readBuffer();
 
       procedure writePager(txt : string);
       procedure setPagerInput(argument : string);
@@ -152,6 +153,8 @@ begin
       begin
       buf[read] := #0;
       input_buf := input_buf + buf;
+
+			processIAC();
       end
     else
     if (read = 0) then
@@ -189,8 +192,60 @@ begin
   until false;
 end;
 
-procedure GConnection.readBuffer;
-var i : integer;
+procedure GConnection.processIAC();
+var 
+	i : integer;
+	iac : boolean;
+	new_buf : string;
+begin
+	iac := false;
+	new_buf := '';
+	i := 1;
+	
+	while (i <= length(input_buf)) do
+		begin
+    if (iac) then
+    	begin
+    	case byte(input_buf[i]) of
+    		251: 	begin
+    					inc(i);
+    					//writeConsole('IAC WILL ' + IntToStr(byte(input_buf[i])));
+    					end;
+    		252: 	begin
+    					inc(i);
+    					//writeConsole('IAC WON''T ' + IntToStr(byte(input_buf[i])));
+    					end;
+    		253: 	begin
+    					inc(i);
+    					//writeConsole('IAC DO ' + IntToStr(byte(input_buf[i])));
+    					end;
+    		254: 	begin
+    					inc(i);
+    					//writeConsole('IAC DON''T ' + IntToStr(byte(input_buf[i])));
+    					end;
+    	else
+	    	//writeConsole('IAC ' + IntToStr(byte(input_buf[i])));
+    	end;     	
+    	
+    	iac := false;
+    	end    	
+    else
+    if (input_buf[i] = #255) then		// IAC
+    	begin
+    	iac := true;
+    	end
+    else
+    	new_buf := new_buf + input_buf[i];
+    	
+   	inc(i);
+    end;
+    
+  input_buf := new_buf;
+end;
+
+procedure GConnection.readBuffer();
+var 
+	i : integer;
 begin
   if (length(comm_buf) <> 0) or ((pos(#10, input_buf) = 0) and (pos(#13, input_buf) = 0))  then
     exit;
