@@ -91,6 +91,7 @@ procedure improve_skill(ch : GCharacter; sn : integer);
 function skill_success(ch : GCharacter; sn : integer) : boolean;
 
 function findApply(s : string) : GApplyTypes;
+function printApply(apply : GApplyTypes) : string;
 function findAffect(ch : GCharacter; sn : integer) : GAffect;
 procedure removeAffect(ch : GCharacter; aff : GAffect);
 function removeAffectSkill(ch:GCharacter;gsn:integer):boolean;
@@ -395,6 +396,7 @@ begin
                     SET_BIT(ch.aff_flags, modif);
                     exit;
                     end;
+      APPLY_STRIPSPELL: exit;
     end;
 
     modif := -modif;
@@ -412,6 +414,10 @@ begin
     APPLY_MAX_MV: inc(ch.point.max_mv, modif);
     APPLY_MANA: ch.point.mana := UMin(ch.point.mana + modif, ch.point.max_mana);
     APPLY_MAX_MANA: inc(ch.point.max_mana, modif);
+    APPLY_AC: begin
+              inc(ch.point.ac, modif);
+              ch.calcAC;
+              end;
     APPLY_APB: inc(ch.point.apb, modif);
     APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
     APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
@@ -448,6 +454,21 @@ function findApply(s : string) : GApplyTypes;
 begin
   s := uppercase(s);
 
+  if (s = 'APPLY_STR') then
+    Result := APPLY_STR
+  else
+  if (s = 'APPLY_DEX') then
+    Result := APPLY_DEX
+  else
+  if (s = 'APPLY_INT') then
+    Result := APPLY_INT
+  else
+  if (s = 'APPLY_WIS') then
+    Result := APPLY_WIS
+  else
+  if (s = 'APPLY_CON') then
+    Result := APPLY_CON
+  else
   if (s = 'APPLY_HP') then
     Result := APPLY_HP
   else
@@ -475,13 +496,55 @@ begin
   if (s = 'APPLY_AC') then
     Result := APPLY_AC
   else
+  if (s = 'APPLY_APB') then
+    Result := APPLY_APB
+  else
   if (s = 'APPLY_STRIPSPELL') then
     Result := APPLY_STRIPSPELL
+  else
+  if (s = 'APPLY_FULL') then
+    Result := APPLY_FULL
+  else
+  if (s = 'APPLY_THIRST') then
+    Result := APPLY_THIRST
+  else
+  if (s = 'APPLY_DRUNK') then
+    Result := APPLY_DRUNK
+  else
+  if (s = 'APPLY_CAFFEINE') then
+    Result := APPLY_CAFFEINE
   else
     begin
     bugreport('findApply', 'skills.pas', 'Illegal apply type "' + s + '"', '');
     Result := APPLY_NONE;
     end;
+end;
+
+function printApply(apply : GApplyTypes) : string;
+begin
+  case apply of
+    APPLY_STR: Result := 'apply_str';
+    APPLY_CON: Result := 'apply_con';
+    APPLY_INT: Result := 'apply_int';
+    APPLY_WIS: Result := 'apply_wis';
+    APPLY_DEX: Result := 'apply_dex';
+    APPLY_AC : Result := 'apply_ac';
+    APPLY_APB : Result := 'apply_apb';
+    APPLY_STRIPSPELL : Result := 'apply_stripspell';
+    APPLY_AFFECT : Result := 'apply_affect';
+    APPLY_REMOVE : Result := 'apply_remove';
+    APPLY_FULL : Result := 'apply_full';
+    APPLY_THIRST : Result := 'apply_thirst';
+    APPLY_DRUNK : Result := 'apply_drunk';
+    APPLY_CAFFEINE : Result := 'apply_caffeine';
+    APPLY_HP : Result := 'apply_hp';
+    APPLY_MAX_HP : Result := 'apply_max_hp';
+    APPLY_MV : Result := 'apply_mv';
+    APPLY_MAX_MV : Result := 'apply_max_mv';
+    APPLY_MANA : Result := 'apply_mana';
+    APPLY_MAX_MANA : Result := 'apply_max_mana';
+    else Result := 'apply_none';
+  end;
 end;
 
 function findAffect(ch:GCharacter;sn:integer) : GAffect;
