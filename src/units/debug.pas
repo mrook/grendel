@@ -2,7 +2,7 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.10 2004/03/18 15:24:04 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.11 2004/03/19 15:37:24 ***REMOVED*** Exp $
 }
 
 unit debug;
@@ -14,37 +14,11 @@ uses
 	SysUtils,
 	dtypes;
 	
-
-type
-	GDebugWriter = class
-	public
-		procedure write(const msg : string; debugLevel : integer = 1); virtual; abstract;
-	end;
-	
-	GDebugger = class(GSingleton)
-	private
-		writers : GDLinkedList;
-	
-	public
-		constructor actualCreate(); override;
-		destructor actualDestroy(); override;
-		
-	published
-		procedure write(const msg : string; debugLevel : integer = 1);
-		
-		procedure attachWriter(writer : GDebugWriter);
-		procedure detachWriter(writer : GDebugWriter);
-	end;
-	
-
-var
-	debugger : GDebugger;
-
  
 procedure initDebug();
 procedure cleanupDebug();
 
-procedure reportException(E : Exception);
+procedure reportException(E : Exception; sourceFile : string = '');
 
 
 implementation
@@ -64,57 +38,9 @@ uses
 	mudsystem;
 
 
-
-{ GDebugger constructor }
-constructor GDebugger.actualCreate();
-begin
-	writers := GDLinkedList.Create();
-end;
-
-{ GDebugger destructor }
-destructor GDebugger.actualDestroy();
-begin
-	writers.clear();
-	writers.Free();
-end;
-
-{ Feeds a debug message to any attached writers }
-procedure GDebugger.write(const msg : string; debugLevel : integer = 1);
-var
-	iterator : GIterator;
-	writer : GDebugWriter;
-begin
-	iterator := writers.iterator();
-	
-	while (iterator.hasNext()) do
-		begin
-		writer := GDebugWriter(iterator.next());
-		
-		writer.write(msg, debugLevel);
-		end;
-		
-	iterator.Free();
-end;
-
-{ Attach a writer to the debugger }
-procedure GDebugger.attachWriter(writer : GDebugWriter);
-begin
-	writers.add(writer);
-end;
-
-{ Detach a writer from the debugger }
-procedure GDebugger.detachWriter(writer : GDebugWriter);
-begin
-	writers.remove(writer);
-end;
-
-
 {$IFDEF WIN32}
 procedure AnyExceptionNotify(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
 var
-	a : integer;
-	e : Exception;
-	strings : TStringList;
 	list : TJclExceptFrameList;
 begin
 	list := JclLastExceptFrameList;
@@ -123,13 +49,27 @@ begin
 	if (list.items[0].FrameKind = efkAnyException) then
 		exit;
 
-	if (ExceptObj <> nil) then
-		begin
-		e := ExceptObj as Exception;
-		writeConsole('[EX Main:' + e.ClassName + '] ' + e.Message);
-		end
+	if (ExceptObj = nil) then
+		reportException(nil, 'debug.pas:AnyExceptionNotify')
 	else
-		writeConsole('[EX Unknown]');	
+		reportException(ExceptObj as Exception, 'debug.pas:AnyExceptionNotify');
+end;
+
+function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): longint; stdcall;
+begin
+	//MessageBox(0, 'filter', 'filter', 0);
+	Result := 1;
+end;
+
+procedure reportException(E : Exception; sourceFile : string = '');
+var
+	a : integer;
+	strings : TStringList;
+begin
+	if (E = nil) then
+		writeConsole('[EX ' + sourceFile + '] EUnknown', 1)
+	else
+		writeConsole('[EX ' + sourceFile + '] ' + E.ClassName + ': ' + E.Message, 1);
 		
 	strings := TStringList.Create();
 
@@ -137,25 +77,17 @@ begin
 
 	if (strings.count > 0) then
 		begin
-		writeConsole('Stacktrace follows:');
+		writeConsole('Stacktrace follows:', 1);
 
 		for a := 0 to strings.count - 1 do
-			writeConsole(strings[a]);
+			writeConsole(strings[a], 1);
 		end
 	else
-		writeConsole('No stacktrace available.');
+		writeConsole('No stacktrace available.', 1);
 
 	strings.Free();
 end;
 
-function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; stdcall;
-begin
-	Result := 1;
-end;
-
-procedure reportException(E : Exception);
-begin
-end;
 {$ENDIF}
 
 {$IFDEF LINUX}
@@ -181,14 +113,15 @@ begin
 		findSymbol(x[l]);
 end;
 
-procedure reportException(E : Exception);
+procedure reportException(E : Exception; sourceFile : string = '');
 begin
 	E := ExceptObject as Exception;
 
-	writeln('[EX] ' + E.ClassName + ': ' + E.Message);
-	
+	writeConsole('[EX ' + sourceFile + '] ' + E.ClassName + ': ' + E.Message, 1);
+		
 	listBackTrace();
 end;
+{$ENDIF}
 
 var
 	oldExceptProc :  pointer;
@@ -196,42 +129,33 @@ var
 procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
 begin
 	ExceptProc := oldExceptProc;
+
+	{$IFDEF LINUX}	
+	reportException(ExceptObject as Exception, 'debug.pas:ExceptHandler');
+	{$ENDIF}
 	
-	reportException(ExceptObject as Exception);
-	
-	halt;
+	Halt(1);
 end;
-{$ENDIF}
 
 procedure initDebug();
 begin
 {$IFDEF WIN32}
 	// initialize the debug 'fail-safe device'
-
-	ExceptProc := nil;
-
 	JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
 	SetUnhandledExceptionFilter(@ExceptionFilter);
 
-	JclStartExceptionTracking;
-	JclInitializeLibrariesHookExcept;
+	JclStartExceptionTracking();
+	JclInitializeLibrariesHookExcept();
 	JclAddExceptNotifier(AnyExceptionNotify);
 {$ENDIF}
-{$IFDEF LINUX}
+
 	oldExceptProc := exceptProc;
 	ExceptProc := @ExceptHandler;
-{$ENDIF}
 end;
 
 procedure cleanupDebug();
 begin
+	JclStopExceptionTracking();
 end;
-
-
-initialization
-	debugger := GDebugger.Create();
-	
-finalization
-	debugger.Free();
 	
 end.
