@@ -372,7 +372,6 @@ const CPULSE_PER_SEC = 4;
       CPULSE_GAMEHOUR = 25 * CPULSE_PER_SEC;
       CPULSE_AUCTION = 16 * CPULSE_PER_SEC;
       CPULSE_GAMETIME = 150 * CPULSE_PER_SEC;
-      CPULSE_AUTOSAVE = 250 * CPULSE_PER_SEC;     { autosave all characters }
 
       IDLE_NAME = 480;                              // disconnect after 2 mins when not responding at login
       IDLE_NOT_PLAYING = 1200;                      // disconnect after 5 mins when not responding somewhere in nanny()
@@ -610,6 +609,31 @@ const
   MAP_SIZE_X = 39;
   MAP_SIZE_Y = 9;
 
+type GApplyTypes = (APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
+  APPLY_SEX, APPLY_LEVEL, APPLY_AGE, APPLY_HEIGHT, APPLY_WEIGHT,
+  APPLY_HP, APPLY_MAX_HP, APPLY_MV, APPLY_MAX_MV, APPLY_MANA, APPLY_MAX_MANA,
+  APPLY_GOLD, APPLY_XP, APPLY_AC, APPLY_APB, APPLY_AFFECT, APPLY_REMOVE,
+  APPLY_STRIPSPELL,
+
+(*  APPLY_HITROLL, APPLY_DAMROLL, APPLY_SAVING_POISON, APPLY_SAVING_ROD,
+  APPLY_SAVING_PARA, APPLY_SAVING_BREATH, APPLY_SAVING_SPELL,
+  APPLY_BACKSTAB, APPLY_PICK, APPLY_TRACK,
+  APPLY_STEAL, APPLY_SNEAK, APPLY_HIDE, APPLY_DODGE,
+  APPLY_PEEK, APPLY_SCAN, APPLY_GOUGE, APPLY_SEARCH, APPLY_DISARM,
+  APPLY_KICK, APPLY_PARRY, APPLY_BASH, APPLY_STUN, APPLY_PUNCH, APPLY_CLIMB,
+  APPLY_GRIP, APPLY_SCRIBE, APPLY_BREW,
+  APPLY_EMOTION, APPLY_MENTALSTATE, APPLY_STRIPSN, APPLY_REMOVE, APPLY_DIG,
+  APPLY_FULL, APPLY_THIRST, APPLY_DRUNK, APPLY_BLOOD, APPLY_COOK,
+  APPLY_RECURRINGSPELL, APPLY_CONTAGIOUS, APPLY_EXT_AFFECT, APPLY_ODOR,
+  APPLY_ROOMFLAG, APPLY_SECTORTYPE, APPLY_ROOMLIGHT, APPLY_TELEVNUM,
+  APPLY_TELEDELAY, *)
+  MAX_APPLY_TYPE);
+
+// Drunkness strings - Nemesis - Constants.pas
+const drunkbuf : array[0..25] of string =
+	                    ('Zsszzsz', 'y', 'XzsZ', 'wWwWW', 'vVvvV', 'uUUu', 't', 'sSzzsss',
+                             'Rrr', 'ququ', 'P', 'ooOo', 'nNn', 'mmm', 'l', 'K', 'j', 'ii',
+                             'hhh', 'g', 'fff', 'e', 'D', 'ch', 'b', 'Ah');  
 implementation
 
 end.
