@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.37 2001/05/02 21:50:27 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.38 2001/05/10 17:24:42 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -952,7 +952,8 @@ begin
       begin
       ch.sendBuffer('You stop following ' + ch.master.name^ + '.'#13#10);
 
-      act(AT_REPORT,'$n no longer follows you.',false,ch,nil,ch.master,TO_VICT);
+      if not(ch.IS_WIZINVIS() and ch.IS_IMMORT()) then
+        act(AT_REPORT,'$n no longer follows you.',false,ch,nil,ch.master,TO_VICT);
       ch.master := nil;
 
       if (ch.leader <> ch) then
@@ -967,7 +968,8 @@ begin
     begin
     ch.sendBuffer('You now follow ' + vict.name^ + '.'#13#10);
 
-    act(AT_REPORT,'$n now follows you.',false,ch,nil,vict,TO_VICT);
+    if not(ch.IS_WIZINVIS() and ch.IS_IMMORT()) then
+      act(AT_REPORT,'$n now follows you.',false,ch,nil,vict,TO_VICT);
 
     ch.master := vict;
 
