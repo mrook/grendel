@@ -1,7 +1,8 @@
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
     arg,arg2:string;
-    node : GListNode;
+    node, node_next : GListNode;
+    d : integer;
     counter : integer;
 begin
   param:=one_argument(param,arg);
@@ -24,20 +25,21 @@ begin
     node := ch.room.objects.head;
     while (node <> nil) do
       begin
+      node_next := node.next;
       obj := node.element;
 
       if (IS_SET(obj.flags,OBJ_NOPICKUP)) then
         begin
         ch.sendBuffer('You cannot pick that up.'#13#10);
-        node := node.next;
+        node := node_next;
         continue;
         end;
 
-      act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
-      act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
-
-      if (obj.count > 1) then
-        obj.seperate;
+      for d := 1 to obj.count do
+        begin
+        act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
+        end;
 
       if (obj.item_type=ITEM_MONEY) then
         begin
@@ -50,7 +52,7 @@ begin
         obj.toChar(ch);
         end;
 
-      node := node.next;
+      node := node_next;
       end;
     exit;
     end;
@@ -190,7 +192,8 @@ end;
 
 procedure do_drop(ch:GCharacter;param:string);
 var obj:GObject;
-    node : GListNode;
+    node, node_next : GListNode;
+    d : integer;
 begin
   if (length(param) = 0) then
     begin
@@ -212,23 +215,29 @@ begin
 
   if (param = 'all') then
     begin
-    repeat
-      node := ch.objects.tail;
+    node := ch.objects.head;
 
+    while (node <> nil) do
+      begin
+      node_next := node.next;
       obj := node.element;
 
       if IS_SET(obj.flags,OBJ_NODROP) then
         ch.sendBuffer('You cannot drop that.'#13#10)
       else
         begin
-        act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
-        act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
+        for d := 1 to obj.count do
+          begin
+          act(AT_REPORT,'You drop $p$7.',false,ch,obj,nil,TO_CHAR);
+          act(AT_REPORT,'$n drops $p$7.',false,ch,obj,nil,TO_ROOM);
+          end;
 
-        obj.seperate;
         obj.fromChar;
         obj.toRoom(ch.room);
         end;
-    until (ch.objects.tail = nil);
+
+      node := node_next;
+      end;
     end
   else
     begin
