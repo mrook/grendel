@@ -56,6 +56,7 @@ implementation
 
 uses
     magic,
+    md5,
     update,
     progs,
     fight;
@@ -804,6 +805,7 @@ procedure nanny(conn : GConnection; argument : string);
 var ch, vict : GCharacter;
     node : GListNode;
     race : GRace;
+    digest : MD5Digest;
     h,top,x,temp:integer;
     buf, pwd : string;
 begin
@@ -830,7 +832,7 @@ begin
 
                   if (vict <> nil) and (not vict.IS_NPC) and (vict.conn <> nil) then
                     begin
-                    if (pwd <> vict.player^.password) then
+                    if (not MD5Match(MD5String(pwd), vict.player^.md5_password)) then
                       begin
                       conn.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
                       closesocket(conn.socket);
@@ -869,7 +871,7 @@ begin
                     exit;
                     end;
 
-                  if (comparestr(argument, ch.player^.password) <> 0) then
+                  if (not MD5Match(MD5String(argument), ch.player^.md5_password)) then
                     begin
                     write_console('(' + inttostr(conn.socket) + ') Failed password');
                     conn.send('Wrong password.'#13#10);
@@ -974,7 +976,7 @@ CON_NEW_PASSWORD: begin
                     end;
 
                   new(ch.player);
-                  ch.player^.password := argument;
+                  ch.player^.md5_password := MD5String(argument);
                   conn.state := CON_CHECK_PASSWORD;
                   conn.send(#13#10'Please retype your password: ');
                   end;
@@ -984,7 +986,8 @@ CON_CHECK_PASSWORD: begin
                       conn.send('Please retype your password: ');
                       exit;
                       end;
-                    if (comparestr(ch.player^.password, argument) <> 0) then
+
+                    if (not MD5Match(MD5String(argument), ch.player^.md5_password)) then
                       begin
                       conn.send(#13#10'Password did not match!'#13#10'Choose a password: ');
                       conn.state := CON_NEW_PASSWORD;
@@ -1199,11 +1202,10 @@ CON_CHECK_PASSWORD: begin
 
                   case (upcase(argument[1])) of
                     'C':begin
-                        // user_add(ch.name);
-                        buf := ch.player^.password;
+                        digest := ch.player^.md5_password;
 
                         ch.load(ch.name);
-                        ch.player^.password := buf;
+                        ch.player^.md5_password := digest;
                         ch.save(ch.name);
 
                         conn.send(#13#10'Thank you. You have completed your entry.'#13#10);
