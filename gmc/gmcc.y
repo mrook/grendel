@@ -329,7 +329,8 @@ function_body : ';'		{ $$ := nil; }
 							;
 
 declaration	: type_specifier init_declarator_list ';' { $$ := nil; }
-            | function_definition '(' parameter_specifiers ')' function_body { $$ := $1; Expr_Func($$).body := $5; curFunction := ''; }
+            | function_definition '(' parameter_specifiers ')' function_body { $$ := $1; Expr_Func($$).body := $5; 
+                                                                               if ($5 = nil) then updateLabel(curFunction, -1);  curFunction := ''; }
 						;
 
 init_declarator_list	: declarator
