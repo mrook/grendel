@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.2 2003/12/12 23:01:16 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.3 2003/12/13 00:02:20 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -650,7 +650,7 @@ begin
   for i := 0 to 7 do
     val := val + (md[i] shl i);
   
-  Result := val mod size;
+  Result := abs(val) mod size;
 end;
 
 { 
@@ -668,7 +668,7 @@ begin
   for i := 1 to length(key) do
     val := val * prime + byte(key[i]);
 
-  defaultHash := val mod size;
+  defaultHash := abs(val) mod size;
 end;
 
 { 
