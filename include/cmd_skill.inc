@@ -403,14 +403,14 @@ begin
       begin
       pexit := node.element;
 
-      if (IS_SET(pexit.exit_flag,EX_SECRET)) and (IS_SET(pexit.exit_flag,EX_ISDOOR)) then
+      if (IS_SET(pexit.flags, EX_SECRET)) and (IS_SET(pexit.flags, EX_ISDOOR)) then
         begin
         if (length(pexit.keyword) > 0) then
-          act(AT_REPORT,'You uncover a secret passage, '+pexit.keyword+'.',false,ch,nil,nil,TO_CHAR)
+          act(AT_REPORT,'You uncover a $d!',false,ch,nil,pexit,TO_CHAR)
         else
-          act(AT_REPORT,'You uncover a secret passage '+headings[pexit.direction]+'.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You uncover a secret passage '+headings[pexit.direction]+'!',false,ch,nil,nil,TO_CHAR);
 
-        REMOVE_BIT(pexit.exit_flag,EX_SECRET);
+        REMOVE_BIT(pexit.flags, EX_SECRET);
         exit;
         end;
 

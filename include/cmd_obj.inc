@@ -471,7 +471,7 @@ begin
     else
       begin
       pexit := ch.room.findExit(dir);
-      if (pexit=nil) or (IS_SET(pexit.exit_FLAG,EX_SECRET)) then
+      if (pexit=nil) or (IS_SET(pexit.flags, EX_SECRET)) then
         begin
         act(AT_REPORT,'You throw $p '+headings[dir]+
             ', but notice the wall too late!'#13#10'OUCH! That hurts!',false,ch,obj,nil,TO_CHAR);
@@ -479,7 +479,7 @@ begin
         damage(ch,ch,25,TYPE_SILENT);
         end
       else
-      if (IS_SET(pexit.exit_flag,EX_CLOSED)) then
+      if (IS_SET(pexit.flags, EX_CLOSED)) then
         begin
         act(AT_REPORT,'You throw $p '+headings[dir]+
             ', but it rebounds off the door!'#13#10'OUCH! That hurts!',false,ch,obj,nil,TO_CHAR);
@@ -960,19 +960,19 @@ begin
     exit;
     end;
 
-  if (not IS_SET(pexit.exit_flag,EX_ISDOOR)) then
+  if (not IS_SET(pexit.flags, EX_ISDOOR)) then
     begin
     ch.sendBuffer('That is not a door.'#13#10);
     exit;
     end;
 
-  if (not IS_SET(pexit.exit_flag,EX_LOCKED)) then
+  if (not IS_SET(pexit.flags, EX_LOCKED)) then
     begin
     ch.sendBuffer('That door is not locked.'#13#10);
     exit;
     end;
 
-  if IS_SET(pexit.exit_flag,EX_LOCKED) then
+  if IS_SET(pexit.flags, EX_LOCKED) then
     begin
 
     if (ch.objects.getSize = 0) then
@@ -993,11 +993,11 @@ begin
         act(AT_REPORT,'You unlock ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
         act(AT_REPORT,'$n unlocks ' + pexit.keyword + '.',false,ch,nil,nil,TO_ROOM);
 
-        REMOVE_BIT(pexit.exit_flag,EX_LOCKED);
+        REMOVE_BIT(pexit.flags, EX_LOCKED);
 
         room_pos := findRoom(pexit.vnum);
         pexit := room_pos.findExit(dir_inv[dir]);
-        REMOVE_BIT(pexit.exit_flag,EX_LOCKED);
+        REMOVE_BIT(pexit.flags, EX_LOCKED);
 
         exit;
         end;
@@ -1044,19 +1044,19 @@ begin
     exit;
     end;
 
-  if (not IS_SET(pexit.exit_flag,EX_ISDOOR)) then
+  if (not IS_SET(pexit.flags, EX_ISDOOR)) then
     begin
     ch.sendBuffer('That is not a door.'#13#10);
     exit;
     end;
 
-  if (IS_SET(pexit.exit_flag,EX_LOCKED)) then
+  if (IS_SET(pexit.flags, EX_LOCKED)) then
     begin
     ch.sendBuffer('That door is already locked.'#13#10);
     exit;
     end;
 
-  if (not IS_SET(pexit.exit_flag,EX_CLOSED)) then
+  if (not IS_SET(pexit.flags, EX_CLOSED)) then
     begin
     ch.sendBuffer('That door should be closed first'#13#10);
     exit;
@@ -1085,11 +1085,11 @@ begin
           act(AT_REPORT,'You lock ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
           act(AT_REPORT,'$n locks ' + pexit.keyword + '.',false,ch,nil,nil,TO_ROOM);
 
-          SET_BIT(pexit.exit_flag,EX_LOCKED);
+          SET_BIT(pexit.flags, EX_LOCKED);
 
           room_pos := findRoom(pexit.vnum);
           pexit := room_pos.findExit(dir_inv[dir]);
-          SET_BIT(pexit.exit_flag,EX_LOCKED);
+          SET_BIT(pexit.flags, EX_LOCKED);
 
           exit;
           end;

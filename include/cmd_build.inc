@@ -111,13 +111,13 @@ begin
 
     inc(door);
 
-    if (exit_data.exit_flag=0) then
+    if (exit_data.flags = 0) then
       buf := 'none'
     else
       begin
       buf := '';
       for a:=0 to High(exit_flags) do
-       if IS_SET(exit_data.exit_flag,1 shl a) then
+       if IS_SET(exit_data.flags,1 shl a) then
         buf := buf + exit_flags[a] + ' ';
       end;
 
@@ -666,7 +666,7 @@ begin
 
   // does it make a difference if we iterate over object_list or obj_reset?
 
-  obj_node := obj_reset.head;
+  obj_node := obj_list.head;
   while obj_node <> nil do
   begin
     obj_index := GObjectIndex(obj_node.element);
@@ -722,7 +722,7 @@ begin
   // does it make a difference if we iterate over character_list or
   // npc_reset?
 
-  npc_node := npc_reset.head;
+  npc_node := npc_list.head;
   while npc_node <> nil do
   begin
     npc_index := GNPCIndex(npc_node.element);

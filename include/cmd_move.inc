@@ -94,7 +94,7 @@ begin
     pexit := room_pos.findExit(random(6)+1);
 
   { if exit is hidden or it is secret and closed then no exit - Grimlord }
-  if (pexit=nil) or (IS_SET(pexit.exit_flag,EX_SECRET) and IS_SET(pexit.exit_flag,EX_CLOSED)) then
+  if (pexit=nil) or (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) then
     begin
     ch.sendBuffer('You can''t go in that direction.'#13#10);
     exit;
@@ -137,13 +137,13 @@ begin
     exit;
     end;
 
-  if (ch.IS_NPC) and (IS_SET(pexit.exit_flag,EX_NOMOB)) then
+  if (ch.IS_NPC) and (IS_SET(pexit.flags, EX_NOMOB)) then
     begin
     ch.sendBuffer('Sorry, you cannot pass.'#13#10);
     exit;
     end;
 
-  if (ch.IS_NPC) and (IS_SET(pexit.exit_flag,EX_PORTAL)) then
+  if (ch.IS_NPC) and (IS_SET(pexit.flags, EX_PORTAL)) then
     begin
     ch.sendBuffer('Sorry, you cannot use portals.'#13#10);
     exit;
@@ -173,17 +173,14 @@ begin
     exit;
     end;
 
-  if (IS_SET(pexit.exit_flag,EX_CLOSED)) then
+  if (IS_SET(pexit.flags, EX_CLOSED)) then
     begin
-    if length(pexit.keyword)>0 then
-      act(AT_REPORT,pexit.keyword+' is closed.',false,ch,nil,nil,TO_CHAR)
-    else
-      ch.sendBuffer('That door is closed.'#13#10);
+    act(AT_REPORT, 'The $d is closed.', false, ch, nil, pexit, TO_CHAR);
     exit;
     end;
 
   if (room_pos.sector=SECT_AIR) or (room_to.sector=SECT_AIR) or
-   IS_SET(pexit.exit_flag,EX_FLY) then
+   IS_SET(pexit.flags, EX_FLY) then
     if (not ch.IS_FLYING) then
      begin
      ch.sendBuffer('You''d need to fly to get there.'#13#10);
@@ -256,13 +253,13 @@ begin
       txt_room:='flies';
       end
     else
-    if (IS_SET(pexit.exit_flag, EX_SWIM)) then
+    if (IS_SET(pexit.flags, EX_SWIM)) then
       begin
       txt_ch:='swim';
       txt_room:='swims';
       end
     else
-    if IS_SET(pexit.exit_flag,EX_CLIMB) then
+    if IS_SET(pexit.flags, EX_CLIMB) then
       begin
       txt_ch:='climb';
       txt_room:='climbs';
@@ -273,7 +270,7 @@ begin
       txt_room:='walks';
       end;
 
-    if IS_SET(pexit.exit_flag,EX_PORTAL) or IS_SET(pexit.exit_flag,EX_ENTER) then
+    if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
       act(AT_REPORT,'$n leaves through ' + pexit.keyword + '.',true,ch,nil,nil,TO_ROOM)
     else
       act(AT_REPORT,'$n '+txt_room+' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
@@ -288,7 +285,7 @@ begin
 
   if not sneaking then
     begin
-    if IS_SET(pexit.exit_flag,EX_PORTAL) or IS_SET(pexit.exit_flag,EX_ENTER) then
+    if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
       begin
       act(AT_REPORT,'$n enters from somewhere.',true,ch,nil,nil,TO_ROOM);
       act(AT_REPORT,'You enter ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
@@ -568,7 +565,7 @@ begin
     begin
     lexit := node.element;
 
-    if (IS_SET(lexit.exit_flag,EX_PORTAL) or IS_SET(lexit.exit_flag,EX_ENTER))
+    if (IS_SET(lexit.flags, EX_PORTAL) or IS_SET(lexit.flags, EX_ENTER))
      and (pos(param, lexit.keyword) <> 0) then
       begin
       pexit:=lexit;
@@ -596,11 +593,11 @@ begin
   dir := findHeading(param);
   pexit := room_pos.findExit(dir);
 
-  if (pexit <> nil) and (IS_SET(pexit.exit_flag,EX_SECRET)) then
+  if (pexit <> nil) and (IS_SET(pexit.flags, EX_SECRET)) then
     pexit := nil;
 
-  //if (pexit = nil) then
-  //  pexit := get_room_keyword(room_pos,param);
+  if (pexit = nil) then
+    pexit := room_pos.findExitKeyword(param);
 
   if (pexit = nil) then
     begin
@@ -610,34 +607,28 @@ begin
 
   dir:=pexit.direction;
 
-  if not IS_SET(pexit.exit_flag,EX_ISDOOR) then
+  if not IS_SET(pexit.flags, EX_ISDOOR) then
     begin
     ch.sendBuffer('That is not a door.'#13#10);
     exit;
     end;
-  if not IS_SET(pexit.exit_flag,EX_CLOSED) then
+
+  if not IS_SET(pexit.flags, EX_CLOSED) then
     begin
     ch.sendBuffer('That door is already open.'#13#10);
     exit;
     end;
-  if IS_SET(pexit.exit_flag,EX_LOCKED) then
+
+  if IS_SET(pexit.flags, EX_LOCKED) then
     begin
     ch.sendBuffer('That door is locked.'#13#10);
     exit;
     end;
 
-  REMOVE_BIT(pexit.exit_flag,EX_CLOSED);
-  
-  if length(pexit.keyword)>0 then
-    begin
-    act(AT_REPORT,'You open '+pexit.keyword+'.',false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'$n opens '+pexit.keyword+'.',false,ch,nil,nil,TO_ROOM);
-    end
-  else
-    begin
-    act(AT_REPORT,'You open the door '+headings[dir]+'.',false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'$n opens the door '+headings[dir]+'.',false,ch,nil,nil,TO_ROOM);
-    end;
+  REMOVE_BIT(pexit.flags, EX_CLOSED);
+
+  act(AT_REPORT,'You open the $d.', false, ch, nil, pexit, TO_CHAR);
+  act(AT_REPORT,'$n opens the $d.', false, ch, nil, pexit, TO_ROOM);
 
   { get reverse exit }
   room_pos := findRoom(pexit.vnum);
@@ -658,7 +649,7 @@ begin
     exit;
     end;
 
-  REMOVE_BIT(pexit.exit_flag,EX_CLOSED);
+  REMOVE_BIT(pexit.flags, EX_CLOSED);
 end;
 
 procedure do_close(ch:GCharacter;param:string);
@@ -676,7 +667,7 @@ begin
   dir := findHeading(param);
   pexit := room_pos.findExit(dir);
 
-  if (pexit<>nil) and (IS_SET(pexit.exit_flag,EX_SECRET)) then
+  if (pexit<>nil) and (IS_SET(pexit.flags, EX_SECRET)) then
     pexit := nil;
 
   if (pexit = nil) then
@@ -689,27 +680,22 @@ begin
     end;
 
   dir:=pexit.direction;
-  if not IS_SET(pexit.exit_flag,EX_ISDOOR) then
+  if not IS_SET(pexit.flags, EX_ISDOOR) then
     begin
     ch.sendBuffer('That is not a door.'#13#10);
     exit;
     end;
-  if IS_SET(pexit.exit_flag,EX_CLOSED) then
+
+  if IS_SET(pexit.flags, EX_CLOSED) then
     begin
     ch.sendBuffer('That door is already closed.'#13#10);
     exit;
     end;
-  SET_BIT(pexit.exit_flag,EX_CLOSED);
-  if length(pexit.keyword)>0 then
-    begin
-    act(AT_REPORT,'You close '+pexit.keyword+'.',false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'$n closes '+pexit.keyword+'.',false,ch,nil,nil,TO_ROOM);
-    end
-  else
-    begin
-    act(AT_REPORT,'You close the door '+headings[dir]+'.',false,ch,nil,nil,TO_CHAR);
-    act(AT_REPORT,'$n closes the door '+headings[dir]+'.',false,ch,nil,nil,TO_ROOM);
-    end;
+
+  SET_BIT(pexit.flags, EX_CLOSED);
+
+  act(AT_REPORT,'You close the $d.', false, ch, nil, pexit, TO_CHAR);
+  act(AT_REPORT,'$n closes the $d.', false, ch, nil, pexit, TO_ROOM);
 
   { get reverse exit }
   room_pos := findRoom(pexit.vnum);
@@ -730,5 +716,5 @@ begin
     exit;
     end;
 
-  SET_BIT(pexit.exit_flag,EX_CLOSED);
+  SET_BIT(pexit.flags, EX_CLOSED);
 end;

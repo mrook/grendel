@@ -139,7 +139,7 @@ begin
       begin
       pexit := node.element;
 
-      if (IS_SET(pexit.exit_flag,EX_SECRET) and IS_SET(pexit.exit_flag,EX_CLOSED)) then
+      if (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) then
         begin
         node := node.next;
 
@@ -149,16 +149,16 @@ begin
       if (length(buf1) > 0) then
         buf1 := buf1 + ', ';
 
-      if (IS_SET(pexit.exit_flag,EX_CLOSED)) then
+      if (IS_SET(pexit.flags, EX_CLOSED)) then
         buf1 := buf1 + '[' + headings[pexit.direction] + ']'
       else
-      if (IS_SET(pexit.exit_flag, EX_SWIM)) then
+      if (IS_SET(pexit.flags, EX_SWIM)) then
         buf1 := buf1 + '/' + headings[pexit.direction] + '\'
       else
-      if (IS_SET(pexit.exit_flag, EX_FLY)) and (ch.IS_FLYING) then
+      if (IS_SET(pexit.flags, EX_FLY)) and (ch.IS_FLYING) then
         buf1 := buf1 + '<' + headings[pexit.direction] + '>'
       else
-      if (IS_SET(pexit.exit_flag,EX_UNDERWATER)) and (IS_SET(ch.aff_flags,AFF_AQUA_BREATH)) then
+      if (IS_SET(pexit.flags, EX_UNDERWATER)) and (IS_SET(ch.aff_flags,AFF_AQUA_BREATH)) then
         buf1 := buf1 + '{' + headings[pexit.direction] + '}'
       else
         buf1 := buf1 + headings[pexit.direction];
@@ -919,7 +919,7 @@ begin
 
         if (e<>nil) then
         begin
-          if (IS_SET(e.exit_flag,EX_SECRET) and IS_SET(e.exit_flag,EX_CLOSED)) then
+          if (IS_SET(e.flags, EX_SECRET) and IS_SET(e.flags, EX_CLOSED)) then
            break;
 
           room_pos := findRoom(e.vnum);
