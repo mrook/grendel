@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-	## $Id: area.pas,v 1.36 2004/07/28 10:54:48 ***REMOVED*** Exp $
+	## $Id: area.pas,v 1.37 2004/08/24 19:59:01 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -940,7 +940,7 @@ begin
 		begin
 		area := GArea(iterator.next());
 		
-		if (area.flags.isBitSet(AREA_NORESET)) then
+		if (not area.flags.isBitSet(AREA_NORESET)) then
 			area.reset();
 		end;
 
