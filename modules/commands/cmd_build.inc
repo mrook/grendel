@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.8 2003/10/15 13:54:12 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.9 2003/10/22 14:52:32 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -219,7 +219,7 @@ var
   buf, buf1, arg, gender, exp, vnum, room_vnum, wimpy : string;
   master, leader : string;
   victim : GCharacter;
-  node : GListNode;
+  iterator : GIterator;
   g : GLearned;
   sk : GSkill;
   aff : GAffect;
@@ -371,31 +371,31 @@ begin
 
   buf1 := buf1 + buf;
 
-  if (victim.affects.getSize() > 0) then
-  begin
+  if (victim.affects.size() > 0) then
+  	begin
     buf := 'Affected by:'#13#10;
-    node := victim.affects.head;
-    while (node <> nil) do
-    begin
-      aff := node.element;
+    iterator := victim.affects.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      aff := GAffect(iterator.next());
 
       if (aff.name <> nil) then
         buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name, aff.duration]);
-
-      node := node.next;
-    end;
+    	end;
+    iterator.Free();
+    
     buf1 := buf1 + buf + #13#10;
-  end;
+  	end;
 
-  if (victim.skills_learned.getSize() > 0) then
+  if (victim.skills_learned.size() > 0) then
     with victim do
     begin
       buf1 := buf1 + #13#10;
       
-      node := skills_learned.head;
-      while (node <> nil) do
-      begin
-        g := node.element;
+      iterator := skills_learned.iterator();
+    	while (iterator.hasNext()) do
+      	begin
+        g := GLearned(iterator.next());
         sk := g.skill;
         
         if (sk.skill_type = SKILL_SPELL) then
@@ -404,9 +404,8 @@ begin
           buf := '  Skill: ';
 
         buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name, g.perc]);
-        
-        node := node.next;
-      end;
+      	end;
+      iterator.Free();
     end;
   
   act(AT_REPORT, buf1, false, ch, nil, nil, TO_CHAR);
@@ -655,10 +654,11 @@ end;
 {Jago 18/Jan/2001 - MFIND - find a NPC}
 { Revised 25/Feb/2001 - Nemesis }
 procedure do_mfind(ch : GCharacter; param : string);
-var buf : string;
-    found, fAll : boolean;
-    node : GListNode;
-    npc : GNPCIndex;
+var 
+	buf : string;
+	found, fAll : boolean;
+	iterator : GIterator;
+	npc : GNPCIndex;
 begin
   if (length(param) = 0) then
     begin
@@ -670,20 +670,18 @@ begin
   fAll := (uppercase(param) = 'ALL');
   buf := #13#10 + '[Vnum] [Name]' + #13#10;
 
-  node := npc_list.head;
-
-  while (node <> nil) do
+  iterator := npc_list.iterator();
+  while (iterator.hasNext()) do
     begin
-    npc := node.element;
+    npc := GNPCIndex(iterator.next());
 
     if (fAll) or (isName(npc.name^, param)) then
       begin
       found := True;
       buf := buf + pad_integer_front(npc.vnum,5) + '   ' + npc.name^ + #13#10;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   if (not found) then
     begin
@@ -1578,17 +1576,17 @@ var
   node,node2 : GListNode;
 begin
   if (ch.IS_NPC()) then
-  begin
+  	begin
     ch.sendBuffer('This command is not available for mobs.'#13#10);
     exit;
-  end;
+  	end;
   
   if (length(param) = 0) then
-  begin
+  	begin
     ch.sendBuffer('Usage: RDELETE <vnum>'#13#10#13#10);
     ch.sendBuffer('Deletes room with given vnum.'#13#10);
     exit;
-  end;
+  	end;
 
   if (ch.room.vnum < GPlayer(ch).r_lo) or (ch.room.vnum > GPlayer(ch).r_hi) then
     begin
@@ -1600,40 +1598,41 @@ begin
     room := findRoom(StrToInt(param));
   except
     on E: EConvertError do
-    begin
+    	begin
       ch.sendBuffer('That vnum doesn''t exit.');
       exit;
-    end;
+    	end;
   end;
 
   if (room = ch.room) then
-  begin
+  	begin
     ch.sendBuffer('Removing the room you''re in would not be wise.'#13#10);
     exit;
-  end;
+  	end;
   
   ch.sendBuffer('Unlinking all exits pointing to the room...'#13#10);
   node := room.exits.head;
   while (node <> nil) do
-  begin
-    ex := node.element;
+  	begin
+    ex := GExit(node.element);
 
     room2 := ex.to_room;
     node2 := room2.exits.head;
     while (node2 <> nil) do
-    begin
-      ex2 := node2.element;
+    	begin
+      ex2 := GExit(node2.element);
+      
       if (ex2.to_room = room) then
-      begin
+      	begin
         ch.sendBuffer(Format('Removing in room #%d the %s-exit.'#13#10, [room2.vnum, headings[ex2.direction]]));
         room2.exits.remove(node2);
         ex2.Free();
-      end;
+      	end;
       node2 := node2.next;
-    end;
+    	end;
     
     node := node.next;
-  end;
+  	end;
 
   room_list.remove(room.vnum);
   
@@ -1729,60 +1728,54 @@ var
   i : integer;
   room : GRoom;
   area : GArea;
-  node : GListNode;
+  iterator : GIterator;
 begin
   if (ch.IS_NPC()) then
-  begin
+  	begin
     ch.sendBuffer('This command is not available for mobs.'#13#10);
     exit;
-  end;
+  	end;
   
   if (length(param) = 0) then
-  begin
+  	begin
     if ((GPlayer(ch).area = nil) and (ch.level < LEVEL_GOD)) then
-    begin
+    	begin
       if (length(GPlayer(ch).area_fname) = 0) then
         ch.sendBuffer('You don''t have an area assigned to you.'#13#10)
       else
         ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
       exit;
-    end;
+    	end;
 
     if (ch.level < LEVEL_GOD) then
       area := GPlayer(ch).area
     else
       area := ch.room.area;
-  end
+  	end
   else
-  begin
+  	begin
     area := findArea(param);
 
     if (area = nil) then
-    begin
+    	begin
       ch.sendBuffer('That area could not be found.'#13#10);
       exit;
-    end;
-  end;
+    	end;
+  	end;
   
-  for i := 0 to room_list.hashsize - 1 do
-  begin
-    node := room_list.bucketList[i].head;
+  iterator := room_list.iterator();
+  
+  while (iterator.hasNext()) do
+		begin
+		room := GRoom(iterator.next());
 
-    while (node <> nil) do
-    begin
-      room := GRoom(GHashValue(node.element).value);
+		if (room.area <> area) then
+			continue;
 
-      if (room.area <> area) then
-      begin
-        node := node.next;
-        continue;
-      end;
-
-      ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name]));
-      
-      node := node.next;
-    end
-  end;
+		ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name]));
+		end;
+		
+	iterator.Free();
 end;
 
 { Re-added area assign - Nemesis }
@@ -2081,17 +2074,17 @@ begin
 
   act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
 
-  act(AT_REPORT,'Nr. of resets:    '+inttostr(area.resets.getSize()),false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT,'Nr. of resets:    '+inttostr(area.resets.size()),false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT,'Nr. of players:   '+inttostr(area.nplayer),false,ch,nil,nil,TO_CHAR);
 end;
 
 procedure do_checkarea(ch : GCharacter; param : string);
 var
-   room : GRoom;
-   area : GArea;
-   node : GListNode;
-   no_errors : boolean;
-   h : integer;
+	room : GRoom;
+	area : GArea;
+	iterator : GIterator;
+	no_errors : boolean;
+	h : integer;
 begin
   if (GPlayer(ch).area_fname='') then
     begin
@@ -2109,44 +2102,40 @@ begin
   ch.sendBuffer('Checking area '+area.fname+'...'#13#10#13#10);
   no_errors := true;
 
-  for h := 0 to room_list.hashsize - 1 do
-    begin
-    node := room_list.bucketList[h].head;
+	iterator := room_list.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		room := GRoom(iterator.next());
 
-    while (node <> nil) do
-      begin
-      room := GRoom(GHashValue(node.element).value);
+		if (room.area = area) then
+			begin
+			if (length(room.name) = 0) then
+				begin
+				no_errors := false;
+				ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
+				end;
+			{ else
+			if (find_last(room.name) = '.') then
+				begin
+				no_errors:=false;
+				ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
+				end; }
 
-      if (room.area = area) then
-        begin
-        if (length(room.name) = 0) then
-          begin
-          no_errors := false;
-          ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room name empty'#13#10);
-          end;
-        { else
-        if (find_last(room.name) = '.') then
-          begin
-          no_errors:=false;
-          ch.sendBuffer('('+inttostr(room.vnum)+') '+room.name+': dot not allowed in room name'#13#10));
-          end; }
-
-        if (length(room.description) = 0) then
-          begin
-          no_errors := false;
-          ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
-          end;
-        { else
-        if (find_last(room.description)<>'.') then
-          begin
-          no_errors:=false;
-          ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
-          end; }
-        end;
-
-      node := node.next;
-      end;
-    end;
+			if (length(room.description) = 0) then
+				begin
+				no_errors := false;
+				ch.sendBuffer('('+inttostr(room.vnum)+') WARNING room description null'#13#10);
+				end;
+			{ else
+			if (find_last(room.description)<>'.') then
+				begin
+				no_errors:=false;
+				ch.sendBuffer(pchar('('+inttostr(room.vnum)+') '+room.name+': dot required in room description'#13#10));
+				end; }
+			end;
+		end;
+	iterator.Free();
 
   { obj := obj_reset_first;
   while (obj <> nil) do
@@ -2297,8 +2286,8 @@ end;
 
 procedure do_reset(ch: GCharacter; param : string);
 var
-   area : GArea;
-   node : GListNode;
+	area : GArea;
+	iterator : GIterator;
 begin
   area := nil;
 
@@ -2328,15 +2317,15 @@ begin
     act(AT_WHITE,'All areas reset.',false,ch,nil,nil,TO_CHAR);
 
     { reset the areas }
-    node := area_list.head;
+    iterator := area_list.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      area := node.element;
+      area := GArea(iterator.next());
       area.reset();
-
-      node := node.next;
       end;
+      
+    iterator.Free();
 
     exit;
     end
@@ -2518,7 +2507,7 @@ end;
 procedure build_map(var gr : TGrid; var room : GRoom);
 var
   new_room : GRoom;
-  node : GListNode;
+  iterator : GIterator;
   vict : GCharacter;
   pcs, npcs : integer;
   pexit : GExit;
@@ -2532,18 +2521,17 @@ begin
   
   grid_insert(gr, 0, MAP_ROOM_EXIST);
 
-  node := room.chars.head;
-  while (node <> nil) do
-  begin
-    vict := node.element;
+  iterator := room.chars.iterator();
+  while (iterator.hasNext()) do
+  	begin
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC()) then
       inc(npcs)
     else
       inc(pcs);
-    
-    node := node.next;
-  end;
+  	end;
+  iterator.Free();
 
   if (npcs > 0) then
     grid_insert(gr, 0, MAP_NPC);
@@ -2552,7 +2540,7 @@ begin
     grid_insert(gr, 0, MAP_PC);
   
   for direction := DIR_NORTH to DIR_UP do
-  begin
+  	begin
     if (direction = DIR_NORTH) and not(gr.curpos.y > 1) then
       continue;
     if (direction = DIR_EAST) and not(gr.curpos.x < MAP_SIZE_X) then
@@ -2563,20 +2551,21 @@ begin
       continue;
 
     if (room.isConnectedTo(direction) <> nil) then
-    begin
+    	begin
       if (direction = DIR_UP) then
-      begin
+      	begin
         grid_insert(gr, 0, MAP_UP);
         continue;
-      end;
+      	end;
+      	
       if (direction = DIR_DOWN) then
-      begin
+      	begin
         grid_insert(gr, 0, MAP_DOWN);
         continue;
-      end;
-        
+      	end;
+      	  
       if not(been_there(gr, direction)) then
-      begin
+      	begin
         pexit := room.findExit(direction);
         if (IS_SET(pexit.flags, EX_ISDOOR)) then
           if (IS_SET(pexit.flags, EX_CLOSED)) then
@@ -2606,9 +2595,9 @@ begin
           inc(gr.curpos.x);
         if (direction = DIR_SOUTH) then
           dec(gr.curpos.y);
-      end;
-    end;
-  end;
+      	end;
+    	end;
+  	end;
 end;
 
 procedure show_legenda();

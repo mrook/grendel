@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.5 2003/10/17 16:34:35 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.6 2003/10/22 14:52:33 ***REMOVED*** Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -107,7 +107,7 @@ end;
 procedure do_suggest(ch:GCharacter;param:string);
 var 
   f : textfile;
-  he : THistoryElement;
+  he : GHistoryElement;
   iterator : GIterator; 
 begin
   if (length(param) = 0) then
@@ -118,7 +118,7 @@ begin
       
       while (iterator.hasNext()) do
         begin
-        he := THistoryElement(iterator.next());
+        he := GHistoryElement(iterator.next());
        
         ch.sendBuffer(he.contents^ + #13#10);
         end;
@@ -138,17 +138,17 @@ begin
   writeln(f, DateTimeToStr(Now),'> ', 'Suggestion by ',ch.name,': ',param);
   closefile(f);
 
-  he := THistoryElement.Create(ch.name+' suggested '''+param+'''');
+  he := GHistoryElement.Create(ch.name+' suggested '''+param+'''');
   
   suggestHistory.insertLast(he);
 
-  if (suggestHistory.getSize() > CHANNEL_HISTORY_MAX) then
+  if (suggestHistory.size() > CHANNEL_HISTORY_MAX) then
     suggestHistory.remove(suggestHistory.head);
 end;
 
 procedure do_pray(ch:GCharacter;param:string);
 var
-  he : THistoryElement;
+  he : GHistoryElement;
   iterator : GIterator;
 begin
   if (length(param) = 0) then
@@ -159,7 +159,7 @@ begin
       
       while (iterator.hasNext()) do
         begin
-        he := THistoryElement(iterator.next());
+        he := GHistoryElement(iterator.next());
        
         ch.sendBuffer(he.contents^ + #13#10);
         end;
@@ -174,11 +174,11 @@ begin
   act(AT_PRAY, 'You =PRAY= '''+param+'''.',false,ch,nil,nil,TO_CHAR);
   writeConsole(ch.name + ' prays ''' + param + '''');
   
-  he := THistoryElement.Create(ch.name + ' prays ''' + param + '''');
+  he := GHistoryElement.Create(ch.name + ' prays ''' + param + '''');
   
   prayHistory.insertLast(he);
 
-  if (prayHistory.getSize() > CHANNEL_HISTORY_MAX) then
+  if (prayHistory.size() > CHANNEL_HISTORY_MAX) then
     prayHistory.remove(prayHistory.head);
 end;
 

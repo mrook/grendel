@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.13 2003/10/17 16:34:36 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.14 2003/10/22 14:52:34 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -41,10 +41,10 @@ end;
 
 procedure do_peek(ch : GCharacter; param : string);
 var
-   cnt : integer;
-   node : GListNode;
-   vict : GCharacter;
-   obj : GObject;
+	cnt : integer;
+	iterator : GIterator;
+	vict : GCharacter;
+	obj : GObject;
 begin
   if (ch.LEARNED(gsn_peek) = 0) then
   begin
@@ -61,34 +61,34 @@ begin
   vict := ch.room.findChar(ch, param);
 
   if (vict = nil) then
-  begin
+  	begin
     act(AT_REPORT,'You do not see that here.',false,ch,nil,nil,TO_CHAR);
     exit;
-  end;
+  	end;
   
   if (number_percent <= ch.LEARNED(gsn_peek)) then
-  begin
+  	begin
     act(AT_REPORT, 'You peek at the inventory and see:'#13#10, false, ch, nil, nil, TO_CHAR);
 
     cnt := 0;
-    node := vict.inventory.head;
-
-    while (node <> nil) do
-    begin
-      obj := node.element;
+    iterator := vict.inventory.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      obj := GObject(iterator.next());
 
 			if (obj.count > 1) then
 				act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
 			else
 				act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
 			inc(cnt);
-
-      node := node.next;
-    end;
+    	end;
+    iterator.Free();
 
     if (cnt = 0) then
       ch.sendBuffer('  nothing.'#13#10);
-  end;
+  	end
+  else
+  	act(AT_REPORT, 'You failed to see anything.', false, ch, nil, nil, TO_CHAR);
 end;
 
 { Xenon 22/Feb/2001: seperated peek from look (it's a command on its own now) }
@@ -197,7 +197,7 @@ begin
 
       if (obj.item_type=ITEM_CONTAINER) or (obj.item_type=ITEM_CORPSE) then
         begin
-        if (obj.contents.getSize > 0) then
+        if (obj.contents.size() > 0) then
           begin
           act(AT_REPORT,'$p contains:'#13#10,false,ch,obj,nil,TO_CHAR);
 
@@ -860,20 +860,20 @@ begin
 end;
 
 procedure do_group(ch:GCharacter;param:string);
-var buf1 : string;
-    vict : GCharacter;
-    node : GListNode;
+var 
+	buf1 : string;
+	vict : GCharacter;
+	iterator : GIterator;
 begin
   if (length(param)=0) then
     begin
     act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name+'$A$7]',false,ch,nil,nil,TO_CHAR);
     ch.sendBuffer(#13#10'[Power of Char]  [Name]      [Health]  [Stamina]   [Xp2Lvl]'#13#10);
 
-    node := char_list.head;
-
-    while (node <> nil) do
+		iterator := char_list.iterator();
+    while (iterator.hasNext()) do
       begin
-      vict := node.element;
+      vict := GCharacter(iterator.next());
 
       if (vict.leader = ch.leader) then
         begin
@@ -908,17 +908,16 @@ begin
 
         act(AT_REPORT,buf1,false,ch,nil,nil,TO_CHAR);
         end;
-
-      node := node.next;
       end;
+    iterator.Free();
     end
   else
   if (comparestr('all',param) = 0) then
     begin
-    node := char_list.head;
-    while (node <> nil) do
+		iterator := char_list.iterator();
+    while (iterator.hasNext()) do
       begin
-      vict := node.element;
+      vict := GCharacter(iterator.next());
 
       if (vict.master = ch) and (vict.leader <> ch) then
         begin
@@ -926,9 +925,9 @@ begin
         act(AT_REPORT,'$N joins $n''s group.',false,ch,nil,vict,TO_ROOM);
         to_channel(ch, '$B$7[Group]: '+vict.name+' has joined the group!', CHANNEL_GROUP, AT_WHITE);
         end;
-
-      node := node.next;
       end;
+    iterator.Free();
+    
     ch.sendBuffer('Ok.'#13#10);
     end
   else
@@ -942,21 +941,19 @@ begin
       begin
       act(AT_REPORT,'You have disbanded the group.',false,ch,nil,nil,TO_CHAR);
 
-      node := char_list.head;
-
-      while (node <> nil) do
-        begin
-        vict := node.element;
-
+			iterator := char_list.iterator();
+			while (iterator.hasNext()) do
+				begin
+				vict := GCharacter(iterator.next());
+				
         if (vict.master = ch) and (vict.leader = ch) then
           begin
           act(AT_REPORT,'$n has disbanded the group and you follow no-one.',false,ch,nil,vict,TO_VICT);
           vict.master := nil;
           vict.leader := vict;
           end;
-
-        node := node.next;
-        end;
+      	end;
+    	iterator.Free();
       end
     else
     if (vict.master <> ch) then
@@ -1021,8 +1018,8 @@ end;
 
 procedure do_ditch(ch:GCharacter;param:string);
 var
-   vict : GCharacter;
-   node : GListNode;
+	vict : GCharacter;
+	iterator : GIterator;
 begin
   if (length(param) = 0) then
     begin
@@ -1032,18 +1029,16 @@ begin
 
   if (comparestr(param, 'all') = 0) then
     begin
-    node := ch.room.chars.head;
-
-    while (node <> nil) do
+		iterator := ch.room.chars.iterator();
+    while (iterator.hasNext()) do
       begin
-      vict := node.element;
+      vict := GCharacter(iterator.next());
 
       if (vict.master = ch) then
         interpret(vict, 'follow self');
-
-      node := node.next;
       end;
-
+    iterator.Free();
+    
     ch.sendBuffer('Ok.'#13#10);
     end
   else
@@ -1064,10 +1059,10 @@ end;
 
 procedure do_where(ch:GCharacter;param:string);
 var
-   buf : string;
-   vict : GCharacter;
-   node : GListNode;
-   d : integer;
+	buf : string;
+	vict : GCharacter;
+	iterator : GIterator;
+	d : integer;
 begin
   buf := 'You are in ' + ch.room.area.name + ', built by ' + ch.room.area.author + '.'#13#10#13#10'Players near:'#13#10;
 
@@ -1075,11 +1070,10 @@ begin
 
   d := -1;
 
-  node := char_list.head;
-
-  while (node <> nil) do
-    begin
-    vict := node.element;
+	iterator := char_list.iterator();
+	while (iterator.hasNext()) do
+		begin
+		vict := GCharacter(iterator.next());
 
     if (vict <> ch) and (not vict.IS_NPC) and (vict.room.area = ch.room.area) and (ch.IS_SAME_ALIGN(vict)) then
       begin
@@ -1087,9 +1081,8 @@ begin
       ch.sendBuffer(buf);
       inc(d);
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   if (d = -1) then
    ch.sendBuffer('Nobody.'#13#10);
@@ -1100,8 +1093,8 @@ var
    buf : string;
 begin
   buf := '$B$4Some world statistics:$A$7'#13#10#13#10 +
-         'Open areas:        [$B$1' + pad_integer_front(area_list.getSize(), 5) + '$A$7]'#13#10 +
-         'Rooms explorable:  [$B$1' + pad_integer_front(room_list.getSize(), 5) + '$A$7]'#13#10 +
+         'Open areas:        [$B$1' + pad_integer_front(area_list.size(), 5) + '$A$7]'#13#10 +
+         'Rooms explorable:  [$B$1' + pad_integer_front(room_list.size(), 5) + '$A$7]'#13#10 +
          'World user max:    [$B$1' + pad_integer_front(system_info.user_high, 5) + '$A$7]'#13#10;
 
   act(AT_REPORT, buf, false, ch, nil, nil, TO_CHAR);
@@ -1293,10 +1286,11 @@ begin
 end;
 
 procedure do_affects(ch:GCharacter;param:string);
-var h:integer;
-    buf:string;
-    node : GListNode;
-    aff : GAffect;
+var 
+	h:integer;
+	buf:string;
+	iterator : GIterator;
+	aff : GAffect;
 begin
   act(AT_REPORT, '$B$1[$B$7Current status:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);
 
@@ -1321,11 +1315,10 @@ begin
   h:=0;
   act(AT_REPORT, #13#10'$B$1[$B$7Current affects:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);
 
-  node := ch.affects.head;
-
-  while (node <> nil) do
+  iterator := ch.affects.iterator();
+  while (iterator.hasNext()) do
     begin
-    aff := node.element;
+    aff := GAffect(iterator.next());
 
     if (aff.name <> nil) and (aff.name^ <> '') then
       with aff do
@@ -1357,11 +1350,10 @@ begin
         ch.sendBuffer(buf);
         inc(h);
         end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
-  if h=0 then
+  if (h = 0) then
     ch.sendBuffer('No affects.'#13#10);
 end;
 
@@ -1603,34 +1595,31 @@ begin
 end;
 
 procedure do_socials(ch:GCharacter; param:string);
-var social : GSocial;
-    node : GListNode;
-    line : string;
-    i, count : integer;
+var 
+	social : GSocial;
+	iterator : GIterator;
+	line : string;
+	i, count : integer;
 begin
   count := 0;
   line := '';
-  for i := 0 to socials.hashsize - 1 do
-    begin
-    node := socials.bucketList[i].head;
+  
+  iterator := socials.iterator();
 
-    while (node <> nil) do
-      begin
-      social := GSocial(GHashValue(node.element).value);
+	while (iterator.hasNext()) do
+		begin
+		social := GSocial(iterator.next());
 
-      line := line + pad_string(lowercase(social.name), 13);
+		line := line + pad_string(lowercase(social.name), 13);
 
-      inc(count);
-      if (count = 6) then
-        begin
-        ch.sendBuffer(line + #13#10);
-        count := 0;
-        line := '';
-        end;
-
-      node := node.next;
-      end;
-    end;
+		inc(count);
+		if (count = 6) then
+			begin
+			ch.sendBuffer(line + #13#10);
+			count := 0;
+			line := '';
+			end;
+		end;
 
   if (length(line) > 0) then
     ch.sendBuffer(line + #13#10);
@@ -1639,11 +1628,11 @@ end;
 { Xenon 23/Feb/2001: fixed a small bug; made alias'ing an already existing alias replace it }
 procedure do_alias(ch : GCharacter; param : string);
 var
-   node : GListNode;
-   al : GAlias;
-   count : integer;
-   alname, alfill : string;
-   replaced : boolean;
+	iterator : GIterator;
+	al, tmp : GAlias;
+	count : integer;
+	alname, alfill : string;
+	replaced : boolean;
 begin
   replaced := false;
 
@@ -1658,27 +1647,28 @@ begin
   if (length(alname) > 0) then
     begin
     al := nil;
-    node := GPlayer(ch).aliases.head;
+    iterator := GPlayer(ch).aliases.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      if (GAlias(node.element).alias = alname) then
+      tmp := GAlias(iterator.next());
+      
+      if (tmp.alias = alname) then
         begin
-        al := node.element;
+        al := tmp;
         break;
         end;
-
-      node := node.next;
-      end;
+			end;
+		iterator.Free();
 
     if (length(alfill) > 0) then
-    begin
+    	begin
       if (al <> nil) then
-      begin        
+      	begin        
         GPlayer(ch).aliases.remove(al.node);
         al.Free;
         replaced := true;
-      end;
+      	end;
 
       al := GAlias.Create;
 
@@ -1689,7 +1679,7 @@ begin
         ch.sendBuffer('Alias replaced.'#13#10)
       else
         ch.sendBuffer('Alias added.'#13#10);
-    end
+    	end
     else
       begin
       if (al = nil) then
@@ -1706,25 +1696,25 @@ begin
     exit;
     end;
 
-  if (GPlayer(ch).aliases.getSize = 0) then
+  if (GPlayer(ch).aliases.size() = 0) then
     begin
     ch.sendBuffer('No aliases.'#13#10);
     exit;
     end;
 
-  node := GPlayer(ch).aliases.head;
+  iterator := GPlayer(ch).aliases.iterator();
   count := 0;
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    al := node.element;
+    al := GAlias(iterator.next());
 
     ch.sendBuffer('[' + ch.ansiColor(3) + pad_integer(count, 2) + ch.ansiColor(7) + '] ' + pad_string(al.alias, 10) + ' -> ' + al.expand + #13#10);
 
     inc(count);
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 procedure do_brag(ch : GCharacter; param : string);

@@ -9,6 +9,7 @@ uses
   SysUtils,
   Strip,
   Math,
+  Variants,
 {$IFDEF LINUX}
   Libc,
 {$ENDIF}
@@ -142,21 +143,21 @@ begin
   end;
 
   while (node <> nil) do
-  begin
-    s := node.element;
+	  begin
+    s := THelpKeyword(node.element);
 
     if (AnsiCompareStr(hk.keyword, s.keyword) > 0) then
-    begin
+   	 	begin
       ins := node;
-    end
+    	end
     else
-    begin
+    	begin
       ll.insertBefore(node, hk);
       exit;
-    end;
+    	end;
 
     node := node.next;
-  end;
+  	end;
 
   ll.insertAfter(ins, hk)
 end;
@@ -166,111 +167,111 @@ end;
 { Xenon 16/Apr/2001: - help without arguments now gives sorted keywordlist
                      - help with an arg that matches multiple keywords will show matching keywords}
 procedure do_help(ch : GCharacter; param : string);
-var buf, s, keyword : string;
-    help : GHelp;
-    counter : integer;
-    node : GListNode;
-    keywordlist : GDLinkedList;
-    hk : THelpKeyword;
-    done : boolean;
+var 
+	buf, s, keyword : string;
+	help : GHelp;
+	counter : integer;
+	iterator : GIterator;
+	keywordlist : GDLinkedList;
+	hk : THelpKeyword;
+	done : boolean;
 begin
   keywordlist := nil; hk := nil;
   done := false;
   counter := 0;
   
   if (length(param) = 0) then
-  begin
+  	begin
     buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Available help keywords ', '-') + ch.ansiColor(7) + #13#10#13#10;
 
     keywordlist := GDLinkedList.Create();
     
-    node := help_files.head;
-    while (node <> nil) do
-    begin
-      help := node.element;
+    iterator := help_files.iterator();
+    while (iterator.hasNext()) do
+   		begin
+      help := GHelp(iterator.next());
 
       keyword := help.keywords;
 
       while (length(keyword) > 0) do
-      begin
+      	begin
         keyword := one_argument(keyword, s);
-
+        
         if ((s[length(s)] <> '_') and (help.level <= ch.level)) then
-        begin
+        	begin
           hk := THelpKeyword.Create(lowercase(s), help);
 
           insertAlphabetical(keywordlist, hk);
-        end;
+        	end;
           
-      end;
+      	end;
+    	end;
+    iterator.Free();
 
-      node := node.next;
-    end;
-
-    node := keywordlist.head;
-    while (node <> nil) do
-    begin
-      buf := buf + pad_string(THelpKeyword(node.element).keyword, 19);
+    iterator := keywordlist.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      buf := buf + pad_string(THelpKeyword(iterator.next()).keyword, 19);
       inc(counter);
 
       if (counter = 4) then
-      begin
+      	begin
         buf := buf + #13#10;
         counter := 0;
-      end;      
-      node := node.next;
-    end;
+      	end;      
+    	end;
+    iterator.Free();
 
     keywordlist.Clean();
     keywordlist.Free();
     ch.sendPager(buf + #13#10);
     exit;
-  end;
+  	end;
 
   keywordlist := GDLinkedList.Create();
-  node := help_files.head;
-  while (node <> nil) do
-  begin
-    help := node.element;
+  iterator := help_files.iterator();
+  while (iterator.hasNext()) do
+  	begin
+    help := GHelp(iterator.next());
 
     keyword := help.keywords;
 
     while (length(keyword) > 0) do
-    begin
+    	begin
       keyword := one_argument(keyword, s);
 
       if (s[length(s)] <> '_') then
-      begin
+      	begin
         if ((pos(uppercase(param), s) = 1) and (help.level <= ch.level)) then
-        begin
+        	begin
           hk := THelpKeyword.Create(lowercase(s), help);
           insertAlphabetical(keywordlist, hk);
-        end;
+	        end;
+        
         if ((uppercase(param) = s) and (help.level <= ch.level)) then // if it's a 1-on-1 match, stop right away
-        begin
+        	begin
           keywordlist.Clean();
           keywordlist.Free();
           keywordlist := GDLinkedList.Create();
           keywordlist.insertLast(THelpKeyword.Create(lowercase(s), help));
           done := true;
           break;
-        end;
-      end;
-    end;
+        	end;
+      	end;
+    	end;
 
-    if (done) then
-      break;
-      
-    node := node.next;
-  end;
+	    if (done) then
+      	break;     
+	  end;
+	iterator.Free();
   
-  if (keywordlist.getSize() = 0) then
-  begin
+  if (keywordlist.size() = 0) then
+  	begin
     ch.sendBuffer('No help on that word.'#13#10)
-  end
+  	end
   else
-  if (keywordlist.getSize() = 1) then
-  begin
+  if (keywordlist.size() = 1) then
+  	begin
     help := THelpKeyword(keywordlist.head.element).phelp;
     buf := '$A$3 ' + add_chars(78, '---- Help topic ', '-') + '$A$7'#13#10#13#10 +
            'Name:    $A$3' + help.keywords + #13#10 + '$A$7' +
@@ -280,20 +281,21 @@ begin
            #13#10 + help.text;
 
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
-  end
+  	end
   else
-  if (keywordlist.getSize() > 1) then
-  begin
-    buf := Format('Your help query ''$B$7%s$A$7'' matched $B$7%d$A$7 keywords:'#13#10#13#10, [param, keywordlist.getSize()]);
-    node := keywordlist.head;
-    while (node <> nil) do
-    begin
-      buf := buf + Format('  $B$7%s$A$7'#13#10, [THelpKeyword(node.element).keyword]);
-      node := node.next;
-    end;
+  if (keywordlist.size() > 1) then
+  	begin
+    buf := Format('Your help query ''$B$7%s$A$7'' matched $B$7%d$A$7 keywords:'#13#10#13#10, [param, keywordlist.size()]);
+    
+    iterator := keywordlist.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      buf := buf + Format('  $B$7%s$A$7'#13#10, [THelpKeyword(iterator.next()).keyword]);
+    	end;
+    iterator.Free();
 
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
-  end;
+  	end;
 
   keywordlist.Clean();
   keywordlist.Free();
@@ -367,10 +369,11 @@ end;
 
 // Handle Notes - Nemesis
 procedure do_note(ch : GCharacter; param : string);
-var arg1, arg2, buf : string;
-    number, counter : integer;
-    note : GNote;
-    node : GListNode;
+var 
+	arg1, arg2, buf : string;
+	number, counter : integer;
+	note : GNote;
+	iterator : GIterator;
 begin
   if (ch.IS_NPC) then
     exit;
@@ -405,26 +408,25 @@ begin
   if (uppercase(arg1) = 'LIST') then
     begin
     counter := 0;
-    node := notes.head;
 
-    if (node = nil) then
+    if (notes.size() = 0) then
       begin
       ch.sendBuffer('There are no notes on this board.'#13#10);
       exit;
       end;
 
-    while (node <> nil) do
+    iterator := notes.iterator();
+    while (iterator.hasNext()) do
       begin
-      note := node.element;
+      note := GNote(iterator.next());
 
       if (note.board = GPlayer(ch).active_board) then
         begin
         inc(counter);
         buf := buf + ch.ansiColor(15) + ' ' + pad_integer_front(note.number,3) + ch.ansiColor(7) + '>   ' + pad_string(note.author,20) + ' ' + note.subject + #13#10;
         end;
-
-      node := node.next;
       end;
+    iterator.Free();
 
     if (counter = 0) then
       buf := ch.ansiColor(7) + 'There are no notes on this board.' + #13#10;
@@ -488,28 +490,28 @@ begin
       exit;
     end;
 
-    node := notes.head;
-
-    if (node = nil) then
+    if (notes.size() = 0) then
       begin
       ch.sendBuffer('There are no notes to delete.'#13#10);
       exit;
       end;
 
-    while (node <> nil) do
+    iterator := notes.iterator();
+    while (iterator.hasNext()) do
       begin
-      note := node.element;
+      note := GNote(iterator.next());
 
       if (note.board = GPlayer(ch).active_board) and (note.number = number) then
         begin
-        notes.remove(node);
+        { TODO notes.remove(note.node); }
         save_notes;
         ch.sendBuffer('Note succesfully deleted.'#13#10);
+        iterator.Free();
         exit;
         end;
-
-      node := node.next;
       end;
+    
+    iterator.Free();
 
     ch.sendBuffer('Not a valid number.'#13#10);
     exit;
@@ -529,10 +531,11 @@ end;
 
 // Bulletinboard - Nemesis
 procedure do_board(ch : GCharacter; param : string);
-var node : GListNode;
-    i, counter, boardnumber : integer;
-    note : GNote;
-    arg1 : string;
+var 
+	iterator : GIterator;
+	i, counter, boardnumber : integer;
+	note : GNote;
+	arg1 : string;
 begin
   if (ch.IS_NPC) then
     exit;
@@ -565,20 +568,19 @@ begin
     for i:=1 to BOARD_MAX-1 do
       begin
       counter := 0;
-      node := notes.head;
+      iterator := notes.iterator();
 
-      while (node <> nil) do
+      while (iterator.hasNext()) do
         begin
-        note := node.element;
+        note := GNote(iterator.next());
 
         if (note.board = i) then
           begin
           if (note.number > counter) then
             counter := note.number;
           end;
-
-        node := node.next;
-        end;
+				end;
+			iterator.Free();
 
       counter := counter - GPlayer(ch).boards[i];
 
@@ -603,7 +605,7 @@ end;
 { Xenon 23/Apr/2001: apropos searches through all helpfiles for a match on user input }
 procedure do_apropos(ch : GCharacter; param : string);
 var
-  node : GListNode;
+  iterator : GIterator;
   help : GHelp;
   matchlist : GDLinkedList;
   hk : THelpKeyword;
@@ -613,49 +615,47 @@ begin
     exit;
 
   if (length(param) = 0) then
-  begin
+  	begin
     ch.sendBuffer('Usage: APROPOS <text>'#13#10#13#10);
     ch.sendBuffer('Apropos searches for ''text'' in the online helpfiles.'#13#10);
     exit;
-  end;
+  	end;
 
   matchlist := GDLinkedList.Create();
   
-  node := help_files.head;
-  while (node <> nil) do
-  begin
-    help := node.element;
+  iterator := help_files.iterator();
+  while (iterator.hasNext()) do
+	  begin
+    help := GHelp(iterator.next());
 
     s := help.keywords;
     
     if ((s[length(s)] <> '_') and (pos(param, help.text) > 0) and (help.level <= ch.level)) then
-    begin
+    	begin
       hk := THelpKeyword.Create(lowercase(s), help);
       insertAlphabetical(matchlist, hk);
-    end;
+    	end;
+  	end;
+ 	iterator.Free();
 
-    node := node.next;
-  end;
-
-  if (matchlist.getSize() = 0) then
-  begin
+  if (matchlist.size() = 0) then
+  	begin
     ch.sendBuffer(Format('No matches found for your query ''%s''.'#13#10, [param]));
     exit;
-  end
+  	end
   else
-  begin
-    ch.sendPager(act_string(Format('Found $B$7%d$A$7 helpfiles that match your query ''$B$7%s$A$7'':'#13#10#13#10, [matchlist.getSize(), param]), ch, nil, nil, nil));
+  	begin
+    ch.sendPager(act_string(Format('Found $B$7%d$A$7 helpfiles that match your query ''$B$7%s$A$7'':'#13#10#13#10, [matchlist.size(), param]), ch, nil, nil, nil));
     
-    node := matchlist.head;
-    while (node <> nil) do
-    begin
-      hk := node.element;
+    iterator := matchlist.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      hk := THelpKeyword(iterator.next());
 
       ch.sendPager(act_string(Format('  $B$7%s$A$7'#13#10, [hk.keyword]), ch, nil, nil, nil));
-
-      node := node.next;
-    end;
-  end;
+    	end;
+    iterator.Free();
+  	end;
 
   matchlist.Clean();
   matchlist.Free();

@@ -1,11 +1,13 @@
-// $Id: cmd_obj.inc,v 1.9 2003/10/15 13:57:59 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.10 2003/10/22 14:52:35 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
-var obj, obj_in :GObject;
-    arg,arg2:string;
-    node, node_next : GListNode;
-    d : integer;
-    counter : integer;
+var 
+	obj, obj_in :GObject;
+	arg,arg2:string;
+	d : integer;
+	counter : integer;
+	node : GListNode;
+	iterator : GIterator;
 begin
   param:=one_argument(param,arg);
   one_argument(param,arg2);
@@ -24,22 +26,20 @@ begin
 
   if (arg = 'all') and (length(arg2) = 0) then
     begin
-    if (ch.room.objects.getSize = 0) then
+    if (ch.room.objects.size() = 0) then
       begin
       ch.sendBuffer('There is nothing here.'#13#10);
       exit;
       end;
 
-    node := ch.room.objects.head;
-    while (node <> nil) do
+    iterator := ch.room.objects.iterator();
+    while (iterator.hasNext()) do
       begin
-      node_next := node.next;
-      obj := node.element;
+      obj := GObject(iterator.next());
 
       if (IS_SET(obj.flags,OBJ_NOPICKUP) and (not ch.IS_IMMORT)) then
         begin
         ch.sendBuffer('You cannot pick that up.'#13#10);
-        node := node_next;
         continue;
         end;
 
@@ -59,9 +59,8 @@ begin
         obj.fromRoom;
         obj.toChar(ch);
         end;
-
-      node := node_next;
       end;
+    iterator.Free();
     exit;
     end;
 
@@ -75,7 +74,7 @@ begin
       exit;
       end;
 
-    if (obj.contents.getSize = 0) then
+    if (obj.contents.size() = 0) then
       begin
       act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR);
       exit;
@@ -84,12 +83,12 @@ begin
     repeat
       node := obj.contents.tail;
 
-      obj_in := node.element;
+      obj_in := GObject(node.element);
 
       act(AT_REPORT,'You get $p from $P.',false,ch,obj_in,obj,TO_CHAR);
       act(AT_REPORT,'$n gets $p from $P.',false,ch,obj_in,obj,TO_ROOM);
 
-      obj.seperate;
+      obj.seperate();
 
       if (obj_in.item_type=ITEM_MONEY) then
         begin
@@ -117,20 +116,18 @@ begin
       exit;
       end;
 
-    if (obj.contents.getSize = 0) then
+    if (obj.contents.size() = 0) then
       begin
       act(AT_REPORT,'$p is empty.',false,ch,obj,nil,TO_CHAR);
       exit;
       end;
 
-    node := obj.contents.head;
-
     counter := 0;
 
-    while (node <> nil) do
+    iterator := obj.contents.iterator();
+    while (iterator.hasNext()) do
       begin
-      node_next := node.next;
-      obj_in := node.element;
+      obj_in := GObject(iterator.next());
 
       if (isName(obj_in.name, arg)) then
         begin
@@ -150,11 +147,12 @@ begin
           obj_in.fromObject;
           obj_in.toChar(ch);
           end;
+        iterator.Free();
         exit;
         end;
-
-      node := node_next;
       end;
+      
+    iterator.Free();
 
     if (counter = 0) then
       begin
@@ -181,7 +179,7 @@ begin
     act(AT_REPORT,'You get $p.',false,ch,obj,nil,TO_CHAR);
     act(AT_REPORT,'$n gets $p.',false,ch,obj,nil,TO_ROOM);
 
-    obj.seperate;
+    obj.seperate();
 
     if (obj.item_type=ITEM_MONEY) then
       begin
@@ -210,7 +208,7 @@ begin
     ch.sendBuffer( 'Drop what?'#13#10);
     end;
 
-  if (ch.inventory.getSize() = 0) then
+  if (ch.inventory.size() = 0) then
     begin
     ch.sendBuffer( 'You move your arms around wildly, but nothing happens.'#13#10);
     exit;
@@ -310,7 +308,7 @@ begin
     while (node <> nil) do
       begin
       node_next := node.next;
-      obj_in := node.element;
+      obj_in := GObject(node.element);
 
       obj_in.Free();
 
@@ -335,7 +333,7 @@ begin
 
   if (param = 'all') then
     begin
-    if (ch.inventory.getSize() = 0) then
+    if (ch.inventory.size() = 0) then
       begin
       ch.sendBuffer('You are not carrying anything!'#13#10);
       exit;
@@ -629,25 +627,26 @@ end; *)
 
 { Added drink without argument - Nemesis }
 procedure do_drink(ch:GCharacter;param:string);
-var obj : GObject;
-    liq, counter : integer;
-    node, node_next : GListNode;
+var 
+	obj : GObject;
+	liq, counter : integer;
+	iterator : GIterator;
 begin
   counter := 0;
   if (length(param) = 0) then
     begin
-    node := ch.room.objects.head;
+    iterator := ch.room.objects.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      node_next := node.next;
-      obj := node.element;
+      obj := GObject(iterator.next());
 
       if (obj.item_type = ITEM_FOUNTAIN) then
         begin
         if (not ch.IS_NPC) and (GPlayer(ch).condition[COND_THIRST] > (MAX_COND - 15)) then
           begin
           act(AT_REPORT,'Ow yeah? And spill your ruptured bladder all over the clean floor?',false,ch,nil,nil,TO_CHAR);
+          iterator.Free();
           exit;
           end;
 
@@ -667,11 +666,11 @@ begin
          if (GPlayer(ch).condition[COND_THIRST] > (MAX_COND - 15)) then
           ch.sendBuffer('You are no longer thirsty.'#13#10);
 
+				iterator.Free();
         exit;
         end;
-
-      node := node_next;
       end;
+		iterator.Free();
 
     if (counter = 0) then
       begin
@@ -691,7 +690,7 @@ begin
     exit;
     end;
 
-  obj.seperate;
+  obj.seperate();
 
   if not (obj.item_type in [ITEM_DRINK,ITEM_FOUNTAIN]) then
     ch.sendBuffer('You cannot drink that.'#13#10)
@@ -918,7 +917,7 @@ begin
     
     while (node <> nil) do
       begin
-      obj := node.element;
+      obj := GObject(node.element);
 
 			act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
 			act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
@@ -1017,7 +1016,7 @@ begin
 
     while (node <> nil) do
       begin
-      obj := node.element;
+      obj := GObject(node.element);
 
       if IS_SET(obj.flags,OBJ_NODROP) then
         ch.sendBuffer('You can''t put that anywhere.'#13#10)
@@ -1086,9 +1085,10 @@ end;
 
 { Refill ITEM_DRINK with liquid type of fountain - Nemesis }
 procedure do_fill(ch:GCharacter;param:string);
-var obj, objsource : GObject;
-    counter, liq : integer;
-    node : GListNode;
+var 
+	obj, objsource : GObject;
+	counter, liq : integer;
+	iterator : GIterator;
 begin
   counter := 0;
   if (length(param) = 0) then
@@ -1111,18 +1111,17 @@ begin
     exit;
     end;
 
-  if (ch.room.objects.getSize = 0) then
+  if (ch.room.objects.size() = 0) then
     begin
     ch.sendBuffer('You cannot fill that here.'#13#10);
     exit;
     end;
 
-  node := ch.room.objects.head;
+	iterator := ch.room.objects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-
-    objsource := node.element;
+    objsource := GObject(iterator.next());
 
     if (objsource.item_type = ITEM_FOUNTAIN) then
       begin
@@ -1136,11 +1135,11 @@ begin
       act(AT_REPORT,'You fill $p with ' + liq_types[liq].name + '.',false,ch,obj,nil,TO_CHAR);
       act(AT_REPORT,'$n fills $p with ' + liq_types[liq].name + '.',false,ch,obj,nil,TO_ROOM);
 
+			iterator.Free();
       exit;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   if (counter = 0) then
     begin
@@ -1151,11 +1150,12 @@ end;
 
 { Unlock doors - Nemesis }
 procedure do_unlock(ch:GCharacter;param:string);
-var pexit : GExit;
-    room_pos : GRoom;
-    dir : integer;
-    lastobj : GObject;
-    node : GListNode;
+var 
+	pexit : GExit;
+	room_pos : GRoom;
+	dir : integer;
+	lastobj : GObject;
+	iterator : GIterator;
 begin
   if (length(param) = 0) then
     begin
@@ -1195,18 +1195,17 @@ begin
   if IS_SET(pexit.flags, EX_LOCKED) then
     begin
 
-    if (ch.inventory.getSize() = 0) then
+    if (ch.inventory.size() = 0) then
       begin
       ch.sendBuffer('You don''t have a key.'#13#10);
       exit;
       end;
 
-    node := ch.inventory.head;
+    iterator := ch.inventory.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-
-      lastobj := node.element;
+      lastobj := GObject(iterator.next());
 
       if (lastobj.item_type = ITEM_KEY) and (pexit.key = lastobj.value[1]) then
         begin
@@ -1219,27 +1218,24 @@ begin
         pexit := room_pos.findExit(dir_inv[dir]);
         REMOVE_BIT(pexit.flags, EX_LOCKED);
 
+				iterator.Free();
         exit;
         end;
-
-      if (node = ch.inventory.tail) then
-        begin
-        ch.sendBuffer('You lack the key.'#13#10);
-        exit;
-        end;
-
-      node := node.next;
       end;
+    iterator.Free();
+
+		ch.sendBuffer('You lack the key.'#13#10);
     end;
 end;
 
 { Lock doors - Nemesis }
 procedure do_lock(ch:GCharacter;param:string);
-var pexit : GExit;
-    room_pos : GRoom;
-    dir : integer;
-    lastobj : GObject;
-    node : GListNode;
+var 
+	pexit : GExit;
+	room_pos : GRoom;
+	dir : integer;
+	lastobj : GObject;
+	iterator : GIterator;
 begin
   if (length(param) = 0) then
     begin
@@ -1285,18 +1281,17 @@ begin
     begin
     if (pexit.key > 0) then
       begin
-      if (ch.inventory.getSize() = 0) then
+      if (ch.inventory.size() = 0) then
         begin
         ch.sendBuffer('You don''t have a key.'#13#10);
         exit;
         end;
 
-      node := ch.inventory.head;
+			iterator := ch.inventory.iterator();
 
-      while (node <> nil) do
-        begin
-
-        lastobj := node.element;
+			while (iterator.hasNext()) do
+				begin
+				lastobj := GObject(iterator.next());
 
         if (lastobj.item_type = ITEM_KEY) and (pexit.key = lastobj.value[1]) then
           begin
@@ -1309,17 +1304,13 @@ begin
           pexit := room_pos.findExit(dir_inv[dir]);
           SET_BIT(pexit.flags, EX_LOCKED);
 
+					iterator.Free();
           exit;
-          end;
+					end;
+				end;
+			iterator.Free();
 
-        if (node = ch.inventory.tail) then
-          begin
-          ch.sendBuffer('You lack the key.'#13#10);
-          exit;
-          end;
-
-        node := node.next;
-        end;
+			ch.sendBuffer('You lack the key.'#13#10);
       end;
     end;
 end;

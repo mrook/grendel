@@ -1,27 +1,26 @@
 // $Id
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
-var obj : GObject;
-    node : GListNode;
+var 
+	obj : GObject;
+	iterator : GIterator;
 begin
-  node := ch.room.objects.head;
+  iterator := ch.room.objects.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     if (obj.item_type=ITEM_BLOOD) and (obj.value[2]=pexit.direction) then
       begin
+      iterator.Free();
       exit;
-      break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 
-  obj := nil;
-
-  obj := GObject.Create;
+  obj := GObject.Create();
 
   with obj do
     begin
@@ -45,24 +44,23 @@ end;
 
 procedure maketrack(ch : GCharacter; pexit : GExit);
 var
-   node : GListNode;
-   track : GTrack;
+	iterator : GIterator;
+	track : GTrack;
 begin
   // first check wether tracks already exist
-  node := ch.room.tracks.head;
+  iterator := ch.room.tracks.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    track := node.element;
+    track := GTrack(iterator.next());
 
     if (track.who = ch.name) and (track.direction = pexit.direction) then
       begin
       track.life := 150;
       exit;
       end;
-
-    node := node.next;
-    end;
+    end;    
+  iterator.Free();
 
   track := GTrack.Create;
 
@@ -81,6 +79,7 @@ var
   room_pos, room_to : GRoom;
   mv_cost : integer;
   drunk : boolean;
+  iterator : GIterator;
   node, node_next : GListNode;
   p : integer;
 begin
@@ -185,7 +184,7 @@ begin
     exit;
     end;
 
-  if (pexit.to_room.flags.isBitSet(ROOM_SOLITARY)) and (pexit.to_room.chars.getSize > 0) and (not ch.IS_HOLYWALK) then
+  if (pexit.to_room.flags.isBitSet(ROOM_SOLITARY)) and (pexit.to_room.chars.size() > 0) and (not ch.IS_HOLYWALK) then
     begin
     ch.sendBuffer('Only one person can enter that room at a time.'#13#10);
     exit;
@@ -226,10 +225,10 @@ begin
 
   { when a mob blocks ch, we don't want to continue - Grimlord }
 
-  node := ch.room.chars.head;
-  while (node <> nil) do
+  iterator := ch.room.chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) then
       begin
@@ -249,9 +248,8 @@ begin
           end; 
         end;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   if (not ch.IS_FLYING) then
     mv_cost := movement_loss[room_pos.sector]
@@ -326,7 +324,7 @@ begin
       act(AT_REPORT, '$n ' + txt_room + ' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
     end;
 
-  ch.fromRoom;
+  ch.fromRoom();
   ch.toRoom(room_to);
 
   ch.mv := ch.mv - mv_cost;
@@ -361,12 +359,10 @@ begin
   if (ch.tracking <> '') then
     interpret(ch, 'track');
 
-  node := room_pos.chars.head;
-
-  while (node <> nil) do
+  iterator := room_pos.chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    node_next := node.next;
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (Assigned(vict)) and (vict.master = ch) then
       begin
@@ -374,18 +370,17 @@ begin
 
       act(AT_REPORT,'You follow $N '+headings[pexit.direction]+'.',false,vict,nil,ch,TO_CHAR);
       interpret(vict, headings[pexit.direction]);
-      vict.emptyBuffer;
+      vict.emptyBuffer();
 
       vict.in_command := false;
       end;
-
-    node := node_next;
     end;
+  iterator.Free();
 
-  node := ch.room.chars.head;
-  while (node <> nil) do
+  iterator := ch.room.chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) then
       begin
@@ -399,9 +394,8 @@ begin
         GNPC(vict).context.Execute;
         end;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
     
   if (ch.room.flags.isBitSet(ROOM_NOFLOOR)) and (not ch.IS_FLYING) then
     begin
@@ -601,8 +595,9 @@ begin
 end;
 
 procedure do_enter(ch:GCharacter;param:string);
-var pexit, lexit : GExit;
-    node : GListNode;
+var 
+	pexit, lexit : GExit;
+	iterator : GIterator;
 begin
   if (length(param)=0) then
     begin
@@ -612,11 +607,10 @@ begin
 
   pexit:=nil;
 
-  node := ch.room.exits.head;
-
-  while (node <> nil) do
+  iterator := ch.room.exits.iterator();
+  while (iterator.hasNext()) do
     begin
-    lexit := node.element;
+    lexit := GExit(iterator.next());
 
     if (IS_SET(lexit.flags, EX_PORTAL) or IS_SET(lexit.flags, EX_ENTER))
      and (pos(param, lexit.keywords^) <> 0) then
@@ -624,9 +618,8 @@ begin
       pexit:=lexit;
       break;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   do_move(ch, pexit);
 end;

@@ -1,27 +1,27 @@
-// $Id: cmd_shops.inc,v 1.4 2003/06/24 21:41:29 ***REMOVED*** Exp $
+// $Id: cmd_shops.inc,v 1.5 2003/10/22 14:52:36 ***REMOVED*** Exp $
 
 procedure do_balance(ch:GCharacter;param:string);
 var
-   node : GListNode;
-   banker, vict : GCharacter;
+	iterator : GIterator;
+	banker, vict : GCharacter;
 begin
   banker := nil;
-  node := ch.room.chars.head;
+  iterator := ch.room.chars.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_BANKER) then
       begin
       banker := vict;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 
-  if banker=nil then
+  if (banker = nil) then
     ch.sendBuffer('If only there was a banker in sight!'#13#10)
   else
     ch.sendBuffer('You currently have '+inttostr(GPlayer(ch).bankgold)+
@@ -29,9 +29,10 @@ begin
 end;
 
 procedure do_withdraw(ch:GCharacter;param:string);
-var s:integer;
-    node : GListNode;
-    banker,vict:GCharacter;
+var 
+	s:integer;
+	iterator : GIterator;
+	banker, vict : GCharacter;
 begin
   if (length(param)=0) then
     begin
@@ -40,22 +41,22 @@ begin
     end;
 
   banker := nil;
-  node := ch.room.chars.head;
+  iterator := ch.room.chars.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_BANKER) then
       begin
       banker := vict;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 
-  if banker=nil then
+  if (banker = nil) then
     ch.sendBuffer('If only there was a banker in sight!'#13#10)
   else
     begin
@@ -100,9 +101,10 @@ begin
 end;
 
 procedure do_deposit(ch:GCharacter;param:string);
-var s:integer;
-    banker,vict:GCharacter;
-    node : GListNode;
+var 
+	s:integer;
+	iterator : GIterator;
+	banker, vict : GCharacter;
 begin
   if (length(param) = 0) then
     begin
@@ -111,20 +113,20 @@ begin
     end;
 
   banker := nil;
-  node := ch.room.chars.head;
+  iterator := ch.room.chars.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_BANKER) then
       begin
       banker := vict;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 
   if (banker = nil) then
     ch.sendBuffer('If only there was a banker in sight!'#13#10)
@@ -179,77 +181,79 @@ begin
 end;
 
 procedure do_list(ch:GCharacter;param:string);
-var i:integer;
-    obj : GObject;
-    node : GListNode;
-    keeper,vict:GCharacter;
+var 
+	i:integer;
+	iterator : GIterator;
+	obj : GObject;
+	keeper,vict:GCharacter;
 begin
   keeper := nil;
-  node := ch.room.chars.head;
+  iterator := ch.room.chars.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_SHOPKEEPER) then
       begin
       keeper := vict;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();  
 
-  if (keeper=nil) then
+  if (keeper = nil) then
     begin
     ch.sendBuffer('You cannot do that here.'#13#10);
     exit;
     end;
 
-  if (keeper.inventory.getSize = 0) then
+  if (keeper.inventory.size() = 0) then
     begin
     interpret(keeper, 'say I am not selling anything today, '+ch.name+'.');
     exit;
     end;
 
-  node := keeper.inventory.head;
+  iterator := keeper.inventory.iterator();
   i:=0;
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    obj := node.element;
+    obj := GObject(iterator.next());
 
     if (obj.item_type <> ITEM_MONEY) then
       act(AT_REPORT,'$6[$7'+pad_integer(i,2)+'$6]$7 $p, for $6'+inttostr(getCost(keeper,ch,obj))+'$7 coins',false,ch,obj,nil,TO_CHAR);
 
     inc(i);
-    node := node.next;
     end;
+  iterator.Free();
 end;
 
 procedure do_buy(ch:GCharacter;param:string);
-var obj,newobj : GObject;
-    keeper,vict:GCharacter;
-    node : GListNode;
-    cost:integer;
+var 
+	obj,newobj : GObject;
+	iterator : GIterator;
+	keeper,vict:GCharacter;
+	cost:integer;
 begin
   keeper := nil;
-  node := ch.room.chars.head;
+  iterator := ch.room.chars.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_SHOPKEEPER) then
       begin
       keeper := vict;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();  
 
-  if (keeper=nil) then
+  if (keeper = nil) then
     begin
     ch.sendBuffer('You cannot do that here.'#13#10);
     exit;
@@ -261,7 +265,7 @@ begin
     exit;
     end;
 
-  if (keeper.inventory.getSize = 0) then
+  if (keeper.inventory.size() = 0) then
     begin
     interpret(keeper, 'say I am not selling anything today, '+ch.name+'.');
     exit;
@@ -290,27 +294,28 @@ begin
 end;
 
 procedure do_sell(ch : GCharacter; param : string);
-var i,sell,cost:integer;
-    keeper,vict:GCharacter;
-    node : GListNode;
-    shop : GShop;
-    obj : GObject;
+var 
+	i,sell,cost:integer;
+	keeper,vict:GCharacter;
+	iterator : GIterator;
+	shop : GShop;
+	obj : GObject;
 begin
   keeper := nil;
-  node := ch.room.chars.head;
+ 	iterator := ch.room.chars.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_SHOPKEEPER) then
       begin
       keeper := vict;
       break;
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();  
 
   if (keeper = nil) or (GNPC(keeper).npc_index.shop = nil) then
     begin

@@ -2,7 +2,7 @@
 	Summary:
 		SOAP Data Module
 	
-	## $Id: DataModule.pas,v 1.3 2003/09/26 22:45:48 ***REMOVED*** Exp $
+	## $Id: DataModule.pas,v 1.4 2003/10/22 14:52:36 ***REMOVED*** Exp $
 }
 Unit DataModule;
 
@@ -39,7 +39,7 @@ var
 	list : TStringArray;
 	i : integer;
 begin
-	SetLength(list, racelist.getSize());
+	SetLength(list, racelist.size());
 	iterator := raceList.iterator();
 	i := 0;
 	

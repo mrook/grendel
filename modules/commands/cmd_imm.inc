@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.24 2003/10/17 16:34:35 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.25 2003/10/22 14:52:33 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -966,16 +966,16 @@ begin
     room := GRoom(iterator.next());
     
     inc(total, room.InstanceSize());
-    inc(total, room.exits.getSize() * GExit.InstanceSize());
-    inc(total, room.tracks.getSize() * GTrack.InstanceSize());
-    inc(total, room.extra.getSize() * GExtraDescription.InstanceSize());
+    inc(total, room.exits.size() * GExit.InstanceSize());
+    inc(total, room.tracks.size() * GTrack.InstanceSize());
+    inc(total, room.extra.size() * GExtraDescription.InstanceSize());
     end;
 
   iterator.Free();
   ch.sendBuffer('Rooms: ' + IntToStr(total) + #13#10);
-  ch.sendBuffer('NPC indices: ' + IntToStr(GNPCIndex.InstanceSize() * npc_list.getSize()) + #13#10);
-  ch.sendBuffer('Object indices: ' + IntToStr(GObject.InstanceSize() * objectIndices.getSize()) + #13#10);
-  ch.sendBuffer('Object instances: ' + IntToStr(GObject.InstanceSize() * objectList.getSize()) + #13#10);
+  ch.sendBuffer('NPC indices: ' + IntToStr(GNPCIndex.InstanceSize() * npc_list.size()) + #13#10);
+  ch.sendBuffer('Object indices: ' + IntToStr(GObject.InstanceSize() * objectIndices.size()) + #13#10);
+  ch.sendBuffer('Object instances: ' + IntToStr(GObject.InstanceSize() * objectList.size()) + #13#10);
 
   total := 0;
   iterator := char_list.iterator();
@@ -996,9 +996,9 @@ begin
 
   total := 0;
 
-  for i := 0 to str_hash.hashsize - 1 do
+  for i := 0 to str_hash.bucketcount - 1 do
     begin
-    iterator := str_hash.bucketList[i].iterator();
+    iterator := str_hash.buckets[i].iterator();
 
     while (iterator.hasNext()) do
       begin
@@ -1011,7 +1011,7 @@ begin
     end;
     
   ch.sendBuffer('String buffer: ' + IntToStr(total) + #13#10);
-  ch.sendBuffer('Programs: ' + IntToStr(GCodeBlock.InstanceSize() * codeCache.getSize()) + #13#10);
+  ch.sendBuffer('Programs: ' + IntToStr(GCodeBlock.InstanceSize() * codeCache.size()) + #13#10);
 end;
 
 procedure do_switch(ch:GCharacter;param:string);
@@ -1599,19 +1599,19 @@ end;
 
 procedure do_hashstats(ch : GCharacter; param : string);
 var
-   node : GListNode;
-   n, c : integer;
-   g : GHashValue;
+	node : GListNode;
+	n, c : integer;
+	g : GHashValue;
 begin
   ch.sendPager('Allocated hash entries: '#13#10#13#10);
   c := 0;
 
-  for n := 0 to str_hash.hashsize - 1 do
+  for n := 0 to str_hash.bucketcount - 1 do
     begin
-    node := str_hash.bucketList[n].head;
+    node := str_hash.buckets[n].head;
     while (node <> nil) do
       begin
-      g := node.element;
+      g := GHashValue(node.element);
 
       ch.sendPager('(' + pad_integer_front(c, 3) + ') ' + GString(g.value).value + ' [' + inttostr(g.refcount) + ']'#13#10);
 
@@ -1838,7 +1838,7 @@ begin
   if (arg1 = 'list') then
   begin
     node := NameTemplateList.head;
-    for i := 1 to (NameTemplateList.getSize()) do
+    for i := 1 to (NameTemplateList.size()) do
     begin
       if (node = nil) then
         break;
@@ -1867,7 +1867,7 @@ begin
     end;
   end;
 
-  if ((template_nr > NameTemplateList.getsize()) or (template_nr < 1)) then
+  if ((template_nr > NameTemplateList.size()) or (template_nr < 1)) then
   begin
     ch.sendBuffer('Template number out of range.'#13#10);
     exit;
@@ -1909,20 +1909,20 @@ end;
 
 procedure createCoordinates(ch : GCharacter; startroom : GRoom);
 var
-  node : GListNode;
+  iterator : GIterator;
   room : GRoom;
   ex : GExit;
 begin
-  node := startroom.exits.head;
+  iterator := startroom.exits.iterator();
 
-  while (node <> nil) do
-  begin
-    ex := node.element;
+  while (iterator.hasNext()) do
+	  begin
+    ex := GExit(iterator.next());
     
     room := ex.to_room;
 
     if (room.areacoords = nil) then
-    begin
+    	begin
       room.areacoords := GCoords.Create(startroom.areacoords);
       case ex.direction of
         DIR_NORTH:
@@ -1952,10 +1952,10 @@ begin
       end;
       ch.sendBuffer('Created coords (#' + IntToStr(room.vnum) + '): ' + room.areacoords.toString() + #13#10);
       createCoordinates(ch, room);
-    end;
-    
-    node := node.next;
-  end;
+    	end;
+  	end;
+  	
+ 	iterator.Free();
 end;
 
 procedure do_coordgen(ch : GCharacter; param : string);
@@ -2076,27 +2076,27 @@ begin
   node := ll.head;
 
   if (ll.head = nil) then
-  begin
+  	begin
     ll.insertLast(snode);
     exit;
-  end;
+  	end;
 
   while (node <> nil) do
-  begin
-    n := node.element;
+  	begin
+    n := TSearchNode(node.element);
 
     if (snode.f > n.f) then
-    begin
+    	begin
       ins := node;
-    end
+    	end
     else
-    begin
+    	begin
       ll.insertBefore(node, snode);
       exit;
-    end;
+    	end;
     
     node := node.next;
-  end;
+  	end;
 
   ll.insertAfter(ins, snode);  
 end;
@@ -2110,15 +2110,15 @@ begin
   
   node := ll.head;
   while (node <> nil) do
-  begin
-    snode := node.element;
+  	begin
+    snode := TSearchNode(node.element);
     if (snode.room = froom) then
-    begin
+    	begin
       Result := node;
       exit;
-    end;
+    	end;
     node := node.next;
-  end;
+  	end;
 end;
 
 { Implementation of A* search algorithm }
@@ -2157,10 +2157,10 @@ begin
 
   found := false;
   
-  while (llopen.getSize() > 0) do
+  while (llopen.size() > 0) do
   begin
     node := llopen.head;
-    snode := node.element;
+    snode := TSearchNode(node.element);
     room := snode.room;
 
     if (room = destroom) then
@@ -2316,7 +2316,7 @@ end;
 procedure do_reload(ch : GCharacter; param : string);
 var
   cmd : string;
-  node : GListNode;
+  iterator : GIterator;
   npc : GNPCIndex;
   vict : GCharacter;
   count1, count2 : integer;
@@ -2342,50 +2342,51 @@ begin
   cmd := uppercase(cmd);
 
   if (cmd = 'PROGS') then
-  begin
-    node := npc_list.head;
-    while (node <> nil) do
-    begin
-      npc := node.element;
+  	begin
+    iterator := npc_list.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      npc := GNPCIndex(iterator.next());
+      
       if (length(npc.progfile) <> 0) then
-      begin
+      	begin
         if (npc.prog <> nil) then
-        begin
+        	begin
         	codeCache.remove(npc.progfile);
           npc.prog.Free();
           npc.prog := nil;
-        end;
+        	end;
+        
         npc.prog := loadCode(npc.progfile);
         inc(count1);
-      end;
-      node := node.next;
-    end;
+      	end;
+	    end;
+	  iterator.Free();
 
-    node := char_list.head;
-    while (node <> nil) do
-    begin
-      vict := node.element;
+    iterator := char_list.iterator();
+    while (iterator.hasNext()) do
+    	begin
+      vict := GCharacter(iterator.next());
+      
       if (vict.IS_NPC() and (GNPC(vict).npc_index <> nil)) then
-      begin
+      	begin
         if (length(GNPC(vict).npc_index.progfile) = 0) then
-        begin
-          node := node.next;
           continue;
-        end;
+        
         if (GNPC(vict).context <> nil) then
-        begin
+        	begin
           GNPC(vict).context.Free();
           GNPC(vict).context := nil;
-        end;
+        	end;
         GNPC(vict).context := GContext.Create();
         GNPC(vict).context.load(GNPC(vict).npc_index.prog);
         GNPC(vict).context.owner := vict;
         if (uppercase(param) <> 'SILENT') then
           interpret(vict, 'emote receives new instructions and twitches violently.');
         inc(count2);
-      end;
-      node := node.next;
-    end;
+      	end;
+	    end;
+	  iterator.Free();
 
     ch.sendBuffer(Format('Reloaded progs on %d NPC indices and reinitialised contexts on %d mobs.'#13#10, [count1, count2]));
   end

@@ -58,11 +58,12 @@ begin
 end;
 
 procedure do_flee(ch:GCharacter;param:string);
-var a : integer;
-    timer : GTimer;
-    room : GRoom;
-    vict : GCharacter;
-    node : GListNode;
+var 
+	a : integer;
+	timer : GTimer;
+	room : GRoom;
+	vict : GCharacter;
+	iterator : GIterator;
 begin
   if (IS_SET(ch.aff_flags, AFF_BASHED) or IS_SET(ch.aff_flags, AFF_STUNNED)) then
     begin
@@ -92,16 +93,14 @@ begin
     // ch.fought_by.clear;
     ch.sendBuffer('You flee as fast as you can!'#13#10);
 
-    node := room.chars.head;
-
-    while (node <> nil) do
+    iterator := room.chars.iterator();
+    while (iterator.hasNext()) do
       begin
-      vict := node.element;
+      vict := GCharacter(iterator.next());
 
       act(AT_REPORT,'$N flees away in panic!',false,vict,nil,ch,TO_CHAR);
-
-      node := node.next;
-      end;
+			end;
+		iterator.Free();
 
     timer := hasTimer(ch, TIMER_COMBAT);
 

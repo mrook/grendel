@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.4 2003/06/24 21:41:29 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.5 2003/10/22 14:52:36 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -230,7 +230,7 @@ procedure do_spells(ch : GCharacter; param : string);
 var
   a, targ : integer;
   buf : string;
-  node : GListNode;
+  iterator : GIterator;
   g : GLearned;
   arr : array[TARGET_OFF_ATTACK..TARGET_OBJECT] of
     record
@@ -252,32 +252,27 @@ begin
   arr[TARGET_DEF_WORLD].str := add_chars(88, '$A$3--- $B$7[World spells]$A$3 -', '-') + '$A$7'#13#10;
   arr[TARGET_OBJECT].str := add_chars(88, '$A$3--- $B$7[Object spells]$A$3 -', '-') + '$A$7'#13#10;
 
-  with ch do
-    begin
-    node := skills_learned.head;
+	iterator := ch.skills_learned.iterator();
+	while (iterator.hasNext()) do
+		begin
+		g := GLearned(iterator.next());
 
-    while (node <> nil) do
-      begin
-      g := node.element;
+		if (GSkill(g.skill).skill_type = SKILL_SPELL) then
+			for targ := TARGET_OFF_ATTACK to TARGET_OBJECT do
+				begin
+				if (GSkill(g.skill).target = targ) then
+					with arr[targ] do
+						begin
+						inc(num);
 
-      if (GSkill(g.skill).skill_type = SKILL_SPELL) then
-        for targ := TARGET_OFF_ATTACK to TARGET_OBJECT do
-          begin
-          if (GSkill(g.skill).target = targ) then
-            with arr[targ] do
-              begin
-              inc(num);
-
-              if (odd(num)) then
-                str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + '    '
-              else
-                str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + #13#10;
-              end;
-          end;
-
-      node := node.next;
-      end;
-    end;
+						if (odd(num)) then
+							str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + '    '
+						else
+							str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + #13#10;
+						end;
+				end;
+		end;
+	iterator.Free();
 
   buf := act_string(add_chars(80, '$A$3---- Known spells -', '-') + #13#10 + #13#10, ch, nil, nil, nil);
 
@@ -304,73 +299,67 @@ var
   a : integer;
   buf : string;
   g : GLearned;
-  node : GListNode;
+  iterator : GIterator;
 begin
   buf := '';
 
-  with ch do
-  begin
-    ch.sendPager(act_string(add_chars(80, '$A$3---- Known skills -', '-') + '$A$7'#13#10#13#10, ch, nil, nil, nil));
+	ch.sendPager(act_string(add_chars(80, '$A$3---- Known skills -', '-') + '$A$7'#13#10#13#10, ch, nil, nil, nil));
 
-    a := 0;
-    node := ch.skills_learned.head;
+	a := 0;
+	iterator := ch.skills_learned.iterator();
+	while (iterator.hasNext()) do
+		begin
+		g := GLearned(iterator.next());
 
-    while (node <> nil) do
-      begin
-      g := node.element;
+		if (GSkill(g.skill).skill_type <> SKILL_SPELL) then
+			begin
+			inc(a);
 
-      if (GSkill(g.skill).skill_type <> SKILL_SPELL) then
-        begin
-        inc(a);
-      
-        if (odd(a)) then
-          buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + '    '
-        else
-          buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + #13#10;
-        end;
+			if (odd(a)) then
+				buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + '    '
+			else
+				buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + #13#10;
+			end;
+		end;
+	iterator.Free();
 
-      node := node.next;
-      end;
+	if (odd(a)) then
+		buf := buf + #13#10;
 
-    if (odd(a)) then
-      buf := buf + #13#10;
+	if (not ch.IS_NPC()) then
+		buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(GPlayer(ch).max_skills - GPlayer(ch).getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
 
-    if (not ch.IS_NPC()) then
-      buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(GPlayer(ch).max_skills - GPlayer(ch).getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
-
-    ch.sendPager(act_string(buf, ch, nil, nil, nil));
-  end;
-
+	ch.sendPager(act_string(buf, ch, nil, nil, nil));
 end;
 
 procedure do_learn(ch:GCharacter;param:string);
-var sn : GSkill;
-    node : GListNode;
-    g : GLearned;
-    vict,learn:GCharacter;
+var 
+	sn, sk : GSkill;
+	iterator : GIterator;
+	g : GLearned;
+	vict,learn:GCharacter;
 begin
   vict := nil;
   learn := nil;
 
   if (ch.IS_NPC()) then
-  begin
+  	begin
     ch.sendBuffer('This command doesn''t work for mobs.'#13#10);
     exit;
-  end;
+  	end;
 
-  node := ch.room.chars.head;
-  while (node <> nil) do
+  iterator := ch.room.chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_LEARNER) then
       begin
       learn := vict;
       break;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   if (learn=nil) then
     begin
@@ -382,18 +371,15 @@ begin
     begin
     ch.sendBuffer('Skills you can learn here:'#13#10#13#10);
 
-    node := vict.skills_learned.head;
-
-    while (node <> nil) do
+    iterator := vict.skills_learned.iterator();
+    while (iterator.hasNext()) do
       begin
-      g := node.element;
+      g := GLearned(iterator.next());
 
-//      if (ch.LEARNED(g.skill) = 0) then
       if ((ch.level >= GSkill(g.skill).min_lvl) and (ch.LEARNED(g.skill) = 0)) then
         act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name^, false, ch, nil, nil, TO_CHAR);
-
-      node := node.next;
-      end;
+			end;
+		iterator.Free();
     end
   else
     begin
@@ -421,18 +407,19 @@ begin
           ch.sendBuffer('You have not yet reached the appropiate level.'#13#10)
         else
           begin
-          node := sn.prereqs.head;
-
-          while (node <> nil) do
+          iterator := sn.prereqs.iterator();
+          while (iterator.hasNext()) do
             begin
-            if (ch.LEARNED(node.element) < 50) then
+            sk := GSkill(iterator.next());
+            
+            if (ch.LEARNED(sk) < 50) then
               begin
-              ch.sendBuffer('You need to have sufficient knowledge of ' + GSkill(node.element).name^ + ' first.'#13#10);
+              ch.sendBuffer('You need to have sufficient knowledge of ' + sk.name^ + ' first.'#13#10);
+              iterator.Free();
               exit;
               end;
-
-            node := node.next;
             end;
+          iterator.Free();
 
           act(AT_REPORT,'You learn ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
 
@@ -468,27 +455,27 @@ begin
 end;
 
 procedure do_practice(ch:GCharacter;param:string);
-var sn : GSkill;
-    vict,learn:GCharacter;
-    node : GListNode;
-    g : GLearned;
+var 
+	sn : GSkill;
+	vict,learn:GCharacter;
+	iterator : GIterator;
+	g : GLearned;
 begin
   vict := nil;
   learn := nil;
-  node := ch.room.chars.head;
 
-  while (node <> nil) do
+  iterator := ch.room.chars.iterator();
+  while (iterator.hasNext()) do
     begin
-    vict := node.element;
+    vict := GCharacter(iterator.next());
 
     if (vict.IS_NPC) and (vict.IS_LEARNER) then
       begin
       learn := vict;
       break;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 
   if (learn=nil) then
     begin
@@ -505,17 +492,15 @@ begin
       if (vict.learsn] > 0) then
         act(AT_REPORT, '  (Level $B$4' + pad_integer_front(skill_table[sn].min_lvl, 3) + '$A$7) ' + skill_table[sn].name, false, ch, nil, nil, TO_CHAR);
       end; }
-    node := vict.skills_learned.head;
-
-    while (node <> nil) do
+    iterator := vict.skills_learned.iterator();
+    while (iterator.hasNext()) do
       begin
-      g := node.element;
+      g := GLearned(iterator.next());
 
       if (ch.level >= GSkill(g.skill).min_lvl) then
         act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
-
-      node := node.next;
-      end;
+			end;
+		iterator.next();
     end
   else
     begin
@@ -558,17 +543,18 @@ begin
 end;
 
 procedure search_timer(ch, victim : GCharacter; sn : GSkill);
-var pexit : GExit;
-    node : GListNode;
+var 
+	pexit : GExit;
+	iterator : GIterator;
 begin
   if (skill_success(ch,sn)) then
     begin
     { check for hidden exits first }
-    node := ch.room.exits.head;
+    iterator := ch.room.exits.iterator();
 
-    while (node <> nil) do
+    while (iterator.hasNext()) do
       begin
-      pexit := node.element;
+      pexit := GExit(iterator.next());
 
       if (IS_SET(pexit.flags, EX_SECRET)) and (IS_SET(pexit.flags, EX_ISDOOR)) then
         begin
@@ -580,9 +566,8 @@ begin
         REMOVE_BIT(pexit.flags, EX_SECRET);
         exit;
         end;
-
-      node := node.next;
       end;
+    iterator.Free();
 
     ch.sendBuffer('You look around, but find nothing.'#13#10);
     end
@@ -831,8 +816,8 @@ end;
 
 procedure track_timer(ch,victim:GCharacter; sn : GSkill);
 var
-   node : GListNode;
-   track : GTrack;
+	iterator : GIterator;
+	track, tmp : GTrack;
 begin
   if (not skill_success(ch, gsn_track)) then
     begin
@@ -840,16 +825,18 @@ begin
     exit;
     end;
 
-  node := ch.room.tracks.head;
+  iterator := ch.room.tracks.iterator();
   track := nil;
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    if (GTrack(node.element).who = ch.tracking) and ((track = nil) or (track.life < GTrack(node.element).life)) then
-      track := node.element;
-
-    node := node.next;
+    tmp := GTrack(iterator.next());
+    
+    if (tmp.who = ch.tracking) and ((track = nil) or (track.life < tmp.life)) then
+      track := tmp;
     end;
+  
+  iterator.Free();  
 
   if (track = nil) then
     begin
