@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.27 2001/04/29 16:53:43 xenon Exp $
+// $Id: area.pas,v 1.28 2001/04/30 16:37:45 xenon Exp $
 
 unit area;
 
@@ -172,8 +172,19 @@ type
       description : string;
     end;
 
+    GCoords = class  // x: west->east; y: south->north; z: down->up
+                x, y, z : integer;
+                constructor Create(); overload;
+                constructor Create(coords : GCoords); overload;
+                function toString() : string;
+                procedure copyTo(coords : GCoords);
+                procedure copyFrom(coords : GCoords);
+              end;
+
     GRoom = class
       vnum : integer;
+      areacoords : GCoords;
+      worldcoords : GCoords; // not used yet
       name : PString;
       description : string;
       area : GArea;
@@ -1034,7 +1045,7 @@ begin
   writeln(f);
   writeln(f, '#ROOMS');
 
-  for h := 0 to room_list.hashsize - 1 do
+{  for h := 0 to room_list.hashsize - 1 do
     begin
     node := room_list.bucketList[h].head;
 
@@ -1091,7 +1102,61 @@ begin
 
       node := node.next;
       end;
-    end;
+    end;}
+
+  for h := r_lo to (r_hi - 1) do
+  begin
+    room := GRoom(room_list.get(h));
+    if (room = nil) then
+      continue;
+
+    if (room.area <> Self) then
+      begin
+      node := node.next;
+      continue;
+      end;
+
+    writeln(f, '#', room.vnum);
+    writeln(f, room.name^);
+    write(f, room.description);
+    writeln(f, '~');
+
+    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
+
+    if (IS_SET(room.flags, ROOM_TELEPORT)) then
+      writeln(f, ' ', room.televnum, ' ', room.teledelay)
+    else
+      writeln(f);
+
+    node_ex := room.exits.head;
+    while (node_ex <> nil) do
+      begin
+      ex := node_ex.element;
+
+      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
+
+      if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
+        writeln(f, ' ', ex.keywords^)
+      else
+        writeln(f);
+
+      node_ex := node_ex.next;
+      end;
+
+    node_ex := room.extra.head;
+    while (node_ex <> nil) do
+      begin
+      extra := node_ex.element;
+
+      writeln(f, 'E ', extra.keywords);
+      write(f, extra.description);
+      writeln(f, '~');
+
+      node_ex := node_ex.next;
+      end;
+
+    writeln(f, 'S');
+  end;
 
   writeln(f, '#END');
   writeln(f);
@@ -1811,6 +1876,40 @@ begin
     end;
 end;
 
+constructor GCoords.Create();
+begin
+  inherited Create();
+  
+  x := 0;
+  y := 0;
+  z := 0;
+end;
+
+constructor GCoords.Create(coords : GCoords);
+begin
+  inherited Create();
+  
+  copyFrom(coords);
+end;
+
+function GCoords.toString() : string;
+begin
+  Result := '(' + IntToStr(x) + ',' + IntToStr(y) + ',' + IntToStr(z) + ')';
+end;
+
+procedure GCoords.copyTo(coords : GCoords);
+begin
+  coords.x := x;
+  coords.y := y;
+  coords.z := z;
+end;
+
+procedure GCoords.copyFrom(coords : GCoords);
+begin
+  x := coords.x;
+  y := coords.y;
+  z := coords.z;
+end;
 
 // GRoom
 constructor GRoom.Create(vn : integer; ar : GArea);
@@ -1819,6 +1918,8 @@ begin
 
   vnum := vn;
   area := ar;
+  areacoords := nil;
+  worldcoords := nil;
 
   extra := GDLinkedList.Create;
   exits := GDLinkedList.Create;
