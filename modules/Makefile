@@ -19,7 +19,8 @@ STATUS=status.bpl
 IMC3=imc3.bpl
 WEBSERVICE=webservice.bpl
 
-CORE=..\\core.bpl
+CORE_SYM=..\\core
+CORE_FILE=..\\core.bpl
 endif
 
 
@@ -32,7 +33,8 @@ STATUS=bplstatus.so
 IMC3=bplimc3.so
 WEBSERVICE=bplwebservice.so
 
-CORE=../bplcore.so
+CORE_SYM=../core
+CORE_FILE=../bplcore.so
 endif
 
 
@@ -46,18 +48,18 @@ all:	$(MODULES)
 clean:
 	rm $(MODULES)
 
-$(COMMANDS):	core_commands.dpk commands/* $(CORE)
-	$(DCC) core_commands.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE) -Ucommands
+$(COMMANDS):	core_commands.dpk commands/* $(CORE_FILE)
+	$(DCC) core_commands.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ucommands
 
-$(SPELLER):	speller.dpk speller/* $(CORE)
-	$(DCC) speller.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE) -Uspeller
+$(SPELLER):	speller.dpk speller/* $(CORE_FILE)
+	$(DCC) speller.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uspeller
 
-$(STATUS):	status.dpk status/* ..\core.bpl
-	$(DCC) status.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE) -Ustatus
+$(STATUS):	status.dpk status/* $(CORE_FILE)
+	$(DCC) status.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ustatus
 
-$(WEBSREVICE):	webservice.dpk webservice/* $(CORE)
-	$(DCC) webservice.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE) -Uwebservice
+$(WEBSREVICE):	webservice.dpk webservice/* $(CORE_FILE)
+	$(DCC) webservice.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uwebservice
 
-$(IMC3):	imc3.dpk imc3/* $(CORE)
-	$(DCC) imc3.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE) -Uimc3
+$(IMC3):	imc3.dpk imc3/* $(CORE_FILE)
+	$(DCC) imc3.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uimc3
 

@@ -61,4 +61,4 @@ $(COPYOVER):	$(COPYOVER_SOURCES)
 #	$(DCC) $(CONVERT_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LUcore
 
 $(CORE): $(CORE_SOURCES)
-	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -GD
+	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -Ugmc -GD

@@ -16,7 +16,8 @@ DCC=dcc32
 GMCC=gmcc.exe
 GASM=gasm.exe
 
-CORE=..\\core.bpl
+CORE_SYM=..\\core
+CORE_FILE=..\\core.bpl
 endif
 
 ifdef LINUX
@@ -25,7 +26,8 @@ DCC=dcc
 GMCC=gmcc
 GASM=gasm
 
-CORE=../bplcore.so
+CORE_SYM=../core
+CORE_FILE=../bplcore.so
 endif
 
 
@@ -45,9 +47,9 @@ $(GMCC_SOURCES): $(GMCC_LEXFILES)
 	yacc gmcc gmcc.dpr
 	lex gmclex
 
-$(GMCC):	$(GMCC_SOURCES) $(CORE)
-	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU$(CORE)
+$(GMCC):	$(GMCC_SOURCES) $(CORE_FILE)
+	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU$(CORE_SYM)
 	
-$(GASM):	$(GASM_SOURCES) $(CORE)
-	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU$(CORE)
+$(GASM):	$(GASM_SOURCES) $(CORE_FILE)
+	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU$(CORE_SYM)
 
