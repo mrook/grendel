@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_packet.pas,v 1.3 2003/10/03 21:00:12 ***REMOVED*** Exp $
+	$Id: imc3_packet.pas,v 1.4 2003/10/28 22:06:12 ***REMOVED*** Exp $
 }
 unit imc3_packet;
 
@@ -170,10 +170,10 @@ begin
 			inc(right);
 			end;
 
-  	s := removeQuotes(MidBStr(msg, left, right - left));
+  	s := MidBStr(msg, left, right - left);
 
   	if (length(s) > 0) then
-			list.Add(GString.Create(s));
+			list.Add(GString.Create(removeQuotes(s)));
 
   	inc(right);
 	 	left := right;
