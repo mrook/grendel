@@ -113,7 +113,7 @@ type
       direction : integer;
       to_room : GRoom;
       keyword : string;
-      exit_flag : cardinal;
+      flags : cardinal;
       key : integer;
     end;
 
@@ -199,7 +199,7 @@ var
    teleport_list : GDLinkedList;
    extracted_object_list : GDLinkedList;
 
-   npc_reset, obj_reset : GDLinkedList;
+   npc_list, obj_list : GDLinkedList;
 
 procedure load_areas;
 
@@ -346,7 +346,7 @@ begin
         s_exit := GExit.Create;
         s_exit.vnum := af.readCardinal;
         s_exit.direction := af.readCardinal;
-        s_exit.exit_flag := af.readCardinal;
+        s_exit.flags := af.readCardinal;
         s_exit.key := af.readInteger;
 
         if not (af.feol) then
@@ -483,7 +483,7 @@ begin
 
         count := 0;
 
-        npc_reset.insertLast(npc);
+        npc_list.insertLast(npc);
         end;
       except
         bugreport('GArea.loadMobiles', 'area.pas', 'something went wrong',
@@ -564,7 +564,7 @@ begin
       obj_count:=0;
       end;
 
-    obj_reset.insertLast(o_index);
+    obj_list.insertLast(o_index);
   until (uppercase(s) = '#END');
 end;
 
@@ -634,7 +634,10 @@ begin
             end
           else
             resets.insertLast(g);
-          end;
+          end
+        else
+        if (reset_type = 'D') then
+          resets.insertLast(g);
         end;
       end;
   until (uppercase(s) = '#END');
@@ -878,14 +881,29 @@ var reset : GReset;
     obj, lastobj : GObject;
     npcindex : GNPCIndex;
     objindex : GObjectIndex;
+    room : GRoom;
+    pexit : GExit;
     conn : GConnection;
     node_reset, node_char : GListNode;
     buf : string;
 begin
-  lastmob:=nil;
+  lastmob := nil;
+
+  node_char := connection_list.head;
+  while (node_char <> nil) do
+    begin
+    conn := node_char.element;
+
+    if (conn.state=CON_PLAYING) and (conn.ch.room.area = Self) then
+      begin
+      buf := conn.ch.ansiColor(AT_REPORT) + reset_msg + #13#10;
+      conn.ch.sendBuffer(buf);
+      end;
+
+    node_char := node_char.next;
+    end;
 
   node_reset := resets.head;
-
   while (node_reset <> nil) do
     begin
     reset := node_reset.element;
@@ -1106,25 +1124,56 @@ begin
             obj.toObject(lastobj);
             end;
           end;
+      'D':begin
+          room := findRoom(reset.arg1);
+          if (room = nil) then
+            begin
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
+                      'Attempted to reset a null room.');
+            exit;
+            end;
+
+          pexit := room.findExit(reset.arg2);
+          if (pexit = nil) then
+            begin
+            bugreport('GArea.reset', 'area.pas', 'direction '+inttostr(reset.arg2) + ' has no exit in room ' + inttostr(reset.arg1),
+                      'Attempted to reset a null exit.');
+            exit;
+            end;
+
+          case reset.arg3 of
+          // open door
+            0 : begin
+                REMOVE_BIT(pexit.flags, EX_LOCKED);
+                REMOVE_BIT(pexit.flags, EX_CLOSED);
+                end;
+          // closed door
+            1 : begin
+                REMOVE_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+                end;
+          // closed secret door
+            2 : begin
+                REMOVE_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+                SET_BIT(pexit.flags, EX_SECRET);
+                end;
+          // locked door
+            3 : begin
+                SET_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+                end;
+          // locked secret door
+            4 : begin
+                SET_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+                SET_BIT(pexit.flags, EX_SECRET);
+                end;
+          end;
+          end;
     end;
 
     node_reset := node_reset.next;
-    end;
-
-  node_char := connection_list.head;
-
-  while (node_char <> nil) do
-    begin
-    conn := node_char.element;
-
-    if (conn.state=CON_PLAYING) and (conn.ch.room.area = Self) then
-      begin
-      buf := conn.ch.ansiColor(AT_REPORT) + reset_msg + #13#10;
-
-      conn.ch.sendBuffer(buf);
-      end;
-
-    node_char := node_char.next;
     end;
 
   age:=0;
@@ -1781,7 +1830,7 @@ var
 begin
   findNPCIndex := nil;
 
-  node := npc_reset.head;
+  node := npc_list.head;
 
   while (node <> nil) do
     begin
@@ -1804,7 +1853,7 @@ var
 begin
   findObjectIndex := nil;
 
-  node := obj_reset.head;
+  node := obj_list.head;
 
   while (node <> nil) do
     begin
@@ -2115,6 +2164,6 @@ begin
   teleport_list := GDLinkedList.Create;
   extracted_object_list := GDLinkedList.Create;
 
-  npc_reset := GDLinkedList.Create;
-  obj_reset := GDLinkedList.Create;
+  npc_list := GDLinkedList.Create;
+  obj_list := GDLinkedList.Create;
 end.
