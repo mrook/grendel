@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.10 2004/05/18 12:08:12 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.11 2004/06/10 20:39:27 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var 
@@ -42,6 +42,23 @@ begin
 
   act(AT_REPORT,sun+', it is '+sky_types[ch.room.area.weather.sky]+
       ' and it''s around '+inttostr(ch.room.area.weather.temp)+' C.',false,ch,nil,nil,TO_CHAR);
+end;
+
+
+function inventorySorter(item1, item2 : pointer) : integer;
+var
+	obj1, obj2 : GObject;
+begin
+	obj1 := item1;
+	obj2 := item2;
+	
+	if (obj1.vnum < obj2.vnum) then
+		Result := 1
+	else
+	if (obj1.vnum > obj2.vnum) then
+		Result := -1
+	else
+		Result := 0;
 end;
 
 procedure do_peek(ch : GCharacter; param : string);
@@ -421,38 +438,60 @@ end;
 
 procedure do_inventory(ch:GCharacter;param:string);
 var
-  obj : GObject;
-  iterator : GIterator;
-  counter : integer;
+	  obj : GObject;
+	  iterator : GIterator;
+	  i, counter : integer;
+	  invlist : TList;
 begin
-  counter := 0;
+	act(AT_REPORT,'You are carrying: ',false,ch,nil,nil,TO_CHAR);
 
-  act(AT_REPORT,'You are carrying: ',false,ch,nil,nil,TO_CHAR);
-  
-  if (ch.gold > 0) then
-    act(AT_REPORT, '  $3' + inttostr(ch.gold) + '$7 coin(s).', false, ch, nil, nil, TO_CHAR);
+	if (ch.gold > 0) then
+		act(AT_REPORT, '  $3' + inttostr(ch.gold) + '$7 coin(s).', false, ch, nil, nil, TO_CHAR);
+		
+	if (ch.inventory.size() > 0) then
+		begin
+		invlist := TList.Create();
+		
+		iterator := ch.inventory.iterator();
 
-  iterator := ch.inventory.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    obj := GObject(iterator.next());
-
-    if (obj.count > 1) then
-      act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
-    else
-      act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-
-    inc(counter);
-    end;
-    
-  iterator.Free();
-
-  if (counter = 0) and (ch.gold = 0) then
-    begin
-    ch.sendBuffer('      nothing.'#13#10);
-    exit;
-    end;
+		while (iterator.hasNext()) do
+			begin
+			obj := GObject(iterator.next());
+			
+			invlist.add(obj);
+			end;
+			
+		iterator.Free();
+		
+		invlist.Sort(inventorySorter);
+		
+		i := 0;
+		
+		while (i < invlist.Count) do
+			begin
+			counter := 0;
+			
+			obj := invlist[i];
+			
+			while (i < invlist.Count) and (GObject(invlist[i]).vnum = obj.vnum) do
+				begin
+				inc(counter);
+				inc(i);
+				end;
+				
+			if (counter > 1) then
+				act(AT_REPORT, '  $p [$6' + inttostr(counter) + 'x$7] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+			else		
+				act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);		
+			end;
+		
+		invlist.Free();
+		end
+	else
+	if (ch.gold = 0) then
+		begin
+		ch.sendBuffer('      nothing.'#13#10);
+		end;
 end;
 
 procedure do_equipment(ch:GCharacter;param:string);
