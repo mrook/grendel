@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.21 2003/06/24 21:41:34 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.22 2003/09/22 21:31:11 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -597,74 +597,76 @@ begin
   func := sn.func;
 
   if ((sn.target in [TARGET_DEF_WORLD, TARGET_OBJECT]) or (victim.room=ch.room)) and (not victim.CHAR_DIED) then
-     begin
-     if (skill_success(ch, sn)) or (ch.IS_IMMORT) or (ch.IS_NPC) then      { immo's don't fail :) }
-       begin
-       if (sn.target <= TARGET_OFF_AREA) then
-        if (not victim.CHAR_DIED) then
-         begin
-         ch.state := STATE_FIGHTING;
-         ch.position := POS_STANDING;
-         ch.fighting := victim;
+		begin
+		if (skill_success(ch, sn)) or (ch.IS_IMMORT) or (ch.IS_NPC) then      { immo's don't fail :) }
+			begin
+			if (sn.target <= TARGET_OFF_AREA) then
+				begin
+				if (not victim.CHAR_DIED) then
+				begin
+				ch.state := STATE_FIGHTING;
+				ch.position := POS_STANDING;
+				ch.fighting := victim;
 
-         if (victim.state <> STATE_FIGHTING) then
-           begin
-           victim.fighting := ch;
-           victim.state := STATE_FIGHTING;
-           victim.position := POS_STANDING;
-           end;
-         end;
+				if (victim.state <> STATE_FIGHTING) then
+					begin
+					victim.fighting := ch;
+					victim.state := STATE_FIGHTING;
+					victim.position := POS_STANDING;
+					end;
+				end;
+			end;
 
-       say_spell(ch, sn.name^);
+		 	say_spell(ch, sn.name^);
 
-       improve_skill(ch, sn);
+		 	improve_skill(ch, sn);
 
-       if (assigned(func)) then
-         func(ch, victim, sn);
+		 	if (assigned(func)) then
+			 	func(ch, victim, sn);
 
-       if (not ch.IS_IMMORT) and (not ch.IS_NPC) then
-         begin
-         ch.cast_timer := 1;
-         ch.mana := ch.mana - sn.min_mana;
-         end;
+		 	if (not ch.IS_IMMORT) and (not ch.IS_NPC) then
+			 	begin
+			 	ch.cast_timer := 1;
+			 	ch.mana := ch.mana - sn.min_mana;
+			 	end;
 
-       if (ch.fighting <> nil) then
-         ch.state := STATE_FIGHTING
-       else
-         ch.state := STATE_IDLE;
-       end
-     else
-       begin
-       ch.mana := ch.mana - sn.min_mana div 2;
+		 	if (ch.fighting <> nil) then
+			 	ch.state := STATE_FIGHTING
+		 	else
+			 	ch.state := STATE_IDLE;
+		 	end
+		else
+		 	begin
+			ch.mana := ch.mana - sn.min_mana div 2;
 
-       if (sn.target < TARGET_OFF_AREA) then
-         begin
-         ch.state := STATE_FIGHTING;
-         ch.position := POS_STANDING;
-         ch.fighting := victim;
+		 	if (sn.target < TARGET_OFF_AREA) then
+			 	begin
+			 	ch.state := STATE_FIGHTING;
+			 	ch.position := POS_STANDING;
+			 	ch.fighting := victim;
 
-         if (victim.state <> STATE_FIGHTING) then
-           begin
-           victim.fighting := ch;
-           victim.state := STATE_FIGHTING;
-           victim.position := POS_STANDING;
-           end;
-         end;
+			 	if (victim.state <> STATE_FIGHTING) then
+				 	begin
+				 	victim.fighting := ch;
+				 	victim.state := STATE_FIGHTING;
+				 	victim.position := POS_STANDING;
+				 	end;
+			 	end;
 
-       act(AT_REPORT, 'You have lost your concentration.',false,ch,nil,nil,TO_CHAR);
+		 	act(AT_REPORT, 'You have lost your concentration.',false,ch,nil,nil,TO_CHAR);
 
-       if (ch.fighting <> nil) then
-         ch.state := STATE_FIGHTING
-       else
-         ch.state := STATE_IDLE;
-       end;
-     end
-   else
-     begin
-     act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
-     
-     ch.state := STATE_IDLE;
-     end;
+		 	if (ch.fighting <> nil) then
+			 	ch.state := STATE_FIGHTING
+		 	else
+			 	ch.state := STATE_IDLE;
+		 	end;
+		end
+	else
+		begin
+		act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR);
+
+		ch.state := STATE_IDLE;
+		end;
 
   ch.emptyBuffer();
 end;
