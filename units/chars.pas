@@ -1,6 +1,6 @@
 {
   @abstract((N)PC classes & routines)
-  @lastmod($Id: chars.pas,v 1.65 2002/08/18 19:35:17 ***REMOVED*** Exp $)
+  @lastmod($Id: chars.pas,v 1.66 2002/09/16 21:01:03 ***REMOVED*** Exp $)
 }
 
 unit chars;
@@ -2383,6 +2383,15 @@ end;
 
 procedure GCharacter.die;
 begin
+  { snooping/switching immortals should stop doing so when we die }
+  if (snooped_by <> nil) then
+    begin
+    GPlayer(snooped_by).snooping := nil;
+    GPlayer(snooped_by).switching := nil;
+    snooped_by.sendBuffer('Ok.'#13#10);
+    snooped_by := nil;
+    end;
+
   addCorpse(Self);
 end;
 
