@@ -7,25 +7,29 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 1. Introduction
 
-It has been two weeks since the 0.3.2 release, and already the 0.3.3 is
-out! This one is mostly bugfixes and a few new features.
+It has been a month since the 0.3.3 release, and here is 0.3.4!
 
-Biggest changes since 0.3.2 are the inclusion of a smaug area convertor
-(still in beta stage), password encryption in playerfiles using MD5
-(backward compatible with older pfiles), door resets, backing up of
-pfiles when deleting/destroying, more help files, better exit handling,
-new ban code (with hostmasks), etc. etc.
-For more details, check the ChangeLog file.
-
-A small note on changes with exits:
-  
-  You can now enclose your exit keywords in single quotes (') to keep
-  them together, e.g. like this:
-
-  D 100 1 0 0 'oaken door' 'wooden door'
-
-  The first argument will used when interacting with a door, using the
-  new $d argument in act().
+The biggest changes since 0.3.3:
+  - the OLC system is pretty much back now, still a wee bit unstable,
+    some features missing, but already quite usable, with one big
+    cool plus: spell checking! (only english language supported now)
+    To use this, please download dicts.zip from the website,
+    as this contains the needed dictionaries.
+  - Some beautifications on info commands by Xenon
+  - Integrated debug routines, helps us (and maybe you) to trace
+    wicked bugs, also features a nice Dead Thread Detector (tm);
+    should players blow up your server, the system will detect this,
+    catch & kill the thread and set the offending player in a linkless state.
+  - race format has been revamped and updated, with a corresponding raceinfo
+    command - this has also opened up the way to a few nice features
+    like spell/skillslots etc.
+  - holywalk, peek, keylock, last; to just name a few cool new commands.
+  - timers are much more stable (and much more generic, but that's code issue),
+    enabling better recovery from a bug, and better tracing of such a bug.
+  - string sharing (with the string hash table) was fixed, reducing memory usage
+  - inventory handling was updated
+  - copyover more stable
+  - tintin/jmc and other clients should work again
 
 
 2. Features
@@ -55,17 +59,19 @@ an update from the Microsoft site.
     .are file to the Grendel format
   - Password encryption: player passwords are encrypted using
     the MD5 Message Digest Algorithm
+  - OLC support: design and builds your area without leaving the MUD!
 
 
 3. The team
 
-One new member has been added to the team since the 0.3.2 release,
-which makes it a 4 man team, with currently on board:
+One new member has been added to the team since the 0.3.3 release,
+which makes it a 5 man team, with currently on board:
 
-  Michiel Rook											manager, code
-  Hemko de Visser										code, field testing
-  Oscar Martin											code
-  Jeremiah Davis (*new member*)			documentation
+  Michiel Rook								(Grimlord)			manager, website, code
+  Hemko de Visser							(Nemesis) 			code, field testing
+  Roeland van Houte (*new*)   (Xenon)		      code
+  Oscar Martin								(Jago)					code
+  Jeremiah Davis              (Woodstock)  		documentation
 
 
 4. Compiling & running
@@ -95,13 +101,17 @@ be any endless loops.
 
 6. Known problems
 
-Most of the OLC commands are left out at the moment, they will be re-implemented
-ASAP. It could be that there still are other things not re-implemented from the 
+As of this release, most of the OLC commands are back. Any stability issues with
+these will be fixed ASAP.
+There are still a few things left unfinished, like the affects system.
+These, and other outstanding issues, can be found in todo\todo.txt.
+It could be that there still are other things not re-implemented from the 
 original source, afaik everything is back in there, but if you see anything
 missing, contact me about it.
 
-The stability of the server has been greatly increased since the last version(s),
-but I'm sure there are still some things left that could bring the server
+Again, there were a lot of stability fixes, and the server has become even more
+skilled at fixing its own problems, so uptime should have been increased greatly.
+However, I'm sure there are still some things left that could bring the server
 down to its knees. If you find such a thing, notify me about it, and I'll get
 on it ASAP.
 
