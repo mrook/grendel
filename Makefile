@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.14 2004/02/19 14:38:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.15 2004/02/21 17:44:05 ***REMOVED*** Exp $
 #
 
 
@@ -70,3 +70,6 @@ ifdef LINUX
 	$(RM) -f modules/bpl*.so
 	$(RM) -f modules/*.map
 endif
+
+tests:
+	$(MAKE) -C src/tests tests

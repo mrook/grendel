@@ -1,6 +1,8 @@
 {
-  @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.4 2004/02/18 23:10:36 ***REMOVED*** Exp $)
+  Summary:
+  	Wrappers for IPv4 and IPv6 socket operations
+  	
+  ## $Id: socket.pas,v 1.5 2004/02/21 17:44:05 ***REMOVED*** Exp $
 }
 
 unit socket;
@@ -89,7 +91,7 @@ type
 
 
 function isSupported(af : integer) : boolean;
-function createSocket(af : integer; fd : TSocket) : GSocket;
+function createSocket(af : integer; fd : TSocket = -1) : GSocket;
 
 
 implementation
@@ -150,7 +152,7 @@ begin
 end;
 {$ENDIF}
 
-function createSocket(af : integer; fd : TSocket) : GSocket;
+function createSocket(af : integer; fd : TSocket = -1) : GSocket;
 begin
   if (af = AF_INET) then
     Result := GSocket4.Create(fd)
