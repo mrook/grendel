@@ -347,6 +347,12 @@ position: 9
 #end
 
 #command
+name: lock
+function: do_lock
+position: 5
+#end
+
+#command
 name: lockpick
 function: do_lockpick
 position: 5
@@ -596,6 +602,12 @@ position: 4
 name: unlearn
 function: do_unlearn
 position: 4
+#end
+
+#command
+name: unlock
+function: do_unlock
+position: 5
 #end
 
 #command
