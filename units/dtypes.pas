@@ -25,10 +25,12 @@ type
       function insertBefore(tn : GListNode; element : pointer) : GListNode;
       procedure remove(node : GListNode);
       procedure clean;
+      procedure smallClean;
 
       function getSize : integer;
 
       constructor Create;
+      destructor Destroy; override;
     end;
 
     GPrimes = array of integer;
@@ -58,6 +60,7 @@ type
       procedure hashPointer(ptr : pointer; key : string);
 
       constructor Create(size : integer);
+      destructor Destroy; override;
     end;
 
     GHashObject = class(GHashTable)
@@ -114,6 +117,13 @@ begin
   lock := TCriticalSection.Create;
 end;
 
+destructor GDLinkedList.Destroy;
+begin
+  lock.Free;
+
+  inherited Destroy;
+end;
+
 function GDLinkedList.insertLast(element : pointer) : GListNode;
 var
    node : GListNode;
@@ -166,10 +176,7 @@ end;
 function GDLinkedList.insertBefore(tn : GListNode; element : pointer) : GListNode;
 var
    node : GListNode;
-   lock : TCriticalSection;
 begin
-  lock := TCriticalSection.Create;
-
   try
     lock.Acquire;
 
@@ -192,11 +199,7 @@ begin
 end;
 
 procedure GDLinkedList.remove(node : GListNode);
-var
-   lock : TCriticalSection;
 begin
-  lock := TCriticalSection.Create;
-  
   try
     lock.Acquire;
 
@@ -228,7 +231,7 @@ var
 begin
   while (true) do
     begin
-    node := head;
+    node := tail;
 
     if (node = nil) then
       exit;
@@ -238,6 +241,23 @@ begin
     remove(node);
     end;
 end;
+
+// doesn't free elements
+procedure GDLinkedList.smallClean;
+var
+   node : GListNode;
+begin
+  while (true) do
+    begin
+    node := head;
+
+    if (node = nil) then
+      exit;
+
+    remove(node);
+    end;
+end;
+
 
 // GString
 constructor GString.Create(s : string);
@@ -402,6 +422,19 @@ begin
     bucketList[n] := GDLinkedList.Create;
 
   hashFunc := defaultHash;
+end;
+
+destructor GHashTable.Destroy;
+var
+   n : integer;
+begin
+  for n := 0 to hashsize - 1 do
+    begin
+    bucketList[n].clean;
+    bucketList[n].Free;
+    end;
+    
+  inherited Destroy;
 end;
 
 
