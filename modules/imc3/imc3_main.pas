@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.5 2003/10/09 14:55:04 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.6 2003/10/09 20:13:15 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -12,15 +12,25 @@ interface
 
 implementation
 
+
 uses
 	SysUtils,
 	chars,
 	mudthread,
 	dtypes,
 	util,
+	modules,
 	imc3_chan,
 	imc3_mud,
 	imc3_core;
+
+
+type
+  GInterMudModule = class(TInterfacedObject, IModuleInterface)
+  	procedure registerModule();
+  	procedure unregisterModule();
+  end;
+
 
 var
  	i3: GInterMud;
@@ -117,16 +127,31 @@ begin
 		ch.sendBuffer('Unimplemented.'#13#10);
 end;
 
-initialization
+
+function returnModuleInterface() : IModuleInterface;
+begin
+	Result := GInterMudModule.Create();
+end;
+
+procedure GInterMudModule.registerModule();
+begin
   i3 := GInterMud.Create(1);
 	i3.FreeOnTerminate := true;
 	registerCommand('do_i3', do_i3);
+end;
 
-finalization
+procedure GInterMudModule.unregisterModule();
+begin
   unregisterCommand('do_i3');
 	i3.Terminate();
 
 	{ Give thread a chance to terminate and free }
 	Sleep(100);
+end;
+
+
+exports
+	returnModuleInterface;
+
 
 end.

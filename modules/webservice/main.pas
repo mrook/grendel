@@ -2,7 +2,7 @@
 	Summary:
 		Base unit for WebService
 	
-	## $Id: main.pas,v 1.1 2003/09/24 14:31:46 ***REMOVED*** Exp $
+	## $Id: main.pas,v 1.2 2003/10/09 20:13:15 ***REMOVED*** Exp $
 }
 unit main;
 
@@ -11,13 +11,27 @@ interface
 implementation
 
 uses
-  SysUtils, Classes, IdHTTPWebBrokerBridge, WebModule;
+  SysUtils, Classes, IdHTTPWebBrokerBridge, WebModule, modules;
 
 var
 	FWebBrokerBridge: TIdHTTPWebBrokerBridge;
 
 
-initialization
+type
+  GWebServiceModule = class(TInterfacedObject, IModuleInterface)
+  	procedure registerModule();
+  	procedure unregisterModule();
+  end;
+
+
+function returnModuleInterface() : IModuleInterface;
+begin
+	Result := GWebServiceModule.Create();
+end;
+
+
+procedure GWebServiceModule.registerModule();
+begin
   // Create server.
   FWebBrokerBridge := TIdHTTPWebBrokerBridge.Create(nil);
 
@@ -29,12 +43,21 @@ initialization
 
   // Start server.
   FWebBrokerBridge.Active := True;
-  
-finalization
+end;
+
+procedure GWebServiceModule.unregisterModule();
+begin
   // Stop server.
   FWebBrokerBridge.Active := False;
 
   // Free server component.
   FreeAndNil(FWebBrokerBridge);
+end;
+
+
+exports
+	returnModuleInterface;
+
+  
 end.
  

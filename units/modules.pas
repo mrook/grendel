@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.13 2003/10/08 13:43:03 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.14 2003/10/09 20:13:15 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -20,11 +20,20 @@ uses
 
 
 type 
-  GModule = class
+  IModuleInterface = interface
+  	procedure registerModule();
+  	procedure unregisterModule();
+  end;
+
+	GReturnModuleInterfaceFunction = function() : IModuleInterface;
+
+  GModuleInfo = class
     handle : HMODULE;
     fname : string;
     desc : string;
+    intf : IModuleInterface;
   end;
+  
 
 procedure loadModules();
 procedure unloadModules();
@@ -49,7 +58,7 @@ uses
 procedure do_modules(ch : GCharacter; param : string);
 var
   iterator : GIterator;
-  module : GModule;
+  module : GModuleInfo;
   arg : string;
 begin
   if (length(param) = 0) then
@@ -62,7 +71,7 @@ begin
   
     while (iterator.hasNext()) do
       begin
-      module := GModule(iterator.next());
+      module := GModuleInfo(iterator.next());
     
       ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
       end;
@@ -118,21 +127,22 @@ end;
 procedure unloadModules();
 var
   iterator : GIterator;
-  module : GModule;
+  module : GModuleInfo;
 begin
   iterator := module_list.iterator();
   
   while (iterator.hasNext()) do
     begin
-    module := GModule(iterator.next());
+    module := GModuleInfo(iterator.next());
 
     writeConsole('Unloading module ' + module.fname);
-    pollConsole();
+    
+    module.intf.unregisterModule();
+    module.intf := nil;
     
     UnloadPackage(module.handle);
       
     writeConsole('Unloaded module ' + module.fname);
-    pollConsole();
     end;
     
   module_list.clear();
@@ -144,35 +154,51 @@ end;
 procedure addModule(name : string);
 var
   hndl : HMODULE;
-  module : GModule;
+  module : GModuleInfo;
+  returnModuleInterface : GReturnModuleInterfaceFunction;
 begin
   if (module_list.get(name) <> nil) then
     raise Exception.Create('Module already loaded');
       
   hndl := LoadPackage('modules' + PathDelimiter + name);
+  
+  @returnModuleInterface := GetProcAddress(hndl, 'returnModuleInterface');
+  
+  if (@returnModuleInterface = nil) then
+  	begin
+  	writeConsole('Could not find interface function in ' + name);
+  	UnloadPackage(hndl);
+  	end
+  else
+  	begin     
+  	module := GModuleInfo.Create();
       
-  module := GModule.Create();
+	  module.handle := hndl;
+  	module.fname := name;
+	  module.desc := GetPackageDescription(PChar('modules' + PathDelimiter + name));
+  	module.intf := returnModuleInterface();
+	  module.intf.registerModule();
       
-  module.handle := hndl;
-  module.fname := name;
-  module.desc := GetPackageDescription(PChar('modules' + PathDelimiter + name));
-      
-  module_list.put(name, module);
+  	module_list.put(name, module);
 
-  writeConsole('Loaded module ' + name + ' (' + module.desc + ')');
+	  writeConsole('Loaded module ' + name + ' (' + module.desc + ')');
+	  end;
   
 //  readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
 end;
 
 procedure removeModule(name : string);
 var
-  module : GModule;
+  module : GModuleInfo;
 begin
-  module := GModule(module_list.get(name));
+  module := GModuleInfo(module_list.get(name));
   
   if (module = nil) then
     raise Exception.Create('Module not loaded');
     
+  module.intf.unregisterModule();
+  module.intf := nil;
+
   UnloadPackage(module.handle);
     
   writeConsole('Unloaded module ' + module.fname);

@@ -4,14 +4,24 @@ interface
 
 implementation
 
+
 uses
   SysUtils,
   chars,
   area,
   dtypes,
+  modules,
   mudthread,
   mudspell;
 
+
+type
+  GSpellerModule = class(TInterfacedObject, IModuleInterface)
+  	procedure registerModule();
+  	procedure unregisterModule();
+  end;
+  
+  
 procedure do_spellcheck(ch : GCharacter; param : string);
 var
    room : GRoom;
@@ -66,13 +76,27 @@ begin
   ch.sendBuffer('Ok.'#13#10);
 end;
 
-initialization
+function returnModuleInterface() : IModuleInterface;
+begin
+	Result := GSpellerModule.Create();
+end;
+
+procedure GSpellerModule.registerModule();
+begin
   registerCommand('do_spellcheck', do_spellcheck);
   registerCommand('do_addcustom', do_addcustom);
+end;
 
-finalization
+procedure GSpellerModule.unregisterModule();
+begin
   unregisterCommand('do_spellcheck');
   unregisterCommand('do_addcustom');
+end;
+
+
+exports
+	returnModuleInterface;
+
 
 end.
 

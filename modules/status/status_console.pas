@@ -13,6 +13,7 @@ uses
   Graphics,
   Forms,
   console,
+  modules,
   constants,
   systray;
   
@@ -22,25 +23,37 @@ type
     procedure write(timestamp : TDateTime; text : string); override;
   end;
   
+  GConsoleModule = class(TInterfacedObject, IModuleInterface)
+  	procedure registerModule();
+  	procedure unregisterModule();
+  end;
+  
 var
   consoleForm : TForm;
   consoleMemo : TMemo;
   consoleFont : TFont;
   consoleDriver : GConsoleWindowWriter;
   
+
+procedure showConsoleProc(id : integer);
+begin
+  consoleForm.Show();
+end;
+ 
+function returnModuleInterface() : IModuleInterface;
+begin
+	Result := GConsoleModule.Create();
+end;
+
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; text : string);
 begin
   consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
   Application.ProcessMessages();
 end;
-  
-procedure showConsoleProc(id : integer);
-begin
-  consoleForm.Show();
-end;
 
-initialization 
-  Application.Title := 'Grendel ' + version_number;
+procedure GConsoleModule.registerModule();
+begin
+	Application.Title := 'Grendel ' + version_number;
 
   consoleForm := TForm.Create(nil);
   consoleForm.Caption := version_info + ': Server console';
@@ -70,15 +83,22 @@ initialization
   fetchConsoleHistory(0, consoleDriver);
   
   registerConsoleDriver(consoleDriver);
-  
+end;
 
-finalization  
-	consoleForm.Free();
+procedure GConsoleModule.unregisterModule();
+begin
   unregisterMenuItem('Show console');
   unregisterConsoleDriver(consoleDriver);
   consoleDriver.Free();
-  
-  
+  consoleMemo.Free();
+	consoleFont.Free();
+	consoleForm.Free();
+end;
+
+
+exports
+	returnModuleInterface;
+ 
 {$ENDIF}
 
 end.

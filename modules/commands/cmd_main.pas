@@ -4,6 +4,7 @@ interface
 
 implementation
 
+
 uses
   SysUtils,
   Strip,
@@ -39,6 +40,14 @@ uses
   bulletinboard,
   modules,
   mudthread;
+
+
+type
+  GCommandsModule = class(TInterfacedObject, IModuleInterface)
+  	procedure registerModule();
+  	procedure unregisterModule();
+  end;
+
 
 { The complete quit procedure, which even logs off NPCs! - Grimlord }
 procedure do_quit(ch : GCharacter; param : string);
@@ -658,8 +667,14 @@ end;
 {$INCLUDE cmd_magic.inc}
 {$INCLUDE cmd_skill.inc}
 
+function returnModuleInterface() : IModuleInterface;
+begin
+	Result := GCommandsModule.Create();
+end;
+
 // registering with the caller
-initialization
+procedure GCommandsModule.registerModule();
+begin
   registerCommand('do_quit', do_quit);
   registerCommand('do_save', do_save);
   registerCommand('do_afk', do_afk);
@@ -851,8 +866,10 @@ initialization
   registerCommand('do_exits', do_exits);
   registerCommand('do_purge', do_purge);
   registerCommand('do_lockpick', do_lockpick);
+end;
 
-finalization
+procedure GCommandsModule.unregisterModule();
+begin
   unregisterCommand('do_quit');
   unregisterCommand('do_save');
   unregisterCommand('do_afk');
@@ -1044,5 +1061,11 @@ finalization
   unregisterCommand('do_exits');
   unregisterCommand('do_purge');
   unregisterCommand('do_lockpick');
+end;
+
+
+exports
+	returnModuleInterface;
+
 
 end.
