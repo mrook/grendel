@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.22 2001/04/22 20:13:30 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.23 2001/04/26 21:21:22 xenon Exp $
 
 unit conns;
 
@@ -68,11 +68,6 @@ procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharact
               arg1, arg2 : pointer; typ : integer);
 
 function playername(from_ch, to_ch : GCharacter) : string;
-
-procedure to_channel(ch : GCharacter; arg : string; channel : integer; color : integer);
-procedure talk_channel(ch : GCharacter; arg : string; channel : integer; verb : string; color : integer);
-
-procedure to_group(ch : GCharacter; arg : string);
 
 implementation
 
@@ -759,64 +754,6 @@ wind:
        node := node.next;
      end;
 end;
-
-procedure to_channel(ch : GCharacter; arg : string; channel : integer; color : integer);
-var
-   vict : GCharacter;
-   node, node_next : GListNode;
-begin
-  node_next := char_list.head;
-
-  while (node_next <> nil) do
-    begin
-    node := node_next;
-    node_next := node_next.next;
-
-    vict := node.element;
-
-    if (channel <> CHANNEL_AUCTION) and (channel <> CHANNEL_CLAN) and (vict=ch) then continue;
-    if (channel = CHANNEL_CHAT) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_BABBEL) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_RAID) and ((vict.level < 100) or (not ch.IS_SAME_ALIGN(vict))) then continue;
-    if (channel = CHANNEL_AUCTION) and (not ch.IS_SAME_ALIGN(vict)) then continue;
-    if (channel = CHANNEL_IMMTALK) and (not vict.IS_IMMORT) then continue;
-    if (channel = CHANNEL_CLAN) and (vict.clan<>ch.clan) then continue;
-    if (channel = CHANNEL_YELL) and (vict.room.area <> ch.room.area) then continue;
-    if (channel = CHANNEL_LOG) and (not vict.IS_NPC) and (vict.level<system_info.level_log) then continue;
-
-    act(color,arg,false,vict,nil,ch,TO_CHAR);
-    end;
-end;
-
-procedure talk_channel(ch : GCharacter; arg : string; channel : integer; verb : string; color : integer);
-var
-   buf : string;
-begin
-  act(color,'You ' + verb + ', ''' + arg + '''',false,ch,nil,nil,TO_CHAR);
-
-  buf := '$N ' + verb + 's, ''' + arg + '''';
-
-  to_channel(ch, buf, channel, color);
-end;
-
-procedure to_group(ch : GCharacter; arg : string);
-var
-   node : GListNode;
-   vict : GCharacter;
-begin
-  node := char_list.head;
-
-  while (node <> nil) do
-    begin
-    vict := node.element;
-
-    if (vict.leader = ch) then
-      act(AT_REPORT, arg, false, vict, nil, nil, TO_CHAR);
-
-    node := node.next;
-    end;
-end;
-
 
 begin
   connection_list := GDLinkedList.Create;
