@@ -7,7 +7,7 @@ E=0
 F=0
 G=1
 H=1
-I=0
+I=1
 J=1
 K=0
 L=1
@@ -80,14 +80,3 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-[HistoryLists\hlDebugSourcePath]
-Count=1
-Item0=include\
-[HistoryLists\hlUnitAliases]
-Count=1
-Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
-[HistoryLists\hlUnitOutputDirectory]
-Count=3
-Item0=G:\Development\Grendel\units
-Item1=units\
-Item2=units
