@@ -160,10 +160,10 @@ begin
       if (IS_SET(pexit.flags, EX_SWIM)) then
         buf1 := buf1 + '/' + headings[pexit.direction] + '\'
       else
-      if (IS_SET(pexit.flags, EX_FLY)) and (ch.IS_FLYING) then
+      if (IS_SET(pexit.flags, EX_FLY)) then
         buf1 := buf1 + '<' + headings[pexit.direction] + '>'
       else
-      if (IS_SET(pexit.flags, EX_UNDERWATER)) and (IS_SET(ch.aff_flags,AFF_AQUA_BREATH)) then
+      if (IS_SET(pexit.flags, EX_UNDERWATER)) then
         buf1 := buf1 + '{' + headings[pexit.direction] + '}'
       else
         buf1 := buf1 + headings[pexit.direction];
