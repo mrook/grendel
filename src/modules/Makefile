@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.12 2004/06/25 13:19:55 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.13 2004/06/25 14:53:09 ***REMOVED*** Exp $
 #
 
 
@@ -40,11 +40,11 @@ endif
 ifdef LINUX
 DCC=dcc
 
-COMMANDS=bplcore_commands.so
-SPELLER=bplspeller.so
-STATUS=bplstatus.so
-IMC3=bplimc3.so
-WEBSERVICE=bplwebservice.so
+COMMANDS=../../build/modules/bplcore_commands.so
+SPELLER=../../build/modules/bplspeller.so
+STATUS=../../build/modules/bplstatus.so
+IMC3=../../build/modules/bplimc3.so
+WEBSERVICE=../../build/modules/bplwebservice.so
 
 MODULES=$(COMMANDS) $(SPELLER) $(IMC3)
 

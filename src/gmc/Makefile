@@ -4,7 +4,7 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.5 2004/06/25 13:19:55 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.6 2004/06/25 14:53:09 ***REMOVED*** Exp $
 #
 
 
@@ -19,10 +19,10 @@ endif
 ifdef WIN32
 DCC=dcc32
 
-GMCC=..\..\build\gmcc.exe
-GASM=..\..\build\gasm.exe
+GMCC=..\..\build\bin\gmcc.exe
+GASM=..\..\build\bin\gasm.exe
 
-CORE_FILE=..\..\build\core.bpl
+CORE_FILE=..\..\build\bin\core.bpl
 
 ifeq ($(OS), Windows_NT)
 	RM=cmd /c del
@@ -34,10 +34,10 @@ endif
 ifdef LINUX
 DCC=dcc
 
-GMCC=../../build/gmcc
-GASM=../../build/gasm
+GMCC=../../build/bin/gmcc
+GASM=../../build/bin/gasm
 
-CORE_FILE=../../build/bplcore.so
+CORE_FILE=../../build/bin/bplcore.so
 
 RM=rm -f
 endif

@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.14 2004/06/25 13:19:55 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.15 2004/06/25 14:53:09 ***REMOVED*** Exp $
 #
 
 
@@ -19,12 +19,12 @@ endif
 ifdef WIN32
 DCC=dcc32
 
-GRENDEL=..\build\grendel.exe
-COPYOVER=..\build\copyover.exe
-CONVERT=..\build\convert.exe
-CORE=..\build\core.bpl
-HELPER=..\build\helper.exe
-SERVICE=..\build\grendelservice.exe
+GRENDEL=..\build\bin\grendel.exe
+COPYOVER=..\build\bin\copyover.exe
+CONVERT=..\build\bin\convert.exe
+CORE=..\build\bin\core.bpl
+HELPER=..\build\bin\helper.exe
+SERVICE=..\build\bin\grendelservice.exe
 
 ALL=$(GRENDEL) $(CONVERT) $(CORE) $(HELPER) $(SERVICE)
 
@@ -41,9 +41,9 @@ endif
 ifdef LINUX
 DCC=dcc
 
-GRENDEL=../build/grendel
-CONVERT=../build/convert
-CORE=../build/bplcore.so
+GRENDEL=../build/bin/grendel
+CONVERT=../build/bin/convert
+CORE=../build/bin/bplcore.so
 
 ALL=$(GRENDEL) $(CONVERT) $(CORE)
 
@@ -75,20 +75,20 @@ clean:
 	$(MAKE) -C modules clean
 
 $(CONVERT):	convert.dpr $(CORE)
-	$(DCC) convert.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -LUcore
+	$(DCC) convert.dpr -D$(DCC_DEFS) $(DCC_FLAGS)
 
 $(CORE): core.dpk units/*.pas gmc/*.pas contrib/*.pas
 	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS)
 
 $(COPYOVER):	copyover.dpr $(CORE)
-	$(DCC) copyover.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -LUcore
+	$(DCC) copyover.dpr -D$(DCC_DEFS) $(DCC_FLAGS)
 
 $(GRENDEL):	grendel.dpr $(CORE)
 	$(DCC) grendel.dpr -D$(DCC_DEFS) $(DCC_FLAGS)
 	
 $(HELPER):	helper.dpr $(CORE)
-	$(DCC) helper.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -LUcore
+	$(DCC) helper.dpr -D$(DCC_DEFS) $(DCC_FLAGS)
 	
 $(SERVICE):	grendelservice.dpr servicemain.pas $(CORE)
-	$(DCC) grendelservice.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -LUcore -LUvcl
+	$(DCC) grendelservice.dpr -D$(DCC_DEFS) $(DCC_FLAGS)
 
