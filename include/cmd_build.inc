@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.27 2001/04/29 16:43:15 xenon Exp $
+// $Id: cmd_build.inc,v 1.28 2001/04/30 16:03:52 xenon Exp $
 
 const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
@@ -1384,7 +1384,13 @@ begin
 
   param := one_argument(param,sub);
   if (sub = 'name') then
-    ch.room.name := hash_string(param)
+    if (length(param) = 0) then
+    begin
+      ch.sendBuffer('Roomname is currently ''' + ch.room.name^ + '''.'#13#10);
+      exit;
+    end
+    else
+      ch.room.name := hash_string(param)
   else
   if (sub = 'desc') then
     begin
@@ -1635,6 +1641,70 @@ begin
   interpret(ch,headings[dir]);
 end;
 
+procedure do_rdelete(ch : GCharacter; param : string);
+var
+  i, j : integer;
+  room, room2 : GRoom;
+  ex, ex2 : GExit;
+  node,node2 : GListNode;
+begin
+  if (ch.IS_NPC()) then
+  begin
+    ch.sendBuffer('This command is not available for mobs.'#13#10);
+    exit;
+  end;
+  
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage: RDELETE <vnum>'#13#10#13#10);
+    ch.sendBuffer('Deletes room with given vnum.'#13#10);
+    exit;
+  end;
+
+  try
+    room := findRoom(StrToInt(param));
+  except
+    on E: EConvertError do
+    begin
+      ch.sendBuffer('That vnum doesn''t exit.');
+      exit;
+    end;
+  end;
+
+  if (room = ch.room) then
+  begin
+    ch.sendBuffer('Removing the room you''re in would not be wise.'#13#10);
+    exit;
+  end;
+  
+  ch.sendBuffer('Unlinking all exits pointing to the room...'#13#10);
+  node := room.exits.head;
+  while (node <> nil) do
+  begin
+    ex := node.element;
+
+    room2 := ex.to_room;
+    node2 := room2.exits.head;
+    while (node2 <> nil) do
+    begin
+      ex2 := node2.element;
+      if (ex2.to_room = room) then
+      begin
+        ch.sendBuffer(Format('Removing in room #%d the %s-exit.'#13#10, [room2.vnum, headings[ex2.direction]]));
+        room2.exits.remove(node2);
+        ex2.Free();
+      end;
+      node2 := node2.next;
+    end;
+    
+    node := node.next;
+  end;
+
+  room_list.remove(room.vnum);
+  
+  room.Free();
+end;
+
 procedure do_rclone(ch : GCharacter; param : string);
 var dir : integer;
     new_vnum : integer;
@@ -1713,6 +1783,67 @@ begin
   interpret(ch,headings[dir]);
 end;
 
+procedure do_rlist(ch : GCharacter; param : string);
+var
+  i : integer;
+  room : GRoom;
+  area : GArea;
+  node : GListNode;
+begin
+  if (ch.IS_NPC()) then
+  begin
+    ch.sendBuffer('This command is not available for mobs.'#13#10);
+    exit;
+  end;
+  
+  if (length(param) = 0) then
+  begin
+    if ((ch.player^.area = nil) and (ch.level < LEVEL_GOD)) then
+    begin
+      if (length(ch.player^.area_fname) = 0) then
+        ch.sendBuffer('You don''t have an area assigned to you.'#13#10)
+      else
+        ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+      exit;
+    end;
+
+    if (ch.level < LEVEL_GOD) then
+      area := ch.player^.area
+    else
+      area := ch.room.area;
+  end
+  else
+  begin
+    area := findArea(param);
+
+    if (area = nil) then
+    begin
+      ch.sendBuffer('That area could not be found.'#13#10);
+      exit;
+    end;
+  end;
+  
+  for i := 0 to room_list.hashsize - 1 do
+  begin
+    node := room_list.bucketList[i].head;
+
+    while (node <> nil) do
+    begin
+      room := GRoom(GHashValue(node.element).value);
+
+      if (room.area <> area) then
+      begin
+        node := node.next;
+        continue;
+      end;
+
+      ch.sendPager(Format('Vnum #%6d  Name: %s'#13#10, [room.vnum, room.name^]));
+      
+      node := node.next;
+    end
+  end;
+end;
+
 { Re-added area assign - Nemesis }
 procedure do_aassign(ch:GCharacter;param:string);
 var vict : GCharacter;
@@ -1758,11 +1889,11 @@ begin
     else
       if (length(param) = 0) then
       begin
-        if (vict.player^.area <> nil) then
+        if (vict.player^.area_fname <> '') then
         begin
-          act(AT_REPORT,'Unassigned area ' + vict.player^.area.name + ' from $N.',false,ch,nil,vict,TO_CHAR);
+          act(AT_REPORT,'Unassigned area ' + vict.player^.area_fname + ' from $N.',false,ch,nil,vict,TO_CHAR);
           if (vict <> ch) then
-            act(AT_REPORT,ch.name^ + ' has unassigned area ' + vict.player^.area.name + ' from you.',false,vict,nil,ch,TO_CHAR);
+            act(AT_REPORT,ch.name^ + ' has unassigned area ' + vict.player^.area_fname + ' from you.',false,vict,nil,ch,TO_CHAR);
           vict.player^.area := nil;
           vict.player^.area_fname := '';
           vict.player^.r_lo := High(integer);
@@ -1986,16 +2117,16 @@ begin
   act(AT_REPORT, 'Reset message:    '+area.reset_msg,false,ch,nil,nil,TO_CHAR);
   act(AT_REPORT, 'Maximum age:      '+inttostr(area.max_age),false,ch,nil,nil,TO_CHAR);
 
-  buf := 'Ranges:          ';
+  buf := 'Ranges:         ';
 
   if (area.r_lo <> High(integer)) then
-    buf := buf + ' ' + inttostr(area.r_lo)+'-'+inttostr(area.r_hi);
+    buf := buf + '  R: ' + inttostr(area.r_lo)+'-'+inttostr(area.r_hi);
 
   if (area.m_lo <> High(integer)) then
-    buf := buf + ' ' + inttostr(area.m_lo)+'-'+inttostr(area.m_hi);
+    buf := buf + '  M: ' + inttostr(area.m_lo)+'-'+inttostr(area.m_hi);
 
   if (area.o_lo <> High(integer)) then
-    buf := buf + ' ' + inttostr(area.o_lo)+'-'+inttostr(area.o_hi);
+    buf := buf + '  O: ' + inttostr(area.o_lo)+'-'+inttostr(area.o_hi);
 
   act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
 
@@ -2196,14 +2327,16 @@ var
    area : GArea;
    fn : string;
 begin
-  if (ch.player^.area_fname = '') then
+  if (length(param) = 0) then
+  begin
+    if (ch.player^.area_fname = '') then
     begin
-    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
-    exit;
+      ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+      exit;
     end;
 
-  if (length(param) = 0) then
     fn := ch.player^.area_fname
+  end
   else
     begin
     if (ch.getTrust() < LEVEL_GOD) then
