@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.30 2001/08/02 20:13:30 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.31 2001/08/07 16:10:49 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -162,6 +162,8 @@ begin
       write_console('could not terminate thread');
     end;
   end;
+  
+  idle := 0;
 
   repeat
     read := recv(sock.getDescriptor, buf, MAX_RECEIVE - 10, 0);
