@@ -695,3 +695,4 @@ end;
 begin
   skill_table := GDLinkedList.Create;
 end.
+

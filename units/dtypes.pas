@@ -646,3 +646,4 @@ end;
 begin
   str_hash := GHashString.Create(STR_HASH_SIZE);
 end.
+
