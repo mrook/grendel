@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.74 2003/10/08 13:43:04 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.75 2003/10/09 20:14:09 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -385,10 +385,10 @@ procedure shutdown_mud;
 begin
 	writeConsole('Server shutting down...');
 
-	{if MUD_Booted then
-		flushConnections;}
+	if (mud_booted) then
+		flushConnections;
 
-	//Sleep(1000);
+	Sleep(250);
 
   cleanupServer();
 end;
@@ -662,10 +662,15 @@ begin
 	
 	  JclLastExceptStackListToStrings(strings, False, False, False);
   
-	  //writeConsole('Possible bug detected, stacktrace follows:');
+  	if (strings.count > 0) then
+  		begin
+		  //writeConsole('Possible bug detected, stacktrace follows:');
 
-	  for a := 0 to strings.count - 1 do
-	    writeConsole(strings[a]);
+	  	for a := 0 to strings.count - 1 do
+	    	writeConsole(strings[a]);
+	    end
+		else
+			writeConsole('No stacktrace available.');
     
 	  strings.Free();
 	  end;
