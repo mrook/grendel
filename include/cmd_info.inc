@@ -447,6 +447,9 @@ begin
     act(AT_REPORT,'   WizLevel: $B$3'+pad_integer(ch.player^.wiz_level,3)+#13#10,false,ch,nil,nil,TO_CHAR);
 
   if (not ch.IS_NPC) then
+    act(AT_REPORT,'   You have $B$3'+IntToStr(ch.player^.pracs)+'$A$7 practice sessions left.',false,ch,nil,nil,TO_CHAR);
+
+  if (not ch.IS_NPC) then
     act(AT_REPORT,'   Thou hast gained $B$3'+inttostr(ch.player^.bg_points)+'$A$7 battleground points.',false,ch,nil,nil,TO_CHAR);
 
   if (ch.getTrust > ch.level) then

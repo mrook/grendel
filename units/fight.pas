@@ -145,6 +145,7 @@ end;
 procedure gain_xp(ch : GCharacter; xp : cardinal);
 var
    hp_gain,mv_gain,ma_gain : integer;
+   pracs_gain : integer;
 begin
   if (ch.IS_NPC) or (ch.IS_IMMORT) then exit;
 
@@ -160,17 +161,16 @@ begin
 
     while (player^.xptogo<=0) do
       begin
-      act(AT_WHITE,'>> You have advanced a level!',false,ch,nil,nil,TO_CHAR);
-
+      pracs_gain := round(ability.wis / 20) + random(6) - 1; // base prac gain on wis
       hp_gain:=(ability.con div 4)+random(6)-3;
       mv_gain:=ability.dex div 4;
       if odd(level) then
-        ma_gain:=round((ability.int+ability.wis)/10)
+        ma_gain:=round((ability.int+ability.wis)/10) // base mana gain on int and wis
+//        ma_gain:=round(ability.wis / 5) // base mana gain on wis
       else
         ma_gain:=0;
 
-      act(AT_REPORT, 'You gain $B$1' + inttostr(hp_gain) + '$A$7 health, $B$1' + inttostr(mv_gain) + '$A$7 moves and $B$1' + inttostr(ma_gain) + '$A$7 mana.', false, ch, nil, nil, TO_CHAR);
-        
+      inc(player^.pracs, pracs_gain);
       with point do
         begin
         inc(max_hp,hp_gain);
@@ -181,6 +181,10 @@ begin
         end;
 
       inc(level);
+      
+      act(AT_WHITE,Format('>> You have advanced to level %d!', [level]),false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT, 'You gain $B$1' + inttostr(hp_gain) + '$A$7 health, $B$1' + inttostr(mv_gain) + '$A$7 moves, $B$1' + inttostr(ma_gain) + '$A$7 mana and $B$1' + inttostr(pracs_gain) + '$A$7 practice sessions.', false, ch, nil, nil, TO_CHAR);
+
       if (level>=LEVEL_MAX) then
         begin
         level:=LEVEL_MAX;

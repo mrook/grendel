@@ -126,11 +126,15 @@ begin
     ch.sendBuffer('You have had enough remorts.'#13#10)
   else
   if (length(param) = 0) then
-    ch.sendBuffer('REMORT <stat> <stat> <stat> <stat> <stat> <extra>'#13#10)
+  begin
+    ch.sendBuffer('REMORT <stat> <stat> <stat> <stat> <stat> <extra>' + #13#10 +
+                  '' + #13#10 +
+                  '   where <stat> is one of str, con, dex, int or wis and <extra> one of dam or pracs.'#13#10);
+  end
   else
     begin
     str:=0; con:=0; dex:=0; int:=0; wis:=0;
-    dam:=0; pracs:=0;
+    dam:=0; pracs:=10;
     for a:=0 to 4 do
       begin
       param:=one_argument(param,sub);
@@ -150,7 +154,7 @@ begin
         inc(wis)
       else
         begin
-        ch.sendBuffer('Unknown stat in parameter list.'#13#10);
+        ch.sendBuffer('Unknown <stat> in parameter list.'#13#10);
         exit;
         end;
       end;
@@ -161,12 +165,19 @@ begin
       inc(dam,2)
     else
     if (comparestr('pracs',sub)=0) then
-      inc(pracs,25)
+//      inc(pracs,25)
+      pracs := 25
     else
       begin
-      ch.sendBuffer('Illegal extra in parameter list.'#13#10);
+      ch.sendBuffer('Illegal <extra> in parameter list.'#13#10);
       exit;
       end;
+
+    if (length(param) <> 0) then
+    begin
+      ch.sendBuffer('Unrecognized option ''' + param + ''' in remort command.'#13#10);
+      exit;
+    end;
 
     with ch do
       begin
@@ -177,8 +188,11 @@ begin
       inc(ability.int,int);
       inc(ability.wis,wis);
       inc(point.apb,dam);
+      inc(player^.max_skills, 1);
+      inc(player^.max_spells, 2);
+      player^.pracs := pracs;
       
-      level:=1;
+      level := 1;
 
       point.max_hp:=50;
       point.max_mv:=40;
@@ -190,6 +204,7 @@ begin
 
     act(AT_WHITE,'Congratulations! This is remort '+inttostr(ch.player^.remorts)+
                  ' for your character!',false,ch,nil,nil,TO_CHAR);
+    interpret(ch, 'save');
     end;
 end;
 

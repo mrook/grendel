@@ -1,5 +1,5 @@
 // experimentje
-// $Id: cmd_skill.inc,v 1.10 2001/04/10 20:37:50 xenon Exp $
+// $Id: cmd_skill.inc,v 1.11 2001/04/15 21:04:35 xenon Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -309,7 +309,8 @@ begin
       end;
     end;
 
-  buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(ch.max_spells - ch.getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
+  if (not ch.IS_NPC()) then
+    buf := buf + act_string('$A$7    Spellslots available: $B$7' + inttostr(ch.player^.max_spells - ch.getUsedSpellslots()) + '$A$7'#13#10#13#10, ch, nil, nil, nil);
     
   delete(buf, length(buf) - 2, 2);
   ch.sendPager(buf);
@@ -351,7 +352,8 @@ begin
     if (odd(a)) then
       buf := buf + #13#10;
 
-    buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(ch.max_skills - ch.getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
+    if (not ch.IS_NPC()) then
+      buf := buf + act_string(#13#10'$A$7    Skillslots available: $B$7' + inttostr(ch.player^.max_skills - ch.getUsedSkillslots()) + '$A$7'#13#10, ch, nil, nil, nil);
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
   end;
 
@@ -364,8 +366,14 @@ var sn : GSkill;
     vict,learn:GCharacter;
 begin
   learn := nil;
-  node := ch.room.chars.head;
 
+  if (ch.IS_NPC()) then
+  begin
+    ch.sendBuffer('This command doesn''t work for mobs.'#13#10);
+    exit;
+  end;
+
+  node := ch.room.chars.head;
   while (node <> nil) do
     begin
     vict := node.element;
@@ -409,10 +417,10 @@ begin
     if (sn = nil) or (vict.LEARNED(sn) = 0) then
       act(AT_REPORT, '$N doesn''t teach this skill.',false,ch,nil,vict,TO_CHAR)
     else
-      if ((sn.skill_type <> SKILL_SPELL) and (ch.max_skills - ch.getUsedSkillslots() <= 0)) then
+      if ((sn.skill_type <> SKILL_SPELL) and (ch.player^.max_skills - ch.getUsedSkillslots() <= 0)) then
         act(AT_REPORT, 'You have no more free skillslots!', false, ch, nil, nil, TO_CHAR)
       else
-      if ((sn.skill_type = SKILL_SPELL) and (ch.max_spells - ch.getUsedSpellslots() <= 0)) then
+      if ((sn.skill_type = SKILL_SPELL) and (ch.player^.max_spells - ch.getUsedSpellslots() <= 0)) then
         act(AT_REPORT, 'You have no more free spellslots!', false, ch, nil, nil, TO_CHAR)
       else
 {    if (sn.skill_type = SKILL_SPELL) and (ch.skills_learned.getSize() = ch.race.max_spells) then
@@ -534,7 +542,17 @@ begin
       else
       if (ch.LEARNED(sn) < 50) then
         begin
-        ch.SET_LEARNED(ch.LEARNED(sn) + 8, sn);
+        if (ch.player^.pracs < 1) then
+        begin
+          ch.sendBuffer('You don''t have enough practice sessions left!'#13#10);
+          exit;
+        end
+        else
+          dec(ch.player^.pracs);
+        
+//        ch.SET_LEARNED(ch.LEARNED(sn) + 8, sn);
+        // base skill gain on int
+        ch.SET_LEARNED(ch.LEARNED(sn) + round(ch.ability.int / 10) + random(4) - 2, sn);
 
         if (ch.LEARNED(sn) > 50) then
           begin

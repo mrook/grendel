@@ -67,6 +67,7 @@ type
       wimpy : integer;
       aliases : GDLinkedList;
       pracs : integer;
+      max_skills, max_spells : integer;
       bamfin, bamfout : string;
       taunt : string;
       // profession:PROF_DATA;
@@ -122,7 +123,6 @@ type
       kills : integer;
       wait : integer;
       skills_learned : GDLinkedList;
-      max_skills, max_spells : integer;
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
       npc_index : GNPCIndex;
@@ -928,14 +928,13 @@ begin
           end
         else
         if (g = 'MAX_SKILLS') then
-        begin
-          max_skills := strtoint(right(a,' '))
-        end
+          player^.max_skills := strtoint(right(a,' '))
         else
         if (g = 'MAX_SPELLS') then
-        begin
-          max_spells := strtoint(right(a,' '))
-        end
+          player^.max_spells := strtoint(right(a,' '))
+        else
+        if (g = 'PRACTICES') then
+          player^.pracs := strtoint(right(a,' '))
         else
         if g='APB' then
           point.apb:=strtoint(right(a,' '))
@@ -1343,22 +1342,22 @@ begin
     point.hitroll:=UMax((level div 5)+50,100);
     end;
 
-  if (max_skills = 0) then
+  if (player^.max_skills = 0) then
   begin
     bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
               'The pfile of this character lacks a Max_skills field. ' +
               'Fixing this *now* by setting these fields to race-max value. ' +
               'Make sure to (force) save this player.');
-    max_skills := race.max_skills;
+    player^.max_skills := race.max_skills;
   end;
   
-  if (max_spells = 0) then
+  if (player^.max_spells = 0) then
   begin
     bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
               'The pfile of this character lacks a Max_spells field. ' +
               'Fixing this *now* by setting these fields to race-max value. ' +
               'Make sure to (force) save this player.');
-    max_spells := race.max_spells;
+    player^.max_spells := race.max_spells;
   end;
   
   calcAC;
@@ -1420,6 +1419,7 @@ begin
     writeln(f,'XP: ',xptot,' ',xptogo);
     writeln(f,'Kills: ',kills);
     writeln(f,'Deaths: ',deaths);
+    writeln(f,'Practices: ', pracs);
     writeln(f,'Bamfin: ',bamfin);
     writeln(f,'Bamfout: ',bamfout);
     writeln(f,'Taunt: ', taunt);
@@ -1456,8 +1456,8 @@ begin
   with ability do
     writeln(f,'Stats: ',str,' ',con,' ',dex,' ',int,' ',wis);
 
-  writeln(f, 'Max_skills: ', max_skills);
-  writeln(f, 'Max_spells: ', max_spells);
+  writeln(f, 'Max_skills: ', player^.max_skills);
+  writeln(f, 'Max_spells: ', player^.max_spells);
   
   with point do
     begin

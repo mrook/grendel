@@ -279,6 +279,14 @@ begin
 
   buf1 := buf1 + buf;
 
+  if (not victim.IS_NPC) then
+  begin
+    buf := Format('Max skillslots: %d.  Max spellslots: %d.  Practices left: %d.' + #13#10,
+                  [victim.player^.max_skills, victim.player^.max_spells, victim.player^.pracs]);
+
+    buf1 := buf1 + buf;
+  end;
+  
   if victim.IS_NPC then
   	wimpy := 'none'
   else
@@ -726,7 +734,7 @@ begin
     ch.sendBuffer('Types for both NPC and PC: hp, mana, moves, strength,'#13#10);
     ch.sendBuffer('wisdom, intelligence, dexterity, constitution, ac, apb,'#13#10);
     ch.sendBuffer('hitroll, alignment, gold, sex.'#13#10#13#10);
-    ch.sendBuffer('Types for PC only: bank, xptnl.'#13#10);
+    ch.sendBuffer('Types for PC only: bank, xptnl, maxskills, maxspells, pracs.'#13#10);
     exit;
     end;
 
@@ -933,6 +941,60 @@ begin
     vict.player^.xptogo := value;
     buf := 'XP TNL';
     end
+  else
+  if (uppercase(arg2) = 'MAXSKILLS') then
+  begin
+    if (vict.IS_NPC) then
+    begin
+      ch.sendBuffer('Type not possible for NPC.'#13#10);
+      exit;
+    end;
+      
+    if (value <= 0) then
+    begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+    end;
+
+    vict.player^.max_skills := value;
+    buf := 'MAXSKILLS';
+  end
+  else
+  if (uppercase(arg2) = 'MAXSPELLS') then
+  begin
+    if (vict.IS_NPC) then
+    begin
+      ch.sendBuffer('Type not possible for NPC.'#13#10);
+      exit;
+    end;
+    
+    if (value <= 0) then
+    begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+    end;
+    
+    vict.player^.max_spells := value;
+    buf := 'MAXSPELLS';
+  end
+  else
+  if (uppercase(arg2) = 'PRACS') then
+  begin
+    if (vict.IS_NPC) then
+    begin
+      ch.sendBuffer('Type not possible for NPC.'#13#10);
+      exit;
+    end;
+    
+    if (value <= 0) then
+    begin
+      ch.sendBuffer('Value must be > 0.'#13#10);
+      exit;
+    end;
+    
+    vict.player^.pracs := value;
+    buf := 'PRACS';
+  end
   else
   if (uppercase(arg2) = 'SEX') then
     begin
