@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.17 2004/08/24 20:00:56 ***REMOVED*** Exp $
+  ## $Id: chars.pas,v 1.18 2004/08/24 20:31:38 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -357,14 +357,14 @@ begin
     exit;
     end;
     
-  room.removeCharacter(Self);
+  fromRoom();
 
   if (not pull) then
     begin
     if (IS_EVIL) then
-      findRoom(ROOM_VNUM_EVIL_PORTAL).addCharacter(Self)
+      toRoom(findRoom(ROOM_VNUM_EVIL_PORTAL))
     else
-      findRoom(ROOM_VNUM_GOOD_PORTAL).addCharacter(Self);
+      toRoom(findRoom(ROOM_VNUM_GOOD_PORTAL));
     end
   else
     begin
