@@ -1,4 +1,7 @@
-// $Id: constants.pas,v 1.46 2002/08/01 20:17:27 ***REMOVED*** Exp $
+{
+  @abstract(Constants)
+  @lastmod($Id: constants.pas,v 1.47 2002/08/03 19:13:55 ***REMOVED*** Exp $)
+}
 
 unit constants;
 

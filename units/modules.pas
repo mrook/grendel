@@ -1,3 +1,8 @@
+{
+  @abstract(Loadable module system)
+  @lastmod($Id)
+}
+  
 unit modules;
 
 interface

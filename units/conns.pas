@@ -1,4 +1,7 @@
-// $Id: conns.pas,v 1.35 2001/09/02 21:53:01 ***REMOVED*** Exp $
+{
+  @abstract(Connection manager)
+  @lastmod($Id: conns.pas,v 1.36 2002/08/03 19:13:55 ***REMOVED*** Exp $)
+}
 
 unit conns;
 

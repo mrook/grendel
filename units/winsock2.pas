@@ -1,13 +1,18 @@
-{	Winsock2.h -- definitions to be used with the WinSock 2 DLL and WinSock 2 applications.
+{
+  @abstract(Winsock2 interface library by Alex Konshin)
+  @lastmod($Id)
+
+	Winsock2.h -- definitions to be used with the WinSock 2 DLL and WinSock 2 applications.
  	This header file corresponds to version 2.2.x of the WinSock API specification.
  	This file includes parts which are Copyright (c) 1982-1986 Regents
 	of the University of California. All rights reserved.
 	The Berkeley Software License Agreement specifies the terms and
-	conditions for redistribution. }
+	conditions for redistribution.
 
-// converted by Alex Konshin, mailto:alexk@msmt.spb.su
+  Converted by Alex Konshin.
 
-// updated by Grimlord with IPv6 specifics - 17/01/2001
+  Updated by Michiel Rook with IPv6 specifics.
+}
 
 unit Winsock2;
 

@@ -1,3 +1,8 @@
+{
+  @abstract(Phonetic namegenerator)
+  @lastmod($Id)
+}
+
 unit NameGen;
 
 interface

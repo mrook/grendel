@@ -1,3 +1,8 @@
+{
+  @abstract(Interface with GMC virtual machine)
+  @lastmod($Id)
+}
+
 unit progs;
 
 interface

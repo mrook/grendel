@@ -1,4 +1,7 @@
-// $Id: mudsystem.pas,v 1.38 2002/01/24 22:39:34 ***REMOVED*** Exp $
+{
+  @abstract(Configuration and other mud specific functions)
+  @lastmod($Id: mudsystem.pas,v 1.39 2002/08/03 19:14:00 ***REMOVED*** Exp $)
+}
 
 unit mudsystem;
 

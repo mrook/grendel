@@ -1,4 +1,7 @@
-// $Id: timers.pas,v 1.17 2001/09/02 21:53:04 ***REMOVED*** Exp $
+{
+  @abstract(Timer class)
+  @lastmod($Id: timers.pas,v 1.18 2002/08/03 19:14:04 ***REMOVED*** Exp $)
+}
 
 unit timers;
 

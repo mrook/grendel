@@ -1,3 +1,8 @@
+{
+  @abstract(Abstract console interface)
+  @lastmod($Id)
+}
+
 unit console;
 
 interface

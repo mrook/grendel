@@ -1,3 +1,8 @@
+{
+  @abstract(Damage & experience routines)
+  @lastmod($Id)
+}
+
 unit fight;
 
 interface

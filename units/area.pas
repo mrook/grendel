@@ -1,4 +1,7 @@
-// $Id: area.pas,v 1.56 2001/10/19 15:02:40 ***REMOVED*** Exp $
+{
+  @abstract(Area loader & manager)
+  @lastmod($Id: area.pas,v 1.57 2002/08/03 19:13:49 ***REMOVED*** Exp $)
+}
 
 unit area;
 

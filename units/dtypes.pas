@@ -1,4 +1,7 @@
-// $Id: dtypes.pas,v 1.24 2001/09/02 21:53:02 ***REMOVED*** Exp $
+{
+  @abstract(Collection of common datastructures)
+  @lastmod($Id: dtypes.pas,v 1.25 2002/08/03 19:13:56 ***REMOVED*** Exp $)
+}
 
 unit dtypes;
 

@@ -1,4 +1,7 @@
-// $Id: update.pas,v 1.17 2001/10/05 15:48:29 ***REMOVED*** Exp $
+{
+  @abstract(Character update & regeneration routines)
+  @lastmod($Id: update.pas,v 1.18 2002/08/03 19:14:04 ***REMOVED*** Exp $)
+}
 
 unit update;
 

@@ -1,4 +1,7 @@
-// $Id: magic.pas,v 1.17 2002/07/06 18:54:23 ***REMOVED*** Exp $
+{
+  @abstract(Various spell related functions)
+  @lastmod($Id: magic.pas,v 1.18 2002/08/03 19:13:58 ***REMOVED*** Exp $)
+}
 
 unit magic;
 

@@ -1,4 +1,7 @@
-// $Id: clean.pas,v 1.18 2001/11/15 20:43:20 ***REMOVED*** Exp $
+{
+  @abstract(Cleaning (system janitor) thread)
+  @lastmod($Id: clean.pas,v 1.19 2002/08/03 19:13:52 ***REMOVED*** Exp $)
+}
 
 unit clean;
 

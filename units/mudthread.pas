@@ -1,4 +1,7 @@
-// $Id: mudthread.pas,v 1.75 2002/01/24 22:41:57 ***REMOVED*** Exp $
+{
+  @abstract(Game thread and command interpreter)
+  @lastmod($Id: mudthread.pas,v 1.76 2002/08/03 19:14:00 ***REMOVED*** Exp $)
+}
 
 unit mudthread;
 
@@ -361,13 +364,13 @@ begin
           end
         else
           begin
-          if (system_info.log_all) or (ch.logging) then
-            writeLog(ch.name^ + ': ' + line);
-
-          if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
-            writeConsole('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
-
           try
+            if (system_info.log_all) or (ch.logging) then
+              writeLog(ch.name^ + ': ' + line);
+
+            if (cmd.level >= LEVEL_IMMORTAL) and (not IS_SET(GPlayer(ch).flags, PLR_CLOAK)) then
+              writeConsole('[LOG] ' + ch.name^ + ': ' + cmd.name + ' (' + inttostr(cmd.level) + ')');
+
 //            time := GetTickCount;
 
             if cmd.addarg0 then

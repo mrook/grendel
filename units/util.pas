@@ -1,4 +1,7 @@
-// $Id: util.pas,v 1.14 2001/08/16 15:40:17 ***REMOVED*** Exp $
+{
+  @abstract(Various utility functions)
+  @lastmod($Id: util.pas,v 1.15 2002/08/03 19:14:05 ***REMOVED*** Exp $)
+}
 
 unit util;
 

@@ -1,3 +1,8 @@
+{
+  @abstract(Bulletinboard (noteboard) interface)
+  @lastmod($Id)
+}
+
 unit bulletinboard;
 
 interface

@@ -1,4 +1,7 @@
-// $Id: fsys.pas,v 1.14 2001/08/16 20:55:33 ***REMOVED*** Exp $
+{
+  @abstract(Buffered filereader & writer)
+  @lastmod($Id: fsys.pas,v 1.15 2002/08/03 19:13:57 ***REMOVED*** Exp $)
+}
 
 unit fsys;
 

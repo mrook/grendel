@@ -1,7 +1,14 @@
+{
+  @abstract(Substring manipulation routines)
+  @lastmod($Id)
+}
+
 unit strip;
 
 interface
-uses SysUtils;
+
+uses 
+  SysUtils;
 
 // return the part on the left of the first occurance of 'delim'
 // or the whole string if there is no 'delim'

@@ -1,9 +1,6 @@
-// $Id: Channels.pas,v 1.14 2002/08/01 19:16:31 ***REMOVED*** Exp $
-
 {
-TODO:
-
-Have channelignores save in pfile?
+  @abstract(Channel manager)
+  @lastmod($Id: Channels.pas,v 1.15 2002/08/03 19:13:49 ***REMOVED*** Exp $)
 }
 
 unit Channels;

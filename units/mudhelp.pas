@@ -1,4 +1,7 @@
-// $Id: mudhelp.pas,v 1.11 2001/09/02 21:53:02 ***REMOVED*** Exp $
+{
+  @abstract(Online help interface)
+  @lastmod($Id: mudhelp.pas,v 1.12 2002/08/03 19:14:00 ***REMOVED*** Exp $)
+}
 
 unit mudhelp;
 

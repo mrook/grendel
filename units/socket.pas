@@ -1,3 +1,8 @@
+{
+  @abstract(Wrappers for IPv4 and IPv6 socket operations)
+  @lastmod($Id)
+}
+
 unit socket;
 
 interface

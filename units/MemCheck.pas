@@ -1,90 +1,8 @@
-(*
-MemCheck: the ultimate memory troubles hunter
-Created by: Jean Marc Eber & Vincent Mahon, Société Générale, INFI/SGOP/R&D
-Version 2.56	-> Also update OutputFileHeader when changing the version #
+{
+  @abstract(MemCheck library 2.58 by Jean Marc Eber & Vincent Mahon, Société Générale, INFI/SGOP/R&D)
+  @lastmod($Id)
+}
 
-Contact...
-	Vincent.Mahon@free.fr
-	http://v.mahon.free.fr/pro/freeware/memcheck
-
-Mail address:
-	Tour Société Générale
-	Sgib/Sgop/R&D
-	92987 Paris - La Défense cedex
-	France
-
-Copyrights...
-The authors grant you the right to modify/change the source code as long as the original authors are mentionned.
-Please let us know if you make any improvements, so that we can keep an up to date version. We also welcome
-all comments, preferably by email.
-
-Portions of this file (all the code dealing with TD32 debug information) where derived from the following work, with permission.
-Reuse of this code in a commercial application is not permitted. The portions are identified by a copyright notice.
-> DumpFB.C Borland 32-bit Turbo Debugger dumper (FB09 & FB0A)
-> Clive Turvey, Electronics Engineer, July 1998
-> Copyright (C) Tenth Planet Software Intl., Clive Turvey 1998. All rights reserved.
-> Clive Turvey <clive@tbcnet.com> http://www.tbcnet.com/~clive/vcomwinp.html
-
-Disclaimer...
-You use MemCheck at your own risks. This means that you cannot hold the authors or Société Générale to be
-responsible for any software\hardware problems you may encounter while using this module.
-
-General information...
-MemCheck replaces Delphi's memory manager with a home made one. This one logs information each time memory is
-allocated, reallocated or freed. When the program ends, information about memory problems is provided in a log file
-and exceptions are raised at problematic points.
-
-Basic use...
-Set the MemCheckLogFileName option. Call MemChk when you want to start the memory monitoring. Nothing else to do !
-When your program terminates and the finalization is executed, MemCheck will report the problems. This is the
-behaviour you'll obtain if you change no option in MemCheck.
-
-Features...
-- List of memory spaces not deallocated, and raising of EMemoryLeak exception at the exact place in the source code
-- Call stack at allocation time. User chooses to see or not to see this call stack at run time (using ShowCallStack),
-  when a EMemoryLeak is raised.
-- Tracking of virtual method calls after object's destruction (we change the VMT of objects when they are destroyed)
-- Tracking of method calls on an interface while the object attached to the interface has been destroyed
-- Checking of writes beyond end of allocated blocks (we put a marker at the end of a block on allocation)
-- Fill freed block with a byte (this allows for example to set fields of classes to Nil, or buffers to $FF, or whatever)
-- Detect writes in deallocated blocks (we do this by not really deallocating block, and checking them on end - this
-  can be time consuming)
-- Statistics collection about objects allocation (how many objects of a given class are created ?)
-- Time stamps can be indicated and will appear in the output
-
-Options and parameters...
-- You can specify the log files names (MemCheckLogFileName)
-- It is possible to tell MemCheck that you are instanciating an object in a special way - See doc for
-  CheckForceAllocatedType
-- Clients can specify the depth of the call stack they want to store (StoredCallStackDepth)
-
-Warnings...
-- MemCheck is based on a lot of low-level hacks. Some parts of it will not work on other versions of Delphi
-without being revisited (as soon as System has been recompiled, MemCheck is very likely to behave strangely,
-because for example the address of InitContext will be bad).
-- Some debugging tools exploit the map file to return source location information. We chose not to do that, because
-we think the way MemCheck raises exceptions at the good places is better. It is still possible to use "find error"
-in Delphi.
-- Memcheck is not able to report accurate call stack information about a leak of a class which does not redefine
-its constructor. For example, if an instance of TStringList is never deallocated, the call stack MemCheck will
-report is not very complete. However, the leak is correctly reported by MemCheck.
-
-A word about uses...
-Since leaks are reported on end of execution (finalization of this unit), we need as many finalizations to occur
-before memcheck's, so that if some memory is freed in these finalizations, it is not erroneously reported as leak. In order to
-finalize MemCheck as late as possible, we use a trick to change the order of the list of finalizations.
-Other memory managing products which are available (found easily on the internet) do not have this
-problem because they just rely on putting the unit first in the DPR; but this is not safe without a build all.
-In MemCheck we absolutely need to use two units: SysUtils and Windows.
-Then, I decided in MemCheck 2.54 to use the unit Classes because I think it will lead to much simpler code.
-We also use two units which we can use without risk since they dont have a finalization: Math and SyncObjs.
-An analysis of the uses clauses of these five units shows that in fact MemCheck uses indirectly the following units:
-Math, Classes, Typinfo, Consts, Variants, VaRUtils, SysUtils, ActiveX, Messages, SysConst, Windows, SyncObjs, System, SysInit and Types.
-Of these, only Classes, Variants, System and SysUtils have a finalization section. I checked and it is not possible to have a leak
-reported by MemCheck which is not correct because the memory would have been freed by one of these finalizations.
-In the procedure ChangeFinalizationsOrder I make sure that only these four units are finalized after MemCheck (I could have decided for
-the fifteen, but this would be more work, and I know it is useless).
-*)
 unit MemCheck;
 {$A+}
 {$H+}
@@ -447,7 +365,7 @@ var
 	RoutinesCount: integer;
 	Units: array of TUnitDebugInfos;
 	UnitsCount: integer;
-	OutputFileHeader: string = 'MemCheck version 2.56'#13#10;
+	OutputFileHeader: string = 'MemCheck version 2.58'#13#10;
 
 function BlockAllocationAddress(P: Pointer): Pointer;
 var
@@ -630,6 +548,7 @@ end;
 const
 	TObjectVirtualMethodNames: array[1..8] of string = ('SafeCallException', 'AfterConstruction', 'BeforeDestruction', 'Dispatch', 'DefaultHandler', 'NewInstance', 'FreeInstance', 'Destroy');
 	AddressOfNewInstance: pointer = @TObject.NewInstance;
+	AddressOfTObjectCreate: pointer = @TObject.Create;
 
 function CallerOfCaller: pointer;	//with stack frames !
 asm
@@ -677,6 +596,7 @@ asm
 	mov eax, $FFFF
 end;
 
+{$IFNDEF VER140}
 function CallerIsNewAnsiString: boolean;	//NewAnsiString has no stack frame
 asm
 	cmp ebp, 0	//this can happen when there are no stack frames
@@ -691,6 +611,7 @@ asm
 	@@yes:
 	mov eax, 1
 end;
+{$ENDIF}
 
 function CallerIsNewInstance: boolean;	//TObject.NewInstance has no stack frame
 asm
@@ -713,8 +634,8 @@ asm
 end;
 
 {$IFDEF VER140}
-	//Tells the address of the caller of FreeInstance from LeakTrackingFreeMem
 function ltfm_CallerOfFreeInstance: pointer;
+	//Tells the address of the caller of FreeInstance from LeakTrackingFreeMem
 asm
 	cmp ebp, 0	//this can happen when there are no stack frames
 	je @@EndOfStack
@@ -736,6 +657,50 @@ asm
 	@@EndOfStack:
 	mov eax, $FFFF
 end;
+
+function ltgmCallerOfGetMemIsTObjectCreate: boolean;
+	//Tells if the guy who called GetMem is TObject.Create
+asm
+	cmp ebp, 0	//this can happen when there are no stack frames
+	je @@EndOfStack
+	mov eax, [ebp + 36]
+	sub eax, 12
+	cmp eax, AddressOfTObjectCreate
+	jne @@no
+	mov eax, 1
+	ret
+	@@no:
+	@@EndOfStack:
+	mov eax, 0
+end;
+
+function ltgmCallerOfTObjectCreate: pointer;
+	//Tells who called TObject.Create
+asm
+	cmp ebp, 0	//this can happen when there are no stack frames
+	je @@EndOfStack
+	mov eax, [EBP + 56]
+	ret
+	@@EndOfStack:
+	mov eax, $FFFF
+end;
+
+function ltgmCallerIsNewAnsiString: boolean;
+	//Tells if the guy who called GetMem is NewAnsiString
+asm
+	cmp ebp, 0	//this can happen when there are no stack frames
+	je @@no
+	mov eax, [ebp + 12]
+	sub eax, 17
+	cmp eax, offset System.@NewAnsiString
+	je @@yes
+	@@no:
+	mov eax, 0
+	ret
+	@@yes:
+	mov eax, 1
+end;
+
 {$ENDIF}
 
 procedure ReleasedInstance.RaiseExcept;
@@ -961,7 +926,11 @@ end;
 
 function LeakTrackingGetMem(Size: Integer): Pointer;
 begin
+	{$IFDEF VER140}
+	if ltgmCallerIsNewAnsiString then
+	{$ELSE}
 	if CallerIsNewAnsiString then
+	{$ENDIF}
 		//We do not log memory allocations for reference counted strings. This would take time and some leaks would be reported	uselessly. However, if you want to know about this, you can just uncomment this part
 		begin
 			Result := OldMemoryManager.GetMem(Size);
@@ -977,7 +946,15 @@ begin
 						raise OutOfMemory;
 					PMemoryBlocHeader(Result).KindOfBlock := MClass;
 					if StoredCallStackDepth > 0 then
-						FillCallStack(PMemoryBlocHeader(Result).CallerAddress, 2);
+						{$IFDEF VER140}
+						if ltgmCallerOfGetMemIsTObjectCreate then
+							begin
+								FillCallStack(PMemoryBlocHeader(Result).CallerAddress, 1);
+								PMemoryBlocHeader(Result).CallerAddress[0]:= ltgmCallerOfTObjectCreate;
+							end
+						else
+						{$ENDIF}
+							FillCallStack(PMemoryBlocHeader(Result).CallerAddress, 2);
 				end
 			else
 				begin	//Neither an object nor a string, this is a MUser
@@ -1628,7 +1605,7 @@ begin
 		end;
 end;
 
-procedure dumplines(NameTbl: PArrayOfPointer; sstptr: PArrayOfByte; size: word);
+procedure dumplines(NameTbl: PArrayOfPointer; sstptr: PArrayOfByte; size: integer);
 //Copyright (C) Tenth Planet Software Intl., Clive Turvey 1998. All rights reserved. - Reused & modified by SG with permission
 var
 	srcmodhdr: PSRCMODHDR;

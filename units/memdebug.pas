@@ -1,9 +1,8 @@
-///////////////////////////////////////////////////////////////////////////////
-// This unit must be included in first string in "uses" clause of your project
-//  main module (*.dpr). You can reach it through   View/Project Source.
-//  You Must run application under any Debugger, that can recieve Debug Messages.
-//  For example MS WinDbg available for free download from Microsoft.
-//
+{
+  @abstract(Memory debugger)
+  @lastmod($Id)
+}
+
 unit MemDebug;
 
 interface

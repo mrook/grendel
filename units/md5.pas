@@ -1,37 +1,7 @@
-// tabs = 2
-// -----------------------------------------------------------------------------------------------
-//
-//                                 MD5 Message-Digest for Delphi 4
-//
-//                                 Delphi 4 Unit implementing the
-//                      RSA Data Security, Inc. MD5 Message-Digest Algorithm
-//
-//                          Implementation of Ronald L. Rivest's RFC 1321
-//
-//                      Copyright © 1997-1999 Medienagentur Fichtner & Meyer
-//                                  Written by Matthias Fichtner
-//
-// -----------------------------------------------------------------------------------------------
-//               See RFC 1321 for RSA Data Security's copyright and license notice!
-// -----------------------------------------------------------------------------------------------
-//
-//     14-Jun-97  mf  Implemented MD5 according to RFC 1321                           RFC 1321
-//     16-Jun-97  mf  Initial release of the compiled unit (no source code)           RFC 1321
-//     28-Feb-99  mf  Added MD5Match function for comparing two digests               RFC 1321
-//     13-Sep-99  mf  Reworked the entire unit                                        RFC 1321
-//     17-Sep-99  mf  Reworked the "Test Driver" project                              RFC 1321
-//     19-Sep-99  mf  Release of sources for MD5 unit and "Test Driver" project       RFC 1321
-//
-// -----------------------------------------------------------------------------------------------
-//                   The latest release of md5.pas will always be available from
-//                  the distribution site at: http://www.fichtner.net/delphi/md5/
-// -----------------------------------------------------------------------------------------------
-//                       Please send questions, bug reports and suggestions
-//                      regarding this code to: mfichtner@fichtner-meyer.com
-// -----------------------------------------------------------------------------------------------
-//                        This code is provided "as is" without express or
-//                     implied warranty of any kind. Use it at your own risk.
-// -----------------------------------------------------------------------------------------------
+{
+  @abstract(MD5 Message-Digest implementation for Delphi by Matthias Fichtner)
+  @lastmod($Id)
+}
 
 unit md5;
 

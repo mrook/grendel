@@ -1,206 +1,7 @@
-(**
-===============================================================================================
-Name    : LibXmlParser
-===============================================================================================
-Project : All Projects
-===============================================================================================
-Subject : Progressive XML Parser for all type of XML Files
-===============================================================================================
-Author  : Stefan Heymann
-          Eschenweg 3
-          72076 Tübingen
-          GERMANY
-
-          Please send notes, bug reports, fixes and questions to
-                 xmlparser@destructor.de
-===============================================================================================
-Source, Legals ("Licence")
---------------------------
-The official site to get this parser is http://www.destructor.de
-
-Usage and Distribution of this Source Code is ruled by the
-"Destructor.de Source code Licence" (DSL) which comes with this file or
-can be downloaded at http://www.destructor.de
-
-IN SHORT: Usage and distribution of this source code is free.
-          You use it completely on your own risk.
-
-Postcardware
-------------
-If you like this code, please send a postcard of your city to my above address.
-===============================================================================================
-!!!  All parts of this code which are not finished or not conforming exactly to
-     the XmlSpec are marked with three exclamation marks
-
--!-  Parts where the parser may be able to detect errors in the document's syntax are
-     marked with the dash-exlamation mark-dash sequence.
-===============================================================================================
-Terminology:
-------------
-- Start:   Start of a buffer part
-- Final:   End (last character) of a buffer part
-- DTD:     Document Type Definition
-- DTDc:    Document Type Declaration
-- XMLSpec: The current W3C XML Recommendation (version 1.0 as of 1998-02-10), Chapter No.
-- Cur*:    Fields concerning the "Current" part passed back by the "Scan" method
-===============================================================================================
-Scanning the XML document
--------------------------
-- Create TXmlParser Instance                     MyXml := TXmlParser.Create;
-- Load XML Document                              MyXml.LoadFromFile (Filename);
-- Start Scanning                                 MyXml.StartScan;
-- Scan Loop                                      WHILE MyXml.Scan DO
-- Test for Part Type                               CASE MyXml.CurPartType OF
-- Handle Parts                                       ... : ;;;
-- Handle Parts                                       ... : ;;;
-- Handle Parts                                       ... : ;;;
-                                                     END;
-- Destroy                                        MyXml.Free;
-===============================================================================================
-Loading the XML document
-------------------------
-You can load the XML document from a file with the "LoadFromFile" method.
-It is beyond the scope of this parser to perform HTTP or FTP accesses. If you want your
-application to handle such requests (URLs), you can load the XML via HTTP or FTP or whatever
-protocol and hand over the data buffer using the "LoadFromBuffer" or "SetBuffer" method.
-"LoadFromBuffer" loads the internal buffer of TXmlParser with the given null-terminated
-string, thereby creating a copy of that buffer.
-"SetBuffer" just takes the pointer to another buffer, which means that the given
-buffer pointer must be valid while the document is accessed via TXmlParser.
-===============================================================================================
-Encodings:
-----------
-This XML parser kind of "understands" the following encodings:
-- UTF-8
-- ISO-8859-1
-- Windows-1252
-
-Any flavor of multi-byte characters (and this includes UTF-16) is not supported. Sorry.
-
-Every string which has to be passed to the application passes the virtual method
-"TranslateEncoding" which translates the string from the current encoding (stored in
-"CurEncoding") into the encoding the application wishes to receive.
-The "TranslateEncoding" method that is built into TXmlParser assumes that the application
-wants to receive Windows ANSI (Windows-1252, about the same as ISO-8859-1) and is able
-to convert UTF-8 and ISO-8859-1 encodings.
-For other source and target encodings, you will have to override "TranslateEncoding".
-===============================================================================================
-Buffer Handling
----------------
-- The document must be loaded completely into a piece of RAM
-- All character positions are referenced by PChar pointers
-- The TXmlParser instance can either "own" the buffer itself (then, FBufferSize is > 0)
-  or reference the buffer of another instance or object (then, FBuffersize is 0 and
-  FBuffer is not NIL)
-- The Property DocBuffer passes back a pointer to the first byte of the document. If there
-  is no document stored (FBuffer is NIL), the DocBuffer returns a pointer to a NULL character.
-===============================================================================================
-Whitespace Handling
--------------------
-The TXmlParser property "PackSpaces" determines how Whitespace is returned in Text Content:
-While PackSpaces is true, all leading and trailing whitespace characters are trimmed of, all
-Whitespace is converted to Space #x20 characters and contiguous Whitespace characters are
-compressed to one.
-If the "Scan" method reports a ptContent part, the application can get the original text
-with all whitespace characters by extracting the characters from "CurStart" to "CurFinal".
-If the application detects an xml:space attribute, it can set "PackSpaces" accordingly or
-use CurStart/CurFinal.
-Please note that TXmlParser does _not_ normalize Line Breaks to single LineFeed characters
-as the XmlSpec requires (XmlSpec 2.11).
-The xml:space attribute is not handled by TXmlParser. This is on behalf of the application.
-===============================================================================================
-Non-XML-Conforming
-------------------
-TXmlParser does not conform 100 % exactly to the XmlSpec:
-- UTF-16 is not supported (XmlSpec 2.2)
-  (Workaround: Convert UTF-16 to UTF-8 and hand the buffer over to TXmlParser)
-- As the parser only works with single byte strings, all Unicode characters > 255
-  can currently not be handled.
-- Line breaks are not normalized to single Linefeed #x0A characters (XmlSpec 2.11)
-  (Workaround: The Application can access the text contents on its own [CurStart, CurFinal],
-  thereby applying every normalization it wishes to)
-- See also the code parts marked with three consecutive exclamation marks. These are
-  parts which are not finished in the current code release.
-
-This list may be incomplete, so it may grow if I get to know any other points.
-As work on the parser proceeds, this list may also shrink.
-===============================================================================================
-Things Todo
------------
-- Introduce a new event/callback which is called when there is an unresolvable
-  entity or character reference
-===============================================================================================
-Change History, Version numbers
--------------------------------
-The Date is given in ISO Year-Month-Day (YYYY-MM-DD) order.
-Versions are counted from 1.0.0 beginning with the version from 2000-03-16.
-Unreleased versions don't get a version number.
-
-Date        Author Version Changes
------------------------------------------------------------------------------------------------
-2000-03-16  HeySt  1.0.0   Start
-2000-03-28  HeySt  1.0.1   Initial Publishing of TXmlParser on the destructor.de Web Site
-2000-03-30  HeySt  1.0.2   TXmlParser.AnalyzeCData: Call "TranslateEncoding" for CurContent
-2000-03-31  HeySt  1.0.3   Deleted the StrPosE function (was not needed anyway)
-2000-04-04  HeySt  1.0.4   TDtdElementRec modified: Start/Final for all Elements;
-                           Should be backwards compatible.
-                           AnalyzeDtdc: Set CurPartType to ptDtdc
-2000-04-23  HeySt  1.0.5   New class TObjectList. Eliminated reference to the Delphi 5
-                           "Contnrs" unit so LibXmlParser is Delphi 4 compatible.
-2000-07-03  HeySt  1.0.6   TNvpNode: Added Constructor
-2000-07-11  HeySt  1.0.7   Removed "Windows" from USES clause
-                           Added three-exclamation-mark comments for Utf8ToAnsi/AnsiToUtf8
-                           Added three-exclamation-mark comments for CHR function calls
-2000-07-23  HeySt  1.0.8   TXmlParser.Clear: CurAttr.Clear; EntityStack.Clear;
-                           (This was not a bug; just defensive programming)
-2000-07-29  HeySt  1.0.9   TNvpList: Added methods: Node(Index), Value(Index), Name(Index);
-2000-10-07  HeySt          Introduced Conditional Defines
-                           Uses Contnrs unit and its TObjectList class again for
-                           Delphi 5 and newer versions
-2001-01-30  HeySt          Introduced Version Numbering
-                           Made LoadFromFile and LoadFromBuffer BOOLEAN functions
-                           Introduced FileMode parameter for LoadFromFile
-                           BugFix: TAttrList.Analyze: Must add CWhitespace to ExtractName call
-                           Comments worked over
-2001-02-28  HeySt  1.0.10  Completely worked over and tested the UTF-8 functions
-                           Fixed a bug in TXmlParser.Scan which caused it to start over when it
-                           was called after the end of scanning, resulting in an endless loop
-                           TEntityStack is now a TObjectList instead of TList
-2001-07-03  HeySt  1.0.11  Updated Compiler Version IFDEFs for Kylix
-2001-07-11  HeySt  1.0.12  New TCustomXmlScanner component (taken over from LibXmlComps.pas)
-2001-07-14  HeySt  1.0.13  Bugfix TCustomXmlScanner.FOnTranslateEncoding
-*)
-
-
-// --- Delphi/Kylix Version Numbers
-//     As this is no code, this does not blow up your object or executable code at all
-       (*$DEFINE D1_OR_NEWER *)
-       (*$IFNDEF VER80 *)
-         (*$DEFINE D2_OR_NEWER *)
-         (*$IFNDEF VER90 *)
-           (*$DEFINE D3_OR_NEWER *)
-           (*$IFNDEF VER100 *)
-             (*$DEFINE D4_OR_NEWER *)
-             (*$IFNDEF VER120 *)
-               (*$DEFINE D5_OR_NEWER *)
-               (*$IFNDEF VER130 *)
-                 (*$IFDEF LINUX *)
-                   (*$DEFINE K1_OR_NEWER *)
-                 (*$ENDIF *)
-                 (*$IFNDEF VER140 *)
-                   If the compiler gets stuck here,
-                   you are using a compiler version unknown to this code.
-                   You will probably have to change this code accordingly.
-                   At first, try to comment out these lines and see what will happen.
-                 (*$ENDIF *)
-               (*$ENDIF *)
-             (*$ENDIF *)
-           (*$ENDIF *)
-         (*$ENDIF *)
-       (*$ELSE *)
-         (*$DEFINE WIN16 *)
-       (*$ENDIF *)
-
+{
+  @abstract(LibXmlParser 1.0.16 by Stefan Heymann)
+  @lastmod($Id)
+}
 
 UNIT LibXmlParser;
 
@@ -214,7 +15,7 @@ USES
   Math;
 
 CONST
-  CVersion = '1.0.13';  // This variable will be updated for every release
+  CVersion = '1.0.16';  // This variable will be updated for every release
                         // (I hope, I won't forget to do it everytime ...)
 
 TYPE
@@ -276,7 +77,7 @@ TYPE
 
                  FNormalize   : BOOLEAN;         // If true: Pack Whitespace and don't return empty contents
                  EntityStack  : TEntityStack;    // Entity Stack for Parameter and General Entities
-                 FCurEncoding : STRING;          // Current Encoding during parsing
+                 FCurEncoding : STRING;          // Current Encoding during parsing (always uppercase)
 
                  PROCEDURE AnalyzeProlog;                                         // Analyze XML Prolog or Text Declaration
                  PROCEDURE AnalyzeComment (Start : PChar; VAR Final : PChar);     // Analyze Comments
@@ -487,7 +288,7 @@ FUNCTION  Utf8ToAnsi  (Source : STRING; UnknownChar : CHAR = '¿') : ANSISTRING; 
 
 (*
 ===============================================================================================
-TCustomXmlScanner component wrapper for TXmlParser
+TCustomXmlScanner event based component wrapper for TXmlParser
 ===============================================================================================
 *)
 
@@ -546,7 +347,7 @@ TYPE
       PROCEDURE WhenEntity   (EntityDef : TEntityDef);                             VIRTUAL;
       PROCEDURE WhenNotation (NotationDef : TNotationDef);                         VIRTUAL;
       PROCEDURE WhenDtdError (ErrorPos : PChar);                                   VIRTUAL;
-      
+
     PUBLIC
       CONSTRUCTOR Create (AOwner: TComponent); OVERRIDE;
       DESTRUCTOR Destroy;                      OVERRIDE;
@@ -767,7 +568,6 @@ BEGIN
   Result := Str;
   REPEAT
     IF Result^ = First THEN
-    IF Result^ = SearchStr^ THEN
       IF StrLComp (Result, SearchStr, Len) = 0 THEN BREAK;
     IF Result^ = #0 THEN BEGIN
       Result := NIL;
@@ -1208,13 +1008,14 @@ BEGIN
       EXIT;
       END;
 
-    IF      StrLComp (CurStart, '<?xml',     5) = 0 THEN AnalyzeProlog            // XML Prolog, Text Declaration
+    IF (StrLComp (CurStart, '<?xml', 5) = 0) AND
+       ((CurStart+5)^ IN CWhitespace) THEN AnalyzeProlog                                      // XML Declaration, Text Declaration
     ELSE IF StrLComp (CurStart, '<?',        2) = 0 THEN AnalyzePI (CurStart, CurFinal)       // PI
     ELSE IF StrLComp (CurStart, '<!--',      4) = 0 THEN AnalyzeComment (CurStart, CurFinal)  // Comment
-    ELSE IF StrLComp (CurStart, '<!DOCTYPE', 9) = 0 THEN AnalyzeDtdc              // DTDc
-    ELSE IF StrLComp (CurStart, CDStart, Length (CDStart)) = 0 THEN AnalyzeCdata  // CDATA Section
-    ELSE IF StrLComp (CurStart, '<',         1) = 0 THEN AnalyzeTag               // Start-Tag, End-Tag, Empty-Element-Tag
-    ELSE AnalyzeText (IsDone);                                                    // Text Content
+    ELSE IF StrLComp (CurStart, '<!DOCTYPE', 9) = 0 THEN AnalyzeDtdc                          // DTDc
+    ELSE IF StrLComp (CurStart, CDStart, Length (CDStart)) = 0 THEN AnalyzeCdata              // CDATA Section
+    ELSE IF StrLComp (CurStart, '<',         1) = 0 THEN AnalyzeTag                           // Start-Tag, End-Tag, Empty-Element-Tag
+    ELSE AnalyzeText (IsDone);                                                                // Text Content
   UNTIL IsDone;
   Result := TRUE;
 END;
@@ -1235,7 +1036,7 @@ BEGIN
   IF CurFinal <> NIL
     THEN INC (CurFinal)
     ELSE CurFinal := StrEnd (CurStart)-1;
-  FCurEncoding := CurAttr.Value ('encoding');
+  FCurEncoding := AnsiUpperCase (CurAttr.Value ('encoding'));
   IF FCurEncoding = '' THEN
     FCurEncoding := 'UTF-8';   // Default XML Encoding is UTF-8
   CurPartType  := ptXmlProlog;
@@ -1494,6 +1295,8 @@ BEGIN
            // and by replacing sequences of space (#x20) characters by a single space (#x20) character.
            // All attributes for which no declaration has been read should be treated by a
            // non-validating parser as if declared CDATA.
+           // !!! The XML 1.0 SE specification is somewhat different here
+           //     This code does not conform exactly to this specification
     FOR I := 0 TO CurAttr.Count-1 DO
       WITH TAttr (CurAttr [I]) DO BEGIN
         ReplaceGeneralEntities   (Value);
@@ -1520,7 +1323,6 @@ BEGIN
     INC (CurFinal, Length (CDEnd)-1);
     CurContent := TranslateEncoding (CurContent);
     END;
-  CurName := '';
 END;
 
 
@@ -2224,6 +2026,7 @@ TObjectList
 DESTRUCTOR TObjectList.Destroy;
 BEGIN
   Clear;
+  SetCapacity(0);
   INHERITED Destroy;
 END;
 

@@ -1,4 +1,7 @@
-// $Id: chars.pas,v 1.62 2002/01/22 13:54:17 ***REMOVED*** Exp $
+{
+  @abstract((N)PC classes & routines)
+  @lastmod($Id: chars.pas,v 1.63 2002/08/03 19:13:51 ***REMOVED*** Exp $)
+}
 
 unit chars;
 

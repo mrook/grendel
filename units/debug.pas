@@ -1,3 +1,8 @@
+{
+  @abstract(Internal debug routines)
+  @lastmod($Id)
+}
+
 unit debug;
 
 interface

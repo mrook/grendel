@@ -1,3 +1,8 @@
+{
+  @abstract(System tray icon routines)
+  @lastmod($Id)
+}
+
 unit systray;
 
 interface

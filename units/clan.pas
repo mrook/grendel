@@ -1,3 +1,8 @@
+{
+  @abstract(Clan routines)
+  @lastmod($Id)
+}
+
 unit clan;
 
 interface

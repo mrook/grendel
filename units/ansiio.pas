@@ -1,18 +1,6 @@
-
-{ A unit to implement FULL ANSI output.  Useful for a BBS or DOOR program
-  where you would want to send string out over the modem.  Simply call
-  your modem routine to :
-
-             SENDSTRING(port,ANSIGoToXY(1,1))
-
-  Would reposition the cursor on the remote terminal.  Get the idea ??
-
-  The thing will EVEN play ANSI music !!
-
-  Gayle Davis 1/24/94
-
-
-
+{ 
+  @abstract(ANSI output routines by Gayle Davis)
+  @lastmod($Id)
 }
 
 UNIT ansiio;

@@ -1,3 +1,8 @@
+{
+  @abstract(Race routines)
+  @lastmod($Id)
+}
+
 unit race;
 
 interface
@@ -22,7 +27,7 @@ type
       max_skills, max_spells : integer;
       abilities : GDLinkedList;
 
-      constructor Create;
+      constructor Create();
     end;
 
 var
@@ -41,9 +46,10 @@ uses
   console,
   skills;
 
-constructor GRace.Create;
+constructor GRace.Create();
 begin
   inherited Create;
+  
   name := '';
   description := '';
   def_alignment := 0;    // fill in default values

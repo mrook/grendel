@@ -1,4 +1,7 @@
-// $Id: skills.pas,v 1.24 2002/01/22 13:54:00 ***REMOVED*** Exp $
+{
+  @abstract(Various skill related functions)
+  @lastmod($Id: skills.pas,v 1.25 2002/08/03 19:14:03 ***REMOVED*** Exp $)
+}
 
 unit skills;
 
