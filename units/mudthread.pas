@@ -22,7 +22,7 @@ uses
     mudsystem;
 
 type
-    GThread = class(TThread)
+    GGameThread = class(TThread)
     private
       socket : TSocket;
       client_addr : TSockAddr_Storage;
@@ -61,7 +61,7 @@ uses
     progs,
     fight;
 
-constructor GThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
+constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
 begin
   inherited Create(False);
 
@@ -1357,7 +1357,7 @@ CON_CHECK_PASSWORD: begin
   end;
 end;
 
-procedure GThread.Execute;
+procedure GGameThread.Execute;
 var conn : GConnection;
     cmdline : string;
     temp_buf : string;
