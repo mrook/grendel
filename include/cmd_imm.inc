@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.32 2001/05/02 21:50:26 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.33 2001/05/10 17:21:07 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1914,11 +1914,338 @@ begin
     end;
   end;
 
+  if (room = nil) then
+  begin
+    ch.sendBuffer('A room with that vnum could not be found.'#13#10);
+    exit;
+  end;
+  
   room.areacoords := GCoords.Create();
   room.areacoords.x := 0;
   room.areacoords.y := 0;
   room.areacoords.z := 0;
   createCoordinates(ch, room);
+end;
+
+{ this function *always* returns a positive value if it succeeds and a negative
+  value if it doesn't }
+function goalDistEstimate(currRoom : GRoom; destRoom : GRoom) : single;
+begin
+//  Assert(currRoom.areacoords <> nil, 'currRoom.areacoords = nil');
+//  Assert(destRoom.areacoords <> nil, 'destRoom.areacoords = nil');
+  if (currRoom.areacoords = nil) then
+  begin
+    bugreport('goalDistEstimate', 'cmd_imm.inc', 'currRoom.areacoords = nil',
+              'The areacoords field is a nil pointer. No coordinates generated for this area or this room? Please fix this, pathfinding will not work without coordinates.');
+    raise GException.Create('cmd_imm.inc:goalDistEstimate', 'currRoom.areacoords = nil');
+    Result := -1;
+    exit;
+  end;
+  if (destRoom.areacoords = nil) then
+  begin
+    bugreport('goalDistEstimate', 'cmd_imm.inc', 'destRoom.areacoords = nil',
+              'The areacoords field is a nil pointer. No coordinates generated for this area or this room? Please fix this, pathfinding will not work without coordinates.');
+    raise GException.Create('cmd_imm.inc:goalDistEstimate', 'destRoom.areacoords = nil');
+    Result := -1;
+    exit;
+  end;
+
+{$IFNDEF UseStraightLine}
+// this is "Manhattan" distance, more appriopriate for A* and thus default
+  Result := abs(destRoom.areacoords.x - currRoom.areacoords.x) +
+            abs(destRoom.areacoords.y - currRoom.areacoords.y) +
+            abs(destRoom.areacoords.z - currRoom.areacoords.z);
+{$ELSE}            
+// this is straight line distance
+  if (currRoom.areacoords.z = destRoom.areacoords.z) then
+    Result := power(
+                power((destRoom.areacoords.x - currRoom.areacoords.x), 2) +
+                power((destRoom.areacoords.y - currRoom.areacoords.y), 2),
+                0.5)
+  else
+    Result := power(
+                power((destRoom.areacoords.x - currRoom.areacoords.x), 2) +
+                power((destRoom.areacoords.y - currRoom.areacoords.y), 2) +
+                power((destRoom.areacoords.z - currRoom.areacoords.z), 2),
+                1/3);
+{$ENDIF}
+end;
+
+type
+  TSearchNode =
+    class
+      f, g, h : single;
+      room : GRoom;
+      parent : TSearchNode;
+      constructor Create(); overload;
+      constructor Create(newg, newh : single; newroom : GRoom; newparent : TSearchNode); overload;
+    end;
+
+constructor TSearchNode.Create();
+begin
+  inherited Create();
+  f := 0;
+  g := 0;
+  h := 0;
+  room := nil;
+  parent := nil;
+end;
+
+constructor TSearchNode.Create(newg, newh : single; newroom : GRoom; newparent : TSearchNode);
+begin
+  inherited Create();
+  g := newg;
+  h := newh;
+  f := g + h;
+  room := newroom;
+  parent := newparent;
+end;
+
+procedure insertPriority(ll : GDLinkedList; snode : TSearchNode);
+var
+  node, ins : GListNode;
+  n : TSearchNode;
+begin
+  ins := nil;
+  node := ll.head;
+
+  if (ll.head = nil) then
+  begin
+    ll.insertLast(snode);
+    exit;
+  end;
+
+  while (node <> nil) do
+  begin
+    n := node.element;
+
+    if (snode.f > n.f) then
+    begin
+      ins := node;
+    end
+    else
+    begin
+      ll.insertBefore(node, snode);
+      exit;
+    end;
+    
+    node := node.next;
+  end;
+
+  ll.insertAfter(ins, snode);  
+end;
+    
+function findRoomAStar(ll : GDLinkedList; froom : GRoom) : GListNode;
+var
+  node : GListNode;
+  snode : TSearchNode;
+begin
+  Result := nil;
+  
+  node := ll.head;
+  while (node <> nil) do
+  begin
+    snode := node.element;
+    if (snode.room = froom) then
+    begin
+      Result := node;
+      exit;
+    end;
+    node := node.next;
+  end;
+end;
+
+{ Implementation of A* search algorithm }
+{ this piece of code is ugly ;) }
+function mpFindPath(startroom, destroom : GRoom; var resultdirs : string) : boolean;
+var
+  room, droom : GRoom;
+  snode : TSearchNode;
+  olnode, clnode : GListNode;
+  new_snode, found_node : TSearchNode;
+  llopen : GDLinkedList;
+  llclosed : GDLinkedList;
+  i : integer;
+  node : GListNode;
+  newg : single;
+  found : boolean;
+  dirs : string;
+begin
+  Result := false;
+  dirs := '';
+  found_node := nil;
+
+  if (startroom = destroom) then
+  begin
+    Result := true;
+    resultdirs := '';
+    exit;
+  end;
+  
+  llopen := GDLinkedList.Create();
+  llclosed := GDLinkedList.Create();
+  
+  snode := TSearchNode.Create(0, goalDistEstimate(startroom, destroom), startroom, nil);
+
+  insertPriority(llopen, snode);
+
+  found := false;
+  
+  while (llopen.getSize() > 0) do
+  begin
+    node := llopen.head;
+    snode := node.element;
+    room := snode.room;
+
+    if (room = destroom) then
+    begin
+      found := true;
+      llopen.remove(node);
+      found_node := snode;
+      break;
+    end;
+
+    if (room = nil) then
+    begin
+      write_console('room = nil');
+      continue;
+    end;
+    
+    llopen.remove(node);
+
+    insertPriority(llclosed, snode);
+    
+    for i := DIR_NORTH to DIR_UP do
+    begin
+      droom := room.isConnectedTo(i);
+      if (droom <> nil) then
+      begin
+        newg := snode.g + 1; // cost
+        olnode := findRoomAStar(llopen, droom);
+        clnode := findRoomAStar(llclosed, droom);
+        if (olnode <> nil) and (TSearchNode(olnode.element).g <= newg) then
+          continue;
+        if (clnode <> nil) and (TSearchNode(clnode.element).g <= newg) then
+          continue;
+        if (clnode <> nil) then
+          llclosed.remove(clnode);
+        if (olnode = nil) then
+        begin
+          if (goalDistEstimate(droom, destroom) < 0) then
+          begin
+            bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)',
+                      'goalDistEstimate returned a negative value.');
+            exit;
+          end;
+          new_snode := TSearchNode.Create(newg, goalDistEstimate(droom, destroom), droom, snode);
+          insertPriority(llopen, new_snode);
+        end;
+      end;
+    end;
+  end;
+
+  if (found) then
+  begin
+    Result := true;
+    
+    dirs := '';
+    snode := found_node;
+    while (snode.parent <> nil) do
+    begin
+//      ch.sendBuffer(Format('- #%d'#13#10, [snode.room.vnum]));
+      dirs := dirs + findDirectionShort(snode.room, snode.parent.room);
+      snode := snode.parent;
+    end;
+
+    resultdirs := '';
+    for i := length(dirs) downto 1 do
+    begin
+      resultdirs := resultdirs + headings_short_i[findHeading(dirs[i])];
+    end;
+  end
+  else
+  begin
+    Result := false;
+    resultdirs := '';
+  end;
+
+  llopen.Clean();
+  llopen.Free();
+  llclosed.Clean();
+  llclosed.Free();
+end;
+
+procedure do_findpath(ch : GCharacter; param : string);
+var
+  goalroom : GRoom;
+  dirs : string;
+  found : boolean;
+  arg1, arg2 : string;
+  i : integer;
+begin
+  goalroom := nil;
+  dirs := '';
+
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage: FINDPATH <vnum> [GO]'#13#10#13#10);
+    ch.sendBuffer('This is a command to test the pathfinding functions.'#13#10);
+    ch.sendBuffer('Supply a vnum as destination, and to optional keyword GO to'#13#10);
+    ch.sendBuffer('follow a path if one is found.'#13#10);
+    exit;
+  end;
+  
+  param := one_argument(param, arg1);
+  param := one_argument(param, arg2);
+  try
+    goalroom := findRoom(StrToInt(arg1));
+  except
+//    on E: EConvertError do
+    begin
+      ch.sendBuffer('That vnum doesn''t exit.'#13#10);
+      exit;
+    end;
+  end;
+
+  if (goalroom = nil) then
+  begin
+    ch.sendBuffer('A room with that vnum could not be found.'#13#10);
+    exit;
+  end;
+
+  if (goalDistEstimate(ch.room, goalroom) < 0) then
+  begin
+    bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)',
+              'goalDistEstimate returned a negative value.');
+    exit;
+  end;
+  
+  ch.sendBuffer(Format('Distance: %g'#13#10, [goalDistEstimate(ch.room, goalroom)]));
+  
+  found := mpFindPath(ch.room, goalroom, dirs);
+  if (found) then
+  begin
+    ch.sendBuffer('A path was found: ' + dirs + #13#10);
+  end
+  else
+  begin
+    ch.sendBuffer('There was no valid path found.'#13#10);
+  end;
+
+  if (trim(uppercase(arg2)) = 'GO') then
+  begin
+    if (length(dirs) = 0) then
+    begin
+      ch.sendBuffer('mpFindPath returned true, but an empty direction string. Perhaps you''re already at the specified vnum?'#13#10);
+      exit;
+    end;
+    
+    ch.sendBuffer('Following the path... hold on tight!'#13#10#13#10);
+    for i := 1 to length(dirs) do
+    begin
+      interpret(ch, dirs[i]);
+    end;
+  end;
 end;
 
 {procedure do_thunder(ch:GCharacter;param:string);
