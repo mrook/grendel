@@ -108,7 +108,7 @@ a $B$7shining$A$3 helm, made by the miners of Neyrat, lies here
 a warbelt of Oblivion
 a $B$4war$A$8belt$7 of $B$3Oblivion$A$7
 a $B$4war$A$8belt$3 of $B$3Oblivion$A$3 lies here
-2 waist none
+18 waist none
 0 2 4 0
 0 98 0
 #50008
@@ -188,6 +188,20 @@ a gemstone, shimmering with dark power, lies here
 9 leftwield rightwield
 0 200 200 0
 0 6 0
+#50019
+a blood red bow
+a $B$8blood red$A$7 bow
+a finely crafted $B$8blood red$A$7 bow lies here
+16 leftwield rightwield
+1 0 0 0
+0 6 0
+#50020
+an arrow
+an arrow
+an arrow lies here
+17 none none none
+1 0 0 0
+0 0 0
 #END
 
 #RESETS
@@ -210,6 +224,8 @@ O: 50014 50001 1
 O: 50015 50001 1
 O: 50016 50001 1
 O: 50018 50001 1
+O: 50019 50001 1
+O: 50020 50001 1
 O: 50017 50002 1
 #END
 
