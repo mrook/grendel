@@ -1,6 +1,6 @@
 {
   @abstract(Area loader & manager)
-  @lastmod($Id: area.pas,v 1.59 2003/09/12 14:21:33 ***REMOVED*** Exp $)
+  @lastmod($Id: area.pas,v 1.60 2003/09/16 16:25:44 ***REMOVED*** Exp $)
 }
 
 unit area;
@@ -44,7 +44,7 @@ type
       fname : string;
       nplayer : integer;
       weather : GWeather;             { current local weather }
-      flags : GBit;
+      flags : GBitVector;
       resets : GDLinkedList;
 
       procedure areaBug(func : string; problem : string);
@@ -227,7 +227,7 @@ type
       chars : GDLinkedList;
       objects : GDLinkedList;
       tracks : GDLinkedList;
-      flags : GBit;
+      flags : GBitVector;
 
       function IS_DARK : boolean;
 
@@ -343,7 +343,7 @@ begin
 
   _maxage := 10;
   _age := 0;
-  flags := GBit.Create(0);
+  flags := GBitVector.Create(0);
 
   with weather do
     begin
@@ -1964,7 +1964,7 @@ begin
   areacoords := nil;
   worldcoords := nil;
 
-  flags := GBit.Create(0);
+  flags := GBitVector.Create(0);
   extra := GDLinkedList.Create();
   exits := GDLinkedList.Create();
   chars := GDLinkedList.Create();

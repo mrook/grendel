@@ -1,6 +1,6 @@
 {
   @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.17 2003/06/24 21:41:32 ***REMOVED*** Exp $)
+  @lastmod($Id: Channels.pas,v 1.18 2003/09/16 16:25:45 ***REMOVED*** Exp $)
 }
 
 unit Channels;
@@ -41,7 +41,7 @@ type
       channelcolor : integer;
       verbyou : string;
       verbother : string;
-      channelFlags : GBit;
+      channelFlags : GBitVector;
       cost : integer;
       
       constructor Create(chname : string);
@@ -112,7 +112,7 @@ begin
   channelcolor := 15;
   verbyou := '%s';
   verbother := '%s';
-  channelFlags := GBit.Create(0);
+  channelFlags := GBitVector.Create(0);
   cost := 0;
 end;
 
