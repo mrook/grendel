@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.22 2004/03/27 10:40:01 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.23 2004/03/30 12:23:28 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -100,11 +100,13 @@ end;
 
 // Reboot procedure
 procedure rebootServer();
-{$IFDEF WIN32}
 var
+{$IFDEF WIN32}
 	SI: TStartupInfo;
 	PI: TProcessInformation;
 {$ENDIF}
+	pid : cardinal;
+	args : array[1..2] of PChar;
 begin
 	{$IFDEF WIN32}
 	FillChar(SI, SizeOf(SI), 0);
@@ -113,26 +115,39 @@ begin
 
 	if (not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
 		bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel.exe, reboot failed!');
-	{$ENDIF}
-	{$IFDEF LINUX}
-	if (execv('grendel', nil) = -1) then
-		bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel, reboot failed!');
+	{$ELSE}
+	pid := fork();
+	
+	// fork succesful
+	if (pid <> 0) then
+		exit;
+		
+	args[1] := 'grendel';
+	args[2] := nil;
+		
+	execv('grendel', PPChar(@args[1]));
 	{$ENDIF}
 end;
 
 // Copyover procedure
 procedure copyoverServer();
-{$IFDEF WIN32}
 var
+{$IFDEF WIN32}
 	SI: TStartupInfo;
 	PI: TProcessInformation;
 	pipe : THandle;
+	prot : TWSAProtocol_Info;
+	w, len : cardinal;
+	name : array[0..1023] of char;
+{$ENDIF}
+{$IFDEF LINUX}
+	output : TextFile;
+	args : array[1..4] of PChar;
+	fd : integer;
+{$ENDIF}
 	node, node_next : GListNode;
 	conn : GPlayerConnection;
-	w, len : cardinal;
-	prot : TWSAProtocol_Info;
 	pid : cardinal;
-	name : array[0..1023] of char;
 begin
 	writeConsole('Server starting copyover...');
 
@@ -161,6 +176,7 @@ begin
 		node := node_next;
 		end;
 
+{$IFDEF WIN32}
 	FillChar(SI, SizeOf(SI), 0);
 	SI.cb := SizeOf(SI);
 	SI.wShowWindow := sw_show;
@@ -242,12 +258,62 @@ begin
 		end;
 		
 	CloseHandle(pipe);
-end;
 {$ELSE}
-begin
-	writeConsole('Copyover not supported on this platform.');
-end;
+	AssignFile(output, 'copyover.temp');
+	Rewrite(output);
+
+	node := connection_list.head;
+
+	while (node <> nil) do
+		begin
+		conn := GPlayerConnection(node.element);
+		node_next := node.next;
+
+		conn.ch.save(conn.ch.name);
+		
+		// duplicate socket desciptor
+		fd := dup(conn.socket.getDescriptor);
+		
+		writeln(output, conn.ch.name);
+		writeln(output, fd);
+		writeln(output, conn.socket.getAddressFamily);
+
+		conn.Terminate();
+		
+		node := node_next;
+		end;
+		
+	CloseFile(output);
+
+	// Wait for connection_list to clean itself
+	while (connection_list.size() > 0) do
+		begin
+		Sleep(25);
+		end; 
+	
+	if (FileExists('grendel.run')) then
+		begin
+		AssignFile(output, 'grendel.run');
+	
+		{$I-}
+		Erase(output);
+		{$I+}
+		end;
+			
+	args[1] := 'grendel';
+	args[2] := 'copyover';
+	args[3] := nil;
+	args[4] := nil;
+	
+	pid := fork();
+	
+	// fork succesful
+	if (pid <> 0) then
+		exit;
+		
+	execv('grendel', PPChar(@args[1]));
 {$ENDIF}
+end;
 
 // Recover from copyover
 procedure from_copyover;
@@ -322,8 +388,37 @@ begin
   CloseHandle(pipe);
 end;
 {$ELSE}
+var
+	client_addr : TSockAddr_Storage;
+	cl : PSockaddr;
+	l : socklen_t;
+	input : TextFile;
+	name : string;
+	fd, af : integer;
+	sk : GSocket;
 begin
-  writeConsole('Copyover not supported on this platform.');
+	AssignFile(input, 'copyover.temp');
+	Reset(input);
+	
+	while (not Eof(input)) do
+		begin
+		readln(input, name);
+		readln(input, fd);
+		readln(input, af);
+		
+		cl := @client_addr;
+		l := 128;
+		getpeername(fd, cl^, l);
+      
+		sk := createSocket(af, fd);
+		sk.setNonBlocking();     
+		sk.socketAddress := client_addr;
+		sk.resolve(system_info.lookup_hosts);
+		
+		GPlayerConnection.Create(sk, true, name);
+		end;
+		
+	CloseFile(input);
 end;
 {$ENDIF}
 
@@ -333,7 +428,7 @@ function controlHandler(event : DWORD) : boolean;
 begin
 	Result := true;
 	SetConsoleCtrlHandler(@controlHandler, false);
-	halt;
+	Halt(0);
 end;
 {$ENDIF}
 {$ENDIF}
@@ -386,7 +481,7 @@ end;
 
 var
 	serverInstance : GServer;
-	f : file;
+	f : textfile;
 	shutdownType : GServerShutdownTypes;
 	tm : TDateTime;
 	cons : GConsole;
@@ -465,10 +560,12 @@ begin
 
 	oldExitProc := ExitProc;
 	ExitProc := @serverExitProc;
-		
+
+	{$I-}		
 	AssignFile(f, 'grendel.run');
 	Rewrite(f);
 	CloseFile(f);
+	{$I+}
 
 	cons := GConsole.Create();
 	cons.attachWriter(GConsoleLogWriter.Create('grendel'));
@@ -500,10 +597,8 @@ begin
 
 	serverInstance.init();
 
-	{$IFDEF WIN32}
-	if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
+	if (paramstr(1) = 'copyover') then
 		from_copyover();
-	{$ENDIF}
 
 	tm := Now() - tm;
 
@@ -518,7 +613,7 @@ begin
 		end
 	else
 		flushConnections();	
-	
+		
 	serverInstance.cleanup();
 	
 	serverInstance.Free();
