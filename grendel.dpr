@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.21 2001/04/14 21:40:33 xenon Exp $
+  $Id: grendel.dpr,v 1.22 2001/04/15 13:14:53 xenon Exp $
 }
 
 program grendel;
@@ -607,6 +607,8 @@ begin
   load_areas;
   write_console('Loading help...');
   load_help('help.dat');
+  write_console('Loading namegenerator data...');
+  loadNameTables(NameTablesDataFile);
 
   write_console('String hash stats: ');
   str_hash.hashStats;

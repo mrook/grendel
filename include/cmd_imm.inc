@@ -1715,10 +1715,16 @@ begin
   
   if (length(param) = 0) then
   begin
-    ch.sendBuffer('Usage:  NAMEGEN list|<template #> [amount to generate]'#13#10);
+    ch.sendBuffer('Usage:  NAMEGEN list|reload|<template #> [amount to generate]'#13#10);
     exit;
   end;
 
+  if (not namegenerator_enabled or (PhonemeList = nil) or (NameTemplateList = nil)) then
+  begin
+    ch.sendBuffer('Namegenerator is not enabled at this moment. (Error loading tables? File missing?)'#13#10);
+    exit;
+  end;
+  
   if (param = 'list') then
   begin
     node := NameTemplateList.head;
@@ -1734,6 +1740,12 @@ begin
     exit;
   end;
 
+  if (param = 'reload') then
+  begin
+    reloadNameTables();
+    exit;
+  end;
+  
   param := one_argument(param, template_nr_str);
   template_nr := StrToInt(template_nr_str);
 

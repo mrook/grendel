@@ -253,8 +253,8 @@ begin
   try
     af := GFileReader.Create('system\bans.dat');
   except
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\bannedsites.dat',
-              'The system file bannedsites.dat could not be opened.');
+    bugreport('load_system', 'mudsystem.pas', 'could not open system\bans.dat',
+              'The system file bans.dat could not be opened.');
     exit;
   end;
 

@@ -4,7 +4,7 @@ interface
 
 uses
   dtypes;
-  
+
 type
   TPhonemePart =
        class
@@ -17,7 +17,7 @@ type
          phoneme_parts : GDLinkedList;
          constructor Create(name : string); // name: phoneme_name
          destructor Destroy(); override;
-         function getNthPhonemePart(nth : integer) : TPhonemePart;
+         function getNthPhonemePart(nth : integer) : TPhonemePart; // returns nth phoneme_part from linked list
        end;
   TNameTemplatePart =
        class
@@ -33,10 +33,12 @@ type
        end;
 
 function generateName(nametemplate : string) : string;
+procedure reloadNameTables();
 
 var
-  PhonemeList : GDLinkedList;
-  NameTemplateList : GDLinkedList;
+  PhonemeList : GDLinkedList = nil;
+  NameTemplateList : GDLinkedList = nil;
+  namegenerator_enabled : boolean = false;
 
 implementation
 
@@ -45,9 +47,6 @@ uses
   mudsystem,
   util,
   LibXmlParser;
-  
-var
-  generator_enabled : boolean = false;
   
 constructor TPhoneme.Create(name : string);
 begin
@@ -60,6 +59,7 @@ end;
 destructor TPhoneme.Destroy();
 begin
 //  phoneme_parts.Destroy();
+  phoneme_parts.Clean();
   phoneme_parts.Free();
   
   inherited Destroy;
@@ -104,12 +104,13 @@ end;
 destructor TNameTemplate.Destroy();
 begin
 //  template_parts.Destroy();
+  template_parts.Clean();
   template_parts.Free();
   
   inherited Destroy;
 end;
 
-procedure loadTables(datafile : string);
+procedure loadNameTables(dfile : string);
 var
   parser : TXmlParser;
   attr : TNvplist;
@@ -123,16 +124,16 @@ var
   currtype : string;
 begin
   phoneme := nil; nametemplate := nil;
-  datafile := trim(datafile);
+  dfile := trim(dfile);
   
   parser := TXmlParser.Create();
   parser.Normalize := false;
-  parser.LoadFromFile(datafile);
+  parser.LoadFromFile(dfile);
 
-  if (parser.Source <> datafile) then
+  if (parser.Source <> dfile) then
   begin
-    generator_enabled := false;
-    write_console('Could not open ' + datafile + ' (automatic name generator), disabled.');
+    namegenerator_enabled := false;
+    write_console('Could not open ' + dfile + ' (automatic namegenerator), disabled.');
     exit;
   end;
   
@@ -221,7 +222,8 @@ begin
 
   parser.Free();
 
-  generator_enabled := true;
+  namegenerator_enabled := true;
+  write_console('Loaded ' + inttostr(PhonemeList.getSize()) + ' phoneme classes and ' + inttostr(NameTemplateList.getSize()) + ' name templates from ' + dfile + '.');
 end;
 
 function findPhoneme(str : string) : TPhoneme;
@@ -267,6 +269,8 @@ var
   nt : TNameTemplate;
 begin
   result := '';
+  if (not namegenerator_enabled) then
+    exit;
 
   nt := findNameTemplate(nametemplate);
   assert(nt <> nil, 'findNameTemplate() returned nil');
@@ -291,7 +295,18 @@ begin
   end;
 end;
 
+procedure reloadNameTables();
+begin
+  PhonemeList.Clean();
+  PhonemeList.Free();
+  NameTemplateList.Clean();
+  NameTemplateList.Free();
+  namegenerator_enabled := false;
+  write_console('Reloading ' + dataFile +'.');
+  loadNameTables(NameTablesDataFile);
+end;
+
 begin
   randomize();
-  loadTables('system\NameData.xml');
 end.
+
