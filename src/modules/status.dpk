@@ -1,4 +1,4 @@
-package speller;
+package status;
 
 {$R *.res}
 {$ALIGN ON}
@@ -27,11 +27,10 @@ package speller;
 {$DESCRIPTION 'Status report & console'}
 
 requires
-  vcl;
+	vcl;
 
-{$IFDEF WIN32}
 contains
-  status_console;
-{$ENDIF} 
+	systray,
+	status_console;
 
 end.

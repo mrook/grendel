@@ -27,13 +27,11 @@ package core;
 {$IMPLICITBUILD OFF}
 
 requires
-	rtl,
-	vcl;
+	rtl;
 
 contains
 {$IFDEF WIN32}
 	WinSock2,
-	systray,
 	JclHookExcept,
 	JclDebug,
 	JclSysInfo,

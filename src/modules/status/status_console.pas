@@ -2,7 +2,7 @@
 	Summary:
 		Module that hooks into systray.pas and displays console form on desktop
 	
-	## $Id: status_console.pas,v 1.11 2004/04/12 20:49:02 ***REMOVED*** Exp $
+	## $Id: status_console.pas,v 1.12 2004/04/14 21:33:02 ***REMOVED*** Exp $
 }
 unit status_console;
 
@@ -11,16 +11,16 @@ interface
 
 implementation
 
-{$IFNDEF CONSOLEBUILD}
+
 uses
+	StdCtrls,
+	ExtCtrls,
+	Graphics,
+	Forms,
 	DateUtils,
 	Classes,
 	Windows,
-	StdCtrls,
-	ExtCtrls,
 	SysUtils,
-	Graphics,
-	Forms,
 	SyncObjs,
 	console,
 	modules,
@@ -94,7 +94,10 @@ var
 	console : GConsole;
 begin
 	cs := TCriticalSection.Create();
-	
+		
+	initSysTray();
+	registerSysTray();
+
 	Application.Title := 'Grendel ' + version_number;
 
 	consoleForm := TForm.Create(nil);
@@ -110,9 +113,9 @@ begin
 	consoleFont.Size := 10;
 
 	consoleMemo := TMemo.Create(consoleForm);
+	consoleMemo.Parent := consoleForm;
 	consoleMemo.Width := consoleForm.ClientWidth;
 	consoleMemo.Height := consoleForm.ClientHeight;
-	consoleMemo.Parent := consoleForm;
 	consoleMemo.ScrollBars := ssVertical;
 	consoleMemo.ReadOnly := True;
 	consoleMemo.WordWrap := false;
@@ -155,12 +158,13 @@ begin
 	consoleQueue.Free();
 	
 	cs.Free();
+
+	unregisterSysTray();
+	cleanupSysTray();
 end;
 
 
 exports
 	returnModuleInterface;
- 
-{$ENDIF}
 
 end.

@@ -2,7 +2,7 @@
 	Summary:
 		System tray icon routines
 		
-	## $Id: systray.pas,v 1.5 2004/04/03 16:04:23 ***REMOVED*** Exp $
+	## $Id: systray.pas,v 1.1 2004/04/14 21:33:02 ***REMOVED*** Exp $
 }
 
 unit systray;
@@ -29,6 +29,7 @@ implementation
 uses
   SysUtils,
   Windows,
+  Classes,
   Messages,
   ShellAPI,
   Forms,
@@ -54,7 +55,8 @@ type
     procedure WMRButtonDown(var Mess: TMessage); message WM_RBUTTONDOWN;
     
     procedure WMCommand(var Mess : TMessage); message WM_COMMAND;
-
+    
+	procedure serverTick();
   public
     constructor Create();
     destructor Destroy; override;
@@ -72,6 +74,11 @@ var
   menuitems : GDLinkedList;
   menu : HMENU;
  
+
+procedure GSysTray.serverTick();
+begin
+	Application.ProcessMessages();
+end;
   
 procedure GSysTray.windowHandler(var msg : TMessage);
 var
@@ -158,8 +165,14 @@ begin
 end;
 
 procedure registerSysTray();
+var
+	serverInstance : GServer;
 begin
-  sys := GSysTray.Create();
+  	sys := GSysTray.Create();
+  
+	serverInstance := GServer.Create();
+	serverInstance.OnTick := sys.serverTick;
+	serverInstance.Free();
 end;
 
 procedure unregisterSysTray();

@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.14 2004/04/04 22:13:54 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.15 2004/04/14 21:33:02 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -63,10 +63,6 @@ implementation
 
 
 uses
-{$IFDEF WIN32}
-	Forms,
-	systray,
-{$ENDIF}
 	Math,
 	SysUtils,
 	conns,
@@ -183,13 +179,6 @@ begin
 		initEvents();
 
 		writeConsole('Booting server...');
-		
-		{$IFDEF WIN32}
-		{$IFNDEF CONSOLEBUILD}
-		initSysTray();
-		registerSysTray();
-		{$ENDIF}
-		{$ENDIF}
 		
 		loadSystem();
 
@@ -341,14 +330,6 @@ begin
 		on E : Exception do reportException(E, 'GServer.cleanup()');
 	end;
 
-	// make sure there's no dangling icon
-	{$IFDEF WIN32}
-	{$IFNDEF CONSOLEBUILD}
-	unregisterSysTray();
-	cleanupSysTray();
-	{$ENDIF}
-	{$ENDIF}
-	
 	writeConsole('Cleanup complete.');
 end;
 
@@ -431,10 +412,6 @@ begin
 
 			iterator.Free();
 		
-			{$IFDEF WIN32}
-			Application.ProcessMessages();
-			{$ENDIF}
-
 			Sleep(SERVER_PULSE_SLEEP);
 		
 			if (Assigned(FOnTick)) then
