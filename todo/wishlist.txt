@@ -2,6 +2,10 @@ Wishlist for the 1.0.x tree
 (! = closed, * = normal, l = lower priority)
 
 
+* run as service (NT/2K/XP)
+
+  - raises the need of some sort of "admin console", remote? through the webservice?
+
 * more stability when starting/shutting down, especially on Win98/ME
 
 * we really need another way of registering commands to the server, pluggable interfaces?
