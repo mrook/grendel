@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.2 2001/07/30 14:46:54 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.3 2001/08/04 22:10:34 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -401,7 +401,7 @@ begin
         else
           buf := '  Skill: ';
 
-        buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name, g.perc]);
+        buf1 := buf1 + buf + Format('%20s %3d%%'#13#10, [sk.name^, g.perc]);
         
         node := node.next;
       end;
