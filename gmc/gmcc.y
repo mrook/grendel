@@ -396,7 +396,10 @@ funcname 	: IDENTIFIER		{ $$ := varName; }
 
 varname  : idlist    	{ varGlob := ':' + $1;
                         tmp := curFunction + varGlob;
+                        varGlob := left(varGlob, '.');
 												varName := left(tmp, '.');
+												
+												// writeln('searching ', varName, ' ', varGlob);
 																																		
 												if (varName <> tmp) then
                           begin
@@ -407,6 +410,14 @@ varname  : idlist    	{ varGlob := ':' + $1;
   													Expr_External($$).id := varName;
   													Expr_External($$).assoc := right(tmp, '.');
   													end
+  											  else
+													if (lookupEnv(varGlob) <> nil) then 
+														begin
+  													$$ := Expr_External.Create;
+  													$$.lineNum := yylineno; 
+  													Expr_External($$).id := varGlob;
+  													Expr_External($$).assoc := right(tmp, '.');
+													end
   												else
   												  begin
   													compilerError(yylineno, 'undeclared identifier "' + right(varGlob, ':') + '"');
@@ -582,14 +593,14 @@ var
 	  t1, t2 : integer;
 begin
   Result := expr;
-
+  
   if (expr = nil) then
     exit;
 
 	Result.typ := _VOID;
 
   if (expr is Expr_Op) then
-    begin
+    begin   
     Expr_Op(expr).le := typeExpr(Expr_Op(expr).le);
     Expr_Op(expr).re := typeExpr(Expr_Op(expr).re);
 
@@ -631,8 +642,10 @@ begin
   else
   if (expr is Expr_Call) then
     begin
+		Expr_Call(expr).params := typeExpr(Expr_Call(expr).params);
+
 		t1 := lookupEnv(Expr_Call(expr).id).typ;
-   
+		 
     if (t1 <> -1) then
 	    expr.typ := t1
     else
@@ -778,6 +791,9 @@ var
 	bval, lval, rval : integer;
 begin
   Result := expr;
+  
+  if (expr = nil) then
+    exit;
 
   if (expr is Expr_Op) then
     begin
@@ -1210,8 +1226,8 @@ begin
 
     e := lookupEnv(Expr_Id(Expr_Assign(expr).id).id);
 
-		if (e.typ = _EXTERNAL) then
-      emit('GET');
+{		if (e.typ = _EXTERNAL) then
+      emit('GET'); }
       
     if (e.varTyp = VARTYPE_GLOBAL) then
       emit('POPR R' + IntToStr(e.displ))
