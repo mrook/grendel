@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.16 2002/01/22 13:18:31 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.17 2002/07/06 18:54:23 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -571,7 +571,7 @@ begin
 
     for syl := 1 to 49 do
       begin
-      if (pos(syl_table[syl,1], s) = 1) then
+      if (pos(syl_table[syl,1], lowercase(s)) = 1) then
         begin
         len := length(syl_table[syl,1]);
         buf := buf + syl_table[syl,2];
