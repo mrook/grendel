@@ -2,7 +2,7 @@
   Summary:
   	Interface with GMC virtual machine
   	
-	## $Id: progs.pas,v 1.5 2004/03/06 20:18:40 ***REMOVED*** Exp $
+	## $Id: progs.pas,v 1.6 2004/03/13 22:09:16 hemko Exp $
 }
 
 unit progs;
@@ -108,7 +108,7 @@ end;
 procedure grendelVMError(owner : TObject; const msg : string);
 begin
   if (owner <> nil) then
-    writeConsole('VM error in context of ' + GNPC(owner).name + ': ' + msg)
+    writeConsole('VM error in context of ' + GNPC(owner).name + ' (#' + IntToStr(GNPC(owner).npc_index.vnum) + '): ' + msg)
   else
     writeConsole('VM error: ' + msg);
 end;
