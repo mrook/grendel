@@ -5,7 +5,7 @@
 ; which are substrings of the command name (so 'l' with name 'look')
 ; will be discarded.
 ;
-; $Id: commands.dat,v 1.36 2004/03/10 23:13:07 ***REMOVED*** Exp $
+; $Id: commands.dat,v 1.37 2004/03/21 21:19:39 ***REMOVED*** Exp $
 
 #command
 name: down
@@ -307,6 +307,11 @@ function: do_give
 #command
 name: group
 function: do_group
+#end
+
+#command
+name: grouphand
+function: do_grouphand
 #end
 
 #command
