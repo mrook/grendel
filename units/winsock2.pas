@@ -441,6 +441,9 @@ const
 { Maximum queue length specifiable by listen. }
 	SOMAXCONN = $7fffffff;
 
+{ Level number for (get/set)sockopt() to apply to socket itself. }
+  SOL_SOCKET = $ffff;
+
 { WinSock 2 extension -- bit values and indices for FD_XXX network events }
 	FD_READ_BIT = 0;
 	FD_READ = (1  shl  FD_READ_BIT);
