@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.21 2003/10/03 20:58:39 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.22 2003/10/09 20:13:36 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -353,20 +353,35 @@ begin
 end;
 
 function removeQuotes(str : string) : string;
+var
+	s : string;
+	x : integer;
 begin
 	if (length(str) = 0) then
 		begin
-		Result := str;
+		Result := '';
 		exit;
 		end;
-		
-	if (str[1] = '"') then
-		str[1] := ' ';
+			
+	x := 1;
+	s := '';
 	
-	if (str[length(str)] = '"') then
-		str[length(str)] := ' ';
+	while (x <= length(str)) do
+		begin
+		if (str[x] = '\') then
+			inc(x);
 		
-	Result := Trim(str);
+		s := s + str[x];
+		inc(x);
+		end;
+
+	if (s[1] = '"') then
+		s[1] := ' ';
+	
+	if (s[length(s)] = '"') then
+		s[length(s)] := ' ';
+		
+	Result := Trim(s);
 end;
 
 function escape(str : string) : string;
