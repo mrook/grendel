@@ -18,6 +18,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! rework input routine, make sure tintin/jmc work again
 ! change all use of string to PString where strings are shared
 ! add extra descriptions to rooms, exits, objects
+! 'drink' without params should drink from first fountain in room
+! generic timer implementation
 
 
 * rework affects system
@@ -37,13 +39,15 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - bugtrack/report system 
 - skill/spellslots
 - practice sessions
+- modularized mud, pluggable objects (like timers, sets of commands, etc.)
 
 
+l implementation of the mud sound protocol
+l new area format using XML
 l purge command (strips char of objects, only for admins)
 l clan competition for wps/pkillnum
 l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
-l 'drink' without params should drink from first fountain in room
 l mud police!
 l online suggest (pray) history
 
