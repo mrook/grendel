@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.42 2003/10/09 21:05:45 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.43 2003/10/10 20:13:43 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -202,7 +202,7 @@ begin
     if ((input_buf[i] = #8) or (input_buf[i] = #127)) then
       delete(comm_buf, length(comm_buf), 1)
     else
-    if (byte(input_buf[i]) > 31) and (byte(input_buf[i]) < 127) then
+    //if (byte(input_buf[i]) > 31) and (byte(input_buf[i]) < 127) then
       begin
       comm_buf := comm_buf + input_buf[i];
       end;
