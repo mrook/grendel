@@ -11,7 +11,7 @@
 		Do not alter / remove this copyright notice
 		Email me at : support@droopyeyes.com
 		
-	## $Id: FastStringFuncs.pas,v 1.2 2004/03/31 20:24:09 ***REMOVED*** Exp $
+	## $Id: FastStringFuncs.pas,v 1.3 2004/03/31 20:27:53 ***REMOVED*** Exp $
 }
 
 unit FastStringFuncs;
@@ -19,11 +19,6 @@ unit FastStringFuncs;
 interface
 
 uses
-  {$IFDEF LINUX}
-    QGraphics,
-  {$ELSE}
-    Graphics,
-  {$ENDIF}
   FastStrings, Sysutils, Classes;
 
 const
@@ -51,7 +46,6 @@ function RandomFileName(aFilename : string) : string;
 function RandomStr(aLength : Longint) : string;
 function ReverseStr(const aSourceString: string): string;
 function RightStr(const aSourceString : string; Size : Integer) : string;
-function RGBToColor(aRGB : string) : TColor;
 function StringCount(const aSourceString, aFindString : string; Const CaseSensitive : Boolean = TRUE) : Integer;
 function SoundEx(const aSourceString: string): Integer;
 function UniqueFilename(aFilename : string) : string;
@@ -553,22 +547,6 @@ begin
   else begin
     SetLength(Result, Size);
     FastCharMove(aSourceString[Length(aSourceString)-(Size-1)],Result[1],Size);
-  end;
-end;
-
-//Converts a typical HTML RRGGBB color to a TColor
-function RGBToColor(aRGB : string) : TColor;
-begin
-  if Length(aRGB) < 6 then raise EConvertError.Create('Not a valid RGB value');
-  if aRGB[1] = '#' then aRGB := Copy(aRGB,2,Length(aRGB));
-  if Length(aRGB) <> 6 then raise EConvertError.Create('Not a valid RGB value');
-
-  Result := HexToInt(aRGB);
-  asm
-    mov   EAX, Result
-    BSwap EAX
-    shr   EAX, 8
-    mov   Result, EAX
   end;
 end;
 
