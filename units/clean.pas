@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.24 2003/10/22 13:12:34 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.25 2003/10/30 19:46:27 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -96,6 +96,8 @@ begin
   a := 0;
   repeat
     try
+      sleep(10000);
+
       inc(a);
 
       if (a = 15) then
@@ -161,8 +163,6 @@ begin
         end;
 
 //      cleanExtractedChars();
-
-      sleep(10000);
     except
 {      on E : EExternal do
         begin
