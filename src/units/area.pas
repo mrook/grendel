@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.3 2003/12/28 12:20:33 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.4 2004/01/25 16:36:28 hemko Exp $
 }
 
 unit area;
@@ -2865,6 +2865,7 @@ begin
   obj.cost := cost;
   obj.count := 1;
   obj.vnum := vnum;
+  obj.timer := timer;
   
   obj_in := GObject(objectIndices[vnum]);
 
