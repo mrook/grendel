@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.31 2001/05/27 10:49:09 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.32 2001/06/06 19:04:17 xenon Exp $
 
 unit area;
 
@@ -141,6 +141,7 @@ type
       gold,weight,height:integer;
 
       prog : GCodeBlock;
+      progfile : string;
 
       skills_learned : GDLinkedList;
 
@@ -477,6 +478,7 @@ var s:string;
     sk : GSkill;
     npc : GNPCIndex;
 //    prog : GProgram;
+//    progfile : string;
 begin
   npc := nil;
   s := af.readLine;
@@ -550,7 +552,10 @@ begin
           begin
           if (pos('>', s) <> 0) then
             begin
-            prog := loadCode('progs\' + right(s, ' '));
+            progfile := 'progs\' + right(s, ' ');
+            prog := loadCode(progfile);
+            if (prog = nil) then
+              areaBug('loadNPCs', 'error loading ''' + progfile + '''; file doesn''t exist?');
             end
           else
             begin
