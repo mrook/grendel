@@ -1969,6 +1969,8 @@ othersfound: $n licks $N.
 victfound: $n licks you.
 charauto: You lick yourself.
 othersauto: $n licks $mself - YUCK.
+charobject: You lick $p.
+othersobject: $n licks $p.
 #END
 
 #SOCIAL
