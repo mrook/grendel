@@ -1475,3 +1475,26 @@ begin
       end;
     end;
 end;
+
+{ Allow players to change their password - Nemesis }
+procedure do_password(ch : GCharacter; param: string);
+var arg1, arg2 : string;
+begin
+  param := one_argument(param,arg1);
+  one_argument(param,arg2);
+
+  if (length(param) = 0) or ((length(arg1) > 0) and (length(arg2) = 0)) then
+    ch.sendBuffer('Usage:  PASSWORD <old password> <new password>'#13#10)
+  else
+  if (ch.player^.password <> arg1) then
+    begin
+    ch.sendBuffer('Your password did not match!'#13#10);
+    exit;
+    end
+  else
+    begin
+    ch.player^.password := arg2;
+    ch.save(ch.name);
+    ch.sendBuffer('Ok, password changed.'#13#10);
+    end;
+end;

@@ -548,6 +548,9 @@ begin
   if (comparestr(s, 'do_autosac') = 0) then
     g := do_autosac
   else
+  if (comparestr(s, 'do_password') = 0) then
+    g := do_password
+  else
     begin
     g := nil;
 
