@@ -364,6 +364,7 @@ end;
 
 {Jago 10/Jan/2001 OSTAT : return data about an object}
 { Revised 28/Jan/2001 - Nemesis }
+{ 19/Feb/2001 - Xenon : fixed bug that made grendel crash on ostat <object> }
 procedure do_ostat(ch : GCharacter; param : string);
 var buf, buf1, arg : string;
     aff_node, obj_node : GListNode;
@@ -401,9 +402,9 @@ begin
                 'Short description: %s.' + #13#10 +
                 'Long description: %s' + #13#10,
                 [obj.obj_index.vnum,
-                obj.name,
-                obj.short,
-                obj.long]);
+                obj.name^,
+                obj.short^,
+                obj.long^]);
 
   buf1 := buf1 + buf;
 
