@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.22 2001/08/16 19:29:44 ***REMOVED*** Exp $
+// $Id: dtypes.pas,v 1.23 2001/08/18 22:07:58 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -210,7 +210,10 @@ begin
   while (current = nil) and (cursor < tbl.hashSize) do
     begin
     if (tbl.bucketlist[cursor].head <> nil) then
+      begin
       current := tbl.bucketList[cursor].head;
+      break;
+      end;
       
     inc(cursor);
     end;
@@ -238,8 +241,11 @@ begin
       while (current = nil) and (cursor < tbl.hashSize) do
         begin
         if (tbl.bucketlist[cursor].head <> nil) then
+          begin
           current := tbl.bucketList[cursor].head;
-
+          break;
+          end;
+      
         inc(cursor);
         end;
       end;
