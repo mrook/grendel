@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.34 2001/05/11 14:25:04 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.35 2001/06/06 18:40:16 xenon Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -2268,6 +2268,92 @@ begin
     begin
       interpret(ch, dirs[i]);
     end;
+  end;
+end;
+
+procedure do_reload(ch : GCharacter; param : string);
+var
+  cmd : string;
+  node : GListNode;
+  npc : GNPCIndex;
+  vict : GCharacter;
+  count1, count2 : integer;
+begin
+  count1 := 0; count2 := 0;
+  
+  if (ch.IS_NPC()) then
+  begin
+    ch.sendBuffer('This command is only available to imms.'#13#10);
+    exit;
+  end;
+
+  if (length(param) = 0) then
+  begin
+    ch.sendBuffer('Usage: RELOAD progs|namegen [silent]'#13#10#13#10);
+    ch.sendBuffer('This command will reload certain parts of the mud online. When the '#13#10 +
+                  'argument progs is used together with the argument silent, mobs won''t'#13#10 +
+                  'emote when their mobprog is being reloaded.'#13#10);
+    exit;
+  end;
+
+  param := one_argument(param, cmd);
+  cmd := uppercase(cmd);
+
+  if (cmd = 'PROGS') then
+  begin
+    node := npc_list.head;
+    while (node <> nil) do
+    begin
+      npc := node.element;
+      if (length(npc.progfile) <> 0) then
+      begin
+        if (npc.prog <> nil) then
+        begin
+          npc.prog.Free();
+          npc.prog := nil;
+        end;
+        npc.prog := loadCode(npc.progfile);
+        inc(count1);
+      end;
+      node := node.next;
+    end;
+
+    node := char_list.head;
+    while (node <> nil) do
+    begin
+      vict := node.element;
+      if (vict.IS_NPC()) then
+      begin
+        if (length(GNPC(vict).npc_index.progfile) = 0) then
+        begin
+          node := node.next;
+          continue;
+        end;
+        if (GNPC(vict).context <> nil) then
+        begin
+          GNPC(vict).context.Free();
+          GNPC(vict).context := nil;
+        end;
+        GNPC(vict).context := GContext.Create();
+        GNPC(vict).context.load(GNPC(vict).npc_index.prog);
+        GNPC(vict).context.owner := vict;
+        if (uppercase(param) <> 'SILENT') then
+          interpret(vict, 'emote twitches violently as he receives new instructions.');
+        inc(count2);
+      end;
+      node := node.next;
+    end;
+
+    ch.sendBuffer(Format('Reloaded progs on %d NPC indices and reinitialised contexts on %d mobs.'#13#10, [count1, count2]));
+  end
+  else
+  if (cmd = 'NAMEGEN') then
+  begin
+    interpret(ch, 'namegen reload');
+  end
+  else
+  begin
+    ch.sendBuffer('Unrecognized option.');
   end;
 end;
 
