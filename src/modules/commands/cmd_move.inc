@@ -1,4 +1,4 @@
-// $Id: cmd_move.inc,v 1.9 2004/06/10 18:10:56 ***REMOVED*** Exp $
+// $Id: cmd_move.inc,v 1.10 2004/07/28 10:57:42 ***REMOVED*** Exp $
 
 procedure makeblood(ch : GCharacter; pexit : GExit);
 var 
@@ -219,6 +219,12 @@ begin
   if ((ch.level < room_to.minlevel) or (ch.level > room_to.maxlevel)) and
    (not ch.IS_IMMORT) and (not ch.IS_NPC) then
     begin
+    ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
+    exit;
+    end;
+    
+  if (not ch.IS_NPC) and (room_to.area.flags.isBitSet(AREA_NOPC)) then
+  	begin
     ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
     exit;
     end;
