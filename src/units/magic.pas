@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.3 2004/02/01 12:06:34 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -286,7 +286,7 @@ begin
     begin
     aff := GAffect(iterator.next());
     
-    aff_find := findAffect(ch, aff.name^);
+    aff_find := findAffect(ch, aff.name);
     
     // prolong existing affect if it already exists
     if (aff_find <> nil) then
@@ -613,7 +613,7 @@ begin
 				end;
 			end;
 
-		 	say_spell(ch, sn.name^);
+		 	say_spell(ch, sn.name);
 
 		 	improve_skill(ch, sn);
 

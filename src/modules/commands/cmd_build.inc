@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.2 2003/12/12 23:01:20 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.3 2004/02/01 12:06:33 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -379,8 +379,7 @@ begin
       begin
       aff := GAffect(iterator.next());
 
-      if (aff.name <> nil) then
-        buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name^, aff.duration]);
+      buf := buf + Format('  %20s (duration: %d)'#13#10, [aff.name, aff.duration]);
       end;
     iterator.Free();
     
@@ -403,7 +402,7 @@ begin
         else
           buf := '  Skill: ';
 
-        buf1 := buf1 + buf + Format('%20s %d%%'#13#10, [sk.name^, g.perc]);        
+        buf1 := buf1 + buf + Format('%20s %d%%'#13#10, [sk.name, g.perc]);
         end;
       iterator.Free();
     end;

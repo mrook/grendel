@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.5 2004/01/26 22:21:22 hemko Exp $
+  ## $Id: area.pas,v 1.6 2004/02/01 12:06:34 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -725,7 +725,7 @@ begin
         begin
         aff := GAffect.Create();
 
-        aff.name := hash_string(af.readToken());
+        aff.name := af.readToken();
         aff.wear_msg := '';
 
         aff.duration := af.readInteger();
@@ -1232,7 +1232,7 @@ begin
       begin
       g := GLearned(node_ex.element);
 
-      writeln(f, 'Skill: ''', GSkill(g.skill).name^, ''' ', g.perc);
+      writeln(f, 'Skill: ''', GSkill(g.skill).name, ''' ', g.perc);
 
       node_ex := node_ex.next;
       end;

@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $
+  ##	$Id: skills.pas,v 1.3 2004/02/01 12:06:34 ***REMOVED*** Exp $
 }
 
 unit skills;
@@ -28,19 +28,32 @@ type
     end;
 
     GAffect = class
-//      skill : GSkill;
-      wear_msg : string;
-      name : PString;
-      duration : longint;
-      modifiers : array of GModifier;
+    private
+      _name : PString;      
+      _wear_msg : string;
+      _duration : integer;
 
+		public
+      modifiers : array of GModifier;
       node : GListNode;
 
-      procedure modify(ch : GCharacter; add : boolean);
-      procedure applyTo(ch : GCharacter);
+			procedure modify(ch : GCharacter; add : boolean);
+			procedure applyTo(ch : GCharacter);
+
+      procedure setName(const name : string);
+      function getName() : string;
+			
+		published
+      property name : string read getName write setName;
+      property wear_msg : string read _wear_msg write _wear_msg;
+      property duration: integer read _duration write _duration;
     end;
 
     GSkill = class
+    private
+      _name : PString;
+
+		public      
       id : integer;
 
       func : SPEC_FUNC;
@@ -48,7 +61,6 @@ type
       affects : GDLinkedList;
       prereqs : GDLinkedList;
 
-      name : PString;
       skill_type:integer;
       min_mana:integer;
       min_lvl:integer;
@@ -66,6 +78,12 @@ type
 
       constructor Create();
       destructor Destroy(); override;
+    
+      procedure setName(const name : string);
+      function getName() : string;
+    
+    published
+      property name : string read getName write setName;    	
     end;
 
 var
@@ -144,7 +162,7 @@ begin
     begin
     sk := GSkill(iterator.next());
 
-    if (s = uppercase(sk.name^)) or (pos(s, uppercase(sk.name^)) = 1) then
+    if (s = uppercase(sk.name)) or (pos(s, uppercase(sk.name)) = 1) then
       begin
       Result := sk;
       break;
@@ -226,7 +244,7 @@ begin
         end
       else
       if (g = 'NAME') then
-        name := hash_string(af.readLine())
+        name := af.readLine()
       else
       if g='ROUNDS' then
         beats := af.readInteger()
@@ -287,7 +305,7 @@ begin
         begin
         aff := GAffect.Create();
 
-        aff.name := hash_string(af.readToken());
+        aff.name := af.readToken();
         aff.wear_msg := af.readToken();
 
         aff.duration := af.readInteger();
@@ -375,7 +393,7 @@ begin
 
   if (percent <= chance div 3) then
     begin
-    act(AT_WHITE, '[You have become better at ' + sn.name^ + '!]',false,ch,nil,nil,TO_CHAR);
+    act(AT_WHITE, '[You have become better at ' + sn.name + '!]',false,ch,nil,nil,TO_CHAR);
     ch.SET_LEARNED(UMin(ch.LEARNED(sn) + 1, 100), sn);
     end;
 end;
@@ -452,13 +470,29 @@ begin
 
     aff.modifiers := Self.modifiers;
 
-    if (findAffect(ch, Self.name^) = nil) then // not yet affected
+    if (findAffect(ch, Self.name) = nil) then // not yet affected
       aff.node := ch.affects.insertLast(aff);
 
     aff.modify(ch, true);
     end
   else
     modify(ch, true);
+end;
+
+procedure GAffect.setName(const name : string);
+begin 
+  if (_name <> nil) then
+    unhash_string(_name);
+    
+  _name := hash_string(name);
+end;
+
+function GAffect.getName() : string;
+begin
+  if (_name <> nil) then
+    Result := _name^
+  else
+    Result := '';
 end;
 
 function findApply(s : string) : GApplyTypes;
@@ -571,7 +605,7 @@ begin
     begin
     aff := GAffect(iterator.next());
 
-    if (aff.name^ = name) then
+    if (aff.name = name) then
       begin
       Result := aff;
       exit;
@@ -689,7 +723,7 @@ begin
       begin
       aff := GAffect(iterator_aff.next());
 
-      dec(aff.duration);
+      aff.duration := aff.duration - 1;
 
       if (aff.duration = 0) then
         begin
@@ -722,6 +756,22 @@ begin
   prereqs.Free();
   
   inherited Destroy();
+end;
+
+procedure GSkill.setName(const name : string);
+begin 
+  if (_name <> nil) then
+    unhash_string(_name);
+    
+  _name := hash_string(name);
+end;
+
+function GSkill.getName() : string;
+begin
+  if (_name <> nil) then
+    Result := _name^
+  else
+    Result := '';
 end;
 
 procedure initSkills();

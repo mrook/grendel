@@ -1,4 +1,4 @@
-// $Id: cmd_skill.inc,v 1.1 2003/12/12 13:19:54 ***REMOVED*** Exp $
+// $Id: cmd_skill.inc,v 1.2 2004/02/01 12:06:34 ***REMOVED*** Exp $
 
 procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
@@ -266,9 +266,9 @@ begin
 						inc(num);
 
 						if (odd(num)) then
-							str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + '    '
+							str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name, GSkill(g.skill).min_mana, g.perc]) + '    '
 						else
-							str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name^, GSkill(g.skill).min_mana, g.perc]) + #13#10;
+							str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name, GSkill(g.skill).min_mana, g.perc]) + #13#10;
 						end;
 				end;
 		end;
@@ -316,9 +316,9 @@ begin
 			inc(a);
 
 			if (odd(a)) then
-				buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + '    '
+				buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name, g.perc]) + '    '
 			else
-				buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name^, g.perc]) + #13#10;
+				buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name, g.perc]) + #13#10;
 			end;
 		end;
 	iterator.Free();
@@ -376,8 +376,13 @@ begin
       begin
       g := GLearned(iterator.next());
 
-      if ((ch.level >= GSkill(g.skill).min_lvl) and (ch.LEARNED(g.skill) = 0)) then
-        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name^, false, ch, nil, nil, TO_CHAR);
+      if (ch.level >= GSkill(g.skill).min_lvl) then
+      	begin
+      	if (ch.LEARNED(g.skill) = 0) then
+        	act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name, false, ch, nil, nil, TO_CHAR)
+        else
+        	act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name + ' ($B$7Learned$A$7)', false, ch, nil, nil, TO_CHAR);
+        end;
 			end;
 		iterator.Free();
     end
@@ -414,14 +419,14 @@ begin
             
             if (ch.LEARNED(sk) < 50) then
               begin
-              ch.sendBuffer('You need to have sufficient knowledge of ' + sk.name^ + ' first.'#13#10);
+              ch.sendBuffer('You need to have sufficient knowledge of ' + sk.name + ' first.'#13#10);
               iterator.Free();
               exit;
               end;
             end;
           iterator.Free();
 
-          act(AT_REPORT,'You learn ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You learn ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
 
           ch.SET_LEARNED(20, sn);
           end;
@@ -450,7 +455,7 @@ begin
   else
     begin
     ch.SET_LEARNED(0, sn);
-    act(AT_REPORT, 'You have unlearned ' + sn.name^ + '.', false, ch, nil, nil, TO_CHAR);
+    act(AT_REPORT, 'You have unlearned ' + sn.name + '.', false, ch, nil, nil, TO_CHAR);
     end;
 end;
 
@@ -496,7 +501,7 @@ begin
     while (iterator.hasNext()) do
       begin
       g := GLearned(iterator.next());
-
+      
       if (ch.level >= GSkill(g.skill).min_lvl) then
         act(AT_REPORT, Format('  (Level $B$4%s$A$7) %-25s $B$7%s$A$7%%', [pad_integer_front(GSkill(g.skill).min_lvl, 3), GSkill(g.skill).name, pad_integer_front(ch.LEARNED(g.skill), 3)]), false, ch, nil, nil, TO_CHAR);
 			end;
@@ -529,10 +534,10 @@ begin
           begin
           ch.SET_LEARNED(50, sn);
 
-          act(AT_REPORT,'You now know enough about ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You now know enough about ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
           end
         else
-          act(AT_REPORT,'You practice ' + cap(sn.name^) + '.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You practice ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
         end
       else
         act(AT_REPORT,'You have practiced this skill enough.',false,ch,nil,nil,TO_CHAR);

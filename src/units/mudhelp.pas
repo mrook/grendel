@@ -1,6 +1,6 @@
 {
   @abstract(Online help interface)
-  @lastmod($Id: mudhelp.pas,v 1.1 2003/12/12 13:20:06 ***REMOVED*** Exp $)
+  @lastmod($Id: mudhelp.pas,v 1.2 2004/02/01 12:06:34 ***REMOVED*** Exp $)
 }
 
 unit mudhelp;
@@ -103,7 +103,7 @@ begin
     gsk := GSkill(iterator.next());
     if (gsk.skill_type = sktype) then
     	begin
-      ask := ASkill.Create(gsk.min_lvl, gsk.name^);
+      ask := ASkill.Create(gsk.min_lvl, gsk.name);
       insertLevelSorted(ll, ask);
     	end;    
 	  end;

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.2 2003/12/12 23:01:18 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.3 2004/02/01 12:06:34 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -1755,7 +1755,7 @@ begin
             begin
             a := right(a, '''');
 
-            name := hash_string(left(a, ''''));
+            name := left(a, '''');
 
             a := right(right(a, ''''), '''');
             
@@ -2098,7 +2098,7 @@ begin
 			begin
 			g := GLearned(iterator.next());
 
-			af.writeLine( 'Skill: ''' + GSkill(g.skill).name^ + ''' ' + IntToStr(g.perc));
+			af.writeLine( 'Skill: ''' + GSkill(g.skill).name + ''' ' + IntToStr(g.perc));
 			end;
 
 		af.writeLine('#END');
@@ -2114,7 +2114,7 @@ begin
 
 			with aff do
 				begin
-				af.writeString('''' + name^ + ''' ''' + wear_msg + ''' ');
+				af.writeString('''' + name + ''' ''' + wear_msg + ''' ');
 				af.writeInteger(duration);
 
 				for h := 0 to length(modifiers) - 1 do

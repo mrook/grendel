@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.2 2003/12/12 23:01:22 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.3 2004/02/01 12:06:33 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1318,10 +1318,10 @@ begin
     begin
     aff := GAffect(iterator.next());
 
-    if (aff.name <> nil) and (aff.name^ <> '') then
+    if (aff.name <> '') then
       with aff do
         begin
-        buf := name^ + ', which will wear off';
+        buf := name + ', which will wear off';
 
         if duration=1 then
           buf := buf + ' any moment'
