@@ -2,7 +2,7 @@
 	Summary:
 		Loadable module system
 
-	## $Id: modules.pas,v 1.3 2004/02/27 22:24:21 ***REMOVED*** Exp $
+	## $Id: modules.pas,v 1.4 2004/03/19 15:37:44 ***REMOVED*** Exp $
 }
   
 unit modules;
@@ -67,6 +67,7 @@ implementation
 uses
   strip,
   chars,
+  debug,
   util,
   commands,
   console,
@@ -86,7 +87,7 @@ end;
 
 procedure GModuleInfo.clearInterface();
 begin
-  _intf := nil;
+	_intf := nil;
 end;
 
 
@@ -163,79 +164,91 @@ end;
 
 procedure unloadModules();
 var
-  iterator : GIterator;
-  module : GModuleInfo;
+	iterator : GIterator;
+	module : GModuleInfo;
 begin
-  iterator := module_list.iterator();
-  
-  while (iterator.hasNext()) do
-    begin
-    module := GModuleInfo(iterator.next());
+	iterator := module_list.iterator();
 
-    writeConsole('Unloading module ' + module.filename);
-    
-    module.intf.unregisterModule();
-    module.clearInterface();
-    
-    UnloadPackage(module.handle);
-      
-    writeConsole('Unloaded module ' + module.filename);
-    end;
-    
-  module_list.clear();
-  module_list.Free();
-  
-  iterator.Free();
+	while (iterator.hasNext()) do
+		begin
+		module := GModuleInfo(iterator.next());
+
+		writeConsole('Unloading module ' + module.filename);
+
+		// possibly dangerous terrain
+		try
+			module.intf.unregisterModule();
+			module.clearInterface();
+
+			UnloadPackage(module.handle);
+		except
+			on E : Exception do reportException(E);
+		end;
+
+		writeConsole('Unloaded module ' + module.filename);
+		end;
+
+	module_list.clear();
+	module_list.Free();
+
+	iterator.Free();
 end;
 
 procedure addModule(const name : string);
 var
-  hndl : HMODULE;
-  module : GModuleInfo;
-  returnModuleInterface : GReturnModuleInterfaceFunction;
+	hndl : HMODULE;
+	module : GModuleInfo;
+	returnModuleInterface : GReturnModuleInterfaceFunction;
 begin
-  if (module_list.get(name) <> nil) then
-    raise Exception.Create('Module already loaded');
-      
-  hndl := LoadPackage('modules' + PathDelimiter + name);
-  
-  @returnModuleInterface := GetProcAddress(hndl, 'returnModuleInterface');
-  
-  if (@returnModuleInterface = nil) then
-  	begin
-  	writeConsole('Could not find interface function in ' + name);
-  	UnloadPackage(hndl);
-  	end
-  else
-  	begin     
-  	module := GModuleInfo.Create(hndl, name, GetPackageDescription(PChar('modules' + PathDelimiter + name)), returnModuleInterface());
-      
-	  module.intf.registerModule();
-      
-  	module_list.put(name, module);
+	if (module_list.get(name) <> nil) then
+		raise Exception.Create('Module already loaded');
 
-	  writeConsole('Loaded module ' + name + ' (' + module.description + ')');
-	  end;
+	hndl := LoadPackage('modules' + PathDelimiter + name);
+
+	@returnModuleInterface := GetProcAddress(hndl, 'returnModuleInterface');
+
+	if (@returnModuleInterface = nil) then
+		begin
+		writeConsole('Could not find interface function in ' + name);
+		UnloadPackage(hndl);
+		end
+	else
+		begin
+		try
+			module := GModuleInfo.Create(hndl, name, GetPackageDescription(PChar('modules' + PathDelimiter + name)), returnModuleInterface());
+
+			module.intf.registerModule();
+
+			module_list.put(name, module);
+
+			writeConsole('Loaded module ' + name + ' (' + module.description + ')');			
+		except
+			on E : Exception do reportException(E);
+		end;
+		end;
 end;
 
 procedure removeModule(const name : string);
 var
-  module : GModuleInfo;
+	module : GModuleInfo;
 begin
-  module := GModuleInfo(module_list.get(name));
-  
-  if (module = nil) then
-    raise Exception.Create('Module not loaded');
-    
-  module.intf.unregisterModule();
-  module.clearInterface();
+	module := GModuleInfo(module_list.get(name));
 
-  UnloadPackage(module.handle);
-    
-  writeConsole('Unloaded module ' + module.filename);
-  
-  module_list.remove(name);
-  module.Free;
+	if (module = nil) then
+		raise Exception.Create('Module not loaded');
+
+	try
+		module.intf.unregisterModule();
+		module.clearInterface();
+		UnloadPackage(module.handle);
+	except
+		on E : Exception do reportException(E);
+	end;
+
+	writeConsole('Unloaded module ' + module.filename, 1);
+
+	module_list.remove(name);
+	module.Free;
 end;
 
 
