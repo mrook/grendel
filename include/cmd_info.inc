@@ -741,20 +741,23 @@ begin
   else
   begin
     if (numImms > 0) then
+    begin
       buf_result := buf_imm;
+      if ((num_good > 0) or (num_evil > 0)) then
+        buf_result := buf_result + #13#10;
+    end;
       
     if ch.IS_IMMORT then
     begin
       if (num_good > 0) then
-        buf_result := buf_result + #13#10 + buf_good;
+        buf_result := buf_result + buf_good;
+      if (num_good > 0) and (num_evil > 0) then
+        buf_result := buf_result + #13#10;
       if (num_evil > 0) then
-        buf_result := buf_result + #13#10 + buf_evil;
+        buf_result := buf_result + buf_evil;
     end
     else
     begin
-      if (numImms > 0) then
-        buf_result := buf_result + #13#10;
-        
       if ch.IS_GOOD then
         buf_result := buf_result + buf_good
       else
@@ -1532,13 +1535,17 @@ begin
     ch.sendBuffer(line + #13#10);
 end;
 
+{ Xenon 23/Feb/2001: fixed a small bug; made alias'ing an already existing alias replace it }
 procedure do_alias(ch : GCharacter; param : string);
 var
    node : GListNode;
    al : GAlias;
    count : integer;
    alname, alfill : string;
+   replaced : boolean;
 begin
+  replaced := false;
+
   if (ch.IS_NPC) then
     begin
     ch.sendBuffer('You cannot do this.'#13#10);
@@ -1554,7 +1561,7 @@ begin
 
     while (node <> nil) do
       begin
-      if (GAlias(node.element).alias = param) then
+      if (GAlias(node.element).alias = alname) then
         begin
         al := node.element;
         break;
@@ -1564,19 +1571,24 @@ begin
       end;
 
     if (length(alfill) > 0) then
-      begin
-      if (al = nil) then
-        begin
-        al := GAlias.Create;
+    begin
+      if (al <> nil) then
+      begin        
+        ch.player^.aliases.remove(al.node);
+        al.Free;
+        replaced := true;
+      end;
 
-        al.expand := one_argument(param, al.alias);
-        al.node := ch.player^.aliases.insertLast(al);
+      al := GAlias.Create;
 
-        ch.sendBuffer('Alias added.'#13#10);
-        end
+      al.expand := one_argument(param, al.alias);
+      al.node := ch.player^.aliases.insertLast(al);
+
+      if replaced then
+        ch.sendBuffer('Alias replaced.'#13#10)
       else
-        ch.sendBuffer('There is already an alias under that name.'#13#10);
-      end
+        ch.sendBuffer('Alias added.'#13#10);
+    end
     else
       begin
       if (al = nil) then
