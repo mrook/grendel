@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.11 2003/12/12 13:31:50 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.12 2003/12/12 13:48:39 ***REMOVED*** Exp $
 #
 
 
@@ -28,12 +28,12 @@ ifdef WIN32
 	copy src\modules\*.map modules
 endif
 ifdef LINUX
-	cp src/grendel
-	cp src/grendel.map
-	cp src/bplcore.so
-	cp src/core.map
-	cp src/gmc/gmcc
-	cp src/gmc/gasm
+	cp src/grendel .
+	cp src/grendel.map .
+	cp src/bplcore.so .
+	cp src/bplcore.map .
+	cp src/gmc/gmcc .
+	cp src/gmc/gasm .
 	cp src/modules/bpl*.so modules
 	cp src/modules/*.map modules
 endif
@@ -49,9 +49,9 @@ ifdef WIN32
 	del modules\*.map
 endif
 ifdef LINUX
-	rm bpl*.so
-	rm grendel
-	rm *.map
-	rm modules/bpl*.so
-	rm modules/*.map
+	rm -f bpl*.so
+	rm -f grendel
+	rm -f *.map
+	rm -f modules/bpl*.so
+	rm -f modules/*.map
 endif

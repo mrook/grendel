@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.1 2003/12/12 13:19:32 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.2 2003/12/12 13:48:39 ***REMOVED*** Exp $
 #
 
 
@@ -39,7 +39,7 @@ DCC_DEFS=CONSOLEBUILD
 GRENDEL=grendel
 COPYOVER=copyover
 CORE=bplcore.so
-RM=rm
+RM=rm -f
 endif
 
 
@@ -59,6 +59,8 @@ clean:
 	$(RM) $(COPYOVER) 
 	$(RM) $(CORE)
 	$(RM) *.map
+	$(RM) *.dpu
+	$(RM) *.dcp
 	$(MAKE) -C gmc clean
 	$(MAKE) -C modules clean
 

@@ -4,7 +4,7 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.1 2003/12/12 13:19:48 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.2 2003/12/12 13:48:40 ***REMOVED*** Exp $
 #
 
 
@@ -41,7 +41,7 @@ GASM=gasm
 CORE_SYM=../core
 CORE_FILE=../bplcore.so
 
-RM=rm
+RM=rm -f
 endif
 
 
