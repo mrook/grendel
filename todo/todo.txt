@@ -47,9 +47,7 @@ Grendel's TODO list with probable release date/version
       		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
 
 
-* (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
-
-
+* (0.4.2) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 * (0.4.2) Better online construction (autocreate exit+room when moving),
           mobile create/edit, reset edit etc.
 * (0.4.2) expand tracking system

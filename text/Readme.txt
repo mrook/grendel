@@ -7,48 +7,13 @@ The Grendel Project - Win32 MUD Server            (c) 2000,2001 by Michiel Rook
 
 1. Introduction
 
-We've reached a milestone in Grendel development. Nearly 9 months after the
-resurrection of the codebase, 0.4.0 final has been released - something you have 
-been waiting for a long, long time.
+It's time for a new Grendel release, this one consisting of mostly
+bug-fixes, small enhancements, gameplay tweaks, etc.
 
-This release features the return of the GUI, or at least part of it. Some of
-you may recall the (very) early days of Grendel. The first few releases (some of
-which where internal and never had widespread use) sported a GUI with buttons, 
-graphical console, all strings/controls attached.
+Among the bugs fixed were some serious security issues - see
+www.grendelproject.nl/bugtrack/ - as well as a number of memory leaks.
 
-Soon afterwards, I decided a simple "textmode" console would be better. 
-The controls used in the GUI were not terribly lightweight, and at that time,
-size was still an issue.
-
-However, with the implementation of dynamically loadable modules in this
-release - more on this later on - I decided it would be time to let the good ol'
-days thrive again. The old console being eradicated, the server now lives in a 
-single system tray icon with a popup menu. 
-
-Clicking in this menu can trigger actions like shutting down or rebooting
-the server, or other commands provided by modules.
-
-One of the other new things is, as noted before, dynamic module support.
-This enables third-party developers to implement functions that can be loaded
-on-demand from the server, thus forming some sort of plugin architecture.
-
-Modules included with this distribution are the core commands, a spellchecker
-and a graphical console module. The latter registers itself into the popup
-menu, and gives you access to a console window.
-
-Another new thing is Linux support - Grendel now compiles on a Linux box
-that has Kylix 1.0 installed. This results in a native binary that can
-run without any speed loss, however, not all features are enabled.
-
-And the last exciting feature is something you probably saw in the two
-0.4.0 release candidates, the mobprog compiler, GMC, or Grendel MUD C.
-
-Some example mobprogs, courtesy of Hemko de Visser and Tristan
-Pothoven (also a resident Dreaven immortal), can be found in the
-"progs\examples" directory!
-
-All in all, this release is something very special. I hope that
-you will have fun toying around with it.
+Check the file "ChangeLog" for the full list of fixes.
 
 Enjoy!
 
@@ -210,7 +175,7 @@ Developers:
   Michiel Rook          (michiel@grendelproject.nl)     manager, website, code
   Hemko de Visser       (nemesis@grendelproject.nl)     code, field testing
   Roeland van Houte     (xenon@grendelproject.nl)       code
-  Oscar Martin          (jago@grendelproject.nl)        code
+  Oscar Martin          (jago@grendelproject.nl)        code, field testing
   Jeremiah Davis        (woodstock@grendelproject.nl)   documentation
 
 Mailinglists:
