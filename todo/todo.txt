@@ -20,6 +20,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! add extra descriptions to rooms, exits, objects
 ! 'drink' without params should drink from first fountain in room
 ! generic timer implementation
+! holywalk (walk thru anything)
 
 
 * rework affects system
@@ -29,6 +30,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 		ROOM_NOFLOOR, SECT_UNDERGROUND (no-light), EX_NOBREAK, EX_SWIM etc.
 * better damage/xp system (more balanced)
 * Better online construction (autocreate exit+room when moving), object
+  > Maybe even a map or something (show current map status in olc)
 * edit/instance, mobile create/edit/instance, reset edit etc.
 - some form of classes/professions/guilds/religions/whatever
 	-> probably Schools	
@@ -40,6 +42,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - skill/spellslots
 - practice sessions
 - modularized mud, pluggable objects (like timers, sets of commands, etc.)
+- spells: Mistform (walk thru doors, ethereal bla)
 
 
 l implementation of the mud sound protocol
