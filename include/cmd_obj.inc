@@ -627,14 +627,56 @@ begin
     end;
 end;
 
+{ Added drink without argument - Nemesis }
 procedure do_drink(ch:GCharacter;param:string);
-var obj:GObject;
-    liq:integer;
+var obj : GObject;
+    liq, counter : integer;
+    node, node_next : GListNode;
 begin
-  if (length(param)=0) then
+  if (length(param) = 0) then
     begin
-    ch.sendBuffer('Drink what?'#13#10);
-    exit;
+    node := ch.room.objects.head;
+
+    while (node <> nil) do
+      begin
+      node_next := node.next;
+      obj := node.element;
+
+      if (obj.item_type = ITEM_FOUNTAIN) then
+        begin
+        if (not ch.IS_NPC) and (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+          begin
+          act(AT_REPORT,'Ow yeah? And spill your ruptured bladder all over the clean floor?',false,ch,nil,nil,TO_CHAR);
+          exit;
+          end;
+
+        inc(counter);
+
+        liq := obj.value[3];
+
+        act(AT_REPORT,'You drink ' + liq_types[liq].name + ' from $p.',false,ch,obj,nil,TO_CHAR);
+        act(AT_REPORT,'$n drinks ' + liq_types[liq].name + ' from $p.',false,ch,obj,nil,TO_ROOM);
+
+        gain_condition(ch,COND_DRUNK,liq_types[liq].affect[COND_DRUNK]);
+        gain_condition(ch,COND_FULL,liq_types[liq].affect[COND_FULL]);
+        gain_condition(ch,COND_THIRST,liq_types[liq].affect[COND_THIRST]);
+        gain_condition(ch,COND_CAFFEINE,liq_types[liq].affect[COND_CAFFEINE]);
+
+        if (not ch.IS_NPC) then
+         if (ch.player^.condition[COND_THIRST] > (MAX_COND - 15)) then
+          ch.sendBuffer('You are no longer thirsty.'#13#10);
+
+        exit;
+        end;
+
+      node := node_next;
+      end;
+
+    if (counter = 0) then
+      begin
+      ch.sendBuffer('Drink what?'#13#10);
+      exit;
+      end;
     end;
 
   obj := ch.findInventory(param);
@@ -663,7 +705,7 @@ begin
     begin
     if item_type=ITEM_DRINK then
       dec(value[2]);
-    liq:=value[3];
+    liq := value[3];
     if (liq < LIQ_WATER) or (liq>=LIQ_MAX) then
       begin
       bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name^,
@@ -791,16 +833,19 @@ begin
 end;
 
 { Added give ALL and give <amount> COINS <char> - Nemesis }
+{ Revised 13/Feb/2001 - Nemesis }
 procedure do_give(ch:GCharacter;param:string);
 var arg, arg2, arg3 : string;
     obj : GObject;
     vict : GCharacter;
-    value : integer;
+    value, counter : integer;
     node : GListNode;
 begin
   param := one_argument(param,arg);
   param := one_argument(param,arg2);
   one_argument(param,arg3);
+  
+  counter := 0;
 
   if (length(arg) = 0) or (length(arg2) = 0) then
     begin
@@ -858,19 +903,32 @@ begin
       exit;
       end;
 
-    repeat
-      node := ch.objects.tail;
-
+    node := ch.objects.tail;
+    
+    while (node <> nil) do
+      begin
       obj := node.element;
 
-      act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
-      act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
+      if (obj.wear_location = WEAR_NULL) then
+        begin
+        act(AT_REPORT,'You give $p to $N.',false,ch,obj,vict,TO_CHAR);
+        act(AT_REPORT,'$n gives $N $p.',false,ch,obj,vict,TO_ROOM);
 
-      obj.seperate;
-      obj.fromChar;
-      obj.toChar(vict);
+        inc(counter);
 
-    until (ch.objects.tail = nil);
+        obj.seperate;
+        obj.fromChar;
+        obj.toChar(vict);
+        end;
+
+      node := node.next;
+      end;
+
+    if (counter = 0) then
+      begin
+      ch.sendBuffer('You have nothing to give.'#13#10);
+      exit;
+      end;
 
     exit;
     end;
@@ -879,6 +937,12 @@ begin
   vict := ch.room.findChar(ch,arg2);
 
   if (obj = nil) then
+    begin
+    ch.sendBuffer('You are not carrying that.'#13#10);
+    exit;
+    end;
+
+  if (obj.wear_location = WEAR_NULL) then
     begin
     ch.sendBuffer('You are not carrying that.'#13#10);
     exit;
@@ -906,14 +970,17 @@ begin
 end;
 
 { Put objects into container - Nemesis }
+{ Revised 13/Feb/2001 - Nemesis }
 procedure do_put(ch:GCharacter;param:string);
-var obj, obj_in :GObject;
-    arg,arg2:string;
+var obj, obj_in : GObject;
+    arg, arg2 : string;
     node : GListNode;
     counter : integer;
 begin
   param:=one_argument(param,arg);
   one_argument(param,arg2);
+  
+  counter := 0;
 
   if (length(arg) = 0) and (length(arg2) = 0) then
     begin
@@ -937,35 +1004,37 @@ begin
       exit;
       end;
 
-    if (ch.objects.tail <> nil) then
-      begin
-      repeat
-        node := ch.objects.tail;
+    node := ch.objects.head;
 
-        obj := node.element;
+    while (node <> nil) do
+      begin
+      obj := node.element;
+
+      if IS_SET(obj.flags,OBJ_NODROP) then
+        ch.sendBuffer('You can''t put that anywhere.'#13#10)
+      else
+      if (obj.wear_location = WEAR_NULL) then
+        begin
+        act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
+        act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
 
         inc(counter);
 
-        if IS_SET(obj.flags,OBJ_NODROP) then
-          ch.sendBuffer('You can''t put that anywhere.'#13#10)
-        else
-          begin
-          act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
-          act(AT_REPORT,'$n puts $p in $P.',false,ch,obj,obj_in,TO_ROOM);
+        obj.seperate;
+        obj.fromChar;
+        obj.toObject(obj_in);
+        end;
 
-          obj.seperate;
-          obj.fromChar;
-          obj.toObject(obj_in);
-          end;
+      node := node.next;
+      end;
 
-      until (ch.objects.tail = nil);
-      exit;
-      end
-    else
+    if (counter = 0) then
       begin
-      ch.sendBuffer('You are not carrying anything.'#13#10);
+      ch.sendBuffer('You cannot put anything anywhere.'#13#10);
       exit;
       end;
+
+    exit;
     end
   else
     begin
@@ -973,6 +1042,12 @@ begin
     obj := ch.findInventory(arg);
 
     if (obj = nil) then
+      begin
+      ch.sendBuffer('You don''t have that.'#13#10);
+      exit;
+      end;
+    
+    if (obj.wear_location <> WEAR_NULL) then
       begin
       ch.sendBuffer('You don''t have that.'#13#10);
       exit;
@@ -991,7 +1066,10 @@ begin
       end;
 
     if IS_SET(obj.flags,OBJ_NODROP) then
-      ch.sendBuffer('You can''t put that anywhere.'#13#10)
+      begin
+      ch.sendBuffer('You can''t put that anywhere.'#13#10);
+      exit;
+      end
     else
       begin
       act(AT_REPORT,'You put $p in $P.',false,ch,obj,obj_in,TO_CHAR);
