@@ -589,7 +589,7 @@ begin
   if (length(param)=0) then
     begin
     act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name+'$A$7]',false,ch,nil,nil,TO_CHAR);
-    ch.sendBuffer(#13#10'[Power of Char]  [Name]'#13#10);
+    ch.sendBuffer(#13#10'[Power of Char]  [Name]      [Health]  [Stamina]   [Xp2Lvl]'#13#10);
 
     node := char_list.head;
 
@@ -619,7 +619,15 @@ begin
         else
           buf1 := '[$8----Deity----';
 
-        buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name,10);
+        buf1 := buf1 + '$7]$B$7  ' + pad_string(vict.name,12);
+
+        buf1 := buf1 + '$B$4' + pad_string(hp_perc[UMin(round((vict.point.hp / vict.point.max_hp) * 5), 0)], 10);
+
+        buf1 := buf1 + '$B$1' + pad_string(mv_perc[UMin(round((vict.point.mv / vict.point.max_mv) * 5), 0)], 12);
+
+        if (not vict.IS_NPC) then
+          buf1 := buf1 + inttostr(vict.player^.xptogo);
+
         act(AT_REPORT,buf1,false,ch,nil,nil,TO_CHAR);
         end;
 
