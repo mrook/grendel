@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.27 2004/03/21 09:49:21 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.28 2004/03/21 21:21:52 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -238,6 +238,7 @@ type
       _televnum, _teledelay : integer;
       _maxlevel, _minlevel : integer;
       _light : integer;
+      _height : integer;
 
     public
       area : GArea;
@@ -279,6 +280,7 @@ type
       property minlevel : integer read _minlevel write _minlevel;
       property maxlevel : integer read _maxlevel write _maxlevel;
       property light : integer read _light write _light;
+      property height : integer read _height write _height;
     end;
 
     GShop = class
@@ -297,7 +299,6 @@ var
    
    area_list : GDLinkedList;
    room_list : GHashTable;
-//   shop_list : GDLinkedList;
    teleport_list : GDLinkedList;
 
    npc_list : GDLinkedList;
