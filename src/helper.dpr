@@ -2,7 +2,7 @@
 	Summary:
 		Copyover / service reboot helper application
 		
-	## $Id: helper.dpr,v 1.2 2004/05/06 20:49:07 ***REMOVED*** Exp $
+	## $Id: helper.dpr,v 1.3 2004/05/06 21:58:05 ***REMOVED*** Exp $
 }
 program helper;
 {$APPTYPE CONSOLE}
@@ -18,6 +18,7 @@ uses
 	SysUtils,
 	DateUtils,
 	Classes,
+	constants,
 	debug,
 	console,
 	socket;
@@ -49,9 +50,9 @@ begin
 end;	
 
 
+{ Copyover (hotboot) support for standalone server }
 procedure copyoverServer();
 var
-	{$IFDEF WIN32}
 	prot : TWSAProtocol_Info;
 	pipe : THandle;
 	connectionList : TList;
@@ -67,13 +68,11 @@ var
 	calling_pid : cardinal;
 	hProcess : THandle;
 	exitCode : cardinal;
-	{$ENDIF}
 begin
 	cons.write('Starting copyover...');
 
 	connectionList := TList.Create();
 
-	{$IFDEF WIN32}
 	pipe := INVALID_HANDLE_VALUE;
 
 	while (true) do
@@ -178,8 +177,6 @@ begin
 			end;
 		end;
 
-	sleep(1000);
-
 	cons.write('Spawning new process...');
 
 	FillChar(SI, SizeOf(SI), 0);
@@ -222,12 +219,12 @@ begin
 		end;
 
 	CloseHandle(pipe);
-	{$ENDIF}
 	
 	connectionList.clear();
 	connectionList.Free();
 end;
 
+{ Reboot support for NT service }
 procedure rebootService();
 var
 	manager : TJclSCManager;
@@ -238,40 +235,199 @@ begin
 	
 	if (not manager.FindService('ServiceGrendel', service)) then
 		begin
-		writeConsole('Could not locate service');
+		cons.write('Could not locate service');
 		exit;
 		end;
 		
 	if (service.serviceState <> ssStopped) then
 		begin
-		writeConsole('Service is probably stopping, waiting 5 seconds');
+		cons.write('Service is probably stopping, waiting 5 seconds');
 		
 		service.WaitFor(ssStopped, 5000);	
 		service.Refresh();
 
 		if (service.serviceState <> ssStopped) then
 			begin
-			writeConsole('Service did not stop in time, aborting');
+			cons.write('Service did not stop in time, aborting');
 			exit;
 			end;
 		end;
 		
-	writeConsole('Starting service');
+	cons.write('Starting service');
 	service.Start(false);
+	manager.Free();
+end;
+
+{ Copyover (hotboot) support for NT service }
+procedure copyoverService();
+var
+	prot : TWSAProtocol_Info;
+	pipe : THandle;
+	connectionList : TList;
+	a, w, len : cardinal;
+	g : array[0..1023] of char;
+	suc : boolean;
+	sock : TSocket;
+	c : Connection;
+	ret : integer;
+	manager : TJclSCManager;
+	service : TJclNtService;
+	service_pid : cardinal;
+	params : array of string;
+begin
+	manager := TJclSCManager.Create();
+	manager.Refresh(true);
+	
+	if (not manager.FindService('ServiceGrendel', service)) then
+		begin
+		cons.write('Could not locate service');
+		exit;
+		end;
+		
+	cons.write('Starting copyover...');
+
+	connectionList := TList.Create();
+
+	pipe := INVALID_HANDLE_VALUE;
+
+	while (true) do
+		begin
+		pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
+
+		if (pipe <> INVALID_HANDLE_VALUE) then
+			break;
+
+		ret := GetLastError();
+
+		if (ret <> ERROR_PIPE_BUSY) and (ret <> ERROR_FILE_NOT_FOUND) then
+			exit;
+
+		// All pipe instances are busy, so wait a second
+		if (ret = ERROR_PIPE_BUSY) then
+			if (not WaitNamedPipe(pipeName, 500)) then
+				exit;
+		end;
+
+	sock := -1;
+	
+	suc := ReadFile(pipe, service_pid, 4, w, nil);
+	
+	repeat
+		suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
+
+		if (not suc) or (w < sizeof(prot)) then
+			break;
+
+		if (suc) then
+			sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
+
+		suc := ReadFile(pipe, len, 4, w, nil);
+
+		if (not suc) or (w < 4) then
+			break;
+
+		suc := ReadFile(pipe, g, len, w, nil);
+
+		if (not suc) or (w < len) then
+			break;
+
+		if (suc) and (sock <> -1) then
+			begin
+			g[len] := #0;
+
+			c := Connection.Create;			
+			c.socket := sock;
+			c.name := g;
+
+			connectionList.add(c);
+			end;
+	until (not suc);
+
+	CloseHandle(pipe);
+
+	// wait for calling Grendel service to terminate
+	cons.write('Waiting for service to die...');		
+	service.WaitFor(ssStopped, 5000);	
+	service.Refresh();
+
+	if (service.serviceState <> ssStopped) then
+		begin
+		cons.write('Service did not stop in time, aborting');
+		exit;
+		end;
+		
+	strpcopy(g, #13#10'In the void of space, you look around... fragments of memory flash by...'#13#10);
+
+	if (connectionList.Count > 0) then
+		begin
+		for w := 0 to connectionList.Count - 1 do
+			begin
+			c := connectionList.items[w];
+
+			send(c.socket, g, strlen(g), 0);
+			end;
+		end;
+
+	cons.write('Starting service...');
+	SetLength(params, 1);
+	params[0] := 'copyover';
+	service.Start(params, false);
+	
+	pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 1, 0, 0, 10000, nil);
+
+	if (not ConnectNamedPipe(pipe, nil)) then
+		exit;
+
+	suc := ReadFile(pipe, service_pid, 4, w, nil);
+	
+	cons.write('Service has pid #' + IntToStr(service_pid) + '...');
+	
+	cons.write('Duplicating connections...');
+
+	if (connectionList.Count > 0) then
+		begin
+		for a := 0 to connectionList.Count - 1 do
+			begin
+			c := connectionList.items[a];
+
+			if (WSADuplicateSocket(c.socket, service_pid, @prot) = -1) then
+				exit;
+
+			if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
+				exit;
+
+			strpcopy(g, c.name);
+			len := strlen(g);
+
+			if (not WriteFile(pipe, len, 4, w, nil)) then
+				exit;
+
+			if (not WriteFile(pipe, g, len, w, nil)) then
+				exit;
+
+			closesocket(c.socket);
+			end;
+		end;
+
+	CloseHandle(pipe);
+	
+	connectionList.clear();
+	connectionList.Free();
 	manager.Free();
 end;
 
 
 begin
-	writeConsole('Reboot/copyover helper application');
-	writeConsole(version_copyright + '.');
-
 	cons := GConsole.Create();
 	cons.attachWriter(GConsoleLogWriter.Create('helper'));
 	cons.attachWriter(GConsoleCopyover.Create());
 
+	cons.write('Reboot/copyover helper application');
+	cons.write(version_copyright + '.');
+
 	if (ParamStr(1) = 'copyoverservice') then
 		begin
+		copyoverService();
 		end
 	else
 	if (ParamStr(1) = 'rebootservice') then
@@ -285,7 +441,7 @@ begin
 		end
 	else
 		begin
-		writeConsole('Unknown command line option ' + ParamStr(1));
+		cons.write('Unknown command line option ' + ParamStr(1));
 		end;
 				
 	initDebug();
