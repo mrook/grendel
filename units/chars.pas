@@ -59,9 +59,9 @@ type
       md5_password : MD5Digest;
       remorts : integer;            { remorts done }
       condition : array[COND_DRUNK..COND_MAX-1] of integer;
-      (* area: GArea;
-      area_fname : pchar;
-      r_lo, r_hi, m_lo, m_hi, o_lo, o_hi : integer; *)
+      area: GArea;
+      area_fname : string;
+      r_lo, r_hi, m_lo, m_hi, o_lo, o_hi : integer;
       wiz_level : integer;          { level of wizinvis }
       bg_status, bg_points : integer;
       bg_room : pointer;

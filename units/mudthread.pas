@@ -1261,8 +1261,9 @@ begin
   registerCommand('do_take', do_take);
   registerCommand('do_holywalk', do_holywalk);
   registerCommand('do_prename', do_prename);
-
   registerCommand('do_peek', do_peek);
+  registerCommand('do_oedit', do_oedit);
+  registerCommand('do_olist', do_olist);
 end;
 
 begin

@@ -991,3 +991,205 @@ begin
 
   act(AT_REPORT,buf + ' of $N set to ' + inttostr(value) + '.',false,ch,nil,vict,TO_CHAR);
 end;
+
+const object_flags:array[0..30] of pchar=('nopickup','glow','hum',
+                                          'antigood','antievil',
+                                          'loyal','noremove',
+                                          'nodrop','clanobject',
+                                          'hidden','poison','missile',
+                                          'nosac','bv13','bv14',
+                                          'bv15','bv16','bv17','bv18',
+                                          'bv19','bv20','bv21','bv22',
+                                          'bv23','bv24','bv25','bv26',
+                                          'bv27','bv28','bv29','proto');
+
+const item_types:array[1..14] of pchar=('weapon','armor','food',
+                                        'drink','light','trash',
+                                        'money','special','gem',
+                                        'container','corpse',
+                                        'fountain','blood','portal');
+
+const wear_types:array[1..26] of pchar=('rfinger','lfinger','neck1',
+                                        'neck2','body','head','legs',
+                                        'feet','hands','arms',
+                                        'shield','about','waist',
+                                        'rwrist','lwrist','float',
+                                        'rhand','lhand','rshoulder',
+                                        'lshoulder','face','rear',
+                                        'lear','rankle','lankle','eyes');
+
+procedure do_oedit(ch : GCharacter; param : string);
+var sub : string;
+    a : integer;
+    obj : GObject;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage:  OEDIT <object> <field> [value]'#13#10#13#10);
+    ch.sendBuffer('Field can be one of the following:'#13#10);
+    ch.sendBuffer('  name short long flags'#13#10);
+    ch.sendBuffer('  type wear1 wear2 weight cost'#13#10);
+    ch.sendBuffer('  value1 value2 value3 value4'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+  obj := ch.findInventory(sub);
+
+  if (obj = nil) then
+    begin
+    ch.sendBuffer('Could not find that object.'#13#10);
+    exit;
+    end;
+
+  if (IS_SET(obj.flags, OBJ_PROTO)) and (obj.obj_index = nil) then
+    begin
+    ch.sendBuffer('Illegal proto.'#13#10);
+    exit;
+    end;
+
+  { make sure builders don't overwrite other areas }
+  if (obj.obj_index <>nil) and
+   ((obj.obj_index.vnum < ch.player^.o_lo) or (obj.obj_index.vnum > ch.player^.o_hi)) then
+    begin
+    ch.sendBuffer('This vnum is not in your range.'#13#10);
+    exit;
+    end;
+
+  param := one_argument(param,sub);
+
+  if (sub = 'name') then
+    begin
+    unhash_string(obj.name);
+    obj.name := hash_string(param);
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      begin
+      unhash_string(obj.obj_index.name);
+      obj.obj_index.name := hash_string(param);
+      end;
+    end
+  else
+  if (sub = 'short') then
+    begin
+    unhash_string(obj.short);
+    obj.short := hash_string(param);
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      begin
+      unhash_string(obj.obj_index.short);
+      obj.obj_index.short := hash_string(param);
+      end;
+    end
+  else
+  if (sub = 'long') then
+    begin
+    unhash_string(obj.long);
+    obj.long := hash_string(param);
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      begin
+      unhash_string(obj.obj_index.long);
+      obj.obj_index.long := hash_string(param);
+      end;
+    end
+  else
+  if (sub = 'flags') then
+    begin
+    for a:=0 to High(object_flags) do
+     if (pos(object_flags[a], param) > 0) then
+      begin
+      if IS_SET(obj.flags,1 shl a) then
+        REMOVE_BIT(obj.flags,1 shl a)
+      else
+        SET_BIT(obj.flags,1 shl a);
+      end;
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      obj.obj_index.flags := obj.flags - OBJ_PROTO;
+    end
+  else
+  if (sub = 'type') then
+    begin
+    for a:=0 to High(item_types) do
+     if (pos(item_types[a], param ) > 0) then
+      begin
+      obj.item_type:=a;
+      break;
+      end;
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      obj.obj_index.item_type:=obj.item_type;
+    end
+  else
+  if (sub = 'wear1') then
+    begin
+    for a:=0 to High(wear_types) do
+     if (pos(wear_types[a], param) > 0) then
+      begin
+      obj.wear1:=a;
+      break;
+      end;
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      obj.obj_index.wear1:=obj.wear1;
+    end
+  else
+  if (sub = 'wear2') then
+    begin
+    for a:=0 to High(wear_types) do
+     if (pos(wear_types[a], param) > 0) then
+      begin
+      obj.wear2:=a;
+      break;
+      end;
+
+    if IS_SET(obj.flags,OBJ_PROTO) then
+      obj.obj_index.wear2:=obj.wear2;
+    end
+  else
+    begin
+    ch.sendBuffer('Unknown option.'#13#10);
+    exit;
+    end;
+
+  ch.sendBuffer('Ok.'#13#10);
+end;
+
+procedure do_olist(ch : GCharacter; param : string);
+var num:integer;
+    area : GArea;
+    obj : GObjectIndex;
+    node : GListNode;
+begin
+  if (ch.player^.area_fname = '') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  area := ch.player^.area;
+  if (area = nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  num:=0;
+  act(AT_REPORT, '$B$1[$B$7Nr$B$1] [$B$7VNum$B$1]  [$B$7Name$B$1]$A$7',false,ch,nil,nil,TO_CHAR);
+  node := obj_list.head;
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (obj.area = area) then
+      begin
+      act(AT_REPORT, pad_integer_front(num, 4) + ' ' + pad_integer(obj.vnum,8) + ' $p',false, ch, obj, nil, TO_CHAR);
+      inc(num);
+      end;
+
+    node := node.next;
+    end;
+end;
+
+
