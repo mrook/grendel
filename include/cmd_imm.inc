@@ -16,17 +16,17 @@ begin
   if (length(param) > 0) then
     begin
     if (param = 'now') then
-      boot_info.timer:=0
+      boot_info.timer := 1
     else
       try
-        boot_info.timer:=strtoint(param);
+        boot_info.timer := strtoint(param) + 1;
       except
         ch.sendBuffer('Boot timer must be a valid numeric value!'#13#10);
         exit;
       end
     end
   else
-    boot_info.timer := 30;
+    boot_info.timer := 31;
 
   boot_info.started_by := ch;
 
@@ -42,12 +42,7 @@ begin
     begin
     act(AT_REPORT,'REBOOT started.',false,ch,nil,nil,TO_CHAR);
 
-    boot_info.boot_type:=BOOTTYPE_REBOOT;
-
-    if (boot_info.timer = 0) then
-      clean_thread.SetMessage(CLEAN_MUD_STOP)
-    else
-      clean_thread.SetMessage(CLEAN_BOOT_MSG);
+    boot_info.boot_type := BOOTTYPE_REBOOT;
     end
   else
   if (haltparam = 'halt') then
@@ -55,11 +50,6 @@ begin
     act(AT_REPORT,'SHUTDOWN started.',false,ch,nil,nil,TO_CHAR);
 
     boot_info.boot_type:=BOOTTYPE_SHUTDOWN;
-
-    if (boot_info.timer = 0) then
-      clean_thread.SetMessage(CLEAN_MUD_STOP)
-    else
-      clean_thread.SetMessage(CLEAN_BOOT_MSG);
     end
   else
   if (haltparam = 'copyover') then
@@ -67,11 +57,6 @@ begin
     act(AT_REPORT, 'COPYOVER started.',false,ch,nil,nil,TO_CHAR);
 
     boot_info.boot_type := BOOTTYPE_COPYOVER;
-
-    if (boot_info.timer = 0) then
-      clean_thread.SetMessage(CLEAN_MUD_STOP)
-    else
-      clean_thread.SetMessage(CLEAN_BOOT_MSG);
     end
   else
     begin
