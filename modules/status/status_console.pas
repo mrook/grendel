@@ -47,8 +47,11 @@ end;
 
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; text : string);
 begin
-  consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
-  Application.ProcessMessages();
+	if (consoleMemo <> nil) then
+		begin
+  	consoleMemo.Lines.add('[' + FormatDateTime('hh:nn', Now) + '] ' + text);
+  	Application.ProcessMessages();
+  	end;
 end;
 
 procedure GConsoleModule.registerModule();
@@ -87,12 +90,14 @@ end;
 
 procedure GConsoleModule.unregisterModule();
 begin
-  unregisterMenuItem('Show console');
+  FreeAndNil(consoleMemo);
+	FreeAndNil(consoleFont);
+	FreeAndNil(consoleForm);
+
   unregisterConsoleDriver(consoleDriver);
+  unregisterMenuItem('Show console');
+  
   consoleDriver.Free();
-  consoleMemo.Free();
-	consoleFont.Free();
-	consoleForm.Free();
 end;
 
 
