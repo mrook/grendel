@@ -1,6 +1,6 @@
 {
   @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.53 2003/10/03 20:58:22 ***REMOVED*** Exp $)
+  @lastmod($Id: constants.pas,v 1.54 2003/10/17 09:04:00 ***REMOVED*** Exp $)
 }
 
 unit constants;
@@ -373,7 +373,7 @@ const CPULSE_PER_SEC = 4;
       IDLE_PLAYING = 3600;                          // disconnect after 15 mins when playing
       IDLE_LINKDEAD = 300 / CPULSE_GAMEHOUR;       // quit ld chars after 15 mins
 
-{ Connect states for sockets }
+{ Player states }
 const CON_PLAYING=0;
       CON_ACCEPTED=1;
       CON_NAME=2;

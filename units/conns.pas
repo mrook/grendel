@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.46 2003/10/16 16:07:29 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.47 2003/10/17 09:04:00 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -46,16 +46,13 @@ type
 		GConnectionInputEvent = procedure(owner : GConnection) of object;
 		
     GConnection = class(TThread)
-    private
+    protected
       node : GListNode;
 
       _socket : GSocket;
 
-      _state : integer;
       _idle : integer;
       
-      _keylock: boolean;
-      _afk : boolean;
       _fcommand : boolean;
 
       input_buf : string;
@@ -99,10 +96,7 @@ type
     published
     	property socket : GSocket read _socket;
 
-    	property state : integer read _state write _state;
     	property idle : integer read _idle write _idle;
-    	property keylock : boolean read _keylock write _keylock;
-    	property afk : boolean read _afk write _afk;
     	property fcommand : boolean read _fcommand write _fcommand;
 
 			property comm_buf : string read _comm_buf write _comm_buf;

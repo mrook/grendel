@@ -1,6 +1,6 @@
 {
   @abstract(Character update & regeneration routines)
-  @lastmod($Id: update.pas,v 1.22 2003/10/16 16:18:44 ***REMOVED*** Exp $)
+  @lastmod($Id: update.pas,v 1.23 2003/10/17 09:04:01 ***REMOVED*** Exp $)
 }
 
 unit update;
@@ -303,20 +303,21 @@ begin
 end;
 
 procedure update_chars;
-var p:integer;
-    ch : GCharacter;
-    e:GExit;
-    r:GRoom;
-    node : GListNode;
+var 
+	p:integer;
+	ch : GCharacter;
+	e:GExit;
+	r:GRoom;
+	iterator : GIterator;
 begin
-  node := char_list.head;
+  iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    ch := node.element;
+    ch := GCharacter(iterator.next());
 
-    { switched mobs don't wander }
-    if (ch.IS_NPC) and (ch.conn = nil) then
+    { TODO: switched mobs don't wander }
+{    if (ch.IS_NPC) and (ch.conn = nil) then
       begin
       if (not IS_SET(GNPC(ch).act_flags, ACT_SENTINEL)) and (ch.state = STATE_IDLE) then
         begin
@@ -412,10 +413,10 @@ begin
              act(AT_REPORT,'$n kneels down, muttering and chanting in tongues...',false,ch,nil,nil,TO_ROOM);
              end;
         end;
-      end;
-
-    node := node.next;
-    end;
+      end; }
+    end; 
+    
+  iterator.Free();
 end;
 
 procedure teleportChar(ch : GCharacter;room:GRoom);
@@ -541,46 +542,50 @@ end;
 
 procedure startBattleground;
 var 
-	iterator : GCharacter;
+	iterator : GIterator;
+	ch : GCharacter;
 	conn : GConnection;
-    node : GListNode;
-    s,vnum:integer;
+	s,vnum:integer;
 begin
   to_channel(nil,pchar('[$B$7Battleground starting NOW!$A$7]'),CHANNEL_ALL,AT_REPORT);
 
-  node := connection_list.head;
+	iterator := char_list.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    conn := node.element;
+    ch := GCharacter(iterator.next());
+    
+    if (ch.IS_NPC) then
+    	continue;
 
-    if (conn.state = CON_PLAYING) and (GPlayer(conn.ch).bg_status=BG_JOIN)
-     and (conn.ch.level >= bg_info.lo_range) and (conn.ch.level <= bg_info.hi_range) then
+    if (ch.state = CON_PLAYING) and (GPlayer(ch).bg_status = BG_JOIN)
+     and (ch.level >= bg_info.lo_range) and (ch.level <= bg_info.hi_range) then
       begin
-      act(AT_REPORT,'You are transfered into the arena.',false,conn.ch,nil,nil,TO_CHAR);
-      act(AT_GREEN,'Niet mokken, lekker knokken!',false,conn.ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,'You are transfered into the arena.',false,ch,nil,nil,TO_CHAR);
+      act(AT_GREEN,'Niet mokken, lekker knokken!',false,ch,nil,nil,TO_CHAR);
 
       s := random(system_info.arena_end - system_info.arena_start + 1) + system_info.arena_start;
       vnum := URange(system_info.arena_start, s, system_info.arena_end);
 
-      GPlayer(conn.ch).bg_room:=conn.ch.room;
+      GPlayer(ch).bg_room := ch.room;
 
-      conn.ch.fromRoom;
-      conn.ch.toRoom(findRoom(vnum));
+      ch.fromRoom;
+      ch.toRoom(findRoom(vnum));
 
-      GPlayer(conn.ch).bg_status := BG_PARTICIPATE;
-      interpret(conn.ch,'look');
+      GPlayer(ch).bg_status := BG_PARTICIPATE;
+      interpret(ch,'look');
       end;
-
-    node := node.next;
     end;
+    
+  iterator.Free();
 end;
 
 procedure update_battleground;
-var s:integer;
-    last:GCharacter;
-    conn : GConnection;
-    node : GListNode;
+var 
+	s : integer;
+	ch, last : GCharacter;
+	iterator : GIterator;
+	conn : GConnection;
 begin
   { battleground is running, check to see if we have a winner }
   if (bg_info.count=0) then
@@ -588,19 +593,20 @@ begin
     last:=nil;
     s:=0;
 
-    node := connection_list.head;
-
-    while (node <> nil) do
+		iterator := char_list.iterator();
+		
+		while (iterator.hasNext()) do
       begin
-      conn := node.element;
+      ch := GCharacter(iterator.next());
+      
+      if (ch.IS_NPC) then
+      	continue;
 
-      if (conn.state = CON_PLAYING) and (GPlayer(conn.ch).bg_status=BG_PARTICIPATE) then
+      if (ch.state = CON_PLAYING) and (GPlayer(ch).bg_status = BG_PARTICIPATE) then
         begin
         inc(s);
-        last:=conn.ch;
+        last := ch;
         end;
-
-      node := node.next;
       end;
 
     if s=0 then

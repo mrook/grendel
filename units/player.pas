@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.1 2003/10/16 16:06:06 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.2 2003/10/17 09:04:00 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -18,6 +18,11 @@ uses
 
 type
     GPlayer = class(GCharacter)
+    protected
+    	_state : integer;
+      _keylock: boolean;
+      _afk : boolean;
+    	
     public
       edit_buffer : string;
       edit_dest : pointer;
@@ -105,8 +110,16 @@ type
       procedure stopEditing;
       procedure editBuffer(text : string);
       procedure sendEdit(text : string);
+
+    	property state : integer read _state write _state;
+    	property keylock : boolean read _keylock write _keylock;
+    	property afk : boolean read _afk write _afk;
     end;
 
+
+var
+	playerList : GDLinkedList;
+	
 
 implementation
 
@@ -208,6 +221,8 @@ begin
     room := findRoom(ROOM_VNUM_EVIL_PORTAL);
 
   fighting := nil;
+  
+  playerList.add(Self);
 end;
 
 destructor GPlayer.Destroy();
@@ -261,7 +276,7 @@ begin
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
     begin
-    conn.state := CON_LOGGED_OUT;
+    state := CON_LOGGED_OUT;
 
     try
       conn.Terminate();
@@ -361,7 +376,7 @@ begin
   if IS_SET(flags, PLR_LINKLESS) then
     IS_AFK := false
   else
-    IS_AFK := GConnection(conn).afk = true;
+    IS_AFK := afk = true;
 end;
 
 function GPlayer.IS_KEYLOCKED : boolean;
@@ -369,12 +384,12 @@ begin
   if IS_SET(flags, PLR_LINKLESS) then
     IS_KEYLOCKED := false
   else
-    IS_KEYLOCKED := GConnection(conn).keylock = true;
+    IS_KEYLOCKED := keylock = true;
 end;
 
 function GPlayer.IS_EDITING : boolean;
 begin
-  IS_EDITING := GConnection(conn).state = CON_EDITING;
+  IS_EDITING := state = CON_EDITING;
 end;
 
 function GPlayer.getUsedSkillslots() : integer;       // returns nr. of skillslots occupied
@@ -1286,7 +1301,7 @@ begin
   if (substate = SUB_SUBJECT) then
     begin
     sendBuffer(ansiColor(7) + #13#10 + 'Subject: ');
-    GConnection(conn).state := CON_EDITING;
+    state := CON_EDITING;
     exit;
     end;
 
@@ -1294,8 +1309,8 @@ begin
   GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------'#13#10'> ');
 
   edit_buffer := text;
-  GConnection(conn).afk := true;
-  GConnection(conn).state := CON_EDITING;
+  afk := true;
+  state := CON_EDITING;
 end;
 
 procedure GPlayer.stopEditing;
@@ -1304,8 +1319,8 @@ begin
 
   edit_buffer := '';
   substate := SUB_NONE;
-  GConnection(conn).afk := false;
-  GConnection(conn).state := CON_PLAYING;
+  afk := false;
+  state := CON_PLAYING;
 
   sendBuffer('You are now back at your keyboard.'#13#10);
   act(AT_REPORT,'$n has returned to $s keyboard.',false,Self,nil,nil,to_room);
@@ -1322,8 +1337,8 @@ begin
         edit_buffer := '';
         substate := SUB_NONE;
 
-        GConnection(conn).state := CON_PLAYING;
-        GConnection(conn).afk := false;
+        state := CON_PLAYING;
+        afk := false;
 
         sendBuffer('Note posted.'#13#10);
 
@@ -1346,8 +1361,8 @@ begin
     SUB_ROOM_DESC :
       begin
         interpret(Self, 'redit');
-        GConnection(conn).state := CON_PLAYING;
-        GConnection(conn).afk := false;
+        state := CON_PLAYING;
+        afk := false;
         edit_buffer := '';
         substate := SUB_NONE;
         edit_dest := nil;
@@ -1376,7 +1391,7 @@ begin
     exit;
     end;
 
-  if (GConnection(conn).state = CON_EDIT_HANDLE) then
+  if (state = CON_EDIT_HANDLE) then
     begin
     if (uppercase(text) = 'A') then
       begin
@@ -1398,7 +1413,7 @@ begin
       GConnection(conn).send(ansiColor(7) + 'Ok. Continue writing...' + #13#10);
       GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
       GConnection(conn).send(ansiColor(7) + edit_buffer);
-      GConnection(conn).state := CON_EDITING;
+      state := CON_EDITING;
       sendPrompt;
       exit;
       end;
@@ -1415,7 +1430,7 @@ begin
 
   if (text = '~') then
     begin
-    GConnection(conn).state := CON_EDIT_HANDLE;
+    state := CON_EDIT_HANDLE;
     GConnection(conn).send(#13#10 + ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
     exit;
     end
@@ -1471,7 +1486,7 @@ begin
   c := conn;
   if (not IS_NPC) then
     begin
-    if (c.state = CON_EDITING) then
+    if (state = CON_EDITING) then
       begin
       c.send('> ');
       exit;
@@ -1505,13 +1520,13 @@ begin
       exit;
       end;
 
-    if (c.state = CON_EDITING) then
+    if (state = CON_EDITING) then
       begin
       c.send('> ');
       exit;
       end;
 
-    if (c.state = CON_EDIT_HANDLE) then
+    if (state = CON_EDIT_HANDLE) then
       begin
       c.send(' ');
       exit;
@@ -1671,6 +1686,16 @@ begin
     r:='a god';
 
   rank := r;
+end;
+
+
+procedure initPlayers();
+begin
+end;
+
+procedure cleanupPlayers();
+begin
+	playerList.
 end;
 
 
