@@ -358,9 +358,8 @@ begin
     closesocket(c.socket);
     end
   else
-    begin
+  if (not IS_NPC) and (not IS_SET(player^.flags, PLR_LINKLESS)) then
     interpret(Self, 'return sub');
-    end;
 
   { perform the cleanup }
   if (not IS_NPC) and (player^.snooping <> nil) then
