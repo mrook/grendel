@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.34 2003/10/22 16:06:30 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.35 2003/10/29 12:55:01 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -98,6 +98,8 @@ type
       function insertLast(element : pointer) : GListNode;
       function insertAfter(tn : GListNode; element : pointer) : GListNode;
       function insertBefore(tn : GListNode; element : pointer) : GListNode;
+      
+      procedure add(element : TObject);
       procedure remove(node : GListNode);
       procedure clean();
       procedure smallClean();
@@ -477,7 +479,7 @@ end;
 }
 function GDLinkedList.insertLast(element : pointer) : GListNode;
 var
-   node : GListNode;
+	node : GListNode;
 begin
 	node := GListNode.Create(element, tail, nil);
 
@@ -492,6 +494,17 @@ begin
 
 	inc(_size);
 	inc(_serial);
+end;
+
+{
+	Summary:
+		Short for insertLast()
+}
+procedure GDLinkedList.add(element : TObject);
+var
+	node : GListNode;
+begin
+	node := insertLast(element);
 end;
 
 {
@@ -861,20 +874,27 @@ var
    hash : cardinal;
    hv : GHashValue;
 begin
-  hv := _get(key);
+	if (value = nil) then
+		begin
+		remove(key);
+		end
+	else
+		begin
+		hv := _get(key);
 
-  if (hv <> nil) then
-    begin
-    hv.addRef();
-    end
-  else
-    begin
-    hash := getHash(key);
+		if (hv <> nil) then
+			begin
+			hv.addRef();
+			end
+		else
+			begin
+			hash := getHash(key);
 
-    hv := GHashValue.Create(key, value);
+			hv := GHashValue.Create(key, value);
 
-    bucketList[hash].insertLast(hv);
-    end;
+			bucketList[hash].insertLast(hv);
+			end;
+		end;
 end;
 
 {
