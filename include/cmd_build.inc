@@ -516,7 +516,7 @@ begin
   obj := instanceObject(obj_index);
 
   // give obj to ch
-  ch.objects.insertLast(obj);
+  obj.toChar(ch);
 
   act(AT_WHITE, '$n has created $p!', false, ch, obj, nil, TO_ROOM);
   ch.sendBuffer('Ok.');
