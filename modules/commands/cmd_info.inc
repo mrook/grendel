@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.14 2003/10/22 14:52:34 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.15 2003/11/03 15:51:02 hemko Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -41,10 +41,10 @@ end;
 
 procedure do_peek(ch : GCharacter; param : string);
 var
-	cnt : integer;
-	iterator : GIterator;
-	vict : GCharacter;
-	obj : GObject;
+  cnt : integer;
+  iterator : GIterator;
+  vict : GCharacter;
+  obj : GObject;
 begin
   if (ch.LEARNED(gsn_peek) = 0) then
   begin
@@ -61,34 +61,34 @@ begin
   vict := ch.room.findChar(ch, param);
 
   if (vict = nil) then
-  	begin
+    begin
     act(AT_REPORT,'You do not see that here.',false,ch,nil,nil,TO_CHAR);
     exit;
-  	end;
+    end;
   
   if (number_percent <= ch.LEARNED(gsn_peek)) then
-  	begin
+    begin
     act(AT_REPORT, 'You peek at the inventory and see:'#13#10, false, ch, nil, nil, TO_CHAR);
 
     cnt := 0;
     iterator := vict.inventory.iterator();
     while (iterator.hasNext()) do
-    	begin
+      begin
       obj := GObject(iterator.next());
 
-			if (obj.count > 1) then
-				act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
-			else
-				act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-			inc(cnt);
-    	end;
+      if (obj.count > 1) then
+        act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+      else
+        act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+      inc(cnt);
+      end;
     iterator.Free();
 
     if (cnt = 0) then
       ch.sendBuffer('  nothing.'#13#10);
-  	end
+    end
   else
-  	act(AT_REPORT, 'You failed to see anything.', false, ch, nil, nil, TO_CHAR);
+    act(AT_REPORT, 'You failed to see anything.', false, ch, nil, nil, TO_CHAR);
 end;
 
 { Xenon 22/Feb/2001: seperated peek from look (it's a command on its own now) }
@@ -170,14 +170,14 @@ begin
         begin
         obj := GObject(iterator.next());
 
-				bodypart := GBodyPart(vict.race.bodyparts[obj.worn]);
+        bodypart := GBodyPart(vict.race.bodyparts[obj.worn]);
 
-				if (bodypart <> nil) then
-					begin
-					act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-					inc(cnt);
-					end;
-				end;
+        if (bodypart <> nil) then
+          begin
+          act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+          inc(cnt);
+          end;
+        end;
       
       iterator.Free();
 
@@ -201,8 +201,8 @@ begin
           begin
           act(AT_REPORT,'$p contains:'#13#10,false,ch,obj,nil,TO_CHAR);
 
-					iterator := obj.contents.iterator();
-					
+          iterator := obj.contents.iterator();
+          
           while (iterator.hasNext()) do
             begin
             obj_in := GObject(iterator.next());
@@ -353,7 +353,7 @@ begin
         end;
       end;
       
-		iterator.Free();    
+    iterator.Free();    
     end;
 
   ch.sendBuffer(ch.ansiColor(7));
@@ -416,12 +416,12 @@ begin
     begin
     obj := GObject(iterator.next());
 
-		if (obj.count > 1) then
-			act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
-		else
-			act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+    if (obj.count > 1) then
+      act(AT_REPORT, '  $p [' + inttostr(obj.count) + '] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+    else
+      act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
 
-		inc(counter);
+    inc(counter);
     end;
     
   iterator.Free();
@@ -450,13 +450,13 @@ begin
     begin
     obj := GObject(iterator.next());
 
-		bodypart := GBodyPart(ch.race.bodyparts[obj.worn]);
+    bodypart := GBodyPart(ch.race.bodyparts[obj.worn]);
 
-		if (bodypart <> nil) then
-			begin
-			act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
-			inc(cnt);
-			end;
+    if (bodypart <> nil) then
+      begin
+      act(AT_REPORT, pad_string('(' + bodypart.description + ')', 20) + '$p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);
+      inc(cnt);
+      end;
     end;
 
   if (cnt = 0) then
@@ -636,13 +636,13 @@ end;
 { Xenon 23/Feb/2001: added 'who good' 'who evil' 'who imm' 'who clan' 'who <race>' 'who <name>' (code could be a bit cleaner still)}
 procedure do_who(ch:GCharacter;param:string);
 var 
-	num, num_good, num_evil, numImms :integer;
-	buf1 : string;
-	buf_imm, buf_good, buf_evil, buf_result : string;
-	conn : GPlayerConnection;
-	iterator : GIterator;
-	arg : string;
-	normarg, specarg : boolean;
+  num, num_good, num_evil, numImms :integer;
+  buf1 : string;
+  buf_imm, buf_good, buf_evil, buf_result : string;
+  conn : GPlayerConnection;
+  iterator : GIterator;
+  arg : string;
+  normarg, specarg : boolean;
 begin
   conn := nil;
   param := one_argument(param, arg);
@@ -665,16 +665,16 @@ begin
   iterator := connection_list.iterator();
 
   while (iterator.hasNext()) do
-	  begin
+    begin
     conn := GPlayerConnection(iterator.next());
     
     if (conn.state in [CON_PLAYING,CON_EDITING,CON_EDIT_HANDLE]) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
-    	begin
+      begin
       if not(specarg) or
         isName(conn.ch.race.name, arg) or
         isName(conn.ch.name, arg) or
         ((arg = 'CLAN') and (ch.clan <> nil) and (ch.clan = conn.ch.clan)) then
-      	begin
+        begin
         inc(num);
         if (conn.ch.IS_GOOD) then
           inc(num_good)
@@ -683,7 +683,7 @@ begin
           inc(num_evil);
         
         if (conn.ch.IS_IMMORT) then
-        	begin
+          begin
           inc(numImms);
 
           if (conn.ch.IS_WIZINVIS) then
@@ -720,9 +720,9 @@ begin
 
           buf_imm := buf_imm + #13#10;
 
-	        end
+          end
         else
-        	begin
+          begin
           delete(buf1, 1, length(buf1));
         
           if (conn.ch.clan <> nil) and (conn.ch.clan = ch.clan) then
@@ -755,90 +755,90 @@ begin
             buf_evil := buf_evil + buf1
           else
             bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name);
-        	end;
-      	end;
-    	end;
-	  end;
+          end;
+        end;
+      end;
+    end;
   
   iterator.Free();
 
   if normarg or (arg = 'CLAN') then
-	  begin
+    begin
     if (arg = 'GOOD') and (ch.IS_GOOD or ch.IS_IMMORT) then
-	    begin
+      begin
       buf_result := buf_good;
       num := num_good;
-    	end
+      end
     else
     if (arg = 'EVIL') and (ch.IS_EVIL or ch.IS_IMMORT) then
-	    begin
+      begin
       buf_result := buf_evil;
       num := num_evil;
-	    end
+      end
     else
     if (arg = 'CLAN') then
-	    begin
+      begin
       if (numImms > 0) then
         buf_result := buf_imm + #13#10;
         
       if (ch.IS_IMMORT) then          // in case imm is in a mortal clan
-      	begin
+        begin
         if (num_good > 0) then
           buf_result := buf_result + buf_good;
         if (num_evil > 0) then
           buf_result := buf_result + buf_evil;
-      	end
+        end
       else
       if (ch.IS_GOOD) then
-      	begin
+        begin
         buf_result := buf_result + buf_good
-      	end
+        end
       else
       if (ch.IS_EVIL) then
-      	begin
+        begin
         buf_result := buf_result + buf_evil
-      	end;
-    	end
+        end;
+      end
     else
     if (pos('IMM', arg) = 1) and (numImms > 0) then
-    	begin
+      begin
       buf_result := buf_imm;
       num := numImms;
-	    end
+      end
     else
-	    begin
+      begin
       num := 0;
-	    end;
-	  end
+      end;
+    end
   else
-	  begin
+    begin
     if (numImms > 0) then
-	    begin
+      begin
       buf_result := buf_imm;
       if ((num_good > 0) or (num_evil > 0)) then
         buf_result := buf_result + #13#10;
-	    end;
+      end;
       
     if (ch.IS_IMMORT) then
-	    begin
+      begin
       if (num_good > 0) then
         buf_result := buf_result + buf_good;
       if (num_good > 0) and (num_evil > 0) then
         buf_result := buf_result + #13#10;
       if (num_evil > 0) then
         buf_result := buf_result + buf_evil;
-    	end
+      end
     else
-    	begin
+      begin
       if (ch.IS_GOOD) then
         buf_result := buf_result + buf_good
       else
       if (ch.IS_EVIL) then
         buf_result := buf_result + buf_evil
       else
-				bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name);
-    	end;
-	  end;
+        bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name);
+      end;
+    end;
         
   act(AT_REPORT,buf_result,false,ch,nil,nil,TO_CHAR);
 
@@ -861,16 +861,16 @@ end;
 
 procedure do_group(ch:GCharacter;param:string);
 var 
-	buf1 : string;
-	vict : GCharacter;
-	iterator : GIterator;
+  buf1 : string;
+  vict : GCharacter;
+  iterator : GIterator;
 begin
   if (length(param)=0) then
     begin
     act(AT_REPORT,'Group leader: [$B$7' + ch.leader.name+'$A$7]',false,ch,nil,nil,TO_CHAR);
     ch.sendBuffer(#13#10'[Power of Char]  [Name]      [Health]  [Stamina]   [Xp2Lvl]'#13#10);
 
-		iterator := char_list.iterator();
+    iterator := char_list.iterator();
     while (iterator.hasNext()) do
       begin
       vict := GCharacter(iterator.next());
@@ -914,7 +914,7 @@ begin
   else
   if (comparestr('all',param) = 0) then
     begin
-		iterator := char_list.iterator();
+    iterator := char_list.iterator();
     while (iterator.hasNext()) do
       begin
       vict := GCharacter(iterator.next());
@@ -941,19 +941,19 @@ begin
       begin
       act(AT_REPORT,'You have disbanded the group.',false,ch,nil,nil,TO_CHAR);
 
-			iterator := char_list.iterator();
-			while (iterator.hasNext()) do
-				begin
-				vict := GCharacter(iterator.next());
-				
+      iterator := char_list.iterator();
+      while (iterator.hasNext()) do
+        begin
+        vict := GCharacter(iterator.next());
+        
         if (vict.master = ch) and (vict.leader = ch) then
           begin
           act(AT_REPORT,'$n has disbanded the group and you follow no-one.',false,ch,nil,vict,TO_VICT);
           vict.master := nil;
           vict.leader := vict;
           end;
-      	end;
-    	iterator.Free();
+        end;
+      iterator.Free();
       end
     else
     if (vict.master <> ch) then
@@ -1018,8 +1018,8 @@ end;
 
 procedure do_ditch(ch:GCharacter;param:string);
 var
-	vict : GCharacter;
-	iterator : GIterator;
+  vict : GCharacter;
+  iterator : GIterator;
 begin
   if (length(param) = 0) then
     begin
@@ -1029,7 +1029,7 @@ begin
 
   if (comparestr(param, 'all') = 0) then
     begin
-		iterator := ch.room.chars.iterator();
+    iterator := ch.room.chars.iterator();
     while (iterator.hasNext()) do
       begin
       vict := GCharacter(iterator.next());
@@ -1059,10 +1059,10 @@ end;
 
 procedure do_where(ch:GCharacter;param:string);
 var
-	buf : string;
-	vict : GCharacter;
-	iterator : GIterator;
-	d : integer;
+  buf : string;
+  vict : GCharacter;
+  iterator : GIterator;
+  d : integer;
 begin
   buf := 'You are in ' + ch.room.area.name + ', built by ' + ch.room.area.author + '.'#13#10#13#10'Players near:'#13#10;
 
@@ -1070,10 +1070,10 @@ begin
 
   d := -1;
 
-	iterator := char_list.iterator();
-	while (iterator.hasNext()) do
-		begin
-		vict := GCharacter(iterator.next());
+  iterator := char_list.iterator();
+  while (iterator.hasNext()) do
+    begin
+    vict := GCharacter(iterator.next());
 
     if (vict <> ch) and (not vict.IS_NPC) and (vict.room.area = ch.room.area) and (ch.IS_SAME_ALIGN(vict)) then
       begin
@@ -1175,10 +1175,10 @@ end;
 procedure do_scan(ch:GCharacter;param:string);
 
 const
-	distance:array[1..3] of string=('pretty close by','fairly far off','a long way off');
+  distance:array[1..3] of string=('pretty close by','fairly far off','a long way off');
 
 var
-		 h,a,i:integer;
+     h,a,i:integer;
     buf1, sModifier : string;
     room_pos:GRoom;
     e:GExit;
@@ -1279,18 +1279,18 @@ begin
     end; {for}
 
     if scanCount = 0 then
-    		act(AT_REPORT,'No-one to be seen in any direction.',false,ch,nil,nil,TO_CHAR);
+        act(AT_REPORT,'No-one to be seen in any direction.',false,ch,nil,nil,TO_CHAR);
   finally
-  	list_first.Free;
+    list_first.Free;
   end;
 end;
 
 procedure do_affects(ch:GCharacter;param:string);
 var 
-	h:integer;
-	buf:string;
-	iterator : GIterator;
-	aff : GAffect;
+  h:integer;
+  buf:string;
+  iterator : GIterator;
+  aff : GAffect;
 begin
   act(AT_REPORT, '$B$1[$B$7Current status:$B$1]$A$7'#13#10, false, ch, nil, nil, TO_CHAR);
 
@@ -1596,30 +1596,30 @@ end;
 
 procedure do_socials(ch:GCharacter; param:string);
 var 
-	social : GSocial;
-	iterator : GIterator;
-	line : string;
-	i, count : integer;
+  social : GSocial;
+  iterator : GIterator;
+  line : string;
+  i, count : integer;
 begin
   count := 0;
   line := '';
   
   iterator := socials.iterator();
 
-	while (iterator.hasNext()) do
-		begin
-		social := GSocial(iterator.next());
+  while (iterator.hasNext()) do
+    begin
+    social := GSocial(iterator.next());
 
-		line := line + pad_string(lowercase(social.name), 13);
+    line := line + pad_string(lowercase(social.name), 13);
 
-		inc(count);
-		if (count = 6) then
-			begin
-			ch.sendBuffer(line + #13#10);
-			count := 0;
-			line := '';
-			end;
-		end;
+    inc(count);
+    if (count = 6) then
+      begin
+      ch.sendBuffer(line + #13#10);
+      count := 0;
+      line := '';
+      end;
+    end;
 
   if (length(line) > 0) then
     ch.sendBuffer(line + #13#10);
@@ -1628,11 +1628,11 @@ end;
 { Xenon 23/Feb/2001: fixed a small bug; made alias'ing an already existing alias replace it }
 procedure do_alias(ch : GCharacter; param : string);
 var
-	iterator : GIterator;
-	al, tmp : GAlias;
-	count : integer;
-	alname, alfill : string;
-	replaced : boolean;
+  iterator : GIterator;
+  al, tmp : GAlias;
+  count : integer;
+  alname, alfill : string;
+  replaced : boolean;
 begin
   replaced := false;
 
@@ -1658,17 +1658,17 @@ begin
         al := tmp;
         break;
         end;
-			end;
-		iterator.Free();
+      end;
+    iterator.Free();
 
     if (length(alfill) > 0) then
-    	begin
+      begin
       if (al <> nil) then
-      	begin        
+        begin        
         GPlayer(ch).aliases.remove(al.node);
         al.Free;
         replaced := true;
-      	end;
+        end;
 
       al := GAlias.Create;
 
@@ -1679,7 +1679,7 @@ begin
         ch.sendBuffer('Alias replaced.'#13#10)
       else
         ch.sendBuffer('Alias added.'#13#10);
-    	end
+      end
     else
       begin
       if (al = nil) then
@@ -2136,8 +2136,8 @@ end;
 
 procedure do_areas(ch:GCharacter; param:string);
 var
-	//area:AREA_DATA;
-	area: GArea;
+  //area:AREA_DATA;
+  area: GArea;
  area_node : GListNode;
 begin
   act(AT_DCYAN, 'Area name                                                    Author'#13#10, false, ch, nil, nil, TO_CHAR);
@@ -2146,8 +2146,48 @@ begin
   while area_node <> nil do
   begin
    area := GArea(area_node.element);
-		act(AT_REPORT, pad_string(area.name, 60) + ' ' + pad_string(area.author, 19), false, ch, nil, nil, TO_CHAR);
-		area_node := area_node.next;
+    act(AT_REPORT, pad_string(area.name, 60) + ' ' + pad_string(area.author, 19), false, ch, nil, nil, TO_CHAR);
+    area_node := area_node.next;
   end;
 end;
 
+// All available commands - Nemesis
+procedure do_commands(ch : GCharacter; param : string);
+var
+  iterator : GIterator;
+  cmd : GCommand;
+  cmdList : TStringList;
+  i, cnt : integer;
+  buf : string;
+begin
+  cmdList := TStringList.Create();
+  iterator := commandList.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    cmd := GCommand(iterator.next());
+  
+    // Show only commands available at your level
+    if (cmd.level <= ch.level) then
+      cmdList.Add(lowercase(cmd.name));
+    end;
+    
+  // Sort the list
+  cmdList.Sort();
+  
+  buf := add_chars(75, '--- Available commands ', '-');
+  
+  for i := 0 to pred(cmdList.Count) do
+    begin
+    if (i mod 5 = 0) then
+      buf := buf + #13#10 + pad_string(cmdList[i], 15)
+    else
+      buf := buf + pad_string(cmdList[i], 15);
+    end;
+  
+  buf := buf + #13#10;
+  
+  cmdList.Free();
+ 
+  ch.sendPager(buf);
+end;

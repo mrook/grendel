@@ -194,6 +194,11 @@ function: do_close
 #end
 
 #command
+name: commands
+function: do_commands
+#end
+
+#command
 name: consider
 function: do_consider
 #end
