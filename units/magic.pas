@@ -175,6 +175,7 @@ begin
      ITEM_CONTAINER:s:='container';
          ITEM_BLOOD:s:='blood';
         ITEM_PORTAL:s:='portal';
+        ITEM_KEY:s:='key'
     else
        s:='unknown object';
     end;
