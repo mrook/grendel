@@ -1,6 +1,6 @@
 {
   @abstract(Wrappers for IPv4 and IPv6 socket operations)
-  @lastmod($Id: socket.pas,v 1.11 2003/09/25 16:06:18 ***REMOVED*** Exp $)
+  @lastmod($Id: socket.pas,v 1.12 2003/09/26 12:45:58 ***REMOVED*** Exp $)
 }
 
 unit socket;
@@ -413,10 +413,7 @@ begin
   sockAddr.sin_port := htons(port);
   StrMove (PChar(@sockAddr.sin_addr.s_addr), addrPointer, addrLength);
         
-	if (WinSock2.connect(fd, sockAddr, sizeof(sockAddr)) <> 0) then
-		raise Exception.Create('Could not connect to ' + remoteName);
-		
-	Result := true;
+	Result := WinSock2.connect(fd, sockAddr, sizeof(sockAddr)) = 0;
 end;
 
 procedure GSocket.openPort(port : integer);
