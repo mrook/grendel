@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.36 2001/07/17 20:42:16 ***REMOVED*** Exp $
+// $Id: constants.pas,v 1.37 2001/07/18 14:15:57 ***REMOVED*** Exp $
 
 unit constants;
 
@@ -57,16 +57,11 @@ const BV00=1 shl 0;
       { certainly don't use more than 32, for that won't fit in
         a dword: you probably don't want to use BV31 when using
         Delphi 2/3 }
-      
-{ system maxima } 
+
+{ system maxima }
 const MAX_RECEIVE = 2048;
-      MAX_ALIAS = 50;
       MAX_WEAR = 25;
-      MAX_CONNS = 250;
-      MAX_SKILLS = 500;
       MAX_TRADE = 5;
-      MAX_PROGSIZE = 2048;
-      MAX_HELP = 1000;
 
 { Wear constants }
 const WEAR_NULL = 0;

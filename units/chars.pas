@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.46 2001/07/17 15:24:11 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.47 2001/07/18 14:15:57 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1156,7 +1156,7 @@ begin
           alignment := strtoint(right(a, ' '))
         else
         if (g = 'LEVEL') then
-          level := strtoint(right(a, ' '))
+          level := UMin(strtoint(right(a, ' ')), LEVEL_MAX_IMMORTAL)
         else
         if g='HOMETOWN' then
           hometown:=strtoint(right(a,' '))

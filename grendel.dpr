@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.37 2001/07/17 20:42:17 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.38 2001/07/18 14:15:56 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -793,7 +793,7 @@ begin
 {$ENDIF}
     end
   else
-  if (connection_list.getSize >= MAX_CONNS) then
+  if (connection_list.getSize >= system_info.max_conns) then
     begin
     send_to_socket(ac, system_info.mud_name+#13#10#13#10);
     send_to_socket(ac, 'Currently, this server is too busy to accept new connections.'#13#10);

@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.26 2001/07/17 20:42:17 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.27 2001/07/18 14:15:59 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -41,11 +41,12 @@ type
       port6 : integer;		   { ipv6 port on which Grendel runs }
       log_all : boolean;           { log all player activity? }
       bind_ip : integer;           { IP the server should bind to (when using multiple interfaces) }
-      level_forcepc : integer;    { level to force players }
-      level_log : integer;        { level to get log messages }
-      lookup_hosts : boolean;     { lookup host names of clients? }
-      deny_newconns : boolean;    { deny new connections? }
-      deny_newplayers : boolean;  { disable 'CREATE', e.g. no new players }
+      level_forcepc : integer;     { level to force players }
+      level_log : integer;         { level to get log messages }
+      lookup_hosts : boolean;      { lookup host names of clients? }
+      deny_newconns : boolean;     { deny new connections? }
+      deny_newplayers : boolean;   { disable 'CREATE', e.g. no new players }
+      max_conns : integer;         { max. concurrent connections on this server }
 
       user_high, user_cur : integer;
      end;
@@ -209,12 +210,14 @@ begin
   system_info.admin_email := 'admin@localhost';
 
   system_info.port := 4444;
+  system_info.port6 := 3333;
   system_info.lookup_hosts := false;
   system_info.deny_newconns := false;
   system_info.deny_newplayers := false;
   system_info.level_forcepc := LEVEL_HIGHGOD;
   system_info.level_log := LEVEL_GOD;
   system_info.bind_ip := INADDR_ANY;
+  system_info.max_conns := 200;
 
   try
     af := GFileReader.Create(SystemDir + 'sysdata.dat');
@@ -256,7 +259,10 @@ begin
       system_info.level_log:=strtoint(right(s,' '))
     else
     if g='BINDIP' then
-      system_info.bind_ip:=inet_addr(pchar(right(s,' ')));
+      system_info.bind_ip:=inet_addr(pchar(right(s,' ')))
+    else
+    if (g = 'MAXCONNS') then
+      system_info.max_conns := strtoint(right(s, ' '));
   until (s = '$') or (af.eof);
 
   af.Free;
@@ -302,6 +308,7 @@ begin
   af.writeLine('LevelForcePC: ' + IntToStr(system_info.level_forcepc));
   af.writeLine('LevelLog: ' + IntToStr(system_info.level_log));
   af.writeLine('BindIP: ' + inet_ntoa(t));
+  af.writeLine('MaxConns: ' + IntToStr(system_info.max_conns));
   af.writeLine('$');
 
   af.Free();
