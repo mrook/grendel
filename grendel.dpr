@@ -285,15 +285,7 @@ begin
     help_files.Free;
     dm_msg.Free;
 
-    for n := 0 to MAX_SKILLS - 1 do
-     if (skill_table[n] <> nil) then
-      begin
-      skill_table[n].prereqs.smallClean;
-      skill_table[n].affects.smallClean;
-      skill_table[n].prereqs.Free;
-      skill_table[n].affects.Free;
-      skill_table[n].Free;
-      end;
+    skill_table.Free;
 
     socials.Free;
     str_hash.Free;
