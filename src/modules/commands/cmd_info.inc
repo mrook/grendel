@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.5 2004/03/21 21:16:33 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.6 2004/03/25 19:58:37 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -855,6 +855,7 @@ begin
     end;
 
   GPlayer(ch).title := param;
+  ch.sendBuffer('Title set to "' + param + '"'#13#10);
 end;
 
 procedure do_group(ch:GCharacter;param:string);
