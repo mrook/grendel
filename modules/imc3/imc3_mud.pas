@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.4 2003/10/03 21:00:28 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.5 2003/10/20 16:00:49 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -178,42 +178,6 @@ begin
 
           routers.Add(router);
 					end
-				else
-				if (prep(parser.CurName) = 'TELL') then
-					tell := true
-				else
-				if (prep(parser.CurName) = 'BEEP') then
-					beep := true
-				else
-				if (prep(parser.CurName) = 'EMOTETO') then
-					emoteto := true
-				else
-				if (prep(parser.CurName) = 'WHO') then
-					who := true
-				else
-				if (prep(parser.CurName) = 'FINGER') then
-					finger := true
-				else
-				if (prep(parser.CurName) = 'LOCATE') then
-					locate := true
-				else
-				if (prep(parser.CurName) = 'CHANNEL') then
-					channel := true
-				else
-				if (prep(parser.CurName) = 'NEWS') then
-					news := true
-				else
-				if (prep(parser.CurName) = 'MAIL') then
-					mail := true
-				else
-				if (prep(parser.CurName) = 'FILE') then
-					mfile := true
-				else
-				if (prep(parser.CurName) = 'AUTH') then
-					auth := true
-				else
-				if (prep(parser.CurName) = 'UCACHE') then
-					ucache := true;
 				end;
 			ptContent:
 				begin
@@ -271,7 +235,45 @@ begin
 				if (prep(parser.CurName) = 'AMRCP') then
 					amrcp := StrToIntDef(parser.CurContent, 0);
 				end;
-			ptEndTag   : // Process End-Tag here (Parser.CurName)
+			ptEmptyTag:
+				begin
+				if (prep(parser.CurName) = 'TELL') then
+					tell := true
+				else
+				if (prep(parser.CurName) = 'BEEP') then
+					beep := true
+				else
+				if (prep(parser.CurName) = 'EMOTETO') then
+					emoteto := true
+				else
+				if (prep(parser.CurName) = 'WHO') then
+					who := true
+				else
+				if (prep(parser.CurName) = 'FINGER') then
+					finger := true
+				else
+				if (prep(parser.CurName) = 'LOCATE') then
+					locate := true
+				else
+				if (prep(parser.CurName) = 'CHANNEL') then
+					channel := true
+				else
+				if (prep(parser.CurName) = 'NEWS') then
+					news := true
+				else
+				if (prep(parser.CurName) = 'MAIL') then
+					mail := true
+				else
+				if (prep(parser.CurName) = 'FILE') then
+					mfile := true
+				else
+				if (prep(parser.CurName) = 'AUTH') then
+					auth := true
+				else
+				if (prep(parser.CurName) = 'UCACHE') then
+					ucache := true;
+				end;
+			ptEndTag: // Process End-Tag here (Parser.CurName)
 				begin
 				if (prep(parser.CurName) = 'MUD') then
 					exit;
