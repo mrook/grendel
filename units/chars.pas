@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.52 2001/08/03 21:35:40 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.53 2001/08/04 16:10:46 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -1434,9 +1434,12 @@ begin
 
           with aff do
             begin
-            name := hash_string(left(a, ' '));
-
             a := right(a, '''');
+
+            name := hash_string(left(a, ''''));
+
+            a := right(right(a, ''''), '''');
+            
             wear_msg := left(a, '''');
 
             a := trim(right(a, ''''));
