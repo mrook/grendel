@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.16 2003/11/07 16:31:52 hemko Exp $
+// $Id: cmd_info.inc,v 1.17 2003/11/07 16:45:01 hemko Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -2197,9 +2197,9 @@ begin
     end;
     
   // Sort the list
-  cmdList.Sort();
+  cmdList.Sort();  
   
-  buf := add_chars(75, '--- Available commands ', '-');
+  buf := #13#10 + ch.ansiColor(3) + ' ' + add_chars(78, '---- Available commands ', '-') + ch.ansiColor(7) + #13#10;
   
   for i := 0 to pred(cmdList.Count) do
     begin
