@@ -1,8 +1,8 @@
 {
-	Summary:
-		Constants
-		
-  ## $Id: constants.pas,v 1.3 2003/12/28 12:20:43 ***REMOVED*** Exp $
+  Summary:
+    Constants
+    
+  ## $Id: constants.pas,v 1.4 2004/02/05 21:30:53 hemko Exp $
 }
 
 unit constants;
@@ -161,7 +161,7 @@ const PLR_NPC = BV00;
       PLR_SILENCED = BV08;        { silenced }
       PLR_HOLYWALK = BV09;      { walk thru anything }
       PLR_HOLYLIGHT = BV10;     { see anything }
-      PLR_CLOAK = BV11;	{ immortals don't get logged }
+      PLR_CLOAK = BV11; { immortals don't get logged }
 
 { Config flags }
 const CFG_ASSIST = BV01;
@@ -369,7 +369,8 @@ const CPULSE_PER_SEC = 4;
       IDLE_NAME = 480;                              // disconnect after 2 mins when not responding at login
       IDLE_NOT_PLAYING = 1200;                      // disconnect after 5 mins when not responding somewhere in nanny()
       IDLE_PLAYING = 3600;                          // disconnect after 15 mins when playing
-      IDLE_LINKDEAD = 300 / CPULSE_GAMEHOUR;       // quit ld chars after 15 mins
+      IDLE_AFK = 7200;                              // disconnect after 30 mins when AFK 
+      IDLE_LINKDEAD = 300 / CPULSE_GAMEHOUR;        // quit ld chars after 15 mins
 
 { Player states }
 const CON_PLAYING=0;
@@ -633,7 +634,7 @@ type GApplyTypes = (APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPL
 
 // Drunkness strings - Nemesis - Constants.pas
 const drunkbuf : array[0..25] of string =
-	                    ('Zsszzsz', 'y', 'XzsZ', 'wWwWW', 'vVvvV', 'uUUu', 't', 'sSzzsss',
+                      ('Zsszzsz', 'y', 'XzsZ', 'wWwWW', 'vVvvV', 'uUUu', 't', 'sSzzsss',
                              'Rrr', 'ququ', 'P', 'ooOo', 'nNn', 'mmm', 'l', 'K', 'j', 'ii',
                              'hhh', 'g', 'fff', 'e', 'D', 'ch', 'b', 'Ah');  
 implementation

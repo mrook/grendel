@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.1 2003/12/12 13:20:09 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.2 2004/02/05 21:30:53 hemko Exp $)
 }
 
 unit timers;
@@ -27,7 +27,7 @@ type
       timer_func : TIMER_FUNC;
       counter, timeout : integer;
       looping : boolean;
-	
+  
       constructor Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
     end;
 
@@ -135,29 +135,29 @@ begin
       node_next := node.next;
 
       try
-				dec(timer.counter);
+        dec(timer.counter);
 
-				if (timer.counter = 0) then
-					begin
-					if (timer is GSpecTimer) then
-						begin
-						spec := GSpecTimer(timer);
+        if (timer.counter = 0) then
+          begin
+          if (timer is GSpecTimer) then
+            begin
+            spec := GSpecTimer(timer);
 
-						if (assigned(spec.spec_func)) then
-							spec.spec_func(spec.ch, spec.victim, spec.sn);
-						end
-					else
-						if (assigned(timer.timer_func)) then
-							timer.timer_func;
+            if (assigned(spec.spec_func)) then
+              spec.spec_func(spec.ch, spec.victim, spec.sn);
+            end
+          else
+            if (assigned(timer.timer_func)) then
+              timer.timer_func;
 
-					if (not timer.looping) then
-						begin
-						timer_list.remove(node);
-						timer.Free;
-						end
-					else
-						timer.counter := timer.timeout;
-					end;
+          if (not timer.looping) then
+            begin
+            timer_list.remove(node);
+            timer.Free;
+            end
+          else
+            timer.counter := timer.timeout;
+          end;
       except
 {        on E : EExternal do
           begin
@@ -168,10 +168,10 @@ begin
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed: ' + E.Message)
         else }
         on E : Exception do
-        	begin
-        	writeConsole('[EX Timer:' + E.ClassName + '] ' + E.Message);
-        	bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
-        	end;
+          begin
+          writeConsole('[EX Timer:' + E.ClassName + '] ' + E.Message);
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
+          end;
 
 {        if (timer is GSpecTimer) then
           begin
@@ -261,9 +261,9 @@ end;
 
 function hasTimer(ch : GCharacter; timer_type : integer) : GTimer;
 var
-	timer : GTimer;
-	spec : GSpecTimer;
-	iterator : GIterator;
+  timer : GTimer;
+  spec : GSpecTimer;
+  iterator : GIterator;
 begin
   Result := nil;
 
@@ -290,9 +290,9 @@ end;
 
 function hasTimer(ch : GCharacter; const timer_name : string) : GTimer;
 var
-	timer : GTimer;
-	spec : GSpecTimer;
-	iterator : GIterator;
+  timer : GTimer;
+  spec : GSpecTimer;
+  iterator : GIterator;
 begin
   Result := nil;
 
@@ -341,8 +341,8 @@ end;
 
 procedure update_main();
 var
-	iterator : GIterator;
-	conn : GPlayerConnection;
+  iterator : GIterator;
+  conn : GPlayerConnection;
 begin
   iterator := connection_list.iterator();
 
@@ -352,9 +352,10 @@ begin
 
     conn.idle := conn.idle + 1;
 
-    if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
-     ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
-      (conn.idle > IDLE_PLAYING)) and ((conn.ch <> nil) and (not conn.ch.IS_IMMORT)) then
+    if ((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
+       ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
+       ((conn.idle > IDLE_PLAYING) and (conn.ch <> nil) and (not conn.ch.afk) and (not conn.ch.IS_IMMORT)) or
+       ((conn.idle > IDLE_AFK) and (conn.ch.afk)) then
        begin
        conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
        conn.Terminate();
@@ -369,14 +370,14 @@ begin
       dec(conn.ch.wait);
     end;
     
-	iterator.Free();
+  iterator.Free();
 end;
 
 procedure update_gamehour();
 var
-	iterator : GIterator;
-	area : GArea;
-	ch : GCharacter;
+  iterator : GIterator;
+  area : GArea;
+  ch : GCharacter;
 begin
 {$IFDEF WIN32}
   status := GetHeapStatus;
@@ -393,7 +394,7 @@ begin
 
     area.update();
     end;
-	iterator.Free();
+  iterator.Free();
 
   iterator := char_list.iterator();
   while (iterator.hasNext()) do
@@ -458,7 +459,7 @@ begin
 
                     boot_type := boot_info.boot_type;
                     grace_exit := true;
-										system_info.terminated := true;
+                    system_info.terminated := true;
                     end;
     end;
     end;
