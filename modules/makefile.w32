@@ -1,7 +1,7 @@
 DCC=dcc32
 DCC_FLAGS=-Q -D+ -V- -W+ -O+ -GD
 
-MODULES=core_commands.bpl speller.bpl
+MODULES=core_commands.bpl speller.bpl status.bpl
 
 all:	$(MODULES)
 
@@ -13,4 +13,7 @@ core_commands.bpl:	core_commands.dpk commands/*
 
 speller.bpl:	speller.dpk speller/*
 	$(DCC) speller.dpk $(DCC_FLAGS) -LU..\core
+
+status.bpl:	status.dpk status/*
+	$(DCC) status.dpk $(DCC_FLAGS) -LU..\core
 
