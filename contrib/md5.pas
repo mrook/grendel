@@ -1,6 +1,6 @@
 {
   @abstract(MD5 Message-Digest implementation for Delphi by Matthias Fichtner)
-  @lastmod($Id: md5.pas,v 1.2 2003/06/24 21:41:15 ***REMOVED*** Exp $)
+  @lastmod($Id: md5.pas,v 1.3 2003/10/14 11:33:54 ***REMOVED*** Exp $)
 }
 
 unit md5;
@@ -81,6 +81,7 @@ begin
 	x := (x shl n) or (x shr (32 - n));
 end;
 
+{$Q-}
 procedure FF(var a: DWORD; b, c, d, x: DWORD; s: BYTE; ac: DWORD);
 begin
 	inc(a, F(b, c, d) + x + ac);
