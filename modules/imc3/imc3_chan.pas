@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_chan.pas,v 1.1 2003/10/01 14:55:19 ***REMOVED*** Exp $
+	$Id: imc3_chan.pas,v 1.2 2003/10/02 08:23:20 ***REMOVED*** Exp $
 }
 unit imc3_chan;
 
@@ -151,5 +151,6 @@ end;
 begin
 	chanList := GHashTable.Create(256);
 	
-	loadChanList();
+	if (FileExists('chanlist.xml')) then
+		loadChanList();
 end.

@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_packet.pas,v 1.1 2003/10/01 14:55:20 ***REMOVED*** Exp $
+	$Id: imc3_packet.pas,v 1.2 2003/10/02 08:23:21 ***REMOVED*** Exp $
 }
 unit imc3_packet;
 
@@ -166,7 +166,6 @@ begin
 							if (count[ord('[')] <> count[ord(']')]) then
 								break;
 
-              writeln('bla');
 							end;
 			end;
 
@@ -189,7 +188,7 @@ begin
   	begin
     packet.packet_type := 'error';
     packet.fields.Clear;
-  	writeln('Invalid packet ' + msg);
+  	//('Invalid packet ' + msg);
     end
   else
 		begin

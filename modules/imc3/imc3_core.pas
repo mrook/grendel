@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.1 2003/10/01 14:55:19 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.2 2003/10/02 08:23:20 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -476,6 +476,12 @@ var
  	buf : array[0..MAX_READ - 1] of char;
 begin
 	inputPointer := 0;
+
+	if (mud.preferredRouter = nil) then	
+		begin
+		writeConsole('Impossible to connect to non-existing router');
+		Terminate();
+		end;
 	
 	while (not Terminated) do
 		begin
@@ -570,7 +576,13 @@ begin
 			end;
 		end;
 
-	sock.disconnect();
+	if (connected) then
+		begin
+		shutdown();
+		connected := false;
+		sock.disconnect();
+		end;
+
 	sock.Free();
 end;
 

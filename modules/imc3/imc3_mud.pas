@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_mud.pas,v 1.1 2003/10/01 14:55:20 ***REMOVED*** Exp $
+	$Id: imc3_mud.pas,v 1.2 2003/10/02 08:23:21 ***REMOVED*** Exp $
 }
 unit imc3_mud;
 
@@ -108,6 +108,7 @@ implementation
 
 uses
 	SysUtils,
+	console,
 	util;
 	
 	
@@ -347,9 +348,15 @@ procedure GMud_I3.readConfig();
 var
 	parser : TXmlParser;
 begin
-  parser := TXmlParser.Create();
+	parser := TXmlParser.Create();
 	parser.Normalize := true;
-  parser.LoadFromFile('config.xml');
+	parser.LoadFromFile('config.xml');
+
+	if (parser.Source <> 'config.xml') then
+		begin
+    		writeConsole('Could not load config.xml');
+		exit;
+		end;
 
 	parser.StartScan();
 
@@ -424,5 +431,6 @@ end;
 begin
 	mudList := GHashTable.Create(256);
 	
-	loadMudList();
+	if (FileExists('mudlist.xml')) then
+		loadMudList();
 end.
