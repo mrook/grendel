@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.67 2003/06/24 22:04:23 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.68 2003/06/27 13:15:29 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -488,7 +488,7 @@ begin
 	writeConsole('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
 	writeConsole('Loading skills...');
-	load_skills;
+	load_skills();
 	writeConsole('Loading races...');
 	loadRaces();
 	writeConsole('Loading clans...');
@@ -684,7 +684,7 @@ begin
 
   ExceptProc := nil;
 
-  //JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
+  JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
   SetUnhandledExceptionFilter(@ExceptionFilter);
 
   JclStartExceptionTracking;
