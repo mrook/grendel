@@ -21,6 +21,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! 'drink' without params should drink from first fountain in room
 ! generic timer implementation
 ! holywalk (walk thru anything)
+! reimplement editing
 
 
 * rework affects system
@@ -32,7 +33,6 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 * Better online construction (autocreate exit+room when moving), object
   edit/instance, mobile create/edit/instance, reset edit etc.
   > Maybe even a map or something (show current map status in olc)
-* reimplement editing
 - some form of classes/professions/guilds/religions/whatever
 	-> probably Schools	
 - more help text
@@ -48,6 +48,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
   some rooms (with beds) have better sleep ratios etc.
 - dynamic prompts, not the hardcoded bla, but a few choosable from a list
   or redefinable by the user
+- expand tracking system
 
 
 l implementation of the mud sound protocol
@@ -63,4 +64,5 @@ l online suggest (pray) history
 
 * general format for docs (docwrite-HOWTO something), both
   for HTML and plaintext docs
+* general coding guidelines
 
