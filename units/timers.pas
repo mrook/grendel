@@ -1,4 +1,4 @@
-// $Id: timers.pas,v 1.14 2001/07/16 16:00:18 ***REMOVED*** Exp $
+// $Id: timers.pas,v 1.15 2001/07/17 15:24:14 ***REMOVED*** Exp $
 
 unit timers;
 
@@ -153,11 +153,11 @@ begin
       except
         on E : EExternal do
           begin
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
           outputError(E);
           end
         else
-          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
+          bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly');
 
 {        if (timer is GSpecTimer) then
           begin

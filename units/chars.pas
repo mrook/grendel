@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.45 2001/07/16 13:36:42 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.46 2001/07/17 15:24:11 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -190,10 +190,10 @@ type
 
       property level : integer read _level write _level;
       property str : integer read _str write _str;
-      property con : integer read _str write _str;
-      property dex : integer read _str write _str;
-      property int : integer read _str write _str;
-      property wis : integer read _str write _str;
+      property con : integer read _con write _con;
+      property dex : integer read _dex write _dex;
+      property int : integer read _int write _int;
+      property wis : integer read _wis write _wis;
 
       property hp : integer read _hp write _hp;
       property max_hp : integer read _max_hp write _max_hp;
@@ -426,8 +426,7 @@ var
 begin
   if (CHAR_DIED) then
     begin
-    bugreport('extract_char', 'area.pas', 'ch already extracted',
-              'Heavy desyncing occured: attempt to extract a character twice.');
+    bugreport('extract_char', 'area.pas', 'ch already extracted');
     exit;
     end;
 
@@ -1426,8 +1425,7 @@ begin
           if (sk <> nil) then
             SET_LEARNED(strtointdef(left(a,' '), 0), sk)
           else
-            bugreport('GArea.load', 'charlist.pas', 'skill '+g+' does not exist',
-                      'The skill specified in the pfile does not exist.');
+            bugreport('GArea.load', 'charlist.pas', 'skill '+g+' does not exist');
           end;
       until (uppercase(a)='#END') or (af.eof);
 
@@ -1527,8 +1525,7 @@ begin
               obj_index := findObjectIndex(d);
 
               if (obj_index = nil) then
-                bugreport('load_user', 'charlist.pas', 'illegal vnum ' + inttostr(d),
-                          'There is no index for this object.')
+                bugreport('load_user', 'charlist.pas', 'illegal vnum ' + inttostr(d))
               else
                 inc(obj_index.obj_count);
               end;
@@ -1612,8 +1609,7 @@ begin
 
   if (inner <> 0) then
     begin
-    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
-              'The pfile of this character was corrupted.');
+    bugreport('GCharacter.load', 'chars.pas', 'corrupted playerfile ' + name^);
 
     race := GRace(race_list.head.element);
     end;
@@ -1629,23 +1625,11 @@ begin
     end;
 
   if (max_skills = 0) then
-  begin
-    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
-              'The pfile of this character lacks a Max_skills field. ' +
-              'Fixing this *now* by setting these fields to race-max value. ' +
-              'Make sure to (force) save this player.');
     max_skills := race.max_skills;
-  end;
-  
+
   if (max_spells = 0) then
-  begin
-    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
-              'The pfile of this character lacks a Max_spells field. ' +
-              'Fixing this *now* by setting these fields to race-max value. ' +
-              'Make sure to (force) save this player.');
     max_spells := race.max_spells;
-  end;
-  
+
   calcAC;
   calcRank;
 
@@ -1982,7 +1966,7 @@ begin
       end
     else
     begin
-      bugreport('GCharacter.sendEdit()', 'chars.pas', 'unrecognized substate', 'The substate this character is in has not been recognized.');
+      bugreport('GCharacter.sendEdit()', 'chars.pas', 'unrecognized substate');
     end;
   end;
 end;
@@ -2232,8 +2216,7 @@ procedure GCharacter.fromRoom;
 begin
   if (room = nil) then
     begin
-    bugreport('GCharacter.fromRoom', 'chars.pas', 'room null',
-              'Attempted to remove character from a null room.');
+    bugreport('GCharacter.fromRoom', 'chars.pas', 'room null');
     exit;
     end;
 
@@ -2256,25 +2239,18 @@ var
 begin
   if (to_room = nil) then
     begin
-    bugreport('GCharacter.toRoom', 'chars.pas', 'room null, moving to portal',
-              'Character was forced to re-move to portal.');
+    bugreport('GCharacter.toRoom', 'chars.pas', 'room null, moving to portal');
 
     if (IS_IMMORT) then
     begin
       to_room := findRoom(ROOM_VNUM_IMMORTAL_PORTAL);
       if (to_room = nil) then
       begin
-        bugreport('GCharacter.toRoom', 'chars.pas', 'immortal portal not found',
-                  'This immortal could not be moved to the immortal portal because '+
-                  'it doesn''t exit. Immortals get moved to this room when they ' +
-                  'logged out in a room that has now been removed.'#13#10 +
-                  'To fix this, please create a room with vnum #' + IntToStr(ROOM_VNUM_IMMORTAL_PORTAL) + ', ' +
-                  'or change the ROOM_VNUM_IMMORTAL_PORTAL constant in constants.pas to an ' +
-                  'existing vnum and recompile Grendel.');
+        bugreport('GCharacter.toRoom', 'chars.pas', 'immortal portal not found');
       end;
     end;
 
-    if (to_room = nil) then      
+    if (to_room = nil) then
       if (IS_EVIL) then
         to_room := findRoom(ROOM_VNUM_EVIL_PORTAL)
       else
@@ -2282,8 +2258,7 @@ begin
 
     if (to_room = nil) then
       begin
-      bugreport('GCharacter.toRoom', 'chars/pas', 'HELP! even portal is NULL room! what did you do?',
-                'There are some serious problems with the limbo area! The portal does NOT exist!');
+      bugreport('GCharacter.toRoom', 'chars.pas', 'HELP! even portal is NULL room! what did you do?');
 
       write_console('System is unstable - prepare for a rough ride');
       exit;

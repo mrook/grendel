@@ -1,4 +1,4 @@
-// $Id: update.pas,v 1.12 2001/05/12 14:24:29 ***REMOVED*** Exp $
+// $Id: update.pas,v 1.13 2001/07/17 15:24:14 ***REMOVED*** Exp $
 
 unit update;
 
@@ -248,8 +248,7 @@ begin
                  retcode:=RESULT_NONE;
                  end;
       else begin
-           bugreport('gain_condition', 'update.pas', 'invalid condition: '+inttostr(icond),
-                     'The condition given is invalid. Please check your settings.');
+           bugreport('gain_condition', 'update.pas', 'invalid condition: '+inttostr(icond));
            retcode:=RESULT_NONE;
            end;
     end;
@@ -648,8 +647,7 @@ begin
 
       if (node_prev <> nil) and (node_prev.next <> node) then
         begin
-        bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil',
-                  'The object list was linked incorrectly and could not be fixed.');
+        bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil');
         exit;
         end;
 

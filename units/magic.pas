@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.11 2001/07/12 16:37:01 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.12 2001/07/17 15:24:13 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -342,8 +342,7 @@ begin
                         end;
       else
         begin
-        bugreport('spell generic', 'magic.pas', 'illegal target ' + inttostr(target),
-                  'The specified target is unknown.');
+        bugreport('spell generic', 'magic.pas', 'illegal target ' + inttostr(target));
         exit;
         end;
     end;
@@ -443,8 +442,7 @@ begin
                           end;
         else
           begin
-          bugreport('spell generic', 'magic.pas', 'illegal target ' + inttostr(target),
-                    'The specified target is unknown.');
+          bugreport('spell generic', 'magic.pas', 'illegal target ' + inttostr(target));
           exit;
           end;
       end;
@@ -497,8 +495,7 @@ begin
   if s='spell_refresh' then
     findFunc:=spell_refresh
   else
-    bugreport('spell', 'magic.pas', 'spell ' + s + ' not found',
-              'The specified spell could not be found.');
+    bugreport('spell', 'magic.pas', 'spell ' + s + ' not found');
 end;
 
 procedure say_spell(ch:GCharacter; name : string);

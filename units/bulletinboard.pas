@@ -44,8 +44,7 @@ begin
   {$I+}
   if (IOResult <> 0) then
     begin
-    bugreport('load_notes', 'bulletinboard.pas', 'could not open boards\' + fname,
-              'The specified board could not be opened. Please check your settings.');
+    bugreport('load_notes', 'bulletinboard.pas', 'could not open boards\' + fname);
     exit;
     end;
 

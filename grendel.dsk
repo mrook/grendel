@@ -1,44 +1,31 @@
 [Closed Files]
-File_0=SourceModule,'G:\Development\Grendel\units\conns.pas',0,1,403,56,415,0,0
-File_1=SourceModule,'G:\Development\Grendel\units\chars.pas',0,1,1,9,21,0,0
-File_2=SourceModule,'G:\Development\Grendel\units\strip.pas',0,1,29,1,48,0,0
-File_3=SourceModule,'G:\Development\Grendel\units\fsys.pas',0,1,100,1,112,0,0
-File_4=SourceModule,'G:\Development\Grendel\include\cmd_build.inc',0,1,347,1,356,0,0
-File_5=SourceModule,'G:\Development\Grendel\units\magic.pas',0,1,575,14,597,0,0
-File_6=SourceModule,'G:\Development\Grendel\include\cmd_obj.inc',0,1,942,3,954,0,0
-File_7=SourceModule,'G:\Development\Grendel\include\cmd_move.inc',0,1,362,3,374,0,0
-File_8=SourceModule,'G:\Development\Grendel\units\Channels.pas',0,1,203,26,225,0,0
+File_0=SourceModule,'G:\Development\Grendel\units\clean.pas',0,50,137,84,148,0,0
+File_1=SourceModule,'G:\Development\Grendel\units\clan.pas',0,1,108,75,119,0,0
+File_2=SourceModule,'G:\Development\Grendel\units\race.pas',0,51,144,72,161,0,0
+File_3=SourceModule,'G:\Development\Grendel\units\conns.pas',0,1,298,1,307,0,0
+File_4=SourceModule,'G:\Development\Grendel\units\update.pas',0,1,639,75,650,0,0
+File_5=SourceModule,'G:\Development\Grendel\units\mudhelp.pas',0,36,229,92,240,0,0
+File_6=SourceModule,'G:\Development\Grendel\units\fight.pas',0,30,782,86,793,0,0
+File_7=SourceModule,'G:\Development\Grendel\units\Channels.pas',0,1,358,5,365,0,0
+File_8=SourceModule,'G:\Development\Grendel\units\mudthread.pas',0,63,1120,93,1132,0,0
+File_9=SourceModule,'G:\Development\Grendel\include\cmd_obj.inc',0,49,689,105,700,0,0
 
 [Modules]
-Module0=G:\Development\Grendel\units\constants.pas
-Module1=G:\Development\Grendel\units\dtypes.pas
-Module2=G:\Development\Grendel\units\update.pas
-Module3=G:\Development\Grendel\units\skills.pas
-Module4=G:\Development\Grendel\units\timers.pas
-Module5=G:\Development\Grendel\grendel.dpr
-Module6=G:\Development\Grendel\gmc\gvm.pas
-Module7=G:\Development\Grendel\units\progs.pas
-Module8=G:\Development\Grendel\units\area.pas
-Module9=G:\Development\Grendel\units\mudthread.pas
-Module10=G:\Development\Grendel\units\fight.pas
-Count=11
+Module0=G:\Development\Grendel\units\skills.pas
+Module1=G:\Development\Grendel\units\timers.pas
+Module2=G:\Development\Grendel\units\fsys.pas
+Module3=G:\Development\Grendel\units\mudsystem.pas
+Module4=G:\Development\Grendel\grendel.dpr
+Module5=G:\Development\Grendel\units\area.pas
+Module6=G:\Development\Grendel\units\bulletinboard.pas
+Module7=G:\Development\Grendel\units\chars.pas
+Module8=G:\Development\Grendel\units\magic.pas
+Module9=G:\Development\Grendel\units\dtypes.pas
+Module10=G:\Development\Grendel\units\constants.pas
+Module11=G:\Development\Grendel\units\progs.pas
+Count=12
 EditWindowCount=1
 PackageWindowCount=1
-
-[G:\Development\Grendel\units\constants.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[G:\Development\Grendel\units\dtypes.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[G:\Development\Grendel\units\update.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
 
 [G:\Development\Grendel\units\skills.pas]
 ModuleType=SourceModule
@@ -50,17 +37,17 @@ ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
+[G:\Development\Grendel\units\fsys.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\mudsystem.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
 [G:\Development\Grendel\grendel.dpr]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[G:\Development\Grendel\gmc\gvm.pas]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[G:\Development\Grendel\units\progs.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -70,12 +57,32 @@ ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[G:\Development\Grendel\units\mudthread.pas]
+[G:\Development\Grendel\units\bulletinboard.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[G:\Development\Grendel\units\fight.pas]
+[G:\Development\Grendel\units\chars.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\magic.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\dtypes.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\constants.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[G:\Development\Grendel\units\progs.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -89,8 +96,8 @@ FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=11
-CurrentView=2
+ViewCount=12
+CurrentView=5
 View0=0
 View1=1
 View2=2
@@ -102,6 +109,7 @@ View7=7
 View8=8
 View9=9
 View10=10
+View11=11
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -125,79 +133,86 @@ BottomPanelData=0000040000000000000000000000000000000000000000000001000000000000
 
 [View0]
 Module=G:\Development\Grendel\grendel.dpr
-CursorX=14
-CursorY=665
-TopLine=644
+CursorX=1
+CursorY=913
+TopLine=893
 LeftCol=1
 
 [View1]
-Module=G:\Development\Grendel\units\mudthread.pas
-CursorX=31
-CursorY=248
-TopLine=235
-LeftCol=1
+Module=G:\Development\Grendel\units\mudsystem.pas
+CursorX=10
+CursorY=578
+TopLine=565
+LeftCol=4
 
 [View2]
-Module=G:\Development\Grendel\units\constants.pas
+Module=G:\Development\Grendel\units\timers.pas
 CursorX=1
-CursorY=126
-TopLine=121
+CursorY=160
+TopLine=144
 LeftCol=1
 
 [View3]
-Module=G:\Development\Grendel\units\update.pas
-CursorX=7
-CursorY=611
-TopLine=587
+Module=G:\Development\Grendel\units\fsys.pas
+CursorX=30
+CursorY=122
+TopLine=115
 LeftCol=1
 
 [View4]
-Module=G:\Development\Grendel\units\dtypes.pas
-CursorX=1
-CursorY=691
-TopLine=670
+Module=G:\Development\Grendel\units\constants.pas
+CursorX=26
+CursorY=16
+TopLine=1
 LeftCol=1
 
 [View5]
-Module=G:\Development\Grendel\units\timers.pas
-CursorX=5
-CursorY=60
-TopLine=50
-LeftCol=1
+Module=G:\Development\Grendel\units\skills.pas
+CursorX=76
+CursorY=517
+TopLine=505
+LeftCol=6
 
 [View6]
-Module=G:\Development\Grendel\units\skills.pas
+Module=G:\Development\Grendel\units\dtypes.pas
 CursorX=1
-CursorY=14
-TopLine=1
+CursorY=781
+TopLine=769
 LeftCol=1
 
 [View7]
 Module=G:\Development\Grendel\units\progs.pas
-CursorX=30
-CursorY=27
-TopLine=25
+CursorX=1
+CursorY=151
+TopLine=145
 LeftCol=1
 
 [View8]
-Module=G:\Development\Grendel\units\area.pas
-CursorX=51
-CursorY=1335
-TopLine=1335
+Module=G:\Development\Grendel\units\magic.pas
+CursorX=66
+CursorY=498
+TopLine=487
 LeftCol=1
 
 [View9]
-Module=G:\Development\Grendel\gmc\gvm.pas
-CursorX=33
-CursorY=335
-TopLine=318
+Module=G:\Development\Grendel\units\chars.pas
+CursorX=45
+CursorY=2261
+TopLine=2250
 LeftCol=1
 
 [View10]
-Module=G:\Development\Grendel\units\fight.pas
-CursorX=26
-CursorY=982
-TopLine=970
+Module=G:\Development\Grendel\units\bulletinboard.pas
+CursorX=84
+CursorY=47
+TopLine=36
+LeftCol=28
+
+[View11]
+Module=G:\Development\Grendel\units\area.pas
+CursorX=59
+CursorY=2622
+TopLine=2611
 LeftCol=1
 
 [PackageWindow0]
@@ -223,9 +238,10 @@ SectionWidth1=210
 Module=c:\program files\borland\delphi5\Lib\dclusr50.dpk
 
 [Watches]
-Count=2
-Watch0='v1',256,0,18,1,0
-Watch1='clockTick',256,0,18,1,0
+Count=3
+Watch0='aff',256,0,18,1,0
+Watch1='s',256,0,18,1,0
+Watch2='dam',256,0,18,1,0
 
 [Breakpoints]
 Count=0
@@ -241,8 +257,8 @@ Left=0
 Top=0
 Width=1024
 Height=105
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1032
 MaxHeight=105
 ClientWidth=1024
@@ -250,7 +266,7 @@ ClientHeight=78
 
 [ProjectManager]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=369
 Top=372
@@ -303,8 +319,8 @@ ShowStatusBar=1
 Create=1
 Visible=1
 State=0
-Left=-17
-Top=513
+Left=1
+Top=557
 Width=421
 Height=149
 MaxLeft=-1

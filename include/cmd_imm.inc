@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.36 2001/07/14 13:26:07 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.37 2001/07/17 15:24:08 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1970,16 +1970,14 @@ begin
 //  Assert(destRoom.areacoords <> nil, 'destRoom.areacoords = nil');
   if (currRoom.areacoords = nil) then
   begin
-    bugreport('goalDistEstimate', 'cmd_imm.inc', 'currRoom.areacoords = nil',
-              'The areacoords field is a nil pointer. No coordinates generated for this area or this room? Please fix this, pathfinding will not work without coordinates.');
+    bugreport('goalDistEstimate', 'cmd_imm.inc', 'currRoom.areacoords = nil');
     raise GException.Create('cmd_imm.inc:goalDistEstimate', 'currRoom.areacoords = nil');
     Result := -1;
     exit;
   end;
   if (destRoom.areacoords = nil) then
   begin
-    bugreport('goalDistEstimate', 'cmd_imm.inc', 'destRoom.areacoords = nil',
-              'The areacoords field is a nil pointer. No coordinates generated for this area or this room? Please fix this, pathfinding will not work without coordinates.');
+    bugreport('goalDistEstimate', 'cmd_imm.inc', 'destRoom.areacoords = nil');
     raise GException.Create('cmd_imm.inc:goalDistEstimate', 'destRoom.areacoords = nil');
     Result := -1;
     exit;
@@ -2168,8 +2166,7 @@ begin
         begin
           if (goalDistEstimate(droom, destroom) < 0) then
           begin
-            bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)',
-                      'goalDistEstimate returned a negative value.');
+            bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)');
             exit;
           end;
           new_snode := TSearchNode.Create(newg, goalDistEstimate(droom, destroom), droom, snode);
@@ -2250,8 +2247,7 @@ begin
 
   if (goalDistEstimate(ch.room, goalroom) < 0) then
   begin
-    bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)',
-              'goalDistEstimate returned a negative value.');
+    bugreport('do_findpath', 'cmd_imm.inc', 'goalDistEstimate return value < 0 (2)');
     exit;
   end;
   

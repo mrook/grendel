@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.39 2001/07/16 16:04:31 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.40 2001/07/17 15:24:10 ***REMOVED*** Exp $
 
 unit area;
 
@@ -27,6 +27,9 @@ type
     end;
 
     GArea = class
+    protected
+      af : GFileReader;
+      
     public
       fname, name, author : string;
       m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
@@ -38,7 +41,6 @@ type
       weather : GWeather;             { current local weather }
 
       found_range : boolean;
-      af : GFileReader;
 
       procedure areaBug(func : string; problem : string);
 
@@ -342,8 +344,7 @@ end;
 
 procedure GArea.areaBug(func : string; problem : string);
 begin
-  bugreport(func, 'area.pas', fname + ': ' + problem + ', line ' + inttostr(af.line),
-            problem);
+  bugreport(func, 'area.pas', fname + ': ' + problem + ', line ' + inttostr(af.line));
 end;
 
 procedure GArea.loadRooms;
@@ -859,8 +860,7 @@ begin
   try
     af := GFileReader.Create('areas\' + fn);
   except
-    bugreport('GArea.load', 'area.pas', 'could not open ' + fn,
-              'The area list file could not be opened.');
+    bugreport('GArea.load', 'area.pas', 'could not open ' + fn);
     exit;
   end;
 
@@ -939,11 +939,7 @@ begin
   {$I+}
 
   if (IOResult <> 0) then
-    begin
-    bugreport('load_areas', 'area.pas', 'could not open areas\area.list',
-              'The area list file could not be opened.');
-    exit;
-    end;
+    raise GException.Create('load_areas', 'Could not open areas\area.list');
 
   repeat
     readln(lf, s);
@@ -994,7 +990,7 @@ begin
         if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
           begin
           bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' illegal direction '+
-                    inttostr(pexit.direction), 'The room parser encountered a flaw in this area.');
+                    inttostr(pexit.direction));
 
           room.exits.remove(node_exit);
 
@@ -1004,8 +1000,7 @@ begin
         if (to_room=nil) then
           begin
           bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' '+
-                     headings[pexit.direction]+' -> '+inttostr(pexit.vnum)+' null',
-                     'The room parser encountered a flaw in this area.');
+                     headings[pexit.direction]+' -> '+inttostr(pexit.vnum)+' null');
 
           room.exits.remove(node_exit);
 
@@ -1069,7 +1064,7 @@ begin
 
   if (IOResult <> 0) then
     begin
-    bugreport('GArea.save', 'area.pas', 'Could not open ' + fn + '!', 'For some reason, the file mentioned could not be opened for writing.');
+    bugreport('GArea.save', 'area.pas', 'Could not open ' + fn + '!');
     exit;
     end;
 
@@ -1354,8 +1349,7 @@ begin
 
   if (npcindex = nil) then
     begin
-    bugreport('instanceNPC', 'area.pas', 'npc_index null',
-              'The index to create a npc from is invalid.');
+    bugreport('instanceNPC', 'area.pas', 'npc_index null');
     Result := nil;
     exit;
     end;
@@ -1453,8 +1447,7 @@ begin
           npcindex := findNPCIndex(reset.arg1);
 
           if (npcindex = nil) then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
-                      'There is no mobile with the specified vnum.')
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
           else
             begin
             lastmob := nil;
@@ -1468,8 +1461,7 @@ begin
 
               if (npc.room = nil) then
                 begin
-                bugreport('GArea.reset', 'area.pas', 'room vnum #'+inttostr(reset.arg2)+' null',
-                          'The room to reset a mobile in does not exist.');
+                bugreport('GArea.reset', 'area.pas', 'room vnum #'+inttostr(reset.arg2)+' null');
 
                 npc.extract(true);
                 end
@@ -1516,8 +1508,7 @@ begin
 
             if (npc = nil) then
               begin
-              bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null',
-                        'Attempted to reset an object to a null mobile.');
+              bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null');
               node_reset := node_reset.next;
               continue;
               end;
@@ -1532,12 +1523,10 @@ begin
             end;
 
           if (objindex = nil) then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
-                      'Attempted to reset a null object to a mobile.')
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
           else
           if npc=nil then
-            bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null',
-                      'Attempted to reset an object to a null mobile.')
+            bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null')
           else
           if (number_percent <= reset.arg2) then
             begin
@@ -1572,8 +1561,7 @@ begin
 
             if (npc = nil) then
               begin
-              bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null',
-                        'Attempted to reset an object to a null mobile.');
+              bugreport('GArea.reset', 'area.pas', '('+inttostr(reset.arg1)+') npc vnum '+inttostr(reset.arg3)+' null');
               node_reset := node_reset.next;
               continue;
               end;
@@ -1588,8 +1576,7 @@ begin
             end;
 
           if objindex=nil then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
-                      'Attempted to reset a null object to a mobile.')
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
           else
             begin
             obj := instanceObject(findObjectIndex(reset.arg1));
@@ -1602,8 +1589,7 @@ begin
           objindex:=findObjectIndex(reset.arg1);
 
           if objindex=nil then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
-                      'Attempted to reset a null object.')
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
           else
           if (objindex.area.nplayer=0) and (reset.arg3>objindex.obj_count) then
             begin
@@ -1623,8 +1609,7 @@ begin
             end;
 
           if objindex=nil then
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
-                      'Attempted to reset a null object.')
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null')
           else
           if (objindex.area.nplayer=0) and (reset.arg3>objindex.obj_count) then
             begin
@@ -1636,16 +1621,14 @@ begin
           room := findRoom(reset.arg1);
           if (room = nil) then
             begin
-            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null',
-                      'Attempted to reset a null room.');
+            bugreport('GArea.reset', 'area.pas', 'vnum '+inttostr(reset.arg1)+' null');
             exit;
             end;
 
           pexit := room.findExit(reset.arg2);
           if (pexit = nil) then
             begin
-            bugreport('GArea.reset', 'area.pas', 'direction '+inttostr(reset.arg2) + ' has no exit in room ' + inttostr(reset.arg1),
-                      'Attempted to reset a null exit.');
+            bugreport('GArea.reset', 'area.pas', 'direction '+inttostr(reset.arg2) + ' has no exit in room ' + inttostr(reset.arg1));
             exit;
             end;
 
@@ -1857,9 +1840,8 @@ begin
                   end;
    else
      begin
-     bugreport('GArea.update', 'update.pas', 'bad sky',
-               'The sky identifier given is unknown.');
-     weather.sky:=SKY_CLOUDLESS;
+     bugreport('GArea.update', 'update.pas', 'bad sky identifier');
+     weather.sky := SKY_CLOUDLESS;
      end;
   end;
 
@@ -2389,8 +2371,7 @@ var
 begin
   if (to_room = nil) then
     begin
-    bugreport('GObject.toRoom', 'area.pas', 'room null',
-              'Attempt to put object in null room.');
+    bugreport('GObject.toRoom', 'area.pas', 'room null');
     exit;
     end;
 
@@ -2416,8 +2397,7 @@ end;
 procedure Gobject.fromRoom;
 begin
   if (room=nil) then
-    bugreport('obj_from_room', 'area.pas', 'room null',
-              'Attempt to remove object from null room.');
+    bugreport('obj_from_room', 'area.pas', 'room null');
 
   room.objects.remove(node_room);
   node_room := nil;
@@ -2639,8 +2619,7 @@ var obj : GObject;
 begin
   if (o_index = nil) then
     begin
-    bugreport('instanceObject', 'area.pas', 'o_index null',
-              'The index to create an object from is invalid.');
+    bugreport('instanceObject', 'area.pas', 'o_index null');
     instanceObject := nil;
     exit;
     end;

@@ -130,8 +130,7 @@ begin
       begin
       ch.sendBuffer('You can''t go in that direction.'#13#10);
 
-      bugreport('do_move', 'cmd_move.inc', 'room_to (' + inttostr(room_pos.vnum) + ' -> ' + inttostr(pexit.vnum) + ') is null',
-                'The room this exit links to does not exist. Please check this area.');
+      bugreport('do_move', 'cmd_move.inc', 'room_to (' + inttostr(room_pos.vnum) + ' -> ' + inttostr(pexit.vnum) + ') is null');
       exit;
       end;
     end;
@@ -673,8 +672,7 @@ begin
 
   if (room_pos = nil) then
     begin
-    bugreport('do_open', 'cmd_move.inc', 'room_to (' + inttostr(ch.room.vnum) + ' -> ' + inttostr(pexit.vnum) + ') is null',
-              'The room this exit links to does not exist. Please check this area.');
+    bugreport('do_open', 'cmd_move.inc', 'room_to (' + inttostr(ch.room.vnum) + ' -> ' + inttostr(pexit.vnum) + ') is null');
     exit;
     end;
 
@@ -682,8 +680,7 @@ begin
 
   if (pexit = nil) then
     begin
-    bugreport('do_open', 'cmd_move.inc', 'reverse exit (' + inttostr(ch.room.vnum) + ') is null',
-              'The reserve exit back to this room does not exist. Please check this area.');
+    bugreport('do_open', 'cmd_move.inc', 'reverse exit (' + inttostr(ch.room.vnum) + ') is null');
     exit;
     end;
 
@@ -740,8 +737,7 @@ begin
 
   if (room_pos = nil) then
     begin
-    bugreport('do_close', 'cmd_move.inc', 'room_to (' + inttostr(ch.room.vnum) + ' -> ' + inttostr(pexit.vnum) + ') is null',
-              'The room this exit links to does not exist. Please check this area.');
+    bugreport('do_close', 'cmd_move.inc', 'room_to (' + inttostr(ch.room.vnum) + ' -> ' + inttostr(pexit.vnum) + ') is null');
     exit;
     end;
 
@@ -749,8 +745,7 @@ begin
 
   if (pexit = nil) then
     begin
-    bugreport('do_close', 'cmd_move.inc', 'reverse exit (' + inttostr(ch.room.vnum) + ') is null',
-              'The reserve exit back to this room does not exist. Please check this area.');
+    bugreport('do_close', 'cmd_move.inc', 'reverse exit (' + inttostr(ch.room.vnum) + ') is null');
     exit;
     end;
 

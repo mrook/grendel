@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.41 2001/07/12 16:37:03 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.42 2001/07/17 15:24:09 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -715,7 +715,7 @@ begin
           if (conn.ch.IS_EVIL) then
             buf_evil := buf_evil + buf1
           else
-            bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name^, 'Could not determine alignment on character ' + conn.ch.name^ + '. Not good nor evil according to IS_GOOD and IS_EVIL. (1)');
+            bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + conn.ch.name^);
         end;
       end;
     end;
@@ -797,7 +797,7 @@ begin
       if ch.IS_EVIL then
         buf_result := buf_result + buf_evil
       else
-          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name^, 'Could not determine alignment on character ' + conn.ch.name^ + '. Not good nor evil according to IS_GOOD and IS_EVIL. (2)');
+          bugreport('do_who', 'cmd_info.inc', 'unknown align on character ' + ch.name^);
     end;
   end;
         

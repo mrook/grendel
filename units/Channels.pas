@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.6 2001/07/14 13:26:09 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.7 2001/07/17 15:24:10 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -270,8 +270,7 @@ begin
   
   if (channel = nil) then
   begin
-    bugreport('to_channel', 'Channels.pas', 'channel = nil',
-              'Procedure was passed a nil argument.');
+    bugreport('to_channel', 'Channels.pas', 'channel = nil');
     exit;
   end;
     
@@ -359,24 +358,25 @@ var
   he : THistoryElement;
 begin
   if (not channels_loaded) then
-  begin
+    begin
     write_console('channelCommunicate(): channels not loaded! Perhaps error loading/parsing ' + channelDataFile + '? Please correct this error.');
     exit;
-  end;
+    end;
+    
   param := one_argument(param, arg0);
   chan := lookupChannel(arg0);
+
   if (ch = nil) then
-  begin
-    bugreport('channelCommunicate', 'Channels.pas', 'ch = nil',
-              'channelCommunicate() was passed nil for variable ch.');
+    begin
+    bugreport('channelCommunicate', 'Channels.pas', 'ch = nil');
     exit;
-  end;
+    end;
+
   if (chan = nil) then
-  begin
-    bugreport('channelCommunicate', 'Channels.pas', 'chan = nil',
-              'Could not find a GChannel record for given parameter.');
+    begin
+    bugreport('channelCommunicate', 'Channels.pas', 'chan = nil');
     exit;
-  end;
+    end;
 
   if (chan.CLAN() and (ch.clan = nil)) then
     begin

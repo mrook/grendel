@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.16 2001/07/14 13:26:23 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.17 2001/07/17 15:24:14 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -163,8 +163,7 @@ begin
   gsn := findSkill(name);
 
   if (gsn = nil) then
-    bugreport('assign_gsn', 'skills.pas', 'skill '''+name+''' not found',
-              'The specified skill could not be found.');
+    bugreport('assign_gsn', 'skills.pas', 'skill '''+name+''' not found');
 
   assign_gsn := gsn;
 end;
@@ -181,8 +180,7 @@ begin
   try
     af := GFileReader.Create('system\skills.dat');
   except
-    bugreport('load_skills', 'skills.pas', 'could not open system\skills.dat',
-              'The system file skills.dat could not be opened.');
+    GException.Create('load_skills', 'Could not open system\skills.dat');
     exit;
   end;
 
@@ -317,8 +315,7 @@ begin
         if (sk <> nil) then
           prereqs.insertLast(sk)
         else
-          bugreport('load_skills', 'skills.pas', 'Could not find prereq skill ' + a,
-                    'The specified skill could not be found.');
+          bugreport('load_skills', 'skills.pas', 'Could not find prereq skill ' + a);
         end;
       until g='#END';
 
@@ -517,7 +514,7 @@ begin
     Result := APPLY_CAFFEINE
   else
     begin
-    bugreport('findApply', 'skills.pas', 'Illegal apply type "' + s + '"', '');
+    bugreport('findApply', 'skills.pas', 'Illegal apply type "' + s + '"');
     Result := APPLY_NONE;
     end;
 end;

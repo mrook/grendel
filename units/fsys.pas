@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.9 2001/07/16 13:36:46 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.10 2001/07/17 15:24:12 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -21,7 +21,7 @@ type
       feol : boolean;
       line : integer;
 
-      function readChar : char;
+      function readChar() : char;
       function eof() : boolean;
       function eol() : boolean;
       procedure seek(pos : integer);
@@ -31,7 +31,22 @@ type
       function readCardinal() : cardinal;
       function readToken() : string;
 
-      procedure flush;
+      constructor Create(fn : string);
+      destructor Destroy; override;
+    end;
+
+    GFileWriter = class
+      fp : TFileStream;
+      fname : string;
+      buffer : array[0..BUFSIZE] of char;
+      fpos : integer;
+
+      procedure writeChar(c : char);
+      procedure writeInteger(i : integer);
+      procedure writeString(s : string);
+      procedure writeLine(s : string);
+
+      procedure flush();
 
       constructor Create(fn : string);
       destructor Destroy; override;
@@ -80,7 +95,7 @@ begin
   inherited Destroy;
 end;
 
-function GFileReader.readChar : char;
+function GFileReader.readChar() : char;
 var c : char;
 begin
   c := buffer[fpos];
@@ -107,12 +122,12 @@ begin
   readChar := c;
 end;
 
-function GFileReader.eof : boolean;
+function GFileReader.eof() : boolean;
 begin
   eof := (fpos >= fsize) or (buffer[fpos] = #0);
 end;
 
-function GFileReader.eol : boolean;
+function GFileReader.eol() : boolean;
 begin
   Result := feol;
 end;
@@ -126,7 +141,7 @@ begin
     inc(fpos,pos);
 end;
 
-function GFileReader.readLine : string;
+function GFileReader.readLine() : string;
 var
    chars : array[0..MAX_LINESIZE] of char;
    pos : integer;
@@ -161,7 +176,7 @@ begin
   readLine := chars;
 end;
 
-function GFileReader.readInteger : integer;
+function GFileReader.readInteger() : integer;
 var c : char;
     number : integer;
     sign : boolean;
@@ -218,7 +233,7 @@ begin
   Result := number;
 end;
 
-function GFileReader.readCardinal : cardinal;
+function GFileReader.readCardinal() : cardinal;
 var c : char;
     number : cardinal;
     sign : boolean;
@@ -337,12 +352,70 @@ begin
   Result := '';
 end;
 
-procedure GFileReader.flush;
-begin
-  if (buffer = nil) then
-    exit;
 
-  fillchar(buffer, BUFSIZE, 0);
+// GFileWriter
+constructor GFileWriter.Create(fn : string);
+begin
+  inherited Create;
+
+  fn := translateFileName(fn);
+  fpos := 0;
+
+  fp := TFileStream.Create(fn, fmOpenWrite);
+  fname := fn;
+end;
+
+destructor GFileWriter.Destroy;
+begin
+  fp.Free;
+
+  inherited Destroy;
+end;
+
+procedure GFileWriter.writeChar(c : char);
+begin
+  buffer[fpos] := c;
+
+  inc(fpos);
+
+  if (fpos >= BUFSIZE) then
+    begin
+    fp.Write(buffer, BUFSIZE);
+    fpos := 0;
+    end;
+end;
+
+procedure GFileWriter.writeInteger(i : integer);
+begin
+  writeString(IntToStr(i));
+end;
+
+procedure GFileWriter.writeString(s : string);
+var
+  a : integer;
+begin
+  for a := 1 to length(s) do
+    writeChar(s[a]);
+end;
+
+procedure GFileWriter.writeLine(s : string);
+var
+  a : integer;
+begin
+  for a := 1 to length(s) do
+    writeChar(s[a]);
+
+  writeChar(#13);
+
+{$IFDEF WIN32}
+  writeChar(#10);
+{$ENDIF}
+end;
+
+procedure GFileWriter.flush();
+begin
+  fp.Write(buffer, fpos);
+  fpos := 0;
 end;
 
 end.

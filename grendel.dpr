@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.35 2001/07/16 16:00:17 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.36 2001/07/17 15:24:08 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -221,15 +221,13 @@ begin
       closesocket(listenv4);
 {$ENDIF}
 
-      write_console('ERROR: Could not bind to IPv4, port ' + inttostr(system_info.port));
-      write_console('Fatal error, could not complete boot.');
-      halt;
+      raise GException.Create('startup_tcpip', 'Could not bind to IPv4, port ' + inttostr(system_info.port));
       end;
 
     rc := listen(listenv4, 15);
 
     if (rc > 0) then
-      write_console('ERROR: Could not listen on IPv4 socket.')
+      raise GException.Create('startup_tcpip', 'Could not listen on IPv4 socket')
     else
       write_console('IPv4 bound on port ' + inttostr(system_info.port) + '.');
     end;
@@ -373,8 +371,7 @@ begin
   except
     on E : EExternal do
     begin
-      bugreport('cleanup', 'grendel.dpr', 'something went wrong',
-                'A procedure in the cleanup cycle failed. Contact Grimlord.');
+      bugreport('cleanup', 'grendel.dpr', 'Cleanup procedure failed, terminating now.');
       outputError(E);
     end;
   end;
@@ -435,8 +432,7 @@ begin
   SI.wShowWindow := sw_show;
 
   if not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI) then
-    bugreport('reboot_mud', 'grendel.dpr', 'could not execute grendel.exe',
-              'The server could not be rebooted! Please check your settings!');
+    bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel.exe, reboot failed!');
 {$ENDIF}
 end;
 
@@ -482,8 +478,7 @@ begin
 
   if (not CreateProcess('copyover.exe', nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
     begin
-    bugreport('copyover_mud', 'grendel.dpr', 'Could not execute copyover.exe',
-              'The copyover could not be started! Please check your settings!');
+    bugreport('copyover_mud', 'grendel.dpr', 'Could not execute copyover.exe, copyover failed!');
     reboot_mud;
     end;
 
@@ -497,7 +492,7 @@ begin
 
   if (not ConnectNamedPipe(pipe, nil)) then
     begin
-    bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!', 'The IPC pipe for copyover could not be created.');
+    bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!');
     reboot_mud;
     end;
 
@@ -510,13 +505,13 @@ begin
 
     if (WSADuplicateSocket(conn.socket, PI.dwProcessId, @prot) = -1) then
       begin
-      bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed', 'Error code: ' + IntToStr(WSAGetLastError));
+      bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
       reboot_mud;
       end;
 
     if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
       begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe', 'Could not send socket info through IPC pipe');
+      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
       reboot_mud;
       end;
 
@@ -525,13 +520,13 @@ begin
 
     if (not WriteFile(pipe, len, 4, w, nil)) then
       begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe', 'Could not send socket info through IPC pipe');
+      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
       reboot_mud;
       end;
 
     if (not WriteFile(pipe, name, len, w, nil)) then
       begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe', 'Could not send socket info through IPC pipe');
+      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
       reboot_mud;
       end;
 
@@ -608,8 +603,7 @@ begin
     Sleep(1000);
 
     { give operator/logfile a message }
-    bugreport('CRASH', 'grendel.dpr', 'CRASH WARNING',
-              'The system encountered a fatal error and will reboot.');
+    bugreport('CRASH', 'grendel.dpr', 'CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
 
     write_console('---- CRASH TERMINATE. REBOOTING SERVER ----');
 
@@ -638,8 +632,9 @@ begin
 end;
 
 
-procedure boot_mud;
-var s : string;
+procedure bootServer();
+var
+  s : string;
 begin
   { open a standard log file, filename is given by current system time }
   AssignFile(LogFile, translateFileName('log\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
@@ -660,73 +655,80 @@ begin
   write_direct('This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.'#13#10);
   write_console('Booting server...');
 
-  load_system;
+  try
+    load_system;
 
-  s := FormatDateTime('ddddd', Now);
-  write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
+    s := FormatDateTime('ddddd', Now);
+    write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
 
-  write_console('Initializing GMC contexts...');
-  init_progs;
-  write_console('Loading races...');
-  load_races;
-  // write_console('Loading professions...');
-  // load_profs;
-  write_console('Loading clans...');
-  load_clans;
-  write_console('Loading skills...');
-  load_skills;
-  write_console('Loading texts...');
-  registerCommands;
-  load_commands;
-  load_socials;
-  load_damage;
-  write_console('Loading channels...');
-  load_channels();
-  write_console('Loading areas...');
-  load_areas;
-  write_console('Loading help...');
-  load_help('help.dat');
-  write_console('Loading namegenerator data...');
-  loadNameTables(NameTablesDataFile);
-  write_console('Loading noteboards...');
-  load_notes('boards.dat');
+    write_console('Initializing GMC contexts...');
+    init_progs;
+    write_console('Loading races...');
+    load_races;
+    write_console('Loading clans...');
+    load_clans;
+    write_console('Loading skills...');
+    load_skills;
+    write_console('Loading texts...');
+    registerCommands;
+    load_commands;
+    load_socials;
+    load_damage;
+    write_console('Loading channels...');
+    load_channels();
+    write_console('Loading areas...');
+    load_areas;
+    write_console('Loading help...');
+    load_help('help.dat');
+    write_console('Loading namegenerator data...');
+    loadNameTables(NameTablesDataFile);
+    write_console('Loading noteboards...');
+    load_notes('boards.dat');
+    write_console('Loading mud state...');
+    loadMudState();
 
-  write_console('String hash stats: ');
-  str_hash.hashStats;
+    write_console('String hash stats: ');
+    str_hash.hashStats;
 
-  randomize;
+    randomize;
 
-  use_ipv4 := false;
-  use_ipv6 := false;
-  startup_tcpip;
+    use_ipv4 := false;
+    use_ipv6 := false;
+    startup_tcpip;
 
-  ExitProc := @reboot_exitproc;
+    ExitProc := @reboot_exitproc;
 
-  BootTime := Now;
+    BootTime := Now;
 
-  update_time;
+    update_time;
 
-  time_info.day := 1;
-  time_info.month := 1;
-  time_info.year := 1;
+    time_info.day := 1;
+    time_info.month := 1;
+    time_info.year := 1;
 
-  boot_type := 0;
-  bg_info.count := -1;
-  boot_info.timer := -1;
-  mud_booted:=true;
+    boot_type := 0;
+    bg_info.count := -1;
+    boot_info.timer := -1;
+    mud_booted:=true;
 
+    registerTimer('teleports', update_teleports, 1, true);
+    registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
+    registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
+    registerTimer('objects', update_objects, CPULSE_TICK, true);
+    registerTimer('characters', update_chars, CPULSE_TICK, true);
+    registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
 
-  registerTimer('teleports', update_teleports, 1, true);
-  registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
-  registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
-  registerTimer('objects', update_objects, CPULSE_TICK, true);
-  registerTimer('characters', update_chars, CPULSE_TICK, true);
-  registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
+    timer_thread := GTimerThread.Create;
+    clean_thread := GCleanThread.Create;
 
-  timer_thread := GTimerThread.Create;
-  clean_thread := GCleanThread.Create;
-
-  calculateonline;
+    calculateonline;
+  except
+    on E: GException do
+      begin
+      write_console('Fatal error while booting: ' + E.Message);
+      halt;
+      end;
+  end;
 end;
 
 function send_to_socket(sock : TSocket; s : string) : integer;
@@ -837,8 +839,8 @@ begin
         accept_connection(listenv6);
       end;
 
-    usleep(500000);
-//    sleep(500);
+//    usleep(500000);
+    sleep(500);
     end;
 end;
 
@@ -875,8 +877,7 @@ begin
 
     if (GetLastError() <> ERROR_PIPE_BUSY) then
       begin
-      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover',
-              'The copyover could not be completed succesfully.');
+      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
 			exit;
       end;
 
@@ -884,8 +885,7 @@ begin
 
     if (not WaitNamedPipe(pipeName, 1000)) then
       begin
-      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover',
-              'The copyover could not be completed succesfully.');
+      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
 			exit;
       end;
   end;
@@ -928,7 +928,7 @@ begin
   MemChk;
 {$ENDIF}
 
-  boot_mud;
+  bootServer();
 
   if (CmdLine = 'copyover') then
     from_copyover;

@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.54 2001/07/14 13:26:21 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.55 2001/07/17 15:24:13 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -147,8 +147,7 @@ begin
   {$I+}
   if IOResult<>0 then
     begin
-    bugreport('load_commands', 'mudthread.pas', 'could not open system\commands.dat',
-              'The system file commands.dat could not be opened.');
+    bugreport('load_commands', 'mudthread.pas', 'could not open system\commands.dat');
     exit;
     end;
 
@@ -953,8 +952,7 @@ CON_CHECK_PASSWORD: begin
                  end;
                  end;
     else
-      bugreport('nanny', 'mudthread.pas', 'illegal state ' + inttostr(conn.state),
-                'The specified connection state is unknown. Someone may be hacking.');
+      bugreport('nanny', 'mudthread.pas', 'illegal state ' + inttostr(conn.state));
   end;
 end;
 
@@ -1131,7 +1129,7 @@ begin
 
     if (g.name = name) or (pointer(@g.func) = pointer(@func)) then
       begin
-      bugreport('registerCommand', 'mudthread.pas', 'Command ' + name + ' registered twice.', 'Command ' + name + ' registered twice.');
+      bugreport('registerCommand', 'mudthread.pas', 'Command ' + name + ' registered twice.');
       exit;
       end;
 

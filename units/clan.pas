@@ -55,8 +55,7 @@ begin
 
   if (IOResult <> 0) then
     begin
-    bugreport('GClan.load', 'clan.pas', 'could not open clans\' + fname,
-              'Could not open the specified clan file.');
+    bugreport('GClan.load', 'clan.pas', 'could not open clans\' + fname);
     exit;
     end;
 
@@ -83,8 +82,7 @@ begin
         minlevel := strtointdef(right(d,' '), 0)
       except
         minlevel:=0;
-        bugreport('load_clan', 'area.pas', 'illegal character in MINLEVEL parameter',
-                  'The string was not a valid numeric value.');
+        bugreport('load_clan', 'area.pas', 'illegal character in MINLEVEL parameter');
       end
     else
     if r='CLANOBJ' then
@@ -92,8 +90,7 @@ begin
         clanobj := strtoint(right(d,' '))
       except
         clanobj:=0;
-        bugreport('load_clan', 'area.pas', 'illegal character in CLANOBJ parameter',
-                  'The string was not a valid numeric value.');
+        bugreport('load_clan', 'area.pas', 'illegal character in CLANOBJ parameter');
       end
     else
     if r='CLANVNUM' then
@@ -101,8 +98,7 @@ begin
         clanvnum:=strtoint(right(d,' '));
       except
         clanvnum:=0;
-        bugreport('load_clan', 'area.pas', 'illegal character in CLANVNUM parameter',
-                  'The string was not a valid numeric value.');
+        bugreport('load_clan', 'area.pas', 'illegal character in CLANVNUM parameter');
       end;
   until uppercase(d)='#END';
 
@@ -120,8 +116,7 @@ begin
   {$I+}
   if IOResult<>0 then
     begin
-    bugreport('load_clans', 'area.pas', 'could not open clans\clan.list',
-              'The specified clan list could not be found.');
+    bugreport('load_clans', 'area.pas', 'could not open clans\clan.list');
     exit;
     end;
   repeat

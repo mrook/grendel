@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.27 2001/07/16 13:36:44 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.28 2001/07/17 15:24:12 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -303,12 +303,6 @@ begin
 {$ELSE}
       break;
 {$ENDIF}      
-      end
-    else
-      begin
-      bugreport('GConnection.read', 'conns.pas', 'weird!',
-                'This part should NOT be reached. Contact Grimlord.');
-      exit;
       end;
   until false;
 end;

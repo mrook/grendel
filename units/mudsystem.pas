@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.24 2001/07/16 16:00:18 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.25 2001/07/17 15:24:13 ***REMOVED*** Exp $
 
 unit mudsystem;
 
@@ -110,19 +110,15 @@ var
   mobs_loaded:integer;
   online_time:string;
   status : THeapStatus;
-  mud_booted : boolean;
-  grace_exit : boolean;
-  boot_type : integer;
-
-
-//const 
-//   stable_system : boolean = true;
+  mud_booted : boolean = false;
+  grace_exit : boolean = false;
+  boot_type : integer = BOOTTYPE_SHUTDOWN;
 
 
 procedure write_direct(s:string);
 procedure write_console(s:string);
 procedure write_log(s:string);
-procedure bugreport(func, pasfile, bug, desc : string);
+procedure bugreport(func, pasfile, bug : string);
 procedure calculateonline;
 
 procedure load_system;
@@ -136,6 +132,8 @@ procedure load_socials;
 function findSocial(cmd : string) : GSocial;
 function checkSocial(c : pointer; cmd, param : string) : boolean;
 
+procedure loadMudState();
+procedure saveMudState();
 
 implementation
 
@@ -173,13 +171,14 @@ begin
     system.writeln(logfile,s);
 end;
 
-procedure bugreport(func, pasfile, bug, desc : string);
+procedure bugreport(func, pasfile, bug : string);
 begin
   write_console('[BUG] ' + func + ' -> ' + bug);
-  write_direct('[Extended error information]');
+
+{  write_direct('[Extended error information]');
   write_direct('Location:    function ' + func + ' in ' + pasfile);
   write_direct('Description: ' + desc);
-  write_direct('');
+  write_direct(''); }
 end;
 
 procedure calculateonline;
@@ -220,8 +219,7 @@ begin
   try
     af := GFileReader.Create('system\sysdata.dat');
   except
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\sysdata.dat.',
-              'The system file sysdata.dat could not be opened.');
+    bugreport('load_system', 'mudsystem.pas', 'could not open system\sysdata.dat.');
     exit;
   end;
 
@@ -266,8 +264,7 @@ begin
   try
     af := GFileReader.Create('system\bans.dat');
   except
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\bans.dat',
-              'The system file bans.dat could not be opened.');
+    bugreport('load_system', 'mudsystem.pas', 'could not open system\bans.dat');
     exit;
   end;
 
@@ -340,8 +337,7 @@ begin
 
   if (IOResult <> 0) then
     begin
-    bugreport('load_socials', 'mudsystem.pas', 'could not open system\socials.dat',
-              'The system file socials.dat could not be opened.');
+    bugreport('load_socials', 'mudsystem.pas', 'could not open system\socials.dat');
     exit;
     end;
 
@@ -536,23 +532,20 @@ begin
 end;
 
 procedure load_damage;
-var f:textfile;
-    s:string;
-    dam : GDamMessage;
+var
+  af : GFileReader;
+  s : string;
+  dam : GDamMessage;
 begin
-  assignfile(f, translateFileName('system\damage.dat'));
-  {$I-}
-  reset(f);
-  {$I+}
-  if IOResult<>0 then
-    begin
-    bugreport('load_damage', 'mudsystem.pas', 'could not open system\damage.dat',
-              'The system file damage.dat could not be opened.');
+  try
+    af := GFileReader.Create('system\damage.dat');
+  except
+    bugreport('load_damage', 'mudsystem.pas', 'could not open system\damage.dat');
     exit;
-    end;
+  end;
 
   repeat
-    readln(f,s);
+    s := af.readLine();
 
     dam := GDamMessage.Create;
 
@@ -561,22 +554,100 @@ begin
       min := strtoint(left(s,' '));
       max := strtoint(right(s,' '));
 
-      readln(f,s);
-      msg[1] := s;
-
-      readln(f,s);
-      msg[2] := s;
-
-      readln(f,s);
-      msg[3] := s;
+      msg[1] := af.readLine();
+      msg[2] := af.readLine();
+      msg[3] := af.readLine();
       end;
 
     dm_msg.insertLast(dam);
+  until (af.eof());
 
-    readln(f,s);
-  until eof(f);
-  close(f);
+  af.Free();
 end;
+
+procedure loadMudState();
+var
+   af : GFileREader;
+   s : string;
+   area : GArea;
+begin
+  try
+    af := GFileReader.Create('system\mudstate.dat');
+  except
+    bugreport('loadMudState()', 'mudsystem.pas', 'Could not load mud state');
+    exit;
+  end;
+
+  with time_info do
+    begin
+    hour := af.readInteger();
+    day := af.readInteger();
+    month := af.readInteger();
+    year := af.readInteger();
+    sunlight := af.readInteger();
+    end;
+
+  repeat
+    s := af.readLine();
+
+    if (s <> '$') then
+      begin
+      area := findArea(s);
+
+      if (area = nil) then
+        bugreport('loadMudState()', 'mudsystem.pas', 'area ' + s + ' not found')
+      else
+        with area.weather do
+          begin
+          mmhg := af.readInteger();
+          change := af.readInteger();
+          sky := af.readInteger();
+          temp := af.readInteger();
+          end;
+        end;
+  until (s = '$');
+
+  af.Free;
+end;
+
+procedure saveMudState();
+var
+  af : GFileWriter;
+  node : GListNode;
+  area : GArea;
+begin
+  try
+    af := GFileWriter.Create('system\mudstate.dat');
+  except
+    bugreport('saveMudState()', 'mudsystem.pas', 'Could not save mud state');
+    exit;
+  end;
+
+  with time_info do
+    af.writeLine('Time: ' + IntToStr(hour) + ' ' + IntToStr(day) + ' ' +
+                 IntToStr(month) + ' ' + IntToStr(year) + ' ' + IntToStr(sunlight));
+
+  node := area_list.head;
+
+  while (node <> nil) do
+    begin
+    area := node.element;
+
+    if (not IS_SET(area.flags, AREA_PROTO)) then
+      with area do
+        begin
+        af.writeLine(fname);
+        af.writeLine('Weather: ' + IntToStr(weather.mmhg) + ' ' + IntToStr(weather.change) +
+                     ' ' + IntToStr(weather.sky) + ' ' + IntToStr(weather.temp));
+        end;
+
+    node := node.next;
+    end;
+
+  af.writeLine('$');
+  af.Free;
+end;
+
 
 // GAuction
 constructor GAuction.Create;
@@ -655,8 +726,5 @@ initialization
   auction_good := GAuction.Create;
   auction_evil := GAuction.Create;
   banned_masks := TStringList.Create;
-  mud_booted := false;
-  grace_exit := false;
-  boot_type := BOOTTYPE_SHUTDOWN;
 end.
 

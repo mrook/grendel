@@ -366,8 +366,7 @@ begin
     end
   else
     begin
-    bugreport('damage', 'fight.pas', 'unknown damagetype ' + inttostr(dt),
-              'The specified damage type is unknown.');
+    bugreport('damage', 'fight.pas', 'unknown damagetype ' + inttostr(dt));
     exit;
     end;
 
@@ -791,8 +790,7 @@ begin
     ch.fighting := nil;
     ch.position := POS_STANDING;
 
-    bugreport('multi_hit', 'fight.pas', 'desync error: ch.fighting & vict not same',
-              'Character information has been desynced heavily.');
+    bugreport('multi_hit', 'fight.pas', 'desync error: ch.fighting & vict not same');
     write_console('System is unstable - prepare for a rough ride');
 
     exit;

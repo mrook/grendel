@@ -1,4 +1,4 @@
-// $Id: mudhelp.pas,v 1.8 2001/07/16 13:36:47 ***REMOVED*** Exp $
+// $Id: mudhelp.pas,v 1.9 2001/07/17 15:24:13 ***REMOVED*** Exp $
 
 unit mudhelp;
 
@@ -134,8 +134,7 @@ begin
   {$I+}
   if IOResult<>0 then
     begin
-    bugreport('load_help', 'mudhelp.pas', 'could not open help\' + fname,
-              'The specified helpfile could not be opened. Please check your settings.');
+    bugreport('load_help', 'mudhelp.pas', 'could not open help\' + fname);
     exit;
     end;
 
@@ -207,8 +206,7 @@ begin
           begin
           if (a = length(s)) then
             begin
-            bugreport('load_help', 'mudhelp.pas', 'illegal "%" character use in ' + fname,
-                      'Use of the character "%" is prohibited in helpfiles.');
+            bugreport('load_help', 'mudhelp.pas', 'illegal "%" character use in ' + fname);
             exit;
             end;
           if (s[a + 1] = '%') then
@@ -239,8 +237,7 @@ begin
           if (key = 'SPELL_LIST') then
             g := getSkillSpellList(SKILL_SPELL)
           else
-            bugreport('load_help', 'mudhelp.pas', 'illegal key "' + key + '" in ' + fname,
-                      'This helpfile uses an unknown key.');
+            bugreport('load_help', 'mudhelp.pas', 'illegal key "' + key + '" in ' + fname);
           text := text + g;
           a := b;
           end

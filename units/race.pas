@@ -73,7 +73,7 @@ begin
           except
             on E: Exception do
             begin
-              bugreport('load_races()', 'race.pas', 'error opening race file ' + t.name, 'Some unexpected error while opening ' + t.name + ': ''' + E.Message + '''.');
+              bugreport('load_races()', 'race.pas', 'error opening race file ' + t.name);
               exit;
             end;
           end;
@@ -97,7 +97,7 @@ begin
               begin
                 if not(arg[1] in ['0', '1']) then
                 begin
-                  bugreport('load_races()', 'race.pas', 'boolean conversion error', 'Error converting string to boolean value. Possible cause: ' + full + '.');
+                  bugreport('load_races()', 'race.pas', 'boolean conversion error');
                   exit;
                 end;
                 convert := (strtoint(arg) = 1);
@@ -153,12 +153,12 @@ begin
           except
             on EConvertError do
             begin
-              bugreport('load_races()', 'race.pas', 'conversion error', 'Error converting string to numeric value. Possible cause: ' + full + '.');
+              bugreport('load_races()', 'race.pas', 'conversion error');
               exit;
             end;
             on E: Exception do
             begin
-              bugreport('load_races()', 'race.pas', 'unknown exception', 'Caught unkown exception: ''' + E.Message + '''.');
+              bugreport('load_races()', 'race.pas', 'unknown exception');
               exit;
             end;
           end;

@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.17 2001/05/27 10:49:09 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.18 2001/07/17 15:24:09 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -697,8 +697,7 @@ begin
     liq := value[3];
     if (liq < LIQ_WATER) or (liq>=LIQ_MAX) then
       begin
-      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name^,
-                'This liquid type does not exist. Please check this object.');
+      bugreport('do_drink', 'cmd_obj.inc', 'illegal liquid type ' + inttostr(liq) + ' in ' + obj.name^);
       exit;
       end;
 
