@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.48 2001/08/02 20:16:01 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.49 2001/08/02 21:27:51 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -235,13 +235,6 @@ begin
     connection_list.clean;
     connection_list.Free;
     commands.Free;
-  except
-    on E : EExternal do
-    begin
-      bugreport('cleanup', 'grendel.dpr', 'Cleanup procedure failed, terminating now.');
-      outputError(E);
-    end;
-  end;
 
   listenv4.Free();
   listenv6.Free();
@@ -249,6 +242,14 @@ begin
   write_console('Cleanup complete.');
   if (TTextRec(logfile).mode = fmOutput) then
     CloseFile(LogFile);
+
+  except
+    on E : EExternal do
+    begin
+      bugreport('cleanup', 'grendel.dpr', 'Cleanup procedure failed, terminating now.');
+      outputError(E);
+    end;
+  end;
 end;
 
 procedure reboot_mud;
