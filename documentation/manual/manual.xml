@@ -15,7 +15,7 @@
 				<email>nemesis@grendelproject.nl</email>
 			</author>
 		</authorgroup>
-		<releaseinfo>$Id: manual.xml,v 1.3 2004/04/19 22:26:51 ***REMOVED*** Exp $</releaseinfo>
+		<releaseinfo>$Id: manual.xml,v 1.4 2004/04/21 20:55:11 ***REMOVED*** Exp $</releaseinfo>
 	</articleinfo>
 	<section id="intro">
 		<title>Introduction</title>
@@ -24,13 +24,11 @@
 		These pages will tell you everything you need to know about
 		installing, setting up, running and maintaining Grendel.
 		</para>
-		<note>
 		<para>
-		This manual is by no means complete. If you spot any errors,
+		This manual is by no means complete. If you spot any errors or omissions,
 		have suggestions or questions, do not hesitate to contact one of the
 		authors.
 		</para>
-		</note>
 		<section id="copyright">
 			<title>Copyright and License</title>
 			<para>
@@ -307,6 +305,1073 @@ You -&lt; { { : : : DISINTEGRATE : : : } } &gt;- a bit with your GODLY punch!!!!
 			<literal>SHUTDOWN stop</literal> stops any existing shutdown timer.
 			</para>
 		</section>
+	</section>
+	<section id="building">
+		<title>Building areas</title>
+		<para>
+		This section discusses the area format used by Grendel, common practices when building,
+		as well as various structures and constants used in areas.
+		</para>
+		<section id="building_areaformat">
+			<title>Area format</title>
+			<para>
+			Listed below is a sample area (actually a trimmed-down version of the <literal>roads.area</literal>
+			file that is shipped with Grendel). Attentive readers will notice that the
+			format of the area is quite similar to the format used in the SMAUG codebase.
+			</para>
+			<para>
+			A Grendel area file consists of several sections: <literal>#AREA</literal>, 
+			<literal>#ROOMS</literal>, <literal>#OBJECTS</literal>, <literal>#MOBILES</literal> 
+			and <literal>#RESETS</literal>. Of these, only the <literal>#AREA</literal> section is
+			required.</para>
+			<note>
+			<para>
+			An integrated GUI area builder is currently in development, and a prototype can be found in the
+			(highly experimental) Grendel Management Console.
+			</para>
+			</note>
+			<note>
+			<para>
+			Since a switch to an XML area format is planned, this section is subject to change.
+			</para>
+			</note>
+			<para>
+			<example>
+				<title>An example area</title>
+<programlisting linenumbering='numbered'>#RANGES
+100 199 100 199 100 199                                                         <lineannotation>Hints for min/max rooms/mobiles/objects</lineannotation>
+
+#AREA
+Central Ruia                                                                    <lineannotation>Name of the area</lineannotation>
+Grimlord                                                                        <lineannotation>Name of the owner/builder</lineannotation>
+A fresh wind blows through your hair.                                           <lineannotation>Message to display when area resets</lineannotation>
+35                                                                              <lineannotation>Number of gamerounds (roughly 75 secs) between resets</lineannotation>
+8 18 0                                                                          <lineannotation>Temp. multiplier, avg. temperature, flags (see: <xref linkend="table.areaflags"/>)</lineannotation>
+
+#ROOMS
+#100                                                                            <lineannotation>Number (vnum) of room</lineannotation>
+The Great Junction                                                              <lineannotation>Name of room</lineannotation>
+The wind blows through your hair as you arrive at the great junction            <lineannotation>Multiline room description</lineannotation>
+of roads, the central point in Ruia. Here, 3 roads come together.
+To the south, the road to Southaven. To the north, the road to Gailen and
+Castle Pakthan. To the east, you see the Warriors School.
+~                                                                               <lineannotation>Separator</lineannotation>
+0 0 500 3
+D 101 3 0 0                                                                     <lineannotation>An exit to room #101, direction (see: <xref linkend="table.directions"/>), flags (see: (<xref linkend="table.exitflags"/>)</lineannotation>
+E sign                                                                          <lineannotation>Extra description "sign"</lineannotation>
+The sign says 'Southaven south'.                                                <lineannotation>Multiline extra description</lineannotation>
+~                                                                               <lineannotation>Separator</lineannotation>
+S                                                                               <lineannotation>End of room #100</lineannotation>
+#101
+Southaven Road
+This road is one of the main roads leading through Ruia. It takes you
+from the junction to Southaven or back. The road is paved well and
+walking on this road is pleasant.
+~
+0 0 500 3
+D 100 1 0 0
+D 102 3 0 0
+S
+#102
+Southaven Central Square
+The beautiful fountain built on the square shows the welfare of the city.
+Numerous little drops burst out of the fountain, falling down till they
+hit the little pool of water. Many people come here to sit and eat or talk.
+To the north, you see some shops. To the east, you see the bank. To the
+west you see the town hall. To the south, you can continue to the docks.
+~
+0 0 500 2
+D 101 1 0 0
+S
+#END
+
+#MOBILES                                                                        <lineannotation>Mobiles (NPC's) section</lineannotation>
+#100                                                                            <lineannotation>Number (vnum) of NPC</lineannotation>
+Syra                                                                            <lineannotation>Name</lineannotation>
+Syra is here                                                                    <lineannotation>Short description</lineannotation>
+Syra, protectress of Southaven, patrols for danger                              <lineannotation>Long description</lineannotation>
+800 1                                                                           <lineannotation>Level, sex (see <xref linkend="table.sex"/>)</lineannotation>
+15 521 0 0 0                                                                    <lineannotation>Armour, flags (see <xref linkend="table.npcflags"/>), gold carried, height, weight</lineannotation>
+skill: Burning Hands                                                            <lineannotation>NPC has skill "Burning Hands"</lineannotation>
+skill: Magic Missile
+skill: Slashing Weapons
+skill: Second Attack
+> give.cod                                                                      <lineannotation>Use GMC program "give.cod"</lineannotation>
+#END
+
+#OBJECTS                                                                        <lineannotation>Objects section</lineannotation>
+#100                                                                            <lineannotation>Number (vnum) of object</lineannotation>
+a fountain                                                                      <lineannotation>Name</lineannotation>
+a sparkling fountain                                                            <lineannotation>Short description</lineannotation>
+a $B$7sparkling$A$3 $2brew$3 fountain has been placed here                      <lineannotation>Long description (note the use of coloring!)</lineannotation>
+12 none none                                                                    <lineannotation>Item type (see <xref linkend="table.itemtypes"/>), bodyparts to wear object on (see <xref linkend="races"/>)</lineannotation>
+0 0 12 0                                                                        <lineannotation>value[1..4] (see <xref linkend="table.itemtypes"/>)</lineannotation>
+0 4097 0                                                                        <lineannotation>Weight (in ounces), flags (see <xref linkend="table.objectflags"/>), avg. cost</lineannotation> 
+#101
+a robe
+a stained robe
+a robe, cluttered with dirty stains, lies here
+1 body none
+0 2 2 0
+0 0 0
+A "" 0 { apply_max_hp 20 }
+#END
+
+#RESETS
+M 100 102 1
+G 101 100 0
+O 100 101 1
+#END
+
+$</programlisting>
+			</example>
+			</para>
+		</section>
+		<section id="building_notes">
+			<title>Some notes on NPC's</title>
+			<para>
+			Non-Player Characters (NPC's) are the artificially intelligent (sic) population,
+			possibly even the core, of a mud. They are sometimes called "Mobiles", which, apart from the
+			unfortunate name collision with certain wireless devices, wrongfully suggests that NPC's can't
+			be forced to stay in one place.
+			</para>
+			<para>
+			NPC's can be quite a challenge for your players, so try to be careful when tinkering with the 
+			various values that define a NPC: balance is everything.
+			</para>
+		</section>
+		<section id="building_install">
+			<title>Installing a new area</title>
+			<para>
+			Start a text editor (such as Notepad), and open the file <literal>areas\area.list</literal>. 
+			Add a line with the filename of your new area to the top of the file, save the file, and 
+			reboot (or copyover) the server.
+			</para>
+		</section>
+		<section id="building_ansi">
+			<title>Using ANSI color codes</title>
+			<para>
+			Grendel supports the formatting and sending of ANSI (color) control codes.
+			This can be very helpful, especially when constructing objects, where
+			the intensity of the coloring usually determines the value and worth of the object.
+			</para>
+			<para>
+			<example>
+				<title>Using colors</title>
+				<screen>$A$0black
+$A$1blue
+$A$2green
+$A$3turquoise
+$A$4red
+$A$5purple
+$A$6yellow
+$A$7gray
+$B$0dark gray
+$B$1bright blue
+$B$2bright green
+$B$3bright turquoise
+$B$4bright red
+$B$5bright purple
+$B$6bright yellow
+$B$7white</screen>
+			</example>
+			</para>
+		</section>
+		<section id="building_tables">
+			<title>Tables, constants and structures</title>
+			<para>
+			<table id="table.sex">
+				<title>Sexes</title>
+				<tgroup cols='2'>
+					<thead>
+						<row>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>Male</entry>
+						<entry>0</entry>
+						</row>
+						<row>
+						<entry>Female</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>Genderless (It)</entry>
+						<entry>2</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.areaflags">
+				<title>Area flags</title>
+				<tgroup cols='4'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>AREA_NORESET</entry>
+						<entry>Do not reset area</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>AREA_NOPC</entry>
+						<entry>No players allowed</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>AREA_PROTO</entry>
+						<entry>Prototype</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.itemtypes">
+				<title>Item types and values</title>
+				<tgroup cols='7'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						<entry>Use of value[1]</entry>
+						<entry>Use of value[2]</entry>
+						<entry>Use of value[3]</entry>
+						<entry>Use of value[4]</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>ITEM_WEAPON</entry>
+						<entry>Weapon</entry>
+						<entry>1</entry>
+						<entry>condition</entry>
+						<entry>number of dice</entry>
+						<entry>size of dice</entry>
+						<entry>type of weapon (see: <xref linkend="table.weapontypes"/>)</entry>
+						</row>
+						<row>
+						<entry>ITEM_ARMOR</entry>
+						<entry>Armor</entry>
+						<entry>2</entry>
+						<entry>condition</entry>
+						<entry>type of armor (see: <xref linkend="table.armortypes"/>)</entry>
+						<entry>modifier</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_FOOD</entry>
+						<entry>Something edible</entry>
+						<entry>3</entry>
+						<entry>condition</entry>
+						<entry>poisoned</entry>
+						<entry>hours of value</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_DRINK</entry>
+						<entry>Container filled with some liquid</entry>
+						<entry>4</entry>
+						<entry>capacity</entry>
+						<entry>current quantity</entry>
+						<entry>liquid type (see: <xref linkend="table.liquidtypes"/>)</entry>
+						<entry>poisoned</entry>
+						</row>
+						<row>
+						<entry>ITEM_LIGHT</entry>
+						<entry>Light (i.e. torch)</entry>
+						<entry>5</entry>
+						<entry>hours of light remaining (0 = out)</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_TRASH</entry>
+						<entry>Trah</entry>
+						<entry>6</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_MONEY</entry>
+						<entry>Gold coins</entry>
+						<entry>7</entry>
+						<entry>amount</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_SPECIAL</entry>
+						<entry>Special item</entry>
+						<entry>8</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_GEM</entry>
+						<entry>Magical gem</entry>
+						<entry>9</entry>
+						<entry>mana type (unused)</entry>
+						<entry>spell level</entry>
+						<entry>mana when charged</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_CONTAINER</entry>
+						<entry>Contains other objects</entry>
+						<entry>10</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_CORPSE</entry>
+						<entry>Corpse of killed (N)PC</entry>
+						<entry>11</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_FOUNTAIN</entry>
+						<entry>Fountain</entry>
+						<entry>12</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>liquid type (see: <xref linkend="table.liquidtypes"/>)</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_BLOOD</entry>
+						<entry>Blood trail</entry>
+						<entry>13</entry>
+						<entry>direction of blood trail (see: <xref linkend="table.directions"/>)</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_PORTAL</entry>
+						<entry>Portal</entry>
+						<entry>14</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+						<row>
+						<entry>ITEM_KEY</entry>
+						<entry>Key</entry>
+						<entry>15</entry>
+						<entry>unique key number</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						<entry>unused</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.directions">
+				<title>Directions</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>DIR_NORTH</entry>
+						<entry>North</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>DIR_EAST</entry>
+						<entry>East</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>DIR_SOUTH</entry>
+						<entry>South</entry>
+						<entry>3</entry>
+						</row>
+						<row>
+						<entry>DIR_WEST</entry>
+						<entry>West</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>DIR_DOWN</entry>
+						<entry>Down</entry>
+						<entry>5</entry>
+						</row>
+						<row>
+						<entry>DIR_UP</entry>
+						<entry>Up</entry>
+						<entry>6</entry>
+						</row>
+						<row>
+						<entry>DIR_SOMEWHERE</entry>
+						<entry>Somewhere (i.e. for portals)</entry>
+						<entry>7</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.exitflags">
+				<title>Exit flags</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>EX_ISDOOR</entry>
+						<entry>Exit is a door</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>EX_CLOSED</entry>
+						<entry>Closed</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>EX_LOCKED</entry>
+						<entry>Locked</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>EX_PICKPROOF</entry>
+						<entry>Lockpick will fail</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>EX_SECRET</entry>
+						<entry>Hidden exit</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>EX_SWIM</entry>
+						<entry>Character needs to swim to enter</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>EX_FLY</entry>
+						<entry>Character needs to fly to enter</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>EX_CLIMB</entry>
+						<entry>Inclination</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>EX_PORTAL</entry>
+						<entry>Portal</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>EX_NOBREAK</entry>
+						<entry>Can't break door</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>EX_NOMOB</entry>
+						<entry>NPC's not allowed</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>EX_ENTER</entry>
+						<entry>Use "enter" command to enter</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>EX_UNDERWATER</entry>
+						<entry>Under water</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.npcflags">
+				<title>NPC flags</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>ACT_AGGRESSIVE</entry>
+						<entry>Aggressive (auto-attack) npc</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>ACT_SENTINEL</entry>
+						<entry>Does not wander (guard)</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>ACT_SCAVENGER</entry>
+						<entry>Picks up stray objects</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>ACT_STAY_AREA</entry>
+						<entry>Does not wander beyond area boundaries</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>ACT_HUNTING</entry>
+						<entry>Actively hunts opponents when attacked</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>ACT_FASTHUNT</entry>
+						<entry>Fast hunter</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>ACT_MOBINVIS</entry>
+						<entry>Invisible</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>ACT_TEACHER</entry>
+						<entry>Can teach skills/spells</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>ACT_BANKER</entry>
+						<entry>Banker</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>ACT_SPIRIT</entry>
+						<entry>Non-magic weapons are ineffective</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>ACT_NOBASH</entry>
+						<entry>Impossible to bash</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+						<row>
+						<entry>ACT_SHOPKEEP</entry>
+						<entry>Shopkeeper</entry>
+						<entry>BV13</entry>
+						<entry>8192</entry>
+						</row>
+						<row>
+						<entry>ACT_IMMORTAL</entry>
+						<entry>Immortal</entry>
+						<entry>BV14</entry>
+						<entry>16384</entry>
+						</row>
+						<row>
+						<entry>ACT_PROTO</entry>
+						<entry>Prototype</entry>
+						<entry>BV31</entry>
+						<entry>2147483648</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>	
+			<table id="table.roomflags">
+				<title>Room flags</title>
+				<tgroup cols='4'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>	
+						<row>
+						<entry>ROOM_DARK</entry>
+						<entry>Total darkness</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>ROOM_DEATH</entry>
+						<entry>Deathtrap</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOMOB</entry>
+						<entry>Mobiles not allowed</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>ROOM_INDOORS</entry>
+						<entry>Indoors</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>ROOM_GOOD</entry>
+						<entry>Only good aligned players allowed</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>ROOM_EVIL</entry>
+						<entry>Only evil aligned players allowed</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOCAST</entry>
+						<entry>Using magic not allowed</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>ROOM_TUNNEL</entry>
+						<entry>Tunnel (could cause problems for larger sized characters)</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>ROOM_PRIVATE</entry>
+						<entry>Mere mortals can not enter</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>ROOM_SAFE</entry>
+						<entry>Fighting not allowed</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>ROOM_SOLITARY</entry>
+						<entry>Only one character at a time</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>ROOM_NORECALL</entry>
+						<entry>Recall spell not allowed</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>ROOM_NODROPALL</entry>
+						<entry>Command "drop all" can not be used here</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOSUMMON</entry>
+						<entry>Summon spell not allowed</entry>
+						<entry>BV13</entry>
+						<entry>8192</entry>
+						</row>
+						<row>
+						<entry>ROOM_CLANSTORE</entry>
+						<entry>Clan store</entry>
+						<entry>BV14</entry>
+						<entry>16384</entry>
+						</row>
+						<row>
+						<entry>ROOM_TELEPORT</entry>
+						<entry>Teleport</entry>
+						<entry>BV15</entry>
+						<entry>32768</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOFLOOR</entry>
+						<entry>No floor</entry>
+						<entry>BV16</entry>
+						<entry>65536</entry>
+						</row>
+						<row>
+						<entry>ROOM_MANAROOM</entry>
+						<entry>Accelerated mana replenishment</entry>
+						<entry>BV17</entry>
+						<entry>131072</entry>
+						</row>
+						<row>
+						<entry>ROOM_NOTRADE</entry>
+						<entry>Trading not allowed</entry>
+						<entry>BV18</entry>
+						<entry>262144</entry>
+						</row>
+						<row>
+						<entry>ROOM_PROTO</entry>
+						<entry>Prototype</entry>
+						<entry>BV31</entry>
+						<entry>2147483648</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.objectflags">
+				<title>Object flags</title>
+				<tgroup cols='4'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Bitvector</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>OBJ_NOPICKUP</entry>
+						<entry>Can not be picked up (i.e. fountains)</entry>
+						<entry>BV00</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>OBJ_GLOW</entry>
+						<entry>Object glows</entry>
+						<entry>BV01</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>OBJ_HUM</entry>
+						<entry>Object hums</entry>
+						<entry>BV02</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>OBJ_ANTI_GOOD</entry>
+						<entry>Can only be worn by evil-aligned characters</entry>
+						<entry>BV03</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>OBJ_ANTI_EVIL</entry>
+						<entry>Can only be worn by good-aligned characters</entry>
+						<entry>BV04</entry>
+						<entry>16</entry>
+						</row>
+						<row>
+						<entry>OBJ_LOYAL</entry>
+						<entry>Stays with wearer (even when killed)</entry>
+						<entry>BV05</entry>
+						<entry>32</entry>
+						</row>
+						<row>
+						<entry>OBJ_NOREMOVE</entry>
+						<entry>Can not be removed</entry>
+						<entry>BV06</entry>
+						<entry>64</entry>
+						</row>
+						<row>
+						<entry>OBJ_NODROP</entry>
+						<entry>Can not be dropped</entry>
+						<entry>BV07</entry>
+						<entry>128</entry>
+						</row>
+						<row>
+						<entry>OBJ_CLANOBJECT</entry>
+						<entry>Belongs to a clan</entry>
+						<entry>BV08</entry>
+						<entry>256</entry>
+						</row>
+						<row>
+						<entry>OBJ_HIDDEN</entry>
+						<entry>Hidden</entry>
+						<entry>BV09</entry>
+						<entry>512</entry>
+						</row>
+						<row>
+						<entry>OBJ_POISON</entry>
+						<entry>Poisoned</entry>
+						<entry>BV10</entry>
+						<entry>1024</entry>
+						</row>
+						<row>
+						<entry>OBJ_MISSILE</entry>
+						<entry>Missile</entry>
+						<entry>BV11</entry>
+						<entry>2048</entry>
+						</row>
+						<row>
+						<entry>OBJ_NOSAC</entry>
+						<entry>Can not be sacrificed</entry>
+						<entry>BV12</entry>
+						<entry>4096</entry>
+						</row>
+						<row>
+						<entry>OBJ_NODECAY</entry>
+						<entry>Does not decay</entry>
+						<entry>BV13</entry>
+						<entry>8192</entry>
+						</row>
+						<row>
+						<entry>OBJ_PROTO</entry>
+						<entry>Prototype</entry>
+						<entry>BV31</entry>
+						<entry>2147483648</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.weapontypes">
+				<title>Weapon types</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>FG_NONE</entry>
+						<entry>No weapon</entry>
+						<entry>0</entry>
+						</row>
+						<row>
+						<entry>FG_PUNCH</entry>
+						<entry>Punch (fists of fury)</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>FG_SLASH</entry>
+						<entry>Slashing weapon (sword)</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>FG_PIERCE</entry>
+						<entry>Piercing weapon (knife)</entry>
+						<entry>3</entry>
+						</row>
+						<row>
+						<entry>FG_CLEAVE</entry>
+						<entry>Cleaving weapon (axe)</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>FG_BLAST</entry>
+						<entry>Blasting weapon (missile)</entry>
+						<entry>5</entry>
+						</row>
+						<row>
+						<entry>FG_CRUSH</entry>
+						<entry>Concussion weapon (morningstar)</entry>
+						<entry>6</entry>
+						</row>
+						<row>
+						<entry>FG_BITE</entry>
+						<entry>Bite</entry>
+						<entry>7</entry>
+						</row>
+						<row>
+						<entry>FG_CLAW</entry>
+						<entry>Claw</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>FG_WHIP</entry>
+						<entry>Whip</entry>
+						<entry>9</entry>
+						</row>
+						<row>
+						<entry>FG_STAB</entry>
+						<entry>Alias for FG_PIERCE</entry>
+						<entry>10</entry>
+						</row>
+						<row>
+						<entry>FG_GAZE</entry>
+						<entry>If looks could kill...</entry>
+						<entry>11</entry>
+						</row>
+						<row>
+						<entry>FG_BREATH</entry>
+						<entry>Foul breath</entry>
+						<entry>12</entry>
+						</row>
+						<row>
+						<entry>FG_STING</entry>
+						<entry>Sting</entry>
+						<entry>13</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<table id="table.armortypes">
+				<title>Armor types</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>ARMOR_HAC</entry>
+						<entry>Head armor</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>ARMOR_BAC</entry>
+						<entry>Body armor</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>ARMOR_AAC</entry>
+						<entry>Arm armor</entry>
+						<entry>3</entry>
+						</row>
+						<row>
+						<entry>ARMOR_LAC</entry>
+						<entry>Leg armor</entry>
+						<entry>4</entry>
+						</row>
+					</tbody>
+				</tgroup>			
+			</table>
+			<table id="table.liquidtypes">
+				<title>Liquids</title>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+						<entry>Identifier</entry>
+						<entry>Description</entry>
+						<entry>Value</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+						<entry>LIQ_WATER</entry>
+						<entry>Plain H2O</entry>
+						<entry>1</entry>
+						</row>
+						<row>
+						<entry>LIQ_BEER</entry>
+						<entry>Beer</entry>
+						<entry>2</entry>
+						</row>
+						<row>
+						<entry>LIQ_ALE</entry>
+						<entry>Ale</entry>
+						<entry>3</entry>
+						</row>
+						<row>
+						<entry>LIQ_WHISKEY</entry>
+						<entry>Scotch</entry>
+						<entry>4</entry>
+						</row>
+						<row>
+						<entry>LIQ_VODKA</entry>
+						<entry>Schmirnoff</entry>
+						<entry>5</entry>
+						</row>
+						<row>
+						<entry>LIQ_WINE</entry>
+						<entry>Wine</entry>
+						<entry>6</entry>
+						</row>
+						<row>
+						<entry>LIQ_JUICE</entry>
+						<entry>OJ</entry>
+						<entry>7</entry>
+						</row>
+						<row>
+						<entry>LIQ_MILK</entry>
+						<entry>Milk</entry>
+						<entry>8</entry>
+						</row>
+						<row>
+						<entry>LIQ_TEA</entry>
+						<entry>Tea, earl gray, hot</entry>
+						<entry>9</entry>
+						</row>
+						<row>
+						<entry>LIQ_COFFEE</entry>
+						<entry>Coffee</entry>
+						<entry>10</entry>
+						</row>
+						<row>
+						<entry>LIQ_COLA</entry>
+						<entry>Coca-Cola</entry>
+						<entry>11</entry>
+						</row>
+						<row>
+						<entry>LIQ_SPECIAL</entry>
+						<entry>Special Brew</entry>
+						<entry>12</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			</para>
+		</section>
+	</section>
+	<section id="races">
+		<title>Races</title>
+		<para>
+		TODO
+		</para>
 	</section>
 	<section id="gmc">
 		<title>GMC introductory guide and specification</title>
@@ -628,617 +1693,6 @@ end;
 exports
 	returnModuleInterface;</programlisting>
 			</example>
-			</para>
-		</section>
-	</section>
-	<section id="building">
-		<title>Building areas</title>
-		<para>
-		This section discusses the area format used by Grendel, common practices when building,
-		as well as various structures and constants used in areas.
-		</para>
-		<section id="building_areaformat">
-			<title>Area format</title>
-			<para>
-			Listed below is a sample area (actually a trimmed-down version of the <literal>roads.area</literal>
-			file that is shipped with Grendel). Attentive readers will notice that the
-			format of the area is quite similar to the format used in the SMAUG codebase.
-			</para>
-			<para>
-			A Grendel area file consists of several sections: <literal>#AREA</literal>, 
-			<literal>#ROOMS</literal>, <literal>#OBJECTS</literal>, <literal>#MOBILES</literal> 
-			and <literal>#RESETS</literal>. Of these, only the <literal>#AREA</literal> section is
-			required.</para>
-			<note>
-			<para>
-			An integrated GUI area builder is currently in development, and a prototype can be found in the
-			(highly experimental) Grendel Management Console.
-			</para>
-			</note>
-			<note>
-			<para>
-			Since a switch to an XML area format is planned, this section is subject to change.
-			</para>
-			</note>
-			<para>
-			<example>
-				<title>An example area</title>
-<programlisting linenumbering='numbered'>#RANGES
-100 199 100 199 100 199                                                         <lineannotation>Hints for min/max rooms/mobiles/objects</lineannotation>
-
-#AREA
-Central Ruia                                                                    <lineannotation>Name of the area</lineannotation>
-Grimlord                                                                        <lineannotation>Name of the owner/builder</lineannotation>
-A fresh wind blows through your hair.                                           <lineannotation>Message to display when area resets</lineannotation>
-35                                                                              <lineannotation>Number of gamerounds (roughly 75 secs) between resets</lineannotation>
-8 18 0                                                                          <lineannotation>Temp. multiplier, avg. temperature, flags (see: <xref linkend="table.areaflags"/>)</lineannotation>
-
-#ROOMS
-#100                                                                            <lineannotation>Number (vnum) of room</lineannotation>
-The Great Junction                                                              <lineannotation>Name of room</lineannotation>
-The wind blows through your hair as you arrive at the great junction            <lineannotation>Multiline room description</lineannotation>
-of roads, the central point in Ruia. Here, 3 roads come together.
-To the south, the road to Southaven. To the north, the road to Gailen and
-Castle Pakthan. To the east, you see the Warriors School.
-~                                                                               <lineannotation>Separator</lineannotation>
-0 0 500 3
-D 101 3 0 0                                                                     <lineannotation>An exit to room #101, direction (see: <xref linkend="table.directions"/>), flags (see: (<xref linkend="table.exitflags"/>)</lineannotation>
-E sign                                                                          <lineannotation>Extra description "sign"</lineannotation>
-The sign says 'Southaven south'.                                                <lineannotation>Multiline extra description</lineannotation>
-~                                                                               <lineannotation>Separator</lineannotation>
-S                                                                               <lineannotation>End of room #100</lineannotation>
-#101
-Southaven Road
-This road is one of the main roads leading through Ruia. It takes you
-from the junction to Southaven or back. The road is paved well and
-walking on this road is pleasant.
-~
-0 0 500 3
-D 100 1 0 0
-D 102 3 0 0
-S
-#102
-Southaven Central Square
-The beautiful fountain built on the square shows the welfare of the city.
-Numerous little drops burst out of the fountain, falling down till they
-hit the little pool of water. Many people come here to sit and eat or talk.
-To the north, you see some shops. To the east, you see the bank. To the
-west you see the town hall. To the south, you can continue to the docks.
-~
-0 0 500 2
-D 101 1 0 0
-S
-#END
-
-#MOBILES                                                                        <lineannotation>Mobiles (NPC's) section</lineannotation>
-#100                                                                            <lineannotation>Number (vnum) of NPC</lineannotation>
-Syra                                                                            <lineannotation>Name</lineannotation>
-Syra is here                                                                    <lineannotation>Short description</lineannotation>
-Syra, protectress of Southaven, patrols for danger                              <lineannotation>Long description</lineannotation>
-800 1                                                                           <lineannotation>Level, sex (see <xref linkend="table.sex"/>)</lineannotation>
-15 521 0 0 0                                                                    <lineannotation>Armour, flags (see <xref linkend="table.npcflags"/>), gold carried, height, weight</lineannotation>
-skill: Burning Hands                                                            <lineannotation>NPC has skill "Burning Hands"</lineannotation>
-skill: Magic Missile
-skill: Slashing Weapons
-skill: Second Attack
-> give.cod                                                                      <lineannotation>Use GMC program "give.cod"</lineannotation>
-#END
-
-#OBJECTS
-#100                                                                          
-a fountain
-a sparkling fountain
-a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
-12 none none
-0 0 12 0
-0 4097 0
-#101
-a robe
-a stained robe
-a robe, cluttered with dirty stains, lies here
-1 body none
-0 2 2 0
-0 0 0
-A "" 0 { apply_max_hp 20 }
-#END
-
-#RESETS
-M 100 102 1
-G 101 100 0
-O 100 101 1
-#END
-
-$</programlisting>
-			</example>
-			</para>
-		</section>
-		<section id="building_notes">
-			<title>Some notes on NPC's</title>
-			<para>
-			Non-Player Characters (NPC's) are the artificially intelligent (sic) population,
-			possibly even the core, of a mud. They are sometimes called "Mobiles", which, apart from the
-			unfortunate name collision with certain wireless devices, wrongfully suggests that NPC's can't
-			be forced to stay in one place.
-			</para>
-			<para>
-			NPC's can be quite a challenge for your players, so try to be careful when tinkering with the 
-			various values that define a NPC: balance is everything.
-			</para>
-		</section>
-		<section id="building_install">
-			<title>Installing a new area</title>
-			<para>
-			Start a text editor (such as Notepad), and open the file <literal>areas\area.list</literal>. 
-			Add a line with the filename of your new area to the top of the file, save the file, and 
-			reboot (or copyover) the server.
-			</para>
-		</section>
-		<section id="building_ansi">
-			<title>Using ANSI color codes</title>
-			<para>
-			Grendel supports the formatting and sending of ANSI (color) control codes.
-			This can be very helpful, especially when constructing objects, where
-			the intensity of the coloring usually determines the value and worth of the object.
-			</para>
-			<para>
-			<example>
-				<title>Using colors</title>
-				<screen>$A$0black
-$A$1blue
-$A$2green
-$A$3turquoise
-$A$4red
-$A$5purple
-$A$6yellow
-$A$7gray
-$B$0dark gray
-$B$1bright blue
-$B$2bright green
-$B$3bright turquoise
-$B$4bright red
-$B$5bright purple
-$B$6bright yellow
-$B$7white</screen>
-			</example>
-			</para>
-		</section>
-		<section id="building_tables">
-			<title>Tables, constants and structures</title>
-			<para>
-			<table id="table.sex">
-				<title>Sexes</title>
-				<tgroup cols='2'>
-					<thead>
-						<row>
-						<entry>Description</entry>
-						<entry>Value</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-						<entry>Male</entry>
-						<entry>0</entry>
-						</row>
-						<row>
-						<entry>Female</entry>
-						<entry>1</entry>
-						</row>
-						<row>
-						<entry>Genderless (It)</entry>
-						<entry>2</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>
-			<table id="table.areaflags">
-				<title>Area flags</title>
-				<tgroup cols='4'>
-					<thead>
-						<row>
-						<entry>Identifier</entry>
-						<entry>Description</entry>
-						<entry>Bitvector</entry>
-						<entry>Value</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-						<entry>AREA_NORESET</entry>
-						<entry>Do not reset area</entry>
-						<entry>BV00</entry>
-						<entry>1</entry>
-						</row>
-						<row>
-						<entry>AREA_NOPC</entry>
-						<entry>No players allowed</entry>
-						<entry>BV01</entry>
-						<entry>2</entry>
-						</row>
-						<row>
-						<entry>AREA_PROTO</entry>
-						<entry>Prototype area</entry>
-						<entry>BV02</entry>
-						<entry>4</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>
-			<table id="table.directions">
-				<title>Directions</title>
-				<tgroup cols='3'>
-					<thead>
-						<row>
-						<entry>Identifier</entry>
-						<entry>Description</entry>
-						<entry>Value</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-						<entry>DIR_NORTH</entry>
-						<entry>North</entry>
-						<entry>1</entry>
-						</row>
-						<row>
-						<entry>DIR_EAST</entry>
-						<entry>East</entry>
-						<entry>2</entry>
-						</row>
-						<row>
-						<entry>DIR_SOUTH</entry>
-						<entry>South</entry>
-						<entry>3</entry>
-						</row>
-						<row>
-						<entry>DIR_WEST</entry>
-						<entry>West</entry>
-						<entry>4</entry>
-						</row>
-						<row>
-						<entry>DIR_DOWN</entry>
-						<entry>Down</entry>
-						<entry>5</entry>
-						</row>
-						<row>
-						<entry>DIR_UP</entry>
-						<entry>Up</entry>
-						<entry>6</entry>
-						</row>
-						<row>
-						<entry>DIR_SOMEWHERE</entry>
-						<entry>Somewhere (i.e. for portals)</entry>
-						<entry>7</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>
-			<table id="table.exitflags">
-				<title>Exit flags</title>
-				<tgroup cols='3'>
-					<thead>
-						<row>
-						<entry>Identifier</entry>
-						<entry>Description</entry>
-						<entry>Bitvector</entry>
-						<entry>Value</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-						<entry>EX_ISDOOR</entry>
-						<entry>Exit is a door</entry>
-						<entry>BV00</entry>
-						<entry>1</entry>
-						</row>
-						<row>
-						<entry>EX_CLOSED</entry>
-						<entry>Closed</entry>
-						<entry>BV01</entry>
-						<entry>2</entry>
-						</row>
-						<row>
-						<entry>EX_LOCKED</entry>
-						<entry>Locked</entry>
-						<entry>BV02</entry>
-						<entry>4</entry>
-						</row>
-						<row>
-						<entry>EX_PICKPROOF</entry>
-						<entry>Lockpick will fail</entry>
-						<entry>BV03</entry>
-						<entry>8</entry>
-						</row>
-						<row>
-						<entry>EX_SECRET</entry>
-						<entry>Hidden exit</entry>
-						<entry>BV04</entry>
-						<entry>16</entry>
-						</row>
-						<row>
-						<entry>EX_SWIM</entry>
-						<entry>Character needs to swim to enter</entry>
-						<entry>BV05</entry>
-						<entry>32</entry>
-						</row>
-						<row>
-						<entry>EX_FLY</entry>
-						<entry>Character needs to fly to enter</entry>
-						<entry>BV06</entry>
-						<entry>64</entry>
-						</row>
-						<row>
-						<entry>EX_CLIMB</entry>
-						<entry>Inclination</entry>
-						<entry>BV07</entry>
-						<entry>128</entry>
-						</row>
-						<row>
-						<entry>EX_PORTAL</entry>
-						<entry>Portal</entry>
-						<entry>BV08</entry>
-						<entry>256</entry>
-						</row>
-						<row>
-						<entry>EX_NOBREAK</entry>
-						<entry>Can't break door</entry>
-						<entry>BV09</entry>
-						<entry>512</entry>
-						</row>
-						<row>
-						<entry>EX_NOMOB</entry>
-						<entry>NPC's not allowed</entry>
-						<entry>BV10</entry>
-						<entry>1024</entry>
-						</row>
-						<row>
-						<entry>EX_ENTER</entry>
-						<entry>Use "enter" command to enter</entry>
-						<entry>BV11</entry>
-						<entry>2048</entry>
-						</row>
-						<row>
-						<entry>EX_UNDERWATER</entry>
-						<entry>Under water</entry>
-						<entry>BV12</entry>
-						<entry>4096</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>
-			<table id="table.npcflags">
-				<title>NPC flags</title>
-				<tgroup cols='3'>
-					<thead>
-						<row>
-						<entry>Identifier</entry>
-						<entry>Description</entry>
-						<entry>Bitvector</entry>
-						<entry>Value</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-						<entry>ACT_AGGRESSIVE</entry>
-						<entry>Aggressive (auto-attack) npc</entry>
-						<entry>BV02</entry>
-						<entry>4</entry>
-						</row>
-						<row>
-						<entry>ACT_SENTINEL</entry>
-						<entry>Does not wander (guard)</entry>
-						<entry>BV03</entry>
-						<entry>8</entry>
-						</row>
-						<row>
-						<entry>ACT_SCAVENGER</entry>
-						<entry>Picks up stray objects</entry>
-						<entry>BV04</entry>
-						<entry>16</entry>
-						</row>
-						<row>
-						<entry>ACT_STAY_AREA</entry>
-						<entry>Does not wander beyond area boundaries</entry>
-						<entry>BV05</entry>
-						<entry>32</entry>
-						</row>
-						<row>
-						<entry>ACT_HUNTING</entry>
-						<entry>Actively hunts opponents when attacked</entry>
-						<entry>BV06</entry>
-						<entry>64</entry>
-						</row>
-						<row>
-						<entry>ACT_FASTHUNT</entry>
-						<entry>Fast hunter</entry>
-						<entry>BV07</entry>
-						<entry>128</entry>
-						</row>
-						<row>
-						<entry>ACT_MOBINVIS</entry>
-						<entry>Invisible</entry>
-						<entry>BV08</entry>
-						<entry>256</entry>
-						</row>
-						<row>
-						<entry>ACT_TEACHER</entry>
-						<entry>Can teach skills/spells</entry>
-						<entry>BV09</entry>
-						<entry>512</entry>
-						</row>
-						<row>
-						<entry>ACT_BANKER</entry>
-						<entry>Banker</entry>
-						<entry>BV10</entry>
-						<entry>1024</entry>
-						</row>
-						<row>
-						<entry>ACT_SPIRIT</entry>
-						<entry>Non-magic weapons are ineffective</entry>
-						<entry>BV11</entry>
-						<entry>2048</entry>
-						</row>
-						<row>
-						<entry>ACT_NOBASH</entry>
-						<entry>Impossible to bash</entry>
-						<entry>BV12</entry>
-						<entry>4096</entry>
-						</row>
-						<row>
-						<entry>ACT_SHOPKEEP</entry>
-						<entry>Shopkeeper</entry>
-						<entry>BV13</entry>
-						<entry>8192</entry>
-						</row>
-						<row>
-						<entry>ACT_IMMORTAL</entry>
-						<entry>Immortal</entry>
-						<entry>BV14</entry>
-						<entry>16384</entry>
-						</row>
-						<row>
-						<entry>ACT_PROTO</entry>
-						<entry>Prototype NPC</entry>
-						<entry>BV31</entry>
-						<entry>2147483648</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>	
-			<table id="table.roomflags">
-				<title>Room flags</title>
-				<tgroup cols='4'>
-					<thead>
-						<row>
-						<entry>Identifier</entry>
-						<entry>Description</entry>
-						<entry>Bitvector</entry>
-						<entry>Value</entry>
-						</row>
-					</thead>
-					<tbody>	
-						<row>
-						<entry>ROOM_DARK</entry>
-						<entry>Total darkness</entry>
-						<entry>BV00</entry>
-						<entry>1</entry>
-						</row>
-						<row>
-						<entry>ROOM_DEATH</entry>
-						<entry>Deathtrap</entry>
-						<entry>BV01</entry>
-						<entry>2</entry>
-						</row>
-						<row>
-						<entry>ROOM_NOMOB</entry>
-						<entry>Mobiles not allowed</entry>
-						<entry>BV02</entry>
-						<entry>4</entry>
-						</row>
-						<row>
-						<entry>ROOM_INDOORS</entry>
-						<entry>Indoors</entry>
-						<entry>BV03</entry>
-						<entry>8</entry>
-						</row>
-						<row>
-						<entry>ROOM_GOOD</entry>
-						<entry>Only good aligned players allowed</entry>
-						<entry>BV04</entry>
-						<entry>16</entry>
-						</row>
-						<row>
-						<entry>ROOM_EVIL</entry>
-						<entry>Only evil aligned players allowed</entry>
-						<entry>BV05</entry>
-						<entry>32</entry>
-						</row>
-						<row>
-						<entry>ROOM_NOCAST</entry>
-						<entry>Using magic not allowed</entry>
-						<entry>BV06</entry>
-						<entry>64</entry>
-						</row>
-						<row>
-						<entry>ROOM_TUNNEL</entry>
-						<entry>Tunnel (could cause problems for larger sized characters)</entry>
-						<entry>BV07</entry>
-						<entry>128</entry>
-						</row>
-						<row>
-						<entry>ROOM_PRIVATE</entry>
-						<entry>Only one character at a time</entry>
-						<entry>BV08</entry>
-						<entry>256</entry>
-						</row>
-						<row>
-						<entry>ROOM_SAFE</entry>
-						<entry>Fighting not allowed</entry>
-						<entry>BV09</entry>
-						<entry>512</entry>
-						</row>
-						<row>
-						<entry>ROOM_SOLITARY</entry>
-						<entry>??</entry>
-						<entry>BV10</entry>
-						<entry>1024</entry>
-						</row>
-						<row>
-						<entry>ROOM_NORECALL</entry>
-						<entry>Recall spell not allowed</entry>
-						<entry>BV11</entry>
-						<entry>2048</entry>
-						</row>
-						<row>
-						<entry>ROOM_NODROPALL</entry>
-						<entry>??</entry>
-						<entry>BV12</entry>
-						<entry>4096</entry>
-						</row>
-						<row>
-						<entry>ROOM_NOSUMMON</entry>
-						<entry>Summon spell not allowed</entry>
-						<entry>BV13</entry>
-						<entry>8192</entry>
-						</row>
-						<row>
-						<entry>ROOM_CLANSTORE</entry>
-						<entry>Clan store</entry>
-						<entry>BV14</entry>
-						<entry>16384</entry>
-						</row>
-						<row>
-						<entry>ROOM_TELEPORT</entry>
-						<entry>Teleport</entry>
-						<entry>BV15</entry>
-						<entry>32768</entry>
-						</row>
-						<row>
-						<entry>ROOM_NOFLOOR</entry>
-						<entry>No floor</entry>
-						<entry>BV16</entry>
-						<entry>65536</entry>
-						</row>
-						<row>
-						<entry>ROOM_MANAROOM</entry>
-						<entry>Accelerated mana replenishment</entry>
-						<entry>BV17</entry>
-						<entry>131072</entry>
-						</row>
-						<row>
-						<entry>ROOM_NOTRADE</entry>
-						<entry>Trading not allowed</entry>
-						<entry>BV18</entry>
-						<entry>262144</entry>
-						</row>
-						<row>
-						<entry>ROOM_PROTO</entry>
-						<entry>Prototype room</entry>
-						<entry>BV31</entry>
-						<entry>2147483648</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>					
 			</para>
 		</section>
 	</section>
