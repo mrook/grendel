@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.14 2004/03/04 19:11:24 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.15 2004/03/04 19:27:45 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -2069,18 +2069,22 @@ var
 	ch, vict : GCharacter;
 begin
   Result := nil;
-  ch := c;
 
-  num := findnumber(name);
-
-  name := uppercase(name);
-  cnt := 0;
+	if (name = '') then
+		exit;
 
   if (name = 'SELF') then
     begin
     Result := ch;
     exit;
     end;
+
+  ch := c;
+
+  num := findNumber(name);
+
+  name := uppercase(name);
+  cnt := 0;
 
   iterator := chars.iterator();
   
@@ -2244,9 +2248,13 @@ var
 	obj : GObject;
 	num, cnt : integer;
 begin
+  Result := nil;
+  
+  if (name = '') then
+  	exit;
+
   iterator := objects.iterator();
   num := findNumber(name);
-  Result := nil;
   cnt := 0;
 
   while (iterator.hasNext()) do
@@ -2276,6 +2284,10 @@ var
 	sub, key : string;
 begin
   Result := nil;
+  
+  if (keyword = '') then
+  	exit;
+  	
   p := high(integer);
 
   iterator := extra.iterator();
@@ -2355,6 +2367,10 @@ var
 	pexit : GExit;
 begin
   Result := nil;
+  
+  if (s = '') then
+  	exit;
+  	
   s := uppercase(s);
 
   iterator := exits.iterator();
@@ -2668,6 +2684,9 @@ var
   victim : GCharacter;
 begin
   result := nil;
+  
+  if (param = '') then	
+  	exit;
 
   searchVNum := StrToIntDef(param, -1);
 
@@ -2904,6 +2923,10 @@ var
   a : integer;
 begin
   FindHeading := -1;
+  
+  if (s = '') then
+  	exit;
+  
   s := lowercase(s);
 
   for a := DIR_NORTH to DIR_UP do
@@ -3063,6 +3086,11 @@ var
   iterator : GIterator;
   number, count : integer;
 begin
+  Result := nil;
+  
+  if (s = '') then
+  	exit;
+  	
   number := findNumber(s); // eg 2.sword
 
   count := 0;
@@ -3084,8 +3112,6 @@ begin
         end;
       end;
     end;
-
-  Result := nil;
 end;
 
 procedure initAreas();
