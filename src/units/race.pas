@@ -2,74 +2,105 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.2 2003/12/12 23:01:19 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.3 2004/02/11 22:15:25 ***REMOVED*** Exp $
 }
 
 unit race;
 
 interface
 
+
 uses
-    SysUtils,
-    mudsystem,
-    constants,
-    strip,
-    util,
-    dtypes,
-    fsys;
+	SysUtils,
+	mudsystem,
+	constants,
+	strip,
+	util,
+	dtypes,
+	fsys;
+
 
 type   
-    GBodyPart = class
-    private
-      _name : string;
-      _description : string;
-      _char_message, _room_message : string;
-      
-    public
-      constructor Create();
-      
-    published
-      property name : string read _name write _name;
-      property description : string read _description write _description;
-      property char_message : string read _char_message write _char_message;
-      property room_message : string read _room_message write _room_message;
-    end;
-    
-    GRace = class
-   	private
-      node : GListNode;
-      
-    public
-      name, description : string;
-      def_alignment : integer;
-      convert : boolean;
-      saves : GHashTable;
-      str_bonus, con_bonus, dex_bonus, int_bonus, wis_bonus : integer;
-      str_max, con_max, dex_max, int_max, wis_max : integer;
-      save_poison, save_cold, save_para, save_breath, save_spell : integer;
-      max_skills, max_spells : integer;
-      abilities : GDLinkedList;
-      bodyparts : GHashTable;
+	GBodyPart = class
+	private
+		_name : string;
+		_description : string;
+		_char_message, _room_message : string;
 
-      constructor Create();
-    end;
+	public
+		constructor Create();
+
+	published
+		property name : string read _name write _name;
+		property description : string read _description write _description;
+		property char_message : string read _char_message write _char_message;
+		property room_message : string read _room_message write _room_message;
+	end;
+
+	GRace = class
+	private
+		node : GListNode;
+
+		_name, _description : string;
+		_str_bonus, _con_bonus, _dex_bonus, _int_bonus, _wis_bonus : integer;
+		_def_alignment : integer;
+		_max_skills, _max_spells : integer;
+		_save_poison, _save_cold, _save_para, _save_breath, _save_spell : integer;
+		_abilities : GDLinkedList;
+		_bodyparts : GHashTable;	
+		_convert : boolean;
+		
+		str_max, con_max, dex_max, int_max, wis_max : integer;
+
+	public
+		constructor Create();
+		
+		property name : string read _name;
+		property description : string read _description;
+		
+		property str_bonus : integer read _str_bonus;
+		property con_bonus : integer read _con_bonus;
+		property dex_bonus : integer read _dex_bonus;
+		property int_bonus : integer read _wis_bonus;
+		property wis_bonus : integer read _int_bonus;
+		
+		property max_skills : integer read _max_skills;
+		property max_spells : integer read _max_spells;
+		
+		property save_poison : integer read _save_poison;
+		property save_cold : integer read _save_cold;
+		property save_para : integer read _save_para;
+		property save_breath : integer read _save_breath;
+		property save_spell : integer read _save_spell;
+		
+		property def_alignment : integer read _def_alignment;
+		
+		property abilities : GDLinkedList read _abilities;
+		property bodyparts : GHashTable read _bodyparts;
+		
+		property convert : boolean read _convert;
+	end;
+
 
 var
-   raceList : GDLinkedList;
+	raceList : GDLinkedList;
+
 
 procedure loadRaces();
-
-function findRace(name : string) : GRace;
-
 procedure initRaces();
 procedure cleanupRaces();
 
+function findRace(name : string) : GRace;
+
+
 implementation
 
+
 uses
-  LibXmlParser,
-  console,
-  skills;
+	LibXmlParser,
+	console,
+	skills;
+
   
 constructor GBodyPart.Create();
 begin
@@ -85,24 +116,24 @@ constructor GRace.Create();
 begin
   inherited Create;
   
-  name := '';
-  description := '';
-  def_alignment := 0;    // fill in default values
-  convert := false;
-  str_bonus := 0;
-  con_bonus := 0;
-  dex_bonus := 0;
-  int_bonus := 0;
-  wis_bonus := 0;
-  save_poison := 0;
-  save_cold := 0;
-  save_para := 0;
-  save_breath := 0;
-  save_spell := 0;
-  max_skills := 10;
-  max_spells := 10;
-  abilities := GDLinkedList.Create();
-  bodyparts := GHashTable.Create(32);
+  _convert := false;
+  _name := '';
+  _description := '';
+  _def_alignment := 0;    // fill in default values
+  _str_bonus := 0;
+  _con_bonus := 0;
+  _dex_bonus := 0;
+  _int_bonus := 0;
+  _wis_bonus := 0;
+  _save_poison := 0;
+  _save_cold := 0;
+  _save_para := 0;
+  _save_breath := 0;
+  _save_spell := 0;
+  _max_skills := 10;
+  _max_spells := 10;
+  _abilities := GDLinkedList.Create();
+  _bodyparts := GHashTable.Create(32);
 end;
 
 procedure loadBodyParts(parser : TXmlParser; race : GRace);
@@ -174,19 +205,19 @@ begin
 		  ptContent:
 		    begin
 		    if (prep(parser.CurName) = 'POISON') then
-		      race.save_poison := StrToInt(parser.CurContent)
+		      race._save_poison := StrToInt(parser.CurContent)
 		    else
 		    if (prep(parser.CurName) = 'COLD') then
-		      race.save_cold := StrToInt(parser.CurContent)
+		      race._save_cold := StrToInt(parser.CurContent)
 		    else
 		    if (prep(parser.CurName) = 'PARA') then
-		      race.save_para := StrToInt(parser.CurContent)
+		      race._save_para := StrToInt(parser.CurContent)
 		    else
 		    if (prep(parser.CurName) = 'BREATH') then
-		      race.save_breath := StrToInt(parser.CurContent)
+		      race._save_breath := StrToInt(parser.CurContent)
 		    else
 		    if (prep(parser.CurName) = 'SPELL') then
-		      race.save_spell := StrToInt(parser.CurContent);
+		      race._save_spell := StrToInt(parser.CurContent);
 		    end;
 			ptEndTag:
 			  begin
@@ -238,12 +269,12 @@ begin
 			        begin
 			        if (prep(parser.CurName) = 'NAME') then
 			        	begin
-			          race.name := cap(parser.CurContent);
+			          race._name := cap(parser.CurContent);
                 writeConsole('   Race: ' + race.name);
 			          end
 			        else
 			        if (prep(parser.CurName) = 'DESCRIPTION') then
-			          race.description := parser.CurContent;
+			          race._description := parser.CurContent;
 			        end;
       			ptEndTag   : // Process End-Tag here (Parser.CurName)
 							begin

@@ -2,7 +2,7 @@
   Summary:
     Command interpreter and supporting code
   
-  ##  $Id: commands.pas,v 1.4 2004/02/05 20:38:04 hemko Exp $
+  ##  $Id: commands.pas,v 1.5 2004/02/11 22:15:25 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -43,8 +43,13 @@ type
   COMMAND_FUNC = procedure(ch : GCharacter; param : string);
 
   GCommandFunc = class
-    name : string;
-    func : COMMAND_FUNC;
+  private
+		_name : string;
+		_func : COMMAND_FUNC;
+		
+	public
+		property name : string read _name write _name;
+		property func : COMMAND_FUNC read _func write _func;
   end;
 
   GCommand = class

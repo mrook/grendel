@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.7 2004/02/02 15:35:58 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.8 2004/02/11 22:15:25 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -465,7 +465,7 @@ begin
                 s_exit.flags := af.readCardinal;
                 s_exit.key := af.readInteger;
 
-                if not (af.feol) then
+                if not (af.eol()) then
                   s_exit.keywords := hash_string(af.readLine)
                 else
                   s_exit.keywords := hash_string('');
@@ -583,7 +583,7 @@ begin
 
         sex := af.readInteger;
 
-        if (not af.feol) then
+        if (not af.eol()) then
           begin
           s := af.readToken();
 

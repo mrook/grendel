@@ -1,62 +1,75 @@
 {
   @abstract(Buffered filereader & writer)
-  @lastmod($Id: fsys.pas,v 1.2 2003/12/12 23:01:17 ***REMOVED*** Exp $)
+  @lastmod($Id: fsys.pas,v 1.3 2004/02/11 22:15:25 ***REMOVED*** Exp $)
 }
 
 unit fsys;
 
 interface
 
+
 uses
-    Classes,
-    SysUtils;
+	Classes,
+	SysUtils;
+
 
 const
-    BUFSIZE = 65536 * 16;
-    MAX_LINESIZE = 1024;
+	BUFSIZE = 65536 * 16;
+	MAX_LINESIZE = 1024;
+
 
 type
-    GFileReader = class
-      fp : TFileStream;
-      fname : string;
-      buffer : array[0..BUFSIZE] of char;
-      fpos, fsize : integer;
-      feol : boolean;
-      line : integer;
+	GFileReader = class
+	private
+		fp : TFileStream;
+		fname : string;
+		fpos, fsize : integer;
+		feol : boolean;
+		fline : integer;
+		buffer : array[0..BUFSIZE] of char;
 
-      function readChar() : char;
-      function eof() : boolean;
-      function eol() : boolean;
-      procedure seek(pos : integer);
+	published
+		function readChar() : char;
+		function eof() : boolean;
+		function eol() : boolean;
+		procedure seek(pos : integer);
 
-      function readLine() : string;
-      function readInteger() : integer;
-      function readCardinal() : cardinal;
-      function readToken() : string;
+		function readLine() : string;
+		function readInteger() : integer;
+		function readCardinal() : cardinal;
+		function readToken() : string;
 
-      constructor Create(fn : string);
-      destructor Destroy; override;
-    end;
+		constructor Create(fn : string);
+		destructor Destroy; override;
+		
+		property line : integer read fline;
+		property filename : string read fname;
+	end;
 
-    GFileWriter = class
-      fp : TFileStream;
-      fname : string;
-      buffer : array[0..BUFSIZE] of char;
-      fpos : integer;
+	GFileWriter = class
+	private
+		fp : TFileStream;
+		fname : string;
+		fpos : integer;
+		buffer : array[0..BUFSIZE] of char;
 
-      procedure writeChar(c : char);
-      procedure writeInteger(i : integer);
-      procedure writeString(s : string);
-      procedure writeLine(s : string);
+	published
+		procedure writeChar(c : char);
+		procedure writeInteger(i : integer);
+		procedure writeString(s : string);
+		procedure writeLine(s : string);
 
-      procedure flush();
+		procedure flush();
 
-      constructor Create(fn : string);
-      destructor Destroy; override;
-    end;
+		constructor Create(fn : string);
+		destructor Destroy; override;
+
+		property filename : string read fname;
+	end;
 
 
 function translateFileName(fn : string) : string;
+
 
 implementation
 
@@ -86,7 +99,7 @@ begin
   //  raise Exception.Create(fn + ': 0 length file');
 
   fpos := 0;
-  line := 0;
+  fline := 0;
   feol := false;
 end;
 
@@ -115,7 +128,7 @@ begin
 //    if (buffer[fpos] = #13) or (buffer[fpos] = #10) then
 //      readChar;
       
-    inc(line);
+    inc(fline);
     feol := true;
     end
   else

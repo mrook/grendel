@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.1 2003/12/12 13:20:05 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.2 2004/02/11 22:15:25 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -30,10 +30,21 @@ type
 	GReturnModuleInterfaceFunction = function() : IModuleInterface;
 
   GModuleInfo = class
-    handle : HMODULE;
-    fname : string;
-    desc : string;
-    intf : IModuleInterface;
+  private
+    _handle : HMODULE;
+    _filename : string;
+    _description : string;
+    _intf : IModuleInterface;
+    
+  published
+  	constructor Create(handle_ : HMODULE; filename_ : string; description_ : string; intf_ : IModuleInterface);
+  	
+  	procedure clearInterface();
+  	
+  	property handle : HMODULE read _handle;
+  	property filename : string read _filename;
+  	property description : string read _description;
+  	property intf : IModuleInterface read _intf;
   end;
   
 
@@ -43,10 +54,13 @@ procedure unloadModules();
 procedure addModule(name : string);
 procedure removeModule(name : string);
 
+
 var
-  module_list : GHashTable;
+	module_list : GHashTable;
+
 
 implementation
+
 
 uses
   strip,
@@ -55,6 +69,23 @@ uses
   commands,
   console,
   mudsystem;
+
+
+
+constructor GModuleInfo.Create(handle_ : HMODULE; filename_ : string; description_ : string; intf_ : IModuleInterface);
+begin
+	inherited Create();
+	
+	_handle := handle_;
+	_filename := filename_;
+	_description := description_;
+	_intf := intf_;
+end;
+
+procedure GModuleInfo.clearInterface();
+begin
+  _intf := nil;
+end;
 
 
 procedure do_modules(ch : GCharacter; param : string);
@@ -75,7 +106,7 @@ begin
       begin
       module := GModuleInfo(iterator.next());
     
-      ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
+      ch.sendBuffer(module.filename + ' (' + module.description + ')'#13#10);
       end;
 
     iterator.Free();
@@ -139,14 +170,14 @@ begin
     begin
     module := GModuleInfo(iterator.next());
 
-    writeConsole('Unloading module ' + module.fname);
+    writeConsole('Unloading module ' + module.filename);
     
     module.intf.unregisterModule();
-    module.intf := nil;
+    module.clearInterface();
     
     UnloadPackage(module.handle);
       
-    writeConsole('Unloaded module ' + module.fname);
+    writeConsole('Unloaded module ' + module.filename);
     end;
     
   module_list.clear();
@@ -175,17 +206,13 @@ begin
   	end
   else
   	begin     
-  	module := GModuleInfo.Create();
+  	module := GModuleInfo.Create(hndl, name, GetPackageDescription(PChar('modules' + PathDelimiter + name)), returnModuleInterface());
       
-	  module.handle := hndl;
-  	module.fname := name;
-	  module.desc := GetPackageDescription(PChar('modules' + PathDelimiter + name));
-  	module.intf := returnModuleInterface();
 	  module.intf.registerModule();
       
   	module_list.put(name, module);
 
-	  writeConsole('Loaded module ' + name + ' (' + module.desc + ')');
+	  writeConsole('Loaded module ' + name + ' (' + module.description + ')');
 	  end;
   
 //  readMapFile(name, 'modules' + PathDelimiter + left(name, '.') + '.map');
@@ -201,11 +228,11 @@ begin
     raise Exception.Create('Module not loaded');
     
   module.intf.unregisterModule();
-  module.intf := nil;
+  module.clearInterface();
 
   UnloadPackage(module.handle);
     
-  writeConsole('Unloaded module ' + module.fname);
+  writeConsole('Unloaded module ' + module.filename);
   
   module_list.remove(name);
   module.Free;

@@ -190,7 +190,7 @@ begin
     exit;
   end;
 
-  yyfname := inputStack[iptr].fname;
+  yyfname := fname;
 
 	yylineno := 0;
 end;
@@ -265,7 +265,7 @@ function yywrap : Boolean;
       yylineno := inputStack[iptr].line;
       yywrap := false;
 			bufptr := 0;
-      yyfname := inputStack[iptr].fname;
+      yyfname := inputStack[iptr].filename;
       end
     else
       yywrap := true;

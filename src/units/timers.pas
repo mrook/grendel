@@ -1,57 +1,71 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.2 2004/02/05 21:30:53 hemko Exp $)
+  @lastmod($Id: timers.pas,v 1.3 2004/02/11 22:15:25 ***REMOVED*** Exp $)
 }
 
 unit timers;
 
 interface
 
+
 uses
 {$IFDEF WIN32}
-    Windows,
+	Windows,
 {$ENDIF}
-    SysUtils,
-    Classes,
-    skills,
-    dtypes,
-    chars;
+	SysUtils,
+	Classes,
+	skills,
+	dtypes,
+	chars;
 
 
 type
-    TIMER_FUNC = procedure;
-    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
+	TIMER_FUNC = procedure;
+	SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
 
-    GTimer = class
-      name : string;
-      timer_func : TIMER_FUNC;
-      counter, timeout : integer;
-      looping : boolean;
-  
-      constructor Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
-    end;
+	GTimer = class
+	private
+		_name : string;
+		_counter : integer;
+		timer_func : TIMER_FUNC;
+		timeout : integer;
+		looping : boolean;
 
-    GSpecTimer = class (GTimer)
-      spec_func : SPEC_FUNC;
+	published
+		constructor Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean);
+		
+		property name : string read _name;
+		property counter : integer read _counter write _counter;
+	end;
 
-      ch, victim : GCharacter;
+	GSpecTimer = class (GTimer)
+	private
+		spec_func : SPEC_FUNC;
+		ch, victim : GCharacter;
+		timer_type : integer;
+		sn : GSkill;
 
-      timer_type : integer;
+	published
+		constructor Create(name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
+	end;
 
-      sn : GSkill;
+	GTimerThread = class (TThread)
+	private
+		last_update : TDateTime;
 
-      constructor Create(name_ : string; timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
-    end;
+	protected
+		procedure Execute; override;
+	
+	published
+		constructor Create();
+		
+		property lastUpdate : TDateTime read last_update;
+	end;
 
-    GTimerThread = class (TThread)
-      last_update : TDateTime;
-
-      procedure Execute; override;
-      constructor Create;
-    end;
 
 var
-   timer_list : GDLinkedList;
+	timer_list : GDLinkedList;
+
 
 procedure registerTimer(name : string; func : TIMER_FUNC; timeout : integer; looping : boolean); overload;
 procedure registerTimer(name : string; timer_type : integer; func : SPEC_FUNC; timeout : integer; ch, victim : GCharacter; sn : GSkill); overload;
@@ -65,22 +79,24 @@ function hasTimer(ch : GCharacter; const timer_name : string) : GTimer; overload
 procedure initTimers();
 procedure cleanupTimers();
 
+
 implementation
+
 
 uses
 {$IFDEF WIN32}
-    Winsock2,
+	Winsock2,
 {$ENDIF}
-    constants,
-    console,
-    mudsystem,
-    util,
-    commands,
-    update,
-    area,
-    conns,
-    player,
-    Channels;
+	constants,
+	console,
+	mudsystem,
+	util,
+	commands,
+	update,
+	area,
+	conns,
+	player,
+	Channels;
 
 
 // GTimer
@@ -88,10 +104,10 @@ constructor GTimer.Create(name_ : string; func_ : TIMER_FUNC; timeout_ : integer
 begin
   inherited Create;
 
-  Self.name := name_;
+  Self._name := name_;
+  Self._counter := timeout_;
   Self.timer_func := func_;
   Self.timeout := timeout_;
-  Self.counter := timeout_;
   Self.looping := looping_;
 end;
 
@@ -135,9 +151,9 @@ begin
       node_next := node.next;
 
       try
-        dec(timer.counter);
+        dec(timer._counter);
 
-        if (timer.counter = 0) then
+        if (timer._counter = 0) then
           begin
           if (timer is GSpecTimer) then
             begin
@@ -156,7 +172,7 @@ begin
             timer.Free;
             end
           else
-            timer.counter := timer.timeout;
+            timer._counter := timer.timeout;
           end;
       except
 {        on E : EExternal do

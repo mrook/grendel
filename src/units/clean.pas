@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.1 2003/12/12 13:20:01 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.2 2004/02/11 22:15:25 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -148,7 +148,7 @@ begin
         end;
       {$ENDIF}
 
-      if (GTimerThread(timer_thread).last_update + THREAD_TIMEOUT < Now()) then
+      if (GTimerThread(timer_thread).lastUpdate + THREAD_TIMEOUT < Now()) then
         begin
         bugreport('GCleanThread.Execute', 'clean.pas', 'Timer thread probably died');
 
