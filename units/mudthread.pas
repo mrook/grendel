@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.74 2001/11/24 15:16:08 xenon Exp $
+// $Id: mudthread.pas,v 1.75 2002/01/24 22:41:57 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -231,7 +231,7 @@ var
     gc : GCommand;
     cmd : GCommand;
     node : GListNode;
-    cmdline, param : string;
+    cmdline, param, ale : string;
     hash, time : cardinal;
     al : GAlias;
 begin
@@ -303,7 +303,17 @@ begin
 
         if (uppercase(al.alias) = cmdline) then
           begin
-          line := al.expand + ' ' + param;
+          ale := al.expand;
+          
+          while (pos(':', ale) > 0) do
+            begin
+            line := left(ale, ':');
+            ale := right(ale, ':');
+            
+            interpret(ch, line);
+            end;
+            
+          line := ale + ' ' + param;
           param := one_argument(line, cmdline);
           cmdline := uppercase(cmdline);
 
