@@ -1,6 +1,6 @@
 {
   @abstract(Various utility functions)
-  @lastmod($Id: util.pas,v 1.19 2003/09/25 16:06:18 ***REMOVED*** Exp $)
+  @lastmod($Id: util.pas,v 1.20 2003/10/03 18:03:59 ***REMOVED*** Exp $)
 }
 
 unit util;
@@ -48,6 +48,7 @@ function makedrunk(param : string) : string;
 
 function prep(str : string) : string;
 function removeQuotes(str : string) : string;
+function escape(str : string) : string;
 
 implementation
 
@@ -354,6 +355,21 @@ end;
 function removeQuotes(str : string) : string;
 begin
 	Result := Trim(FastReplace(str, '"', ' '));
+end;
+
+function escape(str : string) : string;
+var
+	i : integer;
+begin
+	Result := '';
+	
+	for i := 1 to length(str) do
+		begin
+		if (str[i] in ['"','\']) then
+			Result := Result + '\';
+			
+		Result := Result + str[i];
+		end;
 end;
 
 end.
