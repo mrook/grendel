@@ -124,7 +124,7 @@ const SMAUG_ACT_NPC = BV00;
 var
    are : GArea;
    af : GFileReader;
-   typ, s : string;
+   typ, s, g : string;
    npcindex : GNPCIndex;
    room : GRoom;
    ex : GExit;
@@ -176,7 +176,7 @@ begin
 
           // name
           s := af.readLine;
-          room.name := stripl(s, '~');
+          room.name := hash_string(stripl(s, '~'));
 
           // description
           room.description := '';
@@ -219,7 +219,7 @@ begin
 
               // keyword(s)
               s := af.readLine;
-              ex.keyword := stripl(s, '~');
+              ex.keywords := hash_string(stripl(s, '~'));
 
               // exit_flags key to_room
               act_flags := af.readCardinal;
@@ -292,23 +292,22 @@ begin
           s := af.readLine;
           s := af.readLine;
 
-          npcindex.name := stripl(s, '~');
+          npcindex.name := hash_string(stripl(s, '~'));
           npcindex.short := npcindex.name;
 
           // long name
-          npcindex.long := '';
+          g := '';
           repeat
             s := af.readLine;
 
             if (s <> '~') then
-              npcindex.long := npcindex.long + s + #13#10;
+              g := g + s + #13#10;
           until (s = '~');
 
-          // delete the last #13#10
-          npcindex.long := copy(npcindex.long, 1, length(npcindex.long) - 2);
+          if (g[length(g) - 2] = '.') then
+            delete(g, length(g), 1);
 
-          if (npcindex.long[length(npcindex.long)] = '.') then
-            delete(npcindex.long, length(npcindex.long), 1);
+          npcindex.long := hash_string(g);
 
           // description
           repeat
@@ -460,104 +459,8 @@ begin
     end;
 
   af.Free;
-
-  assign(f, paramstr(2));
-  {$I-}
-  rewrite(f);
-  {$I+}
-
-  if (IOResult <> 0) then
-    begin
-    writeln('Could not open ', paramstr(2), '!');
-    exit;
-    end;
-
-  writeln(f, '#AREA');
-  writeln(f, are.name);
-  writeln(f, are.author);
-  writeln(f, 'You hear birds sign.');
-  writeln(f, '10');
-  writeln(f, '2 20 0');
-  writeln(f);
-  writeln(f, '#ROOMS');
-
-  node := room_list.head;
-  while (node <> nil) do
-    begin
-    room := node.element;
-
-    writeln(f, '#', room.vnum);
-    writeln(f, room.name);
-    writeln(f, room.description);
-    writeln(f, '~');
-
-    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
-
-    if (IS_SET(room.flags, ROOM_TELEPORT)) then
-      writeln(f, ' ', room.televnum, ' ', room.teledelay)
-    else
-      writeln(f);
-
-    node_ex := room.exits.head;
-    while (node_ex <> nil) do
-      begin
-      ex := node_ex.element;
-
-      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
-
-      if (length(ex.keyword) > 0) then
-        writeln(f, ' ', ex.keyword)
-      else
-        writeln(f);
-
-      node_ex := node_ex.next;
-      end;
-
-    writeln(f, 'S');
-
-    node := node.next;
-    end;
-
-  writeln(f, '#END');
-  writeln(f);
-  writeln(f, '#MOBILES');
-
-  node := npc_list.head;
-  while (node <> nil) do
-    begin
-    npcindex := node.element;
-
-    writeln(f, '#', npcindex.vnum);
-    
-    writeln(f, npcindex.name);
-    writeln(f, npcindex.short);
-    writeln(f, npcindex.long);
-
-    writeln(f, npcindex.level, ' ', npcindex.sex);
-    writeln(f, npcindex.natural_ac, ' ', npcindex.act_flags, ' ', npcindex.gold, ' ', npcindex.height, ' ', npcindex.weight);
-
-    node := node.next;
-    end;
-
-  writeln(f, '#END');
-  writeln(f);
-  writeln(f, '#RESETS');
-
-  node := are.resets.head;
-  while (node <> nil) do
-    begin
-    reset := node.element;
-
-    writeln(f, reset.reset_type, ' ', reset.arg1, ' ', reset.arg2, ' ', reset.arg3);
-
-    node := node.next;
-    end;
-
-  writeln(f, '#END');
-  writeln(f);
-  writeln(f, '$');
-
-  closefile(f);
+ 
+  are.save(paramstr(2));
 
   writeln('All done.');
 end.
