@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_main.pas,v 1.10 2003/10/22 19:06:39 ***REMOVED*** Exp $
+	$Id: imc3_main.pas,v 1.11 2003/10/28 22:12:08 ***REMOVED*** Exp $
 }
 
 unit imc3_main;
@@ -62,6 +62,9 @@ begin
 		while (iterator.hasNext()) do
 			begin
 			mud := GMud_I3(iterator.next());
+
+			if (prep(arg) = 'UP') and (mud.status >= 0) then 
+				continue;
 			
 			case mud.status of
 				-1:	ch.sendPager(pad_string(mud.name, 30) + pad_string(mud.mud_type, 10) + pad_string(mud.mudlib, 20) + pad_string(mud.ipaddress + ':' + IntToStr(mud.player_port), 15) + #13#10);
@@ -183,6 +186,46 @@ begin
 		
 		i3.sendTell(ch.name, t, mud, param);
 		ch.sendBuffer(Format('You tell %s@%s: %s', [cap(t), mud.name, param]) + #13#10);
+		end
+	else
+	if (prep(cmd) = 'BEEP') then
+		begin
+		if (length(arg) = 0) then
+			begin
+			ch.sendBuffer('Usage: I3 beep <user@mud>'#13#10);
+			exit;
+			end;
+
+		if (pos('@', arg) = 0) then
+			begin
+			ch.sendBuffer('You should specify a person and a mud. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		s := right(arg, '@');
+		t := lowercase(left(arg, '@'));
+		mud := findMud(s);
+		
+		if (mud = nil) then
+			begin
+			ch.sendBuffer('No such mud known. Use "I3 mudlist" to get an overview of the muds available.'#13#10);
+			exit;
+			end;
+			
+		if (mud.status >= 0) then
+			begin
+			ch.sendBuffer('Mud is down.'#13#10);
+			exit;
+			end;
+			
+		if (not mud.beep) then
+			begin
+			ch.sendBuffer('Mud does not support the ''beep'' command.'#13#10);
+			exit
+			end;
+		
+		i3.sendBeep(ch.name, t, mud);
+		ch.sendBuffer(Format('You beep %s@%s.', [cap(t), mud.name]) + #13#10);
 		end
 	else
 		ch.sendBuffer('Unimplemented.'#13#10);
