@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.70 2003/09/19 09:47:34 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.71 2003/09/24 14:32:04 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -646,14 +646,12 @@ begin
 		begin
 		e := ExceptObj as Exception;
 		writeConsole('[EX] ' + E.Message);
-		end
-	else
-		begin
+
 	  strings := TStringList.Create();
 	
 	  JclLastExceptStackListToStrings(strings, False, False, False);
   
-	  writeConsole('Possible bug detected, stacktrace follows:');
+	  //writeConsole('Possible bug detected, stacktrace follows:');
 
 	  for a := 0 to strings.count - 1 do
 	    writeConsole(strings[a]);
@@ -667,21 +665,8 @@ begin
   Result := 1;
 end;
 
-procedure do_crash(ch : GCharacter; param : string);
-var testList : GDLinkedList;
-begin  
-  try
-    testList.insertLast(ch); 
-  except
-  end;
-
-  ch.sendBuffer('Ok.'#13#10);
-end;
-
 var
   tm : TDateTime;
-  cmd : GCommand;
-  x : TList;
 
 begin
   old_exitproc := ExitProc;
@@ -703,18 +688,6 @@ begin
 
   bootServer();  
   
-  registerCommand('crash', do_crash);
-
-  cmd := GCommand.Create();
-  cmd.allowed_states := [STATE_IDLE];
-  cmd.name := 'CRASH';
-  cmd.func_name := 'CRASH';
-  cmd.level := LEVEL_IMMORTAL;
-  cmd.ptr := @do_crash;
-  cmd.addArg0 := true;
-
-  commands.put(cmd.name, cmd);
-
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
     from_copyover;
