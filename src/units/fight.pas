@@ -2,7 +2,7 @@
 	Summary:
 		Damage & experience routines
 	
-	## $Id: fight.pas,v 1.6 2004/03/11 17:18:47 ***REMOVED*** Exp $
+	## $Id: fight.pas,v 1.7 2004/04/21 20:50:31 ***REMOVED*** Exp $
 }
 
 unit fight;
@@ -82,7 +82,6 @@ uses
 	dtypes,
 	console,
 	util,
-	update,
 	Channels;
 
 var
@@ -529,7 +528,7 @@ begin
       end
     else
       begin
-      oppnt.die;
+      oppnt.die();
 
       { Regain 10% of xp needed when killed by NPC,
         4% when killed by PC  - Grimlord}
