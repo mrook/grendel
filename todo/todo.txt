@@ -26,6 +26,7 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! spells: Cure Poison
 ! skill/spellslots
 ! dynamic prompts, not the hardcoded bla, but redefinable by the user
+! show current map status in olc (map command)
 
 
 * add some checks to do_give, do_get, do_drop with respect to inter-align trading,
@@ -35,7 +36,6 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 * better damage/xp system (more balanced)
 * Better online construction (autocreate exit+room when moving),
   mobile create/edit, reset edit etc.
-  > Maybe even a map or something (show current map status in olc)
 - some form of classes/professions/guilds/religions/whatever
 	-> probably Schools	
 - more help text
