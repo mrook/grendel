@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.5 2001/07/30 14:46:55 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.6 2001/07/31 16:33:31 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -706,8 +706,12 @@ begin
   else
   if (vict = ch) then
     begin
-    GPlayer(ch).snooping.snooped_by := nil;
-    GPlayer(ch).snooping := nil;
+    if (GPlayer(ch).snooping <> nil) then 
+      begin
+      GPlayer(ch).snooping := nil;
+      GPlayer(ch).snooping.snooped_by := nil;
+      end;
+      
     ch.sendBuffer('No longer snooping.'#13#10);
     exit;
     end;
