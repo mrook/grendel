@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.10 2004/03/26 19:55:18 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.11 2004/03/26 21:14:27 hemko Exp $
 }
 
 unit timers;
@@ -172,7 +172,7 @@ begin
           if (not timer.looping) then
             begin
             timer_list.remove(node);
-            timer.Free;
+            timer.Free();
             end
           else
             timer._counter := timer.timeout;
@@ -195,7 +195,7 @@ begin
 {        if (timer is GSpecTimer) then
           begin
           timer_list.remove(node);
-          timer.Free;
+          timer.Free();
           end
         else
           timer.counter := timer.timeout; }
@@ -241,7 +241,7 @@ begin
     if (timer.name = name_) then
       begin
       timer_list.remove(node);
-      timer.Free;
+      timer.Free();
       break;
       end;
 

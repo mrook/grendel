@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.25 2004/03/26 20:05:10 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.26 2004/03/26 21:14:26 hemko Exp $
 }
 unit player;
 
@@ -400,7 +400,7 @@ begin
 		end
 	else
 		begin
-		ch.Free;
+		ch.Free();
 		end;
 		
 	connection_list.remove(node);
@@ -704,7 +704,7 @@ begin
 
                   if (vict <> nil) and (vict.conn = nil) then
                     begin
-                    ch.Free;
+                    ch.Free();
 
                     ch := vict;
                     vict.conn := Self;
@@ -1294,6 +1294,8 @@ begin
     tc := GUserChannel.Create(chan.channelname);
     channels.insertLast(tc);
     end;
+    
+	iterator.Free();
 
   active_board := 1;
   boards[BOARD1] := 0;

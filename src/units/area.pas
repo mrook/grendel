@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.28 2004/03/21 21:21:52 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.29 2004/03/26 21:14:26 hemko Exp $
 }
 
 unit area;
@@ -341,7 +341,7 @@ uses
 destructor GNPCIndex.Destroy;
 begin
   if (prog <> nil) then
-    prog.Free;
+    prog.Free();
 
   inherited Destroy;
 end;

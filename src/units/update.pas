@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.7 2004/03/11 17:18:47 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.8 2004/03/26 21:14:27 hemko Exp $
 }
 
 unit update;
@@ -472,7 +472,7 @@ begin
 			if (track.life = 0) then
 				begin
 				room.tracks.remove(node_track);
-				track.Free;
+				track.Free();
 				end;
 
 			node_track := node_tracknext;
