@@ -17,7 +17,7 @@ CORE_SOURCES=core.dpk units/*.pas gmc/*.pas
 
 all:	$(GRENDEL) $(COPYOVER) $(CONVERT)
 	cd modules
-	make /f makefile.w32
+	make /f makefile.w32 -DDCC_DEFS=$(DCC_DEFS)
       
 clean:
 	del $(GRENDEL) $(COPYOVER) $(CONVERT) $(CORE)
