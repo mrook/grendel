@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.10 2003/12/09 20:05:33 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.11 2003/12/12 13:31:50 ***REMOVED*** Exp $
 #
 
 
@@ -15,58 +15,43 @@ else
 endif
 
 
+all:	
+	$(MAKE) -C src
 ifdef WIN32
-DCC=dcc32
-
-GRENDEL=grendel.exe
-COPYOVER=copyover.exe
-CORE=core.bpl
-
-MAKE=$(CURDIR)/make
-
-ifeq ($(OS), Windows_NT)
-	RM=cmd /c del
-else
-	RM=del
+	copy src\grendel.exe
+	copy src\grendel.map
+	copy src\core.bpl
+	copy src\core.map
+	copy src\gmc\gmcc.exe
+	copy src\gmc\gasm.exe
+	copy src\modules\*.bpl modules
+	copy src\modules\*.map modules
 endif
-endif
-
-
 ifdef LINUX
-DCC=dcc
-DCC_DEFS=CONSOLEBUILD
-
-GRENDEL=grendel
-COPYOVER=copyover
-CORE=bplcore.so
-RM=rm
+	cp src/grendel
+	cp src/grendel.map
+	cp src/bplcore.so
+	cp src/core.map
+	cp src/gmc/gmcc
+	cp src/gmc/gasm
+	cp src/modules/bpl*.so modules
+	cp src/modules/*.map modules
 endif
-
-
-DCC_FLAGS=-Q -D+ -V- -W+ -O+
-
-GRENDEL_SOURCES=grendel.dpr
-COPYOVER_SOURCES=copyover.dpr
-CORE_SOURCES=core.dpk units/*.pas gmc/*.pas contrib/*.pas
-
-
-all:	$(GRENDEL) $(COPYOVER)
-	$(MAKE) -C gmc
-	$(MAKE) -C modules
-      
-clean:
-	$(RM) $(GRENDEL) 
-	$(RM) $(COPYOVER) 
-	$(RM) $(CORE)
-	$(RM) *.map
-	$(MAKE) -C gmc clean
-	$(MAKE) -C modules clean
-
-$(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
-	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ujcl
 	
-$(COPYOVER):	$(COPYOVER_SOURCES)
-	$(DCC) $(COPYOVER_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -Uunits
 
-$(CORE): $(CORE_SOURCES)
-	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -Ugmc -GD
+clean:
+	$(MAKE) -C src clean
+ifdef WIN32	
+	del *.bpl
+	del *.exe
+	del *.map
+	del modules\*.bpl
+	del modules\*.map
+endif
+ifdef LINUX
+	rm bpl*.so
+	rm grendel
+	rm *.map
+	rm modules/bpl*.so
+	rm modules/*.map
+endif
