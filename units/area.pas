@@ -58,9 +58,10 @@ type
     GObjectIndex = class
       name, short, long : string;
       area : GArea;
+      flags : cardinal;
       item_type,wear1,wear2:integer;
       value : GObjectValues;
-      weight,flags:integer;
+      weight:integer;
       cost:integer;
       timer:integer;
       obj_count:integer;
@@ -79,9 +80,9 @@ type
 
       name, short, long : string;
 
+      flags : cardinal;
       item_type,wear1,wear2:integer;
       weight:integer;
-      flags:integer;
       cost:integer;
       count:integer;
       timer:integer;
@@ -112,7 +113,7 @@ type
       direction : integer;
       to_room : GRoom;
       keyword : string;
-      exit_flag : integer;
+      exit_flag : cardinal;
       key : integer;
     end;
 
@@ -131,8 +132,7 @@ type
       gold,weight,height:integer;
       learned:array[0..MAX_SKILLS-1] of integer;
       programs : GDLinkedList;
-      mpflags:integer;
-      act_flags:integer;
+      mpflags, act_flags : cardinal;
       area : GArea;
       clan : GClan;
       shop : GShop;
@@ -172,6 +172,8 @@ type
 
       function findChar(c : pointer; name : string) : pointer;
       function findRandomChar : pointer;
+      function findRandomGood : pointer;
+      function findRandomEvil : pointer;
       function findObject(name : string) : pointer;
 
       function findExit(dir : integer) : GExit;
@@ -209,6 +211,10 @@ function findObjectIndex(vnum : integer) : GObjectIndex;
 function instanceObject(o_index : GObjectIndex) : GObject;
 procedure addCorpse(c : pointer);
 function findHeading(s : string) : integer;
+
+procedure cleanObjects;
+
+function findObjectWorld(s : string) : GObject;
 
 implementation
 
@@ -314,25 +320,20 @@ begin
         s := af.readLine;
 
         if (s <> '~') then
-          begin
-          if (length(buf) + length(s) > 4096) then
-            areaBug('load_rooms', 'room description too big')
-          else
-            buf := buf + s + #13#10;
-          end;
+          buf := buf + s + #13#10;
       until (s = '~');
 
       description := buf;
 
-      flags := af.readNumber;
-      min_level := af.readNumber;
-      max_level := af.readNumber;
-      sector := af.readNumber;
+      flags := af.readCardinal;
+      min_level := af.readInteger;
+      max_level := af.readInteger;
+      sector := af.readCardinal;
 
       if (IS_SET(flags, ROOM_TELEPORT)) then
         begin
-        televnum := af.readNumber;
-        teledelay := af.readNumber;
+        televnum := af.readCardinal;
+        teledelay := af.readInteger;
         end;
 
       if (max_level = 0) then
@@ -343,10 +344,10 @@ begin
       while (s <> 'S') do
         begin
         s_exit := GExit.Create;
-        s_exit.vnum := af.readNumber;
-        s_exit.direction := af.readNumber;
-        s_exit.exit_flag := af.readNumber;
-        s_exit.key := af.readNumber;
+        s_exit.vnum := af.readCardinal;
+        s_exit.direction := af.readCardinal;
+        s_exit.exit_flag := af.readCardinal;
+        s_exit.key := af.readInteger;
 
         if not (af.feol) then
           s_exit.keyword := hash_string(af.readQuoted);
@@ -423,7 +424,7 @@ begin
         short := hash_string(af.readLine);
         long := hash_string(af.readLine);
 
-        level := af.readNumber;
+        level := af.readCardinal;
 
         mv:=500;
         str:=UMax(65+random(level div 50),100);
@@ -437,7 +438,7 @@ begin
         damsizedie:=round(sqrt(level));
         damnumdie:=round(sqrt(level));
 
-        sex := af.readNumber;
+        sex := af.readInteger;
 
         if (not af.feol) then
           begin
@@ -446,11 +447,11 @@ begin
           clan := findClan(s);
           end;
 
-        natural_ac := af.readNumber;
-        act_flags := af.readNumber;
-        gold := af.readNumber;
-        height := af.readNumber;
-        weight := af.readNumber;
+        natural_ac := af.readInteger;
+        act_flags := af.readCardinal;
+        gold := af.readInteger;
+        height := af.readInteger;
+        weight := af.readInteger;
 
         s := af.readLine;
 
@@ -536,15 +537,15 @@ begin
           area.o_hi := vnum;
         end;
 
-      item_type := af.readNumber;
+      item_type := af.readInteger;
 
-      wear1:=af.readNumber;
-      wear2:=af.readNumber;
+      wear1 := af.readInteger;
+      wear2 := af.readInteger;
 
-      value[1]:=af.readNumber;
-      value[2]:=af.readNumber;
-      value[3]:=af.readNumber;
-      value[4]:=af.readNumber;
+      value[1] := af.readInteger;
+      value[2] := af.readInteger;
+      value[3] := af.readInteger;
+      value[4] := af.readInteger;
 
       case item_type of
         // if initial condition is set use that, else use max. condition
@@ -556,9 +557,10 @@ begin
           timer := 0;
       end;
 
-      weight:=af.readNumber;
-      flags:=af.readNumber;
-      cost:=af.readNumber;
+      weight := af.readInteger;
+      flags := af.readCardinal;
+      cost := af.readInteger;
+
       obj_count:=0;
       end;
 
@@ -715,15 +717,15 @@ begin
       author := hash_string(af.readLine);
       reset_msg := af.readLine;
 
-      max_age := af.readNumber;
+      max_age := af.readInteger;
 
       with weather do
         begin
-        temp_mult := af.readNumber;
-        temp_avg := af.readNumber;
+        temp_mult := af.readInteger;
+        temp_avg := af.readInteger;
         end;
 
-      flags := af.readNumber;
+      flags := af.readCardinal;
       age := 0;
       end
     else
@@ -731,12 +733,12 @@ begin
       begin
       found_range := true;
 
-      r_lo := af.readNumber;
-      r_hi := af.readNumber;
-      m_lo := af.readNumber;
-      m_hi := af.readNumber;
-      o_lo := af.readNumber;
-      o_hi := af.readNumber;
+      r_lo := af.readInteger;
+      r_hi := af.readInteger;
+      m_lo := af.readInteger;
+      m_hi := af.readInteger;
+      o_lo := af.readInteger;
+      o_hi := af.readInteger;
       end
     else
     if (s = '#ROOMS') then
@@ -1336,6 +1338,9 @@ begin
   chars := GDLinkedList.Create;
   objects := GDLinkedList.Create;
   tracks := GDLinkedList.Create;
+
+  sector := 1;
+  flags := 0;
 end;
 
 function GRoom.findChar(c : pointer; name : string) : pointer;
@@ -1386,7 +1391,6 @@ end;
 
 function GRoom.findRandomChar : pointer;
 var a, num : integer;
-    vict : GCharacter;
     node : GListNode;
 begin
   Result := nil;
@@ -1398,6 +1402,80 @@ begin
 
   if (node <> nil) then
     Result := node.element;
+end;
+
+function GRoom.findRandomGood : pointer;
+var a, cnt, num : integer;
+    vict : GCharacter;
+    node : GListNode;
+begin
+  Result := nil;
+
+  cnt := 0;
+  node := chars.head;
+  while (node <> nil) do
+    begin
+    vict := node.element;
+
+    if (vict.IS_GOOD) then
+      inc(cnt);
+
+    node := node.next;
+    end;
+
+  num := random(cnt);
+  a := 0;
+
+  node := chars.head;
+  while (node <> nil) do
+    begin
+    vict := node.element;
+
+    if (vict.IS_GOOD) and (a = num) then
+      begin
+      Result := vict;
+      break;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+function GRoom.findRandomEvil : pointer;
+var a, cnt, num : integer;
+    vict : GCharacter;
+    node : GListNode;
+begin
+  Result := nil;
+
+  cnt := 0;
+  node := chars.head;
+  while (node <> nil) do
+    begin
+    vict := node.element;
+
+    if (vict.IS_EVIL) then
+      inc(cnt);
+
+    node := node.next;
+    end;
+
+  num := random(cnt);
+  a := 0;
+
+  node := chars.head;
+  while (node <> nil) do
+    begin
+    vict := node.element;
+
+    if (vict.IS_EVIL) and (a = num) then
+      begin
+      Result := vict;
+      break;
+      end;
+
+    node := node.next;
+    end;
 end;
 
 function GRoom.findObject(name : string) : pointer;
@@ -1955,6 +2033,63 @@ end;
 procedure GObject.seperate;
 begin
   split(1);
+end;
+
+procedure cleanObjects;
+var
+   ext : GObject;
+   node : GListNode;
+begin
+  while (true) do
+    begin
+    node := extracted_chars.tail;
+
+    if (node = nil) then
+      exit;
+
+    ext := node.element;
+
+    extracted_object_list.remove(node);
+
+    ext.Free;
+    end;
+end;
+
+{Jago 10/Jan/2001 - utility function }
+{ Revised 28/Jan/2001 - Nemesis }
+function findObjectWorld(s : string) : GObject;
+var obj : GObject;
+    obj_node : GListNode;
+    number, count : integer;
+begin
+
+  number := findNumber(s); // eg 2.sword
+
+  count := 0;
+
+  obj_node := object_list.head;
+
+  while (obj_node <> nil) do
+    begin
+
+    obj := GObject(obj_node.element);
+
+    if isName(obj.name,s) then
+      begin
+
+      inc(count);
+
+      if (count = number) then
+        begin
+        Result := obj;
+        exit;
+        end;
+      end;
+
+    obj_node := obj_node.next;
+    end;
+
+  Result := nil;
 end;
 
 begin
