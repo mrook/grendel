@@ -1141,14 +1141,29 @@ begin
             exit;
             end;
 
+          // Added reverse exits - Nemesis
           case reset.arg3 of
           // open door
             0 : begin
                 REMOVE_BIT(pexit.flags, EX_LOCKED);
                 REMOVE_BIT(pexit.flags, EX_CLOSED);
+
+                // reverse exit
+                room := findRoom(pexit.vnum);
+                pexit := room.findExit(dir_inv[reset.arg2]);
+
+                REMOVE_BIT(pexit.flags, EX_LOCKED);
+                REMOVE_BIT(pexit.flags, EX_CLOSED);
                 end;
           // closed door
             1 : begin
+                REMOVE_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+
+                // reverse exit
+                room := findRoom(pexit.vnum);
+                pexit := room.findExit(dir_inv[reset.arg2]);
+
                 REMOVE_BIT(pexit.flags, EX_LOCKED);
                 SET_BIT(pexit.flags, EX_CLOSED);
                 end;
@@ -1157,14 +1172,37 @@ begin
                 REMOVE_BIT(pexit.flags, EX_LOCKED);
                 SET_BIT(pexit.flags, EX_CLOSED);
                 SET_BIT(pexit.flags, EX_SECRET);
+
+                // reverse exit
+                room := findRoom(pexit.vnum);
+                pexit := room.findExit(dir_inv[reset.arg2]);
+
+                REMOVE_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+                SET_BIT(pexit.flags, EX_SECRET);
                 end;
           // locked door
             3 : begin
                 SET_BIT(pexit.flags, EX_LOCKED);
                 SET_BIT(pexit.flags, EX_CLOSED);
+
+                // reverse exit
+                room := findRoom(pexit.vnum);
+                pexit := room.findExit(dir_inv[reset.arg2]);
+
+                SET_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
                 end;
           // locked secret door
             4 : begin
+                SET_BIT(pexit.flags, EX_LOCKED);
+                SET_BIT(pexit.flags, EX_CLOSED);
+                SET_BIT(pexit.flags, EX_SECRET);
+
+                // reverse exit
+                room := findRoom(pexit.vnum);
+                pexit := room.findExit(dir_inv[reset.arg2]);
+
                 SET_BIT(pexit.flags, EX_LOCKED);
                 SET_BIT(pexit.flags, EX_CLOSED);
                 SET_BIT(pexit.flags, EX_SECRET);
