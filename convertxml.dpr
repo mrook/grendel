@@ -1,6 +1,12 @@
 program convertxml;
+{$APPTYPE CONSOLE}
 
 uses
+	Windows,
+	ActiveX,
+	xmldoc,
+	xmldom,
+	xmlintf,
   SysUtils,
   TypInfo,
   skills,
@@ -13,91 +19,93 @@ uses
 var
   are : GArea;
   room : GRoom;
-  fw : GFileWriter;
   Count, Loop: Integer;
   List: PPropList;
   prop : PPropInfo;
   iterator : GIterator;
+  
+  doc : TXMLDocument;
+  child1, child2, node : IXMLNode;
 
 begin
-  initRaces();
-  initSkills();
-  initAreas();
-  initConsole();
+	CoInitialize(nil);
+	
+	try
+		doc := TXMLDocument.Create(nil);
+		doc.DOMVendor := DOMVendors[0];
+		doc.Active := true;
+		doc.Options := [doNodeAutoIndent];
+		
+		doc.Encoding := 'iso-8859-1';
+		doc.Version := '1.0';
+		doc.NSPrefixBase := 'grendel';
+		
+		node := doc.AddChild('area');
 
-  loadRaces();
+		initRaces();
+		initSkills();
+		initAreas();
+		initConsole();
 
-  are := GArea.Create();
+		loadRaces();
 
-  are.load('limbo.area');
+		are := GArea.Create();
 
-  try
-    fw := GFileWriter.Create('roads.xml');
-  except
-    exit;
-  end;
+		are.load('roads.area');
 
-  fw.writeLine('<?xml version="1.0"?>');
-  fw.writeLine('<area>');
+		Count := GetPropList(TypeInfo(GArea), tkAny, nil);
+		GetMem(List, Count * SizeOf(PPropInfo));
+		GetPropList(TypeInfo(GArea), tkAny, List);
 
-  try
-    Count := GetPropList(TypeInfo(GArea), tkAny, nil);
-    GetMem(List, Count * SizeOf(PPropInfo));
-    GetPropList(TypeInfo(GArea), tkAny, List);
+		for Loop := 0 to Pred(Count) do
+			begin
+			prop := List^[Loop];
 
-    for Loop := 0 to Pred(Count) do
-      begin
-      prop := List^[Loop];
+			child1 := node.addChild(prop^.Name);
 
-      fw.writeString('  <' + prop^.Name + '>');
+		 	case (prop.PropType^.Kind) of
+				tkInteger: child1.Text := IntToStr(GetOrdProp(are, prop));
+				tkFloat: child1.Text := FloatToStr(GetFloatProp(are, prop));
+				tkLString: child1.Text := GetStrProp(are, prop);
+				tkChar: child1.Text := char(GetOrdProp(are, prop));
+			end;
+			end;
 
-      case (prop.PropType^.Kind) of
-        tkInteger: fw.writeString(IntToStr(GetOrdProp(are, prop)));
-        tkFloat: fw.writeString(FloatToStr(GetFloatProp(are, prop)));
-        tkLString: fw.writeString(GetStrProp(are, prop));
-        tkChar: fw.writeString(char(GetOrdProp(are, prop)));
-      end;
+		FreeMem(List, Count * SizeOf(PPropInfo));
 
-      fw.writeLine('</' + prop^.Name + '>');
-      end;
+		Count := GetPropList(TypeInfo(GRoom), tkAny, nil);
+		GetMem(List, Count * SizeOf(PPropInfo));
+		GetPropList(TypeInfo(GRoom), tkAny, List);
 
-    FreeMem(List, Count * SizeOf(PPropInfo));
+		iterator := room_list.iterator();
 
-    Count := GetPropList(TypeInfo(GRoom), tkAny, nil);
-    GetMem(List, Count * SizeOf(PPropInfo));
-    GetPropList(TypeInfo(GRoom), tkAny, List);
+		while (iterator.hasNext()) do
+			begin
+			room := GRoom(iterator.next());
 
-    iterator := room_list.iterator();
+			child1 := node.addChild('room');
 
-    while (iterator.hasNext()) do
-      begin
-      room := GRoom(iterator.next());
+			for Loop := 0 to Pred(Count) do
+				begin
+				prop := List^[Loop];
 
-      fw.writeLine('  <room>');
+				child2 := child1.addChild(prop^.Name);
 
-      for Loop := 0 to Pred(Count) do
-        begin
-        prop := List^[Loop];
+				case (prop.PropType^.Kind) of
+					tkInteger: child2.Text := IntToStr(GetOrdProp(are, prop));
+					tkFloat: child2.Text := FloatToStr(GetFloatProp(are, prop));
+					tkLString: child2.Text := GetStrProp(are, prop);
+					tkChar: child2.Text := char(GetOrdProp(are, prop));
+				end;
+				end;
+			end;
 
-        fw.writeString('    <' + prop^.Name + '>');
+		FreeMem(List, Count * SizeOf(PPropInfo));
 
-        case (prop.PropType^.Kind) of
-          tkInteger: fw.writeString(IntToStr(GetOrdProp(room, prop)));
-          tkFloat: fw.writeString(FloatToStr(GetFloatProp(room, prop)));
-          tkLString: fw.writeString(GetStrProp(room, prop));
-          tkChar: fw.writeString(char(GetOrdProp(room, prop)));
-        end;
+		doc.SaveToFile('test.xml');
 
-        fw.writeLine('</' + prop^.Name + '>');
-        end;
-
-      fw.writeLine('  </room>');
-      end;
-
-    fw.writeLine('</area>');
-  finally
-    FreeMem(List, Count * SizeOf(PPropInfo));
-    fw.Free();
-  end;
-
+	finally
+		CoUninitialize();
+	end;
+	
 end.
