@@ -2,7 +2,7 @@
   Summary:
   	Wrappers for IPv4 and IPv6 socket operations
   	
-  ## $Id: socket.pas,v 1.8 2004/03/26 23:06:32 ***REMOVED*** Exp $
+  ## $Id: socket.pas,v 1.9 2004/03/30 12:22:42 ***REMOVED*** Exp $
 }
 
 unit socket;
@@ -63,6 +63,7 @@ type
 		destructor Destroy; override;
     
 		property getDescriptor : TSocket read fd;
+		property getAddressFamily : integer read af;
 		property socketAddress : TSockAddr_Storage read addr write addr;
 		property hostString : string read host_string;
 		property ipString : string read ip_string;
