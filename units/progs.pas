@@ -54,7 +54,7 @@ end;
 
 function GMathLib.random(x : integer) : integer; stdcall;
 begin
-  Result := System.Random(x);
+  Result := System.Random(x);
 end;
 
 // GStringLib
@@ -124,6 +124,12 @@ begin
   registerExternalMethod('cos', gmlib, gmlib.MethodAddress('cos'), sig);
   registerExternalMethod('sin', gmlib, gmlib.MethodAddress('sin'), sig);
   registerExternalMethod('tan', gmlib, gmlib.MethodAddress('tan'), sig);
+
+  sig.resultType := varInteger;
+  setLength(sig.paramTypes, 1);
+  sig.paramTypes[0] := varInteger;
+
+  registerExternalMethod('random', gmlib, gmlib.MethodAddress('random'), sig);
 
   sig.resultType := varString;
   setLength(sig.paramTypes, 2);
