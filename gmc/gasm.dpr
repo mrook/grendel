@@ -141,6 +141,7 @@ end;
 procedure genCode;
 var
 	b, displ : integer;
+  f : single;
   stat : Asm_Statement;
   line : Asm_Line;
   jump : Asm_Jump;
@@ -160,18 +161,17 @@ begin
       line := Asm_Line(stat);
 
 			case line.opcode of
-			  _NOP, _HALT,
-				_ADD,	_SUB, _MUL, _DIV,
-				_AND, _OR, _LT, _GT, _LTE, _GTE, _EQ	: begin
-																								line.displ := 1;
-																								setLength(line.code, 0);
-																								end;
-
 				_PUSHI : 	begin
 									line.displ := 5;
 									setLength(line.code, 4);
 									b := StrToInt(line.attr);
 									move(b, line.code[0], 4);
+									end;
+				_PUSHF : 	begin
+									line.displ := 5;
+									setLength(line.code, 4);
+									val(line.attr, f, b);
+									move(f, line.code[0], 4);
 									end;
 				_PUSHS : 	begin
 									line.displ := length(line.attr) + 2;

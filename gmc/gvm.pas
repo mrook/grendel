@@ -7,8 +7,8 @@ const
 	stackSize = 512;
 
 type
-	GTrap = procedure(msg : string);
-	GExternalVar = function(obj : variant; member : string) : variant;
+	GSystemTrap = procedure(msg : string);
+	GExternalTrap = function(obj : variant; member : string) : variant;
 
 	GCodeBlock = class
 		code : array of char;
@@ -31,18 +31,17 @@ type
 		procedure Execute;
 	end;
 
-	GVirtualMachine = class
-		constructor Create;	
-	end;
-
 var
   cmdline : string;
   input : file;
-	trap : GTrap;
-  callback : GExternalVar;
+  systemTrap : GSystemTrap;
+  externalTrap : GExternalTrap;
 	codeCache : GHashTable;
 
 function loadCode(fname : string) : GCodeBlock;
+
+procedure setSystemTrap(method : GSystemTrap);
+procedure setExternalTrap(method : GExternalTrap);
 
 implementation
 
@@ -54,14 +53,14 @@ begin
   exit;
 end;
 
-procedure dummyTrap(msg : string);
+procedure dummySystemTrap(msg : string);
 begin
   writeln('Trap: ', msg);
 end;
 
-function dummyCallback(obj : variant; member : string) : variant;
+function dummyExternalTrap(obj : variant; member : string) : variant;
 begin
-  Result := 50;
+  Result := Null;
 end;
 
 function loadCode(fname : string) : GCodeBlock;
@@ -155,6 +154,7 @@ end;
 procedure GContext.Execute;
 var
 	i : integer;
+  f : single;
   r : byte;
   p : pchar;
 	v1, v2 : variant;
@@ -170,6 +170,16 @@ begin
 									push(cmdline);
 									inc(pc);
 									end;
+        _ITOF   : begin
+                  VarCast(v1, pop(), varSingle);
+                  push(v1);
+									inc(pc);
+                  end;
+        _FTOI   : begin
+                  VarCast(v1, pop(), varInteger);
+                  push(v1);
+									inc(pc);
+                  end;
         _ITOS		: begin
                   push(IntToStr(pop()));
                   inc(pc);
@@ -178,21 +188,31 @@ begin
                   push(IntToStr(pop()));
                   inc(pc);
                   end;
+        _FTOS   : begin
+                  VarCast(v1, pop(), varString);
+                  push(v1);
+									inc(pc);
+                  end;
         _PUSHI 	: begin
                   move(block.code[pc + 1], i, 4);
                   inc(pc, 5);
                   push(i);
                   end;
-        _PUSHR  : begin
-                  move(block.code[pc + 1], r, 1);
-                  inc(pc, 2);
-                  push(data[r]);
+        _PUSHF  : begin
+                  move(block.code[pc + 1], f, 4);
+                  inc(pc, 5);
+                  push(f);
                   end;
         _PUSHS  : begin
                   p := @block.code[pc + 1];
                   inc(pc, strlen(p) + 2);
 
                   push(string(p));
+                  end;
+        _PUSHR  : begin
+                  move(block.code[pc + 1], r, 1);
+                  inc(pc, 2);
+                  push(data[r]);
                   end;
         _POPR   : begin
                   move(block.code[pc + 1], r, 1);
@@ -251,7 +271,7 @@ begin
                   inc(pc);
                   end;
         _GET		: begin
-                  push(callback(pop(), pop()));
+                  push(externalTrap(pop(), pop()));
                   inc(pc);
                   end;
         _GETR		: begin
@@ -260,7 +280,7 @@ begin
                   pop();
                   end;
         _TRAP		: begin
-                  trap(pop());
+                  systemTrap(pop());
                   inc(pc);
                   end;
         _RET		: begin
@@ -316,7 +336,7 @@ begin
 
   except
     on E : EVariantError do
-      vmError('stack conversion error');
+      vmError('stack error: ' + E.Message);
   end;
 
   writeln('Execution halted.');
@@ -340,19 +360,23 @@ begin
 end;
 
 
-// GVirtualMachine
-constructor GVirtualMachine.Create;
+procedure setSystemTrap(method : GSystemTrap);
 begin
-  inherited Create;
-
-  trap := dummyTrap;
-  callback := dummyCallback;  
+  if (Assigned(method)) then
+    systemTrap := method;
 end;
 
+procedure setExternalTrap(method : GExternalTrap);
+begin
+  if (Assigned(method)) then
+    externalTrap := method;
+end;
 
 begin
-  trap := dummyTrap;
-  callback := dummyCallback;
+  DecimalSeparator := '.';
+
+  setSystemTrap(dummySystemTrap);
+  setExternalTrap(dummyExternalTrap);
 
   codeCache := GHashTable.Create(1024);
 end.

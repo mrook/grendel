@@ -10,8 +10,11 @@ uses YaccLib, LexLib, SysUtils, Classes, Strip, Windows;
 
 
 const
-	CONV_INT_STRING = 1;
-	CONV_BOOL_STRING = 2;
+  CONV_INT_FLOAT = 1;
+  CONV_FLOAT_INT = 2;
+	CONV_INT_STRING = 3;
+	CONV_BOOL_STRING = 4;
+	CONV_FLOAT_STRING = 5;
 
 
 type 	Root = class
@@ -26,8 +29,12 @@ type 	Root = class
 			end;
 	
 
-			Expr_Const = class(Expr)
+			Expr_ConstInt = class(Expr)
 				value : Integer;
+			end;
+
+			Expr_ConstFloat = class(Expr)
+				value : Single;
 			end;
 
       Expr_String = class(Expr)
@@ -142,7 +149,6 @@ var
 		curFunction : string;
     varType : integer;
     environment : TList;
-		noErrors : boolean;
 
 
 procedure startCompiler(root : Expr); forward;
@@ -155,7 +161,8 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 
 %token IDENTIFIER
 %token LINE
-%token <Integer> NUM       /* constants */
+%token <Integer> INT       /* constants */
+%token <Single> FLOAT      /* constants */
 %type <Expr> expr
 %type <Expr> stop_statement
 %type <Expr> function_definition
@@ -307,7 +314,8 @@ expr 	:  { $$ := nil; }
 			|  '(' expr ')'		 	{ $$ := $2; }
 			|  '-' expr        	{ $$ := Expr_Neg.Create; $$.lineNum := yyLineNum; Expr_Neg($$).ex := $2; }
          %prec UMINUS
-			|  NUM             	{ $$ := Expr_Const.Create; $$.lineNum := yyLineNum; Expr_Const($$).value := $1; }
+			|  INT             	{ $$ := Expr_ConstInt.Create; $$.lineNum := yyLineNum; Expr_ConstInt($$).value := $1; }
+			|  FLOAT           	{ $$ := Expr_ConstFloat.Create; $$.lineNum := yyLineNum; Expr_ConstFloat($$).value := $1; }
       |  '\"' LINE '\"'		{ $$ := Expr_String.Create; $$.lineNum := yyLineNum; Expr_String($$).value := varName; }
 		  |  varname '=' expr { if ($1 <> nil) then
 															begin
@@ -402,6 +410,8 @@ function typeBoolExpr(expr : BoolExpr) : BoolExpr; forward;
 procedure showExpr(expr : Expr); forward;
 procedure showBoolExpr(expr : BoolExpr); forward;
 
+function typeToString(typ : integer) : string; forward;
+
 
 procedure emit(line : string);
 begin
@@ -412,7 +422,7 @@ procedure compilerError(lineNum : integer; msg : string);
 begin
   writeln('error (line ', lineNum, '): ', msg);
  
-  noErrors := false;
+  yyerrors := true;
 end;
 
 procedure addEnvironment(lineNum : integer; id : string; typ, lbl : integer);
@@ -513,10 +523,30 @@ begin
   end;
 end;
 
-function coerse(expr : Expr; src, dest: integer) : Expr;
+function coerce(expr : Expr; src, dest: integer) : Expr;
 var
 	cn : Expr_Conv;
 begin
+  if (src = _INT) and (dest = _FLOAT) then
+    begin
+    cn := Expr_Conv.Create;
+		cn.ex := expr;
+		cn.cnv := CONV_INT_FLOAT;
+		cn.originaltyp := src;
+
+		Result := cn;
+    end
+  else
+  if (src = _FLOAT) and (dest = _INT) then
+    begin
+    cn := Expr_Conv.Create;
+		cn.ex := expr;
+		cn.cnv := CONV_FLOAT_INT;
+		cn.originaltyp := src;
+
+		Result := cn;
+    end
+  else
   if (src = _INT) and (dest = _STRING) then
     begin
     cn := Expr_Conv.Create;
@@ -532,6 +562,16 @@ begin
     cn := Expr_Conv.Create;
 		cn.ex := expr;
 		cn.cnv := CONV_BOOL_STRING;
+		cn.originaltyp := src;
+
+		Result := cn;
+    end
+  else
+  if (src = _FLOAT) and (dest = _STRING) then
+    begin
+    cn := Expr_Conv.Create;
+		cn.ex := expr;
+		cn.cnv := CONV_FLOAT_STRING;
 		cn.originaltyp := src;
 
 		Result := cn;
@@ -620,13 +660,16 @@ begin
 		t2 := Expr_Op(expr).re.typ;
 
     if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
-      Expr_Op(expr).re := coerse(Expr_Op(expr).re, t2, t1);
+      Expr_Op(expr).re := coerce(Expr_Op(expr).re, t2, t1);
 
     expr.typ := t1;
     end
   else
   if (expr is Expr_Func) then
     begin
+    Expr_Func(expr).init := typeExpr(Expr_Func(expr).init);
+    Expr_Func(expr).body := typeExpr(Expr_Func(expr).body);
+
 		t1 := lookupEnv(Expr_Func(expr).id);
    
     if (t1 <> -1) then
@@ -645,8 +688,11 @@ begin
 	    expr.typ := _VOID;
 		end
   else
-  if (expr is Expr_Const) then
+  if (expr is Expr_ConstInt) then
     expr.typ := _INT
+  else
+  if (expr is Expr_ConstFloat) then
+    expr.typ := _FLOAT
   else
   if (expr is Expr_External) then
     expr.typ := _EXTERNAL
@@ -702,8 +748,8 @@ begin
 		t1 := Expr_Assign(expr).id.typ;
 		t2 := Expr_Assign(expr).ex.typ;
 
-    if (t1 <> t2) and (t1 <> _EXTERNAL) then
-			compilerError(expr.lineNum, 'boe');
+    if (t1 <> t2) and (t1 <> _EXTERNAL) and (t2 <> _EXTERNAL) then
+      Expr_Assign(expr).ex := coerce(Expr_Assign(expr).ex, t2, t1);
 
 		expr.typ := _VOID;
     end
@@ -788,8 +834,11 @@ begin
     end;
     end
   else
-  if (expr is Expr_Const) then
-    emit('PUSHI ' + IntToStr(Expr_Const(expr).value))
+  if (expr is Expr_ConstInt) then
+    emit('PUSHI ' + IntToStr(Expr_ConstInt(expr).value))
+  else
+  if (expr is Expr_ConstFloat) then
+    emit('PUSHF ' + FloatToStr(Expr_ConstFloat(expr).value))
   else
   if (expr is Expr_Commandline) then
     emit('GETC')
@@ -899,8 +948,11 @@ begin
     showExpr(Expr_Conv(expr).ex);
 
 		case Expr_Conv(expr).cnv of
+			CONV_INT_FLOAT : emit('ITOF');
+			CONV_FLOAT_INT : emit('FTOI');
 			CONV_INT_STRING : emit('ITOS');
 			CONV_BOOL_STRING : emit('BTOS');
+			CONV_FLOAT_STRING : emit('FTOS');
     end;
     end;
 end;
@@ -909,7 +961,7 @@ procedure startCompiler(root : Expr);
 begin
   root := typeExpr(root);
 
-  if (noErrors) then
+  if (not yyerrors) then
     begin
 	  emit('$DATA ' + IntToStr(curDispl) + #13#10);
     showExpr(root); 
@@ -926,6 +978,7 @@ var
   ex : DWORD;
 
 begin
+  DecimalSeparator := '.';
   writeln('GMCC - Grendel MudC compiler v0.2'#13#10);
 
   if (paramcount < 1) then
@@ -965,7 +1018,6 @@ begin
   curDispl := 0;
   labelNum := 0;
   yylineNum := 1;
-  noErrors := true;
 
   start(INITIAL);
 
@@ -973,12 +1025,15 @@ begin
 
   closefile(output);
 
-  FillChar(SI, SizeOf(SI), 0);
-  SI.cb := SizeOf(SI);
+  if (not yyerrors) then
+    begin
+	  FillChar(SI, SizeOf(SI), 0);
+	  SI.cb := SizeOf(SI);
 
-  CreateProcess(nil, PChar('gasm ' + ofname), nil, nil, false, NORMAL_PRIORITY_CLASS, nil, nil, SI, PI);
+	  CreateProcess(nil, PChar('gasm ' + ofname), nil, nil, false, NORMAL_PRIORITY_CLASS, nil, nil, SI, PI);
 
-  repeat
-    GetExitCodeProcess(PI.hProcess, ex);
-  until (ex <> STILL_ACTIVE);
+	  repeat
+	    GetExitCodeProcess(PI.hProcess, ex);
+	  until (ex <> STILL_ACTIVE);
+    end;
 end.

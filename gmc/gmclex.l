@@ -62,11 +62,20 @@ ALL					{ALPHANUM}|{DIGIT}|{BOOLOP}|{RESERV}|{EXTRA}|{SEP}
 
   var result : integer;
 
-<INITIAL>{DIGITS}(\.{DIGITS})?([Ee][+-]?{DIGITS})?	begin
+<INITIAL>{DIGITS}														begin
 																					  val(yytext, yylval.yyInteger, result);
 
 																						if (result = 0) then
-				  															      return(NUM)
+				  															      return(INT)
+																						else
+																							return(ILLEGAL);
+																						end;
+
+<INITIAL>{DIGITS}"."{DIGITS}								begin
+																					  val(yytext, yylval.yySingle, result);
+
+																						if (result = 0) then
+				  															      return(FLOAT)
 																						else
 																							return(ILLEGAL);
 																						end;

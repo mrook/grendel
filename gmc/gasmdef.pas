@@ -34,17 +34,21 @@ const
   _RET = $A4;
 
 	_PUSHI = $B0;
-	_PUSHR = $B1;
+  _PUSHF = $B1;
 	_PUSHS = $B2;
+	_PUSHR = $B3;
 
 	_POPR = $C0;
   _GET = $C1;
   _GETR = $C2;
 
-	_ITOS = $D0;
-	_BTOS = $D1;
+  _ITOF = $D0;
+  _FTOI = $D1;
+	_ITOS = $D2;
+	_BTOS = $D3;
+	_FTOS = $D4;
 
-  opcodeNum = 28;
+  opcodeNum = 32;
 	
 	opcodes : array[1..opcodeNum] of opcode_trans = (
                                                 (keyword:'NOP'; opcode:_NOP),
@@ -72,15 +76,19 @@ const
                                                 (keyword:'RET'; opcode:_RET),
 
 																								(keyword:'PUSHI'; opcode:_PUSHI),
-																								(keyword:'PUSHR'; opcode:_PUSHR),
+																								(keyword:'PUSHF'; opcode:_PUSHF),
 																								(keyword:'PUSHS'; opcode:_PUSHS),
+																								(keyword:'PUSHR'; opcode:_PUSHR),
 
 																								(keyword:'POPR'; opcode:_POPR),
                                                 (keyword:'GET'; opcode:_GET),
                                                 (keyword:'GETR'; opcode:_GETR),
 
+																								(keyword:'ITOF'; opcode:_ITOF),
+																								(keyword:'FTOI'; opcode:_FTOI),
 																								(keyword:'ITOS'; opcode:_ITOS),
-																								(keyword:'BTOS'; opcode:_BTOS)
+																								(keyword:'BTOS'; opcode:_BTOS),
+																								(keyword:'FTOS'; opcode:_FTOS)
                                                 );
 
 
