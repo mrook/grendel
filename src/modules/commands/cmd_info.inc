@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.3 2004/02/01 12:06:33 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.4 2004/03/11 17:18:47 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -666,7 +666,7 @@ begin
     begin
     conn := GPlayerConnection(iterator.next());
     
-    if (conn.state in [CON_PLAYING,CON_EDITING,CON_EDIT_HANDLE]) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
+    if (conn.isPlaying() or conn.isEditing()) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
       begin
       if not(specarg) or
         isName(conn.ch.race.name, arg) or

@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.11 2004/03/10 21:49:18 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.12 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -30,18 +30,6 @@ uses
 	console,
 	mudsystem;
 	
-
-const
-	IAC_COMPRESS = 85;		// MCCP v1
-	IAC_COMPRESS2 = 86;		// MCCP v2
-	IAC_SE = 240;
-	IAC_SB = 250;
-	IAC_WILL = 251;
-	IAC_WONT = 252;
-	IAC_DO = 253;
-	IAC_DONT = 254;
-	IAC_IAC = 255;
-
 
 type
 	GConnection = class;
@@ -85,7 +73,7 @@ type
 		FOnOutput : GConnectionOutputEvent;
       
 	protected
-    		procedure Execute(); override;
+		procedure Execute(); override;
 
 		procedure sendIAC(option : byte; const params : array of byte);
 		
@@ -111,30 +99,45 @@ type
 	published
 		property socket : GSocket read _socket;
 
-    		property idle : integer read _idle write _idle;
+		property idle : integer read _idle;
+		property last_update : TDateTime read _lastupdate;
 
-	    	property last_update : TDateTime read _lastupdate;
-    	
-    		property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
-	    	property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
-	    	property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
-	    	property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
-	    	property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
-    	
-	    	property useCompress : boolean read compress;
+		property OnOpen : GConnectionOpenEvent read FOnOpen write FOnOpen;
+		property OnClose : GConnectionCloseEvent read FOnClose write FOnClose;
+		property OnTick : GConnectionTickEvent read FOnTick write FOnTick;
+		property OnInput : GConnectionInputEvent read FOnInput write FOnInput;
+		property OnOutput : GConnectionOutputEvent read FOnOutput write FOnOutput;
+
+		property useCompress : boolean read compress;
 	end;
+
 
 var
 	connection_list : GDLinkedList;
 
+
 procedure initConns();
 procedure cleanupConns();
 
+
 implementation
+
 
 uses
 	player,
 	commands;
+
+
+const
+	IAC_COMPRESS = 85;		// MCCP v1
+	IAC_COMPRESS2 = 86;		// MCCP v2
+	IAC_SE = 240;
+	IAC_SB = 250;
+	IAC_WILL = 251;
+	IAC_WONT = 252;
+	IAC_DO = 253;
+	IAC_DONT = 254;
+	IAC_IAC = 255;
 
 
 // GConnection
@@ -292,7 +295,7 @@ begin
 			end;
   end;
   
-  idle := 0;
+  _idle := 0;
 
   repeat
 	if (not _socket.canRead()) then

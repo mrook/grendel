@@ -2,7 +2,7 @@
   Summary:
     Constants
     
-  ## $Id: constants.pas,v 1.8 2004/03/10 21:56:28 ***REMOVED*** Exp $
+  ## $Id: constants.pas,v 1.9 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 unit constants;
@@ -372,31 +372,6 @@ const CPULSE_PER_SEC = 4;
       IDLE_PLAYING = 3600;                          // disconnect after 15 mins when playing
       IDLE_AFK = 7200;                              // disconnect after 30 mins when AFK 
       IDLE_LINKDEAD = 300 / CPULSE_GAMEHOUR;        // quit ld chars after 15 mins
-
-{ Player states }
-const CON_PLAYING=0;
-      CON_ACCEPTED=1;
-      CON_NAME=2;
-      CON_PASSWORD=3;
-      CON_NEW_NAME=4;
-      CON_NEW_PASSWORD=5;
-      CON_NEW_SEX=6;
-      CON_NEW_RACE=7;
-      CON_NEW_STATS=8;
-      CON_PRESS_ENTER=9;
-      CON_MOTD=10;
-      CON_EDITING=11;
-      CON_LOGGED_OUT=12;
-      CON_CHECK_PASSWORD=13;
-      CON_EDIT_HANDLE=14;
-      CON_MAX=14;
-
-      con_states:array[CON_PLAYING..CON_MAX] of string =(
-                'CON_PLAYING','CON_ACCEPTED','CON_NAME',
-                'CON_PASSWORD','CON_NEW_NAME','CON_NEW_PASSWORD',
-                'CON_NEW_SEX','CON_NEW_RACE','CON_NEW_STATS',
-                'CON_PRESS_ENTER','CON_MOTD','CON_EDITING',
-                'CON_LOGGED_OUT','CON_CHECK_PASSWORD','CON_EDIT_HANDLE');
 
 { Bulletinboards - Nemesis }
 const BOARD1     = 1;

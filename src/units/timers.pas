@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.6 2004/03/08 23:30:07 hemko Exp $
+  ## $Id: timers.pas,v 1.7 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -368,24 +368,7 @@ begin
     begin
     conn := GPlayerConnection(iterator.next());
 
-    conn.idle := conn.idle + 1;
-
-    if ((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
-       ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
-       ((conn.idle > IDLE_PLAYING) and (conn.ch <> nil) and (not conn.ch.afk) and (not conn.ch.IS_IMMORT)) or
-       ((conn.idle > IDLE_AFK) and (conn.ch.afk)) then
-       begin
-       conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
-       conn.Terminate();
-
-       continue;
-       end;
-
-    if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
-      conn.ch.emptyBuffer();
-
-    if (conn.state = CON_PLAYING) and (conn.ch.wait > 0) then
-      dec(conn.ch.wait);
+		conn.pulse();
     end;
     
   iterator.Free();

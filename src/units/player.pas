@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.16 2004/03/10 21:49:42 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.17 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -24,13 +24,19 @@ const
 	PLAYER_FIELDS_HASHSIZE = 256;		{ estimated size of hash table for dynamic fields }
 	PLAYER_MAX_QUEUESIZE = 16;			{ max size of command queue (per client) }
 
+
 {$M+}
 type
+	{ The various states of GPlayerConnection}
+	GPlayerConnectionStates = (	CON_STATE_PLAYING, CON_STATE_ACCEPTED, CON_STATE_NAME, CON_STATE_PASSWORD, 
+												CON_STATE_NEW_NAME, CON_STATE_NEW_PASSWORD, CON_STATE_NEW_RACE, CON_STATE_NEW_SEX,
+												CON_STATE_NEW_STATS, CON_STATE_PRESS_ENTER, CON_STATE_MOTD, CON_STATE_EDITING, 
+												CON_STATE_LOGGED_OUT,	CON_STATE_CHECK_PASSWORD );
+
 	GPlayer = class;
 
 	GPlayerConnection = class(GConnection)
 	protected
-		_state : integer;
 		_ch : GPlayer;
 		
 		_pagepoint : integer;
@@ -39,6 +45,8 @@ type
 		fcommand : boolean;
 		copyover : boolean;
 		copyover_name : string;
+
+		state : GPlayerConnectionStates;
 
 		commandQueue : TStringList;
 
@@ -62,10 +70,18 @@ type
 
 		function findDualConnection(const name: string) : GPlayer;
 		procedure nanny(argument : string);
+		
+		function isPlaying() : boolean;
+		function isEditing() : boolean;
+		
+		procedure startEditing();
+		procedure stopEditing();
+		
+		procedure pulse();
+		
+		function stateAsString() : string;
 
 	published
-		property state : integer read _state write _state;
-
 		property pagepoint : integer read _pagepoint write _pagepoint;
 
 		property ch: GPlayer read _ch write _ch;
@@ -217,7 +233,6 @@ type
 var
 	fieldList : GHashTable;
 
-
 procedure registerField(field : GPlayerField);
 procedure unregisterField(const name : string);
 
@@ -264,7 +279,17 @@ uses
 	Channels;
 	
 
-// GPlayerConnection
+{ Array with symbolic names for connection states }
+var
+	con_states : array[CON_STATE_PLAYING..CON_STATE_CHECK_PASSWORD ] of string = (
+							'CON_STATE_PLAYING', 'CON_STATE_ACCEPTED', 'CON_STATE_NAME',
+							'CON_STATE_PASSWORD', 'CON_STATE_NEW_NAME', 'CON_STATE_NEW_PASSWORD',
+							'CON_STATE_NEW_SEX', 'CON_STATE_NEW_RACE', 'CON_STATE_NEW_STATS',
+							'CON_STATE_PRESS_ENTER', 'CON_STATE_MOTD', 'CON_STATE_EDITING',
+							'CON_STATE_LOGGED_OUT', 'CON_STATE_CHECK_PASSWORD');
+
+
+{ GPlayerConnection constructor }
 constructor GPlayerConnection.Create(socket : GSocket; from_copyover : boolean = false; const copyover_name : string = '');
 begin
 	inherited Create(socket);
@@ -275,7 +300,7 @@ begin
 	FOnInput := OnInputEvent;
 	FOnOutput := OnOutputEvent;
 	
-	state := CON_NAME;
+	state := CON_STATE_NAME;
 	
 	ch := GPlayer.Create(Self);
 
@@ -289,13 +314,37 @@ begin
 	Resume();
 end;
 
+{ Fired by timer 4 times per second }
+procedure GPlayerConnection.pulse();
+begin
+	inc(_idle);
+	
+	if ((state = CON_STATE_NAME) and (idle > IDLE_NAME)) or
+		((state <> CON_STATE_PLAYING) and (idle > IDLE_NOT_PLAYING)) or
+		((idle > IDLE_PLAYING) and (ch <> nil) and (not ch.afk) and (not ch.IS_IMMORT)) or
+		((idle > IDLE_AFK) and (ch.afk)) then
+		begin
+		send(#13#10'You have been idle too long. Disconnecting.'#13#10);
+		Terminate();
+
+		exit;
+		end;
+
+	if (state = CON_STATE_PLAYING) and (not ch.in_command) then
+		ch.emptyBuffer();
+
+	if (state = CON_STATE_PLAYING) and (ch.wait > 0) then
+		dec(ch.wait);
+end;
+
+{ Event handler for OnOpen }
 procedure GPlayerConnection.OnOpenEvent();
 var
   temp_buf : string;
 begin
   if (not copyover) then
     begin
-    state := CON_NAME;
+    state := CON_STATE_NAME;
 
     send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
 
@@ -311,7 +360,7 @@ begin
     end
   else
   	begin
-    state := CON_MOTD;
+    state := CON_STATE_MOTD;
     
     ch.setName(copyover_name);
     ch.load(copyover_name);
@@ -322,12 +371,13 @@ begin
     end;
 end;
 
+{ Event handler for OnClose }
 procedure GPlayerConnection.OnCloseEvent();
 begin
-	if (state = CON_LOGGED_OUT) then
+	if (state = CON_STATE_LOGGED_OUT) then
 		dec(system_info.user_cur)
 	else
-	if (not ch.CHAR_DIED) and ((state = CON_PLAYING) or (state = CON_EDITING)) then
+	if (not ch.CHAR_DIED) and ((state = CON_STATE_PLAYING) or (state = CON_STATE_EDITING)) then
 		begin
 		writeConsole('(' + IntToStr(socket.getDescriptor) + ') ' + ch.name + ' has lost the link');
 
@@ -346,6 +396,7 @@ begin
 		end;
 end;
 
+{ Event handler for OnTick }
 procedure GPlayerConnection.OnTickEvent();
 begin
 	if (fcommand) then
@@ -361,6 +412,7 @@ begin
 	emptyCommandQueue();
 end;
 
+{ Event handler for OnInput }
 procedure GPlayerConnection.OnInputEvent();
 var
 	cmdline : string;
@@ -384,26 +436,26 @@ begin
 		setPagerInput(cmdline)
 	else
 		case state of
-			CON_PLAYING: 	begin
-										if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
-											begin
-											ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
-											ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
-											exit;
-											end;
+			CON_STATE_PLAYING: 	begin
+													if (IS_SET(ch.flags,PLR_FROZEN)) and (cmdline <> 'quit') then
+														begin
+														ch.sendBuffer('You have been frozen by the gods and cannot do anything.'#13#10);
+														ch.sendBuffer('To be unfrozen, send an e-mail to the administration, '+system_info.admin_email+'.'#13#10);
+														exit;
+													end;
 										
-										if (not checkAliases(cmdline)) then
-												addCommandQueue(cmdline);												
+													if (not checkAliases(cmdline)) then
+														addCommandQueue(cmdline);												
 
-										emptyCommandQueue();
-										end;
-			CON_EDIT_HANDLE: ch.editBuffer(cmdline);
-			CON_EDITING: ch.editBuffer(cmdline);
+													emptyCommandQueue();
+													end;
+			CON_STATE_EDITING: ch.editBuffer(cmdline);
 			else
 				nanny(cmdline);
 		end;
 end;
 
+{ Find aliases matching 'line' }
 function GPlayerConnection.checkAliases(line : string) : boolean;
 var
 	iterator : GIterator;
@@ -444,6 +496,12 @@ begin
 	iterator.Free();
 end;
 
+{ Event handler for OnOutput }
+procedure GPlayerConnection.OnOutputEvent();
+begin
+	ch.sendPrompt();
+end;
+
 { Flush all lines from the command queue }
 procedure GPlayerConnection.clearCommandQueue();
 begin
@@ -482,12 +540,37 @@ begin
 		end;
 end;
 
-procedure GPlayerConnection.OnOutputEvent();
+{ Returns true if connection has state CON_STATE_PLAYING }
+function GPlayerConnection.isPlaying() : boolean;
 begin
-	ch.sendPrompt();
+	Result := (state = CON_STATE_PLAYING);
 end;
 
-//jago : new func for finding if a new connection is from an already connected player
+{ Returns true if connection has state CON_STATE_EDITING }
+function GPlayerConnection.isEditing() : boolean;
+begin
+	Result := (state = CON_STATE_EDITING);
+end;
+
+{ Sets the state to CON_STATE_EDITING }
+procedure GPlayerConnection.startEditing();
+begin
+	state := CON_STATE_EDITING;
+end;
+
+{ Sets the state to CON_STATE_PLAYING }
+procedure GPlayerConnection.stopEditing();
+begin
+	state := CON_STATE_PLAYING;
+end;
+
+{ Returns a text version of the state of the connection }
+function GPlayerConnection.stateAsString() : string;
+begin
+	Result := con_states[state];
+end;
+
+{ Find out wether 'name' is already connected }
 function GPlayerConnection.findDualConnection(const name: string): GPlayer;
 var
   iterator : GIterator;
@@ -522,7 +605,7 @@ var
 	buf, pwd : string;
 begin
   case state of
-        CON_NAME: begin
+        CON_STATE_NAME: begin
                   pwd := one_argument(argument, argument);
                   
                   if (length(argument) = 0) then
@@ -542,7 +625,7 @@ begin
                     else
                     begin
                       send(#13#10'By what name do you wish to be known? ');
-                      state := CON_NEW_NAME;
+                      state := CON_STATE_NEW_NAME;
                       exit;
                     end;
                     end;
@@ -572,7 +655,7 @@ begin
                       vict.conn := Self;
                       ch := vict;
                       REMOVE_BIT(ch.flags,PLR_LINKLESS);
-                      state := CON_PLAYING;
+                      state := CON_STATE_PLAYING;
                       ch.sendPrompt();
                       end;
 
@@ -585,10 +668,10 @@ begin
                     exit;
                     end;
 
-                  state:=CON_PASSWORD;
+                  state := CON_STATE_PASSWORD;
                   send('Password: ');
                   end;
-    CON_PASSWORD: begin
+    CON_STATE_PASSWORD: begin
                   if (length(argument) = 0) then
                     begin
                     send('Password: ');
@@ -623,7 +706,7 @@ begin
                     writeConsole('(' + inttostr(socket.getDescriptor) + ') ' + ch.name + ' has reconnected');
 
                     ch.sendPrompt();
-                    state := CON_PLAYING;
+                    state := CON_STATE_PLAYING;
                     exit;
                     end;
 
@@ -633,9 +716,9 @@ begin
                     send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
 
                   send('Press Enter.'#13#10);
-                  state := CON_MOTD;
+                  state := CON_STATE_MOTD;
                   end;
-        CON_MOTD: begin
+        CON_STATE_MOTD: begin
                   send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name + ', to this MUD. May your stay be pleasant.'#13#10);
 
                   with system_info do
@@ -658,12 +741,12 @@ begin
                   else
                     ch.sendPrompt();
 
-                  state := CON_PLAYING;
+                  state := CON_STATE_PLAYING;
                   fcommand := true;
                  
                   raiseEvent('char-login', ch);
                   end;
-    CON_NEW_NAME: begin
+    CON_STATE_NEW_NAME: begin
                   if (length(argument) = 0) then
                     begin
                     send('By what name do you wish to be known? ');
@@ -694,10 +777,10 @@ begin
                     end;
 
                   ch.setName(cap(argument));
-                  state := CON_NEW_PASSWORD;
+                  state := CON_STATE_NEW_PASSWORD;
                   send(#13#10'Allright, '+ch.name+', choose a password: ');
                   end;
-CON_NEW_PASSWORD: begin
+CON_STATE_NEW_PASSWORD: begin
                   if (length(argument)=0) then
                     begin
                     send('Choose a password: ');
@@ -705,10 +788,10 @@ CON_NEW_PASSWORD: begin
                     end;
 
                   ch.md5_password := MD5String(argument);
-                  state := CON_CHECK_PASSWORD;
+                  state := CON_STATE_CHECK_PASSWORD;
                   send(#13#10'Please retype your password: ');
                   end;
-CON_CHECK_PASSWORD: begin
+CON_STATE_CHECK_PASSWORD: begin
                     if (length(argument) = 0) then
                       begin
                       send('Please retype your password: ');
@@ -718,17 +801,17 @@ CON_CHECK_PASSWORD: begin
                     if (not MD5Match(MD5String(argument), ch.md5_password)) then
                       begin
                       send(#13#10'Password did not match!'#13#10'Choose a password: ');
-                      state := CON_NEW_PASSWORD;
+                      state := CON_STATE_NEW_PASSWORD;
                       exit;
                       end
                     else
                       begin
-                      state := CON_NEW_SEX;
+                      state := CON_STATE_NEW_SEX;
                       send(#13#10'What sex do you wish to be (M/F/N): ');
                       exit;
                       end;
                     end;
-     CON_NEW_SEX: begin
+     CON_STATE_NEW_SEX: begin
                   if (length(argument) = 0) then
                     begin
                     send('Choose a sex (M/F/N): ');
@@ -747,7 +830,7 @@ CON_CHECK_PASSWORD: begin
                     end;
                   end;
 
-                  state:=CON_NEW_RACE;
+                  state := CON_STATE_NEW_RACE;
                   send(#13#10'Available races: '#13#10#13#10);
 
                   h:=1;
@@ -773,7 +856,7 @@ CON_CHECK_PASSWORD: begin
 
                   send(#13#10'Choose a race: ');
                   end;
-    CON_NEW_RACE: begin
+    CON_STATE_NEW_RACE: begin
                   if (length(argument)=0) then
                     begin
                     send(#13#10'Choose a race: ');
@@ -834,7 +917,7 @@ CON_CHECK_PASSWORD: begin
                     exit;
                     end;
 
-                  ch.race:=race;
+                  ch.race := race;
                   send(race.description);
                   send('250 stat points will be randomly distributed over your five attributes.'#13#10);
                   send('It is impossible to get a lower or a higher total of stat points.'#13#10);
@@ -919,9 +1002,9 @@ CON_CHECK_PASSWORD: begin
                   send(buf);
 
                   send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
-                  state:=CON_NEW_STATS;
+                  state := CON_STATE_NEW_STATS;
                   end;
-   CON_NEW_STATS: begin
+   CON_STATE_NEW_STATS: begin
                   if (length(argument) =0) then
                     begin
                     send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
@@ -946,7 +1029,7 @@ CON_CHECK_PASSWORD: begin
                           send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
 
                         send('Press Enter.'#13#10);
-                        state:=CON_MOTD;
+                        state := CON_STATE_MOTD;
                         end;
                     'R':begin
                         with ch do
@@ -1033,7 +1116,7 @@ CON_CHECK_PASSWORD: begin
                     'S':begin
                         send(#13#10'Very well, restarting.'#13#10);
                         send('By what name do you wish to be known?');
-                        state:=CON_NEW_NAME;
+                        state := CON_STATE_NEW_NAME;
                         end;
                   else
                     send('Do you wish to (C)ontinue, (R)eroll or (S)art over? ');
@@ -1041,7 +1124,7 @@ CON_CHECK_PASSWORD: begin
                  end;
                  end;
     else
-      bugreport('nanny', 'mudthread.pas', 'illegal state ' + inttostr(state));
+      bugreport('nanny', 'mudthread.pas', 'illegal state');
   end;
 end;
 
@@ -1322,7 +1405,7 @@ begin
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
     begin
-    conn.state := CON_LOGGED_OUT;
+    conn.state := CON_STATE_LOGGED_OUT;
 
     try
       conn.Terminate();
@@ -1442,7 +1525,7 @@ end;
 // Player is editing (writing a note)
 function GPlayer.IS_EDITING : boolean;
 begin
-  IS_EDITING := conn.state = CON_EDITING;
+  IS_EDITING := (conn.isEditing());
 end;
 
 // Player is drunk
@@ -2502,10 +2585,11 @@ begin
   if (conn = nil) then
     exit;
 
+	conn.startEditing();
+
   if (substate = SUB_SUBJECT) then
     begin
     sendBuffer(ansiColor(7) + #13#10 + 'Subject: ');
-    state := CON_EDITING;
     exit;
     end;
 
@@ -2514,7 +2598,6 @@ begin
 
   edit_buffer := text;
   afk := true;
-  conn.state := CON_EDITING;
 end;
 
 // Return from editing mode
@@ -2525,7 +2608,8 @@ begin
   edit_buffer := '';
   substate := SUB_NONE;
   afk := false;
-  conn.state := CON_PLAYING;
+  
+  conn.stopEditing();
 
   sendBuffer('You are now back at your keyboard.'#13#10);
   act(AT_REPORT,'$n has returned to $s keyboard.',false,Self,nil,nil,to_room);
@@ -2541,7 +2625,7 @@ begin
         edit_buffer := '';
         substate := SUB_NONE;
 
-        conn.state := CON_PLAYING;
+        conn.stopEditing();
         afk := false;
 
         sendBuffer('Note posted.'#13#10);
@@ -2565,7 +2649,7 @@ begin
     SUB_ROOM_DESC :
       begin
         interpret(Self, 'redit');
-        conn.state := CON_PLAYING;
+        conn.stopEditing();
         afk := false;
         edit_buffer := '';
         substate := SUB_NONE;
@@ -2595,79 +2679,46 @@ begin
     exit;
     end;
 
-  if (state = CON_EDIT_HANDLE) then
-    begin
-    if (uppercase(text) = 'A') then
-      begin
-      stopEditing;
-      exit;
-      end;
-
-    if (uppercase(text) = 'V') then
-      begin
-      GConnection(conn).send(ansiColor(7) + 'Current text:' + #13#10);
-      GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
-      GConnection(conn).send(ansiColor(7) + edit_buffer + #13#10);
-      GConnection(conn).send(ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
-      exit;
-      end;
-
-    if (uppercase(text) = 'C') then
-      begin
-      GConnection(conn).send(ansiColor(7) + 'Ok. Continue writing...' + #13#10);
-      GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
-      GConnection(conn).send(ansiColor(7) + edit_buffer);
-      state := CON_EDITING;
-      sendPrompt;
-      exit;
-      end;
-
-    if (uppercase(text) = 'S') then
-      begin
-      sendEdit(edit_buffer);
-      exit;
-      end;
-
-    GConnection(conn).send(#13#10 + ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
-    exit;
-    end;
-
-  if (text = '~') then
-    begin
-    state := CON_EDIT_HANDLE;
-    GConnection(conn).send(#13#10 + ansiColor(7) + '(C)ontinue, (V)iew, (S)end or (A)bort? ');
-    exit;
-    end
-  else
   if (length(text) > 0) and (text[1] = '.') then
-  begin
+	  begin
     text := uppercase(text);
+    
     case text[2] of
       'H' :
-        begin
-          GConnection(conn).send(ansiColor(7) + '.h  this help' + #13#10);
-          GConnection(conn).send(ansiColor(7) + '.c  clear current text' + #13#10);
-          GConnection(conn).send(ansiColor(7) + '.v  see current text' + #13#10);
-        end;
+      	begin
+				GConnection(conn).send(ansiColor(7) + '.h  this help' + #13#10);
+				GConnection(conn).send(ansiColor(7) + '.c  clear current text' + #13#10);
+				GConnection(conn).send(ansiColor(7) + '.v  see current text' + #13#10);
+				GConnection(conn).send(ansiColor(7) + '.w  to write and quit' + #13#10);
+				GConnection(conn).send(ansiColor(7) + '.q  to quit without writing' + #13#10);
+				end;
       'C' :
         begin
-          edit_buffer := '';
-          GConnection(conn).send(ansiColor(7) + 'Ok, buffer cleared.' + #13#10);
+				edit_buffer := '';
+				GConnection(conn).send(ansiColor(7) + 'Ok, buffer cleared.' + #13#10);
         end;
       'V' :
         begin
-          GConnection(conn).send(ansiColor(7) + 'Current text:' + #13#10);
-          GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
-          GConnection(conn).send(ansiColor(7) + edit_buffer + #13#10);
-        end
+				GConnection(conn).send(ansiColor(7) + 'Current text:' + #13#10);
+				GConnection(conn).send(ansiColor(7) + '----------------------------------------------------------------------' + #13#10);
+				GConnection(conn).send(ansiColor(7) + edit_buffer + #13#10);
+        end;
+      'W' :
+      	begin
+	      sendEdit(edit_buffer);
+      	end;
+      'Q' :
+      	begin
+      	stopEditing();
+      	end;
+    
     else
-      begin
         GConnection(conn).send(ansiColor(7) + 'Enter .h on a blank line for help.' + #13#10);
-      end;
     end;
-    sendPrompt;
+    
+    sendPrompt();
     exit;
-  end;
+  	end;
 
   edit_buffer := edit_buffer + text + #13#10;
   GConnection(conn).send(ansiColor(7) + '> ');
@@ -2687,17 +2738,14 @@ var
    s, pr, buf : string;
    t : integer;
 begin
-  if (not IS_NPC) then
-    begin
-    if (state = CON_EDITING) then
-      begin
-      conn.send('> ');
-      exit;
-      end;
+	if (conn.isEditing()) then
+		begin
+		conn.send('> ');
+		exit;
+		end;
 
-    if (conn.pagepoint > 0) then
-     exit;
-    end;
+	if (conn.pagepoint > 0) then
+		exit;
 
   if (prompt = '') then
     pr := '%hhp %mmv %ama (%l)%t%f> '
@@ -2723,15 +2771,9 @@ begin
       exit;
       end;
 
-    if (state = CON_EDITING) then
+    if (conn.isEditing()) then
       begin
       conn.send('> ');
-      exit;
-      end;
-
-    if (state = CON_EDIT_HANDLE) then
-      begin
-      conn.send(' ');
       exit;
       end;
 

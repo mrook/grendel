@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.19 2004/03/08 23:30:07 hemko Exp $
+  ## $Id: area.pas,v 1.20 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -1428,7 +1428,7 @@ begin
     begin
     conn := GPlayerConnection(iterator.next());
 
-    if (conn.state=CON_PLAYING) and (conn.ch.room.area = Self) then
+    if (conn.isPlaying()) and (conn.ch.room.area = Self) then
       begin
       buf := conn.ch.ansiColor(AT_REPORT) + resetmsg + #13#10;
       conn.ch.sendBuffer(buf);
@@ -1869,7 +1869,7 @@ begin
     begin
     conn := GPlayerConnection(iterator.next());
     
-    if (conn.state = CON_PLAYING) and (conn.ch.room.area = Self) and (conn.ch.IS_OUTSIDE) then
+    if (conn.isPlaying()) and (conn.ch.room.area = Self) and (conn.ch.IS_OUTSIDE) then
       begin
       if (length(buf) > 0) and (conn.ch.IS_AWAKE) then
         act(AT_REPORT,buf,false,conn.ch,nil,nil,TO_CHAR);

@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.11 2004/02/27 22:24:20 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.12 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -128,7 +128,7 @@ begin
     begin
     conn := GPlayerConnection(iterator.next());
     
-    if (conn.state = CON_PLAYING) and (not conn.ch.IS_NPC) then
+    if (conn.isPlaying()) and (not conn.ch.IS_NPC) then
       GPlayer(conn.ch).quit
     else
       conn.Terminate();
@@ -288,7 +288,7 @@ begin
     // disable MCCP compression 
     conn.disableCompression();
 
-    if (conn.state = CON_PLAYING) then
+    if (conn.isPlaying()) then
       begin
       stopfighting(conn.ch);
   		conn.ch.emptyBuffer;

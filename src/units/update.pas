@@ -2,7 +2,7 @@
 	Summary:
 		Character update & regeneration routines
 		
-	## $Id: update.pas,v 1.6 2004/03/10 22:10:01 ***REMOVED*** Exp $
+	## $Id: update.pas,v 1.7 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 unit update;
@@ -568,7 +568,7 @@ begin
     if (ch.IS_NPC) then
     	continue;
 
-    if (ch.state = CON_PLAYING) and (GPlayer(ch).bg_status = BG_JOIN)
+    if (GPlayer(ch).conn.isPlaying) and (GPlayer(ch).bg_status = BG_JOIN)
      and (ch.level >= bg_info.lo_range) and (ch.level <= bg_info.hi_range) then
       begin
       act(AT_REPORT,'You are transfered into the arena.',false,ch,nil,nil,TO_CHAR);
@@ -611,7 +611,7 @@ begin
       if (ch.IS_NPC) then
       	continue;
 
-      if (ch.state = CON_PLAYING) and (GPlayer(ch).bg_status = BG_PARTICIPATE) then
+      if (GPlayer(ch).conn.isPlaying()) and (GPlayer(ch).bg_status = BG_PARTICIPATE) then
         begin
         inc(s);
         last := ch;

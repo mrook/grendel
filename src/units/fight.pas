@@ -2,7 +2,7 @@
 	Summary:
 		Damage & experience routines
 	
-	## $Id: fight.pas,v 1.5 2004/03/06 20:18:40 ***REMOVED*** Exp $
+	## $Id: fight.pas,v 1.6 2004/03/11 17:18:47 ***REMOVED*** Exp $
 }
 
 unit fight;
@@ -1017,7 +1017,7 @@ begin
     begin
     conn := GPlayerConnection(iter_world.next());
 
-    if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
+    if (conn.isPlaying()) and (not conn.ch.in_command) then
       conn.ch.emptyBuffer();
     end;  
 

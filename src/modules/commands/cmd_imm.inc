@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.10 2004/03/08 21:03:45 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.11 2004/03/11 17:18:47 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -654,7 +654,7 @@ begin
       s := '-';
 
     act(AT_REPORT,'$7($B$7' + pad_integer_front(conn.socket.getDescriptor,3) + '$A$7) '+
-        pad_string(con_states[conn.state], 16) + '   ' +
+        pad_string(conn.stateAsString(), 16) + '   ' +
         pad_string(conn.socket.ipString, 32) + '   ' +
         s,false,ch,nil,nil,TO_CHAR);
     end;
