@@ -1,4 +1,4 @@
-// $Id: constants.pas,v 1.28 2001/04/22 21:33:12 xenon Exp $
+// $Id: constants.pas,v 1.29 2001/04/26 21:26:15 xenon Exp $
 
 unit constants;
 
@@ -458,21 +458,16 @@ const AT_BLACK=0;
       AT_WHITE=15;
       AT_BLINK=16;
 
-      AT_AUCTION=AT_PINK;
-      AT_CHAT=AT_YELLOW;
       AT_CORPSE=AT_DRED;
       AT_ECHO=AT_YELLOW;
       AT_FIGHT=AT_WHITE;
       AT_FIGHT_HIT=AT_CYAN;
       AT_FIGHT_YOU=AT_PINK;
-      AT_IMMTALK=AT_GREEN;
       AT_KILLED=AT_WHITE;
-      AT_LOG=AT_YELLOW;
       AT_NPC=AT_CYAN;
       AT_OBJ=AT_DCYAN;
       AT_PC=AT_PINK;
       AT_PRAY=AT_PINK;
-      AT_RAID=AT_RED;
       AT_REPORT=AT_GREY;
       AT_SAY=AT_WHITE;
       AT_SLAY=AT_RED;
@@ -480,22 +475,25 @@ const AT_BLACK=0;
       AT_SPELL=AT_BROWN;
       AT_SUGGEST=AT_CYAN;
       AT_TELL=AT_DGREEN;
-      AT_THUNDER=AT_DCYAN;
-      AT_YELL=AT_RED;
-      AT_BABBEL=AT_DGREEN;
 
-{ channels }
-const CHANNEL_CHAT=1;
-      CHANNEL_RAID=2;
-      CHANNEL_AUCTION=3;
-      CHANNEL_IMMTALK=4;
-      CHANNEL_CLAN=5;
-      CHANNEL_YELL=6;
-      CHANNEL_LOG=7;
-      CHANNEL_ALL=8;
-      CHANNEL_THUNDER=9;
-      CHANNEL_BABBEL=10;          { dutch only channel ;) }
+      AT_LOG=AT_YELLOW;
 
+// these values MUST correspond with the ChannelData Name fields in system\channels.xml
+const
+    CHANNEL_LOG = 'LOG';
+    CHANNEL_ALL = 'ALL';
+    CHANNEL_CHAT = 'CHAT';
+    CHANNEL_IMMTALK = 'IMMTALK';
+    CHANNEL_RAID = 'WARTALK';
+    CHANNEL_AUCTION = 'AUCTALK';
+    CHANNEL_CLAN = 'CLANTALK';
+    CHANNEL_BABBEL = 'BABBEL';          { dutch only channel ;) }
+    CHANNEL_THUNDER = 'THUNDER';
+    CHANNEL_YELL = 'YELL';
+    CHANNEL_GROUP = 'GROUPTELL';
+
+    CHANNEL_HISTORY_MAX = 20; // max. lines in channel history
+     
 { battleground status }
 const BG_NOJOIN=0;              { ch will not join bg on start }
       BG_JOIN=1;                { ch will join bg on start }
