@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.5 2001/04/16 17:24:28 xenon Exp $
+// $Id: magic.pas,v 1.6 2001/04/20 20:09:30 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -252,6 +252,8 @@ var
    node : GListNode;
    aff : GAffect;
 begin
+  removeAffectSkill(ch, sn);
+  
   node := sn.affects.head;
 
   while (node <> nil) do
