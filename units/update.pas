@@ -329,20 +329,7 @@ begin
           r := findRoom(e.vnum);
 
           if (r <> nil) and not (IS_SET(ch.act_flags, ACT_STAY_AREA) and (r.area <> ch.room.area)) then
-            begin
             interpret(ch, headings[p]);
-
-            if (ch.hunting <> nil) and (ch.hunting.room = ch.room) then
-              interpret(ch, 'kill '+ch.hunting.name);
-
-            if (IS_SET(ch.act_flags, ACT_AGGRESSIVE)) then
-              begin
-              vict := ch.room.findRandomChar;
-
-              if (vict <> nil) then
-                interpret(ch, 'kill '+vict.name);
-              end;
-            end;
           end;
         end;
 
@@ -698,80 +685,84 @@ var obj : Gobject;
     at_temp : integer;
     node, node_prev : GListNode;
 begin
-  node := object_list.tail;
+  try
+    node := object_list.tail;
 
-  while (node <> nil) do
-    begin
-    node_prev := node.prev;
-
-    if (node_prev <> nil) and (node_prev.next <> node) then
+    while (node <> nil) do
       begin
-      bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil',
-                'The object list was linked incorrectly and could not be fixed.');
-      exit;
-      end;
+      node_prev := node.prev;
 
-    obj := node.element;
-
-    if (IS_SET(obj.flags, OBJ_NODECAY)) then
-      begin
-      node := node_prev;
-      continue;
-      end;
-
-    if (obj.timer <= 0) then
-      begin
-      node := node_prev;
-      continue;
-      end;
-
-    dec(obj.timer);
-    if (obj.timer > 0) then
-      begin
-      node := node_prev;
-      continue;
-      end;
-
-    case obj.item_type of
-      ITEM_CORPSE : begin
-                    msg := '$p decays into dust and blows away.';
-                    at_temp := AT_CORPSE;
-                    end;
-       ITEM_BLOOD : begin
-                    msg := '$p dries up.';
-                    at_temp := AT_RED;
-                    end;
-        ITEM_FOOD : begin
-                    msg := '$p slowly rots away, leaving a foul stench.';
-                    at_temp := AT_REPORT;
-                    end;
-      else
-         begin
-         msg := '$p vanishes in the wink of an eye.';
-         at_temp := AT_REPORT;
-         end;
-    end;
-
-    if (obj.carried_by <> nil) then
-      act(at_temp, msg, false, obj.carried_by, obj, nil, TO_CHAR)
-    else
-    if (obj.room <> nil) then
-      begin
-      if (obj.room.chars.head <> nil) then
-        rch := obj.room.chars.head.element
-      else
-        rch := nil;
-
-      if (rch <> nil) and (not IS_SET(obj.flags, OBJ_HIDDEN)) then
+      if (node_prev <> nil) and (node_prev.next <> node) then
         begin
-        act(at_temp, msg, false, rch, obj, nil, TO_ROOM);
-        act(at_temp, msg, false, rch, obj, nil, TO_CHAR);
+        bugreport('update_objects', 'update.pas', 'obj.prev.next <> nil',
+                  'The object list was linked incorrectly and could not be fixed.');
+        exit;
         end;
+
+      obj := node.element;
+
+      if (IS_SET(obj.flags, OBJ_NODECAY)) then
+        begin
+        node := node_prev;
+        continue;
+        end;
+
+      if (obj.timer <= 0) then
+        begin
+        node := node_prev;
+        continue;
+        end;
+
+      dec(obj.timer);
+      if (obj.timer > 0) then
+        begin
+        node := node_prev;
+        continue;
+        end;
+
+      case obj.item_type of
+        ITEM_CORPSE : begin
+                      msg := '$p decays into dust and blows away.';
+                      at_temp := AT_CORPSE;
+                      end;
+         ITEM_BLOOD : begin
+                      msg := '$p dries up.';
+                      at_temp := AT_RED;
+                      end;
+          ITEM_FOOD : begin
+                      msg := '$p slowly rots away, leaving a foul stench.';
+                      at_temp := AT_REPORT;
+                      end;
+        else
+           begin
+           msg := '$p vanishes in the wink of an eye.';
+           at_temp := AT_REPORT;
+           end;
       end;
 
-    obj.extract;
+      if (obj.carried_by <> nil) then
+        act(at_temp, msg, false, obj.carried_by, obj, nil, TO_CHAR)
+      else
+      if (obj.room <> nil) then
+        begin
+        if (obj.room.chars.head <> nil) then
+          rch := obj.room.chars.head.element
+        else
+          rch := nil;
 
-    node := node_prev;
+        if (rch <> nil) and (not IS_SET(obj.flags, OBJ_HIDDEN)) then
+          begin
+          act(at_temp, msg, false, rch, obj, nil, TO_ROOM);
+          act(at_temp, msg, false, rch, obj, nil, TO_CHAR);
+          end;
+        end;
+
+      obj.extract;
+
+      node := node_prev;
+    end;
+  except
+    raise GException.Create('update.pas:update_objects', 'Memory failure');
   end;
 end;
 
