@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.12 2003/10/22 19:06:39 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.13 2003/10/28 22:06:45 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -14,7 +14,6 @@ interface
 uses
 	Classes,
   dtypes,
-  player,
 	socket,
 	imc3_chan,
 	imc3_mud,
@@ -46,6 +45,7 @@ type
 		procedure handleLocateReply(packet : GPacket_I3);
 		procedure handleLocateRequest(packet : GPacket_I3);
 		procedure handleTell(packet : GPacket_I3);
+		procedure handleBeep(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -67,6 +67,7 @@ type
 		procedure sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
 		procedure sendLocateRequest(originator, user : string);
 		procedure sendTell(from_user, to_user : string; mud : GMud_I3; msg : string);
+		procedure sendBeep(from_user, to_user : string; mud : GMud_I3);
 		
 		procedure shutdown();
 		
@@ -87,6 +88,7 @@ uses
 	constants,
 	console,
 	chars,
+  player,
 	mudsystem,
 	util;
 
@@ -577,6 +579,24 @@ begin
 		end;
 end;
 
+procedure GInterMud.handleBeep(packet : GPacket_I3);
+var
+	visname : string;
+	pl : GPlayer;
+begin
+	pl := GPlayer(findPlayerWorldEx(nil, packet.target_username));
+	
+	visname := GString(packet.fields[6]).value;
+	
+	if (pl <> nil) then
+		pl.sendBuffer(Format('%s@%s beeps you.'#7 + #13#10, [visname, packet.originator_mudname]))
+	else
+		begin
+		debug('Could not find player "' + packet.target_username + '" referenced in beep packet.', 1);
+		sendError(packet.originator_mudname, packet.originator_username, 'unk-user', 'That player is offline.');
+		end;
+end;
+
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
@@ -602,6 +622,9 @@ begin
   else
   if (packet.packet_type = 'tell') then
   	handleTell(packet)
+  else
+  if (packet.packet_type = 'beep') then
+  	handleBeep(packet)
   else
   if (packet.packet_type = 'error') then
   	handleError(packet)
@@ -838,6 +861,16 @@ begin
 	writeBuffer(from_user);
 	writeBuffer('","');
 	writeBuffer(escape(msg));
+	writeBuffer('",})'#13);
+	sendPacket();
+end;
+
+// void I3_send_beep( CHAR_DATA *ch, char *to, I3_MUD *mud )
+procedure GInterMud.sendBeep(from_user, to_user : string; mud : GMud_I3);
+begin
+	writeHeader('beep', this_mud.name, from_user, mud.name, to_user);
+	writeBuffer('"');
+	writeBuffer(from_user);
 	writeBuffer('",})'#13);
 	sendPacket();
 end;
