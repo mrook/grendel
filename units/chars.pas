@@ -866,9 +866,9 @@ begin
         if g='GOLD' then
           begin
           a:=striprbeg(a,' ');
-          gold:=UMin(strtoint(stripl(a,' ')),0);
+          gold := UMax(strtointdef(stripl(a, ' '), 0), 0);
           a:=striprbeg(a,' ');
-          player^.bankgold:=UMin(strtoint(stripl(a,' ')),0);
+          player^.bankgold := UMax(strtointdef(stripl(a, ' '), 0), 0);
           end
         else
         if g='XP' then
@@ -1351,7 +1351,7 @@ begin
 
     with aff do
       writeln(f,'Affect: ''',skill_table[sn].name,''' ',
-               integer(apply_type), ' ', duration, ' ', modifier);
+               printApply(apply_type), ' ', duration, ' ', modifier);
 
     node := node.next;
     end;
@@ -1606,7 +1606,7 @@ begin
     buf := buf + ' [Oppnt: ';
 
     with fighting do
-      buf := buf + hp_perc[UMin(round((point.hp / point.max_hp) * 5), 0)];
+      buf := buf + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
 
     buf := buf + ']';
     end;
@@ -1617,7 +1617,7 @@ begin
      buf := buf + ' [' + fighting.fighting.name^ + ': ';
 
      with fighting.fighting do
-       buf := buf + hp_perc[UMin(round((point.hp / point.max_hp) * 5), 0)];
+       buf := buf + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
 
     buf := buf + ']';
      end;
@@ -1767,7 +1767,7 @@ end;
 
 procedure GCharacter.setWait(ticks : integer);
 begin
-  wait := UMin(wait, ticks);
+  wait := UMax(wait, ticks);
 end;
 
 function GCharacter.getEQ(location : integer) : GObject;

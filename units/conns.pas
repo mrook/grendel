@@ -379,7 +379,7 @@ begin
   else
     c := ch;
 
-  pclines:=UMin(ch.player^.pagerlen,5) - 2;
+  pclines := UMin(ch.player^.pagerlen, 5) - 2;
 
   c.emptyBuffer;
 

@@ -218,7 +218,7 @@ begin
   range := URange(1, (victim.level - ch.level) + 10,13);
   xp_compute := (xp*range) div 10;
 
-  xp_compute := UMin((victim.level - ch.level + 1)*20,1);
+//  xp_compute := UMin((victim.level - ch.level + 1) * 20, 1);
 end;
 
 function findDamage(dam : integer) : GDamMessage;
@@ -476,7 +476,7 @@ begin
       begin
       act(AT_KILLED,'$N has been killed!',false,ch,nil,oppnt,TO_CHAR);
 
-      xp := xp_compute(oppnt,ch);
+      xp := xp_compute(ch, oppnt);
 
       if (not ch.IS_NPC) then
         act(AT_REPORT,'You gain ' + inttostr(xp)+' XP for the kill and '+IntToStr(ch.player^.fightxp)+' XP for fighting.',false,ch,nil,nil,TO_CHAR);
