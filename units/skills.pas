@@ -213,7 +213,7 @@ begin
         end
       else
       if (g = 'NAME') then
-        name := hash_string(striprbeg(s,' '))
+        name := striprbeg(s,' ')
       else
       if g='ROUNDS' then
         beats:=strtoint(striprbeg(s,' '))
@@ -462,7 +462,7 @@ begin
 
   if (aff = nil) then
     begin
-    bugreport('removeAffectSkill', 'skills.pas', 'skill number null, ch ' + ch.name,
+    bugreport('removeAffectSkill', 'skills.pas', 'skill number null, ch ' + ch.name^,
               'An attempt was made to remove an unexisting affect.');
     exit;
     end;

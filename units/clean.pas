@@ -120,7 +120,7 @@ begin
     ch := node.element;
 
     if (not ch.IS_NPC) then
-      ch.save(ch.name);
+      ch.save(ch.name^);
 
     node := node.next;
     end;

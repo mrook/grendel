@@ -356,7 +356,7 @@ begin
       g := uppercase(stripl(s,':'));
       
       if g = 'NAME' then
-        name := hash_string(uppercase(striprbeg(s,' ')))
+        name := uppercase(striprbeg(s,' '))
       else
       if g='CHARNOARG' then
         char_no_arg := striprbeg(s,' ')
@@ -551,34 +551,34 @@ begin
     1,2:begin
         if (bid > 0) then
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] $7' + cap(GObject(item).name);
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] $7' + cap(GObject(item).name^);
 
           if (going = 1) then
             buf := buf + ' $1is going ONCE to '
           else
             buf := buf + ' $1is going TWICE to ';
 
-          buf := buf + GCharacter(buyer).name + ' for ' + inttostr(bid) + ' coins.';
+          buf := buf + GCharacter(buyer).name^ + ' for ' + inttostr(bid) + ' coins.';
           to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
           end
         else
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] Anyone?$7 ' + cap(GObject(item).name) + '$1 for ' + inttostr(start) + ' coins?';
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] Anyone?$7 ' + cap(GObject(item).name^) + '$1 for ' + inttostr(start) + ' coins?';
           to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
           end;
         end;
       3:begin
         if (bid > 0) then
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] $7' + cap(GObject(item).name);
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] $7' + cap(GObject(item).name^);
 
-          buf := buf + ' $1has been SOLD to ' + GCharacter(buyer).name + ' for ' + inttostr(bid) + ' coins.';
+          buf := buf + ' $1has been SOLD to ' + GCharacter(buyer).name^ + ' for ' + inttostr(bid) + ' coins.';
 
           to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
 
           GObject(item).toChar(buyer);
 
-          act(AT_REPORT,'You have won the auction! '+cap(GObject(item).name)+' at '+
+          act(AT_REPORT,'You have won the auction! '+cap(GObject(item).name^)+' at '+
               inttostr(bid)+' coins.',false,buyer,nil,nil,TO_CHAR);
 
           dec(GCharacter(buyer).player^.bankgold, bid);
@@ -586,7 +586,7 @@ begin
           end
         else
           begin
-          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name + '$1] Due to lack of bidders, auction has been halted.';
+          buf := '$B$2<Auction> $1[$7' + GCharacter(seller).name^ + '$1] Due to lack of bidders, auction has been halted.';
 
           to_channel(seller,buf,CHANNEL_AUCTION,AT_REPORT);
 

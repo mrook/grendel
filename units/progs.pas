@@ -162,8 +162,8 @@ begin
       inc(prog_c);
 
       case prog[prog_c] of
-          'i' : dest := dest + npc.name;
-          'n' : dest := dest + actor.name;
+          'i' : dest := dest + npc.name^;
+          'n' : dest := dest + actor.name^;
          else
            bugreport('parseCode', 'progs.pas', 'unknown format ' + prog[prog_c],
                      'Bad format code in this mobprog. Please check your settings.');
@@ -240,7 +240,7 @@ begin
 
   if (length(ifcheck) = 0) then
     begin
-    bugreport('GProgram.ifcheck', 'mobprogs.pas', 'null ifcheck, ' + npc.name,
+    bugreport('GProgram.ifcheck', 'mobprogs.pas', 'null ifcheck, ' + npc.name^,
               'This ifcheck does not have any parameters.');
 
     Result := BERR;
@@ -257,7 +257,7 @@ begin
     end
   else
     begin
-    bugreport('GProgram.ifcheck', 'mobprogs.pas', 'syntax error, ' + npc.name,
+    bugreport('GProgram.ifcheck', 'mobprogs.pas', 'syntax error, ' + npc.name^,
               'Encountered a syntax error in this mobprog. Please check your settings.');
     Result := BERR;
     exit;
@@ -271,7 +271,7 @@ begin
     end
   else
     begin
-    bugreport('GProgram.ifcheck', 'mobprogs.pas', 'syntax error, ' + npc.name,
+    bugreport('GProgram.ifcheck', 'mobprogs.pas', 'syntax error, ' + npc.name^,
               'Encountered a syntax error in this mobprog. Please check your settings.');
 
     Result := BERR;
@@ -294,7 +294,7 @@ begin
       end
     else
       begin
-      bugreport('GProgram.ifcheck', 'mobprogs.pas', 'operator without value, ' + npc.name,
+      bugreport('GProgram.ifcheck', 'mobprogs.pas', 'operator without value, ' + npc.name^,
                 'Encountered a syntax error in this mobprog. Please check your settings.');
       Result := BERR;
       exit;
@@ -314,7 +314,7 @@ begin
       'p':chkobj:=GObject(vo);
     else
       begin
-        bugreport('GProgram.ifcheck', 'mobprogs.pas', 'bad argument, ' + npc.name,
+        bugreport('GProgram.ifcheck', 'mobprogs.pas', 'bad argument, ' + npc.name^,
                   'Encountered a syntax error in this mobprog. Please check your settings.');
       Result := BERR;
       exit;
@@ -378,7 +378,7 @@ begin
       end;
     end;
 
-  bugreport('GProgram.ifcheck', 'mobprogs.pas', 'illegal ifcheck, '+npc.name,
+  bugreport('GProgram.ifcheck', 'mobprogs.pas', 'illegal ifcheck, '+npc.name^,
             'An unknown ifcheck was found in this mobprog.');
   Result := BERR;
 end;
@@ -498,7 +498,7 @@ begin
                   inc(iflevel);
                   if iflevel>=MAX_IFCHECKS then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'max number of ifs, ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'max number of ifs, ' + npc.name^,
                               'The maximum number of ifchecks was reached.');
                     exit;
                     end;
@@ -510,7 +510,7 @@ begin
                   inc(iflevel);
                   if iflevel>=MAX_IFCHECKS then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'max number of ifs, ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'max number of ifs, ' + npc.name^,
                               'The maximum number of ifchecks was reached.');
                     exit;
                     end;
@@ -521,7 +521,7 @@ begin
            ORTRUE:begin
                   if not (ifstate[iflevel,IN_IF]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched or - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched or - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
@@ -531,7 +531,7 @@ begin
           ORFALSE:begin
                   if not (ifstate[iflevel,IN_IF]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched or - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched or - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
@@ -542,13 +542,13 @@ begin
                     break;
                   if (ifstate[iflevel,IN_ELSE]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'else in else block - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'else in else block - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
                   if not (ifstate[iflevel,IN_IF]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched else - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched else - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
@@ -561,7 +561,7 @@ begin
        FOUNDENDIF:begin
                   if not (ifstate[iflevel,IN_IF] or ifstate[iflevel,IN_ELSE]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched endif - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched endif - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
@@ -580,7 +580,7 @@ begin
         IFIGNORED:begin
                   if not (ifstate[iflevel,IN_IF] or ifstate[iflevel,IN_ELSE]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'ignoring non-if non-else block - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'ignoring non-if non-else block - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
@@ -590,20 +590,20 @@ begin
         ORIGNORED:begin
                   if not (ifstate[iflevel,IN_IF] or ifstate[iflevel,IN_ELSE]) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched or - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'unmatched or - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
                   if (ignorelevel=0) then
                     begin
-                    bugreport('mprog_driver', 'mobprogs.pas', 'ignoring or falsely - ' + npc.name,
+                    bugreport('mprog_driver', 'mobprogs.pas', 'ignoring or falsely - ' + npc.name^,
                               'Syntax error in this mobprog.');
                     exit;
                     end;
                   end;
         { other error while executing }
              BERR:begin
-                  bugreport('mprog_driver', 'mobprogs.pas', 'unknown error - ' + npc.name,
+                  bugreport('mprog_driver', 'mobprogs.pas', 'unknown error - ' + npc.name^,
                               'Syntax error in this mobprog.');
                   exit;
                   end;
@@ -612,7 +612,7 @@ begin
     else
     if (ifstate[iflevel,IN_IF]) or (ifstate[iflevel,IN_ELSE]) then
       begin
-      bugreport('mprog_driver', 'mobprogs.pas', 'missing endif ' + npc.name,
+      bugreport('mprog_driver', 'mobprogs.pas', 'missing endif ' + npc.name^,
                 'The ifcheck was not ended properly.');
       exit;
       end;
@@ -681,7 +681,7 @@ begin
       percentCheck(vmob, ch, nil, MPROG_GREET);
 
     if IS_SET(vmob.act_flags,ACT_AGGRESSIVE) then
-      interpret(vmob, 'growl ' + ch.name);
+      interpret(vmob, 'growl ' + ch.name^);
 
     node := node.next;
     end;

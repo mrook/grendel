@@ -9,8 +9,8 @@ uses
 type
     GListNode = class
       prev, next : GListNode;
-      refcount : integer;
       element : pointer;
+      refcount : integer;
 
       constructor Create(e : pointer; p, n : GListNode);
     end;
@@ -36,6 +36,7 @@ type
     GPrimes = array of integer;
 
     GString = class
+      refcount : integer;
       value : string;
 
       constructor Create(s : string);
@@ -84,7 +85,11 @@ const STR_HASH_SIZE = 1024;
 var
    str_hash : GHashString;
 
-function hash_string(src : string) : string;
+function hash_string(src : string) : PString; overload;
+function hash_string(src : PString) : PString; overload;
+
+procedure unhash_string(src : PString);
+
 
 function defaultHash(size, prime : cardinal; key : string) : integer;
 
@@ -101,7 +106,6 @@ begin
   element := e;
   next := n;
   prev := p;
-
   refcount := 1;
 end;
 
@@ -433,7 +437,9 @@ begin
     bucketList[n].clean;
     bucketList[n].Free;
     end;
-    
+
+  setlength(bucketList, 0);
+
   inherited Destroy;
 end;
 
@@ -480,10 +486,11 @@ begin
   writeln('Bytes used ' + inttostr(bytesused) + ', bytes saved ' + inttostr(wouldhave - bytesused));
 end;
 
-function hash_string(src : string) : string;
+function hash_string(src : string) : PString;
 var
    hash : integer;
    node, fnode : GListNode;
+   g : GString;
 begin
   hash := str_hash.getHash(src);
 
@@ -502,16 +509,82 @@ begin
 
   if (fnode <> nil) then
     begin
-    hash_string := GString(fnode.element).value;
+    g := fnode.element;
+    hash_string := @g.value;
     fnode.refcount := fnode.refcount + 1;
     end
   else
     begin
-    str_hash.bucketList[hash].insertLast(GString.Create(src));
-    hash_string := src;
+    g := GString.Create(src);
+    str_hash.bucketList[hash].insertLast(g);
+    hash_string := @g.value;
     end;
 end;
 
+function hash_string(src : PString) : PString;
+var
+   hash : integer;
+   node, fnode : GListNode;
+   g : GString;
+begin
+  hash := str_hash.getHash(src^);
+
+  node := str_hash.bucketList[hash].head;
+  fnode := nil;
+
+  while (node <> nil) do
+    begin
+    if (comparestr(GString(node.element).value, src^) = 0) then
+      begin
+      fnode := node;
+      end;
+
+    node := node.next;
+    end;
+
+  if (fnode <> nil) then
+    begin
+    g := fnode.element;
+    hash_string := @g.value;
+    fnode.refcount := fnode.refcount + 1;
+    end
+  else
+    begin
+    g := GString.Create(src^);
+    str_hash.bucketList[hash].insertLast(g);
+    hash_string := @g.value;
+    end;
+end;
+
+procedure unhash_string(src : PString);
+var
+   hash : integer;
+   node, fnode : GListNode;
+   g : GString;
+begin
+  hash := str_hash.getHash(src^);
+
+  node := str_hash.bucketList[hash].head;
+  fnode := nil;
+
+  while (node <> nil) do
+    begin
+    if (comparestr(GString(node.element).value, src^) = 0) then
+      begin
+      fnode := node;
+      end;
+
+    node := node.next;
+    end;
+
+  if (fnode <> nil) then
+    begin
+    dec(fnode.refcount);
+
+    if (fnode.refcount <= 0) then
+      str_hash.bucketList[hash].remove(fnode);
+    end;
+end;
 
 // GException
 constructor GException.Create(location, msg : string);

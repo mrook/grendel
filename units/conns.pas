@@ -190,9 +190,10 @@ end;
 
 destructor GConnection.Destroy;
 begin
-  inherited Destroy;
-
+  dispose(tel_val);
   connection_list.remove(node);
+
+  inherited Destroy;
 end;
 
 procedure GConnection.checkReceive;
@@ -454,7 +455,7 @@ begin
   if (not to_ch.IS_NPC) and (not from_ch.IS_NPC) then
     begin
     if (from_ch.IS_IMMORT) then
-      playername := from_ch.name
+      playername := from_ch.name^
     else
     if (not to_ch.IS_SAME_ALIGN(from_ch)) then
       begin
@@ -464,10 +465,10 @@ begin
         playername := '+* A ' + from_ch.race.name + ' *+';
       end
     else
-      playername := from_ch.name;
+      playername := from_ch.name^;
     end
   else
-    playername := from_ch.name;
+    playername := from_ch.name^;
 
   if (from_ch = to_ch) then
     playername := 'you';
@@ -525,31 +526,31 @@ begin
              if (obj1 = nil) then
                write_console('[BUG]: act() -> obj1 null')
              else
-               i := obj1.name;
+               i := obj1.name^;
              end;
         'O': begin
              if (obj2 = nil) then
                write_console('[BUG]: act() -> obj2 null')
              else
-               i := obj2.name;
+               i := obj2.name^;
              end;
         'p': begin
              if (obj1 = nil) then
                write_console('[BUG]: act() -> obj1 null')
              else
-               i := obj1.short;
+               i := obj1.short^;
              end;
         'P': begin
              if (obj2 = nil) then
                write_console('[BUG]: act() -> obj2 null')
              else
-               i := obj2.short;
+               i := obj2.short^;
              end;
         't': begin
              if (arg1 = nil) then
                write_console('[BUG]: act() -> pchar(arg1) null')
              else
-               i := strpas(arg1);
+               i := (PString(arg1))^;
              end;
         'T': begin
              if (arg2 = nil) then
@@ -560,10 +561,10 @@ begin
         'd': begin
              ex := GExit(arg2);
 
-             if (length(ex.keyword) = 0) then
+             if (length(ex.keywords^) = 0) then
                i := 'door'
              else
-               one_argument(ex.keyword, i);
+               one_argument(ex.keywords^, i);
              end;
    '0'..'9','A','B':begin
                     i:='$'+acts[t];
@@ -773,10 +774,6 @@ begin
 end;
 
 
-initialization
-connection_list := GDLinkedList.Create;
-
-finalization
-connection_list.Free;
-
+begin
+  connection_list := GDLinkedList.Create;
 end.

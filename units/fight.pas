@@ -503,10 +503,10 @@ begin
      if (not ch.IS_NPC) then
         begin
         if (IS_SET(ch.player^.cfg_flags,CFG_AUTOLOOT)) then
-          interpret(ch, 'get all ''corpse of ' + oppnt.name + '''');
+          interpret(ch, 'get all ''corpse of ' + oppnt.name^ + '''');
 
         if (IS_SET(ch.player^.cfg_flags,CFG_AUTOSAC)) then
-          interpret(ch, 'sac ''corpse of ' + oppnt.name + '''');
+          interpret(ch, 'sac ''corpse of ' + oppnt.name^ + '''');
         end;
       end
     else
@@ -533,18 +533,18 @@ begin
           inc(oppnt.player^.xptogo,  oppnt.calcxp2lvl div 4);
 
         if (IS_SET(ch.player^.cfg_flags, CFG_AUTOSCALP)) then
-          interpret(ch, 'scalp corpse of '+oppnt.name);
+          interpret(ch, 'scalp corpse of '+oppnt.name^);
         end;
 
       if (oppnt.clan <> nil) then
-        to_channel(oppnt, '*CLAN NOTIFY*: '+oppnt.name+' has been'+
-        ' killed by '+ch.name+'!',CHANNEL_CLAN,AT_WHITE);
+        to_channel(oppnt, '*CLAN NOTIFY*: '+oppnt.name^+' has been'+
+        ' killed by '+ch.name^+'!',CHANNEL_CLAN,AT_WHITE);
 
       if (not ch.IS_NPC) then
         begin
         if (ch.clan<>nil) then
-          to_channel(ch, '*CLAN NOTIFY*: '+ch.name+' has just'+
-          ' killed '+oppnt.name+'!',CHANNEL_CLAN,AT_WHITE);
+          to_channel(ch, '*CLAN NOTIFY*: '+ch.name^+' has just'+
+          ' killed '+oppnt.name^+'!',CHANNEL_CLAN,AT_WHITE);
 
         if not (ch.IS_SAME_ALIGN(oppnt)) then
           begin
@@ -978,14 +978,14 @@ begin
       begin
       // aggress mode
       if (ch.hunting <> nil) and (ch.hunting.room = ch.room) then
-        interpret(ch, 'kill '+ch.hunting.name);
+        interpret(ch, 'kill '+ch.hunting.name^);
 
       if (IS_SET(ch.act_flags, ACT_AGGRESSIVE)) then
         begin
         vch := ch.room.findRandomChar;
 
         if (vch <> nil) then
-          interpret(ch, 'kill ' + vch.name);
+          interpret(ch, 'kill ' + vch.name^);
         end;
       end;
 

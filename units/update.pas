@@ -576,7 +576,7 @@ begin
   if (bg_info.prize<>nil) then
     to_channel(nil,pchar('[$B$7Battleground starting in '+inttostr(bg_info.count)+' seconds$A$7]'#13#10+
                'Allowed levels: '+inttostr(bg_info.lo_range)+
-               '-'+inttostr(bg_info.hi_range)+'  Prize: '+ GObject(bg_info.prize).short),CHANNEL_ALL,AT_REPORT)
+               '-'+inttostr(bg_info.hi_range)+'  Prize: '+ GObject(bg_info.prize).short^),CHANNEL_ALL,AT_REPORT)
   else
     to_channel(nil,pchar('[$B$7Battleground starting in '+inttostr(bg_info.count)+' seconds$A$7]'#13#10+
                'Allowed levels: '+inttostr(bg_info.lo_range)+
@@ -653,7 +653,7 @@ begin
     else
     if s=1 then
       begin
-      to_channel(nil,pchar('[$B$3'+last.name+'$B$7 has won the battleground!$A$7]'),CHANNEL_ALL,AT_REPORT);
+      to_channel(nil,pchar('[$B$3'+last.name^+'$B$7 has won the battleground!$A$7]'),CHANNEL_ALL,AT_REPORT);
       act(AT_REPORT,'Congratulations! You have won the battleground!',false,last,nil,nil,TO_CHAR);
       inc(last.player^.bg_points,3);
 

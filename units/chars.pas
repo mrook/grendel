@@ -126,7 +126,7 @@ type
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
       npc_index : GNPCIndex;
-      name, short, long : string;
+      name, short, long : PString;
       sex : integer;
       race : GRace;
       alignment : integer;
@@ -252,6 +252,7 @@ var
 begin
   if (player <> nil) then
     begin
+    player^.aliases.clean;
     player^.aliases.Free;
     dispose(player);
     end;
@@ -268,6 +269,10 @@ begin
   objects.Free;
 
   hunting := nil;
+
+  unhash_string(name);
+  unhash_string(short);
+  unhash_string(long);
 
   inherited Destroy;
 end;
@@ -328,10 +333,10 @@ begin
     end;
 
   if (c = nil) then
-    write_console('(Linkless) '+ name + ' has logged out')
+    write_console('(Linkless) '+ name^+ ' has logged out')
   else
   if (c <> nil) then
-    write_console('(' + inttostr(c.socket) + ') ' + name + ' has logged out');
+    write_console('(' + inttostr(c.socket) + ') ' + name^ + ' has logged out');
 
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
@@ -342,7 +347,7 @@ begin
     try
       c.thread.terminate;
     except
-      write_console('could not delete thread of ' + name);
+      write_console('could not delete thread of ' + name^);
     end;
 
     conn := nil;
@@ -370,7 +375,7 @@ begin
 
   if (leader <> Self) then
     begin
-    to_group(leader, '$B$7[Group]: ' + name + ' has left the group.');
+    to_group(leader, '$B$7[Group]: ' + name^ + ' has left the group.');
     leader := nil;
     end
   else
@@ -393,7 +398,7 @@ begin
     end;
 
   if (not IS_NPC) then
-    save(name)
+    save(name^)
   else
     dec(npc_index.count);
 
@@ -603,9 +608,9 @@ begin
   s := fn;
   s[1] := upcase(s[1]);
 
-  name := s;
-  short := s + ' is here';
-  long := s + ' is standing here';
+  name := hash_string(s);
+  short := hash_string(s + ' is here');
+  long := hash_string(s + ' is standing here');
 
   if (race <> nil) then
     alignment := race.def_alignment
@@ -809,7 +814,7 @@ begin
           begin
           clan := findClan(striprbeg(a,' '));
 
-          if (clan <> nil) and(clan.leader = name) then
+          if (clan <> nil) and(clan.leader = name^) then
             player^.clanleader := true;
           end
         else
@@ -1122,7 +1127,7 @@ begin
 
   if (inner <> 0) then
     begin
-    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name,
+    bugreport('GCharacter.load', 'chars.pas', 'bugged playerfile ' + name^,
               'The pfile of this character was corrupted.');
 
     race := GRace(race_list.head.element);
@@ -1171,7 +1176,7 @@ begin
     end;
 
   writeln(f,'#PLAYER');
-  writeln(f,'User: '+name);
+  writeln(f,'User: '+name^);
   writeln(f,'MD5-Password: '+MD5Print(player^.md5_password));
   writeln(f,'Sex: ',sex);
   writeln(f,'Race: ',race.name);
@@ -1248,7 +1253,7 @@ begin
   writeln(f,'#SKILLS');
   for h:=0 to MAX_SKILLS-1 do
    if (learned[h]>0) and (learned[h]<=100) then
-    if skill_table[h].name<>'' then
+    if skill_table[h].name <> '' then
      writeln(f,'Skill: ''',skill_table[h].name,''' ',learned[h]);
   writeln(f,'#END');
   writeln(f);
@@ -1298,9 +1303,9 @@ begin
     else
       writeln(f,-1);
 
-    writeln(f,obj.name);
-    writeln(f,obj.short);
-    writeln(f,obj.long);
+    writeln(f,obj.name^);
+    writeln(f,obj.short^);
+    writeln(f,obj.long^);
     writeln(f,obj.item_type,' ',obj.wear1,' ',obj.wear2,' ');
     writeln(f,obj.value[1],' ',obj.value[2],' ',obj.value[3],' ',obj.value[4]);
     writeln(f,obj.weight,' ',obj.flags,' ',obj.cost, ' ', obj.count);
@@ -1458,7 +1463,7 @@ begin
   if (fighting <> nil) and (position >= POS_FIGHTING) then
    if (fighting.fighting <> nil) and (fighting.fighting <> Self) then
      begin
-     buf := buf + ' [' + fighting.fighting.name + ': ';
+     buf := buf + ' [' + fighting.fighting.name^ + ': ';
 
      with fighting.fighting do
        buf := buf + hp_perc[UMin(round((point.hp / point.max_hp) * 5), 0)];
@@ -1821,7 +1826,7 @@ begin
   else
     r:='a god';
 
-  player^.rank := hash_string(r);
+  player^.rank := r;
 end;
 
 procedure GCharacter.startFlying;
@@ -1873,7 +1878,7 @@ begin
     begin
     obj := node.element;
 
-    if (obj.wear_location = WEAR_NULL) and ((pos(s, obj.name) <> 0) or (pos(s, obj.short) <> 0)) then
+    if (obj.wear_location = WEAR_NULL) and ((pos(s, obj.name^) <> 0) or (pos(s, obj.short^) <> 0)) then
       begin
       findInventory := obj;
       exit;
@@ -1908,7 +1913,7 @@ begin
     begin
     vict := node.element;
 
-    if isName(vict.name,name) or isName(vict.short,name) and (ch.CAN_SEE(vict)) then
+    if isName(vict.name^,name) or isName(vict.short^,name) and (ch.CAN_SEE(vict)) then
       begin
       inc(count);
 
