@@ -37,8 +37,10 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 	-> probably Schools	
 - more help text
 - skills: Disarm, Steal, Lockpick, Hide
+- spells: Cure Poison
 - reloadarea command
 - race specifics
+  -> add field to race format for racial abilities like Infravision etc.
 - bugtrack/report system 
 - skill/spellslots
 - practice sessions
