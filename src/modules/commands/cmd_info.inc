@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.11 2004/06/10 20:39:27 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.12 2004/06/15 10:11:54 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var 
@@ -450,42 +450,58 @@ begin
 		
 	if (ch.inventory.size() > 0) then
 		begin
-		invlist := TList.Create();
-		
-		iterator := ch.inventory.iterator();
+		if (IS_SET(GPlayer(ch).cfg_flags, CFG_COMBINE)) then
+			begin
+			invlist := TList.Create();
 
-		while (iterator.hasNext()) do
-			begin
-			obj := GObject(iterator.next());
-			
-			invlist.add(obj);
-			end;
-			
-		iterator.Free();
-		
-		invlist.Sort(inventorySorter);
-		
-		i := 0;
-		
-		while (i < invlist.Count) do
-			begin
-			counter := 0;
-			
-			obj := invlist[i];
-			
-			while (i < invlist.Count) and (GObject(invlist[i]).vnum = obj.vnum) do
+			iterator := ch.inventory.iterator();
+
+			while (iterator.hasNext()) do
 				begin
-				inc(counter);
-				inc(i);
+				obj := GObject(iterator.next());
+
+				invlist.add(obj);
 				end;
-				
-			if (counter > 1) then
-				act(AT_REPORT, '  $p [$6' + inttostr(counter) + 'x$7] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
-			else		
+
+			iterator.Free();
+
+			invlist.Sort(inventorySorter);
+
+			i := 0;
+
+			while (i < invlist.Count) do
+				begin
+				counter := 0;
+
+				obj := invlist[i];
+
+				while (i < invlist.Count) and (GObject(invlist[i]).vnum = obj.vnum) do
+					begin
+					inc(counter);
+					inc(i);
+					end;
+
+				if (counter > 1) then
+					act(AT_REPORT, '  $p [$6' + inttostr(counter) + 'x$7] ' + info_object(obj), false, ch, obj, nil, TO_CHAR)
+				else		
+					act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);		
+				end;
+
+			invlist.Free();
+			end
+		else
+			begin
+			iterator := ch.inventory.iterator();
+
+			while (iterator.hasNext()) do
+				begin
+				obj := GObject(iterator.next());
+
 				act(AT_REPORT, '  $p ' + info_object(obj), false, ch, obj, nil, TO_CHAR);		
+				end;
+
+			iterator.Free();
 			end;
-		
-		invlist.Free();
 		end
 	else
 	if (ch.gold = 0) then
@@ -1617,38 +1633,51 @@ begin
         hi_type('assist','You automatically assist people in your group.')
       else
         lo_type('assist','You do not assist people in your group.');
+        
       if IS_SET(cfg_flags,CFG_AUTOLOOT) then
         hi_type('autoloot','You automatically loot corpses at a kill.')
       else
         lo_type('autoloot','You do not loot corpses at a kill.');
+        
       if IS_SET(cfg_flags,CFG_AUTOSAC) then
         hi_type('autosac','You automatically sacrifice corpses.')
       else
         lo_type('autosac','You do not sacrifice corpses.');
+        
       if IS_SET(cfg_flags,CFG_AUTOSCALP) then
         hi_type('autoscalp','You automatically scalp dead opponents.')
       else
         lo_type('autoscalp','You don''t scalp dead opponents.');
+        
       if IS_SET(cfg_flags,CFG_BLANK) then
         hi_type('blank','You receive a blank line before each prompt.')
       else
         lo_type('blank','You don''t receive a blank line before each prompt.');
+        
       if IS_SET(cfg_flags,CFG_BRIEF) then
         hi_type('brief','All descriptions are brief.')
       else
         lo_type('brief','You receive full descriptions.');
+        
       if IS_SET(cfg_flags,CFG_ANSI) then
         hi_type('ansi','You receive ANSI colors.')
       else
         lo_type('ansi','You don''t receive ANSI colors.');
+        
       if IS_SET(cfg_flags,CFG_PAGER) then
         hi_type('pager','You view paged output when necessary.')
       else
         lo_type('pager','You don''t view paged output.');
+        
       if IS_SET(cfg_flags,CFG_AUTOPEEK) then
         hi_type('autopeek','You automatically peek someone when looking at him.')
       else
         lo_type('autopeek','You don''t automatically peek someone when looking at him.');
+        
+      if (IS_SET(cfg_flags, CFG_COMBINE)) then
+      	hi_type('combine', 'You see combined object lists.')
+      else
+      	lo_type('combine', 'You see object lists in single format.');
 
       ch.sendBuffer(#13#10 + 'Immortal options:' + #13#10#13#10);
       if IS_SET(cfg_flags,CFG_AUTOCREATE) then
@@ -1701,6 +1730,9 @@ begin
     else
     if s='AUTOCREATE' then
       d:=CFG_AUTOCREATE
+    else
+    if s='COMBINE' then
+      d:=CFG_COMBINE
     else
       begin
       ch.sendBuffer('Unknown option.'#13#10);

@@ -2,7 +2,7 @@
   Summary:
     Constants
     
-  ## $Id: constants.pas,v 1.12 2004/05/12 22:43:48 ***REMOVED*** Exp $
+  ## $Id: constants.pas,v 1.13 2004/06/15 10:11:54 ***REMOVED*** Exp $
 }
 
 unit constants;
@@ -174,8 +174,9 @@ const CFG_ASSIST = BV01;
       CFG_BRIEF = BV06;           { brief descriptions }
       CFG_ANSI = BV07;            { receive ansi }
       CFG_PAGER = BV08;           { see pager }
-      CFG_AUTOPEEK = BV09;      { peek automatically on look }
-      CFG_AUTOCREATE = BV10;    { immflag: autocreate rooms when walking? }
+      CFG_AUTOPEEK = BV09;        { peek automatically on look }
+      CFG_AUTOCREATE = BV10;      { immflag: autocreate rooms when walking? }
+      CFG_COMBINE = BV11;         { combine objects in output }
 
 { NPC/PC flags }
 const ACT_AGGRESSIVE=BV02;      { aggressive NPC? }
