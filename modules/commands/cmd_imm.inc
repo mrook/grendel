@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.27 2003/11/03 13:18:58 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.28 2003/11/03 13:24:49 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -708,7 +708,13 @@ begin
     begin
     ch.sendBuffer('Cannot snoop a same or higher level immortal.'#13#10);
     exit;
-    end;
+    end
+  else
+  if (vict.snooped_by <> nil) then
+  	begin
+  	ch.sendBuffer('That character is already being snooped by somebody.'#13#10);
+  	exit;
+  	end;
 
   act(AT_YELLOW,'Started snooping $N.',false,ch,nil,vict,TO_CHAR);
   GPlayer(ch).snooping := vict;
