@@ -41,22 +41,22 @@ Grendel's TODO list with probable release date/version
 ! (0.4.0) modularized mud, pluggable objects (like timers, sets of commands, etc.)
 ! (0.4.0) minimize to systray
 ! (0.4.1) purge command (strips char/room of objects)
+! (0.4.1) add some checks to do_give, do_get, do_drop with respect to inter-align trading,
+          ROOM_NODROPALL, ROOM_NOTRADE etc.
 
 
 * (0.4.1) implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
       		ROOM_NOFLOOR, EX_NOBREAK, EX_SWIM etc.
-* (0.4.1) Better online construction (autocreate exit+room when moving),
-  mobile create/edit, reset edit etc.
 * (0.4.1) when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 
 
 - (0.4.1) implement isPlayerName(), isObjectName(), isMobName() and (perhaps)
   isSpellName() and enforce their use throughout the code
-- (0.4.1) add some checks to do_give, do_get, do_drop with respect to inter-align trading,
-          ROOM_NODROP etc.
 - (0.4.1) expand tracking system
 
 
+* (0.4.2) Better online construction (autocreate exit+room when moving),
+          mobile create/edit, reset edit etc.
 - (0.4.2) use coordinates and mpfindpath code to make mobiles more intelligent
 - (0.4.2) new area format using XML
 - (0.4.2) better damage/xp system (more balanced)
