@@ -35,11 +35,7 @@ requires
 {$ENDIF}
 
 contains
-{$IFDEF LINUX}
-  speller_main in 'speller/speller_main.pas',
-  mudspell in 'speller/mudspell.pas';
-{$ELSE}
-  speller_main in 'speller\speller_main.pas',
-  mudspell in 'speller\mudspell.pas';
-{$ENDIF} 
+  speller_main,
+  mudspell;
+
 end.

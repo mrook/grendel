@@ -35,9 +35,6 @@ requires
 {$ENDIF}
 
 contains
-{$IFDEF LINUX}
-  cmd_main in 'commands/cmd_main.pas';
-{$ELSE}
-  cmd_main in 'commands\cmd_main.pas';
-{$ENDIF} 
+  cmd_main;
+
 end.
