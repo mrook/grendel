@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.8 2004/03/19 20:55:03 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.9 2004/03/22 20:16:54 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -56,29 +56,30 @@ type
 
 	GContext = class
 	private
-  	stack : array[0..stackSize] of variant;
-	  data : array of variant;
-	  pc, sp, bp : integer;
+		stack : array[0..stackSize] of variant;
+		data : array of variant;
+		pc, sp, bp : integer;
 
-    clockTick : integer;
+		clockTick : integer;
 
-	  owner : TObject;
-    block : GCodeBlock;
+		owner : TObject;
+    	block : GCodeBlock;
 
 	protected
 		procedure callMethod(classAddr, methodAddr : pointer; signature : GSignature);
 
 		function findSymbol(const id : string) : integer;
-    procedure setEntryPoint(addr : integer);
+	    procedure setEntryPoint(addr : integer);
 
 		procedure push(v : variant);
 		function pop() : variant;
 
 	public
-    procedure load(cb : GCodeBlock);
+    	procedure load(cb : GCodeBlock);
 
 		procedure run();
-
+		
+		function existsSymbol(const id : string) : boolean;
 		function runSymbol(const id : string; params : array of variant) : boolean;
 		function getResult() : variant;
 		
@@ -639,6 +640,11 @@ begin
       pc := -1;
       end;
   end;
+end;
+
+function GContext.existsSymbol(const id : string) : boolean;
+begin
+	Result := (findSymbol(id) <> -1);
 end;
 
 function GContext.runSymbol(const id : string; params : array of variant) : boolean;
