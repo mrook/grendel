@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.25 2004/03/30 12:49:31 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.26 2004/03/31 22:08:35 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -428,7 +428,7 @@ begin
 		
 		Erase(input);
 	except
-		on E : Exception do reportException(E);
+		on E : Exception do reportException(E, 'copyoverRecover()');
 	end;
 	{$ENDIF}
 end;

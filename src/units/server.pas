@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.10 2004/03/30 12:46:30 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.11 2004/03/31 22:08:19 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -260,7 +260,7 @@ begin
 	except
 		on E : Exception do
 			begin
-			reportException(E);
+			reportException(E, 'GServer.init()');
 			writeConsole('Server boot failed, halting!');
 			Halt(1);
 			end;
@@ -336,9 +336,9 @@ begin
 		cleanupNotes();
 
 		writeConsole('Cleaning events...');
-		cleanupEvents();
+		cleanupEvents();	
 	except
-		on E : Exception do reportException(E);
+		on E : Exception do reportException(E, 'GServer.cleanup()');
 	end;
 
 	// make sure there's no dangling icon
@@ -448,7 +448,7 @@ begin
 			on E : EQuit do break;
 			{$ENDIF}
 			on E : EControlC do break;
-			on E : Exception do reportException(E);
+			on E : Exception do reportException(E, 'GServer.gameLoop()');
 		end;
 		end;
 	

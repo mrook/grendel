@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.19 2004/03/26 20:05:10 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.20 2004/03/31 22:08:19 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -194,15 +194,13 @@ begin
   		on E : Exception do 
   			begin
   			Terminate();
-  			reportException(E);
+  			reportException(E, 'GConnection.Execute');
   			end;
 	end;
 	
 	if (Assigned(FOnClose)) then
 		FOnClose();
 	
-	_socket.disconnect();
-
 	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') Connection closed');
 end;
 
