@@ -2,7 +2,7 @@
 	Summary:
   		Connection manager
   	
-	## $Id: conns.pas,v 1.17 2004/03/26 16:08:02 ***REMOVED*** Exp $
+	## $Id: conns.pas,v 1.18 2004/03/26 17:00:15 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -133,10 +133,12 @@ const
 	IAC_IAC = 255;
 
 
-// GConnection
+{ GConnection constructor }
 constructor GConnection.Create(socket : GSocket);
 begin
 	inherited Create(true);
+	
+	FreeOnTerminate := true;
 
 	_socket := socket;
 
@@ -150,13 +152,15 @@ begin
 	compress := false;
 end;
 
+{ GConnection destructor }
 destructor GConnection.Destroy();
 begin
-  _socket.Free();
+	_socket.Free();
 
-  inherited Destroy();
+	inherited Destroy();
 end;
 
+{ GConnection main loop }
 procedure GConnection.Execute();
 begin 
 	writeConsole('(' + IntToStr(_socket.getDescriptor) + ') New connection (' + _socket.hostString + ')');

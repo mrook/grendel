@@ -2,7 +2,7 @@
 	Summary:
 		Grendel Virtual (Stack) Machine
 	
-	## $Id: gvm.pas,v 1.9 2004/03/22 20:16:54 ***REMOVED*** Exp $
+	## $Id: gvm.pas,v 1.10 2004/03/26 17:00:15 ***REMOVED*** Exp $
 }
 
 unit gvm;
@@ -733,15 +733,23 @@ begin
 	registerExternalMethod(name, classAddr, classAddr.MethodAddress(name), sig);
 end;
 
-begin
-  DecimalSeparator := '.';
+initialization
+	DecimalSeparator := '.';
 
-  setVMError(dummyError);
-  setSystemTrap(dummySystemTrap);
-  setExternalTrap(dummyExternalTrap);
-  setSignalTrap(dummySignalTrap);
-  setWaitTrap(dummyWaitTrap);
+	setVMError(dummyError);
+	setSystemTrap(dummySystemTrap);
+	setExternalTrap(dummyExternalTrap);
+	setSignalTrap(dummySignalTrap);
+	setWaitTrap(dummyWaitTrap);
 
-  codeCache := GHashTable.Create(128);
-  externalMethods := GHashTable.Create(256);
+	codeCache := GHashTable.Create(128);
+	externalMethods := GHashTable.Create(256);
+
+finalization
+	codeCache.Clear();
+	codeCache.Free();
+	
+	externalMethods.Clear();
+	externalMethods.Free();
+	
 end.

@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.23 2004/03/26 16:08:03 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.24 2004/03/26 17:00:15 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -62,6 +62,7 @@ type
 		function checkAliases(line : string) : boolean;
 
 	public
+		destructor Destroy(); override;
 		constructor Create(socket : GSocket; from_copyover : boolean = false; const copyover_name : string = '');
 
 		procedure writePager(const txt : string);
@@ -312,6 +313,15 @@ begin
 	commandQueue := TStringList.Create();
 	
 	Resume();
+end;
+
+{ GPlayerConnection destructor }
+destructor GPlayerConnection.Destroy();
+begin
+	commandQueue.Clear();
+	commandQueue.Free();
+	
+	inherited Destroy();
 end;
 
 { Fired by timer 4 times per second }

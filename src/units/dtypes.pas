@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.13 2004/03/17 00:19:32 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.14 2004/03/26 17:00:15 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -1269,7 +1269,15 @@ end;
 		GSingletonManager destructor
 }
 destructor GSingletonManager.Destroy();
+var
+	x : integer;
 begin
+	if (infoList.Count > 0) then
+		begin
+		for x := 0 to infoList.Count - 1 do
+			GSingletonInfo(infoList[x]).Free();
+		end;
+		
 	FreeAndNil(infoList);
 	
 	inherited Destroy();

@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.7 2004/03/13 15:45:21 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.8 2004/03/26 17:00:15 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -54,6 +54,7 @@ type
 
 	public
 		constructor Create();
+		destructor Destroy(); override;
 		
 		property name : string read _name;
 		property description : string read _description;
@@ -102,7 +103,7 @@ uses
 	skills;
 
 
-// GBodypart constructor
+{ GBodypart constructor }
 constructor GBodyPart.Create();
 begin
   inherited Create;
@@ -113,7 +114,7 @@ begin
   room_message := '$n wears $p on $s bodypart,';
 end;
 
-// GRace constructor
+{ GRace constructor }
 constructor GRace.Create();
 begin
   inherited Create;
@@ -136,6 +137,17 @@ begin
   _max_spells := 10;
   _abilities := GDLinkedList.Create();
   _bodyparts := GHashTable.Create(32);
+end;
+
+{ GRace destructor }
+destructor GRace.Destroy();
+begin
+	_abilities.clear();
+	_abilities.Free();
+	_bodyparts.clear();
+	_bodyparts.Free();
+	
+	inherited Destroy();
 end;
 
 // Load the bodyparts
