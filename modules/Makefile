@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.6 2003/10/31 10:14:04 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.7 2003/11/03 20:56:36 ***REMOVED*** Exp $
 #
 
 
@@ -27,7 +27,11 @@ WEBSERVICE=webservice.bpl
 CORE_SYM=..\\core
 CORE_FILE=..\\core.bpl
 
-RM=del
+ifeq ($(OS), Windows_NT)
+	RM=cmd /c del
+else
+	RM=del
+endif
 endif
 
 

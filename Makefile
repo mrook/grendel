@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.8 2003/10/31 10:14:04 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.9 2003/11/03 20:56:35 ***REMOVED*** Exp $
 #
 
 
@@ -24,7 +24,12 @@ CONVERT=convert.exe
 CORE=core.bpl
 
 MAKE=$(CURDIR)/make
-RM=del
+
+ifeq ($(OS), Windows_NT)
+	RM=cmd /c del
+else
+	RM=del
+endif
 endif
 
 
