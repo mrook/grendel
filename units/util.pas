@@ -39,9 +39,12 @@ function DiffDays (const D1, D2 : TDateTime) : Integer;
 
 function StringMatches(Value, Pattern : String) : Boolean;
 
+function makedrunk(param : string) : string;
+
 implementation
 
 uses
+    constants,
     strip;
 
 function URange(min, value, max : longint) : longint;
@@ -349,6 +352,48 @@ begin
       end;
     end;
   end;
+end;
+
+// Drunken speech - Nemesis
+function makedrunk(param : string) : string;
+var temp : char;
+    i, drunkpos : integer;
+    buf, drunkstring : string;
+begin
+  for i:=1 to length(param) do
+    begin
+    drunkpos := 0;
+
+    param := uppercase(param);
+    temp := param[i];
+
+    if (temp = ' ') then
+      buf := ' '
+    else
+    if not (temp in ['A'..'Z']) then
+      buf := temp
+    else
+      begin
+      try
+        while (cap(temp) < 'Z') do
+          begin
+          inc(temp);
+          inc(drunkpos);
+          end;
+      except
+        drunkpos := -1;
+        end;
+
+      if (drunkpos >= 0) and (drunkpos <= 25) then
+        buf := drunkbuf[drunkpos]
+      else
+        buf := temp;
+      end;
+
+    drunkstring := drunkstring + buf;
+    end;
+
+  Result := drunkstring;
 end;
 
 end.
