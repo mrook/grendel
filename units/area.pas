@@ -1857,6 +1857,7 @@ begin
   instanceObject:=obj;
 end;
 
+{ Revised 29/Jan/2001 - Nemesis }
 procedure addCorpse(c : pointer);
 var obj,obj_in : GObject;
     node : GListNode;
@@ -1881,7 +1882,13 @@ begin
 
     SET_BIT(flags, OBJ_NOPICKUP);
 
-    obj.timer := 60; // decay timer
+    // player corpses will remain longer than mobiles to give players more
+    // opportunity to retreive their items.
+
+    if (ch.IS_NPC) then
+      obj.timer := 5
+    else
+      obj.timer := 20;
     end;
 
   { when ch dies in bg, we don't want to have him lose all his items! - Grimlord }
@@ -1889,15 +1896,22 @@ begin
     begin
     node := ch.objects.head;
 
-    while (node <> nil) do
-      begin
-      obj_in := node.element;
-      node := node.next;
+    // Inventory put into corpse as well, but not for shopkeepers of course :)
 
-      if (IS_SET(obj_in.flags, OBJ_LOYAL)) then
+    if (not ch.IS_SHOPKEEPER) then
+      begin
+      while (node <> nil) do
         begin
-        obj_in.fromChar;
-        obj_in.toObject(obj);
+        obj_in := node.element;
+
+        if (not IS_SET(obj_in.flags, OBJ_LOYAL)) then
+          begin
+          obj_in.fromChar;
+          obj_in.toObject(obj);
+          end;
+
+        node := node.next;
+
         end;
       end;
 
@@ -1908,6 +1922,7 @@ begin
        ch.wear[h].toObject(obj);
        ch.wear[h] := nil;
        end;
+
     end;
 
   obj.toRoom(ch.room);
