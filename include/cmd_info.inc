@@ -1435,3 +1435,43 @@ begin
   ch.player^.pagerlen := value;
   act(AT_REPORT,'Pager set to ' + inttostr(value) + ' lines.',false,ch,nil,nil,TO_CHAR);
 end;
+
+{ shortcut command - Nemesis }
+procedure do_autoloot(ch:GCharacter;param:string);
+begin
+  with ch.player^ do
+    begin
+    if IS_SET(cfg_flags,CFG_AUTOLOOT) then
+      begin
+      REMOVE_BIT(cfg_flags,CFG_AUTOLOOT);
+      ch.sendBuffer('You now won''t loot corpses at a kill.'#13#10);
+      exit;
+      end
+    else
+      begin
+      SET_BIT(cfg_flags,CFG_AUTOLOOT);
+      ch.sendBuffer('You now automatically loot corpses at a kill.'#13#10);
+      exit;
+      end;
+    end;
+end;
+
+{ shortcut command - Nemesis }
+procedure do_autosac(ch:GCharacter;param:string);
+begin
+  with ch.player^ do
+    begin
+    if IS_SET(cfg_flags,CFG_AUTOSAC) then
+      begin
+      REMOVE_BIT(cfg_flags,CFG_AUTOSAC);
+      ch.sendBuffer('You now won''t automatically sacrifice corpses at a kill.'#13#10);
+      exit;
+      end
+    else
+      begin
+      SET_BIT(cfg_flags,CFG_AUTOSAC);
+      ch.sendBuffer('You now automatically sacrifice corpses at a kill.'#13#10);
+      exit;
+      end;
+    end;
+end;

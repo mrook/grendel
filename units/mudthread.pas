@@ -533,11 +533,26 @@ begin
   if (comparestr(s, 'do_lock') = 0) then
     g := do_lock
   else
+  if (comparestr(s, 'do_ascore') = 0) then
+    g := do_ascore
+  else
+  if (comparestr(s, 'do_revive') = 0) then
+    g := do_revive
+  else
+  if (comparestr(s, 'do_setpager') = 0) then
+    g := do_setpager
+  else
+  if (comparestr(s, 'do_autoloot') = 0) then
+    g := do_autoloot
+  else
+  if (comparestr(s, 'do_autosac') = 0) then
+    g := do_autosac
+  else
     begin
     g := nil;
 
-    bugreport('findCommand', 'mudthread.pas', s + ' unknown',
-              'This command has not been found. Please check your settings.');
+    //bugreport('findCommand', 'mudthread.pas', s + ' unknown',
+    //          'This command has not been found. Please check your settings.');
     end;
 
   findCommand := g;
