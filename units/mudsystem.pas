@@ -465,25 +465,48 @@ begin
       act(AT_SOCIAL,others_auto,false,ch,nil,vict,TO_ROOM);
       end
     else
+    if (obj <> nil) then        // victim is object, e.g. 'lick rapier'
+      begin
+      if (length(char_object) = 0) then
+        act(AT_SOCIAL,' ',false,ch,obj,nil,TO_CHAR)
+      else
+        act(AT_SOCIAL,char_object,false,ch,obj,nil,TO_CHAR);
+      if (length(others_object) <> 0) then
+        act(AT_SOCIAL,others_object,false,ch,obj,nil,TO_ROOM);
+      end
+    else
     if (vict = nil) then
       act(AT_SOCIAL,'They are not here.',false,ch,nil,nil,TO_CHAR)
     else
       begin
-      act(AT_SOCIAL,char_found,false,ch,nil,vict,TO_CHAR);
-      act(AT_SOCIAL,others_found,false,ch,nil,vict,TO_NOTVICT);
-      act(AT_SOCIAL,vict_found,false,ch,nil,vict,TO_VICT);
+      if (length(char_found) = 0) then
+        act(AT_SOCIAL,' ',false,ch,nil,vict,TO_CHAR)
+      else
+        act(AT_SOCIAL,char_found,false,ch,nil,vict,TO_CHAR);
+
+      if (length(others_found) <> 0) then
+        act(AT_SOCIAL,others_found,false,ch,nil,vict,TO_NOTVICT);
+
+      if (length(vict_found) <> 0) then
+        act(AT_SOCIAL,vict_found,false,ch,nil,vict,TO_VICT);
 
       if ((not ch.IS_NPC)) and (vict.IS_NPC) and
-       // not IS_SET(vict.npc_index.mpflags,MPROG_ACT) and
+        not IS_SET(vict.npc_index.mpflags,MPROG_ACT) and
        (vict.IS_AWAKE) then
         begin
         chance:=random(10);
         case chance of
           1,2,3,4,5,6:begin
-                      act(AT_SOCIAL,vict_found,false,vict,nil,ch,TO_VICT);
-                      act(AT_SOCIAL,others_found,false,vict,nil,ch,TO_NOTVICT);
-                      act(AT_SOCIAL,char_found,false,vict,nil,ch,TO_CHAR);
-                      end;
+                      if (length(vict_found) <> 0) then
+                        act(AT_SOCIAL,vict_found,false,vict,nil,ch,TO_VICT);
+
+                      if (length(others_found) <> 0) then
+                        act(AT_SOCIAL,others_found,false,vict,nil,ch,TO_NOTVICT);
+
+                      if (length(char_found) = 0) then
+                        act(AT_SOCIAL,' ',false,ch,nil,vict,TO_CHAR)
+                      else
+                        act(AT_SOCIAL,char_found,false,vict,nil,ch,TO_CHAR);                      end;
                   7,8:begin
                       interpret(vict,'say Cut it out!');
                       interpret(vict,'sigh');
