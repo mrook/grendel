@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.9 2004/03/26 19:55:18 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.10 2004/03/30 12:46:30 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -387,7 +387,24 @@ begin
 		end;
 
 	if (shutdownDelay = 0) then
+		begin
 		running := false;
+		
+		case shutdownType of
+			  SHUTDOWNTYPE_HALT:begin
+								writeConsole('Starting shutdown now...');
+      							to_channel(nil, '$B$1 ---- Server will $3shutdown $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+								end;
+			SHUTDOWNTYPE_REBOOT:begin
+								writeConsole('Starting reboot now...');
+      							to_channel(nil, '$B$1 ---- Server will $3reboot $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+								end;
+		  SHUTDOWNTYPE_COPYOVER:begin
+								writeConsole('Starting copyover now...');
+      							to_channel(nil, '$B$1 ---- Server will $3copyover $7NOW!$1 ----',CHANNEL_ALL,AT_REPORT);
+								end;
+		end;
+		end;
 end;
 
 { Gameloop, call this from main program or TService.Execute }
