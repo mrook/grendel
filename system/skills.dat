@@ -155,7 +155,7 @@ startchar: You raise your voice into a booming thunder of pain!
 startroom: $n raises $s voice and sends a booming thunder through the room!
 dammsg: $B$4Voice $7of $6Thunder$A$6
 function: spell_generic
-dice: 3d40+30
+dice: 1200
 #end
 
 #skill
@@ -196,6 +196,19 @@ function: spell_generic
 affects: "Aura of Enlightment" "You feel less bright." 1 { apply_int 2 }
 hitchar: You feel smart.
 hitroom: $N looks very smart.
+#end
+
+#skill
+type: spell
+name: Armour
+rounds: 2
+minlevel: 0
+mana: 10
+target: 3
+function: spell_generic
+affects: "Armour" "You feel less protected." 12 { apply_ac -16 } { apply_str 3 }
+hitchar: You feel protected.
+hitroom: $N feels protected.
 #end
 
 #skill
@@ -246,7 +259,7 @@ minlevel: 22
 mana: 20
 target: 4
 function: spell_generic
-affects: "" 0 { apply_stripname Blindness }
+affects: "" "" 0 { apply_stripname Blindness }
 #end
 
 #skill
@@ -267,7 +280,7 @@ minlevel: 22
 mana: 20
 target: 4
 function: spell_generic
-affects: "" 0 { apply_stripname Poison }
+affects: "" "" 0 { apply_stripname Poison }
 #end
 
 #skill
@@ -306,7 +319,7 @@ target: 4
 function: spell_generic
 hitvict: You look a lot better.
 hitroom: $N looks a lot better.
-affects: "" 0 { apply_hp 100 }
+affects: "" "" 0 { apply_hp 100 }
 #end
 
 #skill
@@ -320,7 +333,7 @@ function: spell_generic
 hitroom: $N looks a bit better.
 hitvict: You look a bit better.
 hitroom: $N looks a bit better.
-affects: "" 0 { apply_hp 12 }
+affects: "" "" 0 { apply_hp 12 }
 #end
 
 #skill
