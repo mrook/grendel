@@ -26,7 +26,7 @@ object GrendelWebModule: TGrendelWebModule
     WebDispatch.MethodType = mtAny
     WebDispatch.PathInfo = 'wsdl*'
     AdminEnabled = False
-    TargetNamespace = 'http://www.grendelproject.nl/'
+    TargetNamespace = 'http://www.grendelproject.nl/namespaces/webservice'
     PublishOptions = []
     Left = 60
     Top = 123
