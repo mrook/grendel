@@ -245,6 +245,8 @@ end;
 destructor GCharacter.Destroy;
 var
    s : integer;
+   node : GListNode;
+   obj : GObject;
 begin
   if (player <> nil) then
     begin
@@ -254,19 +256,16 @@ begin
 
   affects.clean;
   affects.Free;
-  
-  (* for s:=1 to MAX_WEAR do
-   if wear[s]<>nil then
-    begin
-    obj:=wear[s];
-    extract_obj(obj);
-    end;
 
-  if (carried_first<>nil) then
+  for s := 1 to MAX_WEAR do
+   if (wear[s] <> nil) then
+    wear[s].extract;
+
+  if (objects.head <> nil) then
     repeat
-      obj:=carried_last;
-      extract_obj(obj);
-    until (carried_last=nil); *)
+      obj := objects.tail.element;
+      obj.extract;
+    until (objects.head = nil);
 
   hunting := nil;
 
