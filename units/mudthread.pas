@@ -1359,7 +1359,7 @@ begin
     begin
     conn.state := CON_NAME;
 
-    conn.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION').text);
+    conn.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
 
     temp_buf := AnsiColor(6,0) + #13#10;
 
