@@ -37,6 +37,8 @@ function DiffMinutes (const D1, D2 : TDateTime) : Integer;
 function DiffHours (const D1, D2 : TDateTime) : Integer;
 function DiffDays (const D1, D2 : TDateTime) : Integer;
 
+function StringMatches(Value, Pattern : String) : Boolean;
+
 implementation
 
 uses
@@ -274,6 +276,79 @@ end;
 function DiffDays (const D1, D2 : TDateTime) : Integer;
 begin
   Result := Trunc (D2 - D1);
+end;
+
+
+// functions borrowed from the Peter Morris' FastString lib
+function FastCharPos(const aSource : String; const C: Char; StartPos : Integer) : Integer;
+var
+  L                           : Integer;
+begin
+  //If this assert failed, it is because you passed 0 for StartPos, lowest value is 1 !!
+  Assert(StartPos > 0);
+
+  Result := 0;
+  L := Length(aSource);
+  if L = 0 then exit;
+  if StartPos > L then exit;
+  Dec(StartPos);
+  asm
+      PUSH EDI                 //Preserve this register
+
+      mov  EDI, aSource        //Point EDI at aSource
+      add  EDI, StartPos
+      mov  ECX, L              //Make a note of how many chars to search through
+      sub  ECX, StartPos
+      mov  AL,  C              //and which char we want
+    @Loop:
+      cmp  Al, [EDI]           //compare it against the SourceString
+      jz   @Found
+      inc  EDI
+      dec  ECX
+      jnz  @Loop
+      jmp  @NotFound
+    @Found:
+      sub  EDI, aSource        //EDI has been incremented, so EDI-OrigAdress = Char pos !
+      inc  EDI
+      mov  Result,   EDI
+    @NotFound:
+
+      POP  EDI
+  end;
+end;
+
+function StringMatches(Value, Pattern : String) : Boolean;
+var
+  NextPos,
+  Star1,
+  Star2       : Integer;
+  NextPattern   : String;
+begin
+  Star1 := FastCharPos(Pattern,'*',1);
+  if Star1 = 0 then
+    Result := (Value = Pattern)
+  else begin
+    Result := (Copy(Value,1,Star1-1) = Copy(Pattern,1,Star1-1));
+    if Result then begin
+      if Star1 > 1 then Value := Copy(Value,Star1,Length(Value));
+      Pattern := Copy(Pattern,Star1+1,Length(Pattern));
+
+      NextPattern := Pattern;
+      Star2 := FastCharPos(NextPattern, '*',1);
+      if Star2 > 0 then NextPattern := Copy(NextPattern,1,Star2-1);
+
+      NextPos := pos(NextPattern,Value);
+      if (NextPos = 0) and not (NextPattern = '') then
+        Result := False
+      else begin
+        Value := Copy(Value,NextPos,Length(Value));
+        if Pattern = '' then
+          Result := True
+        else
+          Result := Result and StringMatches(Value,Pattern);
+      end;
+    end;
+  end;
 end;
 
 end.
