@@ -209,7 +209,7 @@ begin
     obj := node.element;
 
     if (obj.item_type <> ITEM_MONEY) then
-      act(AT_REPORT,'$6[$7'+pad_integer(i,2)+'$6]$7  '+pad_string(obj.name,25)+' $6($7'+inttostr(getCost(keeper,ch,obj))+' coins$6)',false,ch,obj,nil,TO_CHAR);
+      act(AT_REPORT,'$6[$7'+pad_integer(i,2)+'$6]$7 $p, for $6'+inttostr(getCost(keeper,ch,obj))+'$7 coins',false,ch,obj,nil,TO_CHAR);
 
     inc(i);
     node := node.next;
