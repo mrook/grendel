@@ -97,9 +97,29 @@ begin
     end;
 
   { if exit is hidden or it is secret and closed then no exit - Grimlord }
-  if (pexit=nil) or (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) and (not ch.IS_HOLYWALK) then
+  if (pexit = nil) or (IS_SET(pexit.flags, EX_SECRET) and IS_SET(pexit.flags, EX_CLOSED)) and (not ch.IS_HOLYWALK) then
     begin
-    ch.sendBuffer('You can''t go in that direction.'#13#10);
+    if (drunk) then
+      case random(3) of
+        0 : begin
+            act(AT_REPORT, 'You stumble into some obstacle.', false, ch, nil, nil, TO_CHAR);
+            act(AT_REPORT, '$n stumbles into an obstacle.', false, ch, nil, nil, TO_ROOM);
+            end;
+        1 : begin
+            act(AT_REPORT, 'Your arms flailing wildly, you trip and tumble to the ground.', false, ch, nil, nil, TO_CHAR);
+            act(AT_REPORT, 'Arms flailing wildly, $n trips and tumbles to the ground.', false, ch, nil, nil, TO_ROOM);
+            end;
+        2 : begin
+            act(AT_REPORT, 'Staggering along, you are suddenly intercepted by something solid.', false, ch, nil, nil, TO_CHAR);
+            act(AT_REPORT, 'Everything goes dark and blurry as you fall to the ground.', false, ch, nil, nil, TO_CHAR);
+
+            act(AT_REPORT, '$n staggers along, muttering under $s breath, and bumps into something.', false, ch, nil, nil, TO_ROOM);
+            act(AT_REPORT, 'A loud thud sounds as $n topples to the ground.', false, ch, nil, nil, TO_ROOM);
+            end;
+      end
+    else
+      ch.sendBuffer('You can''t go in that direction.'#13#10);
+
     exit;
     end
   else
@@ -202,7 +222,7 @@ begin
     exit;
     end;
 
-  if (ch.level<room_to.min_level) or (ch.level>room_to.max_level) and
+  if ((ch.level < room_to.min_level) or (ch.level > room_to.max_level)) and
    (not ch.IS_IMMORT) and (not ch.IS_NPC) then
     begin
     ch.sendBuffer('A strange force prevents you from travelling there.'#13#10);
@@ -267,10 +287,16 @@ begin
     txt_room := 'climbs';
     end
   else
-  if IS_SET(ch.aff_flags,AFF_SNEAK) then
+  if IS_SET(ch.aff_flags, AFF_SNEAK) then
     begin
     txt_ch := 'sneak';
     txt_room := 'sneaks';
+    end
+  else
+  if (drunk) then
+    begin
+    txt_ch := 'stumble';
+    txt_room := 'stumbles';
     end
   else
     begin
