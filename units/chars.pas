@@ -199,6 +199,7 @@ type
       procedure stopFlying;
 
       function findInventory(s : string) : GObject;
+      function findEquipment(s : string) : GObject;
 
       constructor Create;
       destructor Destroy; override;
