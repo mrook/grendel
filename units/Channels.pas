@@ -1,6 +1,6 @@
 {
   @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.19 2003/09/25 16:06:25 ***REMOVED*** Exp $)
+  @lastmod($Id: Channels.pas,v 1.20 2003/10/03 18:05:07 ***REMOVED*** Exp $)
 }
 
 unit Channels;
@@ -897,7 +897,7 @@ type
 procedure GConsoleChannel.write(timestamp : TDateTime; text : string);
 begin
   if (channels_loaded) then
-    to_channel(nil, FormatDateTime('[tt] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);
+    to_channel(nil, FormatDateTime('[hh:nn] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);
 end;
 
 procedure initChannels();
