@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.36 2001/11/24 15:35:09 xenon Exp $
+// $Id: mudsystem.pas,v 1.37 2001/11/24 16:01:59 xenon Exp $
 
 unit mudsystem;
 
@@ -401,10 +401,12 @@ begin
       end;
 
   for a := 0 to banned_names.count-1 do
-    if (ExecRegExpr(banned_names[a], name)) then
     begin
-      Result := true;
-      exit;
+      if (ExecRegExpr(banned_names[a], name)) then
+      begin
+        Result := true;
+        exit;
+      end;
     end;
 end;
 
