@@ -90,10 +90,10 @@ begin
       if g='#END' then
         begin
         keyword:=false;
-        help:=GHelp.Create;
-        help.level:=StrToInt(stripr(s,'='));
+        help := GHelp.Create;
+        help.level := StrToInt(stripr(s,'='));
 
-        help.keywords := hash_string(keys);
+        help.keywords := keys;
         help.helptype := helptype;
         help.syntax := syntax;
         help.related := related;
@@ -161,8 +161,10 @@ var
    node : GListNode;
    help : GHelp;
    key, arg : string;
+   s, p : integer;
 begin
   Result := help_files.head.element;
+  p := high(integer);
 
   text := uppercase(text);
 
@@ -177,11 +179,12 @@ begin
     while (length(key) > 0) do
       begin
       key := one_argument(key, arg);
+      s := pos(text, arg);
 
-      if (pos(text, arg) > 0) then
+      if (s > 0) and (s < p) then
         begin
+        p := s;
         Result := help;
-        exit;
         end;
       end;
 
