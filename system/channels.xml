@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<!-- I'm not yet happy with the current format. The aim was making -->
+<!-- channels more configurable, which I think worked out pretty well. -->
+<!-- I just have a feeling I'm missing some nice options, or should've -->
+<!-- done certain things a little bit differently. -->
+<!-- So any suggestions/ideas/feature requests are welcome on the -->
+<!-- grendel mailinglist. -->
+
+<Channels>
+  <!-- the 'log' channel is *essential*; remove it and the mud'll go haywire -->
+  <ChannelData Name="log">
+    <Minimumleveluse>998</Minimumleveluse>
+    <Minimumlevelsee>998</Minimumlevelsee>
+    <Comment>The (essential) log channel</Comment>
+    <Channelcolor>14</Channelcolor>
+    <Flags>1|32</Flags>
+  </ChannelData>
+  <!-- the 'all' channel is almost as essential as the log channel; used for global messages (e.g. bg) -->
+  <ChannelData Name="all">
+    <Minimumleveluse>991</Minimumleveluse>
+    <Minimumlevelsee>1</Minimumlevelsee>
+    <Comment>The channel used for global messages (e.g. battleground)</Comment>
+    <Channelcolor>7</Channelcolor>
+    <Flags>32</Flags>
+  </ChannelData>
+  <ChannelData Name="chat">
+      <!-- Command user has to type. Leave this empty and their won't be a command for this channel. (i.e. like log or all channel) -->
+    <Command>chat</Command>
+      <!-- Alias for command -->
+    <Alias>.</Alias>
+      <!-- Minimum level for player to be able to *use* channel -->
+    <Minimumleveluse>1</Minimumleveluse>
+      <!-- Minimum level for player to be able to *see* channel; if not found defaults to minimumleveluse value -->
+    <Minimumlevelsee>1</Minimumlevelsee>
+      <!-- Comments about channel (channel's purpose etc.) -->
+    <Comment>General per-align channel for chatting (but *only* English)</Comment>
+      <!-- Color used for channeldisplay -->
+    <Channelcolor>14</Channelcolor>
+      <!-- You 'chat,' -->
+    <VerbYou>chat, '%s'</VerbYou>
+      <!-- Xenon 'chats,' -->
+    <VerbOther>chats, '%s'</VerbOther>
+      <!-- Flags: 1: log this channel; 2: channel has history; 4: room; 8: area; 16: align; 32: global/interalign; 64: clan; 128: group -->
+    <Flags>1|2|16</Flags>
+      <!-- Cost: the cost in moves to use this channel once. -->
+    <Cost>-1</Cost>
+  </ChannelData>
+  <ChannelData Name="immtalk">
+    <Command>immtalk</Command>
+    <Minimumleveluse>990</Minimumleveluse>
+    <Comment>General immortal talk channel</Comment>
+    <Channelcolor>10</Channelcolor>
+    <VerbYou>*IMMTALK* %s</VerbYou>
+    <VerbOther>*IMMTALKs* %s</VerbOther>
+    <Flags>2|32</Flags>
+  </ChannelData>
+  <ChannelData Name="wartalk">
+    <Command>raid</Command>
+    <Alias>\</Alias>
+    <Minimumleveluse>100</Minimumleveluse>
+    <Comment>General per-align wartalk channel</Comment>
+    <Channelcolor>12</Channelcolor>
+    <VerbYou>[!] %s</VerbYou>
+    <VerbOther>[!] %s</VerbOther>
+    <Flags>2|16</Flags>
+    <Cost>-1</Cost>
+  </ChannelData>
+  <ChannelData Name="auctalk">
+    <Command>auctalk</Command>
+    <Alias>a</Alias>
+    <Minimumleveluse>20</Minimumleveluse>
+    <Comment>General per-align trade channel</Comment>
+    <Channelcolor>13</Channelcolor>
+    <VerbYou>auction, '%s'</VerbYou>
+    <VerbOther>auctions, '%s'</VerbOther>
+    <Flags>2|16</Flags>
+  </ChannelData>
+  <ChannelData Name="clantalk">
+    <Command>clantalk</Command>
+    <Alias>ct</Alias>
+    <Minimumleveluse>1</Minimumleveluse>
+    <Comment>Channel for chatting between clanmembers</Comment>
+    <Channelcolor>2</Channelcolor>
+    <VerbYou>[Clantalk]: %s</VerbYou>
+    <VerbOther>[Clantalks]: %s</VerbOther>
+    <Flags>2|64</Flags>
+  </ChannelData>
+  <ChannelData Name="babbel">
+    <Command>babbel</Command>
+    <Minimumleveluse>1</Minimumleveluse>
+    <Comment>General per-align chat channel, for other languages than English</Comment>
+    <Channelcolor>14</Channelcolor>
+    <VerbYou>(babbel) '%s'</VerbYou>
+    <VerbOther>(babbels) '%s'</VerbOther>
+    <Flags>2|16</Flags>
+  </ChannelData>
+  <ChannelData Name="thunder">
+    <Command>thunder</Command>
+    <Minimumleveluse>995</Minimumleveluse>
+    <Minimumlevelsee>1</Minimumlevelsee>
+    <Comment>Channel for use by immortals only, visible for everyone online</Comment>
+    <Channelcolor>3</Channelcolor>
+    <VerbYou>THUNDER %s</VerbYou>
+    <VerbOther>THUNDERS %s</VerbOther>
+    <Flags>2|32</Flags>
+  </ChannelData>
+  <ChannelData Name="yell">
+    <Command>yell</Command>
+    <Minimumleveluse>1</Minimumleveluse>
+    <Comment>Area wide interalign channel</Comment>
+    <Channelcolor>12</Channelcolor>
+    <VerbYou>yell, '%s'</VerbYou>
+    <VerbOther>yells, '%s'</VerbOther>
+    <Flags>8|32</Flags>
+  </ChannelData>
+  <ChannelData Name="grouptell">
+    <Command>grouptell</Command>
+    <Alias>gt</Alias>
+    <Minimumleveluse>1</Minimumleveluse>
+    <Minimumlevelsee>1</Minimumlevelsee>
+    <Comment>Channel for communication between groupmembers</Comment>
+    <Channelcolor>10</Channelcolor>
+    <VerbYou>tell the group, '%s'</VerbYou>
+    <VerbOther>tells the group, '%s'</VerbOther>
+    <Flags>1|2|128</Flags>
+  </ChannelData>
+</Channels>
