@@ -239,7 +239,7 @@ begin
 
     if (vict.IS_NPC) then
       begin
-      p := GNPC(ch).context.findSymbol('onFight');
+      p := GNPC(ch).context.findSymbol('onBlock');
 
       if (p <> -1) then
         begin
