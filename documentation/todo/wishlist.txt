@@ -40,14 +40,17 @@ Wishlist for the 1.0.x tree
   
   - objects/scripts/modules should be able to register event handlers
     
-* revise grouping system: generalize GObject to some form of object 'list'
+# revise grouping system: generalize GObject to some form of object 'list'
   (possibly named GItem), which can contain 1 or more GItems or subsets
   of GItem, something along those lines
   
-  -> do not group objects solely on basic stats, two objects must be an
+  # do not group objects solely on basic stats, two objects must be an
      *exact* match if they are to be grouped
+
+* remove all references to grouping from core code, object grouping should
+  be an output feature to remove client clutter
      
-  -> Bags and containers should be saveable
+! Bags and containers should be saveable
     
 * get rid of a lot of obsolete smaug/diku/emlen-inspired code, this
   only helps in keeping the system unstable and hard to manage. 
