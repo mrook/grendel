@@ -2,16 +2,19 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.7 2004/03/06 18:28:57 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.8 2004/03/13 13:19:35 ***REMOVED*** Exp $
 }
 
 unit dtypes;
 
 interface
 
+
 uses
 	Variants,
+	Classes,
 	SysUtils;
+
 
 {$M+}
 type
@@ -96,6 +99,9 @@ type
 		_serial : integer;
 		_head : GListNode;					{ Pointer to head of list }
 		_tail : GListnode;					{ Pointer to tail of list }
+		
+	public
+		procedure remove(node : GListNode); overload;
 
 	published
 		function insertLast(element : pointer) : GListNode;
@@ -104,7 +110,7 @@ type
 		function insertBefore(tn : GListNode; element : pointer) : GListNode;
 
 		procedure add(element : TObject);
-		procedure remove(node : GListNode);
+		procedure remove(element : TObject); overload;
 		procedure clean();
 		procedure smallClean();
 
@@ -192,20 +198,23 @@ type
 		property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
 		property buckets[index : integer] : GDLinkedList read getBucket;
 		property bucketcount : integer read hashsize;
-	end;   
+	end;
+	
+	{
+		Singleton class
+	}
+	GSingleton = class
+	public
+		class function NewInstance : TObject; override;
+		procedure FreeInstance; override;
+	end;
 {$M-}    
 
-{
-	Size of global string hash table
-}
-const STR_HASH_SIZE = 1024;
 
 var
-	{
-		Global string hash table
-	}
+	{	Global string hash table }
   str_hash : GHashTable;
-
+  
 
 function hash_string(const src : string) : PString; overload;
 function hash_string(src : PString) : PString; overload;
@@ -217,7 +226,9 @@ function defaultHash(size, prime : integer; const key : string) : integer;
 function firstHash(size, prime : integer; const key : string) : integer;
 function sortedHash(size, prime : integer; const key : string) : integer;
 
+
 implementation
+
 
 uses
 	md5;
@@ -255,6 +266,32 @@ type
       function hasNext() : boolean; override;
       function next() : TObject; override;
     end;
+    
+    {
+			Singleton manager class
+		}
+		GSingletonManager = class
+		private
+			classList, instanceList : TList;
+			
+		public
+			constructor Create();
+			destructor Destroy(); override;
+			
+		published
+			procedure addInstance(instance : TObject);
+			function findInstance(classType : TClass) : TObject;
+		end;
+
+
+{
+	Size of global string hash table
+}
+const STR_HASH_SIZE = 1024;
+
+var
+  { Instance of singleton manager }
+  singletonManager : GSingletonManager;
 
 
 {
@@ -581,6 +618,28 @@ begin
 
 	inc(_size);
 	inc(_serial);
+end;
+
+{
+	Summary:
+		Find and remove element from list
+}
+procedure GDLinkedList.remove(element : TObject);
+var
+  node : GListNode;
+begin
+  node := head;
+  
+  while (node <> nil) do
+    begin
+    if (node.element = element) then
+      begin
+      remove(node);
+      exit;
+      end;
+      
+    node := node.next;
+    end;
 end;
 
 {
@@ -1179,8 +1238,82 @@ begin
   src := nil;
 end;
 
-
+{ 
+	Summary:
+		GSingletonManager constructor
+}
+constructor GSingletonManager.Create();
 begin
+	inherited Create();
+	
+	classList := TList.Create();
+	instanceList := TList.Create();
+end;
+
+{ 
+	Summary:
+		GSingletonManager destructor
+}
+destructor GSingletonManager.Destroy();
+begin
+	FreeAndNil(classList);
+	FreeAndNil(instanceList);
+	
+	inherited Destroy();
+end;
+
+{ 
+	Summary:
+		Adds instance to manager
+}
+procedure GSingletonManager.addInstance(instance : TObject);
+begin
+	classList.add(instance.ClassType);
+	instanceList.add(instance);
+end;
+
+{
+	Summary:
+		Finds instance of classtype, or nil if unsuccessful
+}
+function GSingletonManager.findInstance(classType : TClass) : TObject;
+var
+	index : integer;
+begin
+	Result := nil;
+
+	index := classList.IndexOf(classType);
+	
+	if (index <> - 1) then
+		Result := instanceList[index];
+end;
+
+{
+	Summary:
+		Returns (if it exists) a previous instance or a new instance
+}
+class function GSingleton.NewInstance : TObject;
+begin
+	Result := singletonManager.findInstance(Self);
+	
+	if (not Assigned(Result)) then
+		begin
+		Result := inherited NewInstance;
+		singletonManager.addInstance(Result);
+		end;		
+end;
+
+procedure GSingleton.FreeInstance;
+begin
+end;
+
+
+initialization
   str_hash := GHashTable.Create(STR_HASH_SIZE);
+  singletonManager := GSingletonManager.Create();
+
+finalization
+	str_hash.Free();
+
 end.
 
