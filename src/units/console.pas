@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.8 2004/03/19 15:34:41 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.9 2004/04/01 11:22:57 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -38,6 +38,8 @@ type
 		writers : GDLinkedList;
 		history : GDLinkedList;
 		queue : GDLinkedList;
+		
+		synchronizer : TMultiReadExclusiveWriteSynchronizer;
 
 	public
 		constructor actualCreate(); override;
@@ -97,6 +99,8 @@ begin
 	writers := GDLinkedList.Create();
 	history := GDLinkedList.Create();
 	queue := GDLinkedList.Create();
+	
+	synchronizer := TMultiReadExclusiveWriteSynchronizer.Create();
 end;
 
 { GConsole destructor }
@@ -109,6 +113,8 @@ begin
 	writers.Free();
 	history.Free();
 	queue.Free();
+	
+	synchronizer.Free();
 end;
 
 { Attach a GConsoleWriter object to the console }
@@ -126,9 +132,11 @@ end;
 { Write a message to the console }
 procedure GConsole.write(const text : string; debugLevel : integer = 0);
 var
-  he : GConsoleHistoryElement;
-  timestamp : TDateTime;
+	he : GConsoleHistoryElement;
+	timestamp : TDateTime;
 begin
+	synchronizer.BeginWrite();
+	
 	timestamp := Now();
 
 	he := GConsoleHistoryElement.Create();
@@ -139,8 +147,9 @@ begin
 
 	if (history.size() > CONSOLE_HISTORY_MAX) then
 		begin
-		GConsoleHistoryElement(history.head.element).Free();
+		he := GConsoleHistoryElement(history.head.element);
 		history.remove(history.head);
+		he.Free();
 		end;
 
 	he := GConsoleHistoryElement.Create();
@@ -151,6 +160,8 @@ begin
   
 	if (not serverBooted) then
 		poll();
+
+	synchronizer.EndWrite();
 end;
 
 { Poll the console }
@@ -160,6 +171,8 @@ var
 	iterator : GIterator;
 	writer : GConsoleWriter;
 begin
+	synchronizer.BeginRead();
+
 	while (queue.head <> nil) do
 		begin
 		he := GConsoleHistoryElement(queue.head.element);
@@ -179,31 +192,37 @@ begin
 		
 		he.Free();
 		end;
+
+	synchronizer.EndRead();
 end;
 
 { Fetch (up to) max items from the history and feed them to callback }
 procedure GConsole.fetchHistory(callback : GConsoleWriter; max : integer = 0);
 var
-  iterator : GIterator;
-  he : GConsoleHistoryElement;
-  count : integer;
+	iterator : GIterator;
+	he : GConsoleHistoryElement;
+	count : integer;
 begin
-  iterator := history.iterator();
-  count := 0;
-  
-  while (iterator.hasNext()) do
-    begin
-    he := GConsoleHistoryElement(iterator.next());
-    
-    callback.write(he.timestamp, he.text);
-    
-    inc(count);
-    
-    if (max > 0) and (count >= max) then
-      break;
-    end;
-    
-  iterator.Free();
+	synchronizer.BeginRead();
+
+	iterator := history.iterator();
+	count := 0;
+
+	while (iterator.hasNext()) do
+		begin
+		he := GConsoleHistoryElement(iterator.next());
+
+		callback.write(he.timestamp, he.text);
+
+		inc(count);
+
+		if (max > 0) and (count >= max) then
+			break;
+		end;
+
+	iterator.Free();
+
+	synchronizer.EndRead();
 end;
 
 procedure writeConsole(const text : string; debugLevel : integer = 0);
