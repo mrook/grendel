@@ -51,12 +51,11 @@ Grendel's TODO list with probable release date/version
 ! (0.4.3) Multi-command alias, commands seperated door bijvoorbeeld ":" teken
 ! (0.4.3) fix for logfile truncation
 
+! (0.4.4) (silently) prolonging spells
 
-- (0.4.3) Variable usage in alias, bijv %1 (voor bijv: "cm Nemesis" en dat alias cm dan staat voor "Cast 'missile' %1")
 
-- (0.4.4) prolonging defensive spells: "You prolong <victims> holy armour."
-          prolonging offensive spells: "<victim> is already affected by <spellname>"
-          removal spells: "<victim> is not cursed".
+- (0.4.4) Variable usage in alias, bijv %1 (voor bijv: "cm Nemesis" en dat alias cm dan staat voor "Cast 'missile' %1")
+- (0.4.4) save channelignores in pfile
 - (0.4.4) re-implement "Switch" and "Snoop"
 - (0.4.4) command to switch tank in a group
 - (0.4.4) command to switch leadership of a group
@@ -74,8 +73,7 @@ Grendel's TODO list with probable release date/version
 	
 l implementation of the mud sound protocol
 l clan competition for wps/pkillnum
-l general format for docs (docwrite-HOWTO something), both
-  for HTML and plaintext docs
+l general format for docs (docwrite-HOWTO something), both for HTML and plaintext docs
 
 
 -- ongoing --
