@@ -1399,3 +1399,39 @@ begin
 
   ch.sendBuffer('Ok.'#13#10);
 end;
+
+{ Sets pagerlength - Nemesis }
+procedure do_setpager(ch:GCharacter;param:string);
+var value : integer;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: SETPAGER <nr. of lines>'#13#10);
+    exit;
+    end;
+
+  if (param[1] in ['0'..'9']) then
+    begin
+    value := strtoint(param);
+    end
+  else
+    begin
+    ch.sendBuffer('Value must be a number.'#13#10);
+    exit;
+    end;
+
+  if (value < 15) then
+    begin
+    ch.sendBuffer('The minimum amount of lines is 15.'#13#10);
+    exit;
+    end;
+
+  if (value > 50) then
+    begin
+    ch.sendBuffer('The maximum amount of lines is 50.'#13#10);
+    exit;
+    end;
+
+  ch.player^.pagerlen := value;
+  act(AT_REPORT,'Pager set to ' + inttostr(value) + ' lines.',false,ch,nil,nil,TO_CHAR);
+end;
