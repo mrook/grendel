@@ -719,7 +719,8 @@ var
 begin
   node_next := char_list.head;
 
-  repeat
+  while (node_next <> nil) do
+    begin
     node := node_next;
     node_next := node_next.next;
 
@@ -736,8 +737,7 @@ begin
     if (channel = CHANNEL_LOG) and (not vict.IS_NPC) and (vict.level<system_info.level_log) then continue;
 
     act(color,arg,false,vict,nil,ch,TO_CHAR);
-
-  until (node_next = nil);
+    end;
 end;
 
 procedure talk_channel(ch : GCharacter; arg : string; channel : integer; verb : string; color : integer);
