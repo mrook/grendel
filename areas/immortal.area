@@ -79,7 +79,7 @@ some fine $B$4battle$A$3-armor, fitted for $B$7gods$A$3 lies here
 #50003
 a demon's silver shield
 a $B$4demon's$7 silver$A$7 shield 
-a $B$7 silver$A$3 shield, that once belonged to a demon, lies here
+a $B$7silver$A$3 shield, that once belonged to a demon, lies here
 2 shield none
 0 2 8 0
 0 98 0
@@ -191,7 +191,7 @@ a gemstone, shimmering with dark power, lies here
 #50019
 a blood red bow
 a $B$8blood red$A$7 bow
-a finely crafted $B$8blood red$A$7 bow lies here
+a finely crafted $B$8blood red$A$3 bow lies here
 16 leftwield rightwield
 1 0 0 0
 0 6 0
