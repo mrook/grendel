@@ -1,0 +1,22 @@
+DCC=/usr/local/kylix/bin/dcc
+DCC_FLAGS=-Q -D+ -V- -W+ -O+
+
+GMCC=gmcc
+GMCC_SOURCES=gmcc.dpr 
+
+GASM=gasm
+GASM_SOURCES=gasm.dpr 
+
+CORE=../bplcore.so
+
+all:	$(GMCC) $(GASM)
+      
+clean:
+	del $(GMCC) $(GASM)
+	
+$(GMCC):	$(GMCC_SOURCES) $(CORE)
+	$(DCC) $(GMCC_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU../core
+	
+$(GASM):	$(GASM_SOURCES) $(CORE)
+	$(DCC) $(GASM_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -LU../core
+

@@ -11,10 +11,12 @@ CORE=bplcore.so
 CORE_SOURCES=core.dpk units/*.pas gmc/*.pas
 
 all:	$(GRENDEL) $(CONVERT)
+	cd gmc && make -f makefile.lnx
 	cd modules && make -f makefile.lnx
       
 clean:
 	rm -f $(GRENDEL) $(CONVERT) $(CORE)
+	cd gmc && make -f makefile.lnx clean
 	cd modules && make -f makefile.lnx clean
 
 $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
