@@ -5,7 +5,7 @@
 ; which are substrings of the command name (so 'l' with name 'look')
 ; will be discarded.
 ;
-; $Id: commands.dat,v 1.35 2004/03/04 19:39:50 ***REMOVED*** Exp $
+; $Id: commands.dat,v 1.36 2004/03/10 23:13:07 ***REMOVED*** Exp $
 
 #command
 name: down
@@ -53,7 +53,7 @@ allowed_states: idle
 name: look
 alias: l
 function: do_look
-allowed_states: idle,resting,meditating
+allowed_states: idle,resting,meditating,fighting
 #end
 
 
@@ -62,7 +62,7 @@ allowed_states: idle,resting,meditating
 #command
 name: affects
 alias: aff
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 function: do_affects
 #end
 
@@ -74,7 +74,7 @@ function: do_afk
 
 #command
 name: alias
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 function: do_alias
 #end
 
@@ -92,7 +92,7 @@ allowed_states: idle,resting,meditating,sleeping
 #command
 name: armor
 alias: arm
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 function: do_armor
 #end
 
@@ -492,7 +492,7 @@ function: do_scalp
 #command
 name: score
 function: do_score
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 #end
 
 #command
@@ -552,7 +552,7 @@ allowed_states: idle,resting,meditating,sleeping
 #command
 name: stats
 function: do_stats
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 #end
 
 #command
@@ -573,7 +573,7 @@ function: do_taunt
 #command
 name: tell
 function: do_tell
-allowed_states: idle,resting,meditating,sleeping
+allowed_states: idle,resting,meditating,sleeping,fighting
 #end
 
 #command
