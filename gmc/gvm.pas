@@ -1,7 +1,7 @@
 unit gvm;
 interface
 
-uses SysUtils, dtypes;
+uses SysUtils, dtypes, Windows;
 
 const
 	stackSize = 512;
@@ -310,26 +310,26 @@ begin
                   data[r] := pop();
                   end;
         _ADD		: begin
-                  v1 := pop();
                   v2 := pop();
+                  v1 := pop();
                   push(v1 + v2);
                   inc(pc);
                   end;
         _SUB		: begin
-                  v1 := pop();
                   v2 := pop();
+                  v1 := pop();
                   push(v1 - v2);
                   inc(pc);
                   end;
         _MUL		: begin
-                  v1 := pop();
                   v2 := pop();
+                  v1 := pop();
                   push(v1 * v2);
                   inc(pc);
                   end;
         _DIV		: begin
-                  v1 := pop();
                   v2 := pop();
+                  v1 := pop();
                   push(v1 / v2);
                   inc(pc);
                   end;
@@ -386,6 +386,14 @@ begin
                   systemTrap(pop());
                   inc(pc);
                   end;
+        _SLEEP  : begin
+                  Sleep(pop() * 1000);
+									inc(pc);
+                  end;
+        _WAIT   : begin
+                  v1 := pop();
+									inc(pc);
+                  end;
         _RET		: begin
                   i := popr();
                   pc := i;
@@ -425,7 +433,7 @@ begin
                   if (i < 0) or (i > block.codeSize) then
                     vmError('jump outside of boundary');
 
-                  if (not v1) then
+                  if (integer(v1) = 0) then
                     pc := i
                   else
                     inc(pc, 5);
@@ -437,7 +445,7 @@ begin
                   if (i < 0) or (i > block.codeSize) then
                     vmError('jump outside of boundary');
 
-                  if (v1) then
+                  if (integer(v1) <> 0) then
                     pc := i
                   else
                     inc(pc, 5);

@@ -15,6 +15,10 @@ const
 	CONV_INT_STRING = 3;
 	CONV_BOOL_STRING = 4;
 	CONV_FLOAT_STRING = 5;
+	
+	SPECIAL_TRAP = 1;
+	SPECIAL_SLEEP = 2;
+	SPECIAL_WAIT = 3;
 
 
 type 	Root = class
@@ -100,15 +104,16 @@ type 	Root = class
 				assoc : string;
       end;
 
-			Expr_Trap = class(Expr)
-				ex : Expr;
-      end;
-
 			Expr_Conv = class(expr)
 				ex : Expr;
 
 				cnv : integer;
 				originaltyp : integer;	
+			end;
+			
+			Expr_Special = class(Expr)
+				spec : integer;
+				ex : Expr;
 			end;
 
 	
@@ -200,7 +205,7 @@ procedure compilerError(lineNum : integer; msg : string); forward;
 %token _AND _OR
 %token _RELGT _RELLT _RELGTE _RELLTE _RELEQ
 %token _RETURN _BREAK _CONTINUE
-%token _DO _WHILE _FOR _REQUIRE
+%token _DO _SLEEP _WAIT _WHILE _FOR _REQUIRE
 %token _VOID _BOOL _INT _FLOAT _STRING _EXTERNAL
 
 %%
@@ -244,7 +249,9 @@ statement	: { $$ := nil; }
 																														Expr_If($$).le := $5; Expr_If($$).re := nil; 
 																														Expr_If($$).lThen := labelNum; inc(labelNum); 
 																														Expr_If($$).lAfter := labelNum; inc(labelNum); }
-					| _DO expr ';'																		{ $$ := Expr_Trap.Create; $$.lineNum := yylineno; Expr_Trap($$).ex := $2; }
+					| _DO expr ';'																		{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_TRAP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
+					| _SLEEP expr ';'																	{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_SLEEP; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
+					| _WAIT expr ';'																	{ $$ := Expr_Special.Create; Expr_Special($$).spec := SPECIAL_WAIT; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
           | _ASM '{' asm_list '}'														{ $$ := $3; }
           | stop_statement																	{ $$ := $1; }
           | _REQUIRE '"' LINE '"'														{ $$ := nil;
@@ -286,6 +293,7 @@ compound_statement	: '{' '}'									{ $$ := nil; }
 										;
 
 declaration_list		: { $$ := nil; }
+										| declaration  { $$ := nil; }
 										| declaration_list declaration  { $$ := nil; }
 										;
 
@@ -419,6 +427,9 @@ var
 
 function typeExpr(expr : Expr) : Expr; forward;
 function typeBoolExpr(expr : BoolExpr) : BoolExpr; forward;
+
+function optimizeBoolExpr(expr : BoolExpr) : BoolExpr; forward;
+function optimizeExpr(expr : Expr) : Expr; forward;
 
 procedure showExpr(expr : Expr); forward;
 procedure showBoolExpr(expr : BoolExpr); forward;
@@ -783,12 +794,250 @@ begin
 		expr.typ := _VOID;
     end
   else
-  if (expr is Expr_Trap) then
+  if (expr is Expr_Special) then
     begin
-    Expr_Trap(expr).ex := typeExpr(Expr_Trap(expr).ex);
+    Expr_Special(expr).ex := typeExpr(Expr_Special(expr).ex);
 
-		expr.typ := Expr_Trap(expr).ex.typ;
+		expr.typ := Expr_Special(expr).ex.typ;
     end;
+end;
+
+function optimizeBoolExpr(expr : BoolExpr) : BoolExpr;
+var
+	lval, rval : boolean;
+begin
+  Result := expr;
+
+  if (expr is BoolExpr_And) then 
+    begin
+    BoolExpr_And(expr).le := optimizeBoolExpr(BoolExpr_And(expr).le);
+    BoolExpr_And(expr).re := optimizeBoolExpr(BoolExpr_And(expr).re);
+
+    if (BoolExpr_And(expr).le is BoolExpr_Const) and (BoolExpr_And(expr).re is BoolExpr_Const) then
+      begin
+      lval := BoolExpr_Const(BoolExpr_And(expr).le).value;
+      rval := BoolExpr_Const(BoolExpr_And(expr).re).value;
+
+      Result := BoolExpr_Const.Create;
+      BoolExpr_Const(Result).value := lval and rval;
+
+      BoolExpr_And(expr).le.Free;
+      BoolExpr_And(expr).re.Free;
+      expr.Free;
+      end
+    else
+		if (BoolExpr_And(expr).le is BoolExpr_Const) then
+		  begin
+      lval := BoolExpr_Const(BoolExpr_And(expr).le).value;
+      
+      if (lval) then
+        begin
+        Result := BoolExpr_And(expr).re;
+        BoolExpr_And(expr).le.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := BoolExpr_And(expr).le;
+        BoolExpr_And(expr).re.Free;
+        expr.Free;
+        end;
+      end
+    else
+		if (BoolExpr_And(expr).re is BoolExpr_Const) then
+		  begin
+      lval := BoolExpr_Const(BoolExpr_And(expr).re).value;
+      
+      if (lval) then
+        begin
+        Result := BoolExpr_And(expr).le;
+        BoolExpr_And(expr).re.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := BoolExpr_And(expr).re;
+        BoolExpr_And(expr).le.Free;
+        expr.Free;
+        end;
+      end; 
+    end
+  else
+  if (expr is BoolExpr_Or) then 
+    begin
+    BoolExpr_Or(expr).le := optimizeBoolExpr(BoolExpr_Or(expr).le);
+    BoolExpr_Or(expr).re := optimizeBoolExpr(BoolExpr_Or(expr).re);
+
+    if (BoolExpr_Or(expr).le is BoolExpr_Const) and (BoolExpr_Or(expr).re is BoolExpr_Const) then
+      begin
+      lval := BoolExpr_Const(BoolExpr_Or(expr).le).value;
+      rval := BoolExpr_Const(BoolExpr_Or(expr).re).value;
+
+      Result := BoolExpr_Const.Create;
+      BoolExpr_Const(Result).value := lval and rval;
+
+      BoolExpr_Or(expr).le.Free;
+      BoolExpr_Or(expr).re.Free;
+      expr.Free;
+      end
+    else
+		if (BoolExpr_Or(expr).le is BoolExpr_Const) then
+		  begin
+      lval := BoolExpr_Const(BoolExpr_Or(expr).le).value;
+      
+      if (lval) then
+        begin
+        Result := BoolExpr_Or(expr).le;
+        BoolExpr_Or(expr).re.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := BoolExpr_Or(expr).re;
+        BoolExpr_Or(expr).le.Free;
+        expr.Free;
+        end;
+      end
+    else
+		if (BoolExpr_Or(expr).re is BoolExpr_Const) then
+		  begin
+      lval := BoolExpr_Const(BoolExpr_Or(expr).re).value;
+      
+      if (lval) then
+        begin
+        Result := BoolExpr_Or(expr).re;
+        BoolExpr_Or(expr).le.Free;
+        expr.Free;
+        end
+      else
+        begin
+        Result := BoolExpr_Or(expr).le;
+        BoolExpr_Or(expr).re.Free;
+        expr.Free;
+        end;
+      end; 
+    end
+  else
+  if (expr is BoolExpr_Rel) then 
+    begin
+    BoolExpr_Rel(expr).le := optimizeExpr(BoolExpr_Rel(expr).le);
+    BoolExpr_Rel(expr).re := optimizeExpr(BoolExpr_Rel(expr).re);
+    end;
+end;
+
+function optimizeExpr(expr : Expr) : Expr;
+var
+	lval, rval : integer;
+  bval : boolean;
+begin
+  Result := expr;
+
+  if (expr is Expr_Op) then
+    begin
+    Expr_Op(expr).le := optimizeExpr(Expr_Op(expr).le);
+    Expr_Op(expr).re := optimizeExpr(Expr_Op(expr).re);
+
+    if (Expr_Op(expr).le is Expr_ConstInt) and (Expr_Op(expr).re is Expr_ConstInt) then
+      begin
+      lval := Expr_ConstInt(Expr_Op(expr).le).value;
+      rval := Expr_ConstInt(Expr_Op(expr).re).value;
+
+      case Expr_Op(expr).op of
+        '+': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval + rval;
+             end;
+        '-': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval - rval;
+             end;
+        '*': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval * rval;
+             end;
+        '/': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval div rval;
+             end;
+        '%': begin
+             Result := Expr_ConstInt.Create;
+             Expr_ConstInt(Result).value := lval mod rval;
+             end;
+  			'&': emit('BAND');
+  			'|': emit('BOR');
+      end;
+   
+			Expr_Op(expr).le.Free;
+			Expr_Op(expr).re.Free;
+      expr.Free;
+      end;
+    end
+  else
+  if (expr is Expr_Seq) then
+    begin
+    Expr_Seq(expr).ex := optimizeExpr(Expr_Seq(expr).ex);
+    Expr_Seq(expr).seq := optimizeExpr(Expr_Seq(expr).seq);
+    end
+  else
+  if (expr is Expr_Func) then
+    begin
+    Expr_Func(expr).init := optimizeExpr(Expr_Func(expr).init);
+    Expr_Func(expr).body := optimizeExpr(Expr_Func(expr).body);
+    end
+  else
+  if (expr is Expr_Assign) then
+    begin
+    Expr_Assign(expr).ex := optimizeExpr(Expr_Assign(expr).ex);
+    end
+  else
+  if (expr is Expr_Call) then
+    begin
+    Expr_Call(expr).params := optimizeExpr(Expr_Call(expr).params);
+    end
+  else
+  if (expr is Expr_Conv) then
+    begin
+    Expr_Conv(expr).ex := optimizeExpr(Expr_Conv(expr).ex);
+
+		case Expr_Conv(expr).cnv of
+			CONV_INT_FLOAT : if (Expr_Conv(expr).ex is Expr_ConstInt) then
+                         begin
+                         Result := Expr_ConstFloat.Create;
+                         Expr_ConstFloat(Result).value := Expr_ConstInt(Expr_Conv(expr).ex).value;
+        
+        								 Expr_Conv(expr).ex.Free;
+        								 expr.Free;
+                         end;
+			CONV_FLOAT_INT : if (Expr_Conv(expr).ex is Expr_ConstFloat) then
+                         begin
+                         Result := Expr_ConstInt.Create;
+                         Expr_ConstInt(Result).value := trunc(Expr_ConstFloat(Expr_Conv(expr).ex).value);
+        
+        								 Expr_Conv(expr).ex.Free;
+        								 expr.Free;
+                         end;
+    end;
+    end
+  else
+  if (expr is Expr_Bool) then
+    begin
+    Expr_Bool(expr).ex := optimizeBoolExpr(Expr_Bool(expr).ex); 
+    end
+  else
+  if (expr is Expr_If) then
+    begin
+    Expr_If(expr).ce := optimizeBoolExpr(Expr_If(expr).ce); 
+
+    if (Expr_If(expr).ce is BoolExpr_Const) then
+      begin
+      bval := BoolExpr_Const(Expr_If(expr).ce).value;
+
+      if (bval) then
+        Result := Expr_If(expr).le
+      else
+        Result := Expr_If(expr).re;
+      end;
+    end
 end;
 
 procedure showBoolExpr(expr : BoolExpr);
@@ -849,8 +1098,8 @@ begin
 
   if (expr is Expr_Op) then
     begin
-    showExpr(Expr_Op(expr).re);
     showExpr(Expr_Op(expr).le);
+    showExpr(Expr_Op(expr).re);
 
     case Expr_Op(expr).op of
       '+': emit('ADD');
@@ -975,10 +1224,15 @@ begin
     emit(Expr_Asm(expr).line);
     end
   else
-  if (expr is Expr_Trap) then
+  if (expr is Expr_Special) then
     begin
-    showExpr(Expr_Trap(expr).ex);
-    emit('TRAP');
+    showExpr(Expr_Special(expr).ex);
+    
+    case Expr_Special(expr).spec of
+      SPECIAL_TRAP:   emit('TRAP');
+      SPECIAL_SLEEP:	emit('SLEEP');
+      SPECIAL_WAIT:		emit('WAIT');
+    end;
     end
 	else
   if (expr is Expr_Conv) then
@@ -998,6 +1252,9 @@ end;
 procedure startCompiler(root : Expr);
 begin
   root := typeExpr(root);
+
+  if (not yyerrors) then
+    root := optimizeExpr(root);
 
   if (not yyerrors) then
     begin

@@ -10,7 +10,7 @@ type
 			end;
 
 const 
-			KWSize = 25;
+			KWSize = 27;
 			KWTable : array[1..KWSize] of Keyword = (
 																							(kw:'true'; state:_TRUE), 
 																							(kw:'false'; state:_FALSE),
@@ -27,6 +27,8 @@ const
 																							(kw:'continue'; state:_CONTINUE),
 																							(kw:'return'; state:_RETURN),
 																							(kw:'do'; state:_DO),
+																							(kw:'sleep'; state:_SLEEP),
+																							(kw:'wait'; state:_WAIT),
 																							(kw:'while'; state:_WHILE),
 																							(kw:'for'; state:_FOR),
 																							(kw:'void'; state:_VOID),

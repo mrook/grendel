@@ -141,9 +141,9 @@ function get_char : Char;
   begin
     if (bufptr=0) and (not inputStack[iptr].eof()) then
       begin
+      yylineno := inputStack[iptr].line;
       yyline := inputStack[iptr].readLine();
 
-      yylineno := inputStack[iptr].line;
       yycolno := 1;
       buf[1] := nl;
       for i := 1 to length(yyline) do
