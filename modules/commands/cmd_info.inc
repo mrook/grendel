@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.18 2003/11/07 16:58:08 hemko Exp $
+// $Id: cmd_info.inc,v 1.19 2003/11/07 17:20:06 hemko Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1634,37 +1634,6 @@ begin
  
   ch.sendPager(buf);
 end;
-
-(*procedure do_socials(ch:GCharacter; param:string);
-var 
-  social : GSocial;
-  iterator : GIterator;
-  line : string;
-  i, count : integer;
-begin
-  count := 0;
-  line := '';
-  
-  iterator := socials.iterator();
-
-  while (iterator.hasNext()) do
-    begin
-    social := GSocial(iterator.next());
-
-    line := line + pad_string(lowercase(social.name), 13);
-
-    inc(count);
-    if (count = 6) then
-      begin
-      ch.sendBuffer(line + #13#10);
-      count := 0;
-      line := '';
-      end;
-    end;
-
-  if (length(line) > 0) then
-    ch.sendBuffer(line + #13#10);
-end;*)
 
 { Xenon 23/Feb/2001: fixed a small bug; made alias'ing an already existing alias replace it }
 procedure do_alias(ch : GCharacter; param : string);

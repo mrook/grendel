@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.28 2003/11/03 13:24:49 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.29 2003/11/07 17:20:05 hemko Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -344,7 +344,7 @@ end;
 procedure do_force(ch:GCharacter;param:string);
 var
  vict_node: GListnode;
-	vict:GCharacter;
+  vict:GCharacter;
     //sub:array[0..63] of char;
     sub : string;
 begin
@@ -371,8 +371,8 @@ begin
       vict := GCharacter(vict_node.element);
       if vict <> ch then
       begin
-      	act(AT_WHITE,'$n forces you to "' + param + '"',false,ch,nil,vict,TO_VICT);
-      	interpret(vict,param);
+        act(AT_WHITE,'$n forces you to "' + param + '"',false,ch,nil,vict,TO_VICT);
+        interpret(vict,param);
       end;
       vict_node := vict_node.next;
     end {while}
@@ -394,7 +394,7 @@ begin
       vict := GCharacter(vict_node.element);
       if (vict <> ch) and (not vict.IS_NPC) then
       begin
-      	act(AT_WHITE,'$n forces you to "' + param + '"',false,ch,nil,vict,TO_VICT);
+        act(AT_WHITE,'$n forces you to "' + param + '"',false,ch,nil,vict,TO_VICT);
        interpret(vict,param);
       end;
       vict_node := vict_node.next;
@@ -427,7 +427,7 @@ end;
 {Jago 5/Jan/01 : implemented do_transfer as done in MERC (implementation not quite identical to MERC)}
 procedure do_transfer( ch : GCharacter; param : string );
 var
-	arg1, arg2 : string;
+  arg1, arg2 : string;
  location : GRoom;
  victim : GCharacter;
  char_node : GListNode;
@@ -478,7 +478,7 @@ begin
        interpret(victim, 'look _AUTO');
      end;
 
-    	char_node := char_node.next;
+      char_node := char_node.next;
    end; {while}
 
   end
@@ -489,7 +489,7 @@ begin
    if (victim <> nil) then
      begin
      if victim.fighting <> nil then
-     	stopFighting(victim);
+      stopFighting(victim);
       
      act(AT_WHITE,'$n disappears in a mushroom cloud.',false,victim,nil,nil,TO_ROOM);
      victim.fromRoom;
@@ -711,10 +711,10 @@ begin
     end
   else
   if (vict.snooped_by <> nil) then
-  	begin
-  	ch.sendBuffer('That character is already being snooped by somebody.'#13#10);
-  	exit;
-  	end;
+    begin
+    ch.sendBuffer('That character is already being snooped by somebody.'#13#10);
+    exit;
+    end;
 
   act(AT_YELLOW,'Started snooping $N.',false,ch,nil,vict,TO_CHAR);
   GPlayer(ch).snooping := vict;
@@ -1067,51 +1067,56 @@ begin
   vict.emptyBuffer();
 end;
 
-procedure do_wizhelp(ch:GCharacter;param:string);
+// All available immortal commands - Nemesis
+procedure do_wizhelp(ch : GCharacter; param : string);
 var
-  lev : integer;
   iterator : GIterator;
   cmd : GCommand;
+  cmdList : TStringList;
+  i, lev : integer;
   buf : string;
-  count : integer;
 begin
-  buf := #13#10 + ch.ansiColor(3) + ' ' + add_chars(78, '---- Available immortal commands ', '-') + ch.ansiColor(7) + #13#10#13#10;
-  ch.sendPager(buf);
-
+  cmdList := TStringList.Create();
   lev := ch.getTrust;
-
-  count := 0;
-
-	iterator := commandList.iterator();
-	
-	while (iterator.hasNext()) do
-		begin
+  
+  iterator := commandList.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
     cmd := GCommand(iterator.next());
-
-		if (cmd.level > LEVEL_MAX) and (cmd.level <= lev) then
-			begin
-			ch.sendPager(pad_string(lowercase(cmd.name), 14));
-
-			inc(count);
-
-			if (count = 5) then
-				begin
-				ch.sendPager(#13#10);
-				count := 0;
-				end;
-			end;
+  
+    // Show only immortal commands available at your level
+    if (cmd.level > LEVEL_MAX) and (cmd.level <= lev) then
+      cmdList.Add(lowercase(cmd.name));
     end;
     
   iterator.Free();
-
-  ch.sendPager(#13#10);
+  
+  // Sort the list
+  cmdList.Sort();  
+  
+  buf := #13#10 + ch.ansiColor(3) + ' ' + add_chars(78, '---- Available immortal commands ', '-') + ch.ansiColor(7) + #13#10;
+  
+  for i := 0 to pred(cmdList.Count) do
+    begin
+    if (i mod 5 = 0) then
+      buf := buf + #13#10 + pad_string(cmdList[i], 15)
+    else
+      buf := buf + pad_string(cmdList[i], 15);
+    end;
+  
+  buf := buf + #13#10;
+  
+  cmdList.Free();
+ 
+  ch.sendPager(buf);
 end;
 
 {Jago 5/Jan/01 : implemented do_restore to use GCharacter instead of CHAR_DATA, }
-{							added restore all functionality}
+{             added restore all functionality}
 procedure do_restore(ch:GCharacter;param:string);
 var
-	victim: GCharacter;
+  victim: GCharacter;
  vict_node: GListnode;
 begin
   if (length(param)=0) then
@@ -1138,7 +1143,7 @@ begin
 
       vict_node := vict_node.next;
       end; {while}
-  	 ch.sendBuffer('Ok.'#13#10);
+     ch.sendBuffer('Ok.'#13#10);
   end
   else // restore single char
   begin
@@ -1162,7 +1167,7 @@ end;
 { Xenon 12/Apr/2001: freeze now only works on players lowerlevel than you and you cannot freeze yourself anymore :P }
 procedure do_freeze(ch:GCharacter;param:string);
 var 
-	victim : GPlayer;
+  victim : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -1206,7 +1211,7 @@ end;
 
 procedure do_silence(ch:GCharacter;param:string);
 var 
-	victim : GPlayer;
+  victim : GPlayer;
 begin
   if (length(param)=0) then
     begin
@@ -1252,7 +1257,7 @@ end;
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
 procedure do_peace(ch:GCharacter; param:string);
 var
-	rch:GCharacter;
+  rch:GCharacter;
  rch_node : GListNode;
 begin
   act(AT_REPORT, '$n BOOOOMS: ''PEACE!!!''', false, ch, nil, nil, TO_ROOM);
@@ -1297,7 +1302,7 @@ end;
 {Jago 6/Jan/2001 - repaired for v 0.3}
 procedure do_disconnect(ch : GCharacter; param : string);
 var
-		 sock : integer;
+     sock : integer;
     conn : GConnection;
     conn_f : GConnection;
     conn_node : GListNode;
@@ -1516,13 +1521,13 @@ end;
 { Revive player when killed - Nemesis }
 procedure do_revive(ch:GCharacter; param:string);
 var 
-	obj : GObject;
-	corpseroom : GRoom;
-	victim : GCharacter;
-	number,count : integer;
-	conn : GPlayerConnection;
-	iterator : GIterator;
-	buf : string;
+  obj : GObject;
+  corpseroom : GRoom;
+  victim : GCharacter;
+  number,count : integer;
+  conn : GPlayerConnection;
+  iterator : GIterator;
+  buf : string;
 begin
   // Without argument shows existing corpses, decay timer and VNUM.
 
@@ -1599,9 +1604,9 @@ end;
 
 procedure do_hashstats(ch : GCharacter; param : string);
 var
-	node : GListNode;
-	n, c : integer;
-	g : GHashValue;
+  node : GListNode;
+  n, c : integer;
+  g : GHashValue;
 begin
   ch.sendPager('Allocated hash entries: '#13#10#13#10);
   c := 0;
@@ -1916,13 +1921,13 @@ begin
   iterator := startroom.exits.iterator();
 
   while (iterator.hasNext()) do
-	  begin
+    begin
     ex := GExit(iterator.next());
     
     room := ex.to_room;
 
     if (room.areacoords = nil) then
-    	begin
+      begin
       room.areacoords := GCoords.Create(startroom.areacoords);
       case ex.direction of
         DIR_NORTH:
@@ -1952,10 +1957,10 @@ begin
       end;
       ch.sendBuffer('Created coords (#' + IntToStr(room.vnum) + '): ' + room.areacoords.toString() + #13#10);
       createCoordinates(ch, room);
-    	end;
-  	end;
-  	
- 	iterator.Free();
+      end;
+    end;
+    
+  iterator.Free();
 end;
 
 procedure do_coordgen(ch : GCharacter; param : string);
@@ -2076,27 +2081,27 @@ begin
   node := ll.head;
 
   if (ll.head = nil) then
-  	begin
+    begin
     ll.insertLast(snode);
     exit;
-  	end;
+    end;
 
   while (node <> nil) do
-  	begin
+    begin
     n := TSearchNode(node.element);
 
     if (snode.f > n.f) then
-    	begin
+      begin
       ins := node;
-    	end
+      end
     else
-    	begin
+      begin
       ll.insertBefore(node, snode);
       exit;
-    	end;
+      end;
     
     node := node.next;
-  	end;
+    end;
 
   ll.insertAfter(ins, snode);  
 end;
@@ -2110,15 +2115,15 @@ begin
   
   node := ll.head;
   while (node <> nil) do
-  	begin
+    begin
     snode := TSearchNode(node.element);
     if (snode.room = froom) then
-    	begin
+      begin
       Result := node;
       exit;
-    	end;
+      end;
     node := node.next;
-  	end;
+    end;
 end;
 
 { Implementation of A* search algorithm }
@@ -2342,51 +2347,51 @@ begin
   cmd := uppercase(cmd);
 
   if (cmd = 'PROGS') then
-  	begin
+    begin
     iterator := npc_list.iterator();
     while (iterator.hasNext()) do
-    	begin
+      begin
       npc := GNPCIndex(iterator.next());
       
       if (length(npc.progfile) <> 0) then
-      	begin
+        begin
         if (npc.prog <> nil) then
-        	begin
-        	codeCache.remove(npc.progfile);
+          begin
+          codeCache.remove(npc.progfile);
           npc.prog.Free();
           npc.prog := nil;
-        	end;
+          end;
         
         npc.prog := loadCode(npc.progfile);
         inc(count1);
-      	end;
-	    end;
-	  iterator.Free();
+        end;
+      end;
+    iterator.Free();
 
     iterator := char_list.iterator();
     while (iterator.hasNext()) do
-    	begin
+      begin
       vict := GCharacter(iterator.next());
       
       if (vict.IS_NPC() and (GNPC(vict).npc_index <> nil)) then
-      	begin
+        begin
         if (length(GNPC(vict).npc_index.progfile) = 0) then
           continue;
         
         if (GNPC(vict).context <> nil) then
-        	begin
+          begin
           GNPC(vict).context.Free();
           GNPC(vict).context := nil;
-        	end;
+          end;
         GNPC(vict).context := GContext.Create();
         GNPC(vict).context.load(GNPC(vict).npc_index.prog);
         GNPC(vict).context.owner := vict;
         if (uppercase(param) <> 'SILENT') then
           interpret(vict, 'emote receives new instructions and twitches violently.');
         inc(count2);
-      	end;
-	    end;
-	  iterator.Free();
+        end;
+      end;
+    iterator.Free();
 
     ch.sendBuffer(Format('Reloaded progs on %d NPC indices and reinitialised contexts on %d mobs.'#13#10, [count1, count2]));
   end
