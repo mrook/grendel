@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.3 2004/01/27 00:17:35 hemko Exp $
+// $Id: cmd_imm.inc,v 1.4 2004/01/30 18:31:54 hemko Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1300,9 +1300,9 @@ end;
 procedure do_disconnect(ch : GCharacter; param : string);
 var
      sock : integer;
-    conn : GConnection;
-    conn_f : GConnection;
-    conn_node : GListNode;
+    conn : GPlayerConnection;
+    conn_f : GPlayerConnection;
+    iterator : GIterator;
 begin
   if (length(param) = 0) then
   begin
@@ -1318,20 +1318,20 @@ begin
     exit;
   end;
 
-  conn_node := connection_list.head;
+  iterator := connection_list.iterator();
   conn_f := nil;
-  while conn_node <> nil do
+  while (iterator.hasNext()) do
   begin
-    conn := GConnection(conn_node.element);
+    conn := GPlayerConnection(iterator.Next());
 
     if (conn.socket.getDescriptor = sock) then
     begin
       conn_f := conn;
       break;
     end;
-
-    conn_node := conn_node.next;
   end;
+
+  iterator.Free();
 
   if (conn_f = nil) then
   begin
@@ -1339,9 +1339,9 @@ begin
     exit;
   end;
 
-  conn_f.socket.disconnect();
-
   ch.sendBuffer( 'Ok.'#13#10);
+
+  conn_f.Terminate();
 end;
 
 procedure do_bamfin(ch : GCharacter; param : string);
