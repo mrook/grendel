@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.73 2003/10/02 15:53:23 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.74 2003/10/08 13:43:04 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -136,18 +136,28 @@ procedure cleanupServer();
 var
    node : GListNode;
 begin
+	writeConsole('Terminating threads...');
+	pollConsole();
+	
 	mud_booted := false;
 
 	timer_thread.Terminate;
 	clean_thread.Terminate;
 
-	Sleep(250);
+	Sleep(100);
+
+	writeConsole('Saving mudstate...');
+	pollConsole();
 
 	saveMudState();
+	
+	writeConsole('Unloading modules...');
+	pollConsole();
 
 	unloadModules();
 
 	writeConsole('Releasing allocated memory...');
+	pollConsole();
 
 	node := char_list.tail;
 	while (node <> nil) do
@@ -157,47 +167,52 @@ begin
 		end;
 		
 	writeConsole('Cleaning chars...');
+	pollConsole();	
 	cleanupChars();
 	
 	writeConsole('Cleaning clans...');
+	pollConsole();	
 	cleanupClans();
 
 	writeConsole('Cleaning channels...');
+	pollConsole();	
 	cleanupChannels();
 
 	writeConsole('Cleaning commands...');
+	pollConsole();	
 	cleanupCommands();
 
 	writeConsole('Cleaning connections...');
+	pollConsole();	
 	cleanupConns();
 
 	writeConsole('Cleaning help...');
+	pollConsole();	
 	cleanupHelp();
 
 	writeConsole('Cleaning skills...');
+	pollConsole();	
 	cleanupSkills();
 
 	writeConsole('Cleaning areas...');
+	pollConsole();	
 	cleanupAreas();
 
 	writeConsole('Cleaning timers...');
+	pollConsole();	
 	cleanupTimers();
 
 	writeConsole('Cleaning races...');
+	pollConsole();	
 	cleanupRaces();
 
 	writeConsole('Cleaning system...');
+	pollConsole();	
 	cleanupSystem();
 
 	writeConsole('Cleaning notes...');
+	pollConsole();	
 	cleanupNotes();
-
-	{$IFDEF WIN32}      
-		{$IFNDEF CONSOLEBUILD}
-		unregisterSysTray();
-		cleanupSysTray();
-		{$ENDIF}
-	{$ENDIF}
 
 	str_hash.Free;
 
@@ -207,8 +222,16 @@ begin
 	listenv6 := nil;
 
 	writeConsole('Cleanup complete.');
+	pollConsole();	
 
 	cleanupConsole();
+
+	{$IFDEF WIN32}      
+		{$IFNDEF CONSOLEBUILD}
+		unregisterSysTray();
+		cleanupSysTray();
+		{$ENDIF}
+	{$ENDIF}
 end;
 
 procedure reboot_mud;
@@ -362,10 +385,10 @@ procedure shutdown_mud;
 begin
 	writeConsole('Server shutting down...');
 
-	if MUD_Booted then
-		flushConnections;
+	{if MUD_Booted then
+		flushConnections;}
 
-	Sleep(1000);
+	//Sleep(1000);
 
   cleanupServer();
 end;

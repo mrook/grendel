@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.42 2003/10/02 15:53:23 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.43 2003/10/08 13:43:03 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -57,6 +57,8 @@ type
       arena_end : integer;         { vnum start/end of arena (battleground) }
 
       user_high, user_cur : integer;
+      
+      terminated : boolean;
      end;
 
      GSocial = class
@@ -203,6 +205,7 @@ begin
   system_info.level_log := LEVEL_GOD;
   system_info.bind_ip := INADDR_ANY;
   system_info.max_conns := 200;
+  system_info.terminated := false;
 
   try
     af := GFileReader.Create(SystemDir + 'sysdata.dat');

@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.21 2003/10/02 15:53:23 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.22 2003/10/08 13:43:04 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -459,8 +459,7 @@ begin
 
                     boot_type := boot_info.boot_type;
                     grace_exit := true;
-
-                    halt;
+										system_info.terminated := true;
                     end;
     end;
     end;

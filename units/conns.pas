@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.40 2003/10/06 21:24:33 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.41 2003/10/08 13:43:03 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -784,15 +784,7 @@ end;
 
 procedure gameLoop();
 begin
-{$IFDEF WIN32}
-  {$IFNDEF CONSOLEBUILD}
-  while (not Application.Terminated) do
-  {$ELSE}
-  while (true) do
-  {$ENDIF}
-{$ELSE}
-  while (true) do
-{$ENDIF}
+  while (not system_info.terminated) and (not Application.Terminated) do
     begin
     if (listenv4 <> nil) then
       begin
@@ -813,7 +805,7 @@ begin
 		pollConsole();
     
     sleep(25);
-    end;
+    end;    
 end;
 
 procedure initConns();

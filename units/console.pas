@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.8 2003/10/03 18:04:32 ***REMOVED*** Exp $)
+  @lastmod($Id: console.pas,v 1.9 2003/10/08 13:43:03 ***REMOVED*** Exp $)
 }
 
 unit console;
@@ -77,7 +77,7 @@ begin
     if (node.element = writer) then
       begin
       writers.remove(node);
-      break;
+      exit;
       end;
       
     node := node.next;

@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.12 2003/06/24 21:41:34 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.13 2003/10/08 13:43:03 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -125,10 +125,14 @@ begin
   while (iterator.hasNext()) do
     begin
     module := GModule(iterator.next());
+
+    writeConsole('Unloading module ' + module.fname);
+    pollConsole();
     
     UnloadPackage(module.handle);
       
     writeConsole('Unloaded module ' + module.fname);
+    pollConsole();
     end;
     
   module_list.clear();
