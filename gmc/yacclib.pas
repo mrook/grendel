@@ -56,7 +56,7 @@ uses lexlib;
 
 procedure yyerror ( msg : String );
   begin
-    writeln(msg, ' at line ', yylineno,':',yycolno);
+    writeln('error (line ', yylineno, ', file ', yyfname, '): ', msg);
     yyerrors := true;
   end(*yyerrmsg*);
 

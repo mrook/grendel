@@ -14,6 +14,7 @@ uses
 var
 
 yyoutput : Text;        (* input and output file *)
+yyfname : String;
 yyline            : String;      (* current input line *)
 yylineno, yycolno : Integer;     (* current input position *)
 yytext            : String;      (* matched text (should be considered r/o) *)
@@ -189,6 +190,8 @@ begin
     exit;
   end;
 
+  yyfname := inputStack[iptr].fname;
+
 	yylineno := 0;
 end;
 
@@ -262,6 +265,7 @@ function yywrap : Boolean;
       yylineno := inputStack[iptr].line;
       yywrap := false;
 			bufptr := 0;
+      yyfname := inputStack[iptr].fname;
       end
     else
       yywrap := true;

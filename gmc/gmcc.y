@@ -347,9 +347,9 @@ expr 	:  { $$ := nil; }
 														else
  															$$ := nil; }
 		  |  varname		      { $$ := $1; }
-			|  funcname '(' parameter_list ')'					{	if (lookupEnv(varName) = -1) then 
+			|  funcname '(' parameter_list ')'					{	if (lookupEnv($1) = -1) then 
 																					  					begin
-																											compilerError(yylineno, 'undefined function ' + varName);
+																											compilerError(yylineno, 'undefined function ' + $1);
 																											$$ := nil;
 																											yyabort;
 																											end;
@@ -433,7 +433,7 @@ end;
 
 procedure compilerError(lineNum : integer; msg : string);
 begin
-  writeln('error (line ', lineNum, '): ', msg);
+  writeln('error (line ', lineNum, ', file ', yyfname, '): ', msg);
  
   yyerrors := true;
 end;
