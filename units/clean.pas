@@ -1,3 +1,5 @@
+// $Id: clean.pas,v 1.6 2001/04/26 21:18:50 xenon Exp $
+
 unit clean;
 
 interface
