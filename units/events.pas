@@ -2,7 +2,7 @@
   Summary:
     System events
   
-  ##  $Id: events.pas,v 1.1 2003/11/05 11:28:29 ***REMOVED*** Exp $
+  ##  $Id: events.pas,v 1.2 2003/11/05 15:19:51 ***REMOVED*** Exp $
 }
 
 unit events;
@@ -84,6 +84,12 @@ end;
 procedure initEvents();
 begin
   eventList := GHashTable.Create(128);
+  
+  // default events
+  registerEvent('char-login');
+  registerEvent('mud-boot');
+  registerEvent('mud-shutdown');
+  registerEvent('room-enter');
 end;
 
 procedure cleanupEvents();
