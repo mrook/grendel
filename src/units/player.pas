@@ -2,7 +2,7 @@
 	Summary:
 		Player specific functions
 	
-	## $Id: player.pas,v 1.20 2004/03/17 00:19:32 ***REMOVED*** Exp $
+	## $Id: player.pas,v 1.21 2004/03/22 19:35:33 ***REMOVED*** Exp $
 }
 unit player;
 
@@ -3365,6 +3365,8 @@ var
 	vch : GCharacter;
 	to_ch : GCharacter;
 	node : GListNode;
+	actList : TList;
+	x : integer;
 
 label wind;
 begin
@@ -3400,6 +3402,8 @@ begin
     node := ch.room.chars.head
   else
     node := nil;
+    
+  actList := TList.Create();
 
   while (node <> nil) do
     begin
@@ -3425,7 +3429,10 @@ begin
     to_ch.sendBuffer(to_ch.ansiColor(atype) + txt + #13#10);
 
     if (to_ch.IS_NPC) and (to_ch <> ch) then
-      GNPC(to_ch).context.runSymbol('onAct', [integer(to_ch), integer(ch), txt]);
+    	begin
+    	if (GNPC(to_ch).context.existsSymbol('onAct')) then
+    		actList.add(to_ch);
+    	end;
 
 wind:
      if (typ = TO_CHAR) or (typ = TO_VICT) or (typ = TO_IMM) then
@@ -3434,6 +3441,16 @@ wind:
      if (typ = TO_ROOM) or (typ = TO_NOTVICT) or (typ = TO_ALL) then
        node := node.next;
      end;
+
+	if (actList.Count > 0) then
+		begin
+		for x := 0 to actList.Count - 1 do
+			begin
+			GNPC(actList[x]).context.runSymbol('onAct', [integer(actList[x]), integer(ch), txt]);
+			end;
+		end;
+	
+	actList.Free();
 end;
 
 end.
