@@ -1,6 +1,6 @@
 {
   The Grendel Project - A Windows/Linux MUD Server
-  Copyright (c) 2000-2003 by Michiel Rook (Grimlord)
+  Copyright (c) 2000-2004 by Michiel Rook (Grimlord)
 
   Contact information:
   Webpage:            http://www.grendelproject.nl/
@@ -32,12 +32,12 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.8 2004/02/18 20:49:21 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.9 2004/02/19 14:38:12 ***REMOVED*** Exp $
 }
 
 program grendel;
 
-{$DESCRIPTION 'The Grendel Project - A Windows/Linux MUD Server. Copyright (c) 2000-2003 by Michiel Rook.'}
+{$DESCRIPTION 'The Grendel Project - A Windows/Linux MUD Server. Copyright (c) 2000-2004 by Michiel Rook.'}
 
 {$R grendel_icon.res}
 
@@ -56,8 +56,6 @@ uses
   {$IFNDEF CONSOLEBUILD}
   systray,
   {$ENDIF}
-  JclHookExcept,
-  JclDebug,
 {$ENDIF}
   Classes,
 {$IFDEF LINUX}
@@ -65,6 +63,7 @@ uses
 {$ENDIF}
   constants,
   clan,
+  debug,
   mudsystem,
   timers,
   update,
@@ -701,58 +700,6 @@ begin
     end;    
 end;
 
-{$IFDEF WIN32}
-procedure AnyExceptionNotify(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
-var
-	a : integer;
-	e : Exception;
-	strings : TStringList;
-begin
-	if (ExceptObj <> nil) then
-		begin
-		e := ExceptObj as Exception;
-		writeConsole('[EX Main:' + E.ClassName + '] ' + E.Message);
-		end;
-		
-	strings := TStringList.Create();
-
-	JclLastExceptStackListToStrings(strings, False, False, False);
-
-	if (strings.count > 0) then
-		begin
-		writeConsole('Stacktrace follows:');
-
-		for a := 0 to strings.count - 1 do
-			writeConsole(strings[a]);
-		end
-	else
-		writeConsole('No stacktrace available.');
-
-	strings.Free();
-end;
-
-function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; stdcall;
-begin
-	Result := 1;
-end;
-{$ENDIF}
-
-{$IFDEF LINUX}
-procedure ExceptHandler(ExceptObject : TObject; ExceptAddr : Pointer);
-var
-	E : Exception;
-begin
-	E := ExceptObject as Exception;
-
-	writeln('[EX] ' + E.ClassName + ': ' + E.Message);
-
-	if (E is EControlC) then
-		grace_exit := true;
-
-	halt;
-end;
-{$ENDIF}
-
 var
 	tm : TDateTime;
 	f : file;
@@ -776,22 +723,8 @@ begin
 	
 	old_exitproc := ExitProc;
 	tm := Now();
-
-{$IFDEF WIN32}
-  // initialize the debug 'fail-safe device'
-
-  ExceptProc := nil;
-
-  JclStackTrackingOptions := JclStackTrackingOptions + [stRawMode,stStaticModuleList,stExceptFrame];
-  SetUnhandledExceptionFilter(@ExceptionFilter);
-
-	JclStartExceptionTracking;
-	JclInitializeLibrariesHookExcept;
-	JclAddExceptNotifier(AnyExceptionNotify);
-{$ENDIF}
-{$IFDEF LINUX}
-	ExceptProc := @ExceptHandler;
-{$ENDIF}
+	
+	initDebug();
 
 	bootServer();  
   

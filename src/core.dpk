@@ -69,6 +69,7 @@ contains
 	modules,
 	socket,
 	console,
-	events;
+	events,
+	debug;
 
 end.
