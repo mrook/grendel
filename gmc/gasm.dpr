@@ -46,7 +46,7 @@ begin
   errors := true;
 end;
 
-function getLine : string;
+function getLine() : string;
 var
 	look : string;
 begin
@@ -57,7 +57,7 @@ begin
   Result := look;
 end;
 
-function readLine : Asm_Statement;
+function readLine() : Asm_Statement;
 var
    statement, keyword, rhs : string;
    a, opcode : integer;
@@ -129,32 +129,28 @@ begin
   end;
 end;
 
-procedure optimize;
+procedure optimize();
 var
-	node, node_next : GListNode;
+	iterator : GIterator;
 	stat : Asm_Statement;
 	line : Asm_Line;
 begin
-  node := statements.head;
+  iterator := statements.iterator();
 
-  while (node <> nil) do
+  while (iterator.hasNext()) do
     begin
-    node_next := node.next;
-    stat := node.element;
+    stat := Asm_Statement(iterator.next());
 
 		if (not (stat is Asm_Line)) then
-      begin
-      node := node_next;
 			continue;
-      end;
 
 		line := Asm_Line(stat);
-
-		node := node_next;
 		end;
+	
+	iterator.Free();
 end;
 
-procedure genCode;
+procedure genCode();
 var
 	b, displ : integer;
   f : single;
@@ -162,16 +158,16 @@ var
   line : Asm_Line;
   jump : Asm_Jump;
   lbl : Asm_Label;
-	node, node_in : GListNode;
+  node_in : GListNode;
+	iterator : GIterator;  
 	sym : Symbol;
 begin
   displ := 0;
 
-  node := statements.head;
-
-  while (node <> nil) do
+  iterator := statements.iterator();
+  while (iterator.hasNext()) do
     begin
-    stat := node.element;
+    stat := Asm_Statement(iterator.next());
 
     if (stat is Asm_Line) then
       begin
@@ -275,15 +271,14 @@ begin
 		else
 		if (stat is Asm_Jump) then
 			inc(displ, 5);
-    
-		node := node.next;
 		end;
+	iterator.Free();
 
-  node := statements.head;
 
-  while (node <> nil) do
+  iterator := statements.iterator();
+  while (iterator.hasNext()) do
     begin
-    stat := node.element;
+    stat := Asm_Statement(iterator.next());
 
     if (stat is Asm_Jump) then
       begin
@@ -313,17 +308,15 @@ begin
       if (jump.addr = -1) then
         asmError(jump.lineNum, 'undefined label ' + jump.lbl);
       end;
-
-		node := node.next;
     end;
+  iterator.Free();
  
   codeSize := displ;
   
-  node := symbols.head;
-  
-  while (node <> nil) do
+  iterator := symbols.iterator(); 
+  while (iterator.hasNext()) do
     begin
-    sym := node.element;
+    sym := Symbol(iterator.next());
     
 		node_in := statements.head;
 		while (node_in <> nil) do
@@ -344,27 +337,26 @@ begin
 
 			node_in := node_in.next;
       end;
-
-    node := node.next;
     end;
+  iterator.Free();
 end;
 
-procedure writeCode;
+procedure writeCode();
 var
   stat : Asm_Statement;
   sym : Symbol;
   line : Asm_Line;
   jump : Asm_Jump;
-  node : GListNode;
+  iterator : GIterator;
   t : byte;
 begin
 	blockwrite(output, codeSize, 4);
 	blockwrite(output, dataSize, 4);
 
-  node := statements.head;
-  while (node <> nil) do
+  iterator := statements.iterator();
+  while (iterator.hasNext()) do
     begin
-    stat := node.element;
+    stat := Asm_Statement(iterator.next());
 
     if (stat is Asm_Line) then
       begin
@@ -381,22 +373,20 @@ begin
 			blockwrite(output, jump.opcode, 1);
 			blockwrite(output, jump.addr, 4);
 			end;
-
-		node := node.next;
 		end;
+	iterator.Free();
 		
-	node := symbols.head;
-	while (node <> nil) do
-	  begin
-	  sym := node.element;
+  iterator := symbols.iterator(); 
+  while (iterator.hasNext()) do
+    begin
+    sym := Symbol(iterator.next());
 
     t := length(sym.id);
     blockwrite(output, t, 1);
     blockwrite(output, sym.id[1], length(sym.id));
   	blockwrite(output, sym.addr, 4);
-
-		node := node.next;
 	  end;
+	iterator.Free();
 end;
 
 var
