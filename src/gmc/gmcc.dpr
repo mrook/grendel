@@ -4,6 +4,7 @@
 (* global definitions: *)
 
 
+{$APPTYPE CONSOLE}
 uses 
 	SysUtils,
 	Classes,

@@ -6,6 +6,7 @@
 
 %{
 
+{$APPTYPE CONSOLE}
 uses 
 	SysUtils,
 	Classes,

@@ -1,4 +1,5 @@
 program gasm;
+{$APPTYPE CONSOLE}
 uses gasmdef, strip, Classes, SysUtils, dtypes;
 
 type
