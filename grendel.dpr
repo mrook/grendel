@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.49 2001/08/02 21:27:51 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.50 2001/08/03 21:33:02 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -112,8 +112,6 @@ const pipeName : pchar = '\\.\pipe\grendel';
 var
   listenv4 : GSocket = nil;
   listenv6 : GSocket = nil;
-
-  client_addr : TSockAddr_Storage;
 
   old_exitproc : pointer;
 
@@ -665,11 +663,12 @@ var
    suc : boolean;
    sock : TSocket;
    sk : GSocket;
+   client_addr : TSockAddr_Storage;
    cl : PSockAddr;
    l : integer;
 begin
   pipe := INVALID_HANDLE_VALUE;
-
+  
   while (true) do
     begin
     pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
@@ -691,7 +690,7 @@ begin
 			exit;
       end;
   end;
-
+  
   sock := -1;
 
   repeat
@@ -712,7 +711,9 @@ begin
       getpeername(sock, cl^, l);
       
       sk := createSocket(prot.iAddressFamily, sock);
-      sk.setNonBlocking();
+      sk.setNonBlocking();     
+      sk.socketAddress := client_addr;
+      sk.resolve();
 
       GGameThread.Create(sk, true, g);
       end;
@@ -734,11 +735,11 @@ begin
 {$ENDIF}
 
   bootServer();
-
-  if (CmdLine = 'copyover') then
+   
+{$IFDEF WIN32}
+  if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
     from_copyover;
 
-{$IFDEF WIN32}
   SetConsoleCtrlHandler(@ctrl_handler, true);
 {$ENDIF}
 

@@ -39,6 +39,8 @@ begin
 
   if (WSAStartup(ver, hWSAData) <> 0) then
     exit;
+    
+  writeln('Starting copyover...');
 
   pipe := INVALID_HANDLE_VALUE;
 
@@ -98,7 +100,6 @@ begin
   // give Grendel time to die
   sleep(1000);
 
- 
   // check for any new grendel.exe in dir "bin\"
   if (FileExists('bin\grendel.exe')) then
     begin
@@ -120,6 +121,7 @@ begin
 
   sleep(1000);
 
+  writeln('Spawning new process...');
 
   FillChar(SI, SizeOf(SI), 0);
   SI.cb := SizeOf(SI);
@@ -129,9 +131,11 @@ begin
     exit;
 
   pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 1, 0, 0, 10000, nil);
-
+  
   if (not ConnectNamedPipe(pipe, nil)) then
     exit;
+
+  writeln('Duplicating connections...');
 
   for a := 0 to conns.count - 1 do
     begin
@@ -158,5 +162,7 @@ begin
   CloseHandle(pipe);
 
   WSACleanup;
+  
+  writeln('Cleaned up.');
 end.
 
