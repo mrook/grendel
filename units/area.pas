@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.30 2001/05/11 14:25:00 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.31 2001/05/27 10:49:09 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1308,6 +1308,7 @@ var reset : GReset;
     conn : GConnection;
     node_reset, node_char : GListNode;
     buf : string;
+    p : integer;
 begin
   lastobj := nil;
   lastmob := nil;
@@ -1408,7 +1409,15 @@ begin
                 npc.toRoom(npc.room);
                 lastmob := npc;
                 inc(mobs_loaded);
-//                resetTrigger(npc);
+
+                p := npc.context.findSymbol('onReset');
+
+                if (p <> -1) then
+                  begin
+                  npc.context.push(integer(npc));
+                  npc.context.setEntryPoint(p);
+                  npc.context.Execute;
+                  end;
                 end;
               end;
             end;

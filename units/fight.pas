@@ -250,11 +250,13 @@ begin
 end;
 
 function damage(ch, oppnt : GCharacter; dam : integer; dt : integer) : integer;
-var xp,r,dameq:integer;
-    damobj : GObject;
-    dm : GDamMessage;
-    a : array[1..3] of string;
-    s1, s2 : string;
+var
+   xp,r,dameq:integer;
+   damobj : GObject;
+   dm : GDamMessage;
+   a : array[1..3] of string;
+   s1, s2 : string;
+   p : integer;
 begin
   damage := RESULT_NONE;
 
@@ -492,7 +494,15 @@ begin
 
     if (oppnt.IS_NPC) then
       begin
-//      deathTrigger(oppnt, ch);
+      p := GNPC(oppnt).context.findSymbol('onDeath');
+
+      if (p <> -1) then
+        begin
+        GNPC(oppnt).context.push(integer(ch));
+        GNPC(oppnt).context.push(integer(oppnt));
+        GNPC(oppnt).context.setEntryPoint(p);
+        GNPC(oppnt).context.Execute;
+        end;
 
       { if switched, let go }
       if (oppnt.conn <> nil) then
@@ -500,7 +510,7 @@ begin
 
       oppnt.die;
 
-     if (not ch.IS_NPC) then
+      if (not ch.IS_NPC) then
         begin
         if (IS_SET(GPlayer(ch).cfg_flags,CFG_AUTOLOOT)) then
           interpret(ch, 'get all ''corpse of ' + oppnt.name^ + '''');

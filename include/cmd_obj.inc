@@ -1,4 +1,4 @@
-// $Id: cmd_obj.inc,v 1.16 2001/05/11 14:25:07 ***REMOVED*** Exp $
+// $Id: cmd_obj.inc,v 1.17 2001/05/27 10:49:09 ***REMOVED*** Exp $
 
 procedure do_get(ch:GCharacter;param:string);
 var obj, obj_in :GObject;
@@ -829,11 +829,12 @@ var arg, arg2, arg3 : string;
     vict : GCharacter;
     value, counter : integer;
     node : GListNode;
+    p : integer;
 begin
   param := one_argument(param,arg);
   param := one_argument(param,arg2);
   one_argument(param,arg3);
-  
+
   counter := 0;
 
   if (length(arg) = 0) or (length(arg2) = 0) then
@@ -951,7 +952,19 @@ begin
   act(AT_REPORT,'You give $N $p.',false, ch, obj, vict, TO_CHAR);
   act(AT_REPORT,'$n gives $N $p.',false, ch, obj, vict, TO_ROOM);
 
-//  giveTrigger(vict, ch, obj);
+  if (vict.IS_NPC) then
+    begin
+    p := GNPC(vict).context.findSymbol('onGive');
+
+    if (p <> -1) then
+      begin
+      GNPC(vict).context.push(integer(obj));
+      GNPC(vict).context.push(integer(ch));
+      GNPC(vict).context.push(integer(vict));
+      GNPC(vict).context.setEntryPoint(p);
+      GNPC(vict).context.Execute;
+      end;
+    end;
 end;
 
 { Put objects into container - Nemesis }
