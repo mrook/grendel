@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.3 2001/08/01 15:38:26 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.4 2001/08/06 18:55:59 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -634,7 +634,7 @@ begin
   begin
     conn := node.element;
     
-    if (conn.state = CON_PLAYING) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
+    if (conn.state in [CON_PLAYING,CON_EDITING,CON_EDIT_HANDLE]) and (ch.CAN_SEE(conn.ch)) and (ch.IS_SAME_ALIGN(conn.ch)) and (not conn.ch.IS_NPC) then
     begin
       if not(specarg) or
         isName(conn.ch.race.name, arg) or
