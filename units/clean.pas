@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.17 2001/09/02 21:53:01 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.18 2001/11/15 20:43:20 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -108,7 +108,10 @@ begin
 
         if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
           begin
-          bugreport('GCleanThread.Execute', 'clean..pas', 'Thread of ' + conn.ch.name^ + ' probably died');
+          if (Assigned(conn.ch.name)) then
+            bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name^ + ' probably died')
+          else
+            bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of unnamed player probably died');
 
           conn.ch.emptyBuffer;
 
