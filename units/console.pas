@@ -1,6 +1,8 @@
 {
-  @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.12 2003/10/23 08:17:38 ***REMOVED*** Exp $)
+	Summary:
+  	Abstract console interface
+  	
+  ##	$Id: console.pas,v 1.13 2003/10/29 12:55:47 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -29,9 +31,13 @@ type
   end;
   
   GConsoleHistoryElement = class
+  private
+  	_timestamp : TDateTime;
+  	_text : string;
+  	
   public
-    timestamp : TDateTime;
-    text : string;
+    property timestamp : TDateTime read _timestamp write _timestamp;
+    property text : string read _text write _text;
   end;
 
 

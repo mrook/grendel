@@ -1,6 +1,8 @@
 {
-  @abstract(Clan routines)
-  @lastmod($Id: clan.pas,v 1.11 2003/10/22 13:12:34 ***REMOVED*** Exp $)
+  Summary:
+  	Clan routines
+  
+  ##	$Id: clan.pas,v 1.12 2003/10/29 12:55:47 ***REMOVED*** Exp $
 }
 
 unit clan;
@@ -8,22 +10,31 @@ unit clan;
 interface
 
 uses
-    fsys,
-    dtypes;
+	fsys,
+	dtypes;
 
 type
-    GClan = class
-       name : string;          { clan name }
-       abbrev : string;        { abbreviation of clan name, 3-4 chars }
-       leader : string;        { leader of clan }
-       minlevel : integer;     { Minimum level to join }
-       clanobj : integer;      { VNum of clan obj (e.g. a ring) }
-       clanvnum : integer;     { Clan area starting VNum }
+	GClan = class
+	private
+		_name : string;          { clan name }
+		_abbrev : string;        { abbreviation of clan name, 3-4 chars }
+		_leader : string;        { leader of clan }
+		_minlevel : integer;     { Minimum level to join }
+		_clanobj : integer;      { VNum of clan obj (e.g. a ring) }
+		_clanvnum : integer;     { Clan area starting VNum }
 
-       procedure load(fname : string);
+	public
+		constructor Create();
 
-       constructor Create;
-    end;
+		procedure load(fname : string);
+		
+		property name : string read _name write _name;
+		property abbrev : string read _abbrev write _abbrev;
+		property leader : string read _leader write _leader;
+		property minlevel : integer read _minlevel write _minlevel;
+		property clanobj : integer read _clanobj write _clanobj;
+		property clanvnum : integer read _clanvnum write _clanvnum;
+	end;
 
 var
    clan_list : GDLinkedList;
@@ -47,12 +58,12 @@ constructor GClan.Create();
 begin
   inherited Create;
 
-  minlevel := 50;
-  clanvnum := 0;
-  clanobj := 0;
-  leader := '';
-  name := 'Untitled Clan';
-  abbrev := '';
+  _minlevel := 50;
+  _clanvnum := 0;
+  _clanobj := 0;
+  _leader := '';
+  _name := 'Untitled Clan';
+  _abbrev := '';
 end;
 
 procedure GClan.load(fname : string);
@@ -186,7 +197,7 @@ end;
 
 procedure initClans();
 begin
-  clan_list := GDLinkedList.Create;
+  clan_list := GDLinkedList.Create();
 end;
 
 procedure cleanupClans();

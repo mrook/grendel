@@ -1,6 +1,8 @@
 {
-  @abstract(Game thread and command interpreter)
-  @lastmod($Id: commands.pas,v 1.5 2003/10/22 13:12:34 ***REMOVED*** Exp $)
+  Summary:
+  	Command interpreter and supporting code
+  
+  ##	$Id: commands.pas,v 1.6 2003/10/29 12:55:47 ***REMOVED*** Exp $
 }
 
 unit commands;
@@ -46,12 +48,18 @@ type
 	end;
 
 	GCommand = class
-		name : string;
+	private
+		_name : string;
+		_level : integer;             { minimum level }
+	
+	public
 		func_name : string;
 		ptr : COMMAND_FUNC;
-		level : integer;             { minimum level }
 		allowed_states : set of STATE_IDLE .. STATE_SLEEPING;      { allowed states }
 		addArg0 : boolean;           { send arg[0] (the command itself) to func? }
+
+		property name : string read _name write _name;
+		property level : integer read _level write _level;
 	end;
 
 var
