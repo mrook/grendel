@@ -1,4 +1,4 @@
-The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2004 by Michiel Rook
 
 
 

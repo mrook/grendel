@@ -1,4 +1,4 @@
-The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2003 by Michiel Rook
+The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2004 by Michiel Rook
 ---------------------------------------------------------------------------------
 
 
@@ -20,7 +20,7 @@ NOTE: The BSD License allows users to use BSD Licensed software in commercial ap
 The DIKU license does not, and thus takes priority!
 
 
-Copyright (c) 2000-2003 Michiel Rook.
+Copyright (c) 2000-2004 Michiel Rook.
 All rights reserved.
 
 The Grendel Project, in part or in whole, can not be used as a source of income 
