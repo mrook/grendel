@@ -1,3 +1,5 @@
+// $Id: mudhelp.pas,v 1.6 2001/04/16 17:26:58 xenon Exp $
+
 unit mudhelp;
 
 interface
@@ -26,8 +28,97 @@ uses
     constants,
     strip,
     util,
-    mudsystem;
+    mudsystem,
+    skills,
+    AnsiIO;
 
+
+type
+  ASkill = class
+             min_lvl : integer;
+             name : string;
+             constructor Create(lvl : integer; str : string);
+           end;
+
+constructor ASkill.Create(lvl : integer; str : string);
+begin
+  min_lvl := lvl;
+  name := str;
+end;
+
+function getSkillSpellList(sktype : integer) : string;
+  procedure insertLevelSorted(var ll : GDLinkedList; ask : ASkill);
+  var
+    node,ins : GListNode;
+    sk : ASkill;
+  begin
+    ins := nil;
+  
+    if (ll.head = nil) then
+    begin
+      ll.insertLast(ask);
+      exit;
+    end;
+    
+    node := ll.head;
+    while (node <> nil) do
+    begin
+      sk := node.element;
+
+      if (ask.min_lvl > sk.min_lvl) then
+      begin
+        ins := node;
+      end
+      else
+      begin
+        ll.insertBefore(node, ask);
+        exit;
+      end;
+
+      node := node.next;
+    end;
+
+    ll.insertAfter(ins, ask)
+  end;
+
+var
+  buf : string;
+  node : GListNode;
+  gsk : GSkill;
+  ask : ASkill;
+  ll : GDLinkedList;
+begin
+  buf := '';
+  ll := GDLinkedList.Create();
+
+  node := skill_table.head;
+  while (node <> nil) do
+  begin
+    gsk := node.element;
+    if (gsk.skill_type = sktype) then
+    begin
+      ask := ASkill.Create(gsk.min_lvl, gsk.name);
+      insertLevelSorted(ll, ask);
+    end;
+    
+    node := node.next;
+  end;
+  
+  node := ll.head;
+  while (node <> nil) do
+  begin
+    ask := node.element;
+    buf := buf + Format('[$B$4%3d$A$7]  %s', [ask.min_lvl, ask.name]);
+    if (node <> ll.tail) then
+      buf := buf + #13#10;
+
+    node := node.next;
+  end;
+
+  Result := buf;
+end;
+    
+{ Xenon 16/Apr/2001: added keywords %SKILL_LIST% and %SPELL_LIST% and their functionality }
 procedure load_help(fname:string);
 var f:textfile;
     s, g, key : string;
@@ -141,6 +232,12 @@ begin
           if (key = 'COPYRIGHT') then
             g := version_copyright
           else
+          if (key = 'SKILL_LIST') then
+            g := getSkillSpellList(SKILL_SKILL)
+          else
+          if (key = 'SPELL_LIST') then
+            g := getSkillSpellList(SKILL_SPELL)
+          else
             bugreport('load_help', 'mudhelp.pas', 'illegal key "' + key + '" in ' + fname,
                       'This helpfile uses an unknown key.');
           text := text + g;
@@ -196,3 +293,4 @@ end;
 begin
   help_files := GDLinkedList.Create;
 end.
+
