@@ -27,7 +27,7 @@ type
       fname, name, author : string;
       m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
       resets : GDLinkedList;
-      flags : integer;
+      flags : cardinal;
       nplayer : integer;
       age, max_age : integer;         { age/max in gamehours }
       reset_msg : string;              { msg when reset }

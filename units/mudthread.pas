@@ -1268,6 +1268,9 @@ begin
   registerCommand('do_rmake', do_rmake);
   registerCommand('do_rclone', do_rclone);
   registerCommand('do_aassign', do_aassign);
+  registerCommand('do_acreate', do_acreate);
+  registerCommand('do_aset', do_aset);
+  registerCommand('do_astat', do_astat);
 end;
 
 begin

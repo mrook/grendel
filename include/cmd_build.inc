@@ -1,4 +1,4 @@
-const room_flags:array[0..30] of pchar=('dark','death','nomob',
+const room_flags:array[0..30] of string = ('dark','death','nomob',
                                         'indoors','good','evil',
                                         'nocast','tunnel','private',
                                         'safe','solitary','norecall',
@@ -9,7 +9,7 @@ const room_flags:array[0..30] of pchar=('dark','death','nomob',
                                         'bv23','bv24','bv25','bv26',
                                         'bv27','bv28','bv29','proto');
 
-const exit_flags:array[0..12] of pchar=('isdoor','closed','locked',
+const exit_flags:array[0..12] of string = ('isdoor','closed','locked',
                                         'pickproof','secret','swim',
                                         'fly','clibm','portal',
                                         'nobreak','nomob','enter',
@@ -992,7 +992,7 @@ begin
   act(AT_REPORT,buf + ' of $N set to ' + inttostr(value) + '.',false,ch,nil,vict,TO_CHAR);
 end;
 
-const object_flags:array[0..30] of pchar=('nopickup','glow','hum',
+const object_flags:array[0..30] of string=('nopickup','glow','hum',
                                           'antigood','antievil',
                                           'loyal','noremove',
                                           'nodrop','clanobject',
@@ -1003,13 +1003,13 @@ const object_flags:array[0..30] of pchar=('nopickup','glow','hum',
                                           'bv23','bv24','bv25','bv26',
                                           'bv27','bv28','bv29','proto');
 
-const item_types:array[1..14] of pchar=('weapon','armor','food',
+const item_types:array[1..14] of string=('weapon','armor','food',
                                         'drink','light','trash',
                                         'money','special','gem',
                                         'container','corpse',
                                         'fountain','blood','portal');
 
-const wear_types:array[1..26] of pchar=('rfinger','lfinger','neck1',
+const wear_types:array[1..26] of string=('rfinger','lfinger','neck1',
                                         'neck2','body','head','legs',
                                         'feet','hands','arms',
                                         'shield','about','waist',
@@ -1500,3 +1500,182 @@ begin
       ch.sendBuffer('That area cannot be found.'#13#10);
     end;
 end;
+
+function createArea(fn : string) : GArea;
+var
+   area : GArea;
+begin
+  area := GArea.create;
+
+  area.m_lo := High(integer);
+  area.m_hi := -1;
+  area.r_lo := High(integer);
+  area.r_hi := -1;
+  area.o_lo := High(integer);
+  area.o_hi := -1;
+
+  area.fname := fn;
+  area.author := 'No author';
+  area.reset_msg := 'No reset message';
+  area.name := 'New area';
+
+  area.max_age := 10;
+  area.age := 0;
+  area.flags := 0;
+
+  with area.weather do
+    begin
+    mmhg := 1000;
+    sky := SKY_CLOUDLESS;
+    change := 0;
+    temp := 20;
+    temp_avg := 20;
+    temp_mult := 5;
+    end;
+
+  area_list.insertLast(area);
+
+  Result := area;
+end;
+
+procedure do_acreate(ch : GCharacter; param : string);
+var
+   area : GArea;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: ACREATE <filename>'#13#10#13#10);
+    ch.sendBuffer('Creates a new area file using default values.'#13#10);
+    exit;
+    end;
+
+  area := findArea(param);
+  if (area <> nil) then
+    begin
+    ch.sendBuffer('Area already exists.'#13#10);
+    exit;
+    end;
+
+  area := createArea(param);
+  area.author := ch.name^;
+  area.flags := AREA_NOPC or AREA_PROTO;           { not for mortals, proto }
+  act(AT_REPORT,'Area '+param+' created.',false,ch,nil,nil,TO_CHAR);
+end;
+
+const area_flags : array[0..2] of string = ('noreset','nopc','proto');
+
+procedure do_aset(ch : GCharacter; param : string);
+var
+   area : GArea;
+   sub : string;
+   a : integer;
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('Usage: ASET <field> <value>'#13#10#13#10);
+    ch.sendBuffer('Field can be one of the following:'#13#10#13#10);
+    ch.sendBuffer('  author name resetmsg age flags'#13#10);
+    exit;
+    end;
+
+  if (ch.player^.area_fname='') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  if (ch.player^.area=nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  area := ch.player^.area;
+  param := one_argument(param,sub);
+
+  if (sub = 'author') then
+    area.author := param
+  else
+  if (sub = 'name') then
+    area.name := param
+  else
+  if (sub = 'resetmsg') then
+    area.reset_msg := param
+  else
+  if (sub = 'age') then
+    area.max_age := strtointdef(param, 0)
+  else
+  if (sub = 'flags') then
+    begin
+    for a:=0 to High(area_flags) do
+     if (pos(area_flags[a], param) > 0) then
+      begin
+      if IS_SET(area.flags,1 shl a) then
+        REMOVE_BIT(area.flags, 1 shl a)
+      else
+        SET_BIT(area.flags,1 shl a);
+      end;
+    end
+  else
+    begin
+    ch.sendBuffer('Unknown option.'#13#10);
+    exit;
+    end;
+
+  ch.sendBuffer('Ok.'#13#10);
+end;
+
+procedure do_astat(ch : GCharacter; param : string);
+var
+   area : GArea;
+   buf : string;
+   a : integer;
+begin
+  if (ch.player^.area_fname='') then
+    begin
+    ch.sendBuffer('You have not yet been assigned an area.'#13#10);
+    exit;
+    end;
+
+  area:=ch.player^.area;
+  if (area=nil) then
+    begin
+    ch.sendBuffer('Use LOADAREA first to loadup your assigned area.'#13#10);
+    exit;
+    end;
+
+  act(AT_REPORT, '['+area.fname+']'#13#10,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT, 'Name:             '+area.name,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT, 'Author:           '+area.author,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT, 'Reset message:    '+area.reset_msg,false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT, 'Maximum age:      '+inttostr(area.max_age),false,ch,nil,nil,TO_CHAR);
+
+  buf := 'Ranges:          ';
+
+  if (area.r_lo <> High(integer)) then
+    buf := buf + ' ' + inttostr(area.r_lo)+'-'+inttostr(area.r_hi);
+
+  if (area.m_lo <> High(integer)) then
+    buf := buf + ' ' + inttostr(area.m_lo)+'-'+inttostr(area.m_hi);
+
+  if (area.o_lo <> High(integer)) then
+    buf := buf + ' ' + inttostr(area.o_lo)+'-'+inttostr(area.o_hi);
+
+  act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
+
+  buf := 'Flags:           ';
+
+  if (area.flags = 0) then
+    buf := buf + ' none'
+  else
+  for a:=0 to High(area_flags) do
+   if IS_SET(area.flags,1 shl a) then
+    buf := buf + ' ' + area_flags[a];
+
+  act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);
+
+  act(AT_REPORT,'Nr. of resets:    '+inttostr(area.resets.getSize()),false,ch,nil,nil,TO_CHAR);
+  act(AT_REPORT,'Nr. of players:   '+inttostr(area.nplayer),false,ch,nil,nil,TO_CHAR);
+end;
+
+
