@@ -64,6 +64,14 @@ l mud police!
 l online suggest (pray) history
 l mobprog compiling to some sort of pseudo stack machine code
 
+-- random ideas --
+
+* IMC (intermud communication): both channels *and* noteboards
+  (perhaps separate server for noteboard, or whatever)
+* slashdot-like moderation system on noteboards
+* online search through helpfiles (so like 'apropos sect' to find all
+  helppages with the word sect in them)
+
 -- not really code specific, but still open issues: --
 
 * general format for docs (docwrite-HOWTO something), both
