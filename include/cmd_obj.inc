@@ -261,7 +261,9 @@ begin
 end;
 
 procedure do_sacrifice(ch:GCharacter;param:string);
-var obj:GObject;
+var
+   obj, obj_in : GObject;
+   node, node_next : GListNode;
 begin
   if (length(param)=0) then
     begin
@@ -270,7 +272,7 @@ begin
     end;
 
   one_argument(param, param);
-   
+
   obj := ch.room.findObject(param);
 
   if obj=nil then
@@ -291,13 +293,24 @@ begin
       inc(ch.player^.bankgold);
       end;
 
+    node := obj.contents.head;
+    while (node <> nil) do
+      begin
+      node_next := node.next;
+      obj_in := node.element;
+
+      obj_in.extract;
+
+      node := node.next;
+      end;
+
     obj.extract;
     end;
 end;
 
 procedure do_wear(ch:GCharacter;param:string);
 var obj, lastobj : GObject;
-    node : GListNode;
+    node, node_next : GListNode;
     weared : integer;
 begin
   if (length(param)=0) then
@@ -319,6 +332,7 @@ begin
 
     while (node <> nil) do
       begin
+      node_next := node.next;
       obj := node.element;
 
       if (obj.wear1>0) or (obj.wear2>0) then
@@ -326,11 +340,12 @@ begin
         if (ch.equip(obj)) then
           begin
           inc(weared);
+          obj.seperate;
           obj.fromChar;
           end;
         end;
 
-      node := node.next;
+      node := node_next;
       end;
 
     if (weared = 0) then
@@ -353,7 +368,10 @@ begin
       end;
 
     if (ch.equip(obj)) then
+      begin
+      obj.seperate;
       obj.fromChar;
+      end;
     end;
 end;
 
