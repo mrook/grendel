@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.63 2003/10/17 16:34:38 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.64 2003/10/20 12:34:47 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -3007,19 +3007,19 @@ begin
   
   room_list.clear();
   room_list.Free();
- 
+
   shop_list.clean();
   shop_list.Free();
-  
+
   teleport_list.clean();
   teleport_list.Free();
-  
+
   npc_list.clean();
   npc_list.Free();
 
   //objectList.clean();
   objectList.Free();
-  
+
   objectIndices.clear();
   objectIndices.Free();
 end;
