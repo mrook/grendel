@@ -5,7 +5,7 @@
 		Modified by: Grahame Grieve
 		Modified by: Chad Z. Hower (Kudzu)
 		
-	## $Id: IdHTTPWebBrokerBridge.pas,v 1.1 2003/09/24 14:31:46 ***REMOVED*** Exp $
+	## $Id: IdHTTPWebBrokerBridge.pas,v 1.2 2003/09/25 17:53:24 ***REMOVED*** Exp $
 }
 unit IdHTTPWebBrokerBridge;
 
@@ -16,8 +16,7 @@ interface
 uses
   Classes,
   HTTPApp,
-  IdCustomHTTPServer, IdTCPServer, IdIOHandlerSocket,
-  WebBroker;
+  IdCustomHTTPServer, IdTCPServer, IdIOHandlerSocket;
 
 type
   TIdHTTPAppRequest = class(TWebRequest)
