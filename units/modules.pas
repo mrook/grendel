@@ -80,6 +80,8 @@ begin
     
   module_list.clear();
   module_list.Free();
+  
+  iterator.Free();
 end;
 
 procedure addModule(name : string);
@@ -148,6 +150,8 @@ begin
     
       ch.sendBuffer(module.fname + ' (' + module.desc + ')'#13#10);
       end;
+
+    iterator.Free();
     end
   else
     begin

@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.46 2001/08/11 22:02:02 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.47 2001/08/12 18:08:20 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1134,8 +1134,10 @@ begin
 
     writeln(f, 'S');
     end;
+    
+  iterator.Free();
 
-  for h := r_lo to (r_hi - 1) do
+(*  for h := r_lo to (r_hi - 1) do
   begin
     room := GRoom(room_list.get(h));
     if (room = nil) then
@@ -1190,7 +1192,8 @@ begin
   end;
 
   writeln(f, '#END');
-  writeln(f);
+  writeln(f); *)
+  
   writeln(f, '#MOBILES');
 
   node := npc_list.head;
