@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.71 2003/09/24 14:32:04 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.72 2003/10/02 08:22:45 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -645,7 +645,7 @@ begin
 	if (ExceptObj <> nil) then
 		begin
 		e := ExceptObj as Exception;
-		writeConsole('[EX] ' + E.Message);
+		writeConsole('[EX:' + E.ClassName + '] ' + E.Message);
 
 	  strings := TStringList.Create();
 	
