@@ -883,6 +883,26 @@ begin
     begin
     ch := node_world.element;
 
+    if (ch.bash_timer > -2) then
+      dec(ch.bash_timer);
+
+    if (ch.bashing > -2) then
+      dec(ch.bashing);
+
+    if (ch.cast_timer > 0) then
+      dec(ch.cast_timer);
+
+    if (ch.bash_timer = 1) and (ch.position = POS_BASHED) then
+      begin
+      if (ch.fighting <> nil) then
+        ch.position := POS_FIGHTING
+      else
+        ch.position := POS_STANDING;
+
+      act(AT_REPORT,'You recover from the bash and stand quickly.',false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,'$n recovers and stands quickly.',false,ch,nil,nil,TO_ROOM);
+      end;
+
     vch := ch.fighting;
 
     if (ch.position = POS_FIGHTING) then
@@ -948,6 +968,21 @@ begin
 
           node_room := node_room.next;
           end;
+        end;
+      end
+    else
+    if (ch.IS_NPC) then
+      begin
+      // aggress mode
+      if (ch.hunting <> nil) and (ch.hunting.room = ch.room) then
+        interpret(ch, 'kill '+ch.hunting.name);
+
+      if (IS_SET(ch.act_flags, ACT_AGGRESSIVE)) then
+        begin
+        vch := ch.room.findRandomChar;
+
+        if (vch <> nil) then
+          interpret(ch, 'kill ' + vch.name);
         end;
       end;
 
