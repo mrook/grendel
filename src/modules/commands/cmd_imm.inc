@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.13 2004/03/17 00:19:32 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.14 2004/03/22 19:35:50 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch : GCharacter; param : string);
 var
@@ -299,7 +299,7 @@ begin
       ch.sendBuffer('Can only destroy players.'#13#10)
     else
     if (vict.IS_IMMORT) then
-      ch.sendBuffer('That player cannot be destroyed.'#13#10)
+      ch.sendBuffer('That player (online) cannot be destroyed.'#13#10)
     else
     if (vict = ch) then
       ch.sendBuffer('Use DELETE to erase yourself.'#13#10)
@@ -336,7 +336,8 @@ begin
 
         if (level >= 990) then
           begin
-          ch.sendBuffer('That player cannot be destroyed.'#13#10);
+          ch.sendBuffer('That player (offline) cannot be destroyed.'#13#10);
+          closefile(f);
           exit;
           end;
         end;
