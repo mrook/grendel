@@ -212,7 +212,7 @@ const ACT_NPC=BV00;             { doh... never set with PC's! }
       ACT_SHOPKEEP=BV13;        { shop keeper }
       ACT_IMMORTAL=BV14;        { immortal NPC }
       ACT_LOG=BV15;             { actions are logged }
-      ACT_PROTO=BV31;
+      ACT_PROTO = cardinal(BV31);
       
 { Item Types }
 const ITEM_WEAPON=1;
@@ -282,7 +282,7 @@ const ROOM_DARK=BV00;           { can't see without light }
       ROOM_TELEPORT=BV15;       { teleporting room }
       ROOM_NOFLOOR=BV16;        { no floor -> when not flying, ch falls down }
       ROOM_MANAROOM=BV17;       { manaroom, fast magic regeneration }
-      ROOM_PROTO=BV31;
+      ROOM_PROTO = cardinal(BV31);
 
 { sector types }
 const SECT_INSIDE=1;
@@ -347,7 +347,7 @@ const OBJ_NOPICKUP=BV00;
       OBJ_MISSILE=BV11;
       OBJ_NOSAC=BV12;
       OBJ_NODECAY=BV13;
-      OBJ_PROTO=BV31;
+      OBJ_PROTO = cardinal(BV31);
 
 { weather }
 const SUN_DAWN=1;
