@@ -47,7 +47,7 @@ Wishlist for the 1.0.x tree
   # do not group objects solely on basic stats, two objects must be an
      *exact* match if they are to be grouped
 
-* remove all references to grouping from core code, object grouping should
+! remove all references to grouping from core code, object grouping should
   be an output feature to remove client clutter
 
 * get rid of GObject.fromChar/toChar/etc., GObject should not know where
@@ -102,10 +102,6 @@ Wishlist for the 1.0.x tree
   
   - global/mudwide (static) variables
   
-* area loader
-  
-  - auto linewrap, filter out hard line breaks
-
 * shops
 
   - opening times

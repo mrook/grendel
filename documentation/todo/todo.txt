@@ -60,16 +60,15 @@ Grendel's TODO list with probable release date/version
 ! (1.0.0a7) general format for docs: docbook XML
 
 ! (1.0.0a8) sheath/draw for weapons
+! (1.0.0a8) trying to wear an object on a position that's already occupied results in a switch
 
 ! (old) additional reset command to reset containers
 
-- (0.4.4) trying to wear an object on a position that's already occupied results in a switch
 - (0.4.4) work on ranged weapons a bit (load/shoot)
 
 - (long)  when rapier in inv and rapier in eq, make 2.rapier match the one in eq
 - (long)  Better online construction (autocreate exit+room when moving),
           mobile create/edit, reset edit etc.
-- (long)  expand tracking system
 - (long)  reloadarea command
 - (long)  use race defined size of characters (base movement costs on size, room size?)
 
