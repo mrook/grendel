@@ -34,7 +34,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
   USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.31 2004/04/12 20:49:02 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.32 2004/04/14 21:56:46 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -55,7 +55,6 @@ uses
 {$IFDEF WIN32}
 	Windows,
 	Winsock2,
-	Forms,
 {$ENDIF}
 	Classes,
 {$IFDEF LINUX}
@@ -103,10 +102,6 @@ begin
 	// Wait for connection_list to clean itself
 	while (connection_list.size() > 0) do
 		begin
-		{$IFDEF WIN32}
-		Application.ProcessMessages();
-		{$ENDIF}
-		
 		Sleep(25);
 		end;
 end;

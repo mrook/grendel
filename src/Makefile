@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.8 2004/04/04 22:10:03 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.9 2004/04/14 21:56:46 ***REMOVED*** Exp $
 #
 
 
@@ -85,7 +85,7 @@ $(COPYOVER):	copyover.dpr $(CORE)
 	$(DCC) copyover.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
 
 $(SERVICE):	grendelservice.dpr servicemain.pas $(CORE)
-	$(DCC) grendelservice.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
+	$(DCC) grendelservice.dpr -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -LUvcl
 
 $(CORE): core.dpk units/*.pas gmc/*.pas contrib/*.pas
 	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -Ugmc -GD -Ucontrib/jcl
