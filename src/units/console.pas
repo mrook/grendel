@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.14 2004/04/11 13:07:59 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.15 2004/04/12 20:49:02 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -19,7 +19,7 @@ uses
 type
 	GConsoleWriter = class
 	public
-		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); virtual; abstract;
+		procedure write(timestamp : integer; const text : string; debugLevel : integer = 0); virtual; abstract;
 	end;
   
 	GConsoleLogWriter = class(GConsoleWriter)
@@ -30,7 +30,7 @@ type
 		constructor Create(const moduleName : string);
 		destructor Destroy(); override;
 	
-		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
+		procedure write(timestamp : integer; const text : string; debugLevel : integer = 0); override;
 	end;
 
 	GConsole = class(GSingleton)
@@ -52,7 +52,7 @@ type
 
 		procedure fetchHistory(callback : GConsoleWriter; max : integer = 0);
 		
-		function fetchHistoryTimestamp(callback : GConsoleWriter; timestamp : TDateTime) : TDateTime;
+		function fetchHistoryTimestamp(callback : GConsoleWriter; timestamp : integer) : integer;
 	end;
 
   
@@ -63,18 +63,19 @@ implementation
 
 
 uses
+	DateUtils,
 	fsys;
 
 
 type
 	GConsoleHistoryElement = class
 	private
-		_timestamp : TDateTime;
+		_timestamp : integer;
 		_text : string;
 		_debugLevel : integer;
 
 	public
-		property timestamp : TDateTime read _timestamp write _timestamp;
+		property timestamp : integer read _timestamp write _timestamp;
 		property text : string read _text write _text;
 		property debugLevel : integer read _debugLevel write _debugLevel;
 	end;
@@ -141,7 +142,7 @@ begin
 			end;
 
 		he := GConsoleHistoryElement.Create();
-		he.timestamp := Now();
+		he.timestamp := DateTimeToUnix(Now);
 		he.text := text;
 		he.debugLevel := debugLevel;
 		history.add(he);
@@ -196,7 +197,7 @@ begin
 end;
 
 { Enumerate all items with item.timestamp >= timestamp, return last known timestamp }
-function GConsole.fetchHistoryTimestamp(callback : GConsoleWriter; timestamp : TDateTime) : TDateTime;
+function GConsole.fetchHistoryTimestamp(callback : GConsoleWriter; timestamp : integer) : integer;
 var
 	iterator : GIterator;
 	he : GConsoleHistoryElement;
@@ -213,10 +214,11 @@ begin
 			begin
 			he := GConsoleHistoryElement(iterator.next());
 			
-			if (he.timestamp < timestamp) then
+			Result := he.timestamp;
+			
+			if (he.timestamp <= timestamp) then
 				continue;
 
-			Result := he.timestamp;
 			callback.write(he.timestamp, he.text);
 			end;
 			
@@ -259,11 +261,11 @@ begin
 end;
 
 { Writes to logfile }
-procedure GConsoleLogWriter.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
+procedure GConsoleLogWriter.write(timestamp : integer; const text : string; debugLevel : integer = 0);
 begin
 	if (TTextRec(logfile).mode = fmOutput) then
 		begin
-		system.writeln(logfile, '[' + FormatDateTime('yyyymmdd hh:nn:ss', Now) + '] ' + text);
+		system.writeln(logfile, '[' + FormatDateTime('yyyymmdd hh:nn:ss', UnixToDateTime(timestamp)) + '] ' + text);
 		system.flush(logfile);
 		end;
 end;

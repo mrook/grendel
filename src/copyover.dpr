@@ -2,13 +2,14 @@
 	Summary:
 		Windows copyover controller
 		
-	## $Id: copyover.dpr,v 1.7 2004/03/30 12:29:18 ***REMOVED*** Exp $
+	## $Id: copyover.dpr,v 1.8 2004/04/12 20:49:02 ***REMOVED*** Exp $
 }
 program copyover;
 {$APPTYPE CONSOLE}
 {$IFDEF WIN32}
 uses
 	SysUtils,
+	DateUtils,
 	Classes,
 	Windows,
 	WinSock2,
@@ -29,7 +30,7 @@ type
 	
   	GConsoleCopyover = class(GConsoleWriter)
   	public
-		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
+		procedure write(timestamp : integer; const text : string; debugLevel : integer = 0); override;
   	end;
 	
 
@@ -52,9 +53,9 @@ var
 	exitCode : cardinal;
 	
 
-procedure GConsoleCopyover.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
+procedure GConsoleCopyover.write(timestamp : integer; const text : string; debugLevel : integer = 0);
 begin
-	writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
+	writeln('[' + FormatDateTime('hh:nn:ss', UnixToDateTime(timestamp)) + '] ', text);
 end;	
 
 begin

@@ -6,7 +6,8 @@
   Webpage:            http://www.grendelproject.nl/
   E-Mail:             michiel@grendelproject.nl
 
-  Please observe the file "text\License.txt" before using this software.
+  Please observe the file "documentation\License.txt" before using this 
+  software.
 
   Redistribution and use in source and binary forms, with or without 
   modification, are permitted provided that the following conditions are met:
@@ -33,7 +34,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
   USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.30 2004/04/04 22:39:03 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.31 2004/04/12 20:49:02 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -50,13 +51,11 @@ program grendel;
 
 uses
 	SysUtils,
+	DateUtils,
 {$IFDEF WIN32}
 	Windows,
 	Winsock2,
 	Forms,
-  	{$IFNDEF CONSOLEBUILD}
-	systray,
-  	{$ENDIF}
 {$ENDIF}
 	Classes,
 {$IFDEF LINUX}
@@ -65,12 +64,12 @@ uses
 	dtypes,
 	player,
 	mudsystem,
-	debug,
 	socket,
 	server,
 	console,
 	conns,
 	fight,
+	debug,
 	constants;
 
 
@@ -474,12 +473,12 @@ end;
 type
   	GConsoleGrendel = class(GConsoleWriter)
   	public
-		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
+		procedure write(timestamp : integer; const text : string; debugLevel : integer = 0); override;
   	end;
   	
-procedure GConsoleGrendel.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
+procedure GConsoleGrendel.write(timestamp : integer; const text : string; debugLevel : integer = 0);
 begin
-	writeln('[' + FormatDateTime('hh:nn', Now) + '] ', text);
+	writeln('[' + FormatDateTime('hh:nn:ss', UnixToDateTime(timestamp)) + '] ', text);
 end;	
 
 

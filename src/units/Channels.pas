@@ -2,7 +2,7 @@
 	Summary:
 		Channel manager
 		
-  ## $Id: Channels.pas,v 1.6 2004/04/10 22:24:03 ***REMOVED*** Exp $
+  ## $Id: Channels.pas,v 1.7 2004/04/12 20:49:02 ***REMOVED*** Exp $
 }
 
 unit Channels;
@@ -90,12 +90,13 @@ procedure cleanupChannels();
 implementation
 
 uses
-  mudsystem,
-  commands,
-  LibXmlParser,
-  util,
-  console,
-  player;
+	DateUtils,
+	mudsystem,
+	commands,
+	LibXmlParser,
+	util,
+	console,
+	player;
 
 var
   errprefix : string;
@@ -891,13 +892,13 @@ end;
 type 
   GConsoleChannel = class(GConsoleWriter)
   public
-    procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
+    procedure write(timestamp : integer; const text : string; debugLevel : integer = 0); override;
   end;
 
-procedure GConsoleChannel.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
+procedure GConsoleChannel.write(timestamp : integer; const text : string; debugLevel : integer = 0);
 begin
   if (channels_loaded) then
-    to_channel(nil, FormatDateTime('[hh:nn] ', timestamp) + text + '$7',CHANNEL_LOG,AT_LOG);
+    to_channel(nil, FormatDateTime('[hh:nn] ', UnixToDateTime(timestamp)) + text + '$7',CHANNEL_LOG,AT_LOG);
 end;
 
 procedure initChannels();

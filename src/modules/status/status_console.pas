@@ -2,7 +2,7 @@
 	Summary:
 		Module that hooks into systray.pas and displays console form on desktop
 	
-	## $Id: status_console.pas,v 1.10 2004/04/04 22:17:21 ***REMOVED*** Exp $
+	## $Id: status_console.pas,v 1.11 2004/04/12 20:49:02 ***REMOVED*** Exp $
 }
 unit status_console;
 
@@ -13,6 +13,7 @@ implementation
 
 {$IFNDEF CONSOLEBUILD}
 uses
+	DateUtils,
 	Classes,
 	Windows,
 	StdCtrls,
@@ -30,7 +31,7 @@ uses
 type
 	GConsoleWindowWriter = class(GConsoleWriter)
 	public
-		procedure write(timestamp : TDateTime; const text : string; debugLevel : integer = 0); override;
+		procedure write(timestamp : integer; const text : string; debugLevel : integer = 0); override;
 	end;
 
 	GConsoleModule = class(TInterfacedObject, IModuleInterface)
@@ -62,11 +63,11 @@ begin
 	Result := GConsoleModule.Create();
 end;
 
-procedure GConsoleWindowWriter.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
+procedure GConsoleWindowWriter.write(timestamp : integer; const text : string; debugLevel : integer = 0);
 begin
 	cs.Acquire();
 	
-	consoleQueue.add('[' + FormatDateTime('hh:nn', timestamp) + '] ' + text);
+	consoleQueue.add('[' + FormatDateTime('hh:nn:ss', UnixToDateTime(timestamp)) + '] ' + text);
 	
 	cs.Release();
 end;
