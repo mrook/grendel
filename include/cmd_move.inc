@@ -271,7 +271,7 @@ begin
       end;
 
     if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
-      act(AT_REPORT,'$n leaves through ' + pexit.keyword + '.',true,ch,nil,nil,TO_ROOM)
+      act(AT_REPORT,'$n leaves through the $d.',true,ch,nil, pexit,TO_ROOM)
     else
       act(AT_REPORT,'$n '+txt_room+' ' + headings[pexit.direction] + '.',true,ch,nil,nil,TO_ROOM);
     end;
@@ -288,7 +288,7 @@ begin
     if IS_SET(pexit.flags, EX_PORTAL) or IS_SET(pexit.flags, EX_ENTER) then
       begin
       act(AT_REPORT,'$n enters from somewhere.',true,ch,nil,nil,TO_ROOM);
-      act(AT_REPORT,'You enter ' + pexit.keyword + '.',false,ch,nil,nil,TO_CHAR);
+      act(AT_REPORT,'You enter the $d.',false,ch,nil,pexit,TO_CHAR);
       end
     else
       begin
