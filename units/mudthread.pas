@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.61 2001/07/31 21:47:27 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.62 2001/08/04 22:12:04 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -372,12 +372,10 @@ begin
               bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.'); }
           except
             on E : EExternal do
-            begin
-              outputError(E);
-            end;
-
-              //bugreport('interpret', 'mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' bugged',
-              //          'The specified command caused an error and has been terminated.');
+              outputError(E);            
+              
+            on E : Exception do
+              bugreport('interpret', 'mudthread.pas', ch.name^ + ':' + cmd.func_name + ' - ' + E.Message);
           end;
           end;
         end

@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.50 2001/08/03 21:33:02 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.51 2001/08/04 22:12:03 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -243,10 +243,13 @@ begin
 
   except
     on E : EExternal do
-    begin
+      begin
       bugreport('cleanup', 'grendel.dpr', 'Cleanup procedure failed, terminating now.');
       outputError(E);
-    end;
+      end;
+  
+    on E : Exception do
+      bugreport('cleanup', 'grendel.dpr', 'Exception in cleanup procedure: ' + E.Message);
   end;
 end;
 
