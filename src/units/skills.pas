@@ -2,7 +2,7 @@
   Summary:
   	Various skill related functions
   
-  ##	$Id: skills.pas,v 1.8 2004/03/13 15:45:21 ***REMOVED*** Exp $
+  ##	$Id: skills.pas,v 1.9 2004/03/21 20:40:03 ***REMOVED*** Exp $
 }
 
 unit skills;
@@ -631,11 +631,13 @@ end;
 // Remove affect <aff> from char
 procedure removeAffect(ch : GCharacter; aff : GAffect);
 begin
-  aff.modify(ch, false);
+	act(AT_REPORT, aff.wear_msg, false,ch,nil,nil,TO_CHAR);
+	
+	aff.modify(ch, false);
 
-  ch.affects.remove(aff.node);
+	ch.affects.remove(aff.node);
 
-  aff.Free();
+	aff.Free();
 end;
 
 // Remove affect by name from char
@@ -743,10 +745,7 @@ begin
       aff.duration := aff.duration - 1;
 
       if (aff.duration = 0) then
-        begin
-        act(AT_REPORT, aff.wear_msg, false,ch,nil,nil,TO_CHAR);
         removeAffect(ch, aff);
-        end;
       end;
       
     iterator_aff.Free();
