@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.10 2004/04/01 13:05:01 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.11 2004/04/03 16:08:41 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -64,10 +64,7 @@ implementation
 
 
 uses
-	mudsystem,
-	fsys,
-	debug,
-	server;
+	fsys;
 
 
 type
@@ -133,79 +130,77 @@ end;
 procedure GConsole.write(const text : string; debugLevel : integer = 0);
 var
 	he : GConsoleHistoryElement;
-	timestamp : TDateTime;
 begin
 	// lock write
 	synchronizer.BeginWrite();
 	
-	timestamp := Now();
-
-	he := GConsoleHistoryElement.Create();
-	he.timestamp := timestamp;
-	he.text := text;
-	he.debugLevel := debugLevel;
-	history.add(he);
-
-	if (history.size() > CONSOLE_HISTORY_MAX) then
-		begin
-		he := GConsoleHistoryElement(history.head.element);
-		history.remove(history.head);
-		he.Free();
-		end;
-
-	he := GConsoleHistoryElement.Create();
-	he.timestamp := timestamp;
-	he.text := text;
-	he.debugLevel := debugLevel;
-	queue.add(he);
-  
-	if (not serverBooted) then
-		poll();
-
-	// unlock write
-	synchronizer.EndWrite();
+	try
+		he := GConsoleHistoryElement.Create();
+		he.timestamp := Now();
+		he.text := text;
+		he.debugLevel := debugLevel;
+		queue.add(he);
+	finally
+		// unlock write
+		synchronizer.EndWrite();
+	end;
 end;
 
 { Poll the console }
 procedure GConsole.poll();
 var
-	he : GConsoleHistoryElement;
+	he, he_hist : GConsoleHistoryElement;
 	queue_iterator, iterator : GIterator;
 	writer : GConsoleWriter;
 begin
 	// lock read
 	synchronizer.BeginRead();
 
-	queue_iterator := queue.iterator();
-	
-	while (queue_iterator.hasNext()) do
-		begin
-		he := GConsoleHistoryElement(queue_iterator.next());
-	
-  		iterator := writers.iterator();
-  
-		while (iterator.hasNext()) do
+	try
+		queue_iterator := queue.iterator();
+
+		while (queue_iterator.hasNext()) do
 			begin
-			writer := GConsoleWriter(iterator.next());
-			
-			writer.write(he.timestamp, he.text, he.debugLevel);
-			end;    
+			he := GConsoleHistoryElement(queue_iterator.next());
 
-		iterator.Free();	
-		end;
-	
-	queue_iterator.Free();
+			he_hist := GConsoleHistoryElement.Create();
+			he_hist.timestamp := he.timestamp;
+			he_hist.text := he.text;
+			he_hist.debugLevel := he.debugLevel;
+			history.add(he_hist);
 
-	// unlock read
-	synchronizer.EndRead();
+			if (history.size() > CONSOLE_HISTORY_MAX) then
+				begin
+				he_hist := GConsoleHistoryElement(history.head.element);
+				history.remove(history.head);
+				he_hist.Free();
+				end;
+
+			iterator := writers.iterator();
+
+			while (iterator.hasNext()) do
+				begin
+				writer := GConsoleWriter(iterator.next());
+
+				writer.write(he.timestamp, he.text, he.debugLevel);
+				end;    
+
+			iterator.Free();	
+			end;
+
+		queue_iterator.Free();
 	
-	// lock write
-	synchronizer.BeginWrite();
+		// lock write
+		synchronizer.BeginWrite();
 	
-	queue.clear();
-	
-	// unlock write
-	synchronizer.EndWrite();
+		queue.clear();
+	finally
+		// unlock write
+		synchronizer.EndWrite();
+
+		// unlock read
+		synchronizer.EndRead();
+	end;
 end;
 
 { Fetch (up to) max items from the history and feed them to callback }
@@ -217,26 +212,28 @@ var
 begin
 	// lock read
 	synchronizer.BeginRead();
+	
+	try
+		iterator := history.iterator();
+		count := 0;
 
-	iterator := history.iterator();
-	count := 0;
+		while (iterator.hasNext()) do
+			begin
+			he := GConsoleHistoryElement(iterator.next());
 
-	while (iterator.hasNext()) do
-		begin
-		he := GConsoleHistoryElement(iterator.next());
+			callback.write(he.timestamp, he.text);
 
-		callback.write(he.timestamp, he.text);
+			inc(count);
 
-		inc(count);
+			if (max > 0) and (count >= max) then
+				break;
+			end;
 
-		if (max > 0) and (count >= max) then
-			break;
-		end;
-
-	iterator.Free();
-
-	// unlock read
-	synchronizer.EndRead();
+		iterator.Free();
+	finally
+		// unlock read
+		synchronizer.EndRead();
+	end;
 end;
 
 procedure writeConsole(const text : string; debugLevel : integer = 0);

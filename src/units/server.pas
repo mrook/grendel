@@ -2,7 +2,7 @@
 	Summary:
 		Main server class
 	
-	## $Id: server.pas,v 1.11 2004/03/31 22:08:19 ***REMOVED*** Exp $
+	## $Id: server.pas,v 1.12 2004/04/03 16:08:41 ***REMOVED*** Exp $
 }
 unit server;
 
@@ -183,6 +183,7 @@ begin
 		initEvents();
 
 		writeConsole('Booting server...');
+		pollConsole();
 		
 		{$IFDEF WIN32}
 		{$IFNDEF CONSOLEBUILD}
@@ -196,38 +197,49 @@ begin
 		writeConsole('Booting "' + system_info.mud_name + '" database, ' + FormatDateTime('ddddd', Now()) + '.');
 
 		writeConsole('Loading skills...');
+		pollConsole();
 		load_skills();
 
 		writeConsole('Loading races...');
+		pollConsole();
 		loadRaces();
 
 		writeConsole('Loading clans...');
+		pollConsole();
 		load_clans;
 
 		writeConsole('Loading channels...');
+		pollConsole();
 		load_channels();
 
 		writeConsole('Loading areas...');
+		pollConsole();
 		loadAreas();
 
 		writeConsole('Loading help...');
+		pollConsole();
 		loadHelp('help.dat');
 
 		writeConsole('Loading namegenerator data...');
+		pollConsole();
 		loadNameTables(NameTablesDataFile);
 
 		writeConsole('Loading noteboards...');
+		pollConsole();
 		load_notes('boards.dat');
 
 		writeConsole('Loading modules...');
+		pollConsole();
 		loadModules();
 
 		writeConsole('Loading texts...');
+		pollConsole();
 		loadCommands();
 		loadSocials();
 		loadDamage();
 
 		writeConsole('Loading mud state...');
+		pollConsole();
 		BootTime := Now;
 
 		bg_info.count := -1;
@@ -265,6 +277,8 @@ begin
 			Halt(1);
 			end;
 	end;
+
+	pollConsole();
 end;
 
 procedure GServer.cleanup();
@@ -273,6 +287,7 @@ var
 begin
 	try
 		writeConsole('Terminating threads...');
+		pollConsole();
 
 		timer_thread.Terminate();
 		clean_thread.Terminate();
@@ -280,14 +295,17 @@ begin
 		Sleep(100);
 
 		writeConsole('Saving mudstate...');
+		pollConsole();
 
 		saveMudState();
 
 		writeConsole('Unloading modules...');
+		pollConsole();
 
 		unloadModules();
 
 		writeConsole('Releasing allocated memory...');
+		pollConsole();
 
 		node := char_list.tail;
 		while (node <> nil) do
@@ -297,45 +315,59 @@ begin
 			end;
 
 		writeConsole('Cleaning channels...');
+		pollConsole();
 		cleanupChannels();
 
 		writeConsole('Cleaning players...');
+		pollConsole();
 		cleanupPlayers();
 
 		writeConsole('Cleaning chars...');
+		pollConsole();
 		cleanupChars();
 
 		writeConsole('Cleaning clans...');
+		pollConsole();
 		cleanupClans();
 
 		writeConsole('Cleaning commands...');
+		pollConsole();
 		cleanupCommands();
 
 		writeConsole('Cleaning connections...');
+		pollConsole();
 		cleanupConns();
 
 		writeConsole('Cleaning help...');
+		pollConsole();
 		cleanupHelp();
 
 		writeConsole('Cleaning skills...');
+		pollConsole();
 		cleanupSkills();
 
 		writeConsole('Cleaning areas...');
+		pollConsole();
 		cleanupAreas();
 
 		writeConsole('Cleaning timers...');
+		pollConsole();
 		cleanupTimers();
 
 		writeConsole('Cleaning races...');
+		pollConsole();
 		cleanupRaces();
 
 		writeConsole('Cleaning system...');
+		pollConsole();
 		cleanupSystem();
 
 		writeConsole('Cleaning notes...');
+		pollConsole();
 		cleanupNotes();
 
 		writeConsole('Cleaning events...');
+		pollConsole();
 		cleanupEvents();	
 	except
 		on E : Exception do reportException(E, 'GServer.cleanup()');
@@ -350,6 +382,7 @@ begin
 	{$ENDIF}
 	
 	writeConsole('Cleanup complete.');
+	pollConsole();
 end;
 
 { Decreases shutdownDelay (if > 0), reports shutdown times to channels/console }
