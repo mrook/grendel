@@ -80,6 +80,7 @@ contains
   events,
   debug,
   rooms,
-  objects;
+  objects,
+  base;
 
 end.
