@@ -2,7 +2,7 @@
   Summary:
     Constants
     
-  ## $Id: constants.pas,v 1.4 2004/02/05 21:30:53 hemko Exp $
+  ## $Id: constants.pas,v 1.5 2004/02/19 14:38:49 ***REMOVED*** Exp $
 }
 
 unit constants;
@@ -12,7 +12,7 @@ interface
 const 
   version_number = '1.0.0.a6';
   version_info = 'The Grendel Project - A Windows/Linux MUD Server';
-  version_copyright = 'Copyright (c) 2000-2003 by Michiel Rook';
+  version_copyright = 'Copyright (c) 2000-2004 by Michiel Rook';
 
 {$IFDEF LINUX}
   PathDelimiter = '/';

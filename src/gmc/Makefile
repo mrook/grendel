@@ -1,10 +1,10 @@
 #
 # The Grendel Project - A Windows/Linux MUD Server
-# Copyright (c) 2000-2003 by Michiel Rook
+# Copyright (c) 2000-2004 by Michiel Rook
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.2 2003/12/12 13:48:40 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.3 2004/02/19 14:38:49 ***REMOVED*** Exp $
 #
 
 

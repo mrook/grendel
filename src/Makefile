@@ -1,10 +1,10 @@
 #
 # The Grendel Project - A Windows/Linux MUD Server
-# Copyright (c) 2000-2003 by Michiel Rook
+# Copyright (c) 2000-2004 by Michiel Rook
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.4 2003/12/12 22:34:34 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.5 2004/02/19 14:38:49 ***REMOVED*** Exp $
 #
 
 
@@ -67,10 +67,10 @@ clean:
 	$(MAKE) -C modules clean
 
 $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
-	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ucontrib/jcl
+	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore
 	
 $(COPYOVER):	$(COPYOVER_SOURCES)
 	$(DCC) $(COPYOVER_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -Uunits
 
 $(CORE): $(CORE_SOURCES)
-	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -Ugmc -GD
+	$(DCC) core.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -Uunits -Ucontrib -Ugmc -GD -Ucontrib/jcl

@@ -11561,7 +11561,7 @@ WriteMissingFlagsAsText=1
 
 [General]
 Author=
-Copyright=Copyright (c) 2003. All rights reserved.
+Copyright=Copyright (c) 2003-2004. All rights reserved.
 Summary=
 Title=The Grendel Project
 VersionMajor=1
@@ -12382,7 +12382,6 @@ File34=..\src\units\events.pas
 File35=..\src\units\fight.pas
 File36=..\src\units\fsys.pas
 File37=..\src\units\magic.pas
-File38=..\src\units\MemCheck.pas
 File39=..\src\units\modules.pas
 File4=..\src\modules\commands\cmd_imm.inc
 File40=..\src\units\mudhelp.pas

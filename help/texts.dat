@@ -1,7 +1,7 @@
 #KEYWORD=M_DESCRIPTION_
                 The Grendel Project - A Windows/Linux MUD Server
 
-                   *  Copyright (c) 2000-2003 Michiel Rook  *
+                   *  Copyright (c) 2000-2004 Michiel Rook  *
                     * Additional code by Roeland van Houte *
                 * Oscar Martin, Brad Taylor and Hemko de Visser *
                          
@@ -150,7 +150,6 @@ and Hemko de Visser.
 Additional documentation and FAQs by Jeremiah Davis.
 
 Uses the LibXmlParser unit (c) Stefan Heymann.
-Uses the MemCheck unit (c) Jean Marc Eber & Vincent Mahon.
 Uses the RegExpr unit (C) Andrey V. Sorokin.
 Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
 Uses a modified version of the AnsiIO unit (c) Gayle Davis.

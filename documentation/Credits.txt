@@ -6,19 +6,19 @@ The Grendel Project - A Windows/Linux MUD Server    (c) 2000-2004 by Michiel Roo
 
 
 
-The Grendel Project is (c) 2000-2003 by Michiel Rook. 
+The Grendel Project is (c) 2000-2004 by Michiel Rook. 
 Additional code by Hemko de Visser, Roeland van Houte, Brad Taylor and Oscar Martin.
 Additional documentation and FAQs by Jeremiah Davis.
 
 
 Uses the LibXmlParser unit (c) Stefan Heymann.
-Uses the MemCheck unit (c) Jean Marc Eber & Vincent Mahon.
 Uses the RegExpr unit (C) Andrey V. Sorokin.
 Uses a modified version of Winsock2 interface unit (c) Alex Konshin.
 Uses a modified version of the AnsiIO unit (c) Gayle Davis.
 Uses parts of the Delphi Implementation of MD5 Algorithm (c) Matthias Fichtner.
 Uses parts of the Delphi Fundamentals library (c) David Butler.
 Uses parts of the FastStrings library (c) Peter Morris.
+Uses parts of the Jedi Code Library (c) Project JEDI.
 
 Contains (translated) parts of SMAUG, MERC and DIKU.
 
