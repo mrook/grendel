@@ -4,7 +4,7 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.20 2004/04/21 21:44:53 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.21 2004/04/21 21:46:09 ***REMOVED*** Exp $
 #
 
 
@@ -42,7 +42,7 @@ ifdef WIN32
 endif
 ifdef LINUX
 	$(CP) src/grendel .
-	$(CP) src/convert
+	$(CP) src/convert .
 	$(CP) src/bplcore.so .
 	$(CP) src/*.map .
 	$(CP) src/gmc/gmcc .
