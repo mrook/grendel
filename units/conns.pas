@@ -2,7 +2,7 @@
   Summary:
   	Connection manager
   	
-  ## $Id: conns.pas,v 1.54 2003/10/23 08:14:30 ***REMOVED*** Exp $
+  ## $Id: conns.pas,v 1.55 2003/10/29 12:57:50 ***REMOVED*** Exp $
 }
 
 unit conns;
@@ -15,7 +15,6 @@ uses
 {$IFDEF WIN32}
 	Winsock2,
 	Windows,
-	Forms,
 {$ENDIF}
 {$IFDEF LINUX}
 	Libc,
@@ -125,9 +124,6 @@ type
 
 var
   connection_list : GDLinkedList;
-  listenv4 : GSocket = nil;
-  listenv6 : GSocket = nil;
-
 
 function act_string(acts : string; to_ch, ch : GCharacter; arg1, arg2 : pointer) : string;
 function act_color(to_ch : GCharacter; acts : string; sep : char) : string;
@@ -136,8 +132,6 @@ procedure act(atype : integer; acts : string; hideinvis : boolean; ch : GCharact
               arg1, arg2 : pointer; typ : integer);
 
 function playername(from_ch, to_ch : GCharacter) : string;
-
-procedure gameLoop();
 
 procedure initConns();
 procedure cleanupConns();
@@ -161,15 +155,11 @@ begin
   
   compress := false;
 
-  node := connection_list.insertLast(Self);
-  
   FillChar(strm, sizeof(strm), 0);
   strm.zalloc := zlibAllocMem;
   strm.zfree := zlibFreeMem;
 
 	deflateInit_(strm, Z_DEFAULT_COMPRESSION, zlib_version, sizeof(strm));
-
-  sendIAC(IAC_WILL, [IAC_COMPRESS2]);
 end;
 
 destructor GConnection.Destroy();
@@ -181,6 +171,8 @@ end;
 
 procedure GConnection.Execute();
 begin 
+  sendIAC(IAC_WILL, [IAC_COMPRESS2]);
+
   read();
   
   if (Assigned(FOnOpen)) then
@@ -210,6 +202,8 @@ begin
   	
 	if (Assigned(FOnClose)) then
 		FOnClose();
+		
+	socket.disconnect();
 
   connection_list.remove(node);  
 end;
@@ -346,11 +340,11 @@ begin
     	case byte(input_buf[i]) of
     		IAC_WILL: 	begin
 										inc(i);
-    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC WILL ' + IntToStr(byte(input_buf[i])));
+    								//writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC WILL ' + IntToStr(byte(input_buf[i])));
 			    					end;
     		IAC_WONT: 	begin
 										inc(i);
-    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC WON''T ' + IntToStr(byte(input_buf[i])));
+    								//writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC WON''T ' + IntToStr(byte(input_buf[i])));
 										end;
     		IAC_DO: 		begin
 										inc(i);
@@ -363,14 +357,14 @@ begin
     																	end;
     								end;
     								
-    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DO ' + IntToStr(byte(input_buf[i])));
+    								//writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DO ' + IntToStr(byte(input_buf[i])));
 										end;
     		IAC_DONT: 	begin
 										inc(i);
-    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DON''T ' + IntToStr(byte(input_buf[i])));
+    								//writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DON''T ' + IntToStr(byte(input_buf[i])));
 										end;
 			else
-	    	writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC ' + IntToStr(byte(input_buf[i])));
+	    	//writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC ' + IntToStr(byte(input_buf[i])));
     	end;     	
     	
     	iac := false;
@@ -871,83 +865,6 @@ wind:
      if (typ = TO_ROOM) or (typ = TO_NOTVICT) or (typ = TO_ALL) then
        node := node.next;
      end;
-end;
-
-procedure acceptConnection(list_socket : GSocket);
-var
-  ac : GSocket;
-  conn : GConnection;
-begin
-  ac := list_socket.acceptConnection(system_info.lookup_hosts);
-  
-  ac.setNonBlocking();
-
-  if (isMaskBanned(ac.host_string)) then
-    begin
-    writeConsole('(' + IntToStr(ac.getDescriptor) + ') Closed banned IP (' + ac.host_string + ')');
-
-    ac.send(system_info.mud_name + #13#10#13#10);
-    ac.send('Your site has been banned from this server.'#13#10);
-    ac.send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
-    end
-  else
-  if (boot_info.timer >= 0) then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is in the process of a reboot.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  if system_info.deny_newconns then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is refusing new connections.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  if (connection_list.size() >= system_info.max_conns) then
-    begin
-    ac.send(system_info.mud_name+#13#10#13#10);
-    ac.send('Currently, this server is too busy to accept new connections.'#13#10);
-    ac.send('Please try again later.'#13#10);
-    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-    ac.Free();
-    end
-  else
-  	GPlayerConnection.Create(ac, false, '');
-end;
-
-procedure gameLoop();
-begin
-  while (not system_info.terminated) do
-    begin
-    if (listenv4 <> nil) then
-      begin
-      if (listenv4.canRead()) then
-        acceptConnection(listenv4);
-      end;
-
-    if (listenv6 <> nil) then
-      begin
-      if (listenv6.canRead()) then
-        acceptConnection(listenv6);
-      end;
-
-    {$IFDEF WIN32}
-    Application.ProcessMessages();
-    {$ENDIF}
-
-		pollConsole();
-    
-    sleep(25);
-    end;    
 end;
 
 procedure initConns();

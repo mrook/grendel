@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.83 2003/10/23 08:18:37 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.84 2003/10/29 12:57:50 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -52,6 +52,7 @@ uses
 {$IFDEF WIN32}
   Windows,
   Winsock2,
+	Forms,
   {$IFNDEF CONSOLEBUILD}
   systray,
   {$ENDIF}
@@ -93,20 +94,29 @@ const pipeName : pchar = '\\.\pipe\grendel';
 
 var
   old_exitproc : pointer;
+  listenSockets : GDLinkedList;
 
 
-procedure startup_tcpip;
+procedure startup_tcpip();
+var
+	socket : GSocket;
 begin
+	listenSockets := GDLinkedList.Create();
+	
   if (isSupported(AF_INET)) then
     begin
-    listenv4 := GSocket4.Create(); 
-    listenv4.openPort(system_info.port);
+    socket := GSocket4.Create(); 
+    socket.openPort(system_info.port);
+    
+    listenSockets.add(socket);
     end;
 
   if (isSupported(AF_INET6)) then
     begin
-    listenv6 := GSocket6.Create();
-    listenv6.openPort(system_info.port6);
+    socket := GSocket6.Create();
+    socket.openPort(system_info.port6);
+
+    listenSockets.add(socket);
     end;
 end;
 
@@ -132,7 +142,7 @@ end;
 
 procedure cleanupServer();
 var
-   node : GListNode;
+	node : GListNode;
 begin
 	writeConsole('Terminating threads...');
 	
@@ -159,6 +169,9 @@ begin
 		GCharacter(node.element).extract(true);
 		node := char_list.tail;
 		end;
+
+	writeConsole('Cleaning players...');
+	cleanupPlayers();
 		
 	writeConsole('Cleaning chars...');
 	cleanupChars();
@@ -196,12 +209,10 @@ begin
 	writeConsole('Cleaning notes...');
 	cleanupNotes();
 
-	str_hash.Free;
+	str_hash.Free();
 	
-	listenv4.Free();
-	listenv4 := nil;
-	listenv6.Free();
-	listenv6 := nil;
+	listenSockets.clean();
+	listenSockets.Free();
 
 	writeConsole('Cleanup complete.');
 
@@ -456,6 +467,7 @@ begin
 	initHelp();
 	initChannels();
 	initChars();
+	initPlayers();
 	initSkills();
 	initAreas();
 	initTimers();
@@ -627,6 +639,86 @@ begin
 end;
 {$ENDIF}
 {$ENDIF}
+
+procedure acceptConnection(list_socket : GSocket);
+var
+  ac : GSocket;
+  conn : GConnection;
+begin
+  ac := list_socket.acceptConnection(system_info.lookup_hosts);
+  
+  ac.setNonBlocking();
+
+  if (isMaskBanned(ac.host_string)) then
+    begin
+    writeConsole('(' + IntToStr(ac.getDescriptor) + ') Closed banned IP (' + ac.host_string + ')');
+
+    ac.send(system_info.mud_name + #13#10#13#10);
+    ac.send('Your site has been banned from this server.'#13#10);
+    ac.send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
+    end
+  else
+  if (boot_info.timer >= 0) then
+    begin
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is in the process of a reboot.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+    ac.Free();
+    end
+  else
+  if system_info.deny_newconns then
+    begin
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is refusing new connections.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+    ac.Free();
+    end
+  else
+  if (connection_list.size() >= system_info.max_conns) then
+    begin
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is too busy to accept new connections.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+
+    ac.Free();
+    end
+  else
+  	GPlayerConnection.Create(ac, false, '');
+end;
+
+procedure gameLoop();
+var
+	iterator : GIterator;
+	socket : GSocket;
+begin
+  while (not system_info.terminated) do
+    begin
+    iterator := listenSockets.iterator();
+    
+    while (iterator.hasNext()) do
+    	begin
+    	socket := GSocket(iterator.next());
+    	
+    	if (socket.canRead()) then
+    		acceptConnection(socket);
+    	end;
+    	
+    iterator.Free();
+
+    {$IFDEF WIN32}
+    Application.ProcessMessages();
+    {$ENDIF}
+
+		pollConsole();
+    
+    sleep(25);
+    end;    
+end;
 
 procedure AnyExceptionNotify(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
 var
