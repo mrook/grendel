@@ -53,10 +53,26 @@ begin
     end;
 end;
 
+procedure do_addcustom(ch : GCharacter; param : string);
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('ADDCUSTOM <word to add to custom dictionary'#13#10);
+    exit;
+    end;
+    
+  addToCustom(param);
+  
+  ch.sendBuffer('Ok.'#13#10);
+end;
+
 initialization
   registerCommand('do_spellcheck', do_spellcheck);
+  registerCommand('do_addcustom', do_addcustom);
 
 finalization
   unregisterCommand('do_spellcheck');
+  unregisterCommand('do_addcustom');
 
 end.
+

@@ -56,6 +56,7 @@ type
 function StripDelimiter(const Delimiters, xString: STRING): string;
 
 function checkWords(s : string) : boolean;
+procedure addToCustom(s : string);
 
 var
    misspelled_words : string;
@@ -573,6 +574,11 @@ begin
         end;
       end;
     end;
+end;
+
+procedure addToCustom(s : string);
+begin
+  spell.CustomDictAdd(s);
 end;
 
 begin
