@@ -179,15 +179,20 @@ end;
 
 procedure calculateonline;
 var tim : TDateTime;
-    days : integer;
+    days, hours, minutes : integer;
 begin
-  tim := Now - BootTime;
+  tim := Now;
 
-  days := Trunc (Now) - Trunc (BootTime);
+  days := DiffDays(BootTime, Now);
+  hours := DiffHours(BootTime, Now);
+  minutes := DiffMinutes(BootTime, Now);
 
-  tim := tim - days;
+  dec(minutes, 60 * hours);
+  dec(hours, 24 * days);
 
-  online_time := FormatDateTime('"' + inttostr(days) + ' day(s)," h "hour(s) and" m "minute(s)"',tim);
+  online_time := inttostr(days) + ' day(s), ' +
+                 inttostr(hours) + ' hours(s), ' +
+                 inttostr(minutes) + ' minutes(s)';
 end;
 
 procedure init_system;

@@ -249,4 +249,20 @@ begin
 	Result := (Pos(trim(uppercase(param)), trim(uppercase(name)) ) > 0);
 end;
 
+// functions borrowed from the Delphi Fundamentals
+function DiffMinutes (const D1, D2 : TDateTime) : Integer;
+begin
+  Result := Trunc ((D2 - D1) / OneMinute);
+end;
+
+function DiffHours (const D1, D2 : TDateTime) : Integer;
+begin
+  Result := Trunc ((D2 - D1) / OneHour);
+end;
+
+function DiffDays (const D1, D2 : TDateTime) : Integer;
+begin
+  Result := Trunc (D2 - D1);
+end;
+
 end.
