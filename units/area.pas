@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.51 2001/09/06 09:33:27 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.52 2001/09/17 21:13:23 ***REMOVED*** Exp $
 
 unit area;
 
@@ -994,18 +994,27 @@ begin
 
         if not (pexit.direction in [DIR_NORTH..DIR_SOMEWHERE]) then
           begin
-          bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' illegal direction '+
-                    inttostr(pexit.direction));
+          bugreport('load_areas', 'area.pas', 'illegal direction ' + IntToStr(pexit.direction) +
+                    ' for exit in room #' + IntToStr(room.vnum));
 
           room.exits.remove(node_exit);
 
           node_exit := room.exits.head;
           end
         else
-        if (to_room=nil) then
+        if (to_room = room) then
           begin
-          bugreport('room_check', 'area.pas', 'room #'+inttostr(room.vnum)+' '+
-                     headings[pexit.direction]+' -> '+inttostr(pexit.vnum)+' null');
+          bugreport('load_areas', 'area.pas', 'cyclic exit ' + headings[pexit.direction] + ' found in room #' + IntToStr(room.vnum));
+
+          room.exits.remove(node_exit);
+
+          node_exit := room.exits.head;
+          end
+        else
+        if (to_room = nil) then
+          begin
+          bugreport('load_areas', 'area.pas', 'exit ' + headings[pexit.direction] +
+                    ' from room #' + IntToStr(room.vnum) + ' to unexisting room # '+ IntToStr(pexit.vnum));
 
           room.exits.remove(node_exit);
 
