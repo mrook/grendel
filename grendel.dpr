@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.69 2003/09/12 14:21:32 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.70 2003/09/19 09:47:34 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -610,7 +610,7 @@ begin
       sk := createSocket(prot.iAddressFamily, sock);
       sk.setNonBlocking();     
       sk.socketAddress := client_addr;
-      sk.resolve();
+      sk.resolve(system_info.lookup_hosts);
 
       GGameThread.Create(sk, true, g);
       end;

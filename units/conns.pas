@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.37 2003/06/24 21:41:33 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.38 2003/09/19 09:47:35 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -745,7 +745,7 @@ procedure acceptConnection(list_sock : GSocket);
 var
   ac : GSocket;
 begin
-  ac := list_sock.acceptConnection();
+  ac := list_sock.acceptConnection(system_info.lookup_hosts);
   
   ac.setNonBlocking();
 
