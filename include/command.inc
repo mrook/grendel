@@ -1,3 +1,5 @@
+// $Id: command.inc,v 1.12 2001/04/16 17:19:44 xenon Exp $
+
 {$F+}
 
 { The complete quit procedure, which even logs off NPCs! - Grimlord }
@@ -52,66 +54,177 @@ begin
   ch.sendBuffer('You are now listed as AFK. Hitting ENTER will cease this.'#13#10);
 end;
 
+type 
+  THelpKeyword = class
+                   keyword : string;
+                   phelp : GHelp;
+                   constructor Create(str : string; p : GHelp);
+                 end;
+
+constructor THelpKeyword.Create(str : string; p : GHelp);
+begin
+  inherited Create();
+
+  keyword := str;
+  phelp := p;
+end;
+
 { Revised help - Nemesis }
+{ Xenon 16/Apr/2001: - help without arguments now gives sorted keywordlist
+                     - help with an arg that matches multiple keywords will show matching keywords}
 procedure do_help(ch : GCharacter; param : string);
+  procedure insertAlphabetical(var ll : GDLinkedList; hk : THelpKeyword);
+  var
+    node, ins : GListNode;
+    s : THelpKeyword;
+  begin
+    ins := nil;
+    node := ll.head;
+
+    if (ll.head = nil) then
+    begin
+      ll.insertLast(hk);
+      exit;
+    end;
+
+    while (node <> nil) do
+    begin
+      s := node.element;
+
+      if (AnsiCompareStr(hk.keyword, s.keyword) > 0) then
+      begin
+        ins := node;
+      end
+      else
+      begin
+        ll.insertBefore(node, hk);
+        exit;
+      end;
+    
+      node := node.next;
+    end;
+
+    ll.insertAfter(ins, hk)
+  end;
+
 var buf, s, keyword : string;
     help : GHelp;
     counter : integer;
     node : GListNode;
+    keywordlist : GDLinkedList;
+    hk : THelpKeyword;
 begin
+  keywordlist := nil; hk := nil;
+  counter := 0;
+  
   if (length(param) = 0) then
-    begin
+  begin
     buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Available help keywords ', '-') + ch.ansiColor(7) + #13#10#13#10;
 
-    counter := 0;
+    keywordlist := GDLinkedList.Create();
+    
     node := help_files.head;
-
     while (node <> nil) do
-      begin
+    begin
       help := node.element;
 
       keyword := help.keywords;
 
       while (length(keyword) > 0) do
-        begin
+      begin
         keyword := one_argument(keyword, s);
 
-        if (s[length(s)] <> '_') then
-          begin
-          buf := buf + pad_string(lowercase(s), 19);
+        if ((s[length(s)] <> '_') and (help.level <= ch.level)) then
+        begin
+          hk := THelpKeyword.Create(lowercase(s), help);
 
-          inc(counter);
-
-          if (counter = 4) then
-            begin
-            buf := buf + #13#10;
-            counter := 0;
-            end;
-          end;
+          insertAlphabetical(keywordlist, hk);
         end;
-
-      node := node.next;
+          
       end;
 
+      node := node.next;
+    end;
+
+    node := keywordlist.head;
+    while (node <> nil) do
+    begin
+      buf := buf + pad_string(THelpKeyword(node.element).keyword, 19);
+      inc(counter);
+
+      if (counter = 4) then
+      begin
+        buf := buf + #13#10;
+        counter := 0;
+      end;      
+      node := node.next;
+    end;
+
+    keywordlist.Clean();
+    keywordlist.Free();
     ch.sendPager(buf + #13#10);
     exit;
-    end;
+  end;
 
-  help := findHelp(param);
+  keywordlist := GDLinkedList.Create();
+  node := help_files.head;
+  while (node <> nil) do
+  begin
+    help := node.element;
 
-  if (help = nil) or (help = help_files.head.element) then
-    ch.sendBuffer('No help on that word.'#13#10)
-  else
+    keyword := help.keywords;
+
+    while (length(keyword) > 0) do
     begin
-    buf := ch.ansiColor(3) + ' ' + add_chars(78, '---- Help topic ', '-') + ch.ansiColor(7) + #13#10#13#10 +
-           'Name:    ' + ansiColor(3,0) + help.keywords + #13#10 + ansiColor(7,0) +
-           'Type:    ' + ansiColor(3,0) + help.helptype + #13#10 + ansiColor(7,0) +
-           'Syntax:  ' + ansiColor(3,0) + help.syntax + #13#10 + ansiColor(7,0) +
-           'Related: ' + ansiColor(3,0) + help.related + #13#10 + ansiColor(7,0) +
+      keyword := one_argument(keyword, s);
+
+      if (s[length(s)] <> '_') then
+      begin
+        if ((pos(uppercase(param), s) = 1) and (help.level <= ch.level)) then
+        begin
+          hk := THelpKeyword.Create(lowercase(s), help);
+          insertAlphabetical(keywordlist, hk);
+        end
+      end;
+          
+    end;
+    
+    node := node.next;
+  end;
+  
+  if (keywordlist.getSize() = 0) then
+  begin
+    ch.sendBuffer('No help on that word.'#13#10)
+  end
+  else
+  if (keywordlist.getSize() = 1) then
+  begin
+    help := THelpKeyword(keywordlist.head.element).phelp;
+    buf := '$A$3 ' + add_chars(78, '---- Help topic ', '-') + '$A$7'#13#10#13#10 +
+           'Name:    $A$3' + help.keywords + #13#10 + '$A$7' +
+           'Type:    $A$3' + help.helptype + #13#10 + '$A$7' +
+           'Syntax:  $A$3' + help.syntax + #13#10 + '$A$7' +
+           'Related: $A$3' + help.related + #13#10 + '$A$7' +
            #13#10 + help.text;
 
-    ch.sendPager(buf);
+    ch.sendPager(act_string(buf, ch, nil, nil, nil));
+  end
+  else
+  if (keywordlist.getSize() > 1) then
+  begin
+    buf := Format('Your help query ''$B$7%s$A$7'' matched $B$7%d$A$7 keywords:'#13#10#13#10, [param, keywordlist.getSize()]);
+    node := keywordlist.head;
+    while (node <> nil) do
+    begin
+      buf := buf + Format('  $B$7%s$A$7'#13#10, [THelpKeyword(node.element).keyword]);
+      node := node.next;
     end;
+
+    ch.sendPager(act_string(buf, ch, nil, nil, nil));
+  end;
+
+  keywordlist.Clean();
+  keywordlist.Free();
 end;
 
 procedure do_remort(ch : GCharacter; param : string);
