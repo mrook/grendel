@@ -287,7 +287,7 @@ statement	: { $$ := nil; }
 					| _SIGNAL expr ';'																{ $$ := Expr_Special.Create; $$.lineNum := yylineno; Expr_Special($$).spec := SPECIAL_SIGNAL; $$.lineNum := yylineno; Expr_Special($$).ex := $2; }
           | _ASM '{' asm_list '}'														{ $$ := $3; }
           | stop_statement																	{ $$ := $1; }
-          | ';'
+          | ';'                                             { $$ := nil; }
 					;
 
 parameter_specifiers 	: { $$ := nil; }
@@ -1139,6 +1139,10 @@ begin
     begin
     showBoolExpr(Expr_If(expr).ce); 
 
+    if (Expr_If(expr).re = nil) and (Expr_If(expr).le = nil) then
+      begin
+      end
+    else
     if (Expr_If(expr).re <> nil) then
       begin
       emit('JZ L' + IntToStr(Expr_If(expr).lElse));
