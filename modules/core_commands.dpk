@@ -27,12 +27,7 @@ package core_commands;
 {$DESCRIPTION 'Grendel Core Commands'}
 
 requires
-{$IFDEF WIN32}
   vcl;
-{$ENDIF}
-{$IFDEF LINUX}
-  baseclx;
-{$ENDIF}
 
 contains
   cmd_main;
