@@ -2,12 +2,42 @@
 	Summary:
 		Internal debug routines
 		
-	## $Id: debug.pas,v 1.7 2004/03/07 15:37:37 ***REMOVED*** Exp $
+	## $Id: debug.pas,v 1.8 2004/03/13 15:47:51 ***REMOVED*** Exp $
 }
 
 unit debug;
 
 interface
+
+
+uses
+	dtypes;
+	
+
+type
+	GDebugWriter = class
+	public
+		procedure write(const msg : string; debugLevel : integer = 1); virtual; abstract;
+	end;
+	
+	GDebugger = class(GSingleton)
+	private
+		writers : GDLinkedList;
+	
+	public
+		constructor actualCreate(); override;
+		destructor actualDestroy(); override;
+		
+	published
+		procedure write(const msg : string; debugLevel : integer = 1);
+		
+		procedure attachWriter(writer : GDebugWriter);
+		procedure detachWriter(writer : GDebugWriter);
+	end;
+	
+
+var
+	debugger : GDebugger;
 
  
 procedure initDebug();
@@ -34,6 +64,51 @@ uses
 	Classes,
 	console,
 	mudsystem;
+
+
+
+{ GDebugger constructor }
+constructor GDebugger.actualCreate();
+begin
+	writers := GDLinkedList.Create();
+end;
+
+{ GDebugger destructor }
+destructor GDebugger.actualDestroy();
+begin
+	writers.clear();
+	writers.Free();
+end;
+
+{ Feeds a debug message to any attached writers }
+procedure GDebugger.write(const msg : string; debugLevel : integer = 1);
+var
+	iterator : GIterator;
+	writer : GDebugWriter;
+begin
+	iterator := writers.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+		writer := GDebugWriter(iterator.next());
+		
+		writer.write(msg, debugLevel);
+		end;
+		
+	iterator.Free();
+end;
+
+{ Attach a writer to the debugger }
+procedure GDebugger.attachWriter(writer : GDebugWriter);
+begin
+	writers.add(writer);
+end;
+
+{ Detach a writer from the debugger }
+procedure GDebugger.detachWriter(writer : GDebugWriter);
+begin
+	writers.remove(writer);
+end;
 
 
 {$IFDEF WIN32}
@@ -146,5 +221,12 @@ end;
 procedure cleanupDebug();
 begin
 end;
- 
+
+
+initialization
+	debugger := GDebugger.Create();
+	
+finalization
+	debugger.Free();
+	
 end.
