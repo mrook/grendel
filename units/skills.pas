@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.17 2001/07/17 15:24:14 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.18 2001/07/28 21:35:37 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -292,10 +292,14 @@ begin
 
           s := af.readToken();
 
-          modif := cardinal(findSkill(s));
+          try
+            modif := strtoint(s);
+          except
+            modif := cardinal(findSkill(s));
 
-          if (modif = 0) then
-            modif := strtointdef(s, 0);
+            if (modif = 0) then
+              modif := cardinal(hash_string(s));
+          end;
 
           aff.modifiers[num - 1].modifier := modif;
 

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.48 2001/07/23 15:53:48 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.49 2001/07/28 21:35:36 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -231,7 +231,6 @@ type
 
       pagerlen : integer;
       title : string;                     { Title of PC }
-      hometown : integer;                { Hometown (vnum of portal) }
       age : longint;                     { Age in hours (irl) }
       cfg_flags, flags : cardinal;    { config flags and misc. flags }
       deaths : integer;
@@ -1153,9 +1152,6 @@ begin
         if (g = 'LEVEL') then
           level := UMin(strtoint(right(a, ' ')), LEVEL_MAX_IMMORTAL)
         else
-        if g='HOMETOWN' then
-          hometown:=strtoint(right(a,' '))
-        else
         if g='AGE' then
           age:=strtoint(right(a,' '))
         else
@@ -1443,9 +1439,11 @@ begin
           with aff do
             begin
             name := hash_string(left(a, ' '));
-            wear_msg := 'boe';
 
-            a := right(a, ' ');
+            a := right(a, '''');
+            wear_msg := left(a, '''');
+
+            a := right(a, '''');
 
             duration := strtointdef(left(a, ' '), 0);
             len := 1;
@@ -1643,7 +1641,7 @@ end;
 
 function GPlayer.save(fn : string) : boolean;
 var
-   f : textfile;
+   af : GFileWriter;
    temp : TDateTime;
    h : integer;
    node : GListNode;
@@ -1659,171 +1657,183 @@ begin
     exit;
     end;
 
-  assignfile(f, translateFileName('players\' + fn + '.usr'));
-
-  {$I-}
-  rewrite(f);
-  {$I+}
-
-  if (IOResult <> 0) then
-    begin
+  try
+    af := GFileWriter.Create('players\' + fn + '.usr');
+  except
     save := false;
     exit;
-    end;
+  end;
 
-  writeln(f,'#PLAYER');
-  writeln(f,'User: '+name^);
-  writeln(f,'MD5-Password: '+MD5Print(md5_password));
-  writeln(f,'Sex: ',sex);
-  writeln(f,'Race: ',race.name);
-  writeln(f,'Alignment: ',alignment);
-  writeln(f,'Level: ',level);
-  writeln(f,'Weight: ',weight);
-  writeln(f,'Height: ',height);
-  writeln(f,'aff_flags: ',aff_flags);
-  writeln(f,'Mentalstate: ',mental_state);
-  writeln(f,'Last-login: ', DateTimeToStr(Now));
+  af.writeLine('#PLAYER');
+  af.writeLine('User: ' + name^);
+  af.writeLine('MD5-Password: ' + MD5Print(md5_password));
+  af.writeLine('Sex: ' + IntToStr(sex));
+  af.writeLine('Race: ' + race.name);
+  af.writeLine('Alignment: ' + IntToStr(alignment));
+  af.writeLine('Level: ' + IntToStr(level));
+  af.writeLine('Weight: ' + IntToStr(weight));
+  af.writeLine('Height: ' + IntToStr(height));
+  af.writeLine('aff_flags: ' + IntToStr(aff_flags));
+  af.writeLine('Mentalstate: ' + IntToStr(mental_state));
+  af.writeLine('Last-login: ' + DateTimeToStr(Now));
 
-  writeln(f,'Title: ',title);
-  writeln(f,'Home: ',hometown);
-  writeln(f,'Age: ',age);
-  writeln(f,'Gold: ',gold,' ',bankgold);
-  writeln(f,'XP: ',xptot,' ',xptogo);
-  writeln(f,'Kills: ',kills);
-  writeln(f,'Deaths: ',deaths);
-  writeln(f,'Practices: ', pracs);
-  writeln(f,'Bamfin: ',bamfin);
-  writeln(f,'Bamfout: ',bamfout);
-  writeln(f,'Taunt: ', taunt);
-  writeln(f,'Prompt: ', prompt);
-  writeln(f,'Active_board: ', active_board);
-  writeln(f,'Read-notes: ', boards[BOARD1], ' ', boards[BOARD2], ' ', boards[BOARD3], ' ', boards[BOARD_NEWS], ' ', boards[BOARD_IMM]);
+  af.writeLine('Title: ' + title);
+  af.writeLine('Age: ' + IntToStr(age));
+  af.writeLine('Gold: ' + IntToStr(gold) + ' ' + IntToStr(bankgold));
+  af.writeLine('XP: ' + IntToStr(xptot) + ' ' + IntToStr(xptogo));
+  af.writeLine('Kills: ' + IntToStr(kills));
+  af.writeLine('Deaths: ' + IntToStr(deaths));
+  af.writeLine('Practices: ' + IntToStr( pracs));
+  af.writeLine('Bamfin: ' + bamfin);
+  af.writeLine('Bamfout: ' + bamfout);
+  af.writeLine('Taunt: ' + taunt);
+  af.writeLine('Prompt: ' + prompt);
+  af.writeLine('Active_board: ' + IntToStr( active_board));
+  af.writeLine('Read-notes: ' + IntToStr(boards[BOARD1]) +  ' ' + IntToStr(boards[BOARD2]) + ' ' + IntToStr(boards[BOARD3]) + ' ' + IntToStr(boards[BOARD_NEWS]) + ' ' + IntToStr(boards[BOARD_IMM]));
 
   fl := flags;
   REMOVE_BIT(fl, PLR_LINKLESS);
   REMOVE_BIT(fl, PLR_LOADED);
 
-  writeln(f,'Flags: ', fl);
-  writeln(f,'Config: ',cfg_flags);
-  writeln(f,'Remorts: ',remorts);
-  writeln(f,'Wimpy: ',wimpy);
-  writeln(f,'Logon: ',trunc(logon_first),' ',trunc(frac(logon_first)*MSecsPerDay));
+  af.writeLine('Flags: ' + IntToStr(fl));
+  af.writeLine('Config: ' + IntToStr(cfg_flags));
+  af.writeLine('Remorts: ' + IntToStr(remorts));
+  af.writeLine('Wimpy: ' + IntToStr(wimpy));
+  af.writeLine('Logon: ' + IntToStr(trunc(logon_first)) + ' ' + IntToStr(trunc(frac(logon_first)*MSecsPerDay)));
 
   temp:=played + (Now - logon_now);
-  writeln(f,'Played: ',trunc(temp),' ',trunc(frac(temp)*MSecsPerDay));
-  writeln(f,'Condition: ',condition[COND_DRUNK],' ',condition[COND_FULL],
-          ' ',condition[COND_THIRST],' ',condition[COND_CAFFEINE],' ',condition[COND_HIGH]);
+  af.writeLine('Played: ' + IntToStr(trunc(temp)) + ' ' + IntToStr(trunc(frac(temp)*MSecsPerDay)));
+
+  af.writeLine('Condition: ' + IntToStr(condition[COND_DRUNK]) + ' ' + IntToStr(condition[COND_FULL]) +
+          ' ' + IntToStr(condition[COND_THIRST]) + ' ' + IntToStr(condition[COND_CAFFEINE]) + ' ' + IntToStr(condition[COND_HIGH]));
 
   if clan<>nil then
-    writeln(f,'Clan: ',clan.name);
+    af.writeLine('Clan: ' + clan.name);
 
   if area_fname<>'' then
-    writeln(f,'Area: ',area_fname);
+    af.writeLine('Area: ' + area_fname);
 
-  writeln(f,'Ranges: ',r_lo,' ',r_hi,' ',m_lo,' ',m_hi,' ',o_lo,' ',o_hi);
+  af.writeLine('Ranges: ' + IntToStr(r_lo) + ' ' + IntToStr(r_hi) + ' ' + IntToStr(m_lo) + ' ' + IntToStr(m_hi) + ' ' + IntToStr(o_lo) + ' ' + IntToStr(o_hi));
 
-  writeln(f,'Wizlevel: ',wiz_level);
-  writeln(f,'BGpoints: ',bg_points);
-  writeln(f,'Pagerlen: ',pagerlen);
+  af.writeLine('Wizlevel: ' + IntToStr(wiz_level));
+  af.writeLine('BGpoints: ' + IntToStr(bg_points));
+  af.writeLine('Pagerlen: ' + IntToStr(pagerlen));
 
-  writeln(f,'Stats: ',str,' ',con,' ',dex,' ',int,' ',wis);
+  af.writeLine('Stats: ' + IntToStr(str) + ' ' + IntToStr(con) + ' ' + IntToStr(dex) + ' ' + IntToStr(int) + ' ' + IntToStr(wis));
 
-  writeln(f, 'Max_skills: ', max_skills);
-  writeln(f, 'Max_spells: ', max_spells);
+  af.writeLine('Max_skills: ' + IntToStr(max_skills));
+  af.writeLine('Max_spells: ' + IntToStr(max_spells));
 
-  writeln(f,'APB: ',apb);
-  writeln(f,'Mana: ',mana,' ',max_mana);
-  writeln(f,'HP: ',hp,' ',max_hp);
-  writeln(f,'Mv: ',mv,' ',max_mv);
-  writeln(f,'AC: ',ac);
-  writeln(f,'HAC: ',hac);
-  writeln(f,'BAC: ',bac);
-  writeln(f,'AAC: ',aac);
-  writeln(f,'LAC: ',lac);
-  writeln(f,'AC_mod: ',ac_mod);
-  writeln(f,'RoomVNum: ',room.vnum);
-  writeln(f,'#END');
-  writeln(f);
+  af.writeLine('APB: ' + IntToStr(apb));
+  af.writeLine('Mana: ' + IntToStr(mana) + ' ' + IntToStr(max_mana));
+  af.writeLine('HP: ' + IntToStr(hp) + ' ' + IntToStr(max_hp));
+  af.writeLine('Mv: ' + IntToStr(mv) + ' ' + IntToStr(max_mv));
+  af.writeLine('AC: ' + IntToStr(ac));
+  af.writeLine('HAC: ' + IntToStr(hac));
+  af.writeLine('BAC: ' + IntToStr(bac));
+  af.writeLine('AAC: ' + IntToStr(aac));
+  af.writeLine('LAC: ' + IntToStr(lac));
+  af.writeLine('AC_mod: ' + IntToStr(ac_mod));
+  af.writeLine('RoomVNum: ' + IntToStr(room.vnum));
+  af.writeLine('#END');
+  af.writeLine('');
 
-  writeln(f,'#SKILLS');
+  af.writeLine('#SKILLS');
   node := skills_learned.head;;
 
   while (node <> nil) do
     begin
     g := node.element;
 
-    writeln(f, 'Skill: ''', GSkill(g.skill).name^, ''' ', g.perc);
+    af.writeLine( 'Skill: ''' + GSkill(g.skill).name^ + ''' ' + IntToStr(g.perc));
 
     node := node.next;
     end;
 
-  writeln(f,'#END');
-  writeln(f);
+  af.writeLine('#END');
+  af.writeLine('');
 
-  writeln(f,'#AFFECTS');
+  af.writeLine('#AFFECTS');
   node := affects.head;
 
   while (node <> nil) do
     begin
     aff := node.element;
 
-{    with aff do
-      writeln(f,'Affect: ''', skill.name, ''' ',
-               printApply(apply_type), ' ', duration, ' ', modifier); }
+    with aff do
+      begin
+      af.writeString(name^ + ' ''' + wear_msg + ''' ');
+      af.writeInteger(duration);
+
+      af.writeString(' {');
+
+      for h := 0 to length(modifiers) - 1 do
+        begin
+        af.writeString(printApply(modifiers[h].apply_type) + ' ');
+
+        case modifiers[h].apply_type of
+          APPLY_STRIPNAME: af.writeString(PString(modifiers[h].modifier)^);
+          else
+            af.writeInteger(modifiers[h].modifier);
+        end;
+        end;
+
+      af.writeLine('');
+      end;
 
     node := node.next;
     end;
-  writeln(f,'#END');
-  writeln(f);
+  af.writeLine('#END');
+  af.writeLine('');
 
-  writeln(f, '#ALIASES');
+  af.writeLine( '#ALIASES');
   node := aliases.head;
 
   while (node <> nil) do
     begin
     al := node.element;
 
-    writeln(f, al.alias, ':', al.expand);
+    af.writeLine(al.alias + ':' + al.expand);
 
     node := node.next;
     end;
 
-  writeln(f, '#END');
-  writeln(f);
+  af.writeLine( '#END');
+  af.writeLine('');
 
-  writeln(f,'#OBJECTS');
+  af.writeLine('#OBJECTS');
   node := objects.head;
 
   while (node <> nil) do
     begin
     obj := node.element;
 
-    writeln(f, obj.wear_location);
+    af.writeLine(IntToStr(obj.wear_location));
 
     if (obj.obj_index <> nil) then
-      writeln(f,obj.obj_index.vnum)
+      af.writeLine(IntToStr(obj.obj_index.vnum))
     else
-      writeln(f,-1);
+      af.writeLine(IntToStr(-1));
 
-    writeln(f,obj.name^);
-    writeln(f,obj.short^);
-    writeln(f,obj.long^);
-    writeln(f,obj.item_type,' ',obj.wear1,' ',obj.wear2,' ');
-    writeln(f,obj.value[1],' ',obj.value[2],' ',obj.value[3],' ',obj.value[4]);
-    writeln(f,obj.weight,' ',obj.flags,' ',obj.cost, ' ', obj.count);
+    af.writeLine(obj.name^);
+    af.writeLine(obj.short^);
+    af.writeLine(obj.long^);
+    af.writeLine(IntToStr(obj.item_type) + ' ' + IntToStr(obj.wear1) + ' ' + IntToStr(obj.wear2));
+    af.writeLine(IntToStr(obj.value[1]) + ' ' + IntToStr(obj.value[2]) + ' ' + IntToStr(obj.value[3]) + ' ' + IntToStr(obj.value[4]));
+    af.writeLine(IntToStr(obj.weight) + ' ' + IntToStr(obj.flags) + ' ' + IntToStr(obj.cost) + ' ' + IntToStr(obj.count));
 
     node := node.next;
     end;
 
-  writeln(f,'#END');
-  writeln(f);
+  af.writeLine('#END');
+  af.writeLine('');
 
-  writeln(f,'#TROPHY');
-  for h:=1 to trophysize do
-    writeln(f,'Trophy: ',trophy[h].name,' ',trophy[h].level,' ',trophy[h].times);
-  writeln(f,'#END');
+  af.writeLine('#TROPHY');
+  for h := 1 to trophysize do
+    af.writeLine('Trophy: ' + trophy[h].name + ' ' + IntToStr(trophy[h].level) + ' ' + IntToStr(trophy[h].times));
+  af.writeLine('#END');
 
-  closefile(f);
+  af.Free;
 
   save := true;
 end;
