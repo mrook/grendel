@@ -175,6 +175,7 @@ begin
     exit;
     end;
 
+  FillChar(skill_table, sizeof(skill_table), 0);
   num_skills := 0;
 
   repeat

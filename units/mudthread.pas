@@ -635,7 +635,9 @@ begin
 
       if (cmd.alias <> '') and (pos(cmd.alias, cmd.name) = 0) then
         commands.hashObject(cmd, cmd.alias);
-      end;
+      end
+    else
+      cmd.Free;
   until eof(f);
 
   closefile(f);
