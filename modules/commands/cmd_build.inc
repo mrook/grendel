@@ -1,4 +1,4 @@
-// $Id: cmd_build.inc,v 1.3 2001/08/04 22:10:34 ***REMOVED*** Exp $
+// $Id: cmd_build.inc,v 1.4 2001/10/19 19:35:57 ***REMOVED*** Exp $
 
 {Jago 10/Jan/2001 : new imm commands, copied from MERC }
 {RSTAT : return data about a room}
@@ -1477,29 +1477,30 @@ end;
 function findFreeVNum(ch : GCharacter) : integer;
 var
    room : GRoom;
-   node : GListNode;
+   iterator : GIterator;
    vnum, h : integer;
 begin
   vnum := GPlayer(ch).r_lo;
 
-  for h := 0 to room_list.hashsize - 1 do
+  iterator := room_list.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    node := room_list.bucketList[h].head;
+    room := GRoom(iterator.next());
+    
+    if (room.area <> GPlayer(ch).area) then
+      continue;
 
-    while (node <> nil) do
-      begin
-      room := GRoom(GHashValue(node.element).value);
+    if (room.vnum > vnum) then
+      vnum := room.vnum;
 
-      if (room.vnum > vnum) and (room.vnum <= GPlayer(ch).r_hi) then
-        vnum:=room.vnum;
-
-      node := node.next;
-      end;
     end;
+    
+  iterator.free();
 
   inc(vnum);
-
-  if (vnum = GPlayer(ch).r_hi) then
+  
+  if (vnum >= GPlayer(ch).r_hi) then
     Result := -1
   else
     Result := vnum;
@@ -1553,7 +1554,7 @@ begin
     exit;
     end;
 
-  ch.sendBuffer('Creating room #' + inttostr(new_vnum) + '.'#13#10);
+  ch.sendBuffer('Creating room #' + inttostr(new_vnum) + ' [' + headings[dir] + '].'#13#10);
 
   new_room := createRoom(new_vnum, ch.room.area);
 
@@ -1574,7 +1575,7 @@ begin
 
   new_room.exits.insertLast(from_exit);
 
-  interpret(ch,headings[dir]);
+  interpret(ch, headings[dir]);
 end;
 
 procedure do_rdelete(ch : GCharacter; param : string);
@@ -1688,7 +1689,7 @@ begin
     exit;
     end;
 
-  ch.sendBuffer('Creating room #'+inttostr(new_vnum)+'.'#13#10);
+  ch.sendBuffer('Creating room #' + inttostr(new_vnum) + ' [' + headings[dir] + '].'#13#10);
 
   area := GPlayer(ch).area;
   new_room := createRoom(new_vnum, area);
@@ -2708,5 +2709,9 @@ begin
   except
     ch.sendBuffer('Invalid numeric format.'#13#10);
   end;
+end;
+
+procedure do_resedit(ch : GCharacter; param : string);
+begin
 end;
 
