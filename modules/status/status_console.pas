@@ -5,9 +5,11 @@ interface
 
 implementation
 
+{$IFNDEF CONSOLEBUILD}
 uses
   Windows,
   StdCtrls,
+  Graphics,
   Forms,
   console,
   constants,
@@ -22,11 +24,13 @@ type
 var
   consoleForm : TForm;
   consoleMemo : TMemo;
+  consoleFont : TFont;
   consoleDriver : GConsoleWindowWriter;
   
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; text : string);
 begin
   consoleMemo.Lines.add(text);
+  Application.ProcessMessages();
 end;
   
 procedure showConsoleProc(id : integer);
@@ -40,7 +44,12 @@ initialization
   consoleForm.Position := poScreenCenter;
   consoleForm.BorderStyle := bsSingle;
   consoleForm.BorderIcons := [biSystemMenu];
-  consoleForm.Width := 500;
+  consoleForm.Width := 600;
+  consoleForm.Height := 400;
+  
+  consoleFont := TFont.Create();
+  consoleFont.Name := 'Courier';
+  consoleFont.Size := 10;
   
   consoleMemo := TMemo.Create(consoleForm);
   consoleMemo.Width := consoleForm.ClientWidth;
@@ -49,6 +58,7 @@ initialization
   consoleMemo.ScrollBars := ssVertical;
   consoleMemo.ReadOnly := True;
   consoleMemo.WordWrap := false;
+  consoleMemo.Font := consoleFont;
   
   consoleDriver := GConsoleWindowWriter.Create();
 
@@ -64,4 +74,6 @@ finalization
   unregisterMenuItem('Show console');
   
   
+{$ENDIF}
+
 end.
