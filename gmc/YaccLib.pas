@@ -52,7 +52,7 @@ yyerrors : boolean;
 
 implementation
 
-uses lexlib;
+uses LexLib;
 
 procedure yyerror ( msg : String );
   begin
