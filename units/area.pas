@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.38 2001/07/16 13:36:41 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.39 2001/07/16 16:04:31 ***REMOVED*** Exp $
 
 unit area;
 
@@ -947,10 +947,11 @@ begin
 
   repeat
     readln(lf, s);
+
     if (s <> '$') then
       begin
       area := GArea.Create;
-      area.load(s);
+      area.load(trim(s));
 
       s := pad_string(area.fname, 15);
 
