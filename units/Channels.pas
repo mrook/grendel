@@ -1,6 +1,6 @@
 {
   @abstract(Channel manager)
-  @lastmod($Id: Channels.pas,v 1.20 2003/10/03 18:05:07 ***REMOVED*** Exp $)
+  @lastmod($Id: Channels.pas,v 1.21 2003/10/16 16:07:30 ***REMOVED*** Exp $)
 }
 
 unit Channels;
@@ -91,10 +91,11 @@ implementation
 
 uses
   mudsystem,
-  mudthread,
+  commands,
   LibXmlParser,
   util,
-  conns;
+  conns,
+  player;
 
 var
   errprefix : string;
@@ -673,7 +674,7 @@ begin
       cmd.ptr := @channelCommunicate;
       cmd.addArg0 := true;
 
-      commands.put(cmd.name, cmd);
+      commandList.put(cmd.name, cmd);
 
       if (chan.alias <> '') then
       begin
@@ -685,7 +686,7 @@ begin
         alias.ptr := cmd.ptr;
         alias.addArg0 := cmd.addArg0;
 
-        commands.put(alias.name, alias);
+        commandList.put(alias.name, alias);
       end;
     end;
     

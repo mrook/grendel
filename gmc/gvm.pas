@@ -64,7 +64,7 @@ type
 		procedure execute;
 		
 		constructor Create();
-		destructor Destroy();
+		destructor Destroy(); override;
 	end;
 
 var
@@ -344,7 +344,6 @@ procedure GContext.Execute;
 var
 	i : integer;
   f : single;
-  r : byte;
   p : pchar;
 	v1, v2 : variant;
   meth : GExternalMethod;

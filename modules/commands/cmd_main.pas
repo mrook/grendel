@@ -39,7 +39,7 @@ uses
   fight,
   bulletinboard,
   modules,
-  mudthread;
+  commands;
 
 
 type

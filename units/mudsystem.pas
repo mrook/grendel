@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.43 2003/10/08 13:43:03 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.44 2003/10/16 16:07:30 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -149,7 +149,7 @@ procedure cleanupSystem();
 implementation
 
 uses
-    mudthread,
+    commands,
     chars,
     area,
     fsys,
@@ -162,11 +162,6 @@ uses
 procedure bugreport(func, pasfile, bug : string);
 begin
   writeConsole('[BUG] ' + func + ' -> ' + bug);
-
-{  write_direct('[Extended error information]');
-  write_direct('Location:    function ' + func + ' in ' + pasfile);
-  write_direct('Description: ' + desc);
-  write_direct(''); }
 end;
 
 procedure calculateonline;

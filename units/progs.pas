@@ -1,6 +1,6 @@
 {
   @abstract(Interface with GMC virtual machine)
-  @lastmod($Id: progs.pas,v 1.21 2003/06/24 21:41:34 ***REMOVED*** Exp $)
+  @lastmod($Id: progs.pas,v 1.22 2003/10/16 16:07:31 ***REMOVED*** Exp $)
 }
 
 unit progs;
@@ -45,10 +45,11 @@ uses
     console,
     dtypes,
     util,
-    mudthread,
+    commands,
     mudsystem,
     gvm,
     FastStringFuncs;
+    
 
 // GMathLib
 function GMathLib.cos(x : single) : single; stdcall;

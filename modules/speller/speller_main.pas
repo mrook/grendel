@@ -11,7 +11,7 @@ uses
   area,
   dtypes,
   modules,
-  mudthread,
+  commands,
   mudspell;
 
 

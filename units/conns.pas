@@ -1,6 +1,6 @@
 {
   @abstract(Connection manager)
-  @lastmod($Id: conns.pas,v 1.45 2003/10/15 22:38:00 ***REMOVED*** Exp $)
+  @lastmod($Id: conns.pas,v 1.46 2003/10/16 16:07:29 ***REMOVED*** Exp $)
 }
 
 unit conns;
@@ -39,39 +39,81 @@ const
 		IAC_IAC = 255;
 
 type
-    GConnection = class
+		GConnection = class;
+		
+		GConnectionOpenEvent = procedure(owner : GConnection) of object;
+		GConnectionCloseEvent = procedure(owner : GConnection) of object;
+		GConnectionInputEvent = procedure(owner : GConnection) of object;
+		
+    GConnection = class(TThread)
+    private
       node : GListNode;
-      sock : GSocket;
-      thread : TThread;
-      idle : integer;
 
-      ch : GPlayer;                 // only players can be connected
-      keylock, afk : boolean;
-      state : integer;
+      _socket : GSocket;
 
-      input_buf, comm_buf, last_line : string;
+      _state : integer;
+      _idle : integer;
+      
+      _keylock: boolean;
+      _afk : boolean;
+      _fcommand : boolean;
+
+      input_buf : string;
+      _comm_buf : string;
+      last_line : string;
       sendbuffer : string;
 
       empty_busy : boolean;
 
       pagebuf : string;
-      pagepoint : cardinal;
       pagecmd : char;
 
-      fcommand : boolean;
+      _pagepoint : cardinal;
 
-      procedure send(s : string);
-      procedure read();
+      _lastupdate : TDateTime;
+      
+      FOpenEvent : GConnectionOpenEvent;
+      FCloseEvent : GConnectionCloseEvent;
+      FInputEvent : GConnectionInputEvent;
+      
+    protected
+    	procedure Execute(); override;
+
       procedure sendIAC(option : byte; params : array of byte);
       procedure processIAC();
+
+		public
+      procedure send(s : string);
+      procedure read();
       procedure readBuffer();
 
+			procedure emptyBuffer();
       procedure writePager(txt : string);
+      procedure writeBuffer(txt : string; in_command : boolean = false);
       procedure setPagerInput(argument : string);
       procedure outputPager;
 
-      constructor Create(sk : GSocket; thr : TThread);
+      constructor Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
       destructor Destroy; override;
+      
+    published
+    	property socket : GSocket read _socket;
+
+    	property state : integer read _state write _state;
+    	property idle : integer read _idle write _idle;
+    	property keylock : boolean read _keylock write _keylock;
+    	property afk : boolean read _afk write _afk;
+    	property fcommand : boolean read _fcommand write _fcommand;
+
+			property comm_buf : string read _comm_buf write _comm_buf;
+    	
+    	property pagepoint : cardinal read _pagepoint;
+    	
+    	property last_update : TDateTime read _lastupdate;
+    	
+    	property OnOpen : GConnectionOpenEvent read FOpenEvent write FOpenEvent;
+    	property OnClose : GConnectionCloseEvent read FCloseEvent write FCloseEvent;
+    	property OnInput : GConnectionInputEvent read FInputEvent write FInputEvent;
     end;
 
 var
@@ -98,44 +140,96 @@ implementation
 uses
   FastStrings,
   FastStringFuncs,
-  mudthread;
+  commands;
 
 
 // GConnection
-constructor GConnection.Create(sk : GSocket; thr : TThread);
+constructor GConnection.Create(socket : GSocket; from_copyover : boolean = false; copyover_name : string = '');
 begin
-  inherited Create;
+  inherited Create(false);
 
-  sock := sk;
-  state := CON_ACCEPTED;
-  ch := nil;
-  idle := 0;
-  thread := thr;
-  keylock := false;
-  afk := false;
+  _socket := socket;
+  _ch := nil;
+  _state := CON_ACCEPTED;
+  _idle := 0;
+  _keylock := false;
+  _afk := false;
 
   node := connection_list.insertLast(Self);
   
   sendIAC(IAC_WILL, [IAC_COMPRESS2]);
 end;
 
-destructor GConnection.Destroy;
+destructor GConnection.Destroy();
 begin
   connection_list.remove(node);
   
-  sock.Free();
+  _socket.Free();
 
-  inherited Destroy;
+  inherited Destroy();
+end;
+
+procedure GConnection.Execute();
+begin
+  FreeOnTerminate := true;
+
+  writeConsole('(' + IntToStr(socket.getDescriptor) + ') New connection (' + socket.host_string + ')');
+
+  if (isMaskBanned(socket.host_string)) then
+    begin
+    writeConsole('(' + IntToStr(socket.getDescriptor) + ') Closed banned IP (' + socket.host_string + ')');
+
+    send(system_info.mud_name + #13#10#13#10);
+    send('Your site has been banned from this server.'#13#10);
+    send('For more information, please mail the administration, ' + system_info.admin_email + '.'#13#10);
+
+    exit;
+    end;
+    
+  while (not Terminated) do
+  	begin
+  	_lastupdate := Now();
+
+		if (not Terminated) then
+			read();
+
+		if (not Terminated) and (wait > 0) then
+			continue;
+
+		if (not Terminated) then
+			readBuffer();
+  	end;
+
+	if (not ch.CHAR_DIED) and ((state = CON_PLAYING) or (state = CON_EDITING)) then
+		begin
+		writeConsole('(' + IntToStr(socket.getDescriptor) + ') ' + ch.name + ' has lost the link');
+
+		if (ch.level >= LEVEL_IMMORTAL) then
+			interpret(ch, 'return');
+
+		ch.conn := nil;
+
+		act(AT_REPORT,'$n has lost $s link.',false,ch,nil,nil,TO_ROOM);
+		SET_BIT(ch.flags,PLR_LINKLESS);
+		end
+	else
+	if (state = CON_LOGGED_OUT) then
+		dec(system_info.user_cur)
+	else
+		begin
+		writeConsole('(' + IntToStr(socket.getDescriptor) + ') Connection reset by peer');
+		ch.Free;
+		end;
 end;
 
 procedure GConnection.send(s : string);
 begin
   try
-  	while (not sock.canWrite()) do;
+  	while (not socket.canWrite()) do;
   	
-    sock.send(s);
+    socket.send(s);
   except
-    thread.terminate();
+    Terminate();
   end;
 end;
 
@@ -147,20 +241,20 @@ begin
     exit;
 
   try
-    if (not sock.canRead()) then
+    if (not socket.canRead()) then
       exit;
   except
     try
-      thread.terminate;
+      Terminate();
     except
-			writeConsole('(' + IntToStr(sock.getDescriptor) + ') could not terminate thread');
+			writeConsole('(' + IntToStr(socket.getDescriptor) + ') could not terminate thread');
     end;
   end;
   
   idle := 0;
 
   repeat
-    read := recv(sock.getDescriptor, buf, MAX_RECEIVE - 10, 0);
+    read := recv(socket.getDescriptor, buf, MAX_RECEIVE - 10, 0);
 
     if (read > 0) then
       begin
@@ -173,9 +267,9 @@ begin
     if (read = 0) then
       begin
       try
-        thread.terminate;
+        Terminate();
       except
-          writeConsole('(' + IntToStr(sock.getDescriptor) + ') could not terminate thread');
+          writeConsole('(' + IntToStr(socket.getDescriptor) + ') could not terminate thread');
       end;
 
       exit;
@@ -191,9 +285,9 @@ begin
       else
         begin
         try
-          thread.terminate;
+          Terminate();
         except
-          writeConsole('(' + IntToStr(sock.getDescriptor) + ') could not terminate thread');
+          writeConsole('(' + IntToStr(socket.getDescriptor) + ') could not terminate thread');
         end;
 
         exit;
@@ -216,9 +310,9 @@ begin
 	for i := 0 to length(params) - 1 do
 		buf[2 + i] := chr(params[i]);
   	
-	while (not sock.canWrite()) do;
+	while (not socket.canWrite()) do;
   	
-  sock.send(buf, 2 + length(params));
+  socket.send(buf, 2 + length(params));
 end;
 
 procedure GConnection.processIAC();
@@ -238,28 +332,28 @@ begin
     	case byte(input_buf[i]) of
     		IAC_WILL: 	begin
 										inc(i);
-    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC WILL ' + IntToStr(byte(input_buf[i])));
+    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC WILL ' + IntToStr(byte(input_buf[i])));
 			    					end;
     		IAC_WONT: 	begin
 										inc(i);
-    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC WON''T ' + IntToStr(byte(input_buf[i])));
+    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC WON''T ' + IntToStr(byte(input_buf[i])));
 										end;
     		IAC_DO: 		begin
 										inc(i);
     								case byte(input_buf[i]) of
     									IAC_COMPRESS2:	begin
-    																	writeConsole('(' + IntToStr(sock.getDescriptor) + ') Client has MCCPv2');
+    																	writeConsole('(' + IntToStr(socket.getDescriptor) + ') Client has MCCPv2');
     																	end;
     								end;
     								
-    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC DO ' + IntToStr(byte(input_buf[i])));
+    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DO ' + IntToStr(byte(input_buf[i])));
 										end;
     		IAC_DONT: 	begin
 										inc(i);
-    								writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC DON''T ' + IntToStr(byte(input_buf[i])));
+    								writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC DON''T ' + IntToStr(byte(input_buf[i])));
 										end;
 			else
-	    	writeConsole('(' + IntToStr(sock.getDescriptor) + ') IAC ' + IntToStr(byte(input_buf[i])));
+	    	writeConsole('(' + IntToStr(socket.getDescriptor) + ') IAC ' + IntToStr(byte(input_buf[i])));
     	end;     	
     	
     	iac := false;
@@ -290,7 +384,7 @@ begin
   while (i <= length(input_buf)) and (input_buf[i] <> #13) and (input_buf[i] <> #10) do
     begin
     if ((input_buf[i] = #8) or (input_buf[i] = #127)) then
-      delete(comm_buf, length(comm_buf), 1)
+      delete(_comm_buf, length(_comm_buf), 1)
     else
     //if (byte(input_buf[i]) > 31) and (byte(input_buf[i]) < 127) then
       begin
@@ -315,11 +409,42 @@ begin
   delete(input_buf, 1, i - 1);
 end;
 
+procedure GConnection.emptyBuffer();
+begin
+  if (empty_busy) then
+    exit;
+
+  empty_busy := true;
+
+  if (length(sendbuffer) > 0) then
+    begin
+    send(sendbuffer);
+    ch.sendPrompt();
+    sendbuffer := '';
+    end;
+
+  empty_busy := false;
+end;
+
+procedure GConnection.writeBuffer(txt : string; in_command : boolean = false);
+begin
+  if ((length(sendbuffer) + length(txt)) > 2048) then
+    begin
+    send(sendbuffer);
+    sendbuffer := '';
+    end;
+
+  if (not in_command) and (length(sendbuffer) = 0) then
+    sendbuffer := sendbuffer + #13#10;
+
+  sendbuffer := sendbuffer + txt;
+end;
+
 procedure GConnection.writePager(txt : string);
 begin
-  if (pagepoint = 0) then
+  if (_pagepoint = 0) then
     begin
-    pagepoint := 1;
+    _pagepoint := 1;
     pagecmd:=#0;
     end;
 
@@ -361,7 +486,7 @@ begin
     'r':lines:=-1-pclines;
     'q':begin
         c.sendPrompt;
-        pagepoint := 0;
+        _pagepoint := 0;
         pagebuf := '';
         exit;
         end;
@@ -369,19 +494,19 @@ begin
     lines:=0;
   end;
 
-  while (lines<0) and (pagepoint >= 1) do
+  while (lines<0) and (_pagepoint >= 1) do
     begin
-    if (pagebuf[pagepoint] = #13) then
+    if (pagebuf[_pagepoint] = #13) then
       inc(lines);
 
-    dec(pagepoint);
+    dec(_pagepoint);
     end;
 
-  if (pagepoint < 1) then
-    pagepoint := 1;
+  if (_pagepoint < 1) then
+    _pagepoint := 1;
 
-  lines:=0;
-  last:=pagepoint;
+  lines := 0;
+  last := _pagepoint;
 
   while (lines < pclines) and (last <= length(pagebuf)) do
     begin
@@ -401,7 +526,7 @@ begin
     begin
     buf := copy(pagebuf, pagepoint, last - pagepoint);
     send(buf);
-    pagepoint := last;
+    _pagepoint := last;
     end;
 
   while (last <= length(pagebuf)) and (pagebuf[last] = ' ') do
@@ -409,7 +534,7 @@ begin
 
   if (last >= length(pagebuf)) then
     begin
-    pagepoint := 0;
+    _pagepoint := 0;
     c.sendPrompt;
     pagebuf := '';
     exit;
@@ -833,11 +958,12 @@ wind:
      end;
 end;
 
-procedure acceptConnection(list_sock : GSocket);
+procedure acceptConnection(list_socket : GSocket);
 var
   ac : GSocket;
+  conn : GConnection;
 begin
-  ac := list_sock.acceptConnection(system_info.lookup_hosts);
+  ac := list_socket.acceptConnection(system_info.lookup_hosts);
   
   ac.setNonBlocking();
 
@@ -871,7 +997,10 @@ begin
     ac.Free();
     end
   else
-    GGameThread.Create(ac, false, '');
+  	begin
+  	conn := GConnection.Create(ac);
+  	GGameConnection.Create(conn);
+  	end;
 end;
 
 procedure gameLoop();

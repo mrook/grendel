@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.22 2003/10/15 14:29:38 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.23 2003/10/16 16:07:31 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -617,9 +617,9 @@ begin
     else
       s := '-';
 
-    act(AT_REPORT,'$7($B$7' + pad_integer_front(conn.sock.getDescriptor,3) + '$A$7) '+
+    act(AT_REPORT,'$7($B$7' + pad_integer_front(conn.socket.getDescriptor,3) + '$A$7) '+
         pad_string(con_states[conn.state], 16) + '   ' +
-        pad_string(conn.sock.ip_string, 32) + '   ' +
+        pad_string(conn.socket.ip_string, 32) + '   ' +
         s,false,ch,nil,nil,TO_CHAR);
     end;
   
@@ -1069,8 +1069,8 @@ end;
 
 procedure do_wizhelp(ch:GCharacter;param:string);
 var
-  lev, a : integer;
-  node : GListNode;
+  lev : integer;
+  iterator : GIterator;
   cmd : GCommand;
   buf : string;
   count : integer;
@@ -1082,30 +1082,27 @@ begin
 
   count := 0;
 
-  for a := 0 to commands.hashsize - 1 do
-    begin
-    node := commands.bucketList[a].head;
+	iterator := commandList.iterator();
+	
+	while (iterator.hasNext()) do
+		begin
+    cmd := GCommand(iterator.next());
 
-    while (node <> nil) do
-      begin
-      cmd := GCommand(GHashValue(node.element).value);
+		if (cmd.level > LEVEL_MAX) and (cmd.level <= lev) then
+			begin
+			ch.sendPager(pad_string(lowercase(cmd.name), 14));
 
-      if (cmd.level > LEVEL_MAX) and (cmd.level <= lev) then
-        begin
-        ch.sendPager(pad_string(lowercase(cmd.name), 14));
+			inc(count);
 
-        inc(count);
-
-        if (count = 5) then
-          begin
-          ch.sendPager(#13#10);
-          count := 0;
-          end;
-        end;
-
-      node := node.next;
-      end;
+			if (count = 5) then
+				begin
+				ch.sendPager(#13#10);
+				count := 0;
+				end;
+			end;
     end;
+    
+  iterator.Free();
 
   ch.sendPager(#13#10);
 end;
@@ -1323,7 +1320,7 @@ begin
   begin
     conn := GConnection(conn_node.element);
 
-    if (conn.sock.getDescriptor = sock) then
+    if (conn.socket.getDescriptor = sock) then
     begin
       conn_f := conn;
       break;
@@ -1338,7 +1335,7 @@ begin
     exit;
   end;
 
-  conn_f.sock.disconnect();
+  conn_f.socket.disconnect();
 
   ch.sendBuffer( 'Ok.'#13#10);
 end;

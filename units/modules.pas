@@ -1,6 +1,6 @@
 {
   @abstract(Loadable module system)
-  @lastmod($Id: modules.pas,v 1.14 2003/10/09 20:13:15 ***REMOVED*** Exp $)
+  @lastmod($Id: modules.pas,v 1.15 2003/10/16 16:07:29 ***REMOVED*** Exp $)
 }
   
 unit modules;
@@ -50,7 +50,7 @@ uses
   strip,
   chars,
   util,
-  mudthread,
+  commands,
   console,
   mudsystem;
 

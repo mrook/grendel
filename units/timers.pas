@@ -1,6 +1,6 @@
 {
   @abstract(Timer class)
-  @lastmod($Id: timers.pas,v 1.22 2003/10/08 13:43:04 ***REMOVED*** Exp $)
+  @lastmod($Id: timers.pas,v 1.23 2003/10/16 16:07:30 ***REMOVED*** Exp $)
 }
 
 unit timers;
@@ -75,7 +75,7 @@ uses
     console,
     mudsystem,
     util,
-    mudthread,
+    commands,
     update,
     area,
     conns,
@@ -344,14 +344,14 @@ begin
     node_next := node.next;
     conn := node.element;
 
-    inc(conn.idle);
+    conn.idle := conn.idle + 1;
 
     if (((conn.state = CON_NAME) and (conn.idle > IDLE_NAME)) or
      ((conn.state <> CON_PLAYING) and (conn.idle > IDLE_NOT_PLAYING)) or
       (conn.idle > IDLE_PLAYING)) and ((conn.ch <> nil) and (not conn.ch.IS_IMMORT)) then
        begin
        conn.send(#13#10'You have been idle too long. Disconnecting.'#13#10);
-       conn.thread.terminate;
+       conn.Terminate();
 
        node := node_next;
        continue;

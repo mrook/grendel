@@ -1,6 +1,6 @@
 {
   @abstract(Various spell related functions)
-  @lastmod($Id: magic.pas,v 1.22 2003/09/22 21:31:11 ***REMOVED*** Exp $)
+  @lastmod($Id: magic.pas,v 1.23 2003/10/16 16:07:30 ***REMOVED*** Exp $)
 }
 
 unit magic;
@@ -22,7 +22,7 @@ uses
     constants,
     area,
     dtypes,
-    mudthread,
+    commands,
     mudsystem,
     console,
     conns,

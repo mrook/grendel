@@ -1,6 +1,6 @@
 {
   @abstract(Cleaning (system janitor) thread)
-  @lastmod($Id: clean.pas,v 1.21 2003/06/24 21:41:33 ***REMOVED*** Exp $)
+  @lastmod($Id: clean.pas,v 1.22 2003/10/16 16:07:31 ***REMOVED*** Exp $)
 }
 
 unit clean;
@@ -45,7 +45,7 @@ uses
 {$IFDEF LINUX}
     Libc,
 {$ENDIF}
-    mudthread,
+    commands,
     mudsystem;
 
 constructor GCleanThread.Create;
@@ -108,7 +108,7 @@ begin
         node_next := node.next;
         conn := node.element;
 
-        if (GGameThread(conn.thread).last_update + THREAD_TIMEOUT < Now()) then
+        if (conn.last_update + THREAD_TIMEOUT < Now()) then
           begin
           bugreport('GCleanThread.Execute', 'clean.pas', 'Thread of ' + conn.ch.name + ' probably died');
           
@@ -131,7 +131,7 @@ begin
           pthread_kill(THandle(conn.thread.handle), 9);
           {$ENDIF}
           {$IFDEF WIN32}
-          TerminateThread(conn.thread.handle, 1);
+          TerminateThread(conn.handle, 1);
           {$ENDIF}
 
           node := node_next;

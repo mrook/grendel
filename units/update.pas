@@ -1,6 +1,6 @@
 {
   @abstract(Character update & regeneration routines)
-  @lastmod($Id: update.pas,v 1.20 2003/06/24 21:41:35 ***REMOVED*** Exp $)
+  @lastmod($Id: update.pas,v 1.21 2003/10/16 16:07:31 ***REMOVED*** Exp $)
 }
 
 unit update;
@@ -36,7 +36,7 @@ implementation
 uses
     SysUtils,
     mudsystem,
-    mudthread,
+    commands,
     fight,
     conns,
     Channels;

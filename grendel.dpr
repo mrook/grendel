@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.78 2003/10/15 14:55:09 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.79 2003/10/16 16:07:33 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -70,7 +70,7 @@ uses
   fight,
   fsys,
   modules,
-  mudthread,
+  commands,
   NameGen,
   mudhelp,
   conns,
@@ -122,7 +122,7 @@ begin
     if (conn.state = CON_PLAYING) and (not conn.ch.IS_NPC) then
       GPlayer(conn.ch).quit
     else
-      conn.sock.disconnect();
+      conn.socket.disconnect();
     end;
     
   iterator.Free();
@@ -278,7 +278,7 @@ begin
     else
       begin
       conn.send(#13#10'This server is rebooting, please continue in a few minutes.'#13#10#13#10);
-      conn.thread.terminate;
+      conn.Terminate();
       end;
 
     node := node_next;
@@ -315,7 +315,7 @@ begin
     conn := node.element;
     node_next := node.next;
 
-    if (WSADuplicateSocket(conn.sock.getDescriptor, PI.dwProcessId, @prot) = -1) then
+    if (WSADuplicateSocket(conn.socket.getDescriptor, PI.dwProcessId, @prot) = -1) then
       begin
       bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
       reboot_mud;
@@ -343,7 +343,7 @@ begin
       end;
 
     conn.ch.save(conn.ch.name);
-    conn.thread.terminate;
+    conn.Terminate();
 
     node := node_next;
     end;
@@ -496,7 +496,7 @@ begin
 	writeConsole('Loading modules...');
 	loadModules();
 	writeConsole('Loading texts...');
-	load_commands;
+	loadCommands();
 	load_socials;
 	load_damage;
 	writeConsole('Loading mud state...');
@@ -602,7 +602,7 @@ begin
       sk.socketAddress := client_addr;
       sk.resolve(system_info.lookup_hosts);
 
-      GGameThread.Create(sk, true, g);
+      GConnection.Create(sk, true, g);
       end;
   until (not suc);
 

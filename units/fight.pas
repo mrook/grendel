@@ -1,6 +1,6 @@
 {
   @abstract(Damage & experience routines)
-  @lastmod($Id: fight.pas,v 1.27 2003/06/24 21:41:33 ***REMOVED*** Exp $)
+  @lastmod($Id: fight.pas,v 1.28 2003/10/16 16:07:31 ***REMOVED*** Exp $)
 }
 
 unit fight;
@@ -8,43 +8,37 @@ unit fight;
 interface
 
 uses
-    Math,
-    SysUtils,
-    area,
-    constants,
-    skills,
-    conns,
-    mudsystem,
-    mudthread,
-    dtypes,
-    console,
-    util,
-    chars;
+	Math,
+	SysUtils,
+	player,
+	chars;
 
 
 { fighting constants }
-const FG_NONE = 0;
-      FG_PUNCH = 1;
-      FG_SLASH = 2;      { gsn_slashing }
-      FG_PIERCE = 3;     { gsn_piercing }
-      FG_CLEAVE = 4;     { gsn_slashing }
-      FG_BLAST = 5;
-      FG_CRUSH = 6;      { gsn_concussion }
-      FG_BITE = 7;
-      FG_CLAW = 8;
-      FG_WHIP = 9;       { gsn_whipping }
-      FG_STAB = 10;      { gsn_piercing }
-      FG_GAZE = 11;      { gaze from a spirit? }
-      FG_BREATH = 12;    { breath }
-      FG_STING = 13;     { sting (bee, fly) }
-      FG_MAX = FG_STING;
+const 
+	FG_NONE = 0;
+	FG_PUNCH = 1;
+	FG_SLASH = 2;      { gsn_slashing }
+	FG_PIERCE = 3;     { gsn_piercing }
+	FG_CLEAVE = 4;     { gsn_slashing }
+	FG_BLAST = 5;
+	FG_CRUSH = 6;      { gsn_concussion }
+	FG_BITE = 7;
+	FG_CLAW = 8;
+	FG_WHIP = 9;       { gsn_whipping }
+	FG_STAB = 10;      { gsn_piercing }
+	FG_GAZE = 11;      { gaze from a spirit? }
+	FG_BREATH = 12;    { breath }
+	FG_STING = 13;     { sting (bee, fly) }
+	FG_MAX = FG_STING;
 
 { damage types }
-const TYPE_UNDEFINED = 0;
-      TYPE_SLAY = 1;
-      TYPE_SILENT = 2;
-      TYPE_HIT = 3;
-      TYPE_OTHER = TYPE_HIT + FG_MAX + 1;
+const 
+	TYPE_UNDEFINED = 0;
+	TYPE_SLAY = 1;
+	TYPE_SILENT = 2;
+	TYPE_HIT = 3;
+	TYPE_OTHER = TYPE_HIT + FG_MAX + 1;
 
 const attack_table:array[FG_NONE..FG_STING,1..2] of string=(('nothing','nothings'),
                                                       ('punch','punches'),
@@ -76,9 +70,18 @@ procedure update_fighting;
 implementation
 
 uses
-    timers,
-    update,
-    Channels;
+	timers,
+	area,
+	constants,
+	skills,
+	conns,
+	mudsystem,
+	commands,
+	dtypes,
+	console,
+	util,
+	update,
+	Channels;
 
 var
   dual_flip : boolean;
@@ -511,11 +514,11 @@ begin
         GNPC(oppnt).context.Execute;
         end;
 
-      { if switched, let go }
-      if (oppnt.conn <> nil) then
-        interpret(oppnt, 'return sub');
+      { TODO : if switched, let go }
+      { if (oppnt.conn <> nil) then
+        interpret(oppnt, 'return sub'); }
 
-      oppnt.die;
+      oppnt.die();
 
       if (not ch.IS_NPC) then
         begin
@@ -1015,8 +1018,9 @@ begin
     begin
     conn := GConnection(iter_world.next());
 
+    { TODO:
     if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
-      GPlayer(conn.ch).emptyBuffer;
+      GPlayer(conn.ch).emptyBuffer; }
     end;  
 
   iter_world.Free();
