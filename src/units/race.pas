@@ -2,7 +2,7 @@
 	Summary:
 		Race routines
 
-	## $Id: race.pas,v 1.10 2004/04/03 16:03:48 ***REMOVED*** Exp $
+	## $Id: race.pas,v 1.11 2004/05/18 12:06:02 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -50,6 +50,8 @@ type
 		_bodyparts : GHashTable;	
 		_convert : boolean;
 		
+		_avgheight_adjust, _avgheight_female, _avgheight_male : integer;
+		
 		str_max, con_max, dex_max, int_max, wis_max : integer;
 
 	public
@@ -81,6 +83,10 @@ type
 		property bodyparts : GHashTable read _bodyparts;
 		
 		property convert : boolean read _convert;
+		
+		property avgheight_adjust : integer read _avgheight_adjust;
+		property avgheight_female : integer read _avgheight_female;
+		property avgheight_male : integer read _avgheight_male;
 	end;
 
 
@@ -326,9 +332,9 @@ begin
 			        begin
 			        if (prep(parser.CurName) = 'NAME') then
 			        	begin
-			          race._name := cap(parser.CurContent);
-                writeConsole('   Race: ' + race.name);
-			          end
+			          	race._name := cap(parser.CurContent);
+                		writeConsole('   Race: ' + race.name);
+						end
 			        else
 			        if (prep(parser.CurName) = 'SHORT') then
 			        	race._short := cap(parser.CurContent)
@@ -343,7 +349,16 @@ begin
 			        	race._max_skills := StrToInt(parser.CurContent)
 			        else
 			        if (prep(parser.CurName) = 'SPELLS') then
-							 	race._max_spells := StrToInt(parser.CurContent)
+					 	race._max_spells := StrToInt(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'AVGHEIGHT_ADJUST') then
+			        	race._avgheight_adjust := StrToInt(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'AVGHEIGHT_FEMALE') then
+			        	race._avgheight_female := StrToInt(parser.CurContent)
+			        else
+			        if (prep(parser.CurName) = 'AVGHEIGHT_MALE') then
+			        	race._avgheight_male := StrToInt(parser.CurContent)
 			        else
 			        if (prep(parser.CurName) = 'ABILITY') then
 			        	begin
@@ -356,7 +371,7 @@ begin
 			        	end
 			        else
 			        if (prep(parser.CurName) = 'DESCRIPTION') then
-			          race._description := parser.CurContent;
+						race._description := parser.CurContent;
 			        end;
       			ptEndTag: // Process End-Tag here (Parser.CurName)
 							begin
