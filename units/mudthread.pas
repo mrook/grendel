@@ -271,7 +271,7 @@ begin
       end;
 
     if (snooped_by <> nil) then
-      GConnection(snooped_by.conn).send(line + #13#10);
+        GConnection(snooped_by.conn).send(line + #13#10);
 
     clean_cmdline(line);
 
@@ -1216,7 +1216,7 @@ begin
   registerCommand('do_disconnect', do_disconnect);
   registerCommand('do_wizhelp', do_wizhelp);
   registerCommand('do_rstat', do_rstat);
-  registerCommand('do_mstat', do_mstat);
+  registerCommand('do_pstat', do_pstat);
   registerCommand('do_ostat', do_ostat);
   registerCommand('do_report', do_report);
   registerCommand('do_destroy', do_destroy);
@@ -1243,7 +1243,7 @@ begin
   registerCommand('do_fill', do_fill);
   registerCommand('do_unlock', do_unlock);
   registerCommand('do_lock', do_lock);
-  registerCommand('do_ascore', do_ascore);
+  registerCommand('do_pset', do_pset);
   registerCommand('do_revive', do_revive);
   registerCommand('do_setpager', do_setpager);
   registerCommand('do_autoloot', do_autoloot);
@@ -1255,8 +1255,9 @@ begin
   registerCommand('do_unlearn', do_unlearn);
   registerCommand('do_hashstats', do_hashstats);
   registerCommand('do_keylock', do_keylock);
-  registerCommand('do_holywalk', do_holywalk);
   registerCommand('do_take', do_take);
+  registerCommand('do_holywalk', do_holywalk);
+  registerCommand('do_prename', do_prename);
 end;
 
 begin
