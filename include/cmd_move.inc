@@ -315,7 +315,8 @@ begin
   ch.fromRoom;
   ch.toRoom(room_to);
 
-  dec(ch.mv, mv_cost);
+  ch.mv := ch.mv - mv_cost;
+
   if (ch.mv < 15) then
     act(AT_REPORT,'You start breathing heavily... you are very tired.',false,ch,nil,nil,TO_CHAR);
 

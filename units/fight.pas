@@ -172,11 +172,12 @@ begin
 
       inc(pracs, pracs_gain);
 
-      inc(max_hp,hp_gain);
-      inc(max_mv,mv_gain);
-      inc(max_mana,ma_gain);
-      hp:=max_hp;
-      mv:=max_mv;
+      max_hp := max_hp + hp_gain;
+      max_mv := max_mv + mv_gain;
+      max_mana := max_mana + ma_gain;
+
+      hp := max_hp;
+      mv := max_mv;
 
       level := level + 1;
 
@@ -434,7 +435,7 @@ begin
 
   { in a battleground, immortals should receive damage - Grimlord }
   if (not oppnt.IS_IMMORT) or ((not oppnt.IS_NPC) and oppnt.IS_IMMORT) and (GPlayer(oppnt).bg_status = BG_PARTICIPATE) then
-    dec(oppnt.hp, dam);
+    oppnt.hp := oppnt.hp - dam;
 
   { ermmz... you shouldn't receive xp when damaged by poison - Grimlord }
   if (oppnt <> ch) then

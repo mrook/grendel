@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.13 2001/05/11 14:24:24 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.14 2001/06/14 18:19:42 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -399,16 +399,16 @@ begin
     APPLY_WIS: ch.wis := UMin(ch.wis + modif, 100);
     APPLY_CON: ch.con := UMin(ch.con + modif, 100);
     APPLY_HP: ch.hp := UMin(ch.hp + modif, ch.max_hp);
-    APPLY_MAX_HP: inc(ch.max_hp, modif);
+    APPLY_MAX_HP: ch.max_hp := UMin(ch.max_hp + modif, 15000);
     APPLY_MV: ch.mv := UMin(ch.mv + modif, ch.max_mv);
-    APPLY_MAX_MV: inc(ch.max_mv, modif);
+    APPLY_MAX_MV: ch.max_mv := UMin(ch.max_mv + modif, 15000);
     APPLY_MANA: ch.mana := UMin(ch.mana + modif, ch.max_mana);
-    APPLY_MAX_MANA: inc(ch.max_mana, modif);
+    APPLY_MAX_MANA: ch.max_mana := UMin(ch.max_mana + modif, 15000);
     APPLY_AC: begin
               inc(ch.ac, modif);
               ch.calcAC;
               end;
-    APPLY_APB: inc(ch.apb, modif);
+    APPLY_APB: ch.apb := ch.apb + modif;
     APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
     APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
     APPLY_STRIPSPELL: removeAffectSkill(ch, GSkill(pointer(modif)));

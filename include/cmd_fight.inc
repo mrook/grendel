@@ -175,7 +175,7 @@ begin
     act(AT_REPORT,'You go crazy and open up in a flurry of attacks!',false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'$n screams out a warcry and opens up in a flurry of attacks!',false,ch,nil,nil,TO_ROOM);
 
-    dec(mv, 15 + (ch.level div 10));
+    mv := mv - 15 + (ch.level div 10);
 
     ch.setWait(8);
 

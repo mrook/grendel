@@ -1,4 +1,4 @@
-// $Id: magic.pas,v 1.9 2001/06/09 13:09:48 ***REMOVED*** Exp $
+// $Id: magic.pas,v 1.10 2001/06/14 18:19:42 ***REMOVED*** Exp $
 
 unit magic;
 
@@ -594,7 +594,7 @@ begin
        if (not ch.IS_IMMORT) and (not ch.IS_NPC) then
          begin
          ch.cast_timer := 1;
-         dec(ch.mana, sn.min_mana);
+         ch.mana := ch.mana - sn.min_mana;
          end;
 
        if (ch.fighting <> nil) then
@@ -604,7 +604,7 @@ begin
        end
      else
        begin
-       dec(ch.mana, sn.min_mana div 2);
+       ch.mana := ch.mana - sn.min_mana div 2;
 
        if (sn.target < TARGET_OFF_AREA) then
          begin

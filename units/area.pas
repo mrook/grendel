@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.33 2001/06/09 20:56:08 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.34 2001/06/14 18:19:41 ***REMOVED*** Exp $
 
 unit area;
 
@@ -16,7 +16,7 @@ uses
     strip,
     util;
 
-
+{$M+}
 type
     GRoom = class;
     GShop = class;
@@ -27,6 +27,7 @@ type
     end;
 
     GArea = class
+    public
       fname, name, author : string;
       m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
       resets : GDLinkedList;
@@ -60,6 +61,7 @@ type
     GObjectValues = array[1..4] of integer;
 
     GObjectIndex = class
+    public
       name, short, long : PString;
       area : GArea;
       flags : cardinal;
@@ -74,6 +76,7 @@ type
     end;
 
     GObject = class
+    public
       node_world, node_room, node_in, node_carry : GListNode;
 
       contents : GDLinkedList;
@@ -114,9 +117,11 @@ type
 
       constructor Create;
       destructor Destroy; override;
+    published
     end;
 
     GExit = class
+    public
       vnum : integer;
       direction : integer;
       to_room : GRoom;
@@ -127,6 +132,7 @@ type
     end;
 
     GNPCIndex = class
+    public
       str,con,dex,int,wis:integer;
       hp,mv,mana,apb,natural_ac:integer;
       hitroll:integer;
@@ -154,37 +160,43 @@ type
     end;
 
     GReset = class
+    public
       area : GArea;
       reset_type : char;
       arg1, arg2, arg3 : integer;
     end;
 
     GTeleport = class
+    public
       t_room : GRoom;
       timer : integer;
     end;
 
     GTrack = class
+    public
       who : string;
       life : integer;
       direction : integer;
     end;
 
     GExtraDescription = class
+    public
       keywords : string;
       description : string;
     end;
 
     GCoords = class  // x: west->east; y: south->north; z: down->up
-                x, y, z : integer;
-                constructor Create(); overload;
-                constructor Create(coords : GCoords); overload;
-                function toString() : string;
-                procedure copyTo(coords : GCoords);
-                procedure copyFrom(coords : GCoords);
-              end;
+    public
+      x, y, z : integer;
+      constructor Create(); overload;
+      constructor Create(coords : GCoords); overload;
+      function toString() : string;
+      procedure copyTo(coords : GCoords);
+      procedure copyFrom(coords : GCoords);
+    end;
 
     GRoom = class
+    public
       vnum : integer;
       areacoords : GCoords;
       worldcoords : GCoords; // not used yet
@@ -219,9 +231,11 @@ type
 
       constructor Create(vn : integer; ar : GArea);
       destructor Destroy; override;
+    published
     end;
 
     GShop = class
+    public
       node : GListNode;
       keeper : integer;                        { keeper vnum }
       area : GArea;

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.41 2001/06/09 13:09:48 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.42 2001/06/14 18:19:41 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -73,12 +73,12 @@ type
     private
       _level : integer;
       _str, _con, _dex, _int, _wis : integer;
+      _hp, _max_hp : integer;
+      _mv, _max_mv : integer;
+      _mana, _max_mana : integer;
+      _apb : integer;
 
     public
-      mana, max_mana : integer;      { Current mana and maximum mana }
-      hp, max_hp : integer;          { Current hp and maximum hp }
-      mv, max_mv : integer;          { Current move and maximum move }
-      apb : integer;                { Attack Power Bonus }
       ac_mod : integer;             { AC modifier (spells?) }
       natural_ac : integer;         { Natural AC (race based for PC's) }
       hac, bac, aac, lac, ac : integer; { head, body, arm, leg and overall ac }
@@ -180,12 +180,26 @@ type
       constructor Create;
       destructor Destroy; override;
 
+    // properties
+      function getName() : string;
+
       property level : integer read _level write _level;
       property str : integer read _str write _str;
       property con : integer read _str write _str;
       property dex : integer read _str write _str;
       property int : integer read _str write _str;
       property wis : integer read _str write _str;
+
+      property hp : integer read _hp write _hp;
+      property max_hp : integer read _max_hp write _max_hp;
+      property mv : integer read _mv write _mv;
+      property max_mv : integer read _max_mv write _max_mv;
+      property mana : integer read _mana write _mana;
+      property max_mana : integer read _max_mana write _max_mana;
+
+      property apb : integer read _apb write _apb;
+
+      property pname : string read getName;
     end;
 
     GNPC = class(GCharacter)
@@ -435,6 +449,14 @@ begin
 
     char_list.remove(node_world);
     end;
+end;
+
+function GCharacter.getName() : string;
+begin
+  if (name <> nil) then
+    Result := name^
+  else
+    Result := '';
 end;
 
 function GCharacter.getTrust : integer;
@@ -2403,9 +2425,9 @@ begin
                   else
                     inc(Self.room.light);
       ITEM_GEM: if (remove) then
-                  dec(max_mana, obj.value[3])
+                  max_mana := max_mana - obj.value[3]
                 else
-                  inc(max_mana, obj.value[3]);
+                  max_mana := max_mana + obj.value[3]
     end;
 
   if (obj.obj_index <> nil) then
@@ -2679,7 +2701,7 @@ begin
     begin
     vict := node.element;
 
-    if isName(vict.name^,name) or isName(vict.short^,name) and (ch.CAN_SEE(vict)) then
+    if (isName(vict.name^,name)) or (isName(vict.short^,name)) and (ch.CAN_SEE(vict)) then
       begin
       inc(count);
 

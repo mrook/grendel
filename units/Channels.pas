@@ -1,4 +1,4 @@
-// $Id: Channels.pas,v 1.4 2001/05/11 14:25:00 ***REMOVED*** Exp $
+// $Id: Channels.pas,v 1.5 2001/06/14 18:19:41 ***REMOVED*** Exp $
 
 {
 TODO:
@@ -420,7 +420,7 @@ begin
     end;
     
     if (not ch.IS_IMMORT()) then
-      inc(ch.mv, chan.cost);
+      ch.mv := ch.mv - chan.cost;
     
     buf := Format('You ' + chan.verbyou, [param]);
     act(chan.channelcolor, buf, false, ch, nil, nil, TO_CHAR);
