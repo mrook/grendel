@@ -292,6 +292,9 @@ begin
     cmp edx, varInteger
     je @varInteger
 
+    cmp edx, varBoolean
+    je @varInteger
+
     jmp @end
 
 @varSingle:
@@ -304,9 +307,15 @@ begin
     mov vd.TVarData.VInteger, eax
     jmp @end
 
+@varBoolean:
+    mov vd.TVarData.VType, varBoolean   
+    xor ah,ah   
+    mov vd.TVarData.VBoolean, ax
+    jmp @end
+
 @end:
   end;
-
+  
   if (signature.ResultType = varString) then
     push(resstr)
   else
