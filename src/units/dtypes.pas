@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.6 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.7 2004/03/06 18:28:57 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -10,189 +10,189 @@ unit dtypes;
 interface
 
 uses
-    Variants,
-    SysUtils;
+	Variants,
+	SysUtils;
 
 {$M+}
 type
-		{
-			Container class for strings
-		}
-    GString = class
-    private    
-      _value : string;
+	{
+		Container class for strings
+	}
+	GString = class
+	private    
+		_value : string;
 
-    published
-      constructor Create(const value : string);
-      
-      property value : string read _value write _value;		{ The string value }
-    end;
+	published
+		constructor Create(const value : string);
 
-		{
-			Container class for integers
-		}
-    GInteger = class
-    private
-      _value : integer;
+		property value : string read _value write _value;		{ The string value }
+	end;
 
-    published
-      constructor Create(const value : integer);
+	{
+		Container class for integers
+	}
+	GInteger = class
+	private
+		_value : integer;
 
-      property value : integer read _value write _value;	{ The integer value }
-    end;
-    
-    {
-			Container class for bitvectors
-		}
-    GBitVector = class
-    private
-      _value : cardinal;
-      
-    published
-      constructor Create(const value : cardinal);
+	published
+		constructor Create(const value : integer);
 
-      function isBitSet(const bit : cardinal) : boolean;
-      procedure setBit(const bit : cardinal);
-      procedure removeBit(const bit : cardinal);
+		property value : integer read _value write _value;	{ The integer value }
+	end;
 
-      property value : cardinal read _value write _value;	{ The integer value (bitvector) }
-		end;
+	{
+		Container class for bitvectors
+	}
+	GBitVector = class
+	private
+		_value : cardinal;
 
-		{
-			Base class for list nodes
-		}
-    GListNode = class
-    private
-      _prev : GListNode; 				{ Pointer to previous node in list }
-      _next : GListNode;					{ Pointer to next node in list }
-      _element : TObject;				{ Pointer to element }
-      
-    public
-      property prev : GListNode read _prev write _prev;
-      property next : GListNode read _next write _next;
+	published
+		constructor Create(const value : cardinal);
 
-		published
-      constructor Create(e : pointer; p, n : GListNode);
-      
-      property element : TObject read _element write _element;
-    end;
+		function isBitSet(const bit : cardinal) : boolean;
+		procedure setBit(const bit : cardinal);
+		procedure removeBit(const bit : cardinal);
 
-		{
-			Abstract base class for iterators
-		}
-    GIterator = class
-    published
-    	function getCurrent() : TObject; virtual; abstract;	{ Abstract getCurrent() }
-      function hasNext() : boolean; virtual; abstract;		{ Abstract hasNext() }
-      function next() : TObject; virtual; abstract;				{ Abstract next() }
-    end;
-    
-		{
-			Doubled linked list
-		}
-    GDLinkedList = class
-   	private
-      _size : integer;						
-      _serial : integer;
-      _head : GListNode;					{ Pointer to head of list }
-      _tail : GListnode;					{ Pointer to tail of list }
+		property value : cardinal read _value write _value;	{ The integer value (bitvector) }
+	end;
 
-		published
-      function insertLast(element : pointer) : GListNode;
-      function insertFirst(element : pointer) : GListNode;
-      function insertAfter(tn : GListNode; element : pointer) : GListNode;
-      function insertBefore(tn : GListNode; element : pointer) : GListNode;
-      
-      procedure add(element : TObject);
-      procedure remove(node : GListNode);
-      procedure clean();
-      procedure smallClean();
+	{
+		Base class for list nodes
+	}
+	GListNode = class
+	private
+		_prev : GListNode; 				{ Pointer to previous node in list }
+		_next : GListNode;					{ Pointer to next node in list }
+		_element : TObject;				{ Pointer to element }
 
-      function size() : integer;
+	public
+		property prev : GListNode read _prev write _prev;
+		property next : GListNode read _next write _next;
 
-      function iterator() : GIterator;
+	published
+		constructor Create(e : pointer; p, n : GListNode);
 
-      constructor Create();
-      destructor Destroy(); override;
-      
-      property head : GListNode read _head;
-      property tail : GListNode read _tail;
-    end;
+		property element : TObject read _element write _element;
+	end;
 
-		{
-			Array to store a set of prime numbers
-		}
-    GPrimes = array of integer;
-    
-    {
-			Array to store a set of linked lists
-		}
-		GDLinkedListArray = array of GDLinkedList;
+	{
+		Abstract base class for iterators
+	}
+	GIterator = class
+	published
+		function getCurrent() : TObject; virtual; abstract;	{ Abstract getCurrent() }
+		function hasNext() : boolean; virtual; abstract;		{ Abstract hasNext() }
+		function next() : TObject; virtual; abstract;				{ Abstract next() }
+	end;
 
-		{
-			Definition of hash function
-		}
-    GHASH_FUNC = function(size, prime : integer; const key : string) : integer;
+	{
+		Doubled linked list
+	}
+	GDLinkedList = class
+	private
+		_size : integer;						
+		_serial : integer;
+		_head : GListNode;					{ Pointer to head of list }
+		_tail : GListnode;					{ Pointer to tail of list }
 
-		{
-			Container for hash elements
-		}
-    GHashValue = class
-    private
-      _key : variant;				{ Hash key }
-      _refcount : integer;		{ Reference count }
-      _value : TObject;			{ Element }
-      
-    published
-    	constructor Create(key : variant; value : TObject);
-    	
-    	procedure addRef();
-    	procedure release();
-    	
-    	property key : variant read _key;
-    	property refcount : integer read _refcount;
-    	property value : TObject read _value;
-    end;
+	published
+		function insertLast(element : pointer) : GListNode;
+		function insertFirst(element : pointer) : GListNode;
+		function insertAfter(tn : GListNode; element : pointer) : GListNode;
+		function insertBefore(tn : GListNode; element : pointer) : GListNode;
 
-    {
-			Hash table class, loosely based on the Java2 hashing classes
-		}
-    GHashTable = class
-    private
-      hashprime : integer;
-      hashsize : integer;										{ Size of hash table }
-      bucketList : GDLinkedListArray;				{ Array of double linked lists }
-      hashFunc : GHASH_FUNC;
-      
-    	function getBucket(index : integer) : GDLinkedList;
-      function _get(key : variant) : GHashValue;
-      function findPrimes(n : integer) : GPrimes;
+		procedure add(element : TObject);
+		procedure remove(node : GListNode);
+		procedure clean();
+		procedure smallClean();
 
-		published
-      procedure clear();
+		function size() : integer;
 
-      function isEmpty() : boolean;
-      function size() : integer;
+		function iterator() : GIterator;
 
-      function iterator() : GIterator;
+		constructor Create();
+		destructor Destroy(); override;
 
-      function get(key : variant) : TObject;
-      procedure put(key : variant; value : TObject);
-      procedure remove(key : variant);
+		property head : GListNode read _head;
+		property tail : GListNode read _tail;
+	end;
 
-      function getHash(key : variant) : integer;
-      procedure setHashFunc(func : GHASH_FUNC);
+	{
+		Array to store a set of prime numbers
+	}
+	GPrimes = array of integer;
 
-      procedure hashStats(); virtual;
+	{
+		Array to store a set of linked lists
+	}
+	GDLinkedListArray = array of GDLinkedList;
 
-      constructor Create(size : integer);
-      destructor Destroy(); override;
-      
-    public
-      property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
-      property buckets[index : integer] : GDLinkedList read getBucket;
-    	property bucketcount : integer read hashsize;
-    end;   
+	{
+		Definition of hash function
+	}
+	GHASH_FUNC = function(size, prime : integer; const key : string) : integer;
+
+	{
+		Container for hash elements
+	}
+	GHashValue = class
+	private
+		_key : variant;				{ Hash key }
+		_refcount : integer;		{ Reference count }
+		_value : TObject;			{ Element }
+
+	published
+		constructor Create(key : variant; value : TObject);
+
+		procedure addRef();
+		procedure release();
+
+		property key : variant read _key;
+		property refcount : integer read _refcount;
+		property value : TObject read _value;
+	end;
+
+	{
+		Hash table class, loosely based on the Java2 hashing classes
+	}
+	GHashTable = class
+	private
+		hashprime : integer;
+		hashsize : integer;										{ Size of hash table }
+		bucketList : GDLinkedListArray;				{ Array of double linked lists }
+		hashFunc : GHASH_FUNC;
+
+		function getBucket(index : integer) : GDLinkedList;
+		function _get(key : variant) : GHashValue;
+		function findPrimes(n : integer) : GPrimes;
+
+	published
+		procedure clear();
+
+		function isEmpty() : boolean;
+		function size() : integer;
+
+		function iterator() : GIterator;
+
+		function get(key : variant) : TObject;
+		procedure put(key : variant; value : TObject);
+		procedure remove(key : variant);
+
+		function getHash(key : variant) : integer;
+		procedure setHashFunc(func : GHASH_FUNC);
+
+		procedure hashStats(); virtual;
+
+		constructor Create(size : integer);
+		destructor Destroy(); override;
+
+	public
+		property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
+		property buckets[index : integer] : GDLinkedList read getBucket;
+		property bucketcount : integer read hashsize;
+	end;   
 {$M-}    
 
 {
@@ -220,7 +220,7 @@ function sortedHash(size, prime : integer; const key : string) : integer;
 implementation
 
 uses
-    md5;
+	md5;
 
 
 type
@@ -836,6 +836,9 @@ begin
   else
   { shouldn't be here }
   	raise Exception.Create('Impossible to determine hashkey for unknown variant type ' + VarTypeAsText(VarType(key)));
+  
+  // final safeguard against indices < 0
+  Result := abs(Result);
 end;
 
 {
@@ -872,8 +875,12 @@ var
 begin
   Result := nil;
   hash := getHash(key);
-
-  node := bucketList[hash].head;
+  
+	try
+  	node := bucketList[hash].head;
+  except
+  	node := nil;
+  end;
 
   while (node <> nil) do
     begin
