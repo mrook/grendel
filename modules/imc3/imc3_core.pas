@@ -3,7 +3,7 @@
 	
 	Based on client code by Samson of Alsherok.
 	
-	$Id: imc3_core.pas,v 1.5 2003/10/03 21:00:28 ***REMOVED*** Exp $
+	$Id: imc3_core.pas,v 1.6 2003/10/04 09:40:51 ***REMOVED*** Exp $
 }
 
 unit imc3_core;
@@ -40,6 +40,7 @@ type
 		procedure handleMudList(packet : GPacket_I3);
 		procedure handleChanList(packet : GPacket_I3);
 		procedure handleChannelMessage(packet : GPacket_I3);
+		procedure handleChannelEmote(packet : GPacket_I3);
 		procedure handlePacket(packet : GPacket_I3);
 
 		procedure startup();
@@ -56,6 +57,8 @@ type
 		
 		procedure sendChannelListen(channel : GChannel_I3; lconnect : boolean);
 		procedure sendChannelMessage(channel : GChannel_I3; name, msg : string);
+		procedure sendChannelEmote(channel : GChannel_I3; name, msg : string);
+		procedure sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
 		
 		procedure shutdown();
 		
@@ -70,6 +73,7 @@ implementation
 uses
 	WinSock2,
 	SysUtils,
+	FastStrings,
 	Channels,
 	constants,
 	console,
@@ -461,6 +465,23 @@ begin
 	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
 end;
 
+procedure GInterMud.handleChannelEmote(packet : GPacket_I3);
+var
+	channel_name, visname, message, text : string;
+begin
+	channel_name := GString(packet.fields[6]).value;
+	visname := GString(packet.fields[7]).value;
+	message := GString(packet.fields[8]).value;
+	
+	visname := Format('%s@%s', [visname, packet.originator_mudname]);
+	
+	message := FastReplace(message, '$N', visname);
+	
+	text := Format('[%s] s$7', [channel_name, message]);
+	
+	to_channel(nil, text, CHANNEL_ALL, AT_ECHO);
+end;
+
 procedure GInterMud.handlePacket(packet : GPacket_I3);
 begin
 	if (packet.packet_type = 'startup-reply') then
@@ -474,6 +495,9 @@ begin
   else
   if (packet.packet_type = 'channel-m') then
   	handleChannelMessage(packet)
+  else
+  if (packet.packet_type = 'channel-e') then
+  	handleChannelEmote(packet)
   else
   if (packet.packet_type = 'error') then
   	writeConsole('I3: Received error "' + GString(packet.fields[7]).value + '"');
@@ -624,6 +648,45 @@ begin
 	writeBuffer(name);
 	writeBuffer('","');
 	writeBuffer(escape(msg));
+	writeBuffer('",})'#13);
+	sendPacket();
+end;
+
+// void I3_send_channel_emote( I3_CHANNEL *channel, char *name, char *message ) 
+procedure GInterMud.sendChannelEmote(channel : GChannel_I3; name, msg : string);
+begin
+	if (Pos('$N', msg) = 0) then
+		msg := '$N ' + msg;
+		
+	writeHeader('channel-e', mud.name, name, '', '');
+	writeBuffer('"');
+	writeBuffer(channel.I3_name);
+	writeBuffer('","');
+	writeBuffer(name);
+	writeBuffer('","');
+	writeBuffer(escape(msg));
+	writeBuffer('",})'#13);
+	sendPacket();
+end;
+
+// void I3_send_channel_t( I3_CHANNEL *channel, char *name, char *tmud, char *tuser, char *msg_o, char *msg_t, char *tvis )
+procedure GInterMud.sendChannelTarget(channel : GChannel_I3; name, tmud, tuser, msg_o, msg_t, tvis : string);
+begin
+	writeHeader('channel-t', mud.name, name, '', '');
+	writeBuffer('"');
+	writeBuffer(channel.I3_name);
+	writeBuffer('","');
+	writeBuffer(tmud);
+	writeBuffer('","');
+	writeBuffer(tuser);
+	writeBuffer('","');
+	writeBuffer(escape(msg_o));
+	writeBuffer('","');
+	writeBuffer(escape(msg_t));
+	writeBuffer('","');
+	writeBuffer(name);
+	writeBuffer('","');
+	writeBuffer(tvis);
 	writeBuffer('",})'#13);
 	sendPacket();
 end;
