@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.36 2001/04/30 16:07:14 xenon Exp $
+// $Id: cmd_info.inc,v 1.37 2001/05/02 21:50:27 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -1553,7 +1553,7 @@ begin
 
     while (node <> nil) do
       begin
-      social := node.element;
+      social := GSocial(GHashValue(node.element).value);
 
       line := line + pad_string(lowercase(social.name), 13);
 

@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.31 2001/04/30 16:27:33 xenon Exp $
+// $Id: cmd_imm.inc,v 1.32 2001/05/02 21:50:26 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -1026,7 +1026,7 @@ begin
 
     while (node <> nil) do
       begin
-      cmd := node.element;
+      cmd := GCommand(GHashValue(node.element).value);
 
       if (cmd.level > LEVEL_MAX) and (cmd.level <= lev) then
         begin
