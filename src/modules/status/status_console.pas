@@ -14,6 +14,7 @@ uses
 	SysUtils,
 	Graphics,
 	Forms,
+	SyncObjs,
 	console,
 	modules,
 	constants,
@@ -28,6 +29,11 @@ type
 
 	GConsoleModule = class(TInterfacedObject, IModuleInterface)
 	private
+		consoleMemo : TMemo;
+		consoleFont : TFont;
+		consoleTimer : TTimer;
+		consoleDriver : GConsoleWindowWriter;
+		
 		procedure handleOnTimer(Sender : TObject);
 	public
 		procedure registerModule();
@@ -38,11 +44,7 @@ type
 var
 	consoleQueue : TStringList;
 	consoleForm : TForm;
-	consoleMemo : TMemo;
-	consoleFont : TFont;
-	consoleTimer : TTimer;
-	consoleDriver : GConsoleWindowWriter;
-  
+	cs : TCriticalSection;  
 
 procedure showConsoleProc(id : integer);
 begin
@@ -56,13 +58,19 @@ end;
 
 procedure GConsoleWindowWriter.write(timestamp : TDateTime; const text : string; debugLevel : integer = 0);
 begin
+	cs.Acquire();
+	
 	consoleQueue.add('[' + FormatDateTime('hh:nn', timestamp) + '] ' + text);
+	
+	cs.Release();
 end;
 
 procedure GConsoleModule.handleOnTimer(Sender: TObject);
 var
 	idx : integer;
 begin
+	cs.Acquire();
+	
 	for idx := 0 to consoleQueue.Count - 1 do
 		begin
 		consoleMemo.Lines.Add(consoleQueue[idx]);
@@ -70,12 +78,16 @@ begin
 		
 	Application.ProcessMessages();
 	consoleQueue.Clear();
+	
+	cs.Release();
 end;
 
 procedure GConsoleModule.registerModule();
 var
 	console : GConsole;
 begin
+	cs := TCriticalSection.Create();
+	
 	Application.Title := 'Grendel ' + version_number;
 
 	consoleForm := TForm.Create(nil);
@@ -134,6 +146,8 @@ begin
 	consoleDriver.Free();
 	
 	consoleQueue.Free();
+	
+	cs.Free();
 end;
 
 
