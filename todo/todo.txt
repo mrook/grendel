@@ -1,5 +1,6 @@
 Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal priority)
 
+
 ! level messages with amounts
 ! tracking
 ! copyover procedure
@@ -11,6 +12,9 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 ! ability to change password
 
 
+* rework input routine, make sure tintin/jmc work again
+* add some checks to do_give, do_get, do_drop with respect to inter-align trading,
+  ROOM_NODROP etc.
 * implement support for various EX_*, ROOM_*, SECT_* flags, most notably:
 		ROOM_NOFLOOR, SECT_UNDERGROUND (no-light), EX_NOBREAK, EX_SWIM etc.
 * better damage/xp system (more balanced)
@@ -26,13 +30,14 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - bugtrack/report system 
 - ban code update (with masks/wildcards)
 - online suggest (pray) history
-- clan competition for wps/pkillnum
-- channel history, for gt/ct/chat/raid
-- last command (checks last login time for user, only for admins)
-- purge command (strips char of objects, only for admins)
 - unlearn
+- add extra descriptions to rooms, exits, objects
 
 
+l last command (checks last login time for user, only for admins)
+l purge command (strips char of objects, only for admins)
+l clan competition for wps/pkillnum
+l channel history, for gt/ct/chat/raid
 l abbreviation of clanname (3-4 chars) in who list
 l 'drink' without params should drink from first fountain in room
 
