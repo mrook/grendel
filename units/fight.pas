@@ -810,7 +810,7 @@ begin
   if (ch.position = POS_BASHED) then 
     exit;
     
-  if (ch.position = POS_FIGHTING) or ((ch.position = POS_CASTING) and Assigned(ch.fighting) then
+  if (ch.position = POS_FIGHTING) or ((ch.position = POS_CASTING) and Assigned(ch.fighting)) then
     begin
     if (vict.position < POS_FIGHTING) then
       begin
