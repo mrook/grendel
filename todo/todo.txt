@@ -30,8 +30,9 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 		ROOM_NOFLOOR, SECT_UNDERGROUND (no-light), EX_NOBREAK, EX_SWIM etc.
 * better damage/xp system (more balanced)
 * Better online construction (autocreate exit+room when moving), object
+  edit/instance, mobile create/edit/instance, reset edit etc.
   > Maybe even a map or something (show current map status in olc)
-* edit/instance, mobile create/edit/instance, reset edit etc.
+* reimplement editing
 - some form of classes/professions/guilds/religions/whatever
 	-> probably Schools	
 - more help text
@@ -45,6 +46,8 @@ Grendel's TODO list: (! = closed, * = urgent, l = low priority, - = normal prior
 - spells: Mistform (walk thru doors, ethereal bla)
 - "real life" sleep - players need sleep to keep from falling down after 2 days,
   some rooms (with beds) have better sleep ratios etc.
+- dynamic prompts, not the hardcoded bla, but a few choosable from a list
+  or redefinable by the user
 
 
 l implementation of the mud sound protocol
