@@ -1,6 +1,6 @@
 {
   @abstract(Constants)
-  @lastmod($Id: constants.pas,v 1.51 2003/09/12 14:20:37 ***REMOVED*** Exp $)
+  @lastmod($Id: constants.pas,v 1.52 2003/09/16 18:15:32 ***REMOVED*** Exp $)
 }
 
 unit constants;
@@ -64,35 +64,6 @@ const BV00=1 shl 0;
 { system maxima }
 const MAX_RECEIVE = 2048;
       MAX_TRADE = 5;
-
-{ Wear constants }
-{const WEAR_NULL = 0;
-      WEAR_RFINGER=1;
-      WEAR_LFINGER=2;
-      WEAR_NECK1=3;
-      WEAR_NECK2=4;
-      WEAR_BODY=5;
-      WEAR_HEAD=6;
-      WEAR_LEGS=7;
-      WEAR_FEET=8;
-      WEAR_HANDS=9;
-      WEAR_ARMS=10;
-      WEAR_SHIELD=11;
-      WEAR_ABOUT=12;
-      WEAR_WAIST=13;
-      WEAR_RWRIST=14;
-      WEAR_LWRIST=15;
-      WEAR_FLOAT=16;
-      WEAR_RHAND=17;          
-      WEAR_LHAND=18;          
-      WEAR_RSHOULDER=19;
-      WEAR_LSHOULDER=20;
-      WEAR_FACE=21;
-      WEAR_REAR=22;
-      WEAR_LEAR=23;
-      WEAR_RANKLE=24;
-      WEAR_LANKLE=25;
-      WEAR_EYES=26; }
 
 const ARMOR_HAC=1;
       ARMOR_BAC=2;

@@ -1,6 +1,8 @@
 {
-  @abstract(Area loader & manager)
-  @lastmod($Id: area.pas,v 1.60 2003/09/16 16:25:44 ***REMOVED*** Exp $)
+	Summary:
+		Area loader & manager
+  
+  ## $Id: area.pas,v 1.61 2003/09/16 18:15:32 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -49,20 +51,20 @@ type
 
       procedure areaBug(func : string; problem : string);
 
-      procedure loadRooms;
-      procedure loadNPCs;
-      procedure loadObjects;
-      procedure loadResets;
-      procedure loadShops;
+      procedure loadRooms();
+      procedure loadNPCs();
+      procedure loadObjects();
+      procedure loadResets();
+      procedure loadShops();
 
-      procedure update;
-      procedure reset;
+      procedure update();
+      procedure reset();
 
       procedure load(fn : string);
       procedure save(fn : string);
 
-      constructor Create;
-      destructor Destroy; override;
+      constructor Create();
+      destructor Destroy(); override;
     published
       property name : string read _name write _name;
       property author : string read _author write _author;
@@ -1092,7 +1094,6 @@ var
 //   prog : GProgram;
    shop : GShop;
    obj : GObject;
-   h : integer;
 begin
   assign(f, 'areas\' + fn);
   {$I-}
@@ -1424,11 +1425,9 @@ begin
           else
             begin
             lastmob := nil;
-            npc := nil;
 
             if (npcindex.count < reset.arg3) then
               begin
-
               npc := instanceNPC(npcindex);
               npc.room := findRoom(reset.arg2);
 
@@ -2415,7 +2414,11 @@ begin
   oweight := getWeight();
   ch := GCharacter(c);
   
-{  grouped := false;
+{  
+	
+	*** TODO!!
+	
+	grouped := false;
 
   node := ch.objects.head;
 
@@ -2600,8 +2603,6 @@ begin
  (*    if ( ( obj = get_obj_world( ch, arg ) ) != NULL )
 	return obj->in_room;
 *)
-
-  Result := nil;
 end;
 
 function findRoom(vnum : integer) : GRoom;

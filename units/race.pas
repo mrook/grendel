@@ -1,6 +1,8 @@
 {
-  @abstract(Race routines)
-  @lastmod($Id: race.pas,v 1.14 2003/09/12 14:21:34 ***REMOVED*** Exp $)
+	Summary:
+		Race routines
+
+	## $Id: race.pas,v 1.15 2003/09/16 18:15:32 ***REMOVED*** Exp $
 }
 
 unit race;
@@ -22,8 +24,10 @@ type
       _name : string;
       _description : string;
       _char_message, _room_message : string;
+      
     public
       constructor Create();
+      
     published
       property name : string read _name write _name;
       property description : string read _description write _description;
@@ -32,7 +36,10 @@ type
     end;
     
     GRace = class
+   	private
       node : GListNode;
+      
+    public
       name, description : string;
       def_alignment : integer;
       convert : boolean;
@@ -171,8 +178,20 @@ begin
 		case parser.CurPartType of // Here the parser tells you what it has found
 		  ptContent:
 		    begin
-//		    if (prep(parser.CurName) = 'POISON') then
-//		      race.save_poison :=
+		    if (prep(parser.CurName) = 'POISON') then
+		      race.save_poison := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'COLD') then
+		      race.save_cold := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'PARA') then
+		      race.save_para := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'BREATH') then
+		      race.save_breath := StrToInt(parser.CurContent)
+		    else
+		    if (prep(parser.CurName) = 'SPELL') then
+		      race.save_spell := StrToInt(parser.CurContent);
 		    end;
 			ptEndTag:
 			  begin
@@ -182,7 +201,10 @@ begin
     end;
 end;
 
-{ xml version of loadRacesOld() }
+{
+	Summary:
+		Loads all .xml racefiles
+}
 procedure loadRaces();
 var
   t : TSearchRec;
@@ -219,7 +241,10 @@ begin
 			      ptContent:
 			        begin
 			        if (prep(parser.CurName) = 'NAME') then
-			          race.name := cap(parser.CurContent)
+			        	begin
+			          race.name := cap(parser.CurContent);
+                writeConsole('   Race: ' + race.name);
+			          end
 			        else
 			        if (prep(parser.CurName) = 'DESCRIPTION') then
 			          race.description := parser.CurContent;
@@ -236,147 +261,6 @@ begin
   FindClose(t);
 
 	parser.Free();
-end;
-
-{ Xenon 21/Feb/2001: revamped racefile format; made loadRaces() less error prone }
-procedure loadRacesOld();
-var t : TSearchRec;
-    race : GRace;
-    rf : GFileReader;
-    full, lab, arg, str : string;  // lab short for label
-    sk : GSkill;
-begin
-  rf := nil;
-  
-  if (FindFirst('races' + PathDelimiter + '*.race', faAnyFile, t) = 0) then
-    repeat
-      race := GRace.Create;
-
-      with race do
-      begin
-        try
-          try
-            rf := GFileReader.Create('races' + PathDelimiter + t.name);
-          except
-            continue;
-          end;
-
-          try
-            repeat
-              full := rf.readLine;
-              lab := uppercase(left(full, ':'));
-              arg := trim(right(full, ':'));
-
-              if (lab = 'NAME') then
-              begin
-                name := arg;
-                writeConsole('   Race: ' + name);
-              end
-              else
-              if (lab = 'ALIGN') then
-                def_alignment := strtoint(arg)
-              else
-              if (lab = 'CONVERT') then
-              begin
-                if not(arg[1] in ['0', '1']) then
-                begin
-                  bugreport('loadRaces()', 'race.pas', 'boolean conversion error');
-                  exit;
-                end;
-                convert := (strtoint(arg) = 1);
-              end
-              else
-              if (lab = 'BONUS_STR') then
-                str_bonus := strtoint(arg)
-              else
-              if (lab = 'BONUS_CON') then
-                con_bonus := strtoint(arg)
-              else
-              if (lab = 'BONUS_DEX') then
-                dex_bonus := strtoint(arg)
-              else
-              if (lab = 'BONUS_INT') then
-                int_bonus := strtoint(arg)
-              else
-              if (lab = 'BONUS_WIS') then
-                wis_bonus := strtoint(arg)
-              else
-              if (lab = 'SAVE_POISON') then
-                save_poison := strtoint(arg)
-              else
-              if (lab = 'SAVE_COLD') then
-                save_cold := strtoint(arg)
-              else
-              if (lab = 'SAVE_PARA') then
-                save_para := strtoint(arg)
-              else
-              if (lab = 'SAVE_BREATH') then
-                save_breath := strtoint(arg)
-              else
-              if (lab = 'SAVE_SPELL') then
-                save_spell := strtoint(arg)
-              else
-              if (lab = 'SKILLSLOTS') then
-                max_skills := strtoint(arg)
-              else
-              if (lab = 'SPELLSLOTS') then
-                max_spells := strtoint(arg)
-              else
-              if (lab = 'DESCRIPTION') then
-              begin
-                description := '';
-                repeat
-                  str := rf.readLine;
-                  if (str <> '~') then
-                    description := description + str + #13#10;
-                until (str = '~');
-              end
-              else
-              if (lab = 'ABILITY') then
-                begin
-                sk := findSkill(arg);
-                
-                if (sk = nil) then
-                  bugreport('loadRaces()', 'race.pas', 'Could not find racial ability ' + arg)
-                else
-                  abilities.insertLast(sk);
-                end;
-
-            until (rf.eof);
-          except
-            on EConvertError do
-            begin
-              bugreport('loadRaces()', 'race.pas', 'conversion error');
-              exit;
-            end;
-            on E: Exception do
-            begin
-              bugreport('loadRaaces()', 'race.pas', 'unknown exception');
-              exit;
-            end;
-          end;
-        finally
-          begin
-            rf.Free;
-          end;
-        end;
-      end;  
-
-      race.node := raceList.insertLast(race);
-    until (FindNext(t) <> 0);
-
-  FindClose(t);
-
-  // fall-through rule: if no races are loaded, we must create a dummy one
-
-  if (raceList.getSize() = 0) then
-    begin
-    bugreport('loadRaces()', 'race.pas', 'No races loaded, adding default one');
-    
-    race := GRace.Create;
-    race.name := 'Creature';
-    race.node := raceList.insertLast(race);
-    end;
 end;
 
 function findRace(name : string) : GRace;
