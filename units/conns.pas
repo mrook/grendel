@@ -1,4 +1,4 @@
-// $Id: conns.pas,v 1.28 2001/07/17 15:24:12 ***REMOVED*** Exp $
+// $Id: conns.pas,v 1.29 2001/07/31 21:47:27 ***REMOVED*** Exp $
 
 unit conns;
 
@@ -19,28 +19,20 @@ uses
     dtypes,
     util,
     area,
+    socket,
     mudsystem;
 
 
 type
-{$IFDEF LINUX}
-    TSockAddr = sockaddr;
-    TSockAddr6 = sockaddr_in6;
-    TSockAddr_Storage = sockaddr_storage;
-{$ENDIF}
-
     GConnection = class
       node : GListNode;
-      socket : TSocket;
+      sock : GSocket;
       thread : TThread;
       idle : integer;
 
       ch : GPlayer;                 // only players can be connected
       keylock, afk : boolean;
       state : integer;
-
-      ip_string : string;
-      host_string : string;
 
       input_buf, comm_buf, last_line : string;
       sendbuffer : string;
@@ -53,19 +45,15 @@ type
 
       fcommand : boolean;
 
-      read_set, ex_set : TFDSet;
-      tel_val : PTimeVal;
-
-      procedure checkReceive;
+      procedure send(s : string);
       procedure read;
       procedure readBuffer;
-      function send(s : string) : integer;
 
       procedure writePager(txt : string);
       procedure setPagerInput(argument : string);
       procedure outputPager;
 
-      constructor Create(sock : TSocket; addr : TSockAddr_Storage; thr : TThread);
+      constructor Create(sk : GSocket; thr : TThread);
       destructor Destroy; override;
     end;
 
@@ -124,133 +112,37 @@ begin
 end; *)
 
 // GConnection
-constructor GConnection.Create(sock : TSocket; addr : TSockAddr_Storage; thr : TThread);
-var
-   h : PHostEnt;
-   l, p : integer;
-   v6 : TSockAddr6;
-   v4 : TSockAddr;
+constructor GConnection.Create(sk : GSocket; thr : TThread);
 begin
   inherited Create;
 
-  socket := sock;
+  sock := sk;
   state := CON_ACCEPTED;
   ch := nil;
   idle := 0;
   thread := thr;
-  ip_string := '';
   keylock := false;
   afk := false;
-
-{$IFDEF LINUX}
-  if (addr.__ss__family = AF_INET) then
-{$ENDIF}
-{$IFDEF WIN32}
-  if (addr.ss_family = AF_INET) then
-{$ENDIF}
-    begin
-    move(addr, v4, sizeof(v4));
-
-    ip_string := inet_ntoa(v4.sin_addr);
-
-    if (system_info.lookup_hosts) then
-      begin
-      h := gethostbyaddr(@v4.sin_addr.s_addr, 4, AF_INET);
-
-      if (h <> nil) then
-        host_string := h.h_name
-      else
-        host_string := ip_string;
-      end
-    else
-      host_string := ip_string;
-    end
-  else
-{$IFDEF LINUX}
-  if (addr.__ss__family = AF_INET6) then
-{$ENDIF}
-{$IFDEF WIN32}
-  if (addr.ss_family = AF_INET6) then
-{$ENDIF}
-    begin
-    move(addr, v6, sizeof(v6));
-
-    l := 0;
-
-    while (l < 16) do
-      begin
-      p := (byte(v6.sin6_addr.s6_addr[l]) shl 8) + byte(v6.sin6_addr.s6_addr[l + 1]);
-
-      if (p = 0) then
-        begin
-        ip_string := ip_string + ':';
-
-        while (p = 0) do
-          begin
-          p := (byte(v6.sin6_addr.s6_addr[l]) shl 8) + byte(v6.sin6_addr.s6_addr[l + 1]);
-
-          inc(l, 2);
-          end;
-        end
-      else
-        inc(l, 2);
-
-      if (ip_string <> '') then
-        ip_string := ip_string + ':';
-
-      ip_string := ip_string + lowercase(inttohex(p, 1));
-      end;
-
-    host_string := ip_string;
-    end;
-
-  new(tel_val);
 
   node := connection_list.insertLast(Self);
 end;
 
 destructor GConnection.Destroy;
 begin
-  dispose(tel_val);
   connection_list.remove(node);
+  
+  sock.Free();
 
   inherited Destroy;
 end;
 
-procedure GConnection.checkReceive;
-{var
-   msg : TMsg;}
+procedure GConnection.send(s : string);
 begin
-  FD_ZERO(read_set);
-  FD_SET(socket, read_set);
-  FD_ZERO(ex_set);
-  FD_SET(socket, ex_set);
-
-  tel_val^.tv_sec:=0;
-  tel_val^.tv_usec:=0;
-
-{  if (PeekMessage(msg, 0, 0, 0, PM_REMOVE)) then
-    begin
-    TranslateMessage(msg);
-    DispatchMessage(msg);
-    end; }
-
-  if (select(socket+1,@read_set,nil,@ex_set,tel_val) = SOCKET_ERROR) then
-    try
-      thread.terminate;
-    except
-      write_console('could not terminate thread');
-    end;
-
-  if (FD_ISSET(socket, read_set)) then
-    idle:=0;
-
-  if (FD_ISSET(socket, ex_set)) then
-    try
-      thread.terminate;
-    except
-      write_console('could not terminate thread');
-    end;
+  try
+    sock.send(s);
+  except
+    thread.terminate();
+  end;
 end;
 
 procedure GConnection.read;
@@ -260,11 +152,11 @@ begin
   if (length(comm_buf) > 0) then
     exit;
 
-  if (not FD_ISSET(socket, read_set)) then
+  if (not sock.canRead()) then
     exit;
 
   repeat
-    read := recv(socket, buf, MAX_RECEIVE - 10, 0);
+    read := recv(sock.getDescriptor, buf, MAX_RECEIVE - 10, 0);
 
     if (read > 0) then
       begin
@@ -341,31 +233,6 @@ begin
     last_line := comm_buf;
 
   delete(input_buf, 1, i - 1);
-end;
-
-function GConnection.send(s : string) : integer;
-var
-   res : integer;
-begin
-  if (length(s) > 0) then
-{$IFDEF WIN32}
-    res := Winsock2.send(socket, s[1], length(s), 0)
-{$ENDIF}
-{$IFDEF LINUX}
-    res := Libc.send(socket, s[1], length(s), 0)
-{$ENDIF}
-  else
-    res := 0;
-
-  if (res = SOCKET_ERROR) then
-    begin
-    try
-      thread.terminate;
-    except
-      write_console('could not terminate thread');
-    end;
-    exit;
-    end;
 end;
 
 procedure GConnection.writePager(txt : string);

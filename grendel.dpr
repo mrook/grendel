@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.46 2001/07/31 16:34:55 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.47 2001/07/31 21:48:16 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -80,7 +80,8 @@ uses
   progs in 'units\progs.pas',
   gasmdef in 'gmc\gasmdef.pas',
   gvm in 'gmc\gvm.pas',
-  modules in 'units\modules.pas';
+  modules in 'units\modules.pas',
+  socket in 'units\socket.pas';
 {$ENDIF}
 {$IFDEF LINUX}
   Libc,
@@ -113,166 +114,34 @@ uses
   progs in 'units/progs.pas',
   gasmdef in 'gmc/gasmdef.pas',
   gvm in 'gmc/gvm.pas',
-  modules in 'units/modules.pas';
+  modules in 'units/modules.pas',
+  socket in 'units/socket.pas';
 {$ENDIF}
 
 const pipeName : pchar = '\\.\pipe\grendel';
 
 
 var
-{$IFDEF WIN32}
-   hWSAData : TWSAData;
-{$ENDIF}
+  listenv4 : GSocket = nil;
+  listenv6 : GSocket = nil;
 
-   use_ipv4, use_ipv6 : boolean;
+  client_addr : TSockAddr_Storage;
 
-   listenv4, listenv6 : TSocket;
+  old_exitproc : pointer;
 
-   addrv4 : TSockAddrIn;
-   addrv6 : TSockAddr6;
-   ssv6 : TSockAddr_Storage;
-   addrv6p : PSockAddr;
-
-   client_addr : TSockAddr_Storage;
-
-   old_exitproc : pointer;
-
-
-procedure detect_protocols;
-{$IFDEF WIN32}
-var
-   a, t : DWORD;
-   lp : array[0..1] of integer;
-   prot : pointer;
-   pprot : LPWSAProtocol_Info;
-   buf : string;
-begin
-  t := 0;
-  lp[0] := IPPROTO_TCP;
-  lp[1] := 0;
-
-  WSAEnumProtocols(@lp, nil, t);
-
-  getmem(prot, t);
-  pprot := prot;
-
-  t := WSAEnumProtocols(@lp, pprot, t);
-
-  for a := 0 to t - 1 do
-    begin
-    pprot := pointer(integer(prot) + (a * sizeof(TWSAProtocol_Info)));
-
-    if (pprot^.iAddressFamily = AF_INET) then
-      use_ipv4 := true
-    else
-    if (pprot^.iAddressFamily = AF_INET6) then
-      use_ipv6 := true;
-    end;
-
-  buf := 'Supported address families:';
-
-  if (use_ipv4) then
-    buf := buf + ' IPv4';
-
-  if (use_ipv6) then
-    buf := buf + ' IPv6';
-
-  write_console(buf);
-
-  freemem(prot, t);
-end;
-{$ELSE}
-begin
-  use_ipv4 := true;
-  use_ipv6 := true;
-end;
-{$ENDIF}
 
 procedure startup_tcpip;
-var rc : integer;
-    ver : integer;
 begin
-{$IFDEF WIN32}
-  ver := WINSOCK_VERSION;
-
-  if (WSAStartup(ver, hWSAData) <> 0) then
-    write_console('ERROR: WSAStartup failed.');
-{$ENDIF}
-
-  detect_protocols;
-
-  { IPv4 }
-  if (use_ipv4) then
+  if (isSupported(AF_INET)) then
     begin
-    listenv4 := socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    if (listenv4 = INVALID_SOCKET) then
-      write_console('ERROR: Could not create IPv4 socket.');
-      
-    rc := 1;
-      
-    if (setsockopt(listenv4, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
-      write_console('ERROR: Could not set option on IPv4 socket.');
-
-    addrv4.sin_family := AF_INET;
-    addrv4.sin_port := htons(system_info.port);
-    addrv4.sin_addr.s_addr := system_info.bind_ip;
-
-    if (bind(listenv4, TSockaddr(addrv4), sizeof(addrv4)) = -1) then
-      begin
-{$IFDEF LINUX}
-      __close(listenv4);
-{$ELSE}
-      closesocket(listenv4);
-{$ENDIF}
-
-      raise GException.Create('startup_tcpip', 'Could not bind to IPv4, port ' + inttostr(system_info.port));
-      end;
-
-    rc := listen(listenv4, 15);
-
-    if (rc > 0) then
-      raise GException.Create('startup_tcpip', 'Could not listen on IPv4 socket')
-    else
-      write_console('IPv4 bound on port ' + inttostr(system_info.port) + '.');
+    listenv4 := GSocket4.Create(); 
+    listenv4.openPort(system_info.port);
     end;
 
-  { IPv6 }
-  if (use_ipv6) then
+  if (isSupported(AF_INET6)) then
     begin
-    listenv6 := socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-
-    if (listenv6 = INVALID_SOCKET) then
-      write_console('ERROR: Could not create IPv6 socket.');
-
-    fillchar(addrv6, sizeof(TSockAddr6), 0);
-
-    addrv6.sin6_family := AF_INET6;
-    addrv6.sin6_port := htons(system_info.port6);
-
-    move(addrv6, ssv6, sizeof(addrv6));
-
-    addrv6p := @ssv6;
-
-    if (bind(listenv6, addrv6p^, 128) = -1) then
-      begin
-{$IFDEF LINUX}
-      __close(listenv6);
-{$ELSE}
-      closesocket(listenv6);
-{$ENDIF}
-
-      write_console('ERROR: Could not bind to IPv6, port ' + inttostr(system_info.port));
-      end
-    else
-      begin
-      rc := listen(listenv6, 15);
-
-      if (rc > 0) then
-        write_console('ERROR: Could not listen on IPv6 socket.')
-      else
-        write_console('IPv6 bound on port ' + inttostr(system_info.port6) + '.');
-      end;
+    listenv6 := GSocket6.Create();
+    listenv6.openPort(system_info.port6);
     end;
 end;
 
@@ -297,18 +166,18 @@ procedure cleanupServer();
 var
    node : GListNode;
 begin
-  mud_booted := false;
-
-  timer_thread.Terminate;
-  clean_thread.Terminate;
-
-  saveMudState();
-  
-  unloadModules();
-
-  write_console('Releasing allocated memory...');
-
   try
+    mud_booted := false;
+
+    timer_thread.Terminate;
+    clean_thread.Terminate;
+
+    saveMudState();
+  
+    unloadModules();
+
+    write_console('Releasing allocated memory...');
+
     node := char_list.tail;
     while (node <> nil) do
       begin
@@ -385,29 +254,8 @@ begin
     end;
   end;
 
-  if (use_ipv4) then
-    begin
-{$IFDEF LINUX}
-    __close(listenv4);
-{$ELSE}
-    closesocket(listenv4);
-{$ENDIF}
-    listenv4 := -1;
-    end;
-
-  if (use_ipv6) then
-    begin
-{$IFDEF LINUX}
-    __close(listenv6);
-{$ELSE}
-    closesocket(listenv6);
-{$ENDIF}
-    listenv6 := -1;
-    end;
-
-{$IFDEF WIN32}
-  WSACleanup;
-{$ENDIF}
+  listenv4.Free();
+  listenv6.Free();
 
   write_console('Cleanup complete.');
   if (TTextRec(logfile).mode = fmOutput) then
@@ -516,7 +364,7 @@ begin
     conn := node.element;
     node_next := node.next;
 
-    if (WSADuplicateSocket(conn.socket, PI.dwProcessId, @prot) = -1) then
+    if (WSADuplicateSocket(conn.sock.getDescriptor, PI.dwProcessId, @prot) = -1) then
       begin
       bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
       reboot_mud;
@@ -563,15 +411,19 @@ end;
 
 procedure shutdown_mud;
 begin
-  write_console('Server shutting down...');
-
   try
+    write_console('Server shutting down...');
+
     if MUD_Booted then
       flushConnections;
 
     Sleep(1000);
   except
-    write_console('Could not flush connections while shutting down server');
+    on E : EExternal do
+    begin
+      bugreport('shutdown_mud', 'grendel.dpr', 'Error while shutting down');
+      outputError(E);
+    end;
   end;
 
   cleanupServer();
@@ -705,8 +557,6 @@ begin
 
     randomize;
 
-    use_ipv4 := false;
-    use_ipv6 := false;
     startup_tcpip;
 
     ExitProc := @reboot_exitproc;
@@ -744,115 +594,63 @@ begin
   end;
 end;
 
-function send_to_socket(sock : TSocket; s : string) : integer;
-begin
-  send_to_socket := send(sock, s[1], length(s), 0);
-end;
-
-procedure accept_connection(list_sock : TSocket);
+procedure accept_connection(list_sock : GSocket);
 var
-   ac : TSocket;
-   cl : PSockAddr;
-   len : integer;
+  ac : GSocket;
 begin
-  cl := @client_addr;
-  len := 128;
-
-{$IFDEF VER130}
-  ac := accept(list_sock, cl^, len);
-{$ELSE}
-  ac := accept(list_sock, cl, @len);
-{$ENDIF}
-
-  // set non-blocking mode
-
-{$IFDEF WIN32}
-  len := 1;
-  len := ioctlsocket(ac, FIONBIO, len);
-{$ELSE}
-  len := fcntl(ac, F_GETFL, 0);
-
-  if (len <> -1) then
-    fcntl(ac, F_SETFL, len or O_NONBLOCK);
-{$ENDIF}
+  ac := list_sock.acceptConnection();
+  
+  ac.setNonBlocking();
 
   if (boot_info.timer >= 0) then
     begin
-    send_to_socket(ac, system_info.mud_name+#13#10#13#10);
-    send_to_socket(ac, 'Currently, this server is in the process of a reboot.'#13#10);
-    send_to_socket(ac, 'Please try again later.'#13#10);
-    send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is in the process of a reboot.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
 
-{$IFDEF LINUX}
-    __close(ac);
-{$ELSE}
-    closesocket(ac);
-{$ENDIF}
+    ac.Free();
     end
   else
   if system_info.deny_newconns then
     begin
-    send_to_socket(ac, system_info.mud_name+#13#10#13#10);
-    send_to_socket(ac, 'Currently, this server is refusing new connections.'#13#10);
-    send_to_socket(ac, 'Please try again later.'#13#10);
-    send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is refusing new connections.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
 
-{$IFDEF LINUX}
-    __close(ac);
-{$ELSE}
-    closesocket(ac);
-{$ENDIF}
+    ac.Free();
     end
   else
   if (connection_list.getSize >= system_info.max_conns) then
     begin
-    send_to_socket(ac, system_info.mud_name+#13#10#13#10);
-    send_to_socket(ac, 'Currently, this server is too busy to accept new connections.'#13#10);
-    send_to_socket(ac, 'Please try again later.'#13#10);
-    send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
+    ac.send(system_info.mud_name+#13#10#13#10);
+    ac.send('Currently, this server is too busy to accept new connections.'#13#10);
+    ac.send('Please try again later.'#13#10);
+    ac.send('For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
 
-{$IFDEF LINUX}
-    __close(ac);
-{$ELSE}
-    closesocket(ac);
-{$ENDIF}
+    ac.Free();
     end
   else
-    GGameThread.Create(ac, client_addr, false, '');
+    GGameThread.Create(ac, false, '');
 end;
 
 procedure game_loop;
-var
-  accept_set : TFDSet;
-  accept_val : TTimeVal;
 begin
   while (true) do
     begin
-    if (use_ipv4) and (listenv4 >= 0) then
+    if (listenv4 <> nil) then
       begin
-      FD_ZERO(accept_set);
-      FD_SET(listenv4, accept_set);
-
-      accept_val.tv_sec:=0;
-      accept_val.tv_usec:=0;
-
-      if (select(listenv4 + 1, @accept_set, nil, nil, @accept_val) <> 0) then
+      if (listenv4.canRead()) then
         accept_connection(listenv4);
       end;
 
-    if (use_ipv6) and (listenv6 >= 0) then
+    if (listenv6 <> nil) then
       begin
-      FD_ZERO(accept_set);
-      FD_SET(listenv6, accept_set);
-
-      accept_val.tv_sec:=0;
-      accept_val.tv_usec:=0;
-
-      if (select(listenv6 + 1, @accept_set, nil, nil, @accept_val) <> 0) then
+      if (listenv6.canRead()) then
         accept_connection(listenv6);
       end;
 
-//    usleep(500000);
     sleep(500);
     end;
 end;
@@ -876,6 +674,7 @@ var
    g : array[0..1023] of char;
    suc : boolean;
    sock : TSocket;
+   sk : GSocket;
    cl : PSockAddr;
    l : integer;
 begin
@@ -917,12 +716,15 @@ begin
     if (suc) and (sock <> -1) then
       begin
       g[len] := #0;
-
+      
       cl := @client_addr;
       l := 128;
       getpeername(sock, cl^, l);
+      
+      sk := createSocket(prot.iAddressFamily, sock);
+      sk.setNonBlocking();
 
-      GGameThread.Create(sock, client_addr, true, g);
+      GGameThread.Create(sk, true, g);
       end;
   until (not suc);
 

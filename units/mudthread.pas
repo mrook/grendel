@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.60 2001/07/30 18:25:51 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.61 2001/07/31 21:47:27 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -28,6 +28,7 @@ uses
     util,
     bulletinboard,
     mudhelp,
+    socket,
     mudsystem,
     fsys,
     gvm;
@@ -35,8 +36,7 @@ uses
 type
     GGameThread = class(TThread)
     private
-      socket : TSocket;
-      client_addr : TSockAddr_Storage;
+      conn : GConnection;
       copyover : boolean;
       copyover_name : string;
 
@@ -46,7 +46,7 @@ type
     public
       last_update : TDateTime;
       
-      constructor Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
+      constructor Create(s : GSocket; copy : boolean; name : string);
     end;
 
     COMMAND_FUNC = procedure(ch : GCharacter; param : string);
@@ -86,10 +86,10 @@ uses
     NameGen,
     Channels;
 
-constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
+constructor GGameThread.Create(s : GSocket; copy : boolean; name : string);
 begin
-  socket := s;
-  client_addr := a;
+  conn := GConnection.Create(s, Self);
+
   copyover := copy;
   copyover_name := name;
   last_update := Now();
@@ -436,13 +436,13 @@ begin
                   
                   if (length(argument) = 0) then
                     begin
-                    conn.send('Please enter your name: ');
+                    conn.sock.send('Please enter your name: ');
                     exit;
                     end;
 
                   if (uppercase(argument) = 'CREATE') then
                     begin
-                    conn.send(#13#10'By what name do you wish to be known? ');
+                    conn.sock.send(#13#10'By what name do you wish to be known? ');
                     conn.state := CON_NEW_NAME;
                     exit;
                     end;
@@ -453,12 +453,7 @@ begin
                     begin
                     if (not MD5Match(MD5String(pwd), GPlayer(vict).md5_password)) then
                       begin
-                      conn.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
-{$IFDEF LINUX}
-		      __close(conn.socket);
-{$ELSE}
-                      closesocket(conn.socket);
-{$ENDIF}
+                      conn.sock.send(#13#10'You are already logged in under that name! Type your name and password on one line to break in.'#13#10);
                       conn.thread.Terminate;
                       end
                     else
@@ -480,29 +475,24 @@ begin
 
                   if (not ch.load(argument)) then
                     begin
-                    conn.send(#13#10'Are you sure about that name?'#13#10'Name: ');
+                    conn.sock.send(#13#10'Are you sure about that name?'#13#10'Name: ');
                     exit;
                     end;
 
                   conn.state:=CON_PASSWORD;
-                  conn.send('Password: ');
+                  conn.sock.send('Password: ');
                   end;
     CON_PASSWORD: begin
                   if (length(argument) = 0) then
                     begin
-                    conn.send('Password: ');
+                    conn.sock.send('Password: ');
                     exit;
                     end;
 
                   if (not MD5Match(MD5String(argument), ch.md5_password)) then
                     begin
-                    write_console('(' + inttostr(conn.socket) + ') Failed password');
-                    conn.send('Wrong password.'#13#10);
-{$IFDEF LINUX}
-		      __close(conn.socket);
-{$ELSE}
-                      closesocket(conn.socket);
-{$ENDIF}
+                    write_console('(' + inttostr(conn.sock.getDescriptor) + ') Failed password');
+                    conn.sock.send('Wrong password.'#13#10);
                     exit;
                     end;
 
@@ -518,10 +508,10 @@ begin
 
                     ch.ld_timer := 0;
 
-                    conn.send('You have reconnected.'#13#10);
+                    conn.sock.send('You have reconnected.'#13#10);
                     act(AT_REPORT, '$n has reconnected.', false, ch, nil, nil, TO_ROOM);
                     REMOVE_BIT(ch.flags, PLR_LINKLESS);
-                    write_console('(' + inttostr(conn.socket) + ') ' + ch.name^ + ' has reconnected');
+                    write_console('(' + inttostr(conn.sock.getDescriptor) + ') ' + ch.name^ + ' has reconnected');
 
                     ch.sendPrompt;
                     conn.state := CON_PLAYING;
@@ -529,15 +519,15 @@ begin
                     end;
 
                   if (ch.IS_IMMORT) then
-                    conn.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
+                    conn.sock.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
                   else
-                    conn.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
+                    conn.sock.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
 
-                  conn.send('Press Enter.'#13#10);
+                  conn.sock.send('Press Enter.'#13#10);
                   conn.state := CON_MOTD;
                   end;
         CON_MOTD: begin
-                  conn.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name^ + ', to this MUD. May your stay be pleasant.'#13#10);
+                  conn.sock.send(ch.ansiColor(6) + #13#10#13#10'Welcome, ' + ch.name^ + ', to this MUD. May your stay be pleasant.'#13#10);
 
                   with system_info do
                     begin
@@ -549,7 +539,7 @@ begin
                   ch.toRoom(ch.room);
 
                   act(AT_WHITE, '$n enters through a magic portal.', true, ch, nil, nil, TO_ROOM);
-                  write_console('(' + inttostr(conn.socket) + ') '+ ch.name^ +' has logged in');
+                  write_console('(' + inttostr(conn.sock.getDescriptor) + ') '+ ch.name^ +' has logged in');
 
                   ch.node_world := char_list.insertLast(ch);
                   ch.logon_now := Now;
@@ -565,14 +555,14 @@ begin
     CON_NEW_NAME: begin
                   if (length(argument) = 0) then
                     begin
-                    conn.send('By what name do you wish to be known? ');
+                    conn.sock.send('By what name do you wish to be known? ');
                     exit;
                     end;
 
                   if (FileExists('players\' + argument + '.usr')) then
                     begin
-                    conn.send('That name is already used.'#13#10);
-                    conn.send('By what name do you wish to be known? ');
+                    conn.sock.send('That name is already used.'#13#10);
+                    conn.sock.send('By what name do you wish to be known? ');
                     exit;
                     end;
 
@@ -586,50 +576,50 @@ begin
 
                   if (length(argument) < 3) or (length(argument) > 15) then
                     begin
-                    conn.send('Your name must be between 3 and 15 characters long.'#13#10);
-                    conn.send('By what name do you wish to be known? ');
+                    conn.sock.send('Your name must be between 3 and 15 characters long.'#13#10);
+                    conn.sock.send('By what name do you wish to be known? ');
                     exit;
                     end;
 
                   ch.name := hash_string(cap(argument));
                   conn.state := CON_NEW_PASSWORD;
-                  conn.send(#13#10'Allright, '+ch.name^+', choose a password: ');
+                  conn.sock.send(#13#10'Allright, '+ch.name^+', choose a password: ');
                   end;
 CON_NEW_PASSWORD: begin
                   if (length(argument)=0) then
                     begin
-                    conn.send('Choose a password: ');
+                    conn.sock.send('Choose a password: ');
                     exit;
                     end;
 
                   ch.md5_password := MD5String(argument);
                   conn.state := CON_CHECK_PASSWORD;
-                  conn.send(#13#10'Please retype your password: ');
+                  conn.sock.send(#13#10'Please retype your password: ');
                   end;
 CON_CHECK_PASSWORD: begin
                     if (length(argument) = 0) then
                       begin
-                      conn.send('Please retype your password: ');
+                      conn.sock.send('Please retype your password: ');
                       exit;
                       end;
 
                     if (not MD5Match(MD5String(argument), ch.md5_password)) then
                       begin
-                      conn.send(#13#10'Password did not match!'#13#10'Choose a password: ');
+                      conn.sock.send(#13#10'Password did not match!'#13#10'Choose a password: ');
                       conn.state := CON_NEW_PASSWORD;
                       exit;
                       end
                     else
                       begin
                       conn.state := CON_NEW_SEX;
-                      conn.send(#13#10'What sex do you wish to be (M/F/N): ');
+                      conn.sock.send(#13#10'What sex do you wish to be (M/F/N): ');
                       exit;
                       end;
                     end;
      CON_NEW_SEX: begin
                   if (length(argument) = 0) then
                     begin
-                    conn.send('Choose a sex (M/F/N): ');
+                    conn.sock.send('Choose a sex (M/F/N): ');
                     exit;
                     end;
 
@@ -639,14 +629,14 @@ CON_CHECK_PASSWORD: begin
                     'N':ch.sex:=2;
                   else
                     begin
-                    conn.send('That is not a valid sex.'#13#10);
-                    conn.send('Choose a sex (M/F/N): ');
+                    conn.sock.send('That is not a valid sex.'#13#10);
+                    conn.sock.send('Choose a sex (M/F/N): ');
                     exit;
                     end;
                   end;
 
                   conn.state:=CON_NEW_RACE;
-                  conn.send(#13#10'Available races: '#13#10#13#10);
+                  conn.sock.send(#13#10'Available races: '#13#10#13#10);
 
                   h:=1;
                   node := race_list.head;
@@ -661,18 +651,18 @@ CON_CHECK_PASSWORD: begin
 
                     buf := buf + #13#10;
 
-                    conn.send(buf);
+                    conn.sock.send(buf);
 
                     inc(h);
                     node := node.next;
                     end;
 
-                  conn.send(#13#10'Choose a race: ');
+                  conn.sock.send(#13#10'Choose a race: ');
                   end;
     CON_NEW_RACE: begin
                   if (length(argument)=0) then
                     begin
-                    conn.send(#13#10'Choose a race: ');
+                    conn.sock.send(#13#10'Choose a race: ');
                     exit;
                     end;
 
@@ -700,7 +690,7 @@ CON_CHECK_PASSWORD: begin
 
                   if (race = nil) then
                     begin
-                    conn.send('Not a valid race.'#13#10);
+                    conn.sock.send('Not a valid race.'#13#10);
 
                     h:=1;
                     node := race_list.head;
@@ -715,20 +705,20 @@ CON_CHECK_PASSWORD: begin
 
                       buf := buf + #13#10;
 
-                      conn.send(buf);
+                      conn.sock.send(buf);
 
                       inc(h);
                       node := node.next;
                       end;
 
-                    conn.send(#13#10'Choose a race: ');
+                    conn.sock.send(#13#10'Choose a race: ');
                     exit;
                     end;
 
                   ch.race:=race;
-                  conn.send(race.description);
-                  conn.send('250 stat points will be randomly distributed over your five attributes.'#13#10);
-                  conn.send('It is impossible to get a lower or a higher total of stat points.'#13#10);
+                  conn.sock.send(race.description);
+                  conn.sock.send('250 stat points will be randomly distributed over your five attributes.'#13#10);
+                  conn.sock.send('It is impossible to get a lower or a higher total of stat points.'#13#10);
 
                   with ch do
                     begin
@@ -800,22 +790,22 @@ CON_CHECK_PASSWORD: begin
                     top:=str+con+dex+int+wis;
                     end;
 
-                  conn.send(#13#10'Your character statistics are: '#13#10#13#10);
+                  conn.sock.send(#13#10'Your character statistics are: '#13#10#13#10);
 
                   buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
                          'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
                          'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
                          'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
                          'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
-                  conn.send(buf);
+                  conn.sock.send(buf);
 
-                  conn.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                  conn.sock.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                   conn.state:=CON_NEW_STATS;
                   end;
    CON_NEW_STATS: begin
                   if (length(argument) =0) then
                     begin
-                    conn.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                    conn.sock.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                     exit;
                     end;
 
@@ -827,16 +817,16 @@ CON_CHECK_PASSWORD: begin
                         ch.md5_password := digest;
                         ch.save(ch.name^);
 
-                        conn.send(#13#10'Thank you. You have completed your entry.'#13#10);
+                        conn.sock.send(#13#10'Thank you. You have completed your entry.'#13#10);
 
-                        conn.send(ch.ansiColor(2) + #13#10);
+                        conn.sock.send(ch.ansiColor(2) + #13#10);
 
                         if (ch.IS_IMMORT) then
-                          conn.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
+                          conn.sock.send(ch.ansiColor(2) + #13#10 + findHelp('IMOTD').text)
                         else
-                          conn.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
+                          conn.sock.send(ch.ansiColor(2) + #13#10 + findHelp('MOTD').text);
 
-                        conn.send('Press Enter.'#13#10);
+                        conn.sock.send('Press Enter.'#13#10);
                         conn.state:=CON_MOTD;
                         end;
                     'R':begin
@@ -910,24 +900,24 @@ CON_CHECK_PASSWORD: begin
                           top:=str+con+dex+int+wis;
                           end;
 
-                        conn.send(#13#10'Your character statistics are: '#13#10#13#10);
+                        conn.sock.send(#13#10'Your character statistics are: '#13#10#13#10);
 
                         buf := 'Strength:     '+ANSIColor(10,0)+inttostr(ch.str)+ANSIColor(7,0)+#13#10 +
                                'Constitution: '+ANSIColor(10,0)+inttostr(ch.con)+ANSIColor(7,0)+#13#10 +
                                'Dexterity:    '+ANSIColor(10,0)+inttostr(ch.dex)+ANSIColor(7,0)+#13#10 +
                                'Intelligence: '+ANSIColor(10,0)+inttostr(ch.int)+ANSIColor(7,0)+#13#10 +
                                'Wisdom:       '+ANSIColor(10,0)+inttostr(ch.wis)+ANSIColor(7,0)+#13#10;
-                        conn.send(buf);
+                        conn.sock.send(buf);
 
-                        conn.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
+                        conn.sock.send(#13#10'Do you wish to (C)ontinue, (R)eroll or (S)tart over? ');
                         end;
                     'S':begin
-                        conn.send(#13#10'Very well, restarting.'#13#10);
-                        conn.send('By what name do you wish to be known?');
+                        conn.sock.send(#13#10'Very well, restarting.'#13#10);
+                        conn.sock.send('By what name do you wish to be known?');
                         conn.state:=CON_NEW_NAME;
                         end;
                   else
-                    conn.send('Do you wish to (C)ontinue, (R)eroll or (S)art over? ');
+                    conn.sock.send('Do you wish to (C)ontinue, (R)eroll or (S)art over? ');
                     exit;
                  end;
                  end;
@@ -937,33 +927,27 @@ CON_CHECK_PASSWORD: begin
 end;
 
 procedure GGameThread.Execute;
-var conn : GConnection;
-    cmdline : string;
-    temp_buf : string;
-    ch : GPlayer;
-    i : integer;
+var 
+  cmdline : string;
+  temp_buf : string;
+  ch : GPlayer;
+  i : integer;
 
 label nameinput,stopthread;
 begin
   freeonterminate := true;
 
-  conn := GConnection.Create(socket, client_addr, Self);
+  write_console('(' + inttostr(conn.sock.getDescriptor) + ') New connection (' + conn.sock.host_string + ')');
 
-  write_console('(' + inttostr(socket) + ') New connection (' + conn.host_string + ')');
-
-  if (isMaskBanned(conn.host_string)) then
+  if (isMaskBanned(conn.sock.host_string)) then
     begin
-    write_console('('+inttostr(socket)+') Closed banned IP (' + conn.host_string + ')');
+    write_console('('+inttostr(conn.sock.getDescriptor)+') Closed banned IP (' + conn.sock.host_string + ')');
 
-    conn.send(system_info.mud_name+#13#10#13#10);
-    conn.send('Your site has been banned from this server.'#13#10);
-    conn.send('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10);
-{$IFDEF LINUX}
-    __close(conn.socket);
-{$ELSE}
-    closesocket(conn.socket);
-{$ENDIF}
-    conn.Free;
+    conn.sock.send(system_info.mud_name+#13#10#13#10);
+    conn.sock.send('Your site has been banned from this server.'#13#10);
+    conn.sock.send('For more information, please mail the administration, '+system_info.admin_email+'.'#13#10);
+    
+    conn.Free();
     exit;
     end;
 
@@ -975,7 +959,7 @@ begin
     begin
     conn.state := CON_NAME;
 
-    conn.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
+    conn.sock.send(AnsiColor(2,0) + findHelp('M_DESCRIPTION_').text);
 
     temp_buf := AnsiColor(6,0) + #13#10;
 
@@ -984,9 +968,9 @@ begin
     temp_buf := temp_buf + #13#10'This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.';
     temp_buf := temp_buf + AnsiColor(7,0) + #13#10;
 
-    conn.send(temp_buf);
+    conn.sock.send(temp_buf);
 
-    conn.send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
+    conn.sock.send(#13#10#13#10'Enter your name or CREATE to create a new character.'#13#10'Please enter your name: ');
     end
   else
     begin
@@ -994,8 +978,8 @@ begin
 
     conn.ch.name := hash_string(copyover_name);
     conn.ch.load(copyover_name);
-    conn.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
-    conn.send('Copyover complete!'#13#10);
+    conn.sock.send(#13#10#13#10'Gradually, the clouds form real images again, recreating the world...'#13#10);
+    conn.sock.send('Copyover complete!'#13#10);
 
     nanny(conn, '');
     end;
@@ -1013,8 +997,6 @@ begin
     sleep(100);
 
     last_update := Now();
-
-    conn.checkReceive;
 
     if (not Terminated) then
       conn.read;
@@ -1066,33 +1048,35 @@ begin
       end;
   until Terminated;
 
-  if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
+  try
+    if (not conn.ch.CHAR_DIED) and ((conn.state=CON_PLAYING) or (conn.state=CON_EDITING)) then
+      begin
+      write_console('(' + inttostr(conn.sock.getDescriptor) + ') '+conn.ch.name^+' has lost the link');
+
+      interpret(conn.ch, 'return');
+
+      conn.ch.conn := nil;
+
+      act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
+      SET_BIT(conn.ch.flags,PLR_LINKLESS);
+      end
+    else
+    if (conn.state = CON_LOGGED_OUT) then
+      dec(system_info.user_cur)
+    else
+      begin
+      write_console('('+inttostr(conn.sock.getDescriptor)+') Connection reset by peer');
+      conn.ch.Free;
+      end;
+
+    conn.Free();
+  except
+    on E : EExternal do
     begin
-    write_console('(' + inttostr(conn.socket) + ') '+conn.ch.name^+' has lost the link');
-
-    interpret(conn.ch, 'return');
-
-    conn.ch.conn := nil;
-
-    act(AT_REPORT,'$n has lost $s link.',false,conn.ch,nil,nil,TO_ROOM);
-    SET_BIT(conn.ch.flags,PLR_LINKLESS);
-    end
-  else
-  if (conn.state = CON_LOGGED_OUT) then
-    dec(system_info.user_cur)
-  else
-    begin
-    write_console('('+inttostr(conn.socket)+') Connection reset by peer');
-    conn.ch.Free;
+      bugreport('GGameThread.Execute()', 'mudthread.pas', 'Error while shutting down thread');
+      outputError(E);
     end;
-
-{$IFDEF LINUX}
-    __close(conn.socket);
-{$ELSE}
-    closesocket(conn.socket);
-{$ENDIF}
-
-  conn.Free;
+  end;
 end;
 
 // command stuff

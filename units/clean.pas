@@ -1,4 +1,4 @@
-// $Id: clean.pas,v 1.13 2001/07/17 15:24:12 ***REMOVED*** Exp $
+// $Id: clean.pas,v 1.14 2001/07/31 21:47:27 ***REMOVED*** Exp $
 
 unit clean;
 
@@ -114,12 +114,6 @@ begin
         conn.send('to prevent any data loss.'#13#10);
         conn.send('Your character is linkless, and it would be wise to reconnect as soon'#13#10);
         conn.send('as possible.'#13#10);
-
-{$IFDEF LINUX}
-	__close(conn.socket);
-{$ELSE}
-        closesocket(conn.socket);
-{$ENDIF}
 
         conn.ch.conn := nil;
 

@@ -1,4 +1,4 @@
-// $Id: chars.pas,v 1.49 2001/07/28 21:35:36 ***REMOVED*** Exp $
+// $Id: chars.pas,v 1.50 2001/07/31 21:47:26 ***REMOVED*** Exp $
 
 unit chars;
 
@@ -655,7 +655,7 @@ begin
     write_console('(Linkless) '+ name^+ ' has logged out')
   else
   if (c <> nil) then
-    write_console('(' + inttostr(c.socket) + ') ' + name^ + ' has logged out');
+    write_console('(' + inttostr(c.sock.getDescriptor) + ') ' + name^ + ' has logged out');
 
   { switched check}
   if (conn <> nil) and (not IS_NPC) then
@@ -671,11 +671,7 @@ begin
 
     conn := nil;
 
-{$IFDEF LINUX}
-    __close(c.socket);
-{$ELSE}
-    closesocket(c.socket);
-{$ENDIF}
+//    c.sock.Free();
     end
   else
   if (not IS_NPC) and (not IS_SET(GPlayer(Self).flags, PLR_LINKLESS)) then

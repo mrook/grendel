@@ -11,33 +11,84 @@ uses
 {$ENDIF}
 
 type
+{$IFDEF LINUX}
+    TSockAddr = sockaddr;
+    TSockAddr6 = sockaddr_in6;
+    TSockAddr_Storage = sockaddr_storage;
+{$ENDIF}
+
   GSocket = class
   private
+    af : integer;
     fd : TSocket;
-  
+    addr : TSockAddr_Storage;
+    rw_set, ex_set : TFDSet;
+    time : TTimeVal;
+    
   public
-    constructor Create(af : integer);
+    ip_string : string;
+    host_string : string;
+    
+    procedure resolve(); 
+    procedure disconnect();
+  
+    procedure openPort(port : integer); virtual;
+    
+    procedure setNonBlocking();
+    
+    function canRead() : boolean;
+    function canWrite() : boolean;
+    function send(s : string) : integer;
+    
+    function acceptConnection() : GSocket;
+    
+    constructor Create(_af : integer; _fd : TSocket = -1);
+    destructor Destroy; override;
+    
+    property getDescriptor : TSocket read fd;
+  end;
+  
+  GSocket4 = class(GSocket)
+  private
+    addrv4 : TSockAddrIn;
+    
+  public
+    constructor Create(); overload;
+    constructor Create(fd : TSocket); overload;
+
+    procedure openPort(port : integer); override;
+  end;
+  
+  GSocket6 = class(GSocket)
+  private
+    addrv6 : TSockAddr6;
+    ssv6 : TSockAddr_Storage;
+    addrv6p : PSockAddr;
+    
+  public
+    constructor Create(); overload;
+    constructor Create(fd : TSocket); overload;
+
+    procedure openPort(port : integer); override;
   end;
 
 
 function isSupported(af : integer) : boolean;
 
+function createSocket(af : integer; fd : TSocket) : GSocket;
+
 implementation
 
 uses
-  dtypes;
+  SysUtils,
+  dtypes,
+  mudsystem;
 
 var
 {$IFDEF WIN32}
    hWSAData : TWSAData;
+   ver : integer;
 {$ENDIF}
-
-   addrv4 : TSockAddrIn;
-   addrv6 : TSockAddr6;
-   ssv6 : TSockAddr_Storage;
-   addrv6p : PSockAddr;
-
-   client_addr : TSockAddr_Storage;
 
 
 function isSupported(af : integer) : boolean;
@@ -77,794 +128,333 @@ begin
 end;
 {$ENDIF}
 
-
-// GSocket
-constructor GSocket.Create(af : integer);
+function createSocket(af : integer; fd : TSocket) : GSocket;
 begin
-  fd := socket(af, SOCK_STREAM, IPPROTO_TCP);
-
-  if (fd = INVALID_SOCKET)
-    raise GException.Create('socket.pas:GSocket.Create()','Could not create socket.');
+  if (af = AF_INET) then
+    Result := GSocket4.Create(fd)
+  else
+  if (af = AF_INET6) then
+    Result := GSocket6.Create(fd)
+  else
+    begin
+    Result := nil;
+    
+    raise GException.Create('socket.pas:createSocket()', 'Unsupported address family');
+    end;
 end;
 
-procedure startup_tcpip;
-var rc : integer;
-    ver : integer;
+
+// GSocket
+constructor GSocket.Create(_af : integer; _fd : TSocket = -1);
 begin
+  inherited Create();
+  
+  af := _af;
+
+  if (_fd = -1) then
+    begin
+    {$IFDEF WIN32}
+    fd := Winsock2.socket(af, SOCK_STREAM, IPPROTO_TCP);
+    {$ENDIF}
+    {$IFDEF LINUX}
+    fd := Libc.socket(af, SOCK_STREAM, IPPROTO_TCP);
+    {$ENDIF}
+
+    if (fd = INVALID_SOCKET) then
+      raise GException.Create('socket.pas:GSocket.Create()', 'Could not create socket.');
+    end
+  else
+    fd := _fd;
+end;
+
+destructor GSocket.Destroy;
+begin
+  disconnect();
+
+  inherited Destroy();
+end;
+
+procedure GSocket.disconnect();
+begin
+{$IFDEF LINUX}
+  __close(fd);
+{$ENDIF}
+{$IFDEF WIN32}
+  closesocket(fd);
+{$ENDIF}
+end;
+
+procedure GSocket.resolve();
+var
+  h : PHostEnt;
+  l, p : integer;
+  v6 : TSockAddr6;
+  v4 : TSockAddr;
+begin
+{$IFDEF LINUX}
+  if (addr.__ss__family = AF_INET) then
+{$ENDIF}
+{$IFDEF WIN32}
+  if (addr.ss_family = AF_INET) then
+{$ENDIF}
+    begin
+    move(addr, v4, sizeof(v4));
+
+    ip_string := inet_ntoa(v4.sin_addr);
+
+    if (system_info.lookup_hosts) then
+      begin
+      h := gethostbyaddr(@v4.sin_addr.s_addr, 4, AF_INET);
+
+      if (h <> nil) then
+        host_string := h.h_name
+      else
+        host_string := ip_string;
+      end
+    else
+      host_string := ip_string;
+    end
+  else
+{$IFDEF LINUX}
+  if (addr.__ss__family = AF_INET6) then
+{$ENDIF}
+{$IFDEF WIN32}
+  if (addr.ss_family = AF_INET6) then
+{$ENDIF}
+    begin
+    move(addr, v6, sizeof(v6));
+
+    l := 0;
+
+    while (l < 16) do
+      begin
+      p := (byte(v6.sin6_addr.s6_addr[l]) shl 8) + byte(v6.sin6_addr.s6_addr[l + 1]);
+
+      if (p = 0) then
+        begin
+        ip_string := ip_string + ':';
+
+        while (p = 0) do
+          begin
+          p := (byte(v6.sin6_addr.s6_addr[l]) shl 8) + byte(v6.sin6_addr.s6_addr[l + 1]);
+
+          inc(l, 2);
+          end;
+        end
+      else
+        inc(l, 2);
+
+      if (ip_string <> '') then
+        ip_string := ip_string + ':';
+
+      ip_string := ip_string + lowercase(inttohex(p, 1));
+      end;
+
+    host_string := ip_string;
+    end;
+end;
+
+function GSocket.canRead() : boolean;
+begin
+  Result := false;
+  
+  FD_ZERO(rw_set);
+  FD_SET(fd, rw_set);
+  FD_ZERO(ex_set);
+  FD_SET(fd, ex_set);
+
+  time.tv_sec := 0;
+  time.tv_usec := 0;
+  
+  if (select(fd + 1, @rw_set, nil, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
+    raise GException.Create('socket.pas:GSocket.canRead()', 'Connection reset by peer');
+
+  if (FD_ISSET(fd, rw_set)) then
+    Result := true;
+end;
+
+function GSocket.canWrite() : boolean;
+begin
+  Result := false;
+  
+  FD_ZERO(rw_set);
+  FD_SET(fd, rw_set);
+  FD_ZERO(ex_set);
+  FD_SET(fd, ex_set);
+
+  time.tv_sec := 0;
+  time.tv_usec := 0;
+  
+  if (select(fd + 1, nil, @rw_set, @ex_set, @time) = SOCKET_ERROR) or (FD_ISSET(fd, ex_set)) then
+    raise GException.Create('socket.pas:GSocket.canWrite()', 'Connection reset by peer');
+
+  if (FD_ISSET(fd, rw_set)) then
+    Result := true;
+end;
+
+function GSocket.send(s : string) : integer;
+var
+   res : integer;
+begin
+  res := 0;
+  
+  if (length(s) > 0) then
+{$IFDEF WIN32}
+    res := Winsock2.send(fd, s[1], length(s), 0);
+{$ENDIF}
+{$IFDEF LINUX}
+    res := Libc.send(fd, s[1], length(s), 0);
+{$ENDIF}
+
+  if (res = SOCKET_ERROR) then
+    raise GException.Create('socket.pas:GSocket.send()', 'Connection reset by peer');
+    
+  Result := res;
+end;
+
+procedure GSocket.setNonBlocking();
+var
+  len : integer;
+begin
+{$IFDEF WIN32}
+  len := 1;
+  len := ioctlsocket(fd, FIONBIO, len);
+{$ENDIF}
+{$IFDEF LINUX}
+  len := fcntl(fd, F_GETFL, 0);
+
+  if (len <> -1) then
+    fcntl(fd, F_SETFL, len or O_NONBLOCK);
+{$ENDIF}
+end;
+
+function GSocket.acceptConnection() : GSocket;
+var
+  ac_fd : TSocket;
+  client_addr : TSockAddr_Storage;
+  len : integer;
+  sk : GSocket;
+begin
+  len := 128;
+  
+{$IFDEF VER130}
+  ac_fd := accept(fd, PSockAddr(@client_addr)^, len);
+{$ELSE}
+  ac_fd := accept(fd, PSockAddr(@client_addr), @len);
+{$ENDIF}
+
+  sk := createSocket(af, ac_fd);
+  sk.addr := client_addr;
+  
+  sk.resolve();
+  
+  Result := sk;
+end;
+
+procedure GSocket.openPort(port : integer);
+begin
+  raise GException.Create('socket.pas:GSocket.openPort()', 'Operation not supported');
+end;
+
+
+// GSocket4
+constructor GSocket4.Create;
+begin 
+  inherited Create(AF_INET);
+end;
+
+constructor GSocket4.Create(fd : TSocket);
+begin 
+  inherited Create(AF_INET, fd);
+end;
+
+procedure GSocket4.openPort(port : integer);
+var
+  rc : integer;
+begin
+  rc := 1;
+    
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
+    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not set option on IPv4 socket.');
+
+  addrv4.sin_family := AF_INET;
+  addrv4.sin_port := htons(port);
+//  addrv4.sin_addr.s_addr := system_info.bind_ip;
+  addrv4.sin_addr.s_addr := INADDR_ANY;
+
+  if (bind(fd, TSockaddr(addrv4), sizeof(addrv4)) = -1) then
+    begin
+{$IFDEF LINUX}
+    __close(fd);
+{$ELSE}
+    closesocket(fd);
+{$ENDIF}
+
+    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not bind on IPv4 port ' + inttostr(system_info.port));
+    end;
+
+  rc := listen(fd, 15);
+
+  if (rc > 0) then
+    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not listen on IPv4 socket');
+end;
+
+// GSocket6
+constructor GSocket6.Create;
+begin 
+  inherited Create(AF_INET6);
+end;
+
+constructor GSocket6.Create(fd : TSocket);
+begin 
+  inherited Create(AF_INET6, fd);
+end;
+
+procedure GSocket6.openPort(port : integer);
+var
+  rc : integer;
+begin
+  rc := 1;
+    
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
+    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not set option on IPv6 socket.');
+
+
+  addrv6.sin6_family := AF_INET6;
+  addrv6.sin6_port := htons(system_info.port6);
+
+  move(addrv6, ssv6, sizeof(addrv6));
+
+  addrv6p := @ssv6;
+
+  if (bind(fd, addrv6p^, 128) = -1) then
+    begin
+{$IFDEF LINUX}
+    __close(fd);
+{$ELSE}
+    closesocket(fd);
+{$ENDIF}
+
+    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not bind on IPv6 port ' + inttostr(system_info.port));
+    end;
+
+  rc := listen(fd, 15);
+
+  if (rc > 0) then
+    raise GException.Create('socket.pas:GSocket4.openPort()', 'Could not listen on IPv6 socket');
+end;
+
+initialization
 {$IFDEF WIN32}
   ver := WINSOCK_VERSION;
 
   if (WSAStartup(ver, hWSAData) <> 0) then
-    write_console('ERROR: WSAStartup failed.');
+    bugreport('socket.pas', 'initialization', 'Could not perform WSAStartup');
 {$ENDIF}
 
-  detect_protocols;
-
-  { IPv4 }
-  if (use_ipv4) then
-    begin
-    listenv4 := socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    if (listenv4 = INVALID_SOCKET) then
-      write_console('ERROR: Could not create IPv4 socket.');
-      
-    rc := 1;
-      
-    if (setsockopt(listenv4, SOL_SOCKET, SO_REUSEADDR, @rc, sizeof(rc)) < 0) then
-      write_console('ERROR: Could not set option on IPv4 socket.');
-
-    addrv4.sin_family := AF_INET;
-    addrv4.sin_port := htons(system_info.port);
-    addrv4.sin_addr.s_addr := system_info.bind_ip;
-
-    if (bind(listenv4, TSockaddr(addrv4), sizeof(addrv4)) = -1) then
-      begin
-{$IFDEF LINUX}
-      __close(listenv4);
-{$ELSE}
-      closesocket(listenv4);
-{$ENDIF}
-
-      raise GException.Create('startup_tcpip', 'Could not bind to IPv4, port ' + inttostr(system_info.port));
-      end;
-
-    rc := listen(listenv4, 15);
-
-    if (rc > 0) then
-      raise GException.Create('startup_tcpip', 'Could not listen on IPv4 socket')
-    else
-      write_console('IPv4 bound on port ' + inttostr(system_info.port) + '.');
-    end;
-
-  { IPv6 }
-  if (use_ipv6) then
-    begin
-    listenv6 := socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-
-    if (listenv6 = INVALID_SOCKET) then
-      write_console('ERROR: Could not create IPv6 socket.');
-
-    fillchar(addrv6, sizeof(TSockAddr6), 0);
-
-    addrv6.sin6_family := AF_INET6;
-    addrv6.sin6_port := htons(system_info.port6);
-
-    move(addrv6, ssv6, sizeof(addrv6));
-
-    addrv6p := @ssv6;
-
-    if (bind(listenv6, addrv6p^, 128) = -1) then
-      begin
-{$IFDEF LINUX}
-      __close(listenv6);
-{$ELSE}
-      closesocket(listenv6);
-{$ENDIF}
-
-      write_console('ERROR: Could not bind to IPv6, port ' + inttostr(system_info.port));
-      end
-    else
-      begin
-      rc := listen(listenv6, 15);
-
-      if (rc > 0) then
-        write_console('ERROR: Could not listen on IPv6 socket.')
-      else
-        write_console('IPv6 bound on port ' + inttostr(system_info.port6) + '.');
-      end;
-    end;
-end;
-  
-
-implementation
-
-begin
-end.
-
-procedure flushConnections;
-var
-   ch : GCharacter;
-   node : GListNode;
-begin
-  node := char_list.head;
-
-  while (node <> nil) do
-    begin
-    ch := node.element;
-    node := node.next;
-
-    if (not ch.IS_NPC) then
-      GPlayer(ch).quit;
-    end;
-end;
-
-procedure cleanupServer();
-var
-   node : GListNode;
-begin
-  mud_booted := false;
-
-  timer_thread.Terminate;
-  clean_thread.Terminate;
-
-  saveMudState();
-
-  write_console('Releasing allocated memory...');
-
-  try
-    node := char_list.tail;
-    while (node <> nil) do
-      begin
-      GCharacter(node.element).extract(true);
-      node := char_list.tail;
-      end;
-
-    node := object_list.tail;
-    while (node <> nil) do
-      begin
-      GObject(node.element).extract;
-      node := object_list.tail;
-      end;
-
-    cleanChars;
-    cleanObjects;
-
-    char_list.Free;
-    object_list.Free;
-
-    // clean up rooms and all
-    area_list.clean;
-    room_list.clear;
-    shop_list.clean;
-    teleport_list.clean;
-    extracted_object_list.clean;
-    extracted_chars.clean;
-    npc_list.clean;
-    obj_list.Clean;
-    race_list.clean;
-    clan_list.clean;
-    help_files.clean;
-    dm_msg.clean;
-    notes.clean;
-
-    notes.Free;
-    area_list.Free;
-    room_list.Free;
-    shop_list.Free;
-    teleport_list.Free;
-    extracted_object_list.Free;
-    extracted_chars.Free;
-    npc_list.Free;
-    obj_list.Free;
-    race_list.Free;
-    clan_list.Free;
-    help_files.Free;
-    dm_msg.Free;
-
-    skill_table.Free;
-
-    socials.Free;
-    str_hash.Free;
-    auction_good.Free;
-    auction_evil.Free;
-    banned_masks.Free;
-
-    if (namegenerator_enabled) then
-    begin
-      PhonemeList.Clean();
-      PhonemeList.Free();
-      NameTemplateList.Clean();
-      NameTemplateList.Free();
-    end;
-    
-    connection_list.clean;
-    connection_list.Free;
-    commands.Free;
-  except
-    on E : EExternal do
-    begin
-      bugreport('cleanup', 'grendel.dpr', 'Cleanup procedure failed, terminating now.');
-      outputError(E);
-    end;
-  end;
-
-  if (use_ipv4) then
-    begin
-{$IFDEF LINUX}
-    __close(listenv4);
-{$ELSE}
-    closesocket(listenv4);
-{$ENDIF}
-    listenv4 := -1;
-    end;
-
-  if (use_ipv6) then
-    begin
-{$IFDEF LINUX}
-    __close(listenv6);
-{$ELSE}
-    closesocket(listenv6);
-{$ENDIF}
-    listenv6 := -1;
-    end;
-
+finalization
 {$IFDEF WIN32}
-  WSACleanup;
+  WSACleanup();
 {$ENDIF}
 
-  write_console('Cleanup complete.');
-  if (TTextRec(logfile).mode = fmOutput) then
-    CloseFile(LogFile);
-end;
-
-procedure reboot_mud;
-{$IFDEF WIN32}
-var
-  SI: TStartupInfo;
-  PI: TProcessInformation;
-{$ENDIF}
-begin
-  write_console('Server rebooting...');
-  try
-
-    if MUD_Booted then
-      flushConnections;
-
-    { wait for users to logout }
-    Sleep(1000);
-  except
-    write_console('Exception caught while cleaning up memory');
-  end;
-
-  cleanupServer();
-
-{$IFDEF WIN32}
-  FillChar(SI, SizeOf(SI), 0);
-  SI.cb := SizeOf(SI);
-  SI.wShowWindow := sw_show;
-
-  if not CreateProcess('grendel.exe',Nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI) then
-    bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel.exe, reboot failed!');
-{$ENDIF}
-{$IFDEF LINUX}
-  if (execv('grendel', nil) = -1) then
-    bugreport('reboot_mud', 'grendel.dpr', 'Could not execute grendel, reboot failed!');
-{$ENDIF}
-end;
-
-procedure copyover_mud;
-{$IFDEF WIN32}
-var
-   SI: TStartupInfo;
-   PI: TProcessInformation;
-   pipe : THandle;
-   node, node_next : GListNode;
-   conn : GConnection;
-   w, len : cardinal;
-   prot : TWSAProtocol_Info;
-   name : array[0..1023] of char;
-begin
-  write_console('Server starting copyover...');
-
-  node := connection_list.head;
-
-  while (node <> nil) do
-    begin
-    conn := node.element;
-    node_next := node.next;
-
-    if (conn.state = CON_PLAYING) then
-      begin
-      stopfighting(conn.ch);
-  		conn.ch.emptyBuffer;
-      conn.send(#13#10'Slowly, you feel the world as you know it fading away in wisps of steam...'#13#10#13#10);
-      end
-    else
-      begin
-      conn.send(#13#10'This server is rebooting, please continue in a few minutes.'#13#10#13#10);
-      conn.thread.terminate;
-      end;
-
-    node := node_next;
-    end;
-
-  FillChar(SI, SizeOf(SI), 0);
-  SI.cb := SizeOf(SI);
-  SI.wShowWindow := sw_show;
-
-  if (not CreateProcess('copyover.exe', nil, Nil, Nil, False, NORMAL_PRIORITY_CLASS or CREATE_NEW_CONSOLE, Nil, Nil, SI, PI)) then
-    begin
-    bugreport('copyover_mud', 'grendel.dpr', 'Could not execute copyover.exe, copyover failed!');
-    reboot_mud;
-    end;
-
-  pipe := CreateNamedPipe(pipeName, PIPE_ACCESS_DUPLEX, PIPE_WAIT or PIPE_TYPE_BYTE or PIPE_READMODE_BYTE, 10, 0, 0, 1000, nil);
-
-  if (pipe = INVALID_HANDLE_VALUE) then
-    begin
-    writeln('Could not create pipe: ', GetLastError);
-    exit;
-    end;
-
-  if (not ConnectNamedPipe(pipe, nil)) then
-    begin
-    bugreport('copyover_mud', 'grendel.dpr', 'Pipe did not initialize correctly!');
-    reboot_mud;
-    end;
-
-  node := connection_list.head;
-
-  while (node <> nil) do
-    begin
-    conn := node.element;
-    node_next := node.next;
-
-    if (WSADuplicateSocket(conn.socket, PI.dwProcessId, @prot) = -1) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'WSADuplicateSocket failed');
-      reboot_mud;
-      end;
-
-    if (not WriteFile(pipe, prot, sizeof(prot), w, nil)) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
-      reboot_mud;
-      end;
-
-    strpcopy(name, conn.ch.name^);
-    len := strlen(name);
-
-    if (not WriteFile(pipe, len, 4, w, nil)) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
-      reboot_mud;
-      end;
-
-    if (not WriteFile(pipe, name, len, w, nil)) then
-      begin
-      bugreport('copyover_mud', 'grendel.dpr', 'Broken pipe');
-      reboot_mud;
-      end;
-
-    conn.ch.save(conn.ch.name^);
-    conn.thread.terminate;
-
-    node := node_next;
-    end;
-
-  Sleep(500);
-
-  CloseHandle(pipe);
-
-  cleanupServer();
-end;
-{$ELSE}
-begin
-  write_console('Copyover not supported on this platform.');
-end;
-{$ENDIF}
-
-procedure shutdown_mud;
-begin
-  write_console('Server shutting down...');
-
-  try
-    if MUD_Booted then
-      flushConnections;
-
-    Sleep(1000);
-  except
-    write_console('Could not flush connections while shutting down server');
-  end;
-
-  cleanupServer();
-end;
-
-procedure sendtoall(s : string);
-var
-   node : GListNode;
-   conn : GConnection;
-begin
-  node := connection_list.head;
-
-  while (node <> nil) do
-    begin
-    conn := node.element;
-
-    conn.send(s);
-
-    node := node.next;
-    end;
-end;
-
-{ our exit procedure, catches the server when unstable }
-{ This is one of the most important pieces of code: the exit handler.
-  These lines make sure that if the server crashes (due to illegal memory
-  access, file operations, overload, etc.) the players are logged out
-  and their data is saved properly. Also, this routine makes sure the
-  server reboots automatically, no script needed! - Grimlord }
-procedure reboot_exitproc;far;
-begin
-  { okay, so we crashed :) }
-  if (not grace_exit) then
-    begin
-    sendtoall('------ GAME CRASH DETECTED! ---- Saving all players.'#13#10#13#10);
-    sendtoall('The server should be back online in less than a minute.'#13#10);
-    sendtoall('If the server doesn''t auto-reboot, please notify'#13#10);
-    sendtoall(pchar('the administration, '+system_info.admin_email+'.'#13#10));
-
-    { save all characters and try to unlog before quitting }
-    flushConnections;
-
-    Sleep(1000);
-
-    { give operator/logfile a message }
-    bugreport('CRASH', 'grendel.dpr', 'CRASH WARNING -- SERVER IS UNSTABLE, WILL TRY TO REBOOT');
-
-    write_console('---- CRASH TERMINATE. REBOOTING SERVER ----');
-
-    { close logfile }
-    if TTextRec(logfile).mode=fmOutput then
-      CloseFile(LogFile);
-    boot_type := BOOTTYPE_REBOOT;
-    end;
-
-  exitproc:=old_exitproc;
-
-  { reboot }
-  if (boot_type = BOOTTYPE_REBOOT) then
-    reboot_mud
-  else
-  { copyover }
-  if (boot_type = BOOTTYPE_COPYOVER) then
-    begin
-    if (connection_list.getSize > 0) then
-      copyover_mud
-    else
-      reboot_mud;
-    end
-  else
-    shutdown_mud;
-end;
-
-procedure bootServer();
-var
-  s : string;
-begin
-  { open a standard log file, filename is given by current system time }
-  AssignFile(LogFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
-
-  {$I-}
-  rewrite(LogFile);
-  {$I+}
-
-  if (IOResult <> 0) then
-    write_console('NOTE: Could not open logfile. Messages are not being logged.');
-
-{$IFDEF WIN32}
-  SetConsoleTitle(version_info + ', ' + version_number + '(Booting)');
-{$ENDIF}
-
-  write_direct(version_info + ', ' + version_number + '.');
-  write_direct(version_copyright + '.');
-  write_direct('This is free software, with ABSOLUTELY NO WARRANTY; view LICENSE.TXT.'#13#10);
-  write_console('Booting server...');
-
-  try
-    load_system;
-
-    s := FormatDateTime('ddddd', Now);
-    write_console('Booting "' + system_info.mud_name + '" database, ' + s + '.');
-
-    write_console('Initializing GMC contexts...');
-    init_progs;
-    write_console('Loading skills...');
-    load_skills;
-    write_console('Loading races...');
-    load_races;
-    write_console('Loading clans...');
-    load_clans;
-    write_console('Loading channels...');
-    load_channels();
-    write_console('Loading areas...');
-    load_areas;
-    write_console('Loading help...');
-    load_help('help.dat');
-    write_console('Loading namegenerator data...');
-    loadNameTables(NameTablesDataFile);
-    write_console('Loading noteboards...');
-    load_notes('boards.dat');
-    write_console('Loading modules...');
-    loadModules();
-    write_console('Loading texts...');
-    load_commands;
-    load_socials;
-    load_damage;
-    write_console('Loading mud state...');
-    loadMudState();
-
-{    write_console('String hash stats: ');
-    str_hash.hashStats; }
-
-    randomize;
-
-    use_ipv4 := false;
-    use_ipv6 := false;
-    startup_tcpip;
-
-    ExitProc := @reboot_exitproc;
-
-    BootTime := Now;
-
-    update_time;
-
-    time_info.day := 1;
-    time_info.month := 1;
-    time_info.year := 1;
-
-    boot_type := 0;
-    bg_info.count := -1;
-    boot_info.timer := -1;
-    mud_booted:=true;
-
-    registerTimer('teleports', update_teleports, 1, true);
-    registerTimer('fighting', update_fighting, CPULSE_VIOLENCE, true);
-    registerTimer('battleground', update_battleground, CPULSE_VIOLENCE, true);
-    registerTimer('objects', update_objects, CPULSE_TICK, true);
-    registerTimer('characters', update_chars, CPULSE_TICK, true);
-    registerTimer('gametime', update_time, CPULSE_GAMETIME, true);
-
-    timer_thread := GTimerThread.Create;
-    clean_thread := GCleanThread.Create;
-
-    calculateonline;
-  except
-    on E: GException do
-      begin
-      write_console('Fatal error while booting: ' + E.Message);
-      halt;
-      end;
-  end;
-end;
-
-function send_to_socket(sock : TSocket; s : string) : integer;
-begin
-  send_to_socket := send(sock, s[1], length(s), 0);
-end;
-
-procedure accept_connection(list_sock : TSocket);
-var
-   ac : TSocket;
-   cl : PSockAddr;
-   len : integer;
-begin
-  cl := @client_addr;
-  len := 128;
-
-{$IFDEF VER130}
-  ac := accept(list_sock, cl^, len);
-{$ELSE}
-  ac := accept(list_sock, cl, @len);
-{$ENDIF}
-
-  // set non-blocking mode
-
-{$IFDEF WIN32}
-  len := 1;
-  len := ioctlsocket(ac, FIONBIO, len);
-{$ELSE}
-  len := fcntl(ac, F_GETFL, 0);
-
-  if (len <> -1) then
-    fcntl(ac, F_SETFL, len or O_NONBLOCK);
-{$ENDIF}
-
-  if (boot_info.timer >= 0) then
-    begin
-    send_to_socket(ac, system_info.mud_name+#13#10#13#10);
-    send_to_socket(ac, 'Currently, this server is in the process of a reboot.'#13#10);
-    send_to_socket(ac, 'Please try again later.'#13#10);
-    send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-{$IFDEF LINUX}
-    __close(ac);
-{$ELSE}
-    closesocket(ac);
-{$ENDIF}
-    end
-  else
-  if system_info.deny_newconns then
-    begin
-    send_to_socket(ac, system_info.mud_name+#13#10#13#10);
-    send_to_socket(ac, 'Currently, this server is refusing new connections.'#13#10);
-    send_to_socket(ac, 'Please try again later.'#13#10);
-    send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-{$IFDEF LINUX}
-    __close(ac);
-{$ELSE}
-    closesocket(ac);
-{$ENDIF}
-    end
-  else
-  if (connection_list.getSize >= system_info.max_conns) then
-    begin
-    send_to_socket(ac, system_info.mud_name+#13#10#13#10);
-    send_to_socket(ac, 'Currently, this server is too busy to accept new connections.'#13#10);
-    send_to_socket(ac, 'Please try again later.'#13#10);
-    send_to_socket(ac, 'For more information, mail the administration, '+system_info.admin_email+'.'#13#10);
-
-{$IFDEF LINUX}
-    __close(ac);
-{$ELSE}
-    closesocket(ac);
-{$ENDIF}
-    end
-  else
-    GGameThread.Create(ac, client_addr, false, '');
-end;
-
-procedure game_loop;
-var
-  accept_set : TFDSet;
-  accept_val : TTimeVal;
-begin
-  while (true) do
-    begin
-    if (use_ipv4) and (listenv4 >= 0) then
-      begin
-      FD_ZERO(accept_set);
-      FD_SET(listenv4, accept_set);
-
-      accept_val.tv_sec:=0;
-      accept_val.tv_usec:=0;
-
-      if (select(listenv4 + 1, @accept_set, nil, nil, @accept_val) <> 0) then
-        accept_connection(listenv4);
-      end;
-
-    if (use_ipv6) and (listenv6 >= 0) then
-      begin
-      FD_ZERO(accept_set);
-      FD_SET(listenv6, accept_set);
-
-      accept_val.tv_sec:=0;
-      accept_val.tv_usec:=0;
-
-      if (select(listenv6 + 1, @accept_set, nil, nil, @accept_val) <> 0) then
-        accept_connection(listenv6);
-      end;
-
-//    usleep(500000);
-    sleep(500);
-    end;
-end;
-
-{$IFDEF WIN32}
-function ctrl_handler(event:dword):boolean;
-begin
-  ctrl_handler:=true;
-  grace_exit:=true;
-  SetConsoleCtrlHandler(@ctrl_handler, false);
-  halt;
-end;
-{$ENDIF}
-
-procedure from_copyover;
-{$IFDEF WIN32}
-var
-   pipe : THandle;
-   w, len : cardinal;
-   prot : TWSAProtocol_Info;
-   g : array[0..1023] of char;
-   suc : boolean;
-   sock : TSocket;
-   cl : PSockAddr;
-   l : integer;
-begin
-  pipe := INVALID_HANDLE_VALUE;
-
-  while (true) do
-    begin
-    pipe := CreateFile(pipeName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
-
-    if (pipe <> INVALID_HANDLE_VALUE) then
-      break;
-
-    if (GetLastError() <> ERROR_PIPE_BUSY) then
-      begin
-      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
-			exit;
-      end;
-
-    // All pipe instances are busy, so wait a second
-
-    if (not WaitNamedPipe(pipeName, 1000)) then
-      begin
-      bugreport('from_copyover', 'grendel.dpr', 'Could not restart from copyover');
-			exit;
-      end;
-  end;
-
-  sock := -1;
-
-  repeat
-    suc := ReadFile(pipe, prot, sizeof(prot), w, nil);
-
-    if (suc) then
-      sock := WSASocket(prot.iAddressFamily, SOCK_STREAM, IPPROTO_IP, @prot, 0, 0);
-
-    suc := ReadFile(pipe, len, 4, w, nil);
-    suc := ReadFile(pipe, g, len, w, nil);
-
-    if (suc) and (sock <> -1) then
-      begin
-      g[len] := #0;
-
-      cl := @client_addr;
-      l := 128;
-      getpeername(sock, cl^, l);
-
-      GGameThread.Create(sock, client_addr, true, g);
-      end;
-  until (not suc);
-
-  CloseHandle(pipe);
-end;
-{$ELSE}
-begin
-  write_console('Copyover not supported on this platform.');
-end;
-{$ENDIF}
-
-begin
-  old_exitproc := ExitProc;
-
-{$IFDEF __DEBUG}
-  MemChk;
-{$ENDIF}
-
-  bootServer();
-
-  if (CmdLine = 'copyover') then
-    from_copyover;
-
-{$IFDEF WIN32}
-  SetConsoleCtrlHandler(@ctrl_handler, true);
-{$ENDIF}
-
-  write_console('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
-
-{$IFDEF WIN32}
-  SetConsoleTitle(version_info + ', ' + version_number + '. ' + version_copyright + '.');
-{$ENDIF}
-
-  try
-    game_loop();
-  except
-    on EControlC do begin
-                    grace_exit := true;
-                    halt;
-                    end;
-  end;
 end.

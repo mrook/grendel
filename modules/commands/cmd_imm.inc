@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.6 2001/07/31 16:33:31 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.7 2001/07/31 21:47:28 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -613,14 +613,13 @@ end;
 
 {Jago 5/Jan/2001 : repaired to work with v 0.3.0}
 procedure do_connections(ch:GCharacter;param:string);
-var a:integer;
-    s:string;
-    conn: GConnection;
-    conn_node : GListNode;
+var
+  s:string;
+  conn: GConnection;
+  conn_node : GListNode;
 begin
   act(AT_REPORT, '$8[$B$1Nr.$A$8] [$B$1State           $A$8] [$B$1' + pad_string('IP', 32) + '$A$8] [$B$1Name$A$8]'#13#10,false,ch,nil,nil,TO_CHAR);
 
-  a:=0;
   conn_node := connection_list.head;
   while conn_node <> nil do
   begin
@@ -631,11 +630,10 @@ begin
     else
       s := '-';
 
-    act(AT_REPORT,'$7($B$7' + pad_integer_front(a,3) + '$A$7) '+
+    act(AT_REPORT,'$7($B$7' + pad_integer_front(conn.sock.getDescriptor,3) + '$A$7) '+
         pad_string(con_states[conn.state], 16) + '   ' +
-        pad_string(conn.ip_string, 32) + '   ' +
+        pad_string(conn.sock.ip_string, 32) + '   ' +
         s,false,ch,nil,nil,TO_CHAR);
-    inc(a);
 
     conn_node := conn_node.next;
   end;
@@ -1269,7 +1267,7 @@ begin
   begin
     conn := GConnection(conn_node.element);
 
-    if (conn.socket = sock) then
+    if (conn.sock.getDescriptor = sock) then
     begin
       conn_f := conn;
       break;
@@ -1284,11 +1282,8 @@ begin
     exit;
   end;
 
-{$IFDEF LINUX}
-  __close(sock);
-{$ELSE}
-  closesocket(sock);
-{$ENDIF}
+  conn_f.sock.disconnect();
+
   ch.sendBuffer( 'Ok.'#13#10);
 end;
 
