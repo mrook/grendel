@@ -1,4 +1,4 @@
-// $Id: cmd_imm.inc,v 1.7 2001/07/31 21:47:28 ***REMOVED*** Exp $
+// $Id: cmd_imm.inc,v 1.8 2001/08/01 15:37:08 ***REMOVED*** Exp $
 
 procedure do_shutdown(ch:GCharacter;param:string);
 var
@@ -616,14 +616,18 @@ procedure do_connections(ch:GCharacter;param:string);
 var
   s:string;
   conn: GConnection;
-  conn_node : GListNode;
+  iterator : GIterator;
 begin
   act(AT_REPORT, '$8[$B$1Nr.$A$8] [$B$1State           $A$8] [$B$1' + pad_string('IP', 32) + '$A$8] [$B$1Name$A$8]'#13#10,false,ch,nil,nil,TO_CHAR);
 
-  conn_node := connection_list.head;
-  while conn_node <> nil do
-  begin
-  	 conn := GConnection(conn_node.element);
+  iterator := connection_list.iterator();
+  
+  while (iterator.hasNext()) do
+    begin
+    conn := GConnection(iterator.next());
+    
+    if (conn.ch <> nil) and (not conn.ch.IS_NPC) and (IS_SET(GPlayer(conn.ch).flags, PLR_CLOAK)) then
+      continue;
 
     if (conn.ch <> nil) and (conn.ch.name <> nil) then
       s := conn.ch.name^
@@ -634,8 +638,6 @@ begin
         pad_string(con_states[conn.state], 16) + '   ' +
         pad_string(conn.sock.ip_string, 32) + '   ' +
         s,false,ch,nil,nil,TO_CHAR);
-
-    conn_node := conn_node.next;
   end;
 end;
 
@@ -706,8 +708,8 @@ begin
     begin
     if (GPlayer(ch).snooping <> nil) then 
       begin
-      GPlayer(ch).snooping := nil;
       GPlayer(ch).snooping.snooped_by := nil;
+      GPlayer(ch).snooping := nil;
       end;
       
     ch.sendBuffer('No longer snooping.'#13#10);
