@@ -273,11 +273,11 @@ begin
     symboln := 'no symbol';
 
   if (line <> nil) then
-    linen := IntToStr(line.linenr) + ' (' + line.filename + ')'
+    linen := line.filename + ':' + IntToStr(line.linenr)
   else
     linen := 'no line';
 
-  write_console(symboln + ':' + linen + ' (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
+  write_console(linen + ' (' + symboln + ') (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
 {$ELSE}
   write_console(IntToHex(integer(addr), 8));
 {$ENDIF}
