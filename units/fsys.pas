@@ -1,4 +1,4 @@
-// $Id: fsys.pas,v 1.13 2001/08/16 10:53:57 ***REMOVED*** Exp $
+// $Id: fsys.pas,v 1.14 2001/08/16 20:55:33 ***REMOVED*** Exp $
 
 unit fsys;
 
@@ -417,11 +417,11 @@ begin
   for a := 1 to length(s) do
     writeChar(s[a]);
 
-  writeChar(#13);
-
 {$IFDEF WIN32}
-  writeChar(#10);
+  writeChar(#13);
 {$ENDIF}
+
+  writeChar(#10);
 end;
 
 procedure GFileWriter.flush();
