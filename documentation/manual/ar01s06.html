@@ -5,10 +5,17 @@
 			Listed below is a sample area (actually a trimmed-down version of the <tt class="literal">roads.area</tt>
 			file that is shipped with Grendel). Attentive readers will notice that the
 			format of the area is quite similar to the format used in the SMAUG codebase.
-			</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+			</p><p>
+			A Grendel area file consists of several sections: <tt class="literal">#AREA</tt>, 
+			<tt class="literal">#ROOMS</tt>, <tt class="literal">#OBJECTS</tt>, <tt class="literal">#MOBILES</tt> 
+			and <tt class="literal">#RESETS</tt>. Of these, only the <tt class="literal">#AREA</tt> section is
+			required.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+			An integrated GUI area builder is currently in development, and a prototype can be found in the
+			(highly experimental) Grendel Management Console.
+			</p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 			Since a switch to an XML area format is planned, this section is subject to change.
 			</p></div><p>
-			</p><div class="example"><a name="id2506016"></a><p class="title"><b>Example&#160;5.&#160;An example area</b></p><pre class="screen">#RANGES
+			</p><div class="example"><a name="id2506445"></a><p class="title"><b>Example&#160;5.&#160;An example area</b></p><pre class="programlisting">#RANGES
 100 199 100 199 100 199                                                         <i class="lineannotation"><span class="lineannotation">Hints for min/max rooms/mobiles/objects</span></i>
 
 #AREA
@@ -16,8 +23,7 @@ Central Ruia                                                                    
 Grimlord                                                                        <i class="lineannotation"><span class="lineannotation">Name of the owner/builder</span></i>
 A fresh wind blows through your hair.                                           <i class="lineannotation"><span class="lineannotation">Message to display when area resets</span></i>
 35                                                                              <i class="lineannotation"><span class="lineannotation">Number of gamerounds (roughly 75 secs) between resets</span></i>
-8 18 0                                                                          <i class="lineannotation"><span class="lineannotation">Temp. multiplier, avg. temperature, flags 
-                                                                                (see: <a href="ar01s06.html#table.areaflags" title="Table&#160;1.&#160;Area flags">Table&#160;1, &#8220;Area flags&#8221;</a>)</span></i>
+8 18 0                                                                          <i class="lineannotation"><span class="lineannotation">Temp. multiplier, avg. temperature, flags (see: <a href="ar01s06.html#table.areaflags" title="Table&#160;2.&#160;Area flags">Table&#160;2, &#8220;Area flags&#8221;</a>)</span></i>
 
 #ROOMS
 #100                                                                            <i class="lineannotation"><span class="lineannotation">Number (vnum) of room</span></i>
@@ -28,11 +34,11 @@ To the south, the road to Southaven. To the north, the road to Gailen and
 Castle Pakthan. To the east, you see the Warriors School.
 ~                                                                               <i class="lineannotation"><span class="lineannotation">Separator</span></i>
 0 0 500 3
-D 101 3 0 0
+D 101 3 0 0                                                                     <i class="lineannotation"><span class="lineannotation">An exit to room #101, direction (see: <a href="ar01s06.html#table.directions" title="Table&#160;3.&#160;Directions">Table&#160;3, &#8220;Directions&#8221;</a>), flags (see: (<a href="ar01s06.html#table.exitflags" title="Table&#160;4.&#160;Exit flags">Table&#160;4, &#8220;Exit flags&#8221;</a>)</span></i>
 E sign                                                                          <i class="lineannotation"><span class="lineannotation">Extra description "sign"</span></i>
 The sign says 'Southaven south'.                                                <i class="lineannotation"><span class="lineannotation">Multiline extra description</span></i>
 ~                                                                               <i class="lineannotation"><span class="lineannotation">Separator</span></i>
-S
+S                                                                               <i class="lineannotation"><span class="lineannotation">End of room #100</span></i>
 #101
 Southaven Road
 This road is one of the main roads leading through Ruia. It takes you
@@ -56,22 +62,22 @@ D 101 1 0 0
 S
 #END
 
-#MOBILES
-#100
-Syra
-Syra is here
-Syra, protectress of Southaven, patrols for danger
-800 1
-15 521 0 0 0
-skill: Burning Hands
+#MOBILES                                                                        <i class="lineannotation"><span class="lineannotation">Mobiles (NPC's) section</span></i>
+#100                                                                            <i class="lineannotation"><span class="lineannotation">Number (vnum) of NPC</span></i>
+Syra                                                                            <i class="lineannotation"><span class="lineannotation">Name</span></i>
+Syra is here                                                                    <i class="lineannotation"><span class="lineannotation">Short description</span></i>
+Syra, protectress of Southaven, patrols for danger                              <i class="lineannotation"><span class="lineannotation">Long description</span></i>
+800 1                                                                           <i class="lineannotation"><span class="lineannotation">Level, sex (see <a href="ar01s06.html#table.sex" title="Table&#160;1.&#160;Sexes">Table&#160;1, &#8220;Sexes&#8221;</a>)</span></i>
+15 521 0 0 0                                                                    <i class="lineannotation"><span class="lineannotation">Armour, flags (see <a href="ar01s06.html#table.npcflags" title="Table&#160;5.&#160;NPC flags">Table&#160;5, &#8220;NPC flags&#8221;</a>), gold carried, height, weight</span></i>
+skill: Burning Hands                                                            <i class="lineannotation"><span class="lineannotation">NPC has skill "Burning Hands"</span></i>
 skill: Magic Missile
 skill: Slashing Weapons
 skill: Second Attack
-&gt; give.cod
+&gt; give.cod                                                                      <i class="lineannotation"><span class="lineannotation">Use GMC program "give.cod"</span></i>
 #END
 
 #OBJECTS
-#100
+#100                                                                          
 a fountain
 a sparkling fountain
 a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
@@ -95,7 +101,44 @@ O 100 101 1
 #END
 
 $</pre></div><p>
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_notes"></a>Some notes on NPC's</h3></div></div><div></div></div><p>
+			Non-Player Characters (NPC's) are the artificially intelligent (sic) population,
+			possibly even the core, of a mud. They are sometimes called "Mobiles", which, apart from the
+			unfortunate name collision with certain wireless devices, wrongfully suggests that NPC's can't
+			be forced to stay in one place.
+			</p><p>
+			NPC's can be quite a challenge for your players, so try to be careful when tinkering with the 
+			various values that define a NPC: balance is everything.
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_install"></a>Installing a new area</h3></div></div><div></div></div><p>
+			Start a text editor (such as Notepad), and open the file <tt class="literal">areas\area.list</tt>. 
+			Add a line with the filename of your new area to the top of the file, save the file, and 
+			reboot (or copyover) the server.
+			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_ansi"></a>Using ANSI color codes</h3></div></div><div></div></div><p>
+			Grendel supports the formatting and sending of ANSI (color) control codes.
+			This can be very helpful, especially when constructing objects, where
+			the intensity of the coloring usually determines the value and worth of the object.
+			</p><p>
+			</p><div class="example"><a name="id2506833"></a><p class="title"><b>Example&#160;6.&#160;Using colors</b></p><pre class="screen">$A$0black
+$A$1blue
+$A$2green
+$A$3turquoise
+$A$4red
+$A$5purple
+$A$6yellow
+$A$7gray
+$B$0dark gray
+$B$1bright blue
+$B$2bright green
+$B$3bright turquoise
+$B$4bright red
+$B$5bright purple
+$B$6bright yellow
+$B$7white</pre></div><p>
 			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="building_tables"></a>Tables, constants and structures</h3></div></div><div></div></div><p>
-			</p><div class="table"><a name="table.areaflags"></a><p class="title"><b>Table&#160;1.&#160;Area flags</b></p><table summary="Area flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>AREA_NORESET</td><td>Do not reset area</td><td>BV00</td><td>1</td></tr><tr><td>AREA_NOPC</td><td>No players allowed</td><td>BV01</td><td>2</td></tr><tr><td>AREA_PROTO</td><td>Prototype area</td><td>BV02</td><td>4</td></tr></tbody></table></div><p>
-			</p><div class="table"><a name="table.roomflags"></a><p class="title"><b>Table&#160;2.&#160;Room flags</b></p><table summary="Room flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>ROOM_DARK</td><td>Total darkness</td><td>BV00</td><td>1</td></tr><tr><td>ROOM_DEATH</td><td>Deathtrap</td><td>BV01</td><td>2</td></tr><tr><td>ROOM_NOMOB</td><td>Mobiles not allowed</td><td>BV02</td><td>4</td></tr><tr><td>ROOM_INDOORS</td><td>Indoors</td><td>BV03</td><td>8</td></tr><tr><td>ROOM_GOOD</td><td>Only good aligned players allowed</td><td>BV04</td><td>16</td></tr><tr><td>ROOM_EVIL</td><td>Only evil aligned players allowed</td><td>BV05</td><td>32</td></tr><tr><td>ROOM_NOCAST</td><td>Using magic not allowed</td><td>BV06</td><td>64</td></tr><tr><td>ROOM_TUNNEL</td><td>Tunnel (could cause problems for larger sized characters)</td><td>BV07</td><td>128</td></tr><tr><td>ROOM_PRIVATE</td><td>Only one character at a time</td><td>BV08</td><td>256</td></tr><tr><td>ROOM_SAFE</td><td>Fighting not allowed</td><td>BV09</td><td>512</td></tr><tr><td>ROOM_SOLITARY</td><td>??</td><td>BV10</td><td>1024</td></tr><tr><td>ROOM_NORECALL</td><td>Recall spell not allowed</td><td>BV11</td><td>2048</td></tr><tr><td>ROOM_NODROPALL</td><td>??</td><td>BV12</td><td>4096</td></tr><tr><td>ROOM_NOSUMMON</td><td>Summon spell not allowed</td><td>BV13</td><td>8192</td></tr><tr><td>ROOM_CLANSTORE</td><td>Clan store</td><td>BV14</td><td>16384</td></tr><tr><td>ROOM_TELEPORT</td><td>Teleport</td><td>BV15</td><td>32768</td></tr><tr><td>ROOM_NOFLOOR</td><td>No floor</td><td>BV16</td><td>65536</td></tr><tr><td>ROOM_MANAROOM</td><td>Accelerated mana replenishment</td><td>BV17</td><td>131072</td></tr><tr><td>ROOM_NOTRADE</td><td>Trading not allowed</td><td>BV18</td><td>262144</td></tr><tr><td>ROOM_PROTO</td><td>Prototype room</td><td>BV31</td><td>2147483648</td></tr></tbody></table></div><p>					
+			</p><div class="table"><a name="table.sex"></a><p class="title"><b>Table&#160;1.&#160;Sexes</b></p><table summary="Sexes" border="1"><colgroup><col><col></colgroup><thead><tr><th>Description</th><th>Value</th></tr></thead><tbody><tr><td>Male</td><td>0</td></tr><tr><td>Female</td><td>1</td></tr><tr><td>Genderless (It)</td><td>2</td></tr></tbody></table></div><p>
+			</p><div class="table"><a name="table.areaflags"></a><p class="title"><b>Table&#160;2.&#160;Area flags</b></p><table summary="Area flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>AREA_NORESET</td><td>Do not reset area</td><td>BV00</td><td>1</td></tr><tr><td>AREA_NOPC</td><td>No players allowed</td><td>BV01</td><td>2</td></tr><tr><td>AREA_PROTO</td><td>Prototype area</td><td>BV02</td><td>4</td></tr></tbody></table></div><p>
+			</p><div class="table"><a name="table.directions"></a><p class="title"><b>Table&#160;3.&#160;Directions</b></p><table summary="Directions" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Value</th></tr></thead><tbody><tr><td>DIR_NORTH</td><td>North</td><td>1</td></tr><tr><td>DIR_EAST</td><td>East</td><td>2</td></tr><tr><td>DIR_SOUTH</td><td>South</td><td>3</td></tr><tr><td>DIR_WEST</td><td>West</td><td>4</td></tr><tr><td>DIR_DOWN</td><td>Down</td><td>5</td></tr><tr><td>DIR_UP</td><td>Up</td><td>6</td></tr><tr><td>DIR_SOMEWHERE</td><td>Somewhere (i.e. for portals)</td><td>7</td></tr></tbody></table></div><p>
+			</p><div class="table"><a name="table.exitflags"></a><p class="title"><b>Table&#160;4.&#160;Exit flags</b></p><table summary="Exit flags" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>EX_ISDOOR</td><td>Exit is a door</td><td>BV00</td><td>1</td></tr><tr><td>EX_CLOSED</td><td>Closed</td><td>BV01</td><td>2</td></tr><tr><td>EX_LOCKED</td><td>Locked</td><td>BV02</td><td>4</td></tr><tr><td>EX_PICKPROOF</td><td>Lockpick will fail</td><td>BV03</td><td>8</td></tr><tr><td>EX_SECRET</td><td>Hidden exit</td><td>BV04</td><td>16</td></tr><tr><td>EX_SWIM</td><td>Character needs to swim to enter</td><td>BV05</td><td>32</td></tr><tr><td>EX_FLY</td><td>Character needs to fly to enter</td><td>BV06</td><td>64</td></tr><tr><td>EX_CLIMB</td><td>Inclination</td><td>BV07</td><td>128</td></tr><tr><td>EX_PORTAL</td><td>Portal</td><td>BV08</td><td>256</td></tr><tr><td>EX_NOBREAK</td><td>Can't break door</td><td>BV09</td><td>512</td></tr><tr><td>EX_NOMOB</td><td>NPC's not allowed</td><td>BV10</td><td>1024</td></tr><tr><td>EX_ENTER</td><td>Use "enter" command to enter</td><td>BV11</td><td>2048</td></tr><tr><td>EX_UNDERWATER</td><td>Under water</td><td>BV12</td><td>4096</td></tr></tbody></table></div><p>
+			</p><div class="table"><a name="table.npcflags"></a><p class="title"><b>Table&#160;5.&#160;NPC flags</b></p><table summary="NPC flags" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>ACT_AGGRESSIVE</td><td>Aggressive (auto-attack) npc</td><td>BV02</td><td>4</td></tr><tr><td>ACT_SENTINEL</td><td>Does not wander (guard)</td><td>BV03</td><td>8</td></tr><tr><td>ACT_SCAVENGER</td><td>Picks up stray objects</td><td>BV04</td><td>16</td></tr><tr><td>ACT_STAY_AREA</td><td>Does not wander beyond area boundaries</td><td>BV05</td><td>32</td></tr><tr><td>ACT_HUNTING</td><td>Actively hunts opponents when attacked</td><td>BV06</td><td>64</td></tr><tr><td>ACT_FASTHUNT</td><td>Fast hunter</td><td>BV07</td><td>128</td></tr><tr><td>ACT_MOBINVIS</td><td>Invisible</td><td>BV08</td><td>256</td></tr><tr><td>ACT_TEACHER</td><td>Can teach skills/spells</td><td>BV09</td><td>512</td></tr><tr><td>ACT_BANKER</td><td>Banker</td><td>BV10</td><td>1024</td></tr><tr><td>ACT_SPIRIT</td><td>Non-magic weapons are ineffective</td><td>BV11</td><td>2048</td></tr><tr><td>ACT_NOBASH</td><td>Impossible to bash</td><td>BV12</td><td>4096</td></tr><tr><td>ACT_SHOPKEEP</td><td>Shopkeeper</td><td>BV13</td><td>8192</td></tr><tr><td>ACT_IMMORTAL</td><td>Immortal</td><td>BV14</td><td>16384</td></tr><tr><td>ACT_PROTO</td><td>Prototype NPC</td><td>BV31</td><td>2147483648</td></tr></tbody></table></div><p>	
+			</p><div class="table"><a name="table.roomflags"></a><p class="title"><b>Table&#160;6.&#160;Room flags</b></p><table summary="Room flags" border="1"><colgroup><col><col><col><col></colgroup><thead><tr><th>Identifier</th><th>Description</th><th>Bitvector</th><th>Value</th></tr></thead><tbody><tr><td>ROOM_DARK</td><td>Total darkness</td><td>BV00</td><td>1</td></tr><tr><td>ROOM_DEATH</td><td>Deathtrap</td><td>BV01</td><td>2</td></tr><tr><td>ROOM_NOMOB</td><td>Mobiles not allowed</td><td>BV02</td><td>4</td></tr><tr><td>ROOM_INDOORS</td><td>Indoors</td><td>BV03</td><td>8</td></tr><tr><td>ROOM_GOOD</td><td>Only good aligned players allowed</td><td>BV04</td><td>16</td></tr><tr><td>ROOM_EVIL</td><td>Only evil aligned players allowed</td><td>BV05</td><td>32</td></tr><tr><td>ROOM_NOCAST</td><td>Using magic not allowed</td><td>BV06</td><td>64</td></tr><tr><td>ROOM_TUNNEL</td><td>Tunnel (could cause problems for larger sized characters)</td><td>BV07</td><td>128</td></tr><tr><td>ROOM_PRIVATE</td><td>Only one character at a time</td><td>BV08</td><td>256</td></tr><tr><td>ROOM_SAFE</td><td>Fighting not allowed</td><td>BV09</td><td>512</td></tr><tr><td>ROOM_SOLITARY</td><td>??</td><td>BV10</td><td>1024</td></tr><tr><td>ROOM_NORECALL</td><td>Recall spell not allowed</td><td>BV11</td><td>2048</td></tr><tr><td>ROOM_NODROPALL</td><td>??</td><td>BV12</td><td>4096</td></tr><tr><td>ROOM_NOSUMMON</td><td>Summon spell not allowed</td><td>BV13</td><td>8192</td></tr><tr><td>ROOM_CLANSTORE</td><td>Clan store</td><td>BV14</td><td>16384</td></tr><tr><td>ROOM_TELEPORT</td><td>Teleport</td><td>BV15</td><td>32768</td></tr><tr><td>ROOM_NOFLOOR</td><td>No floor</td><td>BV16</td><td>65536</td></tr><tr><td>ROOM_MANAROOM</td><td>Accelerated mana replenishment</td><td>BV17</td><td>131072</td></tr><tr><td>ROOM_NOTRADE</td><td>Trading not allowed</td><td>BV18</td><td>262144</td></tr><tr><td>ROOM_PROTO</td><td>Prototype room</td><td>BV31</td><td>2147483648</td></tr></tbody></table></div><p>					
 			</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a>&#160;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&#160;</td></tr><tr><td width="40%" align="left" valign="top">Developer information&#160;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&#160;</td></tr></table></div></body></html>
