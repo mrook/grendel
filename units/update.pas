@@ -1,6 +1,6 @@
 {
   @abstract(Character update & regeneration routines)
-  @lastmod($Id: update.pas,v 1.21 2003/10/16 16:07:31 ***REMOVED*** Exp $)
+  @lastmod($Id: update.pas,v 1.22 2003/10/16 16:18:44 ***REMOVED*** Exp $)
 }
 
 unit update;
@@ -8,13 +8,14 @@ unit update;
 interface
 
 uses
-    chars,
-    dtypes,
-    area,
-    constants,
-    util,
-    timers,
-    skills;
+	chars,
+	dtypes,
+	area,
+	constants,
+	util,
+	timers,
+	skills;
+
 
 procedure regenerate_chars;
 
@@ -34,12 +35,14 @@ procedure update_objects;
 implementation
 
 uses
-    SysUtils,
-    mudsystem,
-    commands,
-    fight,
-    conns,
-    Channels;
+	SysUtils,
+	mudsystem,
+	commands,
+	fight,
+	conns,
+	player,
+	Channels;
+
 
 procedure regenerate_chars;
 var hp_gain,mv_gain,mana_gain:integer;
@@ -109,9 +112,10 @@ begin
 end;
 
 procedure update_time;
-var buf : string;
-    conn : GConnection;
-    node : GListNode;
+var 
+	buf : string;
+	iterator : GIterator;
+	ch : GCharacter;
 begin
   inc(time_info.hour);
   buf := '';
@@ -165,17 +169,20 @@ begin
 
   if (length(buf) > 0) then
     begin
-    node := connection_list.head;
-
-    while (node <> nil) do
-      begin
-      conn := node.element;
-
-      if (conn.state=CON_PLAYING) and (conn.ch.IS_OUTSIDE) and (conn.ch.IS_AWAKE) then
-        act(AT_REPORT,buf,false,conn.ch,nil,nil,TO_CHAR);
-
-      node := node.next;
-      end;
+    iterator := char_list.iterator();
+    
+    while (iterator.hasNext()) do
+    	begin
+    	ch := GCharacter(iterator.next());
+    	
+    	if (ch.IS_NPC) then
+    		continue;
+    		
+    	if (ch.IS_OUTSIDE) and (ch.IS_AWAKE) then
+        act(AT_REPORT,buf,false,ch,nil,nil,TO_CHAR);    		
+    	end;
+    
+    iterator.Free();
     end;
 end;
 
@@ -533,7 +540,9 @@ begin
 end;
 
 procedure startBattleground;
-var conn : GConnection;
+var 
+	iterator : GCharacter;
+	conn : GConnection;
     node : GListNode;
     s,vnum:integer;
 begin
