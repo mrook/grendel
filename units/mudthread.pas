@@ -363,7 +363,10 @@ begin
               bugreport('interpret','mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' lagged', 'The command took over 1.5 sec to complete.');
           except
             on E : EExternal do
-              outputError(E.ExceptionRecord.ExceptionAddress);
+            begin
+//              outputError(E.ExceptionRecord.ExceptionAddress);
+              outputError(E);
+            end;
 
               //bugreport('interpret', 'mudthread.pas', cmd.func_name + ', ch ' + ch.name^ + ' bugged',
               //          'The specified command caused an error and has been terminated.');

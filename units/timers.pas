@@ -145,7 +145,8 @@ begin
         on E : EExternal do
           begin
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');
-          outputError(E.ExceptionRecord.ExceptionAddress);
+//          outputError(E.ExceptionRecord.ExceptionAddress);
+          outputError(E);
           end
         else
           bugreport('GTimerThread.Execute', 'timers.pas', 'Timer "' + timer.name + '" failed to execute correctly', 'Timer "' + timer.name + '" failed to execute correctly');

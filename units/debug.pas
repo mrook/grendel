@@ -2,14 +2,17 @@ unit debug;
 
 interface
 
-procedure outputError(addr : pointer);
+uses
+  SysUtils;
+  
+//procedure outputError(addr : pointer);
+procedure outputError(E : EExternal);
 
 implementation
 
 uses
     Windows,
     Math,
-    SysUtils,
     Classes,
     strip,
     memcheck,
@@ -277,12 +280,16 @@ begin
   write_console(symboln + ':' + linen + ' (' + ExtractFileName(modu) + '@' + IntToHex(offset, 8) + ')');
 end;
 
-procedure outputError(addr : pointer);
+procedure outputError(E : EExternal);
 var
    st : TCallStack;
    a : integer;
+   addr : pointer;
 begin
-  write_console('Win32 exception detected, call stack follows:');
+  addr := E.ExceptionRecord.ExceptionAddress;
+  write_console('Win32 exception detected.');
+  write_console('Exception message: "' + E.Message + '".');
+  write_console('Call stack follows:');
   showAddress(addr);
 
   FillCallStack(st, false);
