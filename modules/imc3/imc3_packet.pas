@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_packet.pas,v 1.2 2003/10/02 08:23:21 ***REMOVED*** Exp $
+	$Id: imc3_packet.pas,v 1.3 2003/10/03 21:00:12 ***REMOVED*** Exp $
 }
 unit imc3_packet;
 
@@ -81,14 +81,12 @@ var
 	backslash, quote : boolean;
 	count : array[1..256] of integer;
 	len, left, right : integer;
-  found : boolean;
   s : string;
   stack : TObjectStack;
   list : TList;
 begin
 	backslash := false;
 	quote := false;
-  found := false;
 
   for left := 1 to 256 do count[left] := 0;
 
