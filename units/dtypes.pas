@@ -1,4 +1,4 @@
-// $Id: dtypes.pas,v 1.17 2001/05/10 17:29:09 xenon Exp $
+// $Id: dtypes.pas,v 1.18 2001/06/01 21:10:10 ***REMOVED*** Exp $
 
 unit dtypes;
 
@@ -20,7 +20,12 @@ type
 
       constructor Create(s : integer);
     end;
-    
+
+    GIterator = class
+      function hasNext() : boolean; virtual; abstract;
+      function next() : TObject; virtual; abstract;
+    end;
+
     GListNode = class
       prev, next : GListNode;
       element : pointer;
@@ -32,15 +37,18 @@ type
       size : integer;
       head, tail : GListnode;
       lock : TCriticalSection;
+      serial : integer;
 
       function insertLast(element : pointer) : GListNode;
       function insertAfter(tn : GListNode; element : pointer) : GListNode;
       function insertBefore(tn : GListNode; element : pointer) : GListNode;
       procedure remove(node : GListNode);
-      procedure clean;
-      procedure smallClean;
+      procedure clean();
+      procedure smallClean();
 
-      function getSize : integer;
+      function getSize() : integer;
+
+      function iterator() : GIterator;
 
       constructor Create;
       destructor Destroy; override;
@@ -67,10 +75,10 @@ type
 
       procedure clear();
 
-//      function containsKey(key : string) : boolean;
-//      function containsValue(value : TObject) : boolean;
       function isEmpty() : boolean;
       function size() : integer;
+
+      function iterator() : GIterator;
 
       function _get(key : variant) : GHashValue;
 
@@ -82,7 +90,7 @@ type
       procedure setHashFunc(func : GHASH_FUNC);
       function findPrimes(n : integer) : GPrimes;
 
-      procedure hashStats; virtual;
+      procedure hashStats(); virtual;
 
       constructor Create(size : integer);
       destructor Destroy; override;
@@ -92,7 +100,7 @@ type
       e_location : string;
 
       constructor Create(location, msg : string);
-      procedure show;
+      procedure show();
     end;
 
 const STR_HASH_SIZE = 1024;
@@ -114,6 +122,34 @@ implementation
 uses
     mudsystem;
 {$ENDIF}
+
+
+// GDLinkedListIterator
+type
+    GDLinkedListIterator = class(GIterator)
+    private
+      current : GListNode;
+
+    published
+      constructor Create(list : GDLinkedList);
+
+      function hasNext() : boolean; override;
+      function next() : TObject; override;
+    end;
+
+    GHashTableIterator = class(GIterator)
+    private
+      tbl : GHashTable;
+      cursor : integer;
+      current : GListNode;
+
+    published
+      constructor Create(table : GHashTable);
+
+      function hasNext() : boolean; override;
+      function next() : TObject; override;
+    end;
+
 
 // GString
 constructor GString.Create(s : string);
@@ -141,6 +177,79 @@ begin
   prev := p;
 end;
 
+// GDLinkedListIterator
+constructor GDLinkedListIterator.Create(list : GDLinkedList);
+begin
+  inherited Create;
+
+  current := list.head;
+end;
+
+function GDLinkedListIterator.hasNext() : boolean;
+begin
+  Result := (current <> nil);
+end;
+
+function GDLinkedListIterator.next() : TObject;
+begin
+  Result := nil;
+
+  if (hasNext()) then
+    begin
+    Result := current;
+
+    current := current.next;
+    end;
+end;
+
+// GHashTableIterator
+constructor GHashTableIterator.Create(table : GHashTable);
+begin
+  inherited Create;
+
+  tbl := table;
+
+  current := nil;
+  cursor := 0;
+
+  while (current = nil) and (cursor < tbl.hashSize) do
+    begin
+    if (tbl.bucketlist[cursor].head <> nil) then
+      current := tbl.bucketList[cursor].head;
+
+    inc(cursor);
+    end;
+end;
+
+function GHashTableIterator.hasNext() : boolean;
+begin
+  Result := (current <> nil);
+end;
+
+function GHashTableIterator.next() : TObject;
+begin
+  Result := nil;
+
+  if (hasNext()) then
+    begin
+    Result := current;
+
+    current := current.next;
+
+    if (current = nil) then
+      begin
+      inc(cursor);
+
+      while (current = nil) and (cursor < tbl.hashSize) do
+        begin
+        if (tbl.bucketlist[cursor].head <> nil) then
+          current := tbl.bucketList[cursor].head;
+
+        inc(cursor);
+        end;
+      end;
+    end;
+end;
 
 // GDLinkedList
 constructor GDLinkedList.Create;
@@ -150,6 +259,7 @@ begin
   head := nil;
   tail := nil;
   size := 0;
+  serial := 1;
   lock := TCriticalSection.Create;
 end;
 
@@ -179,6 +289,7 @@ begin
     insertLast := node;
 
     inc(size);
+    inc(serial);
   finally
     lock.Release;
   end;
@@ -203,6 +314,7 @@ begin
 
     insertAfter := node;
 
+    inc(serial);
     inc(size);
   finally
     lock.Release;
@@ -228,6 +340,7 @@ begin
 
     insertBefore := node;
 
+    inc(serial);
     inc(size);
   finally
     lock.Release;
@@ -250,6 +363,7 @@ begin
       node.next.prev := node.prev;
 
     dec(size);
+    inc(serial);
     node.Free;
   finally
     lock.Release;
@@ -292,6 +406,11 @@ begin
 
     remove(node);
     end;
+end;
+
+function GDLinkedList.iterator() : GIterator;
+begin
+  Result := GDLinkedListIterator.Create(Self);
 end;
 
 
@@ -567,40 +686,11 @@ begin
   inherited Destroy;
 end;
 
-// GHashString
-{ procedure GHashString.hashString(str : GString; key : string);
+function GHashTable.iterator() : GIterator;
 begin
-  hashPointer(str, key);
+  Result := GHashTableIterator.Create(Self);
 end;
 
-procedure GHashString.hashStats;
-var
-   bytesused, wouldhave : integer;
-   i, s : cardinal;
-   node : GListNode;
-begin
-  inherited hashStats;
-
-  bytesused := 0;
-  wouldhave := 0;
-
-  for i := 0 to hashsize - 1 do
-    begin
-    node := bucketList[i].head;
-
-    while (node <> nil) do
-      begin
-      s := length(GString(node.element).value);
-
-      bytesused := bytesused + (s + 1);
-      wouldhave := wouldhave + (node.refcount * (s + 1));
-
-      node := node.next;
-      end;
-    end;
-
-  writeln('Byte savings (used/saved): ', inttostr(bytesused), '/', inttostr(wouldhave - bytesused), ' (', (bytesused * 100) div wouldhave, '%/', ((wouldhave - bytesused) * 100) div wouldhave, '%)');
-end; }
 
 function hash_string(src : string) : PString;
 var
