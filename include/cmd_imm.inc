@@ -1066,6 +1066,7 @@ begin
   end;
 end;
 
+{ Xenon 12/Apr/2001: freeze now only works on players lowerlevel than you and you cannot freeze yourself anymore :P }
 procedure do_freeze(ch:GCharacter;param:string);
 var victim:GCharacter;
 begin
@@ -1079,7 +1080,7 @@ begin
   victim := findCharWorld(ch,param);
   if (victim=nil) then
     begin
-    ch.sendBuffer('That character does not exist.'#13#10);
+    ch.sendBuffer('That character isn''t online.'#13#10);
     exit;
     end;
 
@@ -1089,14 +1090,27 @@ begin
     exit;
     end;
 
-  ch.sendBuffer('Ok.'#13#10);
+  if (victim = ch) then
+  begin
+    ch.sendBuffer('You cannot freeze yourself.'#13#10);
+    exit;
+  end;
+
+  if (victim.level >= ch.level) then
+  begin
+    ch.sendBuffer('Can only freeze players lower level than you.'#13#10);
+    exit;
+  end;
+
   if (IS_SET(victim.player^.flags,PLR_FROZEN)) then
     begin
+    act(AT_REPORT,Format('You have defrosted $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been un-frozen by $N.',false,victim,nil,ch,TO_CHAR);
     REMOVE_BIT(victim.player^.flags,PLR_FROZEN);
     end
   else
     begin
+    act(AT_REPORT,Format('You have frozen $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been frozen by $N.',false,victim,nil,ch,TO_CHAR);
     SET_BIT(victim.player^.flags,PLR_FROZEN);
     end;
@@ -1125,14 +1139,28 @@ begin
     exit;
     end;
 
-  ch.sendBuffer('Ok.'#13#10);
+  if (victim = ch) then
+  begin
+    ch.sendBuffer('You cannot silence yourself.'#13#10);
+    exit;
+  end;
+
+  if (victim.level >= ch.level) then
+  begin
+    ch.sendBuffer('Can only silence players lower level than you.'#13#10);
+    exit;
+  end;
+
+//  ch.sendBuffer('Ok.'#13#10);
   if (IS_SET(victim.player^.flags,PLR_SILENCED)) then
     begin
+    act(AT_REPORT,Format('You have unsilenced $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been un-silenced by $N.',false,victim,nil,ch,TO_CHAR);
     REMOVE_BIT(victim.player^.flags,PLR_SILENCED);
     end
   else
     begin
+    act(AT_REPORT,Format('You have silenced $B$5%s$A$7.', [victim.name^]),false,ch,nil,nil,TO_CHAR);
     act(AT_REPORT,'You have been silenced by $N.',false,victim,nil,ch,TO_CHAR);
     SET_BIT(victim.player^.flags,PLR_SILENCED);
     end;
@@ -1592,7 +1620,7 @@ begin
 
   if (vict = nil) then
   begin
-    ch.sendBuffer('That character doesn''t exist.'#13#10);
+    ch.sendBuffer('That character isn''t online.'#13#10);
     exit;
   end;
   
@@ -1660,7 +1688,7 @@ begin
 
   if (vict = nil) then
   begin
-    ch.sendBuffer('That character doesn''t exist.'#13#10);
+    ch.sendBuffer('That character isn''t online.'#13#10);
     exit;
   end;
 
