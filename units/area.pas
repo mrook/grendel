@@ -1,6 +1,6 @@
 {
   @abstract(Area loader & manager)
-  @lastmod($Id: area.pas,v 1.58 2003/06/24 21:41:30 ***REMOVED*** Exp $)
+  @lastmod($Id: area.pas,v 1.59 2003/09/12 14:21:33 ***REMOVED*** Exp $)
 }
 
 unit area;
@@ -891,7 +891,6 @@ begin
   try
     af := GFileReader.Create('areas\' + fn);
   except
-    bugreport('GArea.load', 'area.pas', 'could not open ' + fn);
     exit;
   end;
 
@@ -966,7 +965,7 @@ begin
   try
     af := GFileReader.Create('areas\area.list');
   except
-    raise Exception.Create('Could not open areas\area.list');
+  	exit;
   end;
 
   repeat

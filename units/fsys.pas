@@ -1,6 +1,6 @@
 {
   @abstract(Buffered filereader & writer)
-  @lastmod($Id: fsys.pas,v 1.15 2002/08/03 19:13:57 ***REMOVED*** Exp $)
+  @lastmod($Id: fsys.pas,v 1.16 2003/09/12 14:21:33 ***REMOVED*** Exp $)
 }
 
 unit fsys;
@@ -77,11 +77,13 @@ begin
   fn := translateFileName(fn);
 
   fp := TFileStream.Create(fn, fmOpenRead);
-  fname := fn;
+
+	fname := fn;
 
   fsize := fp.Read(buffer, BUFSIZE);
-//  if (fsize = 0) then
-//    raise GException.Create('fsys.pas:GFileReader.Create', '0 length file');
+  
+  //if (fsize = 0) then
+  //  raise Exception.Create(fn + ': 0 length file');
 
   fpos := 0;
   line := 1;

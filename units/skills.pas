@@ -1,6 +1,6 @@
 {
   @abstract(Various skill related functions)
-  @lastmod($Id: skills.pas,v 1.27 2003/06/27 13:15:58 ***REMOVED*** Exp $)
+  @lastmod($Id: skills.pas,v 1.28 2003/09/12 14:21:34 ***REMOVED*** Exp $)
 }
 
 unit skills;
@@ -187,7 +187,6 @@ begin
   try
     af := GFileReader.Create('system\skills.dat');
   except
-    Exception.Create('Could not open system\skills.dat');
     exit;
   end;
 

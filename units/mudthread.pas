@@ -1,6 +1,6 @@
 {
   @abstract(Game thread and command interpreter)
-  @lastmod($Id: mudthread.pas,v 1.80 2003/06/24 21:41:34 ***REMOVED*** Exp $)
+  @lastmod($Id: mudthread.pas,v 1.81 2003/09/12 14:21:34 ***REMOVED*** Exp $)
 }
 
 unit mudthread;
@@ -136,7 +136,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'commands.dat');
   except
-    bugreport('load_commands', 'mudthread.pas', 'could not open system\commands.dat');
     exit;
   end;
 

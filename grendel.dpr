@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.68 2003/06/27 13:15:29 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.69 2003/09/12 14:21:32 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -639,18 +639,27 @@ end;
 procedure AnyExceptionNotify(ExceptObj: TObject; ExceptAddr: Pointer; OSException: Boolean);
 var
   a : integer;
+  e : Exception;
   strings : TStringList;
 begin
-  strings := TStringList.Create();
+	if (ExceptObj <> nil) then
+		begin
+		e := ExceptObj as Exception;
+		writeConsole('[EX] ' + E.Message);
+		end
+	else
+		begin
+	  strings := TStringList.Create();
 	
-  JclLastExceptStackListToStrings(strings, False, False, False);
+	  JclLastExceptStackListToStrings(strings, False, False, False);
   
-  writeConsole('Possible bug detected, stacktrace follows:');
+	  writeConsole('Possible bug detected, stacktrace follows:');
 
-  for a := 0 to strings.count - 1 do
-    writeConsole(strings[a]);
+	  for a := 0 to strings.count - 1 do
+	    writeConsole(strings[a]);
     
-  strings.Free();
+	  strings.Free();
+	  end;
 end;
 
 function ExceptionFilter(ExceptionInfo: _EXCEPTION_POINTERS): Longint; export; stdcall;

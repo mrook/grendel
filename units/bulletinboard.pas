@@ -1,6 +1,6 @@
 {
   @abstract(Bulletinboard (noteboard) interface)
-  @lastmod($Id: bulletinboard.pas,v 1.10 2003/06/24 21:41:32 ***REMOVED*** Exp $)
+  @lastmod($Id: bulletinboard.pas,v 1.11 2003/09/12 14:21:33 ***REMOVED*** Exp $)
 }
 
 unit bulletinboard;
@@ -50,7 +50,6 @@ begin
   try
     af := GFileReader.Create('boards\' + fname);
   except
-    bugreport('load_notes', 'bulletinboard.pas', 'could not open boards\' + fname);
     exit;
   end;
 

@@ -1,6 +1,6 @@
 {
   @abstract(Race routines)
-  @lastmod($Id: race.pas,v 1.13 2003/06/24 21:41:35 ***REMOVED*** Exp $)
+  @lastmod($Id: race.pas,v 1.14 2003/09/12 14:21:34 ***REMOVED*** Exp $)
 }
 
 unit race;
@@ -258,11 +258,7 @@ begin
           try
             rf := GFileReader.Create('races' + PathDelimiter + t.name);
           except
-            on E: Exception do
-            begin
-              bugreport('loadRaces()', 'race.pas', 'error opening race file ' + t.name);
-              exit;
-            end;
+            continue;
           end;
 
           try

@@ -1,6 +1,6 @@
 {
   @abstract(Configuration and other mud specific functions)
-  @lastmod($Id: mudsystem.pas,v 1.40 2003/06/24 21:41:34 ***REMOVED*** Exp $)
+  @lastmod($Id: mudsystem.pas,v 1.41 2003/09/12 14:21:33 ***REMOVED*** Exp $)
 }
 
 unit mudsystem;
@@ -232,7 +232,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'sysdata.dat');
   except
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\sysdata.dat.');
     exit;
   end;
 
@@ -289,7 +288,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'bans.dat');
   except
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\bans.dat');
     exit;
   end;
 
@@ -305,7 +303,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'names.dat');
   except
-    bugreport('load_system', 'mudsystem.pas', 'could not open system\names.dat');
     exit;
   end;
 
@@ -427,7 +424,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'socials.dat');
   except
-    bugreport('load_socials', 'mudsystem.pas', 'could not open system\socials.dat');
     exit;
   end;
 
@@ -626,7 +622,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'damage.dat');
   except
-    bugreport('load_damage', 'mudsystem.pas', 'could not open system\damage.dat');
     exit;
   end;
 
@@ -663,7 +658,6 @@ begin
   try
     af := GFileReader.Create(SystemDir + 'mudstate.dat');
   except
-    bugreport('loadMudState()', 'mudsystem.pas', 'Could not load mud state');
     exit;
   end;
 
@@ -715,7 +709,6 @@ begin
   try
     af := GFileWriter.Create(SystemDir + 'mudstate.dat');
   except
-    bugreport('saveMudState()', 'mudsystem.pas', 'Could not save mud state');
     exit;
   end;
 
