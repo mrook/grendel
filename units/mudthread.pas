@@ -1,4 +1,4 @@
-// $Id: mudthread.pas,v 1.55 2001/07/17 15:24:13 ***REMOVED*** Exp $
+// $Id: mudthread.pas,v 1.56 2001/07/18 10:11:20 ***REMOVED*** Exp $
 
 unit mudthread;
 
@@ -90,13 +90,13 @@ uses
 
 constructor GGameThread.Create(s : TSocket; a : TSockAddr_Storage; copy : boolean; name : string);
 begin
-  inherited Create(False);
-
   socket := s;
   client_addr := a;
   copyover := copy;
   copyover_name := name;
   last_update := Now();
+
+  inherited Create(False);
 end;
 
 {$IFDEF LINUX}
