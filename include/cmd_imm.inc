@@ -966,6 +966,9 @@ end;
 procedure do_return(ch:GCharacter;param:string);
 var vict:GCharacter;
 begin
+  if (ch.conn = nil) then
+    exit;
+    
   if (GConnection(ch.conn).original = nil) then
     begin
     act(AT_REPORT,'You aren''t switched.',false,ch,nil,nil,TO_CHAR);
