@@ -1,4 +1,4 @@
-// $Id: cmd_comm.inc,v 1.3 2004/02/27 22:30:04 ***REMOVED*** Exp $
+// $Id: cmd_comm.inc,v 1.4 2004/03/30 20:58:42 hemko Exp $
 
 procedure do_say(ch:GCharacter;param:string);
 begin
@@ -495,6 +495,7 @@ begin
     end;
 end;
 
+// Enable/Disable MCCP compression
 procedure do_compress(ch : GCharacter; param : string);
 begin
 	if (ch.IS_NPC) then
@@ -503,19 +504,31 @@ begin
 		exit;
 		end;
 
-	if (prep(param) = 'ON') and (not GPlayer(ch).conn.useCompress) then
-  		begin
-	  	ch.sendBuffer('Enabling MCCP (will only work on supporting clients).'#13#10);
+	if (prep(param) = 'ON') then
+ 		begin
+ 		if (GPlayer(ch).conn.useCompress) then
+ 			begin
+ 			ch.sendBuffer('MCCP is already enabled.'#13#10);
+ 			exit;
+ 			end;
+ 		
+	  ch.sendBuffer('Enabling MCCP (will only work on supporting clients).'#13#10);
 		GPlayer(ch).conn.negotiateCompression();
-	  	ch.sendBuffer('Ok.'#13#10);
-  		end
+	  ch.sendBuffer('Ok.'#13#10);
+ 		end
 	else
-	if (prep(param) = 'OFF') and (GPlayer(ch).conn.useCompress) then
-  		begin
-	  	ch.sendBuffer('Disabling MCCP.'#13#10);
-  		GPlayer(ch).conn.disableCompression();
-	  	ch.sendBuffer('Ok.'#13#10);
-  		end
+	if (prep(param) = 'OFF') then
+ 		begin
+ 		if (not GPlayer(ch).conn.useCompress) then
+ 			begin
+ 			ch.sendBuffer('MCCP is already disabled.'#13#10);
+ 			exit;
+ 			end;
+ 			
+  	ch.sendBuffer('Disabling MCCP.'#13#10);
+ 		GPlayer(ch).conn.disableCompression();
+  	ch.sendBuffer('Ok.'#13#10);
+ 		end
 	else
 		begin
 		ch.sendBuffer('Usage: COMPRESS <on/off>'#13#10);
