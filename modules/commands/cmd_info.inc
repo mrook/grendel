@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.8 2001/11/24 14:52:41 xenon Exp $
+// $Id: cmd_info.inc,v 1.9 2002/08/14 18:14:13 ***REMOVED*** Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -154,10 +154,7 @@ begin
       begin
       if (not vict.IS_NPC) then
         act(AT_REPORT,vict.name^+'$7 is known as $B$6' + GPlayer(vict).rank+'$A$7 amongst'+
-        ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR)
-      else 
-        if vict.short^ <> '' then
-         act(AT_REPORT, vict.short^ + #13#10, false, ch, nil, vict, TO_CHAR);
+        ' $S $B$4'+vict.race.name+'$A$7 ancestors.'#13#10,false,ch,nil,vict,TO_CHAR);
 
       w1 := UMax(round((vict.hp / vict.max_hp)*5),0);
       w2 := UMax(round((vict.mv / vict.max_mv)*5),0);
