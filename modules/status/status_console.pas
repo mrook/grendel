@@ -67,7 +67,7 @@ initialization
 
   registerMenuItem('Show console', showConsoleProc);
 
-  //fetchConsoleHistory(0, consoleDriver);
+  fetchConsoleHistory(0, consoleDriver);
   
   registerConsoleDriver(consoleDriver);
   

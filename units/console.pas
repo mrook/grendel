@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.9 2003/10/08 13:43:03 ***REMOVED*** Exp $)
+  @lastmod($Id: console.pas,v 1.10 2003/10/09 14:55:40 ***REMOVED*** Exp $)
 }
 
 unit console;
@@ -58,6 +58,7 @@ procedure cleanupConsole();
 implementation
 
 uses
+	mudsystem,
 	fsys;
 
 
@@ -107,6 +108,9 @@ begin
   he.timestamp := timestamp;
   he.text := text;
   queue.insertLast(he);
+  
+  if (not mud_booted) or (system_info.terminated) then
+  	pollConsole();
 end;
 
 procedure pollConsole();
