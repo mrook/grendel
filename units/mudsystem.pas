@@ -389,8 +389,6 @@ begin
       socials.hashObject(social, social.name);
   until eof(f);
 
-  socials.hashStats;
-
   closefile(f);
 end;
 
