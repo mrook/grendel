@@ -4,12 +4,13 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.7 2004/03/22 14:55:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.8 2004/04/04 22:10:03 ***REMOVED*** Exp $
 #
 
 
 ifeq ($(OSTYPE),linux-gnu)
 	LINUX=1
+	CONSOLEBUILD=1
 else
 	WIN32=1
 endif
@@ -37,7 +38,6 @@ endif
 
 ifdef LINUX
 DCC=dcc
-DCC_DEFS=CONSOLEBUILD
 
 GRENDEL=grendel
 COPYOVER=copyover
@@ -49,7 +49,16 @@ RM=rm -f
 endif
 
 
+ifdef CONSOLEBUILD
+DCC_DEFS=CONSOLEBUILD
+endif
+
+
+ifdef DEBUG
+DCC_FLAGS=-Q '-$$W+' -GD -V
+else
 DCC_FLAGS=-Q '-$$W+' -GD
+endif
 
 
 all:	$(ALL)

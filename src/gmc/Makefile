@@ -4,12 +4,13 @@
 #
 # GMC Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.3 2004/02/19 14:38:49 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.4 2004/04/04 22:10:03 ***REMOVED*** Exp $
 #
 
 
 ifeq ($(OSTYPE),linux-gnu)
 	LINUX=1
+	CONSOLEBUILD=1
 else
 	WIN32=1
 endif
@@ -33,7 +34,6 @@ endif
 
 ifdef LINUX
 DCC=dcc
-DCC_DEFS=CONSOLEBUILD
 
 GMCC=gmcc
 GASM=gasm
@@ -45,7 +45,17 @@ RM=rm -f
 endif
 
 
-DCC_FLAGS=-CC -Q -D- -W- -O+
+ifdef CONSOLEBUILD
+DCC_DEFS=CONSOLEBUILD
+endif
+
+
+ifdef DEBUG
+DCC_FLAGS=-Q '-$$W+' -GD -V
+else
+DCC_FLAGS=-Q '-$$W+' -GD
+endif
+
 
 GMCC_SOURCES=gmcc.dpr 
 GMCC_LEXFILES=gmcc.y gmclex.l

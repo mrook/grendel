@@ -4,12 +4,13 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.9 2004/04/02 11:29:24 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.10 2004/04/04 22:10:03 ***REMOVED*** Exp $
 #
 
 
 ifeq ($(OSTYPE),linux-gnu)
 	LINUX=1
+	CONSOLEBUILD=1
 else
 	WIN32=1
 endif
@@ -39,7 +40,6 @@ endif
 
 ifdef LINUX
 DCC=dcc
-DCC_DEFS=CONSOLEBUILD
 
 COMMANDS=bplcore_commands.so
 SPELLER=bplspeller.so
@@ -56,7 +56,16 @@ RM=rm -f
 endif
 
 
-DCC_FLAGS=-Q -V '-$$W+' -GD
+ifdef CONSOLEBUILD
+DCC_DEFS=CONSOLEBUILD
+endif
+
+
+ifdef DEBUG
+DCC_FLAGS=-Q '-$$W+' -GD -V
+else
+DCC_FLAGS=-Q '-$$W+' -GD
+endif
 
 
 all:	$(MODULES)
