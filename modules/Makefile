@@ -4,7 +4,7 @@
 #
 # Modules Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.4 2003/10/30 19:44:09 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.5 2003/10/30 19:57:34 ***REMOVED*** Exp $
 #
 
 
@@ -63,7 +63,7 @@ $(SPELLER):	speller.dpk speller/* $(CORE_FILE)
 $(STATUS):	status.dpk status/* $(CORE_FILE)
 	$(DCC) status.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Ustatus
 
-$(WEBSREVICE):	webservice.dpk webservice/* $(CORE_FILE)
+$(WEBSERVICE):	webservice.dpk webservice/* $(CORE_FILE)
 	$(DCC) webservice.dpk $(DCC_FLAGS) -D$(DCC_DEFS) -LU$(CORE_SYM) -Uwebservice
 
 $(IMC3):	imc3.dpk imc3/* $(CORE_FILE)
