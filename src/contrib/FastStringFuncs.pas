@@ -1,96 +1,29 @@
-//==================================================
-//All code herein is copyrighted by
-//Peter Morris
-//-----
-//No copying, alteration, or use is permitted without
-//prior permission from myself.
-//------
-//Do not alter / remove this copyright notice
-//Email me at : support@droopyeyes.com
-//
-//The homepage for this library is http://www.droopyeyes.com
-//
-//(Check out www.HowToDoThings.com for Delphi articles !)
-//(Check out www.stuckindoors.com if you need a free events page on your site !)
-//==================================================
-//Ps
-//Permission can be obtained very easily, and there is no ££££ involved,
-//please email me for permission, this way you can be included on the
-//email list to be notififed of updates / fixes etc.
+{
+	Summary:
+		FastStrings support library version 3.2
 
-//(It just includes sending my kids a postcard, nothing more !)
+		All code herein is copyrighted by
+		Peter Morris
 
-//Modifications
-//==============================================================================
-//Date  : 26 June, 2000
-//Found : NEW FEATURE
-//Fixed : Pete M
-//Change: Someone asked for a StringCount function, to count how many times a
-//        sub string exists within a string.
-//        Don't know if it is fast or not, so you'll just have to try it out.
-//==============================================================================
-//Date  : 3 July, 2000
-//Found : NEW FEATURE
-//Fixed : Pete M
-//Change: After using ASP for a short while I have become quite fond of the
-//        LEFT and RIGHT functions.  So I added them.
-//==============================================================================
-//Date  : 3 July, 2000
-//Found : Pete M + Ozz Nixon (Brain patchwork DX)
-//Fixed : Pete M
-//Change: changed Left to LeftStr (so as not to get confused with TForm.Left)
-//        changed RIGHT to RightStr to comply with LEFT
-//        Added CopyStr (quicker than COPY)
-//        Used SetLength method as pointed out by Ozz Nixon
-//==============================================================================
-//Date  : 10 July, 2000
-//Found : NEW FEATURE
-//Fixed : Pete M
-//Change: Routine to convert HTML RGB to TColor,
-//        HEX to INT
-//        URL to plain text
-//        Decrypt and Encrypt
-//        StringMatches
-//        MissingText
-//        ExtractHTML
-//        ExtractNonHTML
-//        RandomStr
-//        RandomFilename
-//        UniqueFilename
-//        WordAt
-//==============================================================================
-//Date  : 28 July, 2000
-//Found : Pete M
-//Fixed : Pete M
-//Change: Some people have requested ReverseStr.
-//        Personally I have no idea what you would use it for, but it was simple
-//        enough to write so I did.
-//        Ps, Oliver's 1st ever birthday tomorrow :-)
-//==============================================================================
-//Date  : 11 Sept, 2001
-//Found : Misc
-//Fixed : Pete M
-//Change: StringCount caused unit to not compile
-//==============================================================================
-//Date  : 14 March, 2001
-//Found : NEW FEATURE
-//Fixed : Pete M
-//Change: Soundex is a very useful tool for searching in databases, I found a
-//        very interesting piece of code on www.interbase.com.  This soundex
-//        code returns an integer instead of a 4 digit string, which is most
-//        likely quicker when searching, and a more useful format to store.
-//==============================================================================
-//Date  : 1 August, 2002
-//Found : NEW FEATURE
-//Fixed : Marc Bir
-//Change: Marc Bir (www.delphihome.com) has kindly donated 2 routines.
-//        Base64Encode and Base64Decode
+		No copying, alteration, or use is permitted without
+		prior permission from myself.
+
+		Do not alter / remove this copyright notice
+		Email me at : support@droopyeyes.com
+		
+	## $Id: FastStringFuncs.pas,v 1.2 2004/03/31 20:24:09 ***REMOVED*** Exp $
+}
 
 unit FastStringFuncs;
 
 interface
 
-Uses
+uses
+  {$IFDEF LINUX}
+    QGraphics,
+  {$ELSE}
+    Graphics,
+  {$ENDIF}
   FastStrings, Sysutils, Classes;
 
 const
@@ -116,16 +49,16 @@ function StringMatches(Value, Pattern : string) : Boolean;
 function MissingText(Pattern, Source : string; SearchText : string = '?') : string;
 function RandomFileName(aFilename : string) : string;
 function RandomStr(aLength : Longint) : string;
-function ReverseStr(const aSourceString : string) : string;
+function ReverseStr(const aSourceString: string): string;
 function RightStr(const aSourceString : string; Size : Integer) : string;
-function RGBToColor(aRGB : string) : integer;
+function RGBToColor(aRGB : string) : TColor;
 function StringCount(const aSourceString, aFindString : string; Const CaseSensitive : Boolean = TRUE) : Integer;
 function SoundEx(const aSourceString: string): Integer;
 function UniqueFilename(aFilename : string) : string;
 function URLToText(aValue : string) : string;
 function WordAt(Text : string; Position : Integer) : string;
 
-procedure Split(aValue : string; aDelimiter : Char; Result : TStrings);
+procedure Split(aValue : string; aDelimiter : Char; var Result : TStrings);
 
 implementation
 const
@@ -133,7 +66,7 @@ const
   cKey2 = 22719;
   Base64_Table : shortstring = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-function StripHTMLorNonHTML(S : string; WantHTML : Boolean) : string; forward;
+function StripHTMLorNonHTML(const S : string; WantHTML : Boolean) : string; forward;
 
 //Encode to Base64
 function Base64Encode(const Source: AnsiString): AnsiString;
@@ -229,7 +162,8 @@ var
   NewLength: Integer;
 begin
 {
-  NB: On invalid input this routine will simply skip the bad data, a better solution would probably report the error
+  NB: On invalid input this routine will simply skip the bad data, a
+better solution would probably report the error
 
 
   ESI -> Source String
@@ -245,7 +179,7 @@ begin
   SetLength( Result, (Length(Source) div 4) * 3);
   NewLength := 0;
   asm
-    Push  ESI         //save the good stuff
+    Push  ESI         
     Push  EDI
     Push  EBX
 
@@ -254,7 +188,7 @@ begin
     Mov   EDI, Result //Result address
     Mov   EDI, [EDI]
 
-    Or    ESI,ESI   // Test for nil
+    Or    ESI,ESI   // Nil Strings
     Jz    @Done
 
     Mov   ECX, [ESI-4]
@@ -355,14 +289,15 @@ begin
     Jmp @Finish
 
   @TestSlash:
-    Cmp AL, '\'
+    Cmp AL, '/'
     Jne @TestPlus
+    Mov AL, 63
     Jmp @Finish
 
   @TestPlus:
     Cmp AL, '+'
     Jne @Skip
-    Mov AL, 63
+    Mov AL, 62
 
   @Finish:
     Or  DL, AL
@@ -398,7 +333,7 @@ end;
 //Return only the HTML of a string
 function ExtractHTML(S : string) : string;
 begin
-  Result := StripHTMLorNonHTML(S,True);
+  Result := StripHTMLorNonHTML(S, True);
 end;
 
 function CopyStr(const aSourceString : string; aStart, aLength : Integer) : string;
@@ -426,7 +361,7 @@ end;
 //Decrypt a string encoded with Encrypt
 function Decrypt(const S: string; Key: Word): string;
 var
-I: byte;
+  I: byte;
 begin
  SetLength(result,length(s));
  for I := 1 to Length(S) do
@@ -480,7 +415,8 @@ begin
   Star1 := FastCharPos(Pattern,'*',1);
   if Star1 = 0 then
     Result := (Value = Pattern)
-  else begin
+  else
+  begin
     Result := (Copy(Value,1,Star1-1) = Copy(Pattern,1,Star1-1));
     if Result then
     begin
@@ -491,7 +427,8 @@ begin
       Star2 := FastCharPos(NextPattern, '*',1);
       if Star2 > 0 then NextPattern := Copy(NextPattern,1,Star2-1);
 
-      NextPos := pos(NextPattern,Value);
+      //pos(NextPattern,Value);
+      NextPos := FastPos(Value, NextPattern, Length(Value), Length(NextPattern), 1);
       if (NextPos = 0) and not (NextPattern = '') then
         Result := False
       else
@@ -574,7 +511,7 @@ begin
     Result[X] := Chr(Random(26) + 65);
 end;
 
-function ReverseStr(const aSourceString : string) : string;
+function ReverseStr(const aSourceString: string): string;
 var
   L                           : Integer;
   S,
@@ -620,7 +557,7 @@ begin
 end;
 
 //Converts a typical HTML RRGGBB color to a TColor
-function RGBToColor(aRGB : string) : integer;
+function RGBToColor(aRGB : string) : TColor;
 begin
   if Length(aRGB) < 6 then raise EConvertError.Create('Not a valid RGB value');
   if aRGB[1] = '#' then aRGB := Copy(aRGB,2,Length(aRGB));
@@ -636,7 +573,7 @@ begin
 end;
 
 //Splits a delimited text line into TStrings (does not account for stuff in quotes but it should)
-procedure Split(aValue : string; aDelimiter : Char; Result : TStrings);
+procedure Split(aValue : string; aDelimiter : Char; var Result : TStrings);
 var
   X : Integer;
   S : string;
@@ -739,37 +676,66 @@ begin
 end;
 
 //Used by ExtractHTML and ExtractNonHTML
-function StripHTMLorNonHTML(S : string; WantHTML : Boolean) : string;
+function StripHTMLorNonHTML(const S : string; WantHTML : Boolean) : string;
 var
-  X,
-  TagCnt    : Integer;
+  X: Integer;
+  TagCnt: Integer;
+  ResChar: PChar;
+  SrcChar: PChar;
 begin
-  S := StringReplace(S,'&nbsp;',' ',[rfReplaceAll, rfIgnoreCase]);
-  S := StringReplace(S,'&amp;','&', [rfReplaceAll, rfIgnoreCase]);
-  S := StringReplace(S,'&lt;','<', [rfReplaceAll, rfIgnoreCase]);
-  S := StringReplace(S,'&gt;','>', [rfReplaceAll, rfIgnoreCase]);
-  s := StringReplace(S,'&quot;','"', [rfReplaceAll, rfIgnoreCase]);
   TagCnt := 0;
-  Result := '';
-  For X:=1 to Length(S) do begin
-    case S[X] of
-      '<' : Inc(TagCnt);
-      '>' : Dec(TagCnt);
+  SetLength(Result, Length(S));
+  if Length(S) = 0 then Exit;
+
+  ResChar := @Result[1];
+  SrcChar := @S[1];
+  for X:=1 to Length(S) do
+  begin
+    case SrcChar^ of
+      '<':
+        begin
+          Inc(TagCnt);
+          if WantHTML and (TagCnt = 1) then
+          begin
+            ResChar^ := '<';
+            Inc(ResChar);
+          end;
+        end;
+      '>':
+        begin
+          Dec(TagCnt);
+          if WantHTML and (TagCnt = 0) then
+          begin
+            ResChar^ := '>';
+            Inc(ResChar);
+          end;
+        end;
     else
       case WantHTML of
-        False :
-          if TagCnt <= 0 then begin
-            Result := Result + S[X];
+        False:
+          if TagCnt <= 0 then
+          begin
+            ResChar^ := SrcChar^;
+            Inc(ResChar);
             TagCnt := 0;
           end;
-        True :
-          if TagCnt >= 1 then begin
-            Result := Result + S[X];
+        True:
+          if TagCnt >= 1 then
+          begin
+            ResChar^ := SrcChar^;
+            Inc(ResChar);
           end else
             if TagCnt < 0 then TagCnt := 0;
       end;
     end;
+    Inc(SrcChar);
   end;
+  SetLength(Result, ResChar - PChar(@Result[1]));
+  Result := FastReplace(Result, '&nbsp;', ' ', False);
+  Result := FastReplace(Result,'&amp;','&', False);
+  Result := FastReplace(Result,'&lt;','<', False);
+  Result := FastReplace(Result,'&gt;','>', False);
+  Result := FastReplace(Result,'&quot;','"', False);
 end;
 
 //Generates a UniqueFilename, makes sure the file does not exist before returning a result

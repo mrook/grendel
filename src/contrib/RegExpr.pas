@@ -1,6 +1,16 @@
 {
-  @abstract(Regular expression library 0.947 by Andrey Sorokin)
-  @lastmod($Id: RegExpr.pas,v 1.1 2003/12/12 13:19:33 ***REMOVED*** Exp $)
+	Summary:
+		Regular expression library v. 0.942
+
+		Author:
+			 Andrey V. Sorokin
+			 St-Petersburg
+			 Russia
+			 anso@mail.ru, anso@usa.net
+			 http://anso.da.ru
+			 http://anso.virtualave.net
+		
+	## $Id: RegExpr.pas,v 1.2 2004/03/31 20:24:09 ***REMOVED*** Exp $
 }
 
 unit RegExpr;
