@@ -178,7 +178,7 @@ begin
       begin
       key := one_argument(key, arg);
 
-      if (arg = text) then
+      if (pos(text, arg) > 0) then
         begin
         Result := help;
         exit;
