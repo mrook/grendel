@@ -2,7 +2,7 @@
   Summary:
   	(N)PC classes & routines
   	
-  ## $Id: chars.pas,v 1.4 2004/02/15 18:51:05 hemko Exp $
+  ## $Id: chars.pas,v 1.5 2004/02/18 23:07:14 ***REMOVED*** Exp $
 }
 
 unit chars;
@@ -32,6 +32,7 @@ uses
     bulletinboard;
 
 
+{$M+}
 type
     GCharacter = class;
 
@@ -41,6 +42,7 @@ type
     end;
 
     GAlias = class
+    public
       alias : string;
       expand : string;
 
@@ -48,6 +50,7 @@ type
     end;
 
     GHistoryElement = class
+    public
         time : TDateTime;
         contents : PString;
         constructor Create(txt : string);
@@ -55,6 +58,7 @@ type
       end;
 
     GUserChannel = class
+    public
 			channelname : string;
 			history : GDLinkedList;
 			ignored : boolean;
@@ -64,6 +68,7 @@ type
 		end;
 
     GLearned = class
+    public
       node : GListNode;
 
       skill : pointer;
@@ -130,7 +135,6 @@ type
       aff_flags : cardinal;
       clan : GClan;                 { joined a clan? }
 
-    published
       procedure sendPrompt; virtual;
       procedure sendBuffer(s : string); virtual;
       procedure sendPager(txt : string); virtual;
@@ -205,6 +209,7 @@ type
       function getLongName() : string;
       function getRaceName() : string;
 
+    published
     // properties   
       property level : integer read _level write _level;
       property str : integer read _str write _str;
@@ -256,11 +261,13 @@ type
       procedure sendBuffer(s : string); override;
       procedure die; override;
     end;
-    {$M-}
+{$M-}
+
 
 var
    char_list : GDLinkedList;
    extracted_chars : GDLinkedList;
+
 
 function findCharWorld(ch : GCharacter; name : string) : GCharacter;
 
@@ -269,7 +276,9 @@ procedure cleanExtractedChars();
 procedure initChars();
 procedure cleanupChars();
 
+
 implementation
+
 
 uses
 	player,

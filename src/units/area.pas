@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.10 2004/02/18 20:48:00 ***REMOVED*** Exp $
+  ## $Id: area.pas,v 1.11 2004/02/18 23:07:14 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -39,15 +39,16 @@ type
       _name, _author : string;
       _maxage : integer;
       _resetmsg : string;
+      _flags : GBitVector;
 
       found_range : boolean;
+
+      _resets : GDLinkedList;
     public     
       m_lo, m_hi, r_lo, r_hi, o_lo, o_hi : integer;
       fname : string;
       nplayer : integer;
       weather : GWeather;             { current local weather }
-      flags : GBitVector;
-      resets : GDLinkedList;
 
       procedure areaBug(func : string; problem : string);
 
@@ -71,6 +72,10 @@ type
       property resetmsg : string read _resetmsg write _resetmsg;
 
       property maxage : integer read _maxage write _maxage;
+      
+      property resets : GDLinkedList read _resets write _resets;
+      
+      property flags : GBitVector read _flags write _flags;
     end;
 
     GObjectValues = array[1..4] of integer;
@@ -175,10 +180,15 @@ type
     end;
 
     GReset = class
-    public
-      area : GArea;
-      reset_type : char;
-      arg1, arg2, arg3 : integer;
+    private
+    	_reset_type : char;
+      _arg1, _arg2, _arg3 : integer;
+    	    
+    published
+    	property reset_type : char read _reset_type write _reset_type;
+      property arg1 : integer read _arg1 write _arg1;
+      property arg2 : integer read _arg2 write _arg2;
+      property arg3 : integer read _arg3 write _arg3;
     end;
 
     GTeleport = class
@@ -770,8 +780,7 @@ begin
 
     if (uppercase(s) <> '#END') then
       begin
-      g := GReset.Create;
-      g.area := Self;
+      g := GReset.Create();
 
       with g do
         begin
@@ -991,7 +1000,7 @@ begin
       area := GArea.Create;
       area.load(trim(s));
 
-      s := pad_string(area.fname, 15);
+      s := pad_string(s, 15);
 
       with area do
         begin

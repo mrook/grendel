@@ -2,7 +2,7 @@
 	Summary:
 		Collection of common datastructures
 		
-  ##	$Id: dtypes.pas,v 1.4 2004/02/02 15:35:42 ***REMOVED*** Exp $
+  ##	$Id: dtypes.pas,v 1.5 2004/02/18 23:07:14 ***REMOVED*** Exp $
 }
 
 unit dtypes;
@@ -13,6 +13,7 @@ uses
     Variants,
     SysUtils;
 
+{$M+}
 type
 		{
 			Container class for strings
@@ -65,12 +66,14 @@ type
       _prev : GListNode; 				{ Pointer to previous node in list }
       _next : GListNode;					{ Pointer to next node in list }
       _element : TObject;				{ Pointer to element }
+      
+    public
+      property prev : GListNode read _prev write _prev;
+      property next : GListNode read _next write _next;
 
 		published
       constructor Create(e : pointer; p, n : GListNode);
       
-      property prev : GListNode read _prev write _prev;
-      property next : GListNode read _next write _next;
       property element : TObject read _element write _element;
     end;
 
@@ -120,6 +123,11 @@ type
 			Array to store a set of prime numbers
 		}
     GPrimes = array of integer;
+    
+    {
+			Array to store a set of linked lists
+		}
+		GDLinkedListArray = array of GDLinkedList;
 
 		{
 			Definition of hash function
@@ -153,7 +161,7 @@ type
     private
       hashprime : integer;
       hashsize : integer;										{ Size of hash table }
-      bucketList : array of GDLinkedList;			{ Array of double linked lists }
+      bucketList : GDLinkedListArray;				{ Array of double linked lists }
       hashFunc : GHASH_FUNC;
       
     	function getBucket(index : integer) : GDLinkedList;
@@ -183,9 +191,9 @@ type
     public
       property item[key : variant] : TObject read get write put; default;		{ Provides overloaded access to hash table }  
       property buckets[index : integer] : GDLinkedList read getBucket;
-
     	property bucketcount : integer read hashsize;
     end;   
+{$M-}    
 
 {
 	Size of global string hash table
