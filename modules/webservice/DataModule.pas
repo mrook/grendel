@@ -2,13 +2,13 @@
 	Summary:
 		SOAP Data Module
 	
-	## $Id: DataModule.pas,v 1.1 2003/09/24 14:31:45 ***REMOVED*** Exp $
+	## $Id: DataModule.pas,v 1.2 2003/09/26 06:15:59 ***REMOVED*** Exp $
 }
 Unit DataModule;
 
 interface
 
-uses SysUtils, Classes, InvokeRegistry, Midas, SOAPMidas, SOAPDm, GrendelWebServiceIntf;
+uses SysUtils, Classes, InvokeRegistry, Midas, SOAPMidas, SOAPDm, GrendelWebServiceIntf, race;
 
 type
   IGrendelDataModule = interface(IAppServerSOAP)
@@ -19,7 +19,7 @@ type
   private
   
   public
-    function HelloWorld(Param1 : String) : string; stdcall;
+    function getRaces() : GRace; stdcall;
   end;
 
 implementation
@@ -29,13 +29,14 @@ begin
  obj := TGrendelDataModule.Create(nil);
 end;
 
-function TGrendelDataModule.HelloWorld(Param1:
-    string): string; stdcall;
-  begin
-    Result := 'Hello World.  Your data: ' + Param1;
-  end;
+function TGrendelDataModule.getRaces() : GRace; stdcall;
+begin
+  Result := nil;
+end;
 
 initialization
    InvRegistry.RegisterInvokableClass(TGrendelDataModule, TGrendelDataModuleCreateInstance);
    InvRegistry.RegisterInterface(TypeInfo(IGrendelDataModule));
+
+//   InvRegistry.RegisterHeaderClass(TypeInfo(GRace), GRace);
 end.

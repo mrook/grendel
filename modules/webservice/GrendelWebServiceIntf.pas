@@ -4,7 +4,7 @@ unit GrendelWebServiceIntf;
 
 interface
 
-uses InvokeRegistry, Types, XSBuiltIns;
+uses InvokeRegistry, Types, Classes, XSBuiltIns, race;
 
 type
 
@@ -14,7 +14,7 @@ type
 
     { Methods of Invokable interface must not use the default }
     { calling convention; stdcall is recommended }
-    function HelloWorld(Param1: string): string; stdcall;
+    function getRaces() : GRace; stdcall;
   end;
 
 implementation
