@@ -164,8 +164,6 @@ var
    s, g : string;
    symbol : TSymbol;
    line : TLine;
-   changed : boolean;
-   a : integer;
    temp : string;
 begin
   assignfile(f, 'grendel.map');

@@ -120,6 +120,7 @@ type
       keywords : PString;
       flags : cardinal;
       key : integer;
+      constructor Create();
     end;
 
     GNPCIndex = class
@@ -399,7 +400,15 @@ begin
                 s_exit.key := af.readInteger;
 
                 if not (af.feol) then
-                  s_exit.keywords := hash_string(af.readLine);
+                  s_exit.keywords := hash_string(af.readLine)
+                else
+                begin
+                  if (s_exit.keywords = nil) then
+                  begin
+                    new(s_exit.keywords);
+                    s_exit.keywords^ := '';
+                  end;
+                end;
 
                 if (exits.head = nil) then
                   exits.insertLast(s_exit)
@@ -2288,6 +2297,17 @@ begin
   getWeight := we;
 end;
 
+constructor GExit.Create();
+begin
+  inherited Create();
+// Make sure variables are at least initialised to a value
+  vnum := -1;
+  direction := 0;
+  to_room := nil;
+  keywords := nil;
+  flags := 0;
+  key := 0;
+end;
 
 // misc
 {Jago 5/Jan/01 : func required for do_goto and do_transfer

@@ -60,6 +60,7 @@ var t : TSearchRec;
     rf : GFileReader;
     full, lab, arg, str : string;  // lab short for label
 begin
+  rf := nil;
   if (FindFirst('races\*.race',faAnyFile,t) = 0) then
     repeat
       race := GRace.Create;

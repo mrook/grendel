@@ -429,6 +429,7 @@ end;
  {This function returns the soundex code for a given character}
 function encodechar(aChar:char):char;
 begin
+   encodechar := '0';
    case upCase(aChar) of
    'A','E','H','I','O','U','W','Y' : encodechar := '0';
    'B','F','P','V'                 : encodechar := '1';

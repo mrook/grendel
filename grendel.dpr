@@ -21,7 +21,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  $Id: grendel.dpr,v 1.22 2001/04/15 13:14:53 xenon Exp $
+  $Id: grendel.dpr,v 1.23 2001/04/15 16:29:13 xenon Exp $
 }
 
 program grendel;
@@ -301,8 +301,12 @@ begin
     connection_list.Free;
     commands.Free;
   except
-    bugreport('cleanup', 'grendel.dpr', 'something went wrong',
-              'A procedure in the cleanup cycle failed. Contact Grimlord.');
+    on E : EExternal do
+    begin
+      bugreport('cleanup', 'grendel.dpr', 'something went wrong',
+                'A procedure in the cleanup cycle failed. Contact Grimlord.');
+      outputError(E);
+    end;
   end;
 
   if (use_ipv4) then

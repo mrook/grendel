@@ -624,12 +624,17 @@ begin
                i := (PString(arg2))^;
              end;
         'd': begin
-             ex := GExit(arg2);
+               if (arg2 = nil) then
+                 write_console('[BUG]: act() -> arg2 is nil')
+               else
+               begin
+                 ex := GExit(arg2);
 
-             if (length(ex.keywords^) = 0) then
-               i := 'door'
-             else
-               one_argument(ex.keywords^, i);
+                 if ((ex.keywords <> nil) and (length(ex.keywords^) = 0)) then
+                   i := 'door'
+                 else
+                   one_argument(ex.keywords^, i);
+               end;
              end;
    '0'..'9','A','B':begin
                     i:='$'+acts[t];

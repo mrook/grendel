@@ -113,6 +113,7 @@ begin
     ch.sendPager(buf);
     end;
 end;
+
 procedure do_remort(ch : GCharacter; param : string);
 var a:integer;
     str,con,dex,int,wis,dam,pracs:integer;
@@ -195,7 +196,6 @@ end;
 { Revised - Nemesis }
 procedure do_delete(ch: GCharacter; param : string);
 var f:file;
-    h:integer;
 begin
   if (ch.IS_NPC) then
     begin

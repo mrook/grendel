@@ -1692,6 +1692,12 @@ begin
     exit;
   end;
 
+  if (vict = ch) then
+  begin
+    ch.sendBuffer('You don''t need AT to do that!'#13#10); // with thanks to Nemesis for his suggestion :)
+    exit;
+  end;
+
   saveroom := ch.room;
   ch.fromRoom();
   ch.toRoom(vict.room);
@@ -1711,6 +1717,7 @@ var
   amount_str : string;
   amount, count : integer;
 begin
+  nt := nil;
   count := 1;
   
   if (length(param) = 0) then

@@ -44,7 +44,7 @@ var
    cnt : integer;
    node : GListNode;
    vict : GCharacter;
-   obj,obj_in : GObject;
+   obj : GObject;
 begin
   if (ch.LEARNED(gsn_peek) = 0) then
   begin
@@ -96,18 +96,17 @@ end;
 
 { Xenon 22/Feb/2001: seperated peek from look (it's a command on its own now) }
 procedure do_look(ch : GCharacter; param:string);
-var a:integer;
-    vict:GCharacter;
+var vict:GCharacter;
     node : GListNode;
     obj,obj_in: GObject;
     s_extra : GExtraDescription;
     pexit:GExit;
     w1,w2:byte;
     inside:string[20];
-    buf, buf1 : string;
+    buf1 : string;
     cnt:integer;
     brief:boolean;
-    r,act_str:string;
+    act_str:string;
 begin
   if (IS_SET(ch.aff_flags,AFF_BLIND)) then
     begin
@@ -575,8 +574,7 @@ end;
 { Xenon 22/Feb/2001: changed the format of WHO some more, still needs some more features (later) }
 { Xenon 23/Feb/2001: added 'who good' 'who evil' 'who imm' 'who clan' 'who <race>' 'who <name>' (code could be a bit cleaner still)}
 procedure do_who(ch:GCharacter;param:string);
-var a:word;
-    num, num_good, num_evil, numImms :integer;
+var num, num_good, num_evil, numImms :integer;
     buf1 : string;
     buf_imm, buf_good, buf_evil, buf_result : string;
     conn : GConnection;
@@ -584,6 +582,7 @@ var a:word;
     arg : string;
     normarg, specarg : boolean;
 begin
+  conn := nil;
   param := one_argument(param, arg);
   arg := trim(uppercase(arg));
   
@@ -1124,7 +1123,7 @@ var
     e:GExit;
     count, scanCount : integer;
     vict:GCharacter;
-    list_first,list_last: GDLinkedList;
+    list_first : GDLinkedList;
     list_count:integer;
     vict_node : GListNode;
 
@@ -1226,7 +1225,7 @@ begin
 end;
 
 procedure do_affects(ch:GCharacter;param:string);
-var g,h:integer;
+var h:integer;
     buf:string;
     node : GListNode;
     aff : GAffect;

@@ -565,7 +565,8 @@ end;
 function one_hit(ch, victim : GCharacter) : integer;
 var chance,ds,dam:integer;
     wield : GObject;
-    fly_bonus, prof_bonus, prof_gsn : integer;
+//    fly_bonus, prof_gsn : integer;
+    prof_bonus : integer;
     vict_ac : integer;
     hit_roll, roll : integer;
 begin

@@ -287,7 +287,7 @@ end;
 
 procedure update_chars;
 var p:integer;
-    ch,vict:GCharacter;
+    ch : GCharacter;
     e:GExit;
     r:GRoom;
     node : GListNode;
