@@ -947,6 +947,8 @@ begin
             gch.position := POS_FIGHTING;
             end;
         end;
+        
+      iter_room.Free();
 
       { NPC's of same type assist each other }
       if (ch.IS_NPC) then
@@ -978,6 +980,8 @@ begin
              multi_hit(gch,vch);
              end;
           end;
+
+        iter_room.Free();
         end;
       end
     else
@@ -997,6 +1001,7 @@ begin
       end;
     end;
 
+  iter_world.Free();
   iter_world := connection_list.iterator();
 
   while (iter_world.hasNext()) do
@@ -1005,8 +1010,9 @@ begin
 
     if (conn.state = CON_PLAYING) and (not conn.ch.in_command) then
       GPlayer(conn.ch).emptyBuffer;
-    end;
+    end;  
 
+  iter_world.Free();
   iter_world := char_list.iterator();
 
   while (iter_world.hasNext()) do
@@ -1026,6 +1032,8 @@ begin
         end;
       end;
     end;
+
+  iter_world.Free();
 end;
 
 begin
