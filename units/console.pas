@@ -1,6 +1,6 @@
 {
   @abstract(Abstract console interface)
-  @lastmod($Id: console.pas,v 1.11 2003/10/22 13:12:35 ***REMOVED*** Exp $)
+  @lastmod($Id: console.pas,v 1.12 2003/10/23 08:17:38 ***REMOVED*** Exp $)
 }
 
 unit console;
@@ -122,6 +122,8 @@ begin
 	while (queue.head <> nil) do
 		begin
 		he := GConsoleHistoryElement(queue.head.element);
+	
+		queue.remove(queue.head);
   
   	iterator := writers.iterator();
   
@@ -135,8 +137,6 @@ begin
 		iterator.Free();
 		
 		he.Free();
-		
-		queue.remove(queue.head);
 		end;
 end;
 
@@ -203,6 +203,8 @@ end;
 
 procedure cleanupConsole();
 begin
+	pollConsole();
+	
   if (TTextRec(logfile).mode = fmOutput) then
     CloseFile(LogFile);
 
