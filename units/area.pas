@@ -1,4 +1,4 @@
-// $Id: area.pas,v 1.43 2001/07/30 11:12:44 ***REMOVED*** Exp $
+// $Id: area.pas,v 1.44 2001/07/31 22:08:35 ***REMOVED*** Exp $
 
 unit area;
 
@@ -1053,6 +1053,7 @@ var
    room : GRoom;
    npcindex : GNPCIndex;
    reset : GReset;
+   iterator : GIterator;
 //   prog : GProgram;
    shop : GShop;
    obj : GObjectIndex;
@@ -1081,65 +1082,57 @@ begin
   writeln(f, Self.weather.temp_mult, ' ', Self.weather.temp_avg, ' ', Self.flags);
   writeln(f);
   writeln(f, '#ROOMS');
-
-{  for h := 0 to room_list.hashsize - 1 do
+  
+  iterator := room_list.iterator();
+  
+  while (iterator.hasNext()) do
     begin
-    node := room_list.bucketList[h].head;
+    room := GRoom(iterator.next());
 
-    while (node <> nil) do
+    if (room.area <> Self) then
+      continue;
+
+    writeln(f, '#', room.vnum);
+    writeln(f, room.name^);
+    write(f, room.description);
+    writeln(f, '~');
+
+    write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
+
+    if (IS_SET(room.flags, ROOM_TELEPORT)) then
+      writeln(f, ' ', room.televnum, ' ', room.teledelay)
+    else
+      writeln(f);
+
+    node_ex := room.exits.head;
+    while (node_ex <> nil) do
       begin
-      room := GRoom(GHashValue(node.element).value);
+      ex := node_ex.element;
 
-      if (room.area <> Self) then
-        begin
-        node := node.next;
-        continue;
-        end;
+      write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
 
-      writeln(f, '#', room.vnum);
-      writeln(f, room.name^);
-      write(f, room.description);
-      writeln(f, '~');
-
-      write(f, room.flags, ' ', room.min_level, ' ', room.max_level, ' ', room.sector);
-
-      if (IS_SET(room.flags, ROOM_TELEPORT)) then
-        writeln(f, ' ', room.televnum, ' ', room.teledelay)
+      if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
+        writeln(f, ' ', ex.keywords^)
       else
         writeln(f);
 
-      node_ex := room.exits.head;
-      while (node_ex <> nil) do
-        begin
-        ex := node_ex.element;
-
-        write(f, 'D ', ex.vnum, ' ', ex.direction, ' ', ex.flags, ' ', ex.key);
-
-        if (ex.keywords <> nil) and (length(ex.keywords^) > 0) then
-          writeln(f, ' ', ex.keywords^)
-        else
-          writeln(f);
-
-        node_ex := node_ex.next;
-        end;
-
-      node_ex := room.extra.head;
-      while (node_ex <> nil) do
-        begin
-        extra := node_ex.element;
-
-        writeln(f, 'E ', extra.keywords);
-        write(f, extra.description);
-        writeln(f, '~');
-
-        node_ex := node_ex.next;
-        end;
-
-      writeln(f, 'S');
-
-      node := node.next;
+      node_ex := node_ex.next;
       end;
-    end;}
+
+    node_ex := room.extra.head;
+    while (node_ex <> nil) do
+      begin
+      extra := node_ex.element;
+
+      writeln(f, 'E ', extra.keywords);
+      write(f, extra.description);
+      writeln(f, '~');
+
+      node_ex := node_ex.next;
+      end;
+
+    writeln(f, 'S');
+    end;
 
   for h := r_lo to (r_hi - 1) do
   begin
