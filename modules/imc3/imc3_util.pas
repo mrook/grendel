@@ -3,7 +3,7 @@
 
 	Based on client code by Samson of Alsherok.
 
-	$Id: imc3_util.pas,v 1.2 2003/11/02 20:21:23 ***REMOVED*** Exp $
+	$Id: imc3_util.pas,v 1.3 2003/11/11 19:34:33 ***REMOVED*** Exp $
 }
 
 unit imc3_util;
@@ -12,11 +12,14 @@ interface
 
 
 uses
+	imc3_const,
+	chars,
 	player;
 
 
 procedure sendToPlayer(pl : GPlayer; buf : string);
 function fishToAnsi(buf : string) : string;
+function I3PERM(ch : GCharacter) : I3_PERMISSIONS;
 
 
 implementation
@@ -25,7 +28,7 @@ implementation
 uses
 	SysUtils,
 	StrUtils,
-	imc3_const;
+	constants;
 	
 
 procedure sendToPlayer(pl : GPlayer; buf : string);
@@ -91,6 +94,23 @@ begin
 		end;
 	
 	Result := Result + Copy(buf, cp2 + 2, length(buf));
+end;
+
+function I3PERM(ch : GCharacter) : I3_PERMISSIONS;
+begin
+  Result := I3PERM_NOTSET;
+  
+	if (ch.level < LEVEL_START) then
+		Result := I3PERM_NONE
+	else
+	if (ch.level <= LEVEL_MAX) then
+		Result := I3PERM_MORT
+	else
+	if (ch.level <= LEVEL_BUILD) then
+		Result := I3PERM_ADMIN
+	else
+	if (ch.level <= LEVEL_MAX_IMMORTAL) then
+		Result := I3PERM_IMP;
 end;
 
 
