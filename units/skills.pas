@@ -1,4 +1,4 @@
-// $Id: skills.pas,v 1.22 2001/09/02 21:53:03 ***REMOVED*** Exp $
+// $Id: skills.pas,v 1.23 2001/09/28 21:30:38 ***REMOVED*** Exp $
 
 unit skills;
 
@@ -418,7 +418,7 @@ begin
       APPLY_MANA: ch.mana := ch.mana + modif;
       APPLY_MAX_MANA: ch.max_mana := ch.max_mana + modif;
       APPLY_AC: begin
-                inc(ch.ac, modif);
+                inc(ch.ac_mod, modif);
                 ch.calcAC;
                 end;
       APPLY_APB: ch.apb := ch.apb + modif;
