@@ -2,7 +2,7 @@
   Summary:
   	Timer class
     
-  ## $Id: timers.pas,v 1.13 2004/05/11 15:04:47 ***REMOVED*** Exp $
+  ## $Id: timers.pas,v 1.14 2004/05/12 20:58:01 ***REMOVED*** Exp $
 }
 
 unit timers;
@@ -185,6 +185,10 @@ begin
 							timer._counter := timer.timeout;
 						end;
 				except
+					{$IFDEF LINUX}
+					on E : EQuit do Terminate();
+					{$ENDIF}
+					on E : EControlC do Terminate();
 					on E : Exception do	
 						begin
 						{$IFDEF WIN32}
@@ -210,8 +214,6 @@ begin
 			{$ELSE}
 			reportException(E, 'timers.pas:GTimerThread.Execute()');
 			{$ENDIF}
-			timer_list.remove(node);
-			timer.Free();
 			end;
 	end;	
 end;
