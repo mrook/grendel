@@ -1,4 +1,4 @@
-// $Id: cmd_info.inc,v 1.34 2001/04/28 16:06:26 ***REMOVED*** Exp $
+// $Id: cmd_info.inc,v 1.35 2001/04/29 16:46:21 xenon Exp $
 
 function info_object(obj : GObject) : string;
 var r : string;
@@ -2050,3 +2050,21 @@ begin
   ch.player^.prompt := param;
   ch.sendBuffer('Ok.'#13#10);
 end;
+
+procedure do_areas(ch:GCharacter; param:string);
+var
+	//area:AREA_DATA;
+	area: GArea;
+ area_node : GListNode;
+begin
+  act(AT_DCYAN, 'Area name                                                    Author'#13#10, false, ch, nil, nil, TO_CHAR);
+
+  area_node := area_list.head;
+  while area_node <> nil do
+  begin
+   area := GArea(area_node.element);
+		act(AT_REPORT, pad_string(area.name, 60) + ' ' + pad_string(area.author, 19), false, ch, nil, nil, TO_CHAR);
+		area_node := area_node.next;
+  end;
+end;
+
