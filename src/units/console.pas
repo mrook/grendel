@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.9 2004/04/01 11:22:57 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.10 2004/04/01 13:05:01 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -135,6 +135,7 @@ var
 	he : GConsoleHistoryElement;
 	timestamp : TDateTime;
 begin
+	// lock write
 	synchronizer.BeginWrite();
 	
 	timestamp := Now();
@@ -161,6 +162,7 @@ begin
 	if (not serverBooted) then
 		poll();
 
+	// unlock write
 	synchronizer.EndWrite();
 end;
 
@@ -168,17 +170,18 @@ end;
 procedure GConsole.poll();
 var
 	he : GConsoleHistoryElement;
-	iterator : GIterator;
+	queue_iterator, iterator : GIterator;
 	writer : GConsoleWriter;
 begin
+	// lock read
 	synchronizer.BeginRead();
 
-	while (queue.head <> nil) do
-		begin
-		he := GConsoleHistoryElement(queue.head.element);
+	queue_iterator := queue.iterator();
 	
-		queue.remove(queue.head);
-  
+	while (queue_iterator.hasNext()) do
+		begin
+		he := GConsoleHistoryElement(queue_iterator.next());
+	
   		iterator := writers.iterator();
   
 		while (iterator.hasNext()) do
@@ -188,12 +191,21 @@ begin
 			writer.write(he.timestamp, he.text, he.debugLevel);
 			end;    
 
-		iterator.Free();
-		
-		he.Free();
+		iterator.Free();	
 		end;
+	
+	queue_iterator.Free();
 
+	// unlock read
 	synchronizer.EndRead();
+	
+	// lock write
+	synchronizer.BeginWrite();
+	
+	queue.clear();
+	
+	// unlock write
+	synchronizer.EndWrite();
 end;
 
 { Fetch (up to) max items from the history and feed them to callback }
@@ -203,6 +215,7 @@ var
 	he : GConsoleHistoryElement;
 	count : integer;
 begin
+	// lock read
 	synchronizer.BeginRead();
 
 	iterator := history.iterator();
@@ -222,6 +235,7 @@ begin
 
 	iterator.Free();
 
+	// unlock read
 	synchronizer.EndRead();
 end;
 
