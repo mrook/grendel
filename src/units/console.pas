@@ -2,7 +2,7 @@
 	Summary:
   	Abstract console interface
   	
-  ##	$Id: console.pas,v 1.3 2004/02/27 22:24:21 ***REMOVED*** Exp $
+  ##	$Id: console.pas,v 1.4 2004/03/13 15:50:06 ***REMOVED*** Exp $
 }
 
 unit console;
@@ -11,6 +11,7 @@ interface
 
 uses
   SysUtils,
+  Contnrs,
   dtypes;
   
 
@@ -26,7 +27,13 @@ type
   end;
 
   GConsoleLogWriter = class(GConsoleWriter)
+  private
+	  logFile : textfile;
+  
   public
+  	constructor Create();
+  	destructor Destroy(); override;
+  	
     procedure write(timestamp : TDateTime; const text : string); override;
   end;
   
@@ -39,6 +46,40 @@ type
     property timestamp : TDateTime read _timestamp write _timestamp;
     property text : string read _text write _text;
   end;
+  
+  GConsole = class(GSingleton)
+  private
+  	writers : GDLinkedList;
+  	history : GDLinkedList;
+  	queue : GDLinkedList;
+ 	
+  public
+  	constructor actualCreate(); override;
+  	destructor actualDestroy(); override;
+  	
+  published
+  	procedure write(const text : string);
+  	procedure poll();
+			
+  	procedure attachWriter(writer : GConsoleWriter);
+  	procedure detachWriter(writer : GConsoleWriter);
+  	
+  	procedure fetchHistory(callback : GConsoleWriter; max : integer = 0);
+  end;
+
+
+
+  
+procedure writeConsole(const text : string);
+procedure pollConsole();
+
+
+implementation
+
+
+uses
+	mudsystem,
+	fsys;
 
 
 const
@@ -46,52 +87,43 @@ const
   
 
 var
-  writers : GDLinkedList;
-  history : GDLinkedList;
-  queue : GDLinkedList;
-  LogFile : textfile;
-
-  
-procedure registerConsoleDriver(writer : GConsoleWriter);
-procedure unregisterConsoleDriver(writer : GConsoleWriter);
-procedure writeConsole(const text : string);
-procedure fetchConsoleHistory(max : integer; callback : GConsoleWriter);
-procedure pollConsole();
-
-procedure initConsole();
-procedure cleanupConsole();
-
-implementation
-
-uses
-	mudsystem,
-	fsys;
+	cons : GConsole;
 
 
-procedure registerConsoleDriver(writer : GConsoleWriter);
+{ GConsole constructor }
+constructor GConsole.ActualCreate();
 begin
-  writers.insertLast(writer);
+	writers := GDLinkedList.Create();
+	history := GDLinkedList.Create();
+	queue := GDLinkedList.Create();
 end;
 
-procedure unregisterConsoleDriver(writer : GConsoleWriter);
-var
-  node : GListNode;
+{ GConsole destructor }
+destructor GConsole.ActualDestroy();
 begin
-  node := writers.head;
-  
-  while (node <> nil) do
-    begin
-    if (node.element = writer) then
-      begin
-      writers.remove(node);
-      exit;
-      end;
-      
-    node := node.next;
-    end;
+	writers.clear();
+	history.clear();
+	queue.clear();
+	
+	writers.Free();
+	history.Free();
+	queue.Free();
 end;
 
-procedure writeConsole(const text : string);
+{ Attach a GConsoleWriter object to the console }
+procedure GConsole.attachWriter(writer : GConsoleWriter);
+begin
+	writers.add(writer);
+end;
+
+{ Detach a GConsoleWriter object from the console }
+procedure GConsole.detachWriter(writer : GConsoleWriter);
+begin
+	writers.remove(writer);
+end;
+
+{ Write a message to the console }
+procedure GConsole.write(const text : string);
 var
   he : GConsoleHistoryElement;
   timestamp : TDateTime;
@@ -101,7 +133,7 @@ begin
   he := GConsoleHistoryElement.Create();
   he.timestamp := timestamp;
   he.text := text;
-  history.insertLast(he);
+  history.add(he);
 
   if (history.size() > CONSOLE_HISTORY_MAX) then
   	begin
@@ -112,13 +144,14 @@ begin
   he := GConsoleHistoryElement.Create();
   he.timestamp := timestamp;
   he.text := text;
-  queue.insertLast(he);
+  queue.add(he);
   
   if (not mud_booted) or (system_info.terminated) then
-  	pollConsole();
+  	poll();
 end;
 
-procedure pollConsole();
+{ Poll the console }
+procedure GConsole.poll();
 var
 	he : GConsoleHistoryElement;
 	iterator : GIterator;
@@ -145,7 +178,8 @@ begin
 		end;
 end;
 
-procedure fetchConsoleHistory(max : integer; callback : GConsoleWriter);
+{ Fetch (up to) max items from the history and feed them to callback }
+procedure GConsole.fetchHistory(callback : GConsoleWriter; max : integer = 0);
 var
   iterator : GIterator;
   he : GConsoleHistoryElement;
@@ -169,8 +203,18 @@ begin
   iterator.Free();
 end;
 
+procedure writeConsole(const text : string);
+begin
+	cons.write(text);
+end;
 
-// GConsoleDefault
+procedure pollConsole();
+begin
+	cons.poll();
+end;
+
+
+{ Writes to stdout (if available) }
 procedure GConsoleDefault.write(timestamp : TDateTime; const text : string);
 begin
 {$IFDEF CONSOLEBUILD}
@@ -178,6 +222,32 @@ begin
 {$ENDIF}
 end;
 
+{ GConsoleLogWriter constructor }
+constructor GConsoleLogWriter.Create();
+begin
+	inherited Create();
+
+  { open a standard log file, filename is given by current system time }
+  AssignFile(logFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
+
+  {$I-}
+  rewrite(logFile);
+  {$I+}
+
+  if (IOResult <> 0) then
+    raise Exception.Create('Could not open logfile');
+end;
+
+{ GConsoleLogWriter destructor }
+destructor GConsoleLogWriter.Destroy();
+begin
+  if (TTextRec(logfile).mode = fmOutput) then
+    CloseFile(LogFile);
+    
+	inherited Destroy();
+end;
+
+{ Writes to logfile }
 procedure GConsoleLogWriter.write(timestamp : TDateTime; const text : string);
 begin
   if (TTextRec(logfile).mode = fmOutput) then
@@ -187,40 +257,14 @@ begin
     end;
 end;
 
-procedure initConsole();
-begin
-  writers := GDLinkedList.Create();
-  queue := GDLinkedList.Create();
-  history := GDLinkedlist.Create();
-  registerConsoleDriver(GConsoleDefault.Create());
-  registerConsoleDriver(GConsoleLogWriter.Create());
-  
-  { open a standard log file, filename is given by current system time }
-  AssignFile(LogFile, translateFileName('logs\' + FormatDateTime('yyyymmdd-hhnnss', Now) + '.log'));
 
-  {$I-}
-  rewrite(LogFile);
-  {$I+}
-
-  if (IOResult <> 0) then
-    writeConsole('NOTE: Could not open logfile. Messages are not being logged.');
-end;
-
-procedure cleanupConsole();
-begin
-	pollConsole();
+initialization
+	cons := GConsole.Create();
 	
-  if (TTextRec(logfile).mode = fmOutput) then
-    CloseFile(LogFile);
-
-  writers.clean();
-  writers.Free();
-
-  queue.clean();
-  queue.Free();
-  
-  history.clean();
-  history.Free();
-end;
-
+	cons.attachWriter(GConsoleDefault.Create());
+	cons.attachWriter(GConsoleLogWriter.Create());
+	
+finalization
+	FreeAndNil(cons);
+	
 end.
