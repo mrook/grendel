@@ -47,6 +47,7 @@ type
       clanleader : boolean;         { is clanleader? }
       password : string;
       md5_password : MD5Digest;
+      prompt : string;
       remorts : integer;            { remorts done }
       condition : array[COND_DRUNK..COND_MAX-1] of integer;
       area: GArea;
@@ -91,6 +92,13 @@ type
       save_breath, save_spell :integer;
     end;
 
+    GLearned = class
+      skill : pointer;
+      perc : integer;
+
+      constructor Create(perc_ : integer; skill_ : pointer);
+    end;
+
     GCharacter = class
       node_world, node_room : GListNode;
       objects : GDLinkedList;
@@ -113,7 +121,7 @@ type
       trust : integer;
       kills : integer;
       wait : integer;
-      learned : array[0..MAX_SKILLS-1] of integer;
+      skills_learned : GDLinkedList;
       cast_timer, bash_timer, bashing : integer;
       in_command : boolean;
       npc_index : GNPCIndex;
@@ -169,10 +177,13 @@ type
       function IS_WEARING(item_type : integer) : boolean;
       function IS_HOLYWALK : boolean;
       function IS_HOLYLIGHT : boolean;
-      function CAN_FLY : boolean;
-      function CAN_SEE(vict : GCharacter) : boolean;
       function IS_AFK : boolean;
       function IS_KEYLOCKED : boolean;
+      function CAN_FLY : boolean;
+      function CAN_SEE(vict : GCharacter) : boolean;
+
+      function LEARNED(skill : pointer) : integer;
+      procedure SET_LEARNED(perc : integer; skill : pointer);
 
       procedure extract(pull : boolean);
       procedure quit;
@@ -612,6 +623,30 @@ begin
     end;
 end;
 
+{ Utility function - Nemesis }
+function GCharacter.IS_AFK : boolean;
+begin
+  if (IS_NPC) then
+    IS_AFK := false
+  else
+  if IS_SET(player^.flags, PLR_LINKLESS) then
+    IS_AFK := false
+  else
+    IS_AFK := GConnection(conn).afk = true;
+end;
+
+{ utility function - Nemesis }
+function GCharacter.IS_KEYLOCKED : boolean;
+begin
+  if (IS_NPC) then
+    IS_KEYLOCKED := false
+  else
+  if IS_SET(player^.flags, PLR_LINKLESS) then
+    IS_KEYLOCKED := false
+  else
+    IS_KEYLOCKED := GConnection(conn).keylock = true;
+end;
+
 function GCharacter.CAN_FLY : boolean;
 begin
   CAN_FLY := false;
@@ -649,28 +684,53 @@ begin
     CAN_SEE := false;
 end;
 
-{ Utility function - Nemesis }
-function GCharacter.IS_AFK : boolean;
+function GCharacter.LEARNED(skill : pointer) : integer;
+var
+   a : integer;
+   node : GListNode;
+   g : GLearned;
 begin
-  if (IS_NPC) then
-    IS_AFK := false
-  else
-  if IS_SET(player^.flags, PLR_LINKLESS) then
-    IS_AFK := false
-  else
-    IS_AFK := GConnection(conn).afk = true;
+  Result := 0;
+
+  node := skills_learned.head;
+
+  while (node <> nil) do
+    begin
+    g := node.element;
+
+    if (g.skill = skill) then
+      begin
+      Result := g.perc;
+      break;
+      end;
+
+    node := node.next;
+    end;
 end;
 
-{ utility function - Nemesis }
-function GCharacter.IS_KEYLOCKED : boolean;
+procedure GCharacter.SET_LEARNED(perc : integer; skill : pointer);
+var
+   g : GLearned;
+   node : GListNode;
 begin
-  if (IS_NPC) then
-    IS_KEYLOCKED := false
+  g := nil;
+  node := skills_learned.head;
+
+  while (node <> nil) do
+    begin
+    if (GLearned(node.element).skill = skill) then
+      begin
+      g := node.element;
+      break;
+      end;
+
+    node := node.next;
+    end;
+
+  if (g = nil) then
+    skills_learned.insertLast(GLearned.Create(perc, skill))
   else
-  if IS_SET(player^.flags, PLR_LINKLESS) then
-    IS_KEYLOCKED := false
-  else
-    IS_KEYLOCKED := GConnection(conn).keylock = true;
+    g.perc := perc;
 end;
 
 function GCharacter.load(fn : string) : boolean;
@@ -681,6 +741,7 @@ var d, x : longint;
     aff : GAffect;
     inner : integer;
     s: string;
+    sk : GSkill;
     al : GAlias;
 begin
   inner := 0;
@@ -730,6 +791,7 @@ begin
     ld_timer := 0;
 
     aliases := GDLinkedList.Create;
+    skills_learned := GDLinkedList.Create;
     end;
 
   with point do
@@ -1013,7 +1075,10 @@ begin
           player^.bamfout := striprbeg(a, ' ')
         else
         if (g = 'TAUNT') then
-          player^.taunt := striprbeg(a, ' ');
+          player^.taunt := striprbeg(a, ' ')
+        else
+        if (g = 'PROMPT') then
+          player^.prompt := striprbeg(a, ' ');
       until (uppercase(a)='#END') or (af.eof);
 
       if (uppercase(a)='#END') then
@@ -1031,10 +1096,10 @@ begin
           a := striprbeg(striprbeg(a,' '),'''');
           g := stripl(a,'''');
           a := striprbeg(striprbeg(a,''''),' ');
-          d := findSkill(g);
+          sk := findSkill(g);
 
-          if (d <> -1) then
-            learned[d] := strtoint(stripl(a,' '))
+          if (sk <> nil) then
+            SET_LEARNED(strtointdef(stripl(a,' '), 0), sk)
           else
             bugreport('GArea.load', 'charlist.pas', 'skill '+g+' does not exist',
                       'The skill specified in the pfile does not exist.');
@@ -1061,7 +1126,7 @@ begin
 
           with aff do
             begin
-            sn := findSkill(g);
+            skill := findSkill(g);
 
             g := stripl(a, ' ');
             apply_type := findApply(g);
@@ -1073,7 +1138,7 @@ begin
             modifier := strtointdef(stripl(a, ' '), 0);
             end;
 
-          if (aff.sn <> -1) then
+          if (aff.skill <> nil) then
             aff.applyTo(Self);
           end;
       until (uppercase(a)='#END') or (af.eof);
@@ -1238,6 +1303,7 @@ var
    node : GListNode;
    obj : GObject;
    al : GAlias;
+   g : GLearned;
    aff : GAffect;
    fl : cardinal;
 begin
@@ -1285,11 +1351,12 @@ begin
     writeln(f,'Bamfin: ',bamfin);
     writeln(f,'Bamfout: ',bamfout);
     writeln(f,'Taunt: ', taunt);
+    writeln(f,'Prompt: ', prompt);
 
     fl := flags;
     REMOVE_BIT(fl, PLR_LINKLESS);
     REMOVE_BIT(fl, PLR_LOADED);
-    
+
     writeln(f,'Flags: ', fl);
     writeln(f,'Config: ',cfg_flags);
     writeln(f,'Remorts: ',remorts);
@@ -1335,10 +1402,17 @@ begin
   writeln(f);
 
   writeln(f,'#SKILLS');
-  for h:=0 to MAX_SKILLS-1 do
-   if (learned[h]>0) and (learned[h]<=100) then
-    if skill_table[h].name <> '' then
-     writeln(f,'Skill: ''',skill_table[h].name,''' ',learned[h]);
+  node := skills_learned.head;;
+
+  while (node <> nil) do
+    begin
+    g := node.element;
+
+    writeln(f, 'Skill: ''', GSkill(g.skill).name, ''' ', g.perc);
+
+    node := node.next;
+    end;
+
   writeln(f,'#END');
   writeln(f);
 
@@ -1350,7 +1424,7 @@ begin
     aff := node.element;
 
     with aff do
-      writeln(f,'Affect: ''',skill_table[sn].name,''' ',
+      writeln(f,'Affect: ''', skill.name, ''' ',
                printApply(apply_type), ' ', duration, ' ', modifier);
 
     node := node.next;
@@ -1558,8 +1632,9 @@ end;
 
 procedure GCharacter.sendPrompt;
 var
-   buf : string;
+   s, prompt, buf : string;
    c : GConnection;
+   t : integer;
 begin
   c := conn;
   if (not IS_NPC) then
@@ -1570,9 +1645,14 @@ begin
       exit;
       end;
 
-    (* if (c.pagepoint <> nil) then
-      exit; *)
+    if (c.pagepoint > 0) then
+     exit;
     end;
+
+  if (IS_NPC) or (player^.prompt = '') then
+    prompt := '%hhp %mmv %ama (%l)> '
+  else
+    prompt := player^.prompt;
 
   buf := ansiColor(7);
 
@@ -1588,48 +1668,64 @@ begin
   if (IS_IMMORT) then
     buf := buf + '#' + inttostr(room.vnum) + ' [' + sector_types[room.sector] + '] ';
 
-  { buf := buf +
-         inttostr(point.hp) + '/' + inttostr(point.max_hp) + 'hp ' +
-         inttostr(point.mv) + '/' + inttostr(point.max_mv) + 'mv ' +
-         inttostr(point.mana) + 'ma ' + inttostr(level); }
+  t := 1;
+  s := '';
 
-  buf := buf +
-         inttostr(point.hp) + 'hp ' +
-         inttostr(point.mv) + 'mv ' +
-         inttostr(point.mana) + 'ma ' + inttostr(level);
-
-  if (not IS_NPC) then
-    buf := buf + ' (' + inttostr(player^.xptogo) + ')';
-
-  if (fighting <> nil) and (position >= POS_FIGHTING) then
+  while (t <= length(prompt)) do
     begin
-    buf := buf + ' [Oppnt: ';
+    if (prompt[t] = '%') then
+      begin
+      case prompt[t + 1] of
+        'h':  s := s + inttostr(point.hp);
+        'H':  s := s + inttostr(point.max_hp);
+        'm':  s := s + inttostr(point.mv);
+        'M':  s := s + inttostr(point.max_mv);
+        'a':  s := s + inttostr(point.mana);
+        'A':  s := s + inttostr(point.max_mana);
+        'l':  s := s + inttostr(level);
+        'x':  s := s + inttostr(player^.xptogo);
+        'f':  begin
+              if (fighting <> nil) and (position >= POS_FIGHTING) then
+                begin
+                s := s + ' [Oppnt: ';
 
-    with fighting do
-      buf := buf + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
+                with fighting do
+                  s := s + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
 
-    buf := buf + ']';
+                s := s + ']';
+                end;
+              end;
+        't':  begin
+              if (fighting <> nil) and (position >= POS_FIGHTING) then
+               if (fighting.fighting <> nil) and (fighting.fighting <> Self) then
+                 begin
+                 s := s + ' [' + fighting.fighting.name^ + ': ';
+
+                 with fighting.fighting do
+                   s := s + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
+
+                 s := s + ']';
+                 end;
+              end;
+        else s := s + '%' + prompt[t + 1]; 
+      end;
+
+      inc(t);
+      end
+    else
+      s := s + prompt[t];
+
+    inc(t);
     end;
 
-  if (fighting <> nil) and (position >= POS_FIGHTING) then
-   if (fighting.fighting <> nil) and (fighting.fighting <> Self) then
-     begin
-     buf := buf + ' [' + fighting.fighting.name^ + ': ';
-
-     with fighting.fighting do
-       buf := buf + hp_perc[UMax(round((point.hp / point.max_hp) * 5), 0)];
-
-    buf := buf + ']';
-     end;
-
-  buf := buf + '> ';
+  buf := buf + act_color(Self, s, '%') + '> ';
 
   if (snooped_by <> nil) then
-  begin
+    begin
     if IS_SET(snooped_by.player^.cfg_flags,CFG_BLANK) then   // Xenon 21/Feb/2001: send extra blank line if config says so
       GConnection(snooped_by.conn).send(#13#10);
     GConnection(snooped_by.conn).send(buf);
-  end;
+    end;
 
   if (not IS_NPC) then
    if IS_SET(player^.cfg_flags,CFG_BLANK) then
@@ -1818,7 +1914,7 @@ begin
   getDualWield := nil;
 
   { can't dual wield }
-  if (learned[gsn_dual_wield] = 0) then
+  if (LEARNED(gsn_dual_wield) = 0) then
     exit;
 
   if (getEQ(WEAR_RHAND) <> nil) and (getEQ(WEAR_LHAND) <> nil) then
@@ -2150,6 +2246,15 @@ begin
 
     ext.free;
     end;
+end;
+
+{ GLearned }
+constructor GLearned.Create(perc_: integer; skill_: pointer);
+begin
+  inherited Create;
+
+  perc := perc_;
+  skill := skill_;
 end;
 
 initialization

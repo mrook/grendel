@@ -11,10 +11,12 @@ uses
     constants;
 
 type
-    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : integer);
+    GSkill = class;
+
+    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
 
     GAffect = class
-      sn : integer;
+      skill : GSkill;
       apply_type : GApplyTypes;
       modifier : longint;
       duration : longint;
@@ -26,6 +28,8 @@ type
     end;
 
     GSkill = class
+      id : integer;
+
       func : SPEC_FUNC;
 
       affects : GDLinkedList;
@@ -37,7 +41,6 @@ type
       min_lvl:integer;
       beats:integer;
       target:integer;
-      sn : integer;
 
       dicenum,dicesize,diceadd:integer;
 
@@ -47,54 +50,55 @@ type
       miss_char,miss_vict,miss_room:string;
       die_char,die_vict,die_room:string;
       imm_char,imm_vict,imm_room:string;
+
+      constructor Create;
+      destructor Destroy; override;
     end;
 
 var
-   skill_table : array[0..MAX_SKILLS-1] of GSkill;
-   num_skills : integer;
+   skill_table : GDLinkedList;
 
 { gsn's }
 var
-   gsn_slashing_weapons : integer;
-   gsn_second_attack : integer;
-   gsn_third_attack : integer;
-   gsn_fourth_attack : integer;
-   gsn_fifth_attack : integer;
-   gsn_enhanced_damage : integer;
-   gsn_dual_wield : integer;
-   gsn_slashing : integer;
-   gsn_piercing : integer;
-   gsn_concussion : integer;
-   gsn_whipping : integer;
-   gsn_kick : integer;
-   gsn_bash : integer;
-   gsn_poison : integer;
-   gsn_sneak : integer;
-   gsn_swim : integer;
-   gsn_searching : integer;
-   gsn_backstab : integer;
-   gsn_circle : integer;
-   gsn_rescue : integer;
-   gsn_dodge : integer;
-   gsn_track : integer;
-   gsn_peek : integer;
-   gsn_hide : integer;
+   gsn_slashing_weapons : GSkill;
+   gsn_second_attack : GSkill;
+   gsn_third_attack : GSkill;
+   gsn_fourth_attack : GSkill;
+   gsn_fifth_attack : GSkill;
+   gsn_enhanced_damage : GSkill;
+   gsn_dual_wield : GSkill;
+   gsn_slashing : GSkill;
+   gsn_piercing : GSkill;
+   gsn_concussion : GSkill;
+   gsn_whipping : GSkill;
+   gsn_kick : GSkill;
+   gsn_bash : GSkill;
+   gsn_poison : GSkill;
+   gsn_sneak : GSkill;
+   gsn_swim : GSkill;
+   gsn_searching : GSkill;
+   gsn_backstab : GSkill;
+   gsn_circle : GSkill;
+   gsn_rescue : GSkill;
+   gsn_dodge : GSkill;
+   gsn_track : GSkill;
+   gsn_peek : GSkill;
+   gsn_hide : GSkill;
 
 
 procedure load_skills;
-procedure done_skills;
 
-function findSkill(s : string) : integer;
-function findSkillPlayer(ch : GCharacter; s : string) : integer;
+function findSkill(s : string) : GSkill;
+function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
 
-procedure improve_skill(ch : GCharacter; sn : integer);
-function skill_success(ch : GCharacter; sn : integer) : boolean;
+procedure improve_skill(ch : GCharacter; sn : GSkill);
+function skill_success(ch : GCharacter; sn : GSkill) : boolean;
 
 function findApply(s : string) : GApplyTypes;
 function printApply(apply : GApplyTypes) : string;
-function findAffect(ch : GCharacter; sn : integer) : GAffect;
+function findAffect(ch : GCharacter; sn : GSkill) : GAffect;
 procedure removeAffect(ch : GCharacter; aff : GAffect);
-function removeAffectSkill(ch:GCharacter;gsn:integer):boolean;
+function removeAffectSkill(ch:GCharacter; sn : GSkill):boolean;
 function removeAffectFlag(ch:GCharacter;flag:integer):boolean;
 procedure update_affects;
 
@@ -109,71 +113,69 @@ uses
     mudsystem;
 
 
-function findSkill(s : string) : integer;
-var h, r : integer;
-begin
-  s := uppercase(s);
-  r := -1;
-
-  for h := 0 to num_skills - 1 do
-   if (s = uppercase(skill_table[h].name)) or (pos(s,uppercase(skill_table[h].name)) <> 0) then
-    begin
-    r := h;
-    break;
-    end;
-
-  findSkill := r;
-end;
-
-function findSkillPlayer(ch : GCharacter; s : string) : integer;
-var h, r : integer;
-begin
-  s := uppercase(s);
-  r := -1;
-
-  for h := 0 to num_skills - 1 do
-   if (s = uppercase(skill_table[h].name)) or (pos(s,uppercase(skill_table[h].name)) <> 0) then
-    begin
-    r := h;
-    break;
-    end;
-
-  if (r <> -1) and (ch.learned[r] = 0) then
-    findSkillPlayer := -1
-  else
-    findSkillPlayer := r;
-end;
-
-function assign_gsn(name : string) : integer;
+function findSkill(s : string) : GSkill;
 var
-   gsn : integer;
+   node : GListNode;
+   sk : GSkill;
+begin
+  s := uppercase(s);
+  Result := nil;
+  node := skill_table.head;
+
+  while (node <> nil) do
+    begin
+    sk := node.element;
+
+    if (s = uppercase(sk.name)) or (pos(s, uppercase(sk.name)) > 0) then
+      begin
+      Result := sk;
+      break;
+      end;
+
+    node := node.next;
+    end;
+end;
+
+function findSkillPlayer(ch : GCharacter; s : string) : GSkill;
+var
+   sk : GSkill;
+begin
+  sk := findSkill(s);
+  Result := nil;
+
+  if (ch.LEARNED(sk) > 0) then
+    Result := sk;
+end;
+
+function assign_gsn(name : string) : GSkill;
+var
+   gsn : GSkill;
 begin
   gsn := findSkill(name);
 
-  if (gsn = -1) then
+  if (gsn = nil) then
     bugreport('assign_gsn', 'skills.pas', 'skill '''+name+''' not found',
               'The specified skill could not be found.');
 
   assign_gsn := gsn;
 end;
 
-procedure process_affect(skill : GSkill; s : integer; format : string);
+procedure process_affect(skill : GSkill; format : string);
 var
    aff : GAffect;
 begin
   aff := GAffect.Create;
+  aff.skill := skill;
 
   with aff do
     begin
-    sn := s;
-
     apply_type := findApply(stripl(format, ' '));
 
     format := striprbeg(format, ' ');
 
-    modifier := findSkill(stripl(format, ' '));
+    modifier := cardinal(findSkill(stripl(format, ' ')));
 
-    if (modifier = -1) then
+    if (modifier = 0) then
       modifier := strtointdef(stripl(format, ' '), 0);
 
     format := striprbeg(format, ' ');
@@ -186,8 +188,8 @@ end;
 procedure load_skills;
 var f:textfile;
     s,g,a:string;
-    h:integer;
-    skill : GSkill;
+    num : integer;
+    sk, skill : GSkill;
 begin
   assignfile(f, 'system\skills.dat');
   {$I-}
@@ -201,8 +203,7 @@ begin
     exit;
     end;
 
-  FillChar(skill_table, sizeof(skill_table), 0);
-  num_skills := 0;
+  num := 0;
 
   repeat
     repeat
@@ -213,10 +214,7 @@ begin
       break;
 
     skill := GSkill.Create;
-
-    skill.affects := GDLinkedList.Create;
-    skill.prereqs := GDLinkedList.Create;
-    skill.sn := num_skills;
+    skill.id := num;
 
     with skill do
       repeat
@@ -300,24 +298,24 @@ begin
         end
       else
       if g='AFFECTS' then
-        process_affect(skill, num_skills, striprbeg(s,' '))
+        process_affect(skill, striprbeg(s,' '))
       else
       if g='PREREQ' then
         begin
         a := striprbeg(s, ' ');
-        h := findSkill(a);
+        sk := findSkill(a);
 
-        if (h >= 0) then
-          prereqs.insertLast(skill_table[h])
+        if (sk <> nil) then
+          prereqs.insertLast(sk)
         else
           bugreport('load_skills', 'skills.pas', 'Could not find prereq skill ' + a,
                     'The specified skill could not be found.');
         end;
       until uppercase(s)='#END';
 
-    skill_table[num_skills] := skill;
+    skill_table.insertLast(skill);
 
-    inc(num_skills);
+    inc(num);
   until eof(f);
 
   closefile(f);
@@ -347,36 +345,26 @@ begin
   gsn_hide := assign_gsn('hide');
 end;
 
-procedure done_skills;
-var
-   a : integer;
-begin
-  for a := 0 to num_skills - 1 do
-    begin
-    skill_table[a].Free;
-    end;
-end;
-
-procedure improve_skill(ch : GCharacter; sn : integer);
+procedure improve_skill(ch : GCharacter; sn : GSkill);
 var chance, percent : integer;
 begin
-  if (ch.learned[sn] = 100) then
+  if (ch.LEARNED(sn) = 100) then
     exit;
 
-  chance := ch.learned[sn] - (ch.ability.wis div 5);
+  chance := ch.LEARNED(sn) - (ch.ability.wis div 5);
 
   percent := number_percent;
 
   if (percent <= chance div 3) then
     begin
-    act(AT_WHITE, '[You have become better at '+skill_table[sn].name+'!]',false,ch,nil,nil,TO_CHAR);
-    ch.learned[sn] := UMAX(ch.learned[sn]+1,100);
+    act(AT_WHITE, '[You have become better at ' + sn.name + '!]',false,ch,nil,nil,TO_CHAR);
+    ch.SET_LEARNED(UMin(ch.LEARNED(sn) + 1, 100), sn);
     end;
 end;
 
-function skill_success(ch : GCharacter; sn : integer) : boolean;
+function skill_success(ch : GCharacter; sn : GSkill) : boolean;
 begin
-  skill_success := (number_percent <= ch.learned[sn]);
+  skill_success := (number_percent <= ch.LEARNED(sn));
 end;
 
 procedure GAffect.modify(ch : GCharacter; add : boolean);
@@ -421,7 +409,7 @@ begin
     APPLY_APB: inc(ch.point.apb, modif);
     APPLY_AFFECT: SET_BIT(ch.aff_flags, modif);
     APPLY_REMOVE: REMOVE_BIT(ch.aff_flags, modif);
-    APPLY_STRIPSPELL: removeAffectSkill(ch, modif);
+    APPLY_STRIPSPELL: removeAffectSkill(ch, GSkill(pointer(modif)));
     APPLY_FULL: gain_condition(ch, COND_FULL, modif);
     APPLY_THIRST: gain_condition(ch, COND_THIRST, modif);
     APPLY_DRUNK: gain_condition(ch, COND_DRUNK, modif);
@@ -437,7 +425,7 @@ begin
   if (duration > 0) then
     begin
     aff := GAffect.Create;
-    aff.sn := Self.sn;
+    aff.skill := Self.skill;
     aff.apply_type := Self.apply_type;
     aff.duration := Self.duration;
     aff.modifier := Self.modifier;
@@ -547,7 +535,7 @@ begin
   end;
 end;
 
-function findAffect(ch:GCharacter;sn:integer) : GAffect;
+function findAffect(ch : GCharacter; sn : GSkill) : GAffect;
 var
    node : GListNode;
    aff : GAffect;
@@ -560,7 +548,7 @@ begin
     begin
     aff := node.element;
 
-    if (aff.sn = sn) then
+    if (aff.skill = sn) then
       begin
       findAffect := aff;
       exit;
@@ -579,11 +567,11 @@ begin
   aff.Free;
 end;
 
-function removeAffectSkill(ch:GCharacter;gsn:integer):boolean;
+function removeAffectSkill(ch:GCharacter; sn : GSkill):boolean;
 var
    aff : GAffect;
 begin
-  aff := findAffect(ch,gsn);
+  aff := findAffect(ch, sn);
 
   if (aff = nil) then
     begin
@@ -641,7 +629,7 @@ begin
       act(AT_REPORT,'You shiver and suffer.',false,ch,nil,nil,TO_CHAR);
       act(AT_REPORT,'$n shivers and suffers.',false,ch,nil,nil,TO_ROOM);
       ch.mental_state:=URANGE(20,ch.mental_state+4,100);
-      damage(ch,ch,6,gsn_poison);
+      damage(ch,ch,6, cardinal(gsn_poison));
       end;
 {    if IS_SET(ch.aff_flags,AFF_COLD) then
       begin
@@ -673,7 +661,7 @@ begin
 
       if (aff.duration = 0) then
         begin
-        act(AT_REPORT, skill_table[aff.sn].wear_msg,false,ch,nil,nil,TO_CHAR);
+        act(AT_REPORT, aff.skill.wear_msg, false,ch,nil,nil,TO_CHAR);
         removeAffect(ch, aff);
         end;
 
@@ -684,4 +672,26 @@ begin
     end;
 end;
 
+{ GSkill }
+constructor GSkill.Create;
+begin
+  inherited Create;
+
+  affects := GDLinkedList.Create;
+  prereqs := GDLinkedList.Create;
+end;
+
+destructor GSkill.Destroy;
+begin
+  affects.clean;
+  affects.Free;
+
+  prereqs.smallClean;
+  prereqs.Free;
+  
+  inherited Destroy;
+end;
+
+begin
+  skill_table := GDLinkedList.Create;
 end.

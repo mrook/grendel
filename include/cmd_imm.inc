@@ -140,7 +140,7 @@ begin
       act(AT_SLAY,'You slay $N in cold blood!',false,ch,nil,t,TO_CHAR);
       act(AT_SLAY,'$n slays you in cold blood!',false,ch,nil,t,TO_VICT);
       act(AT_SLAY,'$n slays $N in cold blood!',false,ch,nil,t,TO_NOTVICT);
-      dam:=UMin(t.point.max_hp,800);
+      dam := UMax(t.point.max_hp, 800);
       damage(ch,t,dam,TYPE_SLAY);
       end;
     end;
@@ -1266,7 +1266,9 @@ end;
 procedure do_sset(ch : GCharacter; param : string);
 var vict : GCharacter;
     victim, skill : string;
-    sn,perc:integer;
+    perc:integer;
+    sn : GSkill;
+    node : GListNode;
 begin
   if (length(param) = 0) then
     begin
@@ -1300,8 +1302,14 @@ begin
 
   if (skill = 'all') then
     begin
-    for sn := 0 to num_skills -1 do
-      vict.learned[sn] := perc;
+    node := skill_table.head;
+
+    while (node <> nil) do
+      begin
+      vict.SET_LEARNED(perc, node.element);
+
+      node := node.next;
+      end;
 
     vict.sendBuffer('You feel a great power increasing your skills.'#13#10);
     end
@@ -1309,13 +1317,14 @@ begin
     begin
     sn := findSkill(skill);
 
-    if (sn=-1) then
+    if (sn = nil) then
       begin
       ch.sendBuffer('That skill does not exist.'#13#10);
       exit;
       end;
 
-    vict.learned[sn] := perc;
+    vict.SET_LEARNED(perc, sn);
+
     vict.sendBuffer('You feel a great power increasing your skills.'#13#10);
     end;
 

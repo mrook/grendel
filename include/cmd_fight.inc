@@ -121,7 +121,7 @@ begin
     if (timer <> nil) then
       timer.counter := combat_timer[COMBAT_MOBILE]
     else
-      registerTimer(TIMER_COMBAT, nil, combat_timer[COMBAT_MOBILE], ch, nil, -1);
+      registerTimer(TIMER_COMBAT, nil, combat_timer[COMBAT_MOBILE], ch, nil, nil);
 
     if (ch.fighting.IS_NPC) then
       begin

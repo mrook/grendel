@@ -1,5 +1,5 @@
 procedure do_cast(ch:GCharacter;param:string);
-var sn:integer;
+var sn : GSkill;
     victim:GCharacter;
     sub : string;
     obj : GObject;
@@ -38,13 +38,13 @@ begin
 
   one_argument(param,sub);
 
-  if (sn <> -1) then
+  if (sn <> nil) then
     begin
-    if (skill_table[sn].skill_type = SKILL_SPELL) then
+    if (sn.skill_type = SKILL_SPELL) then
       begin
-      victim:=nil;
+      victim := nil;
 
-      case skill_table[sn].target of
+      case (sn.target) of
         TARGET_OFF_ATTACK:begin
                           victim := ch.room.findChar(ch, sub);
 
@@ -127,9 +127,8 @@ begin
                           end;
          end;
 
-    if skill_table[sn].target<=TARGET_OFF_AREA then
-     if (not ch.IS_NPC) then
-      ch.player^.fightxp:=0;
+    if (sn.target <= TARGET_OFF_AREA) and (not ch.IS_NPC) then
+      ch.player^.fightxp := 0;
 
     obj := ch.getWield(ITEM_GEM);
 
@@ -138,22 +137,22 @@ begin
     else
       spell_lvl := (ch.ability.int + ch.ability.wis) div 2;
 
-    if (victim=nil) then
+    if (victim = nil) then
       act(AT_REPORT,'They are not here.',false,ch,nil,nil,TO_CHAR)
     else
-    if (victim=ch) and (skill_table[sn].target=TARGET_OFF_ATTACK) then
+    if (victim = ch) and (sn.target = TARGET_OFF_ATTACK) then
       act(AT_REPORT,'You don''t want to cast that on yourself!',false,ch,nil,nil,TO_CHAR)
     else
-    if (spell_lvl < skill_table[sn].min_lvl) and (not ch.IS_NPC) then
+    if (spell_lvl < sn.min_lvl) and (not ch.IS_NPC) then
       act(AT_REPORT,'That spell is too powerful!',false,ch,nil,nil,TO_CHAR)
     else
-    if (ch.point.mana >= skill_table[sn].min_mana) or (ch.IS_NPC) then
+    if (ch.point.mana >= sn.min_mana) or (ch.IS_NPC) then
       begin
-      if (skill_table[sn].target=TARGET_OFF_ATTACK) and (ch.fighting<>nil) then
-        ch.fighting:=victim;
+      if (sn.target = TARGET_OFF_ATTACK) and (ch.fighting<>nil) then
+        ch.fighting := victim;
 
       if (ch.IS_NPC) then
-        magic_timer(ch,victim,sn)
+        magic_timer(ch, victim, sn)
       else
         begin
         ch.position := POS_CASTING;
@@ -161,7 +160,7 @@ begin
         act(AT_REPORT,'You begin to utter some strange incantations...',false,ch,nil,nil,TO_CHAR);
         act(AT_REPORT,'$n begins to utter some strange incantations...',false,ch,nil,nil,TO_ROOM);
 
-        registerTimer(TIMER_CAST, magic_timer, skill_table[sn].beats, ch, victim, sn);
+        registerTimer(TIMER_CAST, magic_timer, sn.beats, ch, victim, sn);
         end;
       end
     else

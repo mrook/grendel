@@ -135,7 +135,9 @@ type
       alignment:integer;
       level:integer;
       gold,weight,height:integer;
-      learned:array[0..MAX_SKILLS-1] of integer;
+
+      skills_learned : GDLinkedList;
+
       programs : GDLinkedList;
       mpflags, act_flags : cardinal;
       area : GArea;
@@ -447,6 +449,7 @@ end;
 procedure GArea.loadNPCs;
 var s:string;
     a,num:integer;
+    sk : GSkill;
     npc : GNPCIndex;
     prog : GProgram;
 begin
@@ -463,10 +466,11 @@ begin
 
     try
       npc := GNPCIndex.Create;
-      
+
       num := strtoint(s);
 
       npc.area := Self;
+      npc.skills_learned := GDLinkedList.Create;
 
       with npc do
         begin
@@ -528,10 +532,10 @@ begin
           else
             begin
             s := striprbeg(s,' ');
-            a := findSkill(s);
+            sk := findSkill(s);
 
-            if (a <> -1) then
-              learned[a] := 100
+            if (sk <> nil) then
+              skills_learned.insertLast(GLearned.Create(100, sk))
             else
               areaBug('loadNPCs', 'unknown skill '+s);
             end;
@@ -633,7 +637,7 @@ begin
         begin
         aff := GAffect.Create;
 
-        aff.sn := -1;
+        aff.skill := nil;
         aff.apply_type := findApply(af.readWord);
         aff.modifier := af.readInteger;
         aff.duration := af.readInteger;
@@ -968,6 +972,7 @@ end;
 procedure GArea.save(fn : string);
 var
    f : textfile;
+   g : GLearned;
    node, node_ex : GListNode;
    ex : GExit;
    extra : GExtraDescription;
@@ -1111,9 +1116,15 @@ begin
       node_ex := node_ex.next;
       end;
 
-    for a := 0 to MAX_SKILLS - 1 do
-      if (npcindex.learned[a] > 0) then
-        writeln(f, 'skill: ', skill_table[a].name);
+    node_ex := npcindex.skills_learned.head;;
+    while (node_ex <> nil) do
+      begin
+      g := node_ex.element;
+
+      writeln(f, 'Skill: ''', GSkill(g.skill).name, ''' ', g.perc);
+
+      node_ex := node_ex.next;
+      end;
 
     node := node.next;
     end;
@@ -1259,7 +1270,7 @@ begin
                 point.damnumdie:=npcindex.damnumdie;
                 point.damsizedie:=npcindex.damsizedie;
                 point.apb:=npcindex.apb;
-                move(npcindex.learned,learned,sizeof(learned));
+                skills_learned := npcindex.skills_learned;
                 clan:=npcindex.clan;
                 conn:=nil;
                 npc.room := findRoom(reset.arg2);
@@ -1815,6 +1826,8 @@ begin
     Result := true;
     exit;
     end;
+
+  Result := false;
 end;
 
 function GRoom.findChar(c : pointer; name : string) : pointer;

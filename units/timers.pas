@@ -6,13 +6,14 @@ uses
     Windows,
     SysUtils,
     Classes,
+    skills,
     dtypes,
     chars;
 
 
 type
     TIMER_FUNC = procedure;
-    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : integer);
+    SPEC_FUNC = procedure(ch, victim : GCharacter; sn : GSkill);
 
     GTimer = class
       name : string;
@@ -30,9 +31,9 @@ type
 
       timer_type : integer;
 
-      sn : integer;
+      sn : GSkill;
 
-      constructor Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer);
+      constructor Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
     end;
 
     GTimerThread = class (TThread)
@@ -46,7 +47,7 @@ var
    timer_list : GDLinkedList;
 
 procedure registerTimer(name_ : string; func_ : TIMER_FUNC; timeout_ : integer; looping_ : boolean); overload;
-procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer); overload;
+procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill); overload;
 
 procedure unregisterTimer(name_ : string); overload;
 procedure unregisterTimer(ch : GCharacter; timer_type : integer); overload;
@@ -59,7 +60,6 @@ uses
     Winsock2,
     constants,
     mudsystem,
-    skills,
     util,
     mudthread,
     update,
@@ -81,7 +81,7 @@ begin
 end;
 
 // GSpecTimer
-constructor GSpecTimer.Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer);
+constructor GSpecTimer.Create(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill);
 begin
   inherited Create(timer_names[timer_type_], nil, timeout_, false);
 
@@ -175,7 +175,7 @@ begin
   timer_list.insertLast(timer);
 end;
 
-procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : integer); overload;
+procedure registerTimer(timer_type_ : integer; func_ : SPEC_FUNC; timeout_ : integer; ch_, victim_ : GCharacter; sn_ : GSkill); overload;
 var
    timer : GSpecTimer;
 begin

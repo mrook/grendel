@@ -553,7 +553,7 @@ begin
     point.damnumdie:=npcindex.damnumdie;
     point.damsizedie:=npcindex.damsizedie;
     point.apb:=npcindex.apb;
-    move(npcindex.learned,learned,sizeof(learned));
+    skills_learned := npcindex.skills_learned;
     clan:=npcindex.clan;
     conn:=nil;
 

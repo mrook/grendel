@@ -6,9 +6,9 @@ uses
     skills,
     chars;
 
-function findFunc(s:string):SPEC_FUNC;
+function findFunc(s:string) : SPEC_FUNC;
 
-procedure magic_timer(ch, victim : GCharacter; sn : integer);
+procedure magic_timer(ch, victim : GCharacter; sn : GSkill);
 
 implementation
 
@@ -31,45 +31,45 @@ begin
   saving_throw:=number_percent<=chance;
 end;
 
-procedure spell_acid_arrow(ch, victim : GCharacter; sn : integer);
+procedure spell_acid_arrow(ch, victim : GCharacter; sn : GSkill);
 var af : GAffect;
 begin
   if (saving_throw(ch.level,victim.point.save_poison,victim)) then
     begin
     act(AT_REPORT,'$N resisted the effects of your spell!',false,ch,nil,victim,TO_CHAR);
-    damage(ch,victim,40,sn);
+    damage(ch,victim,40, cardinal(sn));
     end
   else
     begin
-    af.sn := sn;
+    af.skill := sn;
     af.duration := (ch.level div 8);
     af.apply_type := APPLY_AFFECT;
     af.modifier := AFF_POISON;
 
     af.applyTo(victim);
 
-    damage(ch,victim,55,sn);
+    damage(ch,victim,55, cardinal(sn));
     end;
 end;
 
-procedure spell_burning_hands(ch,victim:GCharacter;sn:integer);
+procedure spell_burning_hands(ch,victim:GCharacter; sn : GSkill);
 begin
-  damage(ch,victim,45,sn);
+  damage(ch,victim,45, cardinal(sn));
 end;
 
-procedure spell_lightning(ch,victim:GCharacter;sn:integer);
+procedure spell_lightning(ch,victim:GCharacter;sn:GSkill);
 begin
   act(AT_SPELL,'Your hands burst into lightning!', false,ch,nil,nil,TO_CHAR);
   act(AT_SPELL,'Your ears pop as $n releases $s lightning!', false,ch,nil,nil,TO_ROOM);
-  damage(ch,victim,110,sn);
+  damage(ch,victim,110,cardinal(sn));
 end;
 
-procedure spell_magic_missile(ch,victim:GCharacter;sn:integer);
+procedure spell_magic_missile(ch,victim:GCharacter;sn:GSkill);
 begin
-  damage(ch,victim,35,sn);
+  damage(ch,victim,35,cardinal(sn));
 end;
 
-procedure spell_poison(ch,victim:GCharacter;sn:integer);
+procedure spell_poison(ch,victim:GCharacter; sn : GSkill);
 var af:GAffect;
 begin
   if saving_throw(ch.level,victim.point.save_poison,victim) then
@@ -79,7 +79,7 @@ begin
     end
   else
     begin
-    af.sn := sn;
+    af.skill := sn;
     af.duration := (ch.level div 8);
     af.apply_type := APPLY_AFFECT;
     af.modifier := AFF_POISON;
@@ -92,25 +92,25 @@ begin
     end;
 end;
 
-procedure spell_vortex(ch,victim:GCharacter;sn:integer);
+procedure spell_vortex(ch,victim:GCharacter;sn:GSkill);
 var dam:integer;
 begin
   dam:=rolldice(4,6);
   inc(dam,ch.ability.int div 4);
-  damage(ch,victim,dam,sn);
+  damage(ch,victim,dam,cardinal(sn));
 end;
 
-procedure spell_winds(ch,victim:GCharacter;sn:integer);
+procedure spell_winds(ch,victim:GCharacter;sn:GSkill);
 var dam:integer;
 begin
   dam:=rolldice(4,10);
   inc(dam,ch.ability.int div 3);
   act(AT_SPELL,'You call upon the elements and release your fury!',false,ch,nil,nil,TO_CHAR);
   act(AT_SPELL,'$n calls upon the elements and releases $s fury!',false,ch,nil,nil,TO_ROOM);
-  damage(ch,victim,dam,sn);
+  damage(ch,victim,dam,cardinal(sn));
 end;
 
-procedure spell_recall(ch,victim:GCharacter;sn:integer);
+procedure spell_recall(ch,victim:GCharacter;sn:GSkill);
 begin
   ch.fromRoom;
 
@@ -123,7 +123,7 @@ begin
   act(AT_REPORT,'$n $B$7implores$A$7 the gods for a safe haven.',false,ch,nil,nil,TO_ROOM);
 end;
 
-procedure spell_summon(ch,victim:GCharacter;sn:integer);
+procedure spell_summon(ch,victim:GCharacter;sn:GSkill);
 begin
   if victim.position<>POS_FIGHTING then
     begin
@@ -141,7 +141,7 @@ begin
     act(AT_REPORT,'$N is not in a normal position to be summoned.',false,ch,nil,victim,TO_CHAR);
 end;
 
-procedure spell_refresh(ch,victim:GCharacter;sn:integer);
+procedure spell_refresh(ch,victim:GCharacter;sn:GSkill);
 var ref:integer;
 begin
   ref:=(ch.ability.wis div 2) + 20 + rolldice(5,10);
@@ -150,7 +150,7 @@ begin
   act(AT_SPELL,'$n looks refreshed.',false,victim,nil,nil,TO_ROOM);
 end;
 
-procedure spell_identify(ch,victim:GCharacter;n:integer);
+procedure spell_identify(ch,victim:GCharacter;sn:GSkill);
 var obj : GObject;
     s:string;
     liq:integer;
@@ -243,12 +243,12 @@ begin
     end;
 end;
 
-procedure spell_affect(ch,caster:GCharacter;sn:integer);
+procedure spell_affect(ch,caster:GCharacter; sn : GSkill);
 var
    node : GListNode;
    aff : GAffect;
 begin
-  node := skill_table[sn].affects.head;
+  node := sn.affects.head;
 
   while (node <> nil) do
     begin
@@ -260,12 +260,12 @@ begin
     end;
 end;
 
-procedure spell_generic(ch,victim:GCharacter;sn:integer);
+procedure spell_generic(ch,victim:GCharacter; sn : GSkill);
 var vict,check:GCharacter;
     node : GListNode;
     dam:integer;
 begin
-  with skill_table[sn] do
+  with sn do
     begin
     check := nil;
     vict := nil;
@@ -369,7 +369,7 @@ begin
        if (dicenum>0) and (dicesize>0) then
         begin
         dam:=rolldice(dicenum,dicesize)+diceadd;
-        damage(ch,vict,dam,sn);
+        damage(ch,vict,dam, cardinal(sn));
         end;
 
       if (not vict.CHAR_DIED) and (affects.getSize() > 0) then
@@ -429,16 +429,16 @@ begin
     end;
 end;
 
-procedure spell_dummy(ch,victim:GCharacter;sn:integer);
+procedure spell_dummy(ch,victim:GCharacter; sn : GSkill);
 begin
 end;
 
-function findFunc(s:string):SPEC_FUNC;
+function findFunc(s : string) : SPEC_FUNC;
 begin
   findFunc := spell_dummy;
 
-  if s='spell_acid_arrow' then
-    findFunc:=spell_acid_arrow
+  if (s = 'spell_acid_arrow') then
+    Result := spell_acid_arrow
   else
   if s='spell_burning_hands' then
     findFunc:=spell_burning_hands
@@ -538,20 +538,20 @@ begin
   act(AT_PURPLE,'$n utter the words '''+buf+'''',false,ch,nil,nil,TO_ROOM);
 end;
 
-procedure magic_timer(ch,victim:GCharacter;sn:integer);
+procedure magic_timer(ch,victim:GCharacter;sn:GSkill);
 var func : SPEC_FUNC;
 begin
-  if (sn = -1) then
+  if (sn = nil) then
     exit;
 
-  func := skill_table[sn].func;
+  func := sn.func;
 
-  if ((skill_table[sn].target in [TARGET_DEF_WORLD,TARGET_OBJECT]) or
+  if ((sn.target in [TARGET_DEF_WORLD,TARGET_OBJECT]) or
    (victim.room=ch.room)) and (not victim.CHAR_DIED) then
      begin
      if skill_success(ch,sn) or (ch.IS_IMMORT) or (ch.IS_NPC) then      { immo's don't fail :) }
        begin
-       if (skill_table[sn].target <= TARGET_OFF_AREA) then
+       if (sn.target <= TARGET_OFF_AREA) then
         if (not victim.CHAR_DIED) then
          begin
          ch.position := POS_FIGHTING;
@@ -566,7 +566,7 @@ begin
        else
          ch.position := POS_STANDING;
 
-       say_spell(ch, skill_table[sn].name);
+       say_spell(ch, sn.name);
 
        improve_skill(ch, sn);
 
@@ -576,7 +576,7 @@ begin
        if (not ch.IS_IMMORT) and (not ch.IS_NPC) then
          begin
          ch.cast_timer := 1;
-         dec(ch.point.mana, skill_table[sn].min_mana);
+         dec(ch.point.mana, sn.min_mana);
          end;
 
        if (ch.fighting <> nil) then
@@ -586,9 +586,9 @@ begin
        end
      else
        begin
-       dec(ch.point.mana, skill_table[sn].min_mana div 2);
+       dec(ch.point.mana, sn.min_mana div 2);
 
-       if (skill_table[sn].target < TARGET_OFF_AREA) then
+       if (sn.target < TARGET_OFF_AREA) then
          begin
          ch.position := POS_FIGHTING;
          ch.fighting := victim;

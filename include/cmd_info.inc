@@ -46,7 +46,7 @@ var
    vict : GCharacter;
    obj,obj_in : GObject;
 begin
-  if (ch.learned[gsn_peek] = 0) then
+  if (ch.LEARNED(gsn_peek) = 0) then
   begin
     ch.sendBuffer('You don''t know how to peek!'#13#10);
     exit;
@@ -66,7 +66,7 @@ begin
     exit;
   end;
   
-  if (number_percent <= ch.learned[gsn_peek]) then
+  if (number_percent <= ch.LEARNED(gsn_peek)) then
   begin
     act(AT_REPORT, 'You peek at the inventory and see:'#13#10, false, ch, nil, nil, TO_CHAR);
 
@@ -1253,10 +1253,10 @@ begin
     begin
     aff := node.element;
 
-    if (aff.sn <> -1) then
+    if (aff.skill <> nil) then
       with aff do
         begin
-        buf := skill_table[sn].name + ', which will wear off';
+        buf := skill.name + ', which will wear off';
 
         if duration=1 then
           buf := buf + ' any moment'
@@ -1999,3 +1999,24 @@ begin
   end;
 end;
 
+procedure do_prompt(ch : GCharacter; param : string);
+begin
+  if (length(param) = 0) then
+    begin
+    ch.sendBuffer('%h - no. of hitpoints'#13#10);
+    ch.sendBuffer('%H - max no. of hitpoints'#13#10);
+    ch.sendBuffer('%m - no. of movement points'#13#10);
+    ch.sendBuffer('%M - max no. of movement points'#13#10);
+    ch.sendBuffer('%a - mana level'#13#10);
+    ch.sendBuffer('%A - max mana level'#13#10);
+    ch.sendBuffer('%l - level'#13#10);
+    ch.sendBuffer('%x - xp to level'#13#10);
+    ch.sendBuffer('%X - total xp'#13#10);
+    ch.sendBuffer('%f - status of opponent (when fighting)'#13#10);
+    ch.sendBuffer('%k - status of tank (when fighting)'#13#10);
+    ch.sendBuffer(#13#10'Default prompt is %hhp %mmv %ama (%l)'#13#10#13#10);
+    end;
+
+  ch.player^.prompt := param;
+  ch.sendBuffer('Ok.'#13#10);
+end;

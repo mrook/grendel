@@ -2,7 +2,7 @@ procedure do_bash(ch:GCharacter;param:string);
 var chance:integer;
     vict:GCharacter;
 begin
-  if (ch.learned[gsn_bash] = 0) then
+  if (ch.LEARNED(gsn_bash) = 0) then
     begin
     ch.sendBuffer('You don''t know how to bash!'#13#10);
     exit;
@@ -73,16 +73,19 @@ begin
           player^.fightxp:=0;
         end;
       end;
-    chance:=ch.learned[gsn_bash];
+
+    chance := ch.LEARNED(gsn_bash);
+
     if (vict.bash_timer>0) then
       act(AT_REPORT,'$N is already bashed to the ground!',false,ch,nil,vict,TO_CHAR)
     else
     if (vict.bash_timer>-2) then
       act(AT_REPORT,'$N is still alert from the last bash.',false,ch,nil,vict,TO_CHAR)
     else
-    if number_percent<=chance then
+    if (number_percent <= chance) then
       begin
-      improve_skill(ch,gsn_bash);
+      // improve_skill(ch,gsn_bash);
+
       vict.position:=POS_BASHED;
       position:=POS_FIGHTING;
       vict.bash_timer:=6;
@@ -110,7 +113,7 @@ procedure do_kick(ch:GCharacter;param:string);
 var dam,chance:integer;
     vict:GCharacter;
 begin
-  if (ch.learned[gsn_kick] = 0) then
+  if (ch.LEARNED(gsn_kick) = 0) then
     begin
     ch.sendBuffer('You don''t know how to kick!'#13#10);
     exit;
@@ -187,7 +190,8 @@ begin
 
     ch.setWait(8);
 
-    chance:=ch.learned[gsn_kick];
+    chance := ch.LEARNED(gsn_kick);
+
     if (vict.IS_NPC) and (IS_SET(vict.act_flags,ACT_SPIRIT)) then
       begin
       ch.sendBuffer('You swing your leg and kick high, but it goes right through your victim!'#13#10);
@@ -201,14 +205,16 @@ begin
     else
     if number_percent<=chance then
       begin
-      improve_skill(ch,gsn_kick);
+      //improve_skill(ch,gsn_kick);
+
       dam:=urange(1,rolldice(4,18),level div 6)*3;
       inc(dam,ch.point.apb);
       dam:=(dam*ch.ability.str) div 50;
-      damage(ch,ch.fighting,dam,gsn_kick);
+
+      damage(ch,ch.fighting,dam, integer(gsn_kick));
       end
     else
-      damage(ch,ch.fighting,0,gsn_kick);
+      damage(ch,ch.fighting,0, integer(gsn_kick));
     end;
 end;
 
@@ -238,6 +244,8 @@ procedure do_spells(ch : GCharacter; param : string);
 var
   a, targ : integer;
   buf : string;
+  node : GListNode;
+  g : GLearned;
   arr : array[TARGET_OFF_ATTACK..TARGET_OBJECT] of
     record
       num : integer;
@@ -257,38 +265,46 @@ begin
   arr[TARGET_DEF_AREA].str := add_chars(88, '$A$3--- $B$7[Defensive area spells]$A$3 -', '-') + '$A$7'#13#10;
   arr[TARGET_DEF_WORLD].str := add_chars(88, '$A$3--- $B$7[World spells]$A$3 -', '-') + '$A$7'#13#10;
   arr[TARGET_OBJECT].str := add_chars(88, '$A$3--- $B$7[Object spells]$A$3 -', '-') + '$A$7'#13#10;
-  
+
   with ch do
-  begin
-    for a := 0 to (MAX_SKILLS - 1) do
-      if (learned[a] > 0) then
-        with skill_table[a] do
-          if (skill_type = SKILL_SPELL) then
-            for targ := TARGET_OFF_ATTACK to TARGET_OBJECT do
-            begin
-              if (target = targ) then
-                with arr[targ] do
-                begin
-                  inc(num);
-                  if odd(num) then
-                    str := str + Format('%25s %3dMa %3d%%', [name, min_mana, learned[a]]) + '    '
-                  else
-                    str := str + Format('%-25s %3dMa %3d%%', [name, min_mana, learned[a]]) + #13#10;
-                end;
-            end;
-  end;
+    begin
+    node := skills_learned.head;
+
+    while (node <> nil) do
+      begin
+      g := node.element;
+
+      if (GSkill(g.skill).skill_type = SKILL_SPELL) then
+        for targ := TARGET_OFF_ATTACK to TARGET_OBJECT do
+          begin
+          if (GSkill(g.skill).target = targ) then
+            with arr[targ] do
+              begin
+              inc(num);
+
+              if (odd(num)) then
+                str := str + Format('%25s %3dMa %3d%%', [GSkill(g.skill).name, GSkill(g.skill).min_mana, g.perc]) + '    '
+              else
+                str := str + Format('%-25s %3dMa %3d%%', [GSkill(g.skill).name, GSkill(g.skill).min_mana, g.perc]) + #13#10;
+              end;
+          end;
+
+      node := node.next;
+      end;
+    end;
+
   buf := act_string(add_chars(80, '$A$3---- Known spells -', '-') + #13#10 + #13#10, ch, nil, nil, nil);
 
   for a := TARGET_OFF_ATTACK to TARGET_OBJECT do
-  begin
-    if (arr[a].num <> 0) then
     begin
+    if (arr[a].num <> 0) then
+      begin
       if odd(arr[a].num) then
         buf := buf + act_string(arr[a].str + #13#10#13#10, ch, nil, nil, nil)
       else
         buf := buf + act_string(arr[a].str + #13#10, ch, nil, nil, nil);
+      end;
     end;
-  end;
 
   delete(buf, length(buf) - 2, 2);
   ch.sendPager(buf);
@@ -298,28 +314,42 @@ procedure do_skills(ch : GCharacter; param : string);
 var
   a : integer;
   buf : string;
+  g : GLearned;
+  node : GListNode;
 begin
   buf := '';
+
   with ch do
   begin
     ch.sendPager(act_string(add_chars(80, '$A$3---- Known skills -', '-') + '$A$7'#13#10#13#10, ch, nil, nil, nil));
-    for a:=0 to (MAX_SKILLS - 1) do
-      if (learned[a] > 0) then
-        with skill_table[a] do
-          if (skill_type <> SKILL_SPELL) then
-          begin
-            if odd(a) then
-              buf := buf + Format('%25s  %3d%%', [name, learned[a]]) + '    '
-            else
-              buf := buf + Format('%-25s  %3d%%', [name, learned[a]]) + #13#10;
-          end;
+
+    a := 0;
+    node := ch.skills_learned.head;
+
+    while (node <> nil) do
+      begin
+      g := node.element;
+
+      if (GSkill(g.skill).skill_type <> SKILL_SPELL) then
+        begin
+        if (not odd(a)) then
+          buf := buf + Format('%25s  %3d%%', [GSkill(g.skill).name, g.perc]) + '    '
+        else
+          buf := buf + Format('%-25s  %3d%%', [GSkill(g.skill).name, g.perc]) + #13#10;
+        end;
+
+      inc(a);
+      node := node.next;
+      end;
+
     ch.sendPager(act_string(buf, ch, nil, nil, nil));
   end;
 end;
 
 procedure do_learn(ch:GCharacter;param:string);
-var sn:integer;
+var sn : GSkill;
     node : GListNode;
+    g : GLearned;
     vict,learn:GCharacter;
 begin
   learn := nil;
@@ -348,30 +378,43 @@ begin
     begin
     ch.sendBuffer('Skills you can learn here:'#13#10#13#10);
 
-    for sn := 0 to MAX_SKILLS - 1 do
+    node := vict.skills_learned.head;
+
+    while (node <> nil) do
       begin
-      if (vict.learned[sn] > 0) and (ch.learned[sn] = 0) then
-        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(skill_table[sn].min_lvl, 3) + '$A$7) ' + skill_table[sn].name, false, ch, nil, nil, TO_CHAR);
+      g := node.element;
+
+      if (ch.LEARNED(g.skill) = 0) then
+        act(AT_REPORT, '  (Level $B$4' + pad_integer_front(GSkill(g.skill).min_lvl, 3) + '$A$7) ' + GSkill(g.skill).name, false, ch, nil, nil, TO_CHAR);
+
+      node := node.next;
       end;
     end
   else
     begin
     sn := findSkill(param);
 
-    if (sn = -1) or (vict.learned[sn] = 0) then
+    if (sn = nil) or (vict.LEARNED(sn) = 0) then
       act(AT_REPORT, '$N doesn''t teach this skill.',false,ch,nil,vict,TO_CHAR)
     else
+{    if (sn.skill_type = SKILL_SPELL) and (ch.skills_learned.getSize() = ch.race.max_spells) then
+      act(AT_REPORT, 'You have reached the maximum number of spells for your race.', false, ch, nil, nil, TO_CHAR)
+    else
+    if (sn.skill_type = SKILL_SKILL) and (ch.skills_learned.getSize() = ch.race.max_skills) then
+      act(AT_REPORT, 'You have reached the maximum number of spells for your race.', false, ch, nil, nil, TO_CHAR)
+    else }
       begin
-      if (ch.learned[sn] = 0) then
+      if (ch.LEARNED(sn) = 0) then
         begin
-        if (skill_table[sn].min_lvl > ch.level) then
+        if (sn.min_lvl > ch.level) then
           ch.sendBuffer('You have not yet reached the appropiate level.'#13#10)
         else
           begin
-          node := skill_table[sn].prereqs.head;
+          node := sn.prereqs.head;
+
           while (node <> nil) do
             begin
-            if (ch.learned[GSkill(node.element).sn] < 50) then
+            if (ch.LEARNED(node.element) < 50) then
               begin
               ch.sendBuffer('You need to have sufficient knowledge of ' + GSkill(node.element).name + ' first.'#13#10);
               exit;
@@ -380,8 +423,9 @@ begin
             node := node.next;
             end;
 
-          act(AT_REPORT,'You learn '+cap(skill_table[sn].name)+'.',false,ch,nil,nil,TO_CHAR);
-          ch.learned[sn]:=20;
+          act(AT_REPORT,'You learn ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
+
+          ch.SET_LEARNED(20, sn);
           end;
         end
       else
@@ -392,7 +436,7 @@ end;
 
 procedure do_unlearn(ch:GCharacter;param:string);
 var
-   sn : integer;
+   sn : GSkill;
 begin
   if (length(param) = 0) then
     begin
@@ -403,17 +447,17 @@ begin
 
   sn := findSkill(param);
 
-  if (sn = -1) or (ch.learned[sn] = 0) then
+  if (sn = nil) or (ch.LEARNED(sn) = 0) then
     act(AT_REPORT, 'You haven''t learned this skill.',false,ch,nil,nil,TO_CHAR)
   else
     begin
-    ch.learned[sn] := 0;
-    act(AT_REPORT, 'You have unlearned ' + skill_table[sn].name + '.', false, ch, nil, nil, TO_CHAR);
+    ch.SET_LEARNED(0, sn);
+    act(AT_REPORT, 'You have unlearned ' + sn.name + '.', false, ch, nil, nil, TO_CHAR);
     end;
 end;
 
 procedure do_practice(ch:GCharacter;param:string);
-var sn:integer;
+var sn : GSkill;
     vict,learn:GCharacter;
     node : GListNode;
 begin
@@ -443,31 +487,33 @@ begin
     begin
     ch.sendBuffer('Skills you can practice here:'#13#10#13#10);
 
-    for sn := 0 to MAX_SKILLS - 1 do
+    { for sn := 0 to MAX_SKILLS - 1 do
       begin
-      if (vict.learned[sn] > 0) then
+      if (vict.learsn] > 0) then
         act(AT_REPORT, '  (Level $B$4' + pad_integer_front(skill_table[sn].min_lvl, 3) + '$A$7) ' + skill_table[sn].name, false, ch, nil, nil, TO_CHAR);
-      end;
+      end; }
     end
   else
     begin
     sn := findSkillPlayer(ch,param);
 
-    if (sn <> -1) then
+    if (sn <> nil) then
       begin
-      if (vict.learned[sn] = 0) then
+      if (vict.LEARNED(sn) = 0) then
         act(AT_REPORT, '$N doesn''t teach this skill.', false, ch, nil, vict, TO_CHAR)
       else
-      if ch.learned[sn]<50 then
+      if (ch.LEARNED(sn) < 50) then
         begin
-        inc(ch.learned[sn],8);
-        if (ch.learned[sn]>50) then
+        ch.SET_LEARNED(ch.LEARNED(sn) + 8, sn);
+
+        if (ch.LEARNED(sn) > 50) then
           begin
-          ch.learned[sn]:=50;
-          act(AT_REPORT,'You now know enough about '+cap(skill_table[sn].name)+'.',false,ch,nil,nil,TO_CHAR);
+          ch.SET_LEARNED(50, sn);
+
+          act(AT_REPORT,'You now know enough about ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
           end
         else
-          act(AT_REPORT,'You practice '+cap(skill_table[sn].name)+'.',false,ch,nil,nil,TO_CHAR);
+          act(AT_REPORT,'You practice ' + cap(sn.name) + '.',false,ch,nil,nil,TO_CHAR);
         end
       else
         act(AT_REPORT,'You have practiced this skill enough.',false,ch,nil,nil,TO_CHAR);
@@ -477,12 +523,12 @@ begin
     end;
 end;
 
-procedure search_timer(ch,victim:GCharacter;sn:integer);
+procedure search_timer(ch, victim : GCharacter; sn : GSkill);
 var pexit : GExit;
     node : GListNode;
 begin
   ch.position := POS_STANDING;
-  
+
   if skill_success(ch,sn) then
     begin
     { check for hidden exits first }
@@ -523,7 +569,7 @@ begin
   registerTimer(TIMER_SEARCH, search_timer, 6, ch, nil, gsn_searching);
 end;
 
-procedure backstab_timer(ch,victim:GCharacter;sn:integer);
+procedure backstab_timer(ch,victim:GCharacter;sn:GSkill);
 var roll,to_hit:integer;
     dam:integer;
     wield : GObject;
@@ -540,9 +586,9 @@ begin
   to_hit:=ch.point.hitroll + 10;             { +10 bonus because of backstab }
 
   inc(to_hit,victim.point.ac);
-  inc(to_hit,(ch.learned[sn]-50) div 5);
+  inc(to_hit,(ch.LEARNED(sn) - 50) div 5);
   roll:=rolldice(1,100);
-  
+
   if (roll<=to_hit) and (wield<>nil) then
     begin
     dam:=URange(1,rolldice(wield.value[2],wield.value[3])*(2+ch.level div 15),350);
@@ -597,14 +643,14 @@ begin
       act(AT_REPORT,'$n targets your spine and thrusts $s blade through!',false,ch,nil,victim,TO_VICT);
       act(AT_REPORT,'$n finds a mark in $N''s spine and thrusts $s blade through!',false,ch,nil,victim,TO_NOTVICT);
       end;
-    damage(ch,victim,dam,sn);
+    damage(ch,victim,dam,cardinal(sn));
     victim.fighting:=ch;
     end
   else
     begin
     act(AT_REPORT,'As you attempt to sneak behind $N''s back, you are uncovered!',false,ch,nil,victim,TO_CHAR);
     act(AT_REPORT,'$n failed to backstab $N!', false,ch,nil,victim,TO_ROOM);
-    damage(ch,victim,0,sn);
+    damage(ch,victim,0,cardinal(sn));
     victim.fighting:=ch;
     end;
 end;
@@ -613,7 +659,7 @@ procedure do_backstab(ch:GCharacter;param:string);
 var victim:GCharacter;
     wield:GObject;
 begin
-  if (ch.learned[gsn_backstab] = 0) then
+  if (ch.LEARNED(gsn_backstab) = 0) then
     begin
     ch.sendBuffer('You don''t know how to backstab!'#13#10);
     exit;
@@ -658,7 +704,7 @@ begin
   ch.position:=POS_BACKSTAB;
 end;
 
-procedure circle_timer(ch,victim:GCharacter;sn:integer);
+procedure circle_timer(ch,victim:GCharacter; sn : GSkill);
 begin
   if (victim.CHAR_DIED) or (victim.room<>ch.room) then
     begin
@@ -666,8 +712,10 @@ begin
     ch.position:=POS_STANDING;
     exit;
     end;
-  ch.position:=POS_FIGHTING;
-  if (number_percent<=ch.learned[sn]) then
+
+  ch.position := POS_FIGHTING;
+
+  if (number_percent <= ch.LEARNED(sn)) then
     begin
     act(AT_REPORT,'You succeed in circling your opponent and find yourself behind $M.',false,ch,nil,victim,TO_CHAR);
     backstab_timer(ch,victim,gsn_backstab);
@@ -680,19 +728,19 @@ procedure do_circle(ch:GCharacter;param:string);
 var
    wield : GObject;
 begin
-  if (ch.learned[gsn_circle] = 0) then
+  if (ch.LEARNED(gsn_circle) = 0) then
     begin
     ch.sendBuffer('You don''t know how to circle!'#13#10);
     exit;
     end;
 
-  if (ch.position<>POS_FIGHTING) then
+  if (ch.position <> POS_FIGHTING) then
     begin
     ch.sendBuffer('You are not fighting!'#13#10);
     exit;
     end;
 
-  if (ch.fighting.fighting=ch) then
+  if (ch.fighting.fighting = ch) then
     begin
     ch.sendBuffer('You are on the frontline and can not circle!'#13#10);
     exit;
@@ -714,7 +762,7 @@ end;
 procedure do_rescue(ch:GCharacter;param:string);
 var victim:GCharacter;
 begin
-  if (ch.learned[gsn_rescue] = 0) then
+  if (ch.LEARNED(gsn_rescue) = 0) then
     begin
     ch.sendBuffer('You don''t know how to rescue!'#13#10);
     exit;
@@ -740,7 +788,7 @@ begin
     exit;
     end;
 
-  if (number_percent <= ch.learned[gsn_rescue]) then
+  if (number_percent <= ch.LEARNED(gsn_rescue)) then
     begin
     act(AT_REPORT,'You rescue $N!',false,ch,nil,victim,TO_CHAR);
     act(AT_REPORT,'$N rescues you!',false,victim,nil,ch,TO_VICT);
@@ -764,7 +812,7 @@ begin
     end;
 end;
 
-procedure track_timer(ch,victim:GCharacter;sn:integer);
+procedure track_timer(ch,victim:GCharacter; sn : GSkill);
 var
    node : GListNode;
    track : GTrack;
@@ -808,7 +856,7 @@ var
 begin
   vict := nil;
   
-  if (ch.learned[gsn_track] = 0) then
+  if (ch.LEARNED(gsn_track) = 0) then
     begin
     ch.sendBuffer('You don''t know how to track!'#13#10);
     exit;

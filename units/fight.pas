@@ -15,27 +15,30 @@ uses
     util,
     chars;
 
-{ damage types }
-const TYPE_UNDEFINED=-1;
-      TYPE_HIT=5000;
-      TYPE_SLAY=6000;
-      TYPE_SILENT=6001;
 
 { fighting constants }
-const FG_NONE=0;
-      FG_PUNCH=1;
-      FG_SLASH=2;      { gsn_slashing }
-      FG_PIERCE=3;     { gsn_piercing }
-      FG_CLEAVE=4;     { gsn_slashing }
-      FG_BLAST=5;
-      FG_CRUSH=6;      { gsn_concussion }
-      FG_BITE=7;
-      FG_CLAW=8;
-      FG_WHIP=9;       { gsn_whipping }
-      FG_STAB=10;      { gsn_piercing }
-      FG_GAZE=11;      { gaze from a spirit? }
-      FG_BREATH=12;    { breath }
-      FG_STING=13;     { sting (bee, fly) }
+const FG_NONE = 0;
+      FG_PUNCH = 1;
+      FG_SLASH = 2;      { gsn_slashing }
+      FG_PIERCE = 3;     { gsn_piercing }
+      FG_CLEAVE = 4;     { gsn_slashing }
+      FG_BLAST = 5;
+      FG_CRUSH = 6;      { gsn_concussion }
+      FG_BITE = 7;
+      FG_CLAW = 8;
+      FG_WHIP = 9;       { gsn_whipping }
+      FG_STAB = 10;      { gsn_piercing }
+      FG_GAZE = 11;      { gaze from a spirit? }
+      FG_BREATH = 12;    { breath }
+      FG_STING = 13;     { sting (bee, fly) }
+      FG_MAX = FG_STING;
+
+{ damage types }
+const TYPE_UNDEFINED = 0;
+      TYPE_SLAY = 1;
+      TYPE_SILENT = 2;
+      TYPE_HIT = 3;
+      TYPE_OTHER = TYPE_HIT + FG_MAX + 1;
 
 const attack_table:array[FG_NONE..FG_STING,1..2] of string=(('nothing','nothings'),
                                                       ('punch','punches'),
@@ -334,13 +337,13 @@ begin
     s2 := 'hits';
     end
   else
-  if (dt > TYPE_UNDEFINED) and (dt < TYPE_HIT) then
+  if (dt > TYPE_OTHER) then
     begin
-    s1 := skill_table[dt].dam_msg;
-    s2 := skill_table[dt].dam_msg;
+    s1 := GSkill(pointer(dt)).dam_msg;
+    s2 := GSkill(pointer(dt)).dam_msg;
     end
   else
-  if (dt>TYPE_HIT) and (dt<TYPE_SLAY) then
+  if (dt > TYPE_HIT) then
     begin
     s1 := attack_table[dt - TYPE_HIT, 1];
     s2 := attack_table[dt - TYPE_HIT, 2];
@@ -375,7 +378,7 @@ begin
     exit;
     end;
 
-  if (s1 <> '') and (s2 <> '') and (dt <> gsn_backstab) then
+  if (s1 <> '') and (s2 <> '') and (dt <> integer(gsn_backstab)) then
     begin
     r := pos('#w',a[1]);
 
@@ -659,7 +662,7 @@ begin
   if (roll <= hit_roll) then
     begin
     { check for dodge }
-    if (number_percent <= victim.learned[gsn_dodge] div 2) then
+    if (number_percent <= victim.LEARNED(gsn_dodge) div 2) then
       begin
       improve_skill(victim,gsn_dodge);
 
@@ -687,12 +690,10 @@ begin
     else
       dam := rolldice(1,3);
 
-    // improve_skill(ch,prof_gsn);
-
     inc(dam,ch.point.apb);
     inc(dam,prof_bonus div 4);
 
-    chance := ch.learned[gsn_enhanced_damage];
+    chance := ch.LEARNED(gsn_enhanced_damage);
 
     if (number_percent <= chance) then
       begin
@@ -812,7 +813,7 @@ begin
 
     if (ch.getDualWield <> nil) then
       begin
-      dual_bonus := ch.learned[gsn_dual_wield] div 10;
+      dual_bonus := ch.LEARNED(gsn_dual_wield) div 10;
 
       if skill_success(ch,gsn_dual_wield) then
         begin
@@ -827,7 +828,7 @@ begin
     if (ch.point.mv < 10) then
       dec(dual_bonus, 20);
 
-    chance := ch.learned[gsn_second_attack] + dual_bonus;
+    chance := ch.LEARNED(gsn_second_attack) + dual_bonus;
 
     if (number_percent <= chance) then
       begin
@@ -837,7 +838,7 @@ begin
         exit;
       end;
 
-    chance := ch.learned[gsn_third_attack] + dual_bonus;
+    chance := ch.LEARNED(gsn_third_attack) + dual_bonus;
 
     if (number_percent <= chance) then
       begin
@@ -847,7 +848,7 @@ begin
         exit;
       end;
 
-    chance := ch.learned[gsn_fourth_attack] + dual_bonus;
+    chance := ch.LEARNED(gsn_fourth_attack) + dual_bonus;
 
     if (number_percent <= chance) then
       begin
@@ -857,7 +858,7 @@ begin
         exit;
       end;
 
-    chance := ch.learned[gsn_fifth_attack] + dual_bonus;
+    chance := ch.LEARNED(gsn_fifth_attack) + dual_bonus;
 
     if (number_percent <= chance) then
       begin

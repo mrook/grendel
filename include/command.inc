@@ -176,14 +176,15 @@ begin
       inc(ability.int,int);
       inc(ability.wis,wis);
       inc(point.apb,dam);
+      
       level:=1;
+
       point.max_hp:=50;
       point.max_mv:=40;
       point.max_mana:=25;
-      // player^.xptogo:=calculatexp2lvl(ch);
-      fillchar(learned,sizeof(learned),0);
-      // recalcac(ch);
       point.hitroll:=50;
+
+      skills_learned.clean;
       end;
 
     act(AT_WHITE,'Congratulations! This is remort '+inttostr(ch.player^.remorts)+
