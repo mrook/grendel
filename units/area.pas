@@ -173,7 +173,8 @@ type
       name : PString;
       description : string;
       area : GArea;
-      flags, sector : integer;
+      flags : cardinal;
+      sector : integer;
       televnum, teledelay : integer;
       max_level, min_level : integer;
 
