@@ -32,7 +32,7 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  $Id: grendel.dpr,v 1.60 2001/09/28 21:29:02 ***REMOVED*** Exp $
+  $Id: grendel.dpr,v 1.61 2001/10/05 21:49:48 ***REMOVED*** Exp $
 }
 
 program grendel;
@@ -672,19 +672,23 @@ end;
 {$ENDIF}
 
 var
-  t : string;
+  tm : TDateTime;
 
 begin
   old_exitproc := ExitProc;
+  
+  tm := Now();
 
   bootServer();
-  
-  t := 'x';
-   
+    
 {$IFDEF WIN32}
   if (GetCommandLine() = 'copyover') or (paramstr(1) = 'copyover') then
     from_copyover;
 {$ENDIF}
+
+  tm := Now() - tm;
+
+  writeConsole('Server boot took ' + FormatDateTime('s "second(s)," z "millisecond(s)"', tm));
 
   writeConsole('Grendel ' + version_number + {$IFDEF __DEBUG} ' (__DEBUG compile)' + {$ENDIF} ' ready...');
 
