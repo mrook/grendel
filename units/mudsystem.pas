@@ -1,4 +1,4 @@
-// $Id: mudsystem.pas,v 1.35 2001/10/19 17:27:46 ***REMOVED*** Exp $
+// $Id: mudsystem.pas,v 1.36 2001/11/24 15:35:09 xenon Exp $
 
 unit mudsystem;
 
@@ -152,7 +152,8 @@ uses
     fsys,
     conns,
     console,
-    Channels;
+    Channels,
+    RegExpr;
 
 procedure writeDirect(text : string);
 begin
@@ -400,11 +401,11 @@ begin
       end;
 
   for a := 0 to banned_names.count-1 do
-    if (pos(banned_names[a], name) > 0) then
-      begin
+    if (ExecRegExpr(banned_names[a], name)) then
+    begin
       Result := true;
       exit;
-      end;
+    end;
 end;
 
 // socials
@@ -827,6 +828,7 @@ begin
   auction_good.Free();
   auction_evil.Free();
   banned_masks.Free();
+  banned_names.Free();
 end;
 
 end.
