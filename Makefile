@@ -4,54 +4,69 @@
 #
 # Main Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.12 2003/12/12 13:48:39 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.13 2003/12/12 22:30:12 ***REMOVED*** Exp $
 #
 
 
 ifeq ($(OSTYPE),linux-gnu)
 	LINUX=1
+	CP=cp
+	RM=rm
 else
 	WIN32=1
+ifeq ($(OS), Windows_NT)
+	RM=cmd /c del
+	CP=cmd /c copy
+else
+	RM=del
+	CP=copy
+endif
 endif
 
 
 all:	
 	$(MAKE) -C src
 ifdef WIN32
-	copy src\grendel.exe
-	copy src\grendel.map
-	copy src\core.bpl
-	copy src\core.map
-	copy src\gmc\gmcc.exe
-	copy src\gmc\gasm.exe
-	copy src\modules\*.bpl modules
-	copy src\modules\*.map modules
+	$(CP) 'src\grendel.exe'
+	$(CP) 'src\grendel.map'
+	$(CP) 'src\core.bpl'
+	$(CP) 'src\core.map'
+	$(CP) 'src\copyover.exe'
+	$(CP) 'src\gmc\gmcc.exe'
+	$(CP) 'src\gmc\gasm.exe'
+	$(CP) 'src\modules\*.bpl' modules
+	$(CP) 'src\modules\*.map' modules
 endif
 ifdef LINUX
-	cp src/grendel .
-	cp src/grendel.map .
-	cp src/bplcore.so .
-	cp src/bplcore.map .
-	cp src/gmc/gmcc .
-	cp src/gmc/gasm .
-	cp src/modules/bpl*.so modules
-	cp src/modules/*.map modules
+	$(CP) src/grendel .
+	$(CP) src/grendel.map .
+	$(CP) src/bplcore.so .
+	$(CP) src/bplcore.map .
+	$(CP) src/gmc/gmcc .
+	$(CP) src/gmc/gasm .
+	$(CP) src/modules/bpl*.so modules
+	$(CP) src/modules/*.map modules
 endif
 	
 
 clean:
 	$(MAKE) -C src clean
 ifdef WIN32	
-	del *.bpl
-	del *.exe
-	del *.map
-	del modules\*.bpl
-	del modules\*.map
+	$(RM) *.bpl
+	$(RM) grendel.exe
+	$(RM) copyover.exe
+	$(RM) gmcc.exe
+	$(RM) gasm.exe
+	$(RM) *.map
+	$(RM) 'modules\*.bpl'
+	$(RM) 'modules\*.map'
 endif
 ifdef LINUX
-	rm -f bpl*.so
-	rm -f grendel
-	rm -f *.map
-	rm -f modules/bpl*.so
-	rm -f modules/*.map
+	$(RM) -f bpl*.so
+	$(RM) -f grendel
+	$(RM) -f gmcc
+	$(RM) -f gasm
+	$(RM) -f *.map
+	$(RM) -f modules/bpl*.so
+	$(RM) -f modules/*.map
 endif

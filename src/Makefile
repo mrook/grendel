@@ -4,7 +4,7 @@
 #
 # Sources Makefile - Use GNU make!
 #
-# $Id: Makefile,v 1.2 2003/12/12 13:48:39 ***REMOVED*** Exp $
+# $Id: Makefile,v 1.3 2003/12/12 22:30:12 ***REMOVED*** Exp $
 #
 
 
@@ -59,13 +59,14 @@ clean:
 	$(RM) $(COPYOVER) 
 	$(RM) $(CORE)
 	$(RM) *.map
-	$(RM) *.dpu
+	$(RM) *.dcu
+	$(RM) *.drc
 	$(RM) *.dcp
 	$(MAKE) -C gmc clean
 	$(MAKE) -C modules clean
 
 $(GRENDEL):	$(GRENDEL_SOURCES) $(CORE)
-	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ucontrib\jcl
+	$(DCC) $(GRENDEL_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -GD -LUcore -Ucontrib/jcl
 	
 $(COPYOVER):	$(COPYOVER_SOURCES)
 	$(DCC) $(COPYOVER_SOURCES) -D$(DCC_DEFS) $(DCC_FLAGS) -Uunits
