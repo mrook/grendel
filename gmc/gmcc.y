@@ -308,7 +308,7 @@ parameter_specifier  	:	type_specifier IDENTIFIER { $$ := nil; addEnvironment(yy
 
 parameter_list 	: { $$ := nil; }
 								| expr												{ $$ := $1; }
-								| parameter_list ',' expr		  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $3; Expr_Seq($$).ex := $1; }
+								| parameter_list ',' expr		  { $$ := Expr_Seq.Create; Expr_Seq($$).seq := $1; Expr_Seq($$).ex := $3; }
 								;
 
 asm_list : asm_statement    					{ $$ := $1; }

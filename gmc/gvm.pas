@@ -240,9 +240,9 @@ begin
   if (methodAddr = nil) then
     exit;
 
-  for i := length(signature.ParamTypes)-1 downto 0 do
+  for i := length(signature.ParamTypes) - 1 downto 0 do
     begin
-    v := pop();
+    v := stack[sp - i];
 
     VarCast(vd, v, signature.ParamTypes[i]);
 
@@ -266,6 +266,8 @@ begin
                   end;
     end;
     end;
+    
+  dec(sp, length(signature.paramTypes));
 
   asm
     mov eax, classAddr

@@ -375,7 +375,7 @@ begin
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
        end;
   39 : begin
-         yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-0].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-2].yyExpr; 
+         yyval.yyExpr := Expr_Seq.Create; Expr_Seq(yyval.yyExpr).seq := yyv[yysp-2].yyExpr; Expr_Seq(yyval.yyExpr).ex := yyv[yysp-0].yyExpr; 
        end;
   40 : begin
          yyval.yyExpr := yyv[yysp-0].yyExpr; 
