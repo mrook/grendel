@@ -2,7 +2,7 @@
 	Summary:
 		Area loader & manager
   
-  ## $Id: area.pas,v 1.25 2004/03/14 20:27:10 hemko Exp $
+  ## $Id: area.pas,v 1.26 2004/03/17 00:21:33 ***REMOVED*** Exp $
 }
 
 unit area;
@@ -303,6 +303,7 @@ var
    npc_list : GDLinkedList;
 
 
+procedure resetAreas();
 procedure processAreas();
 procedure loadAreas();
 
@@ -941,17 +942,34 @@ begin
   af.Free();
 end;
 
+procedure resetAreas();
+var
+	area : GArea;
+	iterator : GIterator;
+begin
+	{ reset the areas }
+	iterator := area_list.iterator();
+
+	while (iterator.hasNext()) do
+		begin
+		area := GArea(iterator.next());
+		area.reset();
+		end;
+
+	iterator.Free();
+end;
+
 procedure processAreas();
 var
 	area : GArea;
 	iterator, in_iterator : GIterator;
-  node_exit : GListNode;
-  to_room, room : GRoom;
-  npc : GNPCIndex;
-  obj : GObject;
-  shop : GShop;
-  reset : GReset;
-  pexit : GExit;
+	node_exit : GListNode;
+	to_room, room : GRoom;
+	npc : GNPCIndex;
+	obj : GObject;
+	shop : GShop;
+	reset : GReset;
+	pexit : GExit;
 begin
   { reset the areas }
   iterator := area_list.iterator();
@@ -1067,9 +1085,9 @@ begin
 
 	iterator.Free();
 
-  writeConsole('Checking exits...');
+  	writeConsole('Checking exits...');
 
-  { Checking rooms for errors }
+  	{ Checking rooms for errors }
 
 	iterator := room_list.iterator();
 	
@@ -1122,17 +1140,6 @@ begin
 			end;
 		end;
 		
-	iterator.Free();
-
-  { reset the areas }
-  iterator := area_list.iterator();
-
-  while (iterator.hasNext()) do
-  	begin
-    area := GArea(iterator.next());
-		area.reset();
-    end;
-
 	iterator.Free();
 end;
 
