@@ -598,9 +598,9 @@ begin
         'A': boldflag := false;
    '0'..'9': begin
              if (boldflag) then
-               i := ch.ansiColor(strtoint(acts[t]) + 8)
+               i := to_ch.ansiColor(strtoint(acts[t]) + 8)
              else
-               i := ch.ansiColor(strtoint(acts[t]));
+               i := to_ch.ansiColor(strtoint(acts[t]));
              end;
       end;
       s := s + i;
