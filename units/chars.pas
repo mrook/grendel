@@ -166,6 +166,7 @@ type
       function IS_OUTSIDE : boolean;
       function IS_AFFECT(affect : integer) : boolean;
       function IS_DRUNK : boolean;
+      function IS_WEARING(item_type : integer) : boolean;
       function CAN_FLY : boolean;
       function CAN_SEE(vict : GCharacter) : boolean;
       function IS_AFK : boolean;
@@ -557,6 +558,28 @@ begin
     IS_DRUNK := false
   else
     IS_DRUNK := (player^.condition[COND_DRUNK] > 80);
+end;
+
+function GCharacter.IS_WEARING(item_type : integer) : boolean;
+var
+   node : GListNode;
+   obj : GObject;
+begin
+  node := objects.head;
+  Result := false;
+
+  while (node <> nil) do
+    begin
+    obj := node.element;
+
+    if (obj.wear_location <> WEAR_NULL) and (obj.item_type = item_type) then
+      begin
+      Result := true;
+      break;
+      end;
+
+    node := node.next;
+    end;
 end;
 
 function GCharacter.CAN_FLY : boolean;
@@ -1596,6 +1619,9 @@ begin
 
   room.chars.remove(node_room);
 
+  if (IS_WEARING(ITEM_LIGHT)) and (room.light > 0) then
+    inc(room.light);
+
   { Only PCs register as players, so increase the number! - Grimlord }
   if (not IS_NPC) then
     dec(room.area.nplayer);
@@ -1607,6 +1633,7 @@ procedure GCharacter.toRoom(to_room : GRoom);
 var
    tele : GTeleport;
    node : GListNode;
+   obj : GObject;
 begin
   if (to_room = nil) then
     begin
@@ -1629,6 +1656,9 @@ begin
     end;
 
   room := to_room;
+
+  if (IS_WEARING(ITEM_LIGHT)) then
+    inc(room.light);
 
   node_room := room.chars.insertLast(Self);
 

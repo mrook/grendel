@@ -179,11 +179,15 @@ type
       televnum, teledelay : integer;
       max_level, min_level : integer;
 
+      light : integer;
+
       extra : GDLinkedList;
       exits : GDLinkedList;
       chars : GDLinkedList;
       objects : GDLinkedList;
       tracks : GDLinkedList;
+
+      function IS_DARK : boolean;
 
       function findChar(c : pointer; name : string) : pointer;
       function findRandomChar : pointer;
@@ -1763,6 +1767,7 @@ begin
   tracks := GDLinkedList.Create;
 
   sector := 1;
+  light := 0;
   flags := 0;
 end;
 
@@ -1783,6 +1788,33 @@ begin
   tracks.Free;
 
   inherited Destroy;
+end;
+
+function GRoom.IS_DARK : boolean;
+begin
+  if (light > 0) then
+    begin
+    Result := false;
+    exit;
+    end;
+
+  if (sector = SECT_INSIDE) or (sector = SECT_CITY) then
+    begin
+    Result := false;
+    exit;
+    end;
+
+  if (IS_SET(flags, ROOM_DARK)) then
+    begin
+    Result := true;
+    exit;
+    end;
+
+  if (time_info.sunlight = SUN_SET) or (time_info.sunlight = SUN_DARK) then
+    begin
+    Result := true;
+    exit;
+    end;
 end;
 
 function GRoom.findChar(c : pointer; name : string) : pointer;

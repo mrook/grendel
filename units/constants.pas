@@ -172,6 +172,7 @@ const AFF_BLIND = BV00;
       AFF_SNEAK = BV12;
       AFF_ENCHANT = BV13;             { magical attacks }
       AFF_HOLYWALK = BV14;          { walk thru anything }
+      AFF_HOLYLIGHT = BV15;         { see anything }
 
 { PC status flags}
 const PLR_NPC=BV00;
