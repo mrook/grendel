@@ -499,35 +499,35 @@ skill: Second Attack
 a fountain
 a sparkling fountain
 a $B$7sparkling$A$3 $2brew$3 fountain has been placed here
-12 0 0
+12 none none
 0 0 12 0
 0 4097 0
 #101
 a loaf of bread
 a loaf of bread
 a loaf of white bread has been thrown away here
-3 0 0
+3 none none
 0 0 24 0
 1 0 10
 #102
 a waterskin
 a waterskin
 a leather skin filled with fresh water lies here
-4 0 0
+4 none none
 3 3 1 0
 10 0 30
 #103
 a torch
 a torch
 a torch lies here on the ground
-5 0 0
+5 none none
 0 0 24 0
 1 0 90
 #104
 a robe
 a stained robe
 a robe, cluttered with dirty stains, lies here
-1 5 0
+1 body none
 0 2 2 0
 0 0 0
 A "" 0 { apply_max_hp 20 }

@@ -59,133 +59,133 @@ a wavering spirit, clad in ethereal blue, stands here guarding
 a ball of essence
 a $B$7shining$A$7 ball of essence
 a pure, $B$7shining$A$3 ball of a holy light lies here
-2 16 0
+2 float none
 0 1 10 0
 0 98 0
 #50001
 a ruby crystal crested rapier
 a $B$7glittering $4ruby $7crystal$A$7 crested rapier
 a $B$7glittering$A$3 rapier, crested with pure $B$4ruby$7 crystals$A$3 lies here
-1 17 18
+1 leftwield rightwield
 0 5 20 10
 0 34 0
 #50002
 some battle-armor
 some $B$7godly $4battle$A$7-armor
 some fine $B$4battle$A$3-armor, fitted for $B$7gods$A$3 lies here
-2 5 0
+2 body none
 0 2 12 0
 0 98 0
 #50003
 a demon's silver shield
 a $B$4demon's$7 silver$A$7 shield 
 a $B$7 silver$A$3 shield, that once belonged to a demon, lies here
-2 11 0
+2 shield none
 0 2 8 0
 0 98 0
 #50004
 wings of Grimlord
 wings of $B$6Grimlord$A$7
 a pair of wings, donated by $B$6Grimlord$A$3, lie here
-2 12 0
+2 back none
 0 2 6 0
 0 98 0
 #50005
-a pair of mithril leg plates
-a pair of $3mithril$7 leg plates
-a pair of leg plates, of pure mithril, lie here
-2 7 0
+a mithril leg plate
+a $3mithril$7 leg plate
+a leg plate, of pure mithril, lies here
+2 leftleg rightleg
 0 4 10 0
 0 98 0
 #50006
 a shining helm of Neyrat
 a $B$7shining$A$7 helm of Neyrat
 a $B$7shining$A$3 helm, made by the miners of Neyrat, lies here
-2 6 0
+2 head none
 0 1 5 0
 0 98 0
 #50007
 a warbelt of Oblivion
 a $B$4war$A$8belt$7 of $B$3Oblivion$A$7
 a $B$4war$A$8belt$3 of $B$3Oblivion$A$3 lies here
-2 13 0
+2 waist none
 0 2 4 0
 0 98 0
 #50008
-a demon's armplates
-a $B$4demon's$A$7 armplates
-a pair of armplates that once belonged to a demon, lie here
-2 10 0
+a demon's armplate
+a $B$4demon's$A$7 armplate
+an armplate that once belonged to a demon, lies here
+2 leftarm rightarm
 0 3 5 0
 0 98 0
 #50009
 a mithril shoulderplate
 a $3mithril$7 shoulderplate
 a shoulderplate of pure mithril lies here
-2 19 20
+2 leftshoulder rightshoulder
 0 3 4 0
 0 98 0
 #50010
 a ring of Immortality
 a ring of $B$6Immortality$A$7
 a $B$7shining$A$3 ring, crafted for gods, lies here
-2 1 2
+2 leftfinger rightfinger
 0 3 2 0
 0 98 0
 #50011
 a Raven spur
 a $8Raven$7 $B$4spur$A$7
 a spur, of fine Raven quality, lies here
-2 24 25
+2 leftankle rightankle
 0 4 5 0
 0 98 0
 #50012
 boots of Grimlord
 boots of $B$6Grimlord$A$7
 a pair of fine boots, donated by $B$6Grimlord$A$3, lie here
-2 8 0
+2 feet none
 0 4 4 0
 0 98 0
 #50013
 a chain of blood
 a $B$7chain$A$7 of $B$4blood$A$7
 a blood-stained chain lies here
-2 3 4
+2 neck none
 0 1 4 0
 0 98 0
 #50014
 a pair of steel gloves
 a pair of $B$7steel$A$7 gloves
 a pair of gloves, of solid steel, lie here
-2 9 0
+2 hands none
 0 3 5 0
 0 98 0
 #50015
 a blue earring
 a $B$7glittering$A$7 $9blue$7 earring
 a $B$7shining$A$3 earring, of pure blue marble, lies here
-2 22 23
+2 leftear rightear
 0 1 3 0
 0 98 0
 #50016
 a bracer of blood
 a $8dark$7 bracer of $B$4blood$A$7
 a bracer, dark and blood-stained, lies here
-2 14 15
+2 leftwrist rightwrist
 0 3 3 0
 0 98 0
 #50017
 a fountain
 a beautifully crafted fountain
 a beautiful fountain, created out of pure granite, stands here
-12 0 0
+12 none none
 0 0 12 0
 0 0 0
 #50018
 a dark-red gem
 a $8dark$7-$4red$7 gemstone
 a gemstone, shimmering with dark power, lies here
-9 17 18
+9 leftwield rightwield
 0 200 200 0
 0 6 0
 #END

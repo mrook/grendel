@@ -246,14 +246,14 @@ a Knight of Pakthan is here, patrolling for danger
 the barons toupet
 the barons toupet
 some hair lies here on the ground
-2 6 0
+2 head none
 0 0 0 0
 1 0 0
 #601
 a soldiers sword
 a soldiers sword
 a sword lies here, shining brightly
-1 17 18
+1 leftwield rightwield
 0 1 10 2
 4 0 0
 #end

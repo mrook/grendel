@@ -187,21 +187,21 @@ S
 a portal
 a shining blue portal
 a $B$7shining $3blue$A$3 portal is here
-14 0 0
+14 none none
 0 0 0 0
 0 4097 0
 #1
 a portal
 a dark blue portal
 a $8dark $B$4red$A$3 portal is here
-14 0 0
+14 none none
 0 0 0 0
 0 4097 0
 #10
 a corpse
 the corpse of
 the corpse of is lying here
-11 0 0
+11 none none
 0 0 0 0
 0 0 0
 #END

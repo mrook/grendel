@@ -10,42 +10,42 @@ No reset
 a small dagger
 a small dagger
 a small dagger lies here, unclaimed
-1 17 18
+1 leftwield rightwield
 0 1 4 3
 8 2048 0
 #1001
 an axe
 an axe
 a battered axe lies here, left by its previous owner
-1 17 18
+1 leftwield rightwield
 0 1 6 4
 30 0 0
 #1002
 a long sword
 a long sword
 a long sword stands in the ground, unused and ready
-1 17 18
+1 leftwield rightwield
 0 5 10 2
 40 0 0
 #1003
 a short sword
 a short sword
 a short sword lies on the ground here, thrown away
-1 17 18
+1 leftwield rightwield
 0 1 6 2
 20 0 0
 #1004
 a knife
 a knife
 a simple knife is lying here unused
-1 17 18
+1 leftwield rightwield
 0 1 4 10
 5 0 0
 #1005
 a long spear
 a long spear
 a long spear, worn and decaying, has been dropped here
-1 17 18
+1 leftwield rightwield
 0 1 6 3
 25 2048 0
 #end
