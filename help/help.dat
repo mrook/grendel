@@ -1,7 +1,7 @@
 #Include=texts.dat
 #Include=spells.ghp
 #Include=skills.ghp
-#Include=immortal.ghp
+#Include=commands.ghp
 #Keyword=DAMAGE
 You miss your punch at a bat.
 You tickle a bat with your punch.
@@ -29,16 +29,4 @@ You [[< == ATOMIZE == >]] a bat with your punch!!
 You < - < ILLUMINATE > - > a bat with your TERRIBLE punch!!
 You ___... DESTROY ...___ a bat with your AGONIZING punch!!!
 You -< { { : : : DISINTEGRATE : : : } } >- a bit with your GODLY punch!!!!
-#End=0
-#Keyword=RACEINFO
-Syntax: RACEINFO [<racename>]
-
-Raceinfo without any parameters gives a list of races available to players.
-Raceinfo <racename> will give information on that particular race.
-#End=0
-#Keyword=APROPOS
-Syntax: APROPOS <text>
-
-Apropos searches through all helpfiles for <text> and gives back
-a list of matching entries.
 #End=0
