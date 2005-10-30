@@ -16,7 +16,7 @@
 			The most important supported language constructs:
 			</p><div class="itemizedlist"><ul type="disc"><li><p>global and local variables</p></li><li><p>function definitions</p></li><li><p>loops (only for currently)</p></li><li><p>'include' files</p></li><li><p>basic flow control (if statements)</p></li><li><p>valid integer and boolean expressions</p></li></ul></div><p>
 			</p><p>
-			</p><div class="example"><a id="id2520084"></a><p class="title"><b>Example&#160;4.&#160;GMC Example</b></p><pre class="programlisting">void onEmoteTarget(external ch, external target, string name)
+			</p><div class="example"><a id="id2520077"></a><p class="title"><b>Example&#160;3.&#160;GMC Example</b></p><pre class="programlisting">void onEmoteTarget(external ch, external target, string name)
 {
 	if ((name == "BOW") &amp;&amp; (ch.name == "Syra"))
 	{
@@ -53,7 +53,7 @@ export onAct</pre></div><p>
 			(in a section commonly known as the 'peephole optimizer'),
 			to reduce the number of instructions.
 			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_compiling"></a>Compiling your own code</h3></div></div></div><p>
-			</p><div class="example"><a id="id2520180"></a><p class="title"><b>Example&#160;5.&#160;Compiling <code class="literal">give.c</code></b></p><pre class="screen">
+			</p><div class="example"><a id="id2520174"></a><p class="title"><b>Example&#160;4.&#160;Compiling <code class="literal">give.c</code></b></p><pre class="screen">
 <code class="prompt">C:\Development\Grendel\progs&gt;</code><strong class="userinput"><code>..\gmcc give.c</code></strong>
 GMCC - GMC 'Elise' compiler v0.3
 			
@@ -112,14 +112,14 @@ Saved 100 byte(s) of code, 0 element(s) data.</pre></div><p>
 					return a value associated with the external.
 					</p></li></ul></div><p>
 			</p><p>
-			</p><div class="example"><a id="id2520445"></a><p class="title"><b>Example&#160;6.&#160;Associating a variable with the environment</b></p><pre class="programlisting">external ch;
+			</p><div class="example"><a id="id2520439"></a><p class="title"><b>Example&#160;5.&#160;Associating a variable with the environment</b></p><pre class="programlisting">external ch;
 ch = "Grimlord";</pre></div><p>
 			</p><p>
 			Executing this snippet will have the external callback trying to associate the string
 			value "Grimlord" with some enviroment. If this association succeeds, the resulting value
 			will be placed in 'ch'.
 			</p><p>
-			</p><div class="example"><a id="id2520472"></a><p class="title"><b>Example&#160;7.&#160;De-referencing an external value</b></p><pre class="programlisting">x = ch.alignment;</pre></div><p>
+			</p><div class="example"><a id="id2520466"></a><p class="title"><b>Example&#160;6.&#160;De-referencing an external value</b></p><pre class="programlisting">x = ch.alignment;</pre></div><p>
 			</p><p>
 			Again, this will have the callback trying to associate the member variable 'alignment'
 			with the (already associated) variable 'ch'. Care must be taken that this member variable
