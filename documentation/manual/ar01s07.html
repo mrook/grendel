@@ -1,49 +1,140 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Developer information</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.66.1"><link rel="start" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="prev" href="ar01s06.html" title="GMC introductory guide and specification"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Developer information</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s06.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;</td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="developers"></a>Developer information</h2></div></div></div><p>
-		This section contains information for developers that want to modify or add to the Grendel sourcecode.
-		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="developers_modules"></a>Modules</h3></div></div></div><p>
-			As of 0.4.0, the Grendel sourcecode contains so called 'modules'. These
-			modules (or plugins, if you will) can be loaded on demand by the server,
-			and can contain arbitrary functionality that you may wish to enable.
+<?xml version="1.0" encoding="ANSI_X3.4-1968" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968" /><title>GMC introductory guide and specification</title><link rel="stylesheet" href="manual.css" type="text/css" /><meta name="generator" content="DocBook XSL Stylesheets V1.68.1" /><link rel="start" href="index.html" title="The Grendel Manual" /><link rel="up" href="index.html" title="The Grendel Manual" /><link rel="prev" href="ar01s06.html" title="Races" /><link rel="next" href="ar01s08.html" title="Developer information" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">GMC introductory guide and specification</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s06.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s08.html">Next</a></td></tr></table><hr /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="gmc"></a>GMC introductory guide and specification</h2></div></div></div><p>
+		GMC (or Grendel MUD C if you will) is a language similar to C, devised for
+		the sole purpose of powering the scripted parts of the Grendel MUD Server.
+		</p><p>
+		It has support for variables, control structures, (nested) functions
+		and external variables/traps.
+		</p><p>
+		The system consists of a compiler, an assembler and a virtual machine setup
+		which can be called from an application, in this case Grendel.
+		</p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_syntax"></a>Syntax</h3></div></div></div><p>
+			The GMC language is in many respects quite like C, with some
+			simplifications and exceptions.
 			</p><p>
-			It also provides a more suitable platform for 3rd party code, which will
-			rely less on the core functionality, and thus better survive the
-			rough tide of code improvements and version changes.
+			The most important supported language constructs:
+			</p><div class="itemizedlist"><ul type="disc"><li><p>global and local variables</p></li><li><p>function definitions</p></li><li><p>loops (only for currently)</p></li><li><p>'include' files</p></li><li><p>basic flow control (if statements)</p></li><li><p>valid integer and boolean expressions</p></li></ul></div><p>
 			</p><p>
-			Modules are built and loaded through the native Delphi package mechanism,
-			and as such they are simply "enhanced" DLL's (or shared libraries).
+			</p><div class="example"><a id="id2520084"></a><p class="title"><b>Example&#160;4.&#160;GMC Example</b></p><pre class="programlisting">void onEmoteTarget(external ch, external target, string name)
+{
+	if ((name == "BOW") &amp;&amp; (ch.name == "Syra"))
+	{
+		do("say Good day, " + target.name + "!");
+	}
+}
+
+void onAct(external ch, external target, string arg)
+{
+}
+
+export onEmoteTarget
+export onAct</pre></div><p>
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_compiler_assembler"></a>Compiler and assembler</h3></div></div></div><p>
+			The GMC compiler works in four distinct passes:
+			</p><div class="itemizedlist"><ul type="disc"><li><p>
+				In the first pass, the source files are scanned and parsed,
+				and basic syntax checking is performed.
+				</p></li><li><p>The second pass performs type checking and coercion.</p></li><li><p>
+				In the third pass an optimizer performs some basic
+				optimizations: dead-code elimination, algebraic
+				simplication (constant elimination) and some flow-of-
+				control optimizations.</p></li><li><p>
+				The fourth and final pass is the code generator,
+				where assembly code for the stack machine is written
+				to a file.
+				</p></li></ul></div><p>
 			</p><p>
-			There are however a few guidelines and requirements for these modules:
-			</p><div class="itemizedlist"><ul type="disc"><li><p>Each module should have a unique name. If in doubt about the name
-				of your module, contact the developers</p></li><li><p>Compiled modules should be placed in the modules directory</p></li><li><p>Add a <tt class="literal">{$DESCRIPTION}</tt> line in the .dpk file of the module, with
-			  	a small description of the functionality of the module</p></li><li><p>Make sure the units in the module do not collide with units in any
-			  	other module. Good common practice is to prefix all units with an abbreviation 
-			  	of the modulename</p></li></ul></div><p>
+			The assembler simply converts the "human readable"
+			assembly code to a binary format (this includes translating
+			the labels for jumps/calls).
 			</p><p>
-			Each module should define a class which implements <tt class="classname">IModuleInterface</tt>,
-			and export that class, as per the following example.
+			Additionally, the assembler performs some simple optimizations
+			(in a section commonly known as the 'peephole optimizer'),
+			to reduce the number of instructions.
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_compiling"></a>Compiling your own code</h3></div></div></div><p>
+			</p><div class="example"><a id="id2520180"></a><p class="title"><b>Example&#160;5.&#160;Compiling <code class="literal">give.c</code></b></p><pre class="screen">
+<code class="prompt">C:\Development\Grendel\progs&gt;</code><strong class="userinput"><code>..\gmcc give.c</code></strong>
+GMCC - GMC 'Elise' compiler v0.3
 			
-			</p><div class="example"><a name="id2530094"></a><p class="title"><b>Example&#160;8.&#160;Implementing IModuleInterface</b></p><pre class="programlisting">type
-	GExampleModule = class(TInterfacedObject, IModuleInterface)
-	published
-		procedure registerModule();
-		procedure unregisterModule();
-	end;
-
-procedure GExampleModule.registerModule();
-begin
-	{ perform some initialization here }
-end;
-
-procedure GExampleModule.unregisterModule();
-begin
-	{ perform some cleanup here }
-end;
-
-function returnModuleInterface() : IModuleInterface;
-begin
-	Result := GExampleMudModule.Create();
-end;
-
-exports
-	returnModuleInterface;</pre></div><p>
-			</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s06.html">Prev</a>&#160;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&#160;</td></tr><tr><td width="40%" align="left" valign="top">GMC introductory guide and specification&#160;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&#160;</td></tr></table></div></body></html>
+Output file written, datasize is 0 element(s).
+GASM - GMC 'Elise' v0.3
+			
+Saved 100 byte(s) of code, 0 element(s) data.</pre></div><p>
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_vm"></a>Virtual Machine</h3></div></div></div><p>
+			The VM of the GMC language is a fully functional stack machine processor
+			with some 40+ opcodes in its instruction set.
+			</p><p>
+			Internally the machine consists of a stack utilizing the Delphi 'variant'
+			type. 
+			</p><p>
+			Apart from the stack there are a number of registers - the stack pointer,
+			the base pointer, and the program counter (or instruction pointer).
+			Only the first two can be accessed directly from the assembler.
+			</p><p>
+			Lastly there is a data segment present. Its size is defined through
+			the assembler directive '$DATA'.
+			</p><p>
+			The VM has support for a number of mechanisms to help a program 'get out' of the 
+			environment and have some interaction with the calling application.
+			</p><p>
+			These mechanisms are:
+			</p><div class="itemizedlist"><ul type="disc"><li><p>System traps</p><p>
+					The system trap (in the form of <code class="literal">do("some expression")</code>) can be set to a
+					userspecified function by the calling application. The trap can do with
+					the string expression as it sees fit.
+					</p></li><li><p>Signals and sleep</p><p>
+					Signals are used to "suspend" the execution of the program until
+					some condition has been met (e.g. a signal has been raised) in another
+					part of the server (wether that be native or scripted code).
+					The sleep function suspends the program until a certain tickcount has
+					been reached.
+					</p></li><li><p>External variables</p><p>
+					External variables are a construct to associate external data with names
+					or expressions in the GMC language.
+					</p></li><li><p>External methods</p><p>
+					External methods are methods within a class, that are registered
+					before a script is executed. In a script they are represented
+					by a function without a body ('float cos(float x);' for example).
+					These 'callbacks' are somewhat dangerous, as there is no mechanism
+					to check the validity of the parameters specified in the declaration, nor 
+					the values provided at the time of calling.
+					</p></li></ul></div><p>
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_types"></a>Types</h3></div></div></div><p>
+			GMC only allows basic (primitive) types - thus compound and structured types
+			or arrays are not included in the language.
+			</p><p>
+			The following basic types are supported:
+			</p><div class="itemizedlist"><ul type="disc"><li><p>int</p><p>Mapped to the pascal type integer</p></li><li><p>bool</p><p>Alias for int</p></li><li><p>float</p><p>Mapped to the pascal type single</p></li><li><p>string</p><p>Mapped to the pascal type LongString</p></li><li><p>void</p><p>Should not be used for basic identifiers</p></li><li><p>external</p><p>A special type; it has no strict semantic meaning in itself, 
+					but will evaluate to a callback to the shell surrounding 
+					(or calling, if you will) the VM. This callback will take care of 
+					the necessary checks (including or excluding typing) and 
+					return a value associated with the external.
+					</p></li></ul></div><p>
+			</p><p>
+			</p><div class="example"><a id="id2520445"></a><p class="title"><b>Example&#160;6.&#160;Associating a variable with the environment</b></p><pre class="programlisting">external ch;
+ch = "Grimlord";</pre></div><p>
+			</p><p>
+			Executing this snippet will have the external callback trying to associate the string
+			value "Grimlord" with some enviroment. If this association succeeds, the resulting value
+			will be placed in 'ch'.
+			</p><p>
+			</p><div class="example"><a id="id2520472"></a><p class="title"><b>Example&#160;7.&#160;De-referencing an external value</b></p><pre class="programlisting">x = ch.alignment;</pre></div><p>
+			</p><p>
+			Again, this will have the callback trying to associate the member variable 'alignment'
+			with the (already associated) variable 'ch'. Care must be taken that this member variable
+			does actually exist, or hell will fall down and chaos will ensue.
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gmc_entrypoints"></a>Common entry points</h3></div></div></div><p>
+			An 'entry point' is a position in your script code that has a common syntax or structure,
+			and can be easily identified by the calling process. These entry points can be viewed
+			as seperate blocks of code that are called when a particular event is triggered.
+			</p><p>
+			Below you will find some common entry points that are used throughout the server code.
+			</p><p>
+			</p><div class="itemizedlist"><ul type="disc"><li><p><code class="literal">void onTick(external ch)</code></p><p>Called every second</p></li><li><p><code class="literal">void onAct(external ch, external target, string arg)</code></p><p>Called when <code class="literal">ch</code> receives some action <code class="literal">arg</code> from <code class="literal">target</code></p></li><li><p><code class="literal">void onFight(external ch, external target)</code></p><p>Called every fight tick</p></li><li><p><code class="literal">void onDeath(external ch, external target)</code></p><p>Called when <code class="literal">ch</code> dies at the hands of <code class="literal">target</code></p></li><li><p><code class="literal">void onReset(external ch)</code></p><p>Called when <code class="literal">ch</code> resets (spawns)</p></li><li><p><code class="literal">bool onBlock(external ch, external target, string dir)</code></p><p>Called when <code class="literal">target</code> tries to leaves the room where <code class="literal">ch</code>
+					is (in direction <code class="literal">dir</code>). Returns <code class="literal">true</code> when blocking</p></li><li><p><code class="literal">void onGive(external ch, external target, external obj)</code></p><p>Called when <code class="literal">target</code> gives <code class="literal">obj</code> to <code class="literal">ch</code></p></li><li><p><code class="literal">void onEmoteTarget(external victim, external actor, string arg)</code></p><p>Called when <code class="literal">victim</code> is target of an emote executed by <code class="literal">actor</code>
+					(e.g. <code class="literal">slap victim</code>).					
+					The name of the emote (Name:-field from system\socials.dat, e.g. 'SLAP') will be in <code class="literal">arg</code>.
+					</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>When an entry point onEmoteTarget exists, the default emote handling (as defined in checkSocial() in mudsystem.pas) 
+			   		will not be used.</p></div></li><li><p><code class="literal">void onGreet(external ch, external target)</code></p><p>Called when <code class="literal">target</code> enters the room where <code class="literal">ch</code> is</p></li></ul></div><p>
+			</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s06.html">Prev</a>&#160;</td><td width="20%" align="center">&#160;</td><td width="40%" align="right">&#160;<a accesskey="n" href="ar01s08.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Races&#160;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&#160;Developer information</td></tr></table></div></body></html>

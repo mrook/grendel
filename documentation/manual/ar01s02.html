@@ -1,12 +1,14 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968"><title>Installing, compiling, running</title><link rel="stylesheet" href="manual.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.66.1"><link rel="start" href="index.html" title="The Grendel Manual"><link rel="up" href="index.html" title="The Grendel Manual"><link rel="prev" href="index.html" title="The Grendel Manual"><link rel="next" href="ar01s03.html" title="Command Reference"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Installing, compiling, running</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s03.html">Next</a></td></tr></table><hr></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="install"></a>Installing, compiling, running</h2></div></div></div><p>
+<?xml version="1.0" encoding="ANSI_X3.4-1968" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ANSI_X3.4-1968" /><title>Installing, compiling, running</title><link rel="stylesheet" href="manual.css" type="text/css" /><meta name="generator" content="DocBook XSL Stylesheets V1.68.1" /><link rel="start" href="index.html" title="The Grendel Manual" /><link rel="up" href="index.html" title="The Grendel Manual" /><link rel="prev" href="index.html" title="The Grendel Manual" /><link rel="next" href="ar01s03.html" title="Player Command Reference" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Installing, compiling, running</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a>&#160;</td><th width="60%" align="center">&#160;</th><td width="20%" align="right">&#160;<a accesskey="n" href="ar01s03.html">Next</a></td></tr></table><hr /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="install"></a>Installing, compiling, running</h2></div></div></div><p>
 		This section outlines the steps required to install, optionally compile, and run the Grendel software.
-		</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="install_installation"></a>Installation</h3></div></div></div><p>  
+		</p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="install_installation"></a>Installation</h3></div></div></div><p>  
 			The archive you have downloaded contains prebuilt binaries for 
 			the target operating system. The target operating system can be identified 
 			by the extension of the archive; .zip =&gt; Windows, .tar.gz =&gt; Linux.
 			</p><p>
 			You can install the software in any location you deem useful.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="install_compilation"></a>Compilation</h3></div></div></div><p>
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="install_compilation"></a>Compilation</h3></div></div></div><p>
 			If you want to recompile the binaries, you need the following ingredients:
 			</p><div class="itemizedlist"><ul type="disc"><li><p>Linux</p><p>
 					</p><div class="itemizedlist"><ul type="circle"><li><p>Borland Kylix 3</p></li><li><p>GNU make (usually pre-installed on your system)</p></li></ul></div><p>
@@ -16,25 +18,25 @@
 			</p><p>
 			If these ingredients are present, you can run 'make' in the directory
 			where you've installed Grendel.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="install_running"></a>Running</h3></div></div></div><p>
-			Starting Grendel is simple. Windows users can click on the <tt class="literal">grendel.exe</tt>
-			icon, or open a console window and start the <tt class="literal">grendel.exe</tt> file manually.
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="install_running"></a>Running</h3></div></div></div><p>
+			Starting Grendel is simple. Windows users can click on the <code class="literal">grendel.exe</code>
+			icon, or open a console window and start the <code class="literal">grendel.exe</code> file manually.
 			</p><p>
-			Linux users can either start the executable <tt class="literal">grendel</tt> from an automated 
+			Linux users can either start the executable <code class="literal">grendel</code> from an automated 
 			script or manually from a terminal.
 			</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Under Linux Grendel forks to the background by default, to override this 
-			and let Grendel write to stdout use <tt class="literal">grendel -f</tt> instead.</p></div><p>
+			and let Grendel write to stdout use <code class="literal">grendel -f</code> instead.</p></div><p>
 			</p><p>
 			If all is well, you should be able to connect to Grendel by using
 			a telnet client to connect to localhost, port 4444.
-			</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="install_immortals"></a>Creating immortals</h3></div></div></div><p>
+			</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="install_immortals"></a>Creating immortals</h3></div></div></div><p>
 			Grendel comes shipped without any users (characters), so you'll have to create your own.
 			</p><p>
 			After connecting to Grendel, you should see a brief introductory message,
 			and a prompt. Here you can create a new user and explore the example world.
 			</p><p>
-			Once you've created a new user, navigate to the <tt class="literal">players</tt> directory,
-			and edit the file <tt class="literal">YourUserName.usr</tt>. To 'immortalize' this user,
-			change the number on the line with <tt class="literal">Level:</tt> to a number
+			Once you've created a new user, navigate to the <code class="literal">players</code> directory,
+			and edit the file <code class="literal">YourUserName.usr</code>. To 'immortalize' this user,
+			change the number on the line with <code class="literal">Level:</code> to a number
 			in the range 990-1000, where 990 is the lowest ranking Immortal, and 1000 the highest.
-			</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a>&#160;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&#160;<a accesskey="n" href="ar01s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The Grendel Manual&#160;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&#160;Command Reference</td></tr></table></div></body></html>
+			</p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a>&#160;</td><td width="20%" align="center">&#160;</td><td width="40%" align="right">&#160;<a accesskey="n" href="ar01s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">The Grendel Manual&#160;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&#160;Player Command Reference</td></tr></table></div></body></html>
