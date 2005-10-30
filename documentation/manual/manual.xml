@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "docbookx.dtd" []>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "docbookx.dtd" [
+<!ENTITY copy   "&#169;"> <!-- copyright sign, U+00A9 ISOnum -->
+]>
 <article>
 	<articleinfo>
 		<title>The Grendel Manual</title>
@@ -208,20 +210,13 @@
 			</para>
 		</section>
 	</section>	
-	<section id="commands">
-		<title>Command Reference</title>
+	<section id="commands_player">
+		<title>Player Command Reference</title>
 		<para>
 		This section contains a reference for most commands available to players on a stock Grendel
-		installation. It does not claim to be an exhaustive reference, as any command-set is subject to
-		change, and documentation often lags behind development.
+		installation.
 		</para>
-		<note>
-			<para>
-			There is no guarantee that any of the commands listed here are actually present on a modified
-			installation of Grendel. Administrators are allowed to remove and add to their command-set as they see fit.
-			</para>
-		</note>
-		<section id="commands_apropos">
+		<section id="commands.apropos">
 			<title>APROPOS</title>
 			<cmdsynopsis>
 				<command>apropos</command>
@@ -229,45 +224,10 @@
 			</cmdsynopsis>
 			<para>
 			<literal>APROPOS <replaceable>text</replaceable></literal> searches through all helpfiles for 
-			<replaceable>text</replaceable> and returns list of matching entries.
+			<replaceable>text</replaceable> and returns a list of matching entries.
 			</para>
 		</section>
-		<section id="damage">
-			<title>DAMAGE</title>
-
-			<para>
-			<example>
-				<title>Literal output produced by the DAMAGE command</title>
-				<programlisting>You miss your punch at a bat.
-You tickle a bat with your punch.
-You barely punch a bat.
-You punch a bat.
-You punch a bat hard.
-You punch a bat very hard.
-You punch a bat extremely hard.
-You hit a bat with your punch.
-You injure a bat with your skillful punch.
-A bat winces in pain with your forceful punch.
-A bat cries out in agony with your powerful punch.
-You devastate a bat with your agonizing punch!
-You mangle a bat with your outstanding punch!
-You MUTILATE a bat with your furious punch!
-You DECIMATE a bat with your incredible punch!
-You ObliteratE a bat with your unsurpassed punch!
-You MASSACRE a bat to pieces with your unforgettable punch!
-You --- ANNIHILATE --- a bat with your deadly punch!
-You &lt;&lt;== LIQUIFY ==&gt;&gt; a bat with your terrifying punch!
-You *** SLAUGHTER *** a bat with your masterful punch!
-You {&lt;&lt;&lt; EVISCERATE &gt;&gt;&gt;} a bat with your unsurvivable punch!
-You %% %% %%  VAPORIZE  %% %% %% a bat with your SUPERB punch!!!
-You [[&lt; == ATOMIZE == &gt;]] a bat with your punch!!
-You &lt; - &lt; ILLUMINATE &gt; - &gt; a bat with your TERRIBLE punch!!
-You ___... DESTROY ...___ a bat with your AGONIZING punch!!!
-You -&lt; { { : : : DISINTEGRATE : : : } } &gt;- a bit with your GODLY punch!!!!</programlisting>
-			</example>
-			</para>
-		</section>
-		<section id="raceinfo">
+		<section id="commands.raceinfo">
 			<title>RACEINFO</title>
 
 			<cmdsynopsis>
@@ -276,11 +236,374 @@ You -&lt; { { : : : DISINTEGRATE : : : } } &gt;- a bit with your GODLY punch!!!!
 			</cmdsynopsis>
 
 			<para>
-			<literal>RACEINFO</literal> (without any parameters gives) a list of races available to players.
+			<literal>RACEINFO</literal> without any parameters returns a list of races available to players.
 			<literal>RACEINFO <replaceable>race</replaceable></literal> will give information on that particular race.
 			</para>
 		</section>
-		<section id="shutdown">
+	</section>
+	<section id="commands_immortal">
+		<title>Immortal Command Reference</title>
+		<para>
+		This section contains a reference for most commands available to immortals on a stock Grendel
+		installation.
+		</para>
+		<section id="commands.advance">
+			<title>ADVANCE</title>
+			
+			<cmdsynopsis>
+				<command>advance</command>
+				<arg choice="req">player</arg>
+				<arg choice="req">level</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="999"/>
+			
+			<para>
+			Advances <replaceable>player</replaceable> to <replaceable>level</replaceable>.
+			</para>
+		</section>
+		<section id="commands.at">
+			<title>AT</title>
+			
+			<cmdsynopsis>
+				<command>at</command>
+				<arg choice="req">player</arg>
+				<arg choice="req">command</arg>
+			</cmdsynopsis>
+					
+			<para userlevel="991"/>
+			
+			<para>
+			<literal>AT</literal> executes <replaceable>command</replaceable> at the location of
+			<replaceable>player</replaceable>.
+			</para>
+		</section>
+		<section id="commands.bamfin">
+			<title>BAMFIN</title>
+			
+			<cmdsynopsis>
+				<command>bamfin</command>
+				<arg choice="opt">message</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="990"/>
+			
+			<para>
+			<literal>BAMFIN</literal> sets the text to display when you enter a room using the 
+			<replaceable>goto</replaceable> command.
+			<literal>BAMFIN</literal> with argument <replaceable>NULL</replaceable> resets the message to the system-wide default message.
+			<literal>BAMFIN</literal> without any arguments displays your current message.
+			</para>
+
+			<para>
+			<example>
+				<title>BAMFIN example</title>
+				<programlisting>bamfin Snoopy Arrives on a Flying Doghouse</programlisting>
+			</example>
+			
+			Now, when you enter a room using the <replaceable>goto</replaceable> command, everyone in that room
+			will see <literal>Snoopy Arrives on a Flying Doghouse</literal>.
+			</para>
+
+			<para>
+			Also see: <link linkend="commands.bamfout">BAMFOUT</link>, <link linkend="commands.goto">GOTO</link>
+			</para>
+		</section>
+		<section id="commands.bamfout">
+			<title>BAMFOUT</title>
+			
+			<cmdsynopsis>
+				<command>bamfout</command>
+				<arg choice="opt">message</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="990"/>
+			
+			<para>
+			<literal>BAMFOUT</literal> sets the text to display you leave a room using the 
+			<replaceable>goto</replaceable> command.
+			<literal>BAMFOUT</literal> with argument <replaceable>NULL</replaceable> resets the message to the system-wide default message.
+			<literal>BAMFOUT</literal> without any arguments displays your current message.
+
+			Example: <literal>bamfout Snoopy Flies off Chasing the Red Baron</literal>.
+			Now, when you leave a room using the goto command, everyone in the room
+			you just left will see <literal>Snoopy Flies off Chasing the Red Baron</literal>.
+			</para>
+			
+			<para>
+			Also see: <link linkend="commands.bamfin">BAMFIN</link>, <link linkend="commands.goto">GOTO</link>
+			</para>
+		</section>
+		<section id="commands.bgset">
+			<title>BGSET</title>
+			
+			<cmdsynopsis>
+				<command>bgset</command>
+				<arg choice="req">level_lo</arg>
+				<arg choice="req">level_hi</arg>
+				<arg choice="req">delay</arg>
+				<arg choice="opt">object</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			<literal>BGSET</literal> initiates a battle ground for players with levels in the range 
+			<replaceable>level_lo</replaceable> - <replaceable>level_hi</replaceable>.
+			Players need only type <literal>battle</literal> to join. The battle ground will 
+			start after <replaceable>delay</replaceable> seconds have expired.
+			The winner of the battle receives <replaceable>object</replaceable>, which must be in your
+			inventory when you initiate the battle ground.
+			</para>
+		</section>
+		<section id="commands.connections">
+			<title>CONNECTIONS</title>
+			
+			<cmdsynopsis>
+				<command>connections</command>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			Lists all current connections, their state, IP and socket number.
+			</para>
+			
+			<para>
+			Also see: <link linkend="commands.disconnect">DISCONNECT</link>
+			</para>
+		</section>
+		<section id="commands.destroy">
+			<title>DESTROY</title>
+			
+			<cmdsynopsis>	
+				<command>destroy</command>
+				<arg choice="req">player</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="998"/>
+			
+			<para>
+			<literal>DESTROY</literal> logs out <replaceable>player</replaceable>, and moves the player
+			file to a backup directory, erasing the player from the world.
+			</para>
+		</section>
+		<section id="commands.disconnect">
+			<title>DISCONNECT</title>
+			
+			<cmdsynopsis>
+				<command>disconnect</command>
+				<arg choice="req">socket</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			Disconnects the given socket number.  Can disconnect yourself ;)
+			</para>
+			
+			<para>
+			Also see: <link linkend="commands.connections">CONNECTIONS</link>
+			</para>
+		</section>
+		<section id="commands.echo">
+			<title>ECHO</title>
+			
+			<cmdsynopsis>
+				<command>echo</command>
+				<arg choice="req">message</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="994"/>
+			
+			<para>
+			<literal>ECHO</literal> sends <replaceable>message</replaceable> to all connected players.
+			</para>
+		</section>
+		<section id="commands.force">
+			<title>FORCE</title>
+			
+			<cmdsynopsis>
+				<command>force</command>
+				<group choice="req">
+					<arg>character</arg>
+					<arg>all</arg>
+				</group>
+				<arg choice="req">command</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="993"/>
+			
+			<para>
+			Forces either <replaceable>character</replaceable> or all characters in the world
+			to perform <replaceable>command</replaceable>.
+			</para>
+		</section>
+		<section id="commands.freeze">
+			<title>FREEZE</title>
+			
+			<cmdsynopsis>
+				<command>freeze</command>
+				<arg choice="req">player</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="996"/>
+			
+			<para>
+			<literal>FREEZE</literal> completely immobilizes a player. If <replaceable>player</replaceable>
+			is already frozen, the command will unfreeze the player.
+			</para>
+		</section>
+		<section id="commands.goto">
+			<title>GOTO</title>
+			
+			<cmdsynopsis>
+				<command>goto</command>
+				<group choice="req">
+					<arg>character</arg>
+					<arg>vnum</arg>
+				</group>
+			</cmdsynopsis>
+			
+			<para userlevel="990"/>
+			
+			<para>
+			<literal>GOTO</literal> moves your character around the world. Can be a to PC or NPC, or to a VNUM.
+			</para>
+		</section>
+		<section id="commands.grace">
+			<title>GRACE</title>
+			
+			<cmdsynopsis>
+				<command>grace</command>
+				<arg choice="req">player</arg>
+				<arg choice="req">level</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="999"/>
+			
+			<para>
+			Immortalizes <replaceable>player</replaceable> and advances the player to 
+			<replaceable>level</replaceable> (must be an immortal level).
+			</para>
+		</section>
+		<section id="commands.loadup">
+			<title>LOADUP</title>
+			
+			<cmdsynopsis>
+				<command>loadup</command>
+				<arg choice="req">player</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="998"/>
+			
+			<para>
+			<literal>LOADUP</literal> allows you to load a player who is not online. 
+			<replaceable>player</replaceable> will remain linkless.
+			</para>
+		</section>
+		<section id="commands.log">
+			<title>LOG</title>
+			
+			<cmdsynopsis>
+				<command>log</command>
+				<group choice="req">
+					<arg>player</arg>
+					<arg>all</arg>
+				</group>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			<literal>LOG</literal> will keep track of what <replaceable>player</replaceable> (or
+			all players) is doing by echoing various details to the system log.
+			</para>
+		</section>
+		<section id="commands.nourish">
+			<title>NOURISH</title>
+			
+			<cmdsynopsis>
+				<command>nourish</command>
+				<group choice="req">
+					<arg>player</arg>
+					<arg>all</arg>
+				</group>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			<literal>NOURISH</literal> resets the hunger and thirst counters for either a player or everyone.
+			It also removes any affects such as high and drunk.
+			</para>
+		</section>
+		<section id="commands.peace">
+			<title>PEACE</title>
+			
+			<cmdsynopsis>
+				<command>peace</command>
+			</cmdsynopsis>
+			
+			<para userlevel="991"/>
+			
+			<para>
+			<literal>PEACE</literal> immediately stops all fighting in the room.
+			</para>
+		</section>
+		<section id="commands.restore">
+			<title>RESTORE</title>
+			
+			<cmdsynopsis>
+				<command>restore</command>
+				<group choice="req">
+					<arg>character</arg>
+					<arg>all</arg>
+				</group>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			Restores either <replaceable>character</replaceable> or all characters to full health, mana and moves.
+			</para>
+		</section>
+		<section id="commands.return">
+			<title>RETURN</title>
+			
+			<cmdsynopsis>
+				<command>return</command>
+			</cmdsynopsis>
+			
+			<para userlevel="998"/>
+			
+			<para>
+			<literal>RETURN</literal> returns you to your normal surroundings after having <quote>possessed</quote>
+			a NPC using the <literal>SWITCH</literal> command.
+			</para>
+			
+			<para>
+			Also see: <link linkend="commands.switch">SWITCH</link>
+			</para>
+		</section>
+		<section id="commands.sconfig">
+			<title>SCONFIG</title>
+			
+			<cmdsynopsis>
+				<command>sconfig</command>
+				<arg choice="req">field</arg>
+				<arg choice="opt">value</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="1000"/>
+			
+			<para>
+			<literal>SCONFIG</literal> allows you to change various configuration settings at runtime.
+			
+			<literal>sconfig show</literal> shows all the valid parameters.
+			</para>
+		</section>
+		<section id="commands.shutdown">
 			<title>SHUTDOWN</title>
 
 			<cmdsynopsis>
@@ -296,13 +619,163 @@ You -&lt; { { : : : DISINTEGRATE : : : } } &gt;- a bit with your GODLY punch!!!!
 					<arg><replaceable>delay</replaceable></arg>
 				</group>
 			</cmdsynopsis>
+			
+			<para userlevel="999"/>
 
 			<para>
-			<literal>SHUTDOWN</literal> starts a server shutdown. The parameters <literal>halt</literal>, 
-			<literal>reboot</literal> and <literal>copyover</literal> start a full shutdown,
+			<literal>SHUTDOWN</literal> starts a server shutdown. The parameters <replaceable>halt</replaceable>,
+			<replaceable>reboot</replaceable> and <replaceable>copyover</replaceable> start a full shutdown,
 			reboot and copyover (hot reboot), respectively. The second parameter indicates
 			the time (in seconds) to wait before starting the shutdown.
-			<literal>SHUTDOWN stop</literal> stops any existing shutdown timer.
+			<literal>SHUTDOWN <replaceable>stop</replaceable></literal> stops any existing shutdown timer.
+			</para>
+		</section>
+		<section id="commands.silence">
+			<title>SILENCE</title>
+			
+			<cmdsynopsis>
+				<command>silence</command>
+				<arg choice="req">player</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="996"/>
+			
+			<para>
+			<literal>SILENCE</literal> completely silences a player. If <replaceable>player</replaceable>
+			is already silenced, the command will unsilence the player.
+			</para>
+		</section>
+		<section id="commands.slay">
+			<title>SLAY</title>
+			
+			<cmdsynopsis>
+				<command>slay</command>
+				<arg choice="req">target</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			<literal>SLAY</literal> causes instant and fatal damage to <replaceable>target</replaceable>.
+			</para>
+		</section>
+		<section id="commands.snoop">
+			<title>SNOOP</title>
+			
+			<cmdsynopsis>
+				<command>snoop</command>
+				<arg choice="req">character</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="998"/>
+			
+			<para>
+			<literal>SNOOP</literal> sniffs every byte that is sent to <replaceable>character</replaceable>,
+			replacing your own output. To stop, type <literal>snoop self</literal>.
+			</para>
+		</section>
+		<section id="commands.sset">
+			<title>SSET</title>
+
+			<cmdsynopsis>
+				<command>sset</command>
+				<arg choice="req">player</arg>
+				<group choice="req">
+					<arg>skill</arg>
+					<arg>spell</arg>
+				</group>
+				<arg choice="req">percent</arg>
+			</cmdsynopsis>
+
+			<para userlevel="990"/>
+			
+			<para>
+			<literal>SSET</literal> (or Skill Set) advances player's skill or spell to the specified percent.
+			If <replaceable>player</replaceable> doesn't know the skill or spell they will automatically
+			learn it.
+			</para>
+		</section>
+		<section id="commands.switch">
+			<title>SWITCH</title>
+			
+			<cmdsynopsis>
+				<command>switch</command>
+				<arg choice="req">character</arg>
+			</cmdsynopsis>
+			
+			<para userlevel="998"/>
+			
+			<para>
+			<literal>SWITCH</literal> enables to you <quote>possess</quote> a NPC, a great way to
+			have some fun.
+			</para>
+			
+			<para>
+			Also see: <link linkend="commands.return">RETURN</link>
+			</para>
+		</section>
+		<section id="commands.transfer">
+			<title>TRANSFER</title>
+			
+			<cmdsynopsis>
+				<command>transfer</command>
+				<group choice="req">
+					<arg>character</arg>
+					<arg>all</arg>
+				</group>
+				<group choice="opt">
+					<arg>character</arg>
+					<arg>vnum</arg>
+				</group>
+			</cmdsynopsis>
+			
+			<para userlevel="995"/>
+			
+			<para>
+			Transfers a PC or NPC to your own location, another room, a mob or other players.
+			Or transfer all PCs to a specified point in the mud, including yourself.
+			</para>
+		</section>
+		<section id="commands.uptime">
+			<title>UPTIME</title>
+			
+			<cmdsynopsis>
+				<command>uptime</command>
+			</cmdsynopsis>
+			
+			<para userlevel="1000"/>
+			
+			<para>
+			Shows uptime and other statistics of the server.
+			</para>
+		</section>
+		<section id="commands.vnums">
+			<title>VNUMS</title>
+			
+			<cmdsynopsis>
+				<command>vnums</command>
+			</cmdsynopsis>
+			
+			<para userlevel="990"/>
+			
+			<para>
+			<literal>VNUMS</literal> displays a list of all areas currently loaded, including
+			vnum range, filename and author of each area.
+			</para>
+		</section>
+		<section id="commands.wizinvis">
+			<title>WIZINVIS</title>
+			
+			<cmdsynopsis>
+				<command>wizinvis</command>
+			</cmdsynopsis>
+			
+			<para userlevel="990"/>
+			
+			<para>
+			<literal>WIZINVIS</literal> allows you to escape the mortal world, and disappear and reappear 
+			as desired.  While invisible, you will not show up on the who list and cannot be seen 
+			by any mortals or immortals of a lower level.
 			</para>
 		</section>
 	</section>
