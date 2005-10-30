@@ -296,11 +296,10 @@
 			</para>
 
 			<para>
-			<example>
-				<title>BAMFIN example</title>
-				<programlisting>bamfin Snoopy Arrives on a Flying Doghouse</programlisting>
-			</example>
+			Example: <literal>bamfin Snoopy Arrives on a Flying Doghouse</literal>
+			</para>
 			
+			<para>			
 			Now, when you enter a room using the <replaceable>goto</replaceable> command, everyone in that room
 			will see <literal>Snoopy Arrives on a Flying Doghouse</literal>.
 			</para>
@@ -324,8 +323,13 @@
 			<replaceable>goto</replaceable> command.
 			<literal>BAMFOUT</literal> with argument <replaceable>NULL</replaceable> resets the message to the system-wide default message.
 			<literal>BAMFOUT</literal> without any arguments displays your current message.
+			</para>
 
+			<para>
 			Example: <literal>bamfout Snoopy Flies off Chasing the Red Baron</literal>.
+			</para>
+			
+			<para>			
 			Now, when you leave a room using the goto command, everyone in the room
 			you just left will see <literal>Snoopy Flies off Chasing the Red Baron</literal>.
 			</para>
